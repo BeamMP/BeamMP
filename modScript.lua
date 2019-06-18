@@ -1,14 +1,16 @@
-print("BEAMNG-MP Loaded")
+print("BEAMNG-MP Loaded") -- This will print at game load to show this script is loaded into the game
+--GUI = require("MPGUI")
+--webserver = require('webserver') -- https://github.com/BeamNG/luawebserver/blob/master/webserver.lua
 
---[[
-Firstly we need to get all statistics about the car, be this gearbox info, turn signals so on so forth.
-]]
-local myGearManual = (electrics.values.gear_M or 0)
-local myGearAuto = (electrics.values.gear_A or 0)
 
-function UpdateVehPos(data)
-  local vehObj = be:getObjectByID(data.subjectID)
-  local vehiclePos = vehObj:getPosition()
-  vehiclePos.y = vehiclePos.y + 50
-  vehObj:setPosition(vehiclePos)
+-- Include all required files for things like webserver for sockets and our GUI system
+
+-- Create Helper Functions to assist us later
+function GetCurrentSessionState()
+
 end
+
+
+-- handle GUI controlling E.G host / client selection
+
+--

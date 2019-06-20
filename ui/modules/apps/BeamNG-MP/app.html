@@ -1,0 +1,152 @@
+<style>
+table {
+  width: 100%;
+}
+th {
+  text-align: left;
+  font-weight: normal;
+}
+td {
+  vertical-align: middle;
+}
+input[type=number] {
+  width: 48px;
+}
+.traffic-tool {
+  height: 100%;
+}
+.title {
+  font-size: 1em;
+  font-weight: bold;
+  color: #BBBBBB;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.over-div {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 50%;
+  height: auto;
+  font-size: 0.8em;
+  color: #000000;
+  visibility: hidden;
+}
+.over-div table {
+  display: inline-block;
+  position: relative;
+  left: -50%;
+  width: 240px;
+  background-color: #FFFFFF;
+}
+.over-div td {
+  display: inline-block;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+  width: 50%;
+  float: left;
+  background-color: #FFFFFF;
+}
+.over-div td:hover {
+  background-color: #C8C8C8;
+}
+.flat-button {
+  display: inline-block;
+  padding: 0px 8px;
+  line-height: 1.5em;
+  text-align: center;
+  color: #000000;
+  background-color: #DADADA;
+  border: 1px solid #888888;
+}
+.flat-button:hover {
+  background-color: #C8C8C8;
+}
+.flat-button:active {
+  background-color: #A8A8A8;
+}
+.b-important {
+  font-weight: bold;
+}
+.b-important:hover {
+  background-color: #C8FFC8;
+}
+.b-important:active {
+  background-color: #A8FFA8;
+}
+.b-hide {
+  position: absolute;
+  padding: 0px;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  font-size: 0.7em;
+}
+.b-check {
+  padding: 0px;
+  width: 20px;
+  height: 20px;
+  line-height: 1em;
+}
+.select {
+  display: inline-block;
+  margin: 0px;
+  width: 120px;
+  height: auto;
+  background-color: white;
+}
+.option {
+  width: 120px;
+  height: 20px;
+}
+.column-wide-2 {
+  width: 49%;
+}
+</style>
+<div class="bngApp traffic-tool" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="ctrl.init()">
+<div>
+  <table ng-style="{'visibility': mainStyle.appShow}">
+    <tr>
+      <th colspan="2"><span class="title">Multiplayer</span></th>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Join Session:
+        <input flex type="number" value="1001" min="0" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">
+        <input flex type="text" value="192.168.0.1" value="{{quantity}}" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
+        <span class="flat-button b-important" ng-click="ctrl.joinSession()">Join</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="column-wide-2">
+        Host Session:
+        <input flex type="number" value="1001" min="0" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">
+        <input flex type="text" disabled value="192.168.0.1" value="{{quantity}}" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
+        <span class="flat-button b-important" ng-click="ctrl.hostSession()">Host</span>
+      </td>
+      <td class="column-wide-2">
+
+      </td>
+    </tr>
+    <tr>
+      <td class="column-wide-2">
+
+      </td>
+      <td class="column-wide-2">
+
+      </td>
+    </tr>
+    <tr>
+      <td class="column-wide-2">
+
+      </td>
+      <td class="column-wide-2">
+
+      </td>
+    </tr>
+  </table>
+</div>
+<span class="flat-button b-hide" ng-click="ctrl.toggleAll()" ng-style="{'left': mainStyle.inLeft, 'right': mainStyle.inRight}">{{inSymbol}}</span>
+</div>

@@ -1,6 +1,6 @@
 angular.module('beamng.apps')
 
-.directive('BeamNG-MP', ['bngApi', function (bngApi) {
+.directive('multiplayer', ['bngApi', function (bngApi) {
 	return {
 		templateUrl: 'modules/apps/BeamNG-MP/app.html',
 		replace: true,
@@ -13,7 +13,7 @@ angular.module('beamng.apps')
 			$scope.visible = {main: true};
 			$scope.inSymbol = "-";
 			$scope.joinOptions = [
-				{port: 1, ip: ""}
+				{port: 1001, ip: "192.168.0.1"}
 			];
 
 			this.init = function() {
@@ -21,7 +21,7 @@ angular.module('beamng.apps')
 				bngApi.engineLua(command);
 			}
 
-			this.toggleAll = function() {
+			this.toggleUI = function() {
 				$scope.visible.main = !$scope.visible.main;
 				if($scope.visible.main == false) {
 					$scope.mainStyle = {appWidth: "24px", appHeight: "24px", inLeft: "4px", inRight: "auto", appShow: "hidden", groupsShow: "hidden"};

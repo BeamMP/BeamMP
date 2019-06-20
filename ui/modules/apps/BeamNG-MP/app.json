@@ -1,17 +1,14 @@
 {
-  "domElement": "<multiplayer></multiplayer>",
   "name": "Multiplayer",
-  "types": [
-    "ui.apps.categories.vehicle_control"
-  ],
-  "css": {
-	"left": "180px",
-	"bottom": "0px",
-	"width": "440px",
-    "height": "160px"
-  },
-  "description": "Host and Join multiplayer games",
   "author": "Titch2000",
-  "version": "1.0",
-  "directive": "BeamNG-MP"
+  "version": "0.1",
+  "description": "Host and Join multiplayer games",
+  "directive": "multiplayer",
+  "domElement": "<multiplayer></multiplayer>",
+  "css": {
+  	"left": "180px",
+  	"bottom": "0px",
+  	"width": "440px",
+    "height": "160px"
+  }
 }

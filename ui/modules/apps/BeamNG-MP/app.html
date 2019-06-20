@@ -11,7 +11,7 @@
       vertical-align: middle;
     }
     input[type=number] {
-      width: 48px;
+      width: 58px;
     }
     .BeamNGMP {
       height: 100%;
@@ -114,7 +114,7 @@
       <td colspan="2">
         Join Session:
         <input flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">
-        <input flex type="text" placeholder="192.168.0.1" value="{{quantity}}" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
+        <input flex type="text" placeholder="192.168.0.1" value="192.168.0.1" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
         <span class="flat-button b-important" ng-click="ctrl.joinSession()">Join</span>
       </td>
     </tr>
@@ -122,7 +122,7 @@
       <td class="column-wide-2">
         Host Session:
         <input flex type="number" value="3359" placeholder="3359"  min="3359" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">
-        <input flex type="text" disabled placeholder="192.168.0.1" value="{{quantity}}" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
+        <input flex type="text" disabled placeholder="0.0.0.0" value="0.0.0.0" ng-model="ctrl.ip" ng-change="ctrl.setIP()">
         <span class="flat-button b-important" ng-click="ctrl.hostSession()">Host</span>
       </td>
       <td class="column-wide-2">

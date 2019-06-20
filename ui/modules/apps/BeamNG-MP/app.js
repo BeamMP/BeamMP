@@ -6,6 +6,13 @@ angular.module('beamng.apps')
 		replace: true,
 		restrict: 'E',
 		scope: false,
+		/*link: function (scope, element, attrs) {
+        //var TAG = '[beamng.apps:CruiseControl]';
+				element.on('load', function () {
+					var svg = element[0].contentDocument
+            , joinBtn = angular.element(svg.getElementById('join_btn'))
+				}
+		},*/
 		controller: function ($scope, $element, $attrs) {
 			$scope.checkImg = "url(modules/apps/BeamNG-MP/checkmark.png)";
 			$scope.mainStyle = {appWidth: "100%", appHeight: "100%", inLeft: "auto", inRight: "4px", appShow: "visible", groupsShow: "hidden"};
@@ -43,12 +50,12 @@ angular.module('beamng.apps')
 			}
 
 			this.joinSession = function() {
-				var command = `extensions.freeroam_multiplayer.joinSession(${this.joinOptions.mode})`;
+				var command = `extensions.freeroam_multiplayer.joinSession(${this.joinOptions})`;
 				bngApi.engineLua(command);
 			}
 
 			this.hostSession = function() {
-				var command = `extensions.freeroam_multiplayer.hostSession(${this.hostOptions.mode})`;
+				var command = `extensions.freeroam_multiplayer.hostSession(${this.hostOptions})`;
 				bngApi.engineLua(command);
 			}
 		},

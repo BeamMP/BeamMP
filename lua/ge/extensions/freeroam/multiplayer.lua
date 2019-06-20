@@ -1,26 +1,27 @@
 print("BeamNG-MP Lua system loaded.")
 local uiWebServer = require('utils/simpleHttpServer')
-local listenHost = "127.0.0.1"
+local wsServer = require('libs/lua-websockets/websocket')
+
+--local ev = require'ev'
+--local ws_client = require('websocket.client').ev()
+
+local listenHost = "192.168.0.1"
 local httpListenPort = 3359
-uiWebServer.start(listenHost, httpListenPort, '/', nil, function(req, path)
-	return {
-		httpPort = httpListenPort,
-		wsPort = httpListenPort + 1,
-		host = listenHost,
-	}
-end)
-print('BeamNG-MP created http server')
 
 -- the websocket counterpart
-local wsServer = require('libs/lua-websockets/websocket').server.copas.listen({
-	interface = listenHost,
-	port = httpListenPort + 1,
-	protocols = {
-		bngApi = bngApi_websocket_handler,
-	},
-	default = bngApi_websocket_handler,
-})
-print('BeamNG-MP created http server')
+local wsServer = nil
+
+local echo_handler = function(ws)
+  while true do
+    local message = ws:receive()
+    if message then
+      ws:send(message)
+    else
+      ws:close()
+      return
+    end
+  end
+end
 
 local M = {}
 
@@ -29,21 +30,85 @@ local function ready()
 end
 
 local function joinSession(value)
-	if not value then
+	print('BeamNG-MP Attempting to join multiplayer session.')
+	if false then --if not value then
 		print("Join Session port or IP are blank.")
 	else
+		value = {}
+		value.ip = "192.168.0.1"
+		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
+			--[[local ws_client = require('libs/lua-websockets/websocket').new{
+				ws_client:sock_receive(function()
+			    print('connected')
+			  end)
 
+				ws_client:sock_connect('ws://'..value.ip..':'..value.port..'','echo')
+
+				ws_client:sock_receive(function(ws, msg)
+			    print('received',msg)
+			  end)
+			}]]
 		end
 	end
 end
 
 local function hostSession(value)
-	if not value then
-		print("Join Session port or IP are blank.")
+	print('BeamNG-MP Attempting to host multiplayer session.')
+	local map = get
+	if false then --if not value then
+		print("Host Session port or IP are blank.")
 	else
-		if value.ip ~= "" and value.port ~= 0 then
+		value = 3359
+		if value ~= 0 then
+			listenHost = "192.168.0.1"
+			httpListenPort = value
+			uiWebServer.start(listenHost, httpListenPort, '/', nil, function(req, path)
+				return {
+					httpPort = 3359,--httpListenPort,
+					wsPort = 3360,--httpListenPort + 1,
+					host = listenHost,
+				}
+			end)
+			print('BeamNG-MP Webserver hosted on '..listenHost..":"..httpListenPort)
 
+			-- create a copas webserver and start listening
+			local server = require('libs/lua-websockets/websocket').server.copas.listen{
+			  --[[-- listen on port 8080
+			  port = 3360,
+			  -- the protocols field holds
+			  --   key: protocol name
+			  --   value: callback on new connection
+			  protocols = {
+			    -- this callback is called, whenever a new client connects.
+			    -- ws is a new websocket instance
+			    echo = function(ws)
+			      while true do
+			        local message = ws:receive()
+							print(message)
+			        if message then
+								print(message)
+			           ws:send(message)
+			        else
+			           ws:close()
+			           return
+			        end
+			      end
+			    end
+			  }]]
+				-- listen on port 8080
+			  port = 3360,
+			  -- the protocols field holds
+			  --   key: protocol name
+			  --   value: callback on new connection
+			  protocols = {
+			    -- this callback is called, whenever a new client connects.
+			    -- ws is a new websocket instance
+			    echo = echo_handler
+			  },
+			  default = echo_handler
+			}
+			print('BeamNG-MP Websockets hosted on '..listenHost..':3360')
 		end
 	end
 end

@@ -26,6 +26,17 @@ local echo_handler = function(ws)
   end
 end
 
+local function receive_data_job(job)
+    while ws_client do
+      local data_raw = ws_client:receive() --apparently always blocking so we need to use a coroutine
+      if not data_raw then
+        return
+      end
+      print('Cleint received ' .. tostring(data_raw))
+    end
+    print('receive coroutine done')
+end
+
 local M = {}
 
 local function ready()
@@ -42,8 +53,9 @@ local function joinSession(value)
 		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
 			extensions.core_jobsystem.create(function ()
-				ws_client = websocket.client.copas()
+				ws_client = websocket.client.copas({timeout=0})
 				ws_client:connect('ws://'..value.ip..':'..value.port..'')
+				extensions.core_jobsystem.create(receive_data_job)
 				ws_client:send("I'm a client")
 			end)
 		end
@@ -92,8 +104,9 @@ local function hostSession(value)
 end
 
 local function onUpdate()
-	if ws_client or webServerRunning then
-		copas.step(0)
+	copas.step(0)
+	--[[if ws_client or webServerRunning then
+		--copas.step(0)
 	else
 		return
 	end
@@ -103,7 +116,7 @@ local function onUpdate()
 		if recv then
 			print("client received ="..dumps(recv) )
 		end
-	end
+	end]]
 
 	if webServerRunning then
 		uiWebServer.update()

@@ -1,5 +1,6 @@
 print("BeamNG-MP Lua system loaded.")
 local uiWebServer = require('utils/simpleHttpServer')
+local websocket = require('libs/lua-websockets/websocket')
 local copas = require('libs/copas/copas')
 
 --local ev = require'ev'
@@ -10,6 +11,7 @@ local httpListenPort = 3359
 
 -- the websocket counterpart
 local wsG = nil -- for use outside of standard system
+local ws_client
 local echo_handler = function(ws)
 	wsG = ws
   while true do
@@ -39,14 +41,10 @@ local function joinSession(value)
 		value.ip = "192.168.0.1" -- Preset to the host in my case
 		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
-			local ws_client = require('libs/lua-websockets/websocket').client.copas.sock_connect{
-				host = value.ip,
-				port = value.port
-			}
-			ws_client:sock_send('Hey there from your friendly client')
-
-			ws_client:sock_receive(function(ws, msg)
-			   print('BeamNG-MP > Socket Message: ',msg)
+			extensions.core_jobsystem.create(function ()
+				ws_client = websocket.client.copas()
+				ws_client:connect('ws://'..value.ip..':'..value.port..'')
+				ws_client:send("I'm a client")
 			end)
 		end
 	end
@@ -75,7 +73,7 @@ local function hostSession(value)
 			print('BeamNG-MP Webserver hosted on '..listenHost..":"..httpListenPort)
 
 			-- create a copas webserver and start listening
-			local server = require('libs/lua-websockets/websocket').server.copas.listen{
+			wsServer = websocket.server.copas.listen{
 				-- listen on port 8080
 			  port = 3360,
 			  -- the protocols field holds
@@ -94,11 +92,22 @@ local function hostSession(value)
 end
 
 local function onUpdate()
-	if not uiWebServer and not webServerRunning then return end
+	if ws_client or webServerRunning then
+		copas.step(0)
+	else
+		return
+	end
 
-	copas.step(0)
-	uiWebServer.update()
-	--wsG.broadcast('Hello')
+	if ws_client then
+		local recv = ws_client:receive()
+		if recv then
+			print("client received ="..dumps(recv) )
+		end
+	end
+
+	if webServerRunning then
+		uiWebServer.update()
+	end
 end
 
 M.onUpdate = onUpdate

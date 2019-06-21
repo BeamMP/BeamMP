@@ -1,6 +1,5 @@
 print("BeamNG-MP Lua system loaded.")
 local uiWebServer = require('utils/simpleHttpServer')
-local wsServer = require('libs/lua-websockets/websocket')
 local copas = require('libs/copas/copas')
 
 --local ev = require'ev'
@@ -10,9 +9,9 @@ local listenHost = "0.0.0.0"
 local httpListenPort = 3359
 
 -- the websocket counterpart
-local wsServer = nil
-
+local wsG = nil -- for use outside of standard system
 local echo_handler = function(ws)
+	wsG = ws
   while true do
     local message = ws:receive()
     if message then
@@ -37,23 +36,23 @@ local function joinSession(value)
 		print("Join Session port or IP are blank.")
 	else
 		value = {}
-		value.ip = "0.0.0.0"
+		value.ip = "192.168.0.1" -- Preset to the host in my case
 		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
-			local ws_client = require('libs/lua-websockets/websocket').new{
-				ws_client:sock_receive(function()
-			    print('connected')
-			  end)
-
-				ws_client:sock_connect('ws://'..value.ip..':'..value.port..'','echo')
-
-				ws_client:sock_receive(function(ws, msg)
-			    print('received',msg)
-			  end)
+			local ws_client = require('libs/lua-websockets/websocket').client.copas.sock_connect{
+				host = value.ip,
+				port = value.port
 			}
+			ws_client:sock_send('Hey there from your friendly client')
+
+			ws_client:sock_receive(function(ws, msg)
+			   print('BeamNG-MP > Socket Message: ',msg)
+			end)
 		end
 	end
 end
+
+local webServerRunning = false
 
 local function hostSession(value)
 	print('BeamNG-MP Attempting to host multiplayer session.')
@@ -66,6 +65,7 @@ local function hostSession(value)
 			listenHost = "0.0.0.0"
 			httpListenPort = value
 			uiWebServer.start(listenHost, httpListenPort, '/', nil, function(req, path)
+				webServerRunning = true
 				return {
 					httpPort = 3359,--httpListenPort,
 					wsPort = 3360,--httpListenPort + 1,
@@ -94,10 +94,11 @@ local function hostSession(value)
 end
 
 local function onUpdate()
-	if not uiWebServer then return end
+	if not uiWebServer and not webServerRunning then return end
 
 	copas.step(0)
 	uiWebServer.update()
+	--wsG.broadcast('Hello')
 end
 
 M.onUpdate = onUpdate

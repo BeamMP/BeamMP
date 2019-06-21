@@ -22,6 +22,7 @@ angular.module('beamng.apps')
 			$scope.joinOptions = [
 				{port: 1001, ip: "192.168.0.1"}
 			];
+			$scope.ChatMessage = "";
 
 			this.init = function() {
 				var command = `extensions.freeroam_multiplayer.ready()`;
@@ -40,22 +41,35 @@ angular.module('beamng.apps')
 			}
 
 			this.setPort = function() {
-				var command = `extensions.freeroam_multiplayer.setPort(${this.joinOptions.port})`;
+				var command = `extensions.freeroam_multiplayer.setPort(${$scope.joinOptions.port})`;
 				bngApi.engineLua(command);
 			}
 
 			this.setIP = function() {
-				var command = `extensions.freeroam_multiplayer.setIP(${this.joinOptions.ip})`;
+				var command = `extensions.freeroam_multiplayer.setIP(${$scope.joinOptions.ip})`;
+				bngApi.engineLua(command);
+			}
+
+			this.chatSend = function() {
+				var command = `extensions.freeroam_multiplayer.chatSend(`+$scope.ChatMessage+`)`;
+				print($scope.ChatMessage);
+				bngApi.engineLua(command);
+				this.ChatMessage = "";
+			}
+
+			this.setChatMessage = function() {
+				var command = `extensions.freeroam_multiplayer.setChatMessage(${this.ChatMessage})`;
+				print(this.ChatMessage);
 				bngApi.engineLua(command);
 			}
 
 			this.joinSession = function() {
-				var command = `extensions.freeroam_multiplayer.joinSession(${this.joinOptions})`;
+				var command = `extensions.freeroam_multiplayer.joinSession()`;
 				bngApi.engineLua(command);
 			}
 
 			this.hostSession = function() {
-				var command = `extensions.freeroam_multiplayer.hostSession(${this.hostOptions})`;
+				var command = `extensions.freeroam_multiplayer.hostSession()`;
 				bngApi.engineLua(command);
 			}
 		},

@@ -26,3 +26,26 @@ https://trello.com/b/Kw75j3zZ/beamngdrive-multiplayer
 
 # Helpful links
 https://github.com/BeamNG/luawebserver/blob/master/webserver.lua
+
+
+# Helper Snippets
+
+```
+ge_utils.lua
+-- returns a list of all BeamNGVehicle objects currently spawned in the level
+function getAllVehicles()
+    local result = {}
+    local nVehicles = be:getObjectCount()
+    for objectId=0,nVehicles-1,1 do
+        local vehicleObj = be:getObject(objectId)
+        table.insert(result, vehicleObj)
+    end
+    return result
+end
+
+environment.lua
+getState()
+setState(state)
+
+local levelInfo = getObject("LevelInfo")
+```

@@ -16,6 +16,7 @@ local echo_handler = function(ws)
   while true do
     local message = ws:receive()
     if message then
+      print('BeamNG-MP > Socket Message: '..message)
       ws:send(message)
     else
       ws:close()
@@ -39,7 +40,7 @@ local function joinSession(value)
 		value.ip = "0.0.0.0"
 		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
-			--[[local ws_client = require('libs/lua-websockets/websocket').new{
+			local ws_client = require('libs/lua-websockets/websocket').new{
 				ws_client:sock_receive(function()
 			    print('connected')
 			  end)
@@ -49,7 +50,7 @@ local function joinSession(value)
 				ws_client:sock_receive(function(ws, msg)
 			    print('received',msg)
 			  end)
-			}]]
+			}
 		end
 	end
 end
@@ -75,28 +76,6 @@ local function hostSession(value)
 
 			-- create a copas webserver and start listening
 			local server = require('libs/lua-websockets/websocket').server.copas.listen{
-			  --[[-- listen on port 8080
-			  port = 3360,
-			  -- the protocols field holds
-			  --   key: protocol name
-			  --   value: callback on new connection
-			  protocols = {
-			    -- this callback is called, whenever a new client connects.
-			    -- ws is a new websocket instance
-			    echo = function(ws)
-			      while true do
-			        local message = ws:receive()
-							print(message)
-			        if message then
-								print(message)
-			           ws:send(message)
-			        else
-			           ws:close()
-			           return
-			        end
-			      end
-			    end
-			  }]]
 				-- listen on port 8080
 			  port = 3360,
 			  -- the protocols field holds

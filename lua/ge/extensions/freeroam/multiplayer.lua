@@ -3,19 +3,16 @@ local uiWebServer = require('utils/simpleHttpServer')
 local websocket = require('libs/lua-websockets/websocket')
 local copas = require('libs/copas/copas')
 local helper = require('freeroam/helpers')
---local message = require(guihooks).message
-
---local ev = require'ev'
---local ws_client = require('websocket.client').ev()
 
 local listenHost = "0.0.0.0"
 local httpListenPort = 3359
+local chatMessage = ""
+local nick = ""
 
 -- the websocket counterpart
-local wsG = nil -- for use outside of standard system
 local ws_client
+
 local echo_handler = function(ws) -- Our Server
-	wsG = ws
   while true do
     local message = ws:receive()
     if message then
@@ -26,11 +23,27 @@ local echo_handler = function(ws) -- Our Server
 			if msg[1] == 'JOIN' then
 				-- a client has asked to join the server, lets check they are using the correct map.
 				print('BeamNG-MP > A new player is trying to join')
-				ws:send('MAP|'..helper.GetMap())
+				ws:broadcast('CHAT|'..msg[2]..' is joining the session.')
+				ws:send('MAP|freeroam')--..helper.GetMap())
 			elseif msg[1] == 'CONNECTING' then
 			-- a client is now joining having confirmed the map, we need to send them all current vehicle data
 				print('BeamNG-MP > The new player has confirmed the map, Send them the session data')
-				ws:send('Session data to go here')
+				local vehs = helper.GetVehicles()
+				print(helper.dump(vehs))
+				print(vehs)
+				local peeps = helper.GetPlayer()
+				print(helper.dump(peeps))
+				print(peeps)
+				local map = helper.GetMap()
+				print(helper.dump(map))
+				print(map)
+				local state = getState()
+				print(helper.dump(state))
+				print(state)
+				local levelInfo = getObject("LevelInfo")
+				print(helper.dump(levelInfo))
+				print(levelInfo)
+				ws:send('SETUP|'..vehs)
 			elseif msg[1] == 'CONNECTED' then
 			-- start sending out our game data again. We will be the point of sync for all players
 				print('BeamNG-MP > The new player has now synced with us. Now to unpause')
@@ -38,9 +51,12 @@ local echo_handler = function(ws) -- Our Server
 			elseif msg[1] == 'UPDATE' then
 			-- a client sendus new data about they session state, so we need to update our vehicles to match theirs
 				print('BeamNG-MP > A new player is trying to join')
-				ws:send('Update our game with client data')
+				ws:broadcast('Update our game with client data')
 			elseif msg[1] == 'CHAT' then
-				ws:send('CHAT|'..msg[2])
+				print('Attempting to broadcast chat message')
+				ws:broadcast('CHAT|'..msg[2])
+			elseif msg[1] == 'ERROR' then
+				ws:send('ERROR|'..msg[2])
 			end
     else
       ws:close()
@@ -56,14 +72,21 @@ local function receive_data_job(job) -- Our Client
         return
       end
       print('Client received ' .. tostring(data_raw))
-			-- now lets break up the message we received so that we can make use of it since we dont know of a way to subscribe to different channels. Maybe in a new update? Socket.io?
+			-- now lets break up the message we received so that we can make use of it since we dont know of a way to subscribe to different channels.
+			-- Maybe in a new update? Socket.io?
 			local msg = helper.split(data_raw, '|')
+			print(helper.dump(msg))
+
+			print('BeamNG-MP > Socket Message: new data = '..msg[1]..' : '..msg[2])
 			if msg[1] == 'MAP' then
-				print('BeamNG-MP > Socket Message: new data = '..msg[1]..' : '..msg[2])
-				ui_message('Connection Successful. Setting up Session!', 10, 0, 0)
-			elseif msg[1] == 'VEHICLE' then
+				ui_message('Connection Successful. Setting up Session... (Map = '..msg[2]..')', 10, 0, 0)
+				ws_client:send("CONNECTING|Map=good")
+			elseif msg[1] == 'SETUP' then
+				--print(msg[2])
+			elseif msg[1] == 'UPDATE' then
 
 			elseif msg[1] == 'CHAT' then
+				print('New Chat Message: '..msg[2])
 				ui_message(msg[2], 10, 0, 0)
 			end
     end
@@ -90,7 +113,8 @@ local function joinSession(value)
 				ws_client = websocket.client.copas({timeout=0})
 				ws_client:connect('ws://'..value.ip..':'..value.port..'')
 				extensions.core_jobsystem.create(receive_data_job)
-				ws_client:send("JOIN|Hey")
+				local user = nick or "User"
+				ws_client:send("JOIN|"..user)
 			end)
 		end
 	end
@@ -133,6 +157,12 @@ local function hostSession(value)
 			  },
 			  default = echo_handler
 			}
+			extensions.core_jobsystem.create(function ()
+				ws_client = websocket.client.copas({timeout=0})
+				ws_client:connect('ws://localhost:3360')
+				extensions.core_jobsystem.create(receive_data_job)
+				ws_client:send("JOIN|Hey")
+			end)
 			print('BeamNG-MP Websockets hosted on '..listenHost..':3360')
 			ui_message('Session hosted on: '..listenHost..':3360', 10, 0, 0)
 		end
@@ -141,43 +171,38 @@ end
 
 local function onUpdate()
 	copas.step(0)
-	--[[if ws_client or webServerRunning then
-		--copas.step(0)
-	else
-		return
-	end
-
-	if ws_client then
-		local recv = ws_client:receive()
-		if recv then
-			print("client received ="..dumps(recv) )
-		end
-	end]]
-
 	if webServerRunning then
 		uiWebServer.update()
 	end
 end
 
+local function setNickname(value)
+	nick = value.data
+	--print('Chat Values (setChatMessage): '..value.data..' | '..chatMessage or "")
+end
+
 local function setChatMessage(value)
-	print('Chat Values (chatSend): '..value..' | '..chatMessage)
-	chatMessage = value
+	chatMessage = value.data
+	--print('Chat Values (setChatMessage): '..value.data..' | '..chatMessage or "")
 end
 
 local function chatSend(value)
-	print('Chat Values (setChatMessage): '..value..' | '..chatMessage)
+	--print('Chat Values (chatSend): '..value.data..' | '..chatMessage or "")
 	if not value then
-		print('Chat Value not set! '..value..' | '..chatMessage)
+		print('Chat Value not set! '..value.data..' | '..chatMessage or "")
 		return
 	else
-		ws_client:send('CHAT|'..value)
+		print('BeamNG-MP Chat: Message sent = '..value.data)
+		ws_client:send('CHAT|'..nick..': '..value.data)
+		chatMessage = ""
 	end
 end
 
 M.onUpdate = onUpdate
 M.ready = ready
 M.chatSend = chatSend
-M.setChatMessage = SetChatMessage
+M.setNickname = setNickname
+M.setChatMessage = setChatMessage
 M.joinSession = joinSession
 M.hostSession = hostSession
 

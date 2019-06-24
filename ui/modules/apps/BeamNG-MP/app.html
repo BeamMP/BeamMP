@@ -127,17 +127,15 @@
     </tr>
     <tr>
       <td colspan="2">
-        Chat:
-        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-change="ctrl.setChatMessage()">
-        <span class="flat-button b-important" ng-click="ctrl.chatSend()">Send</span>
+        Nickname:
+        <input flex type="text" placeholder="Nickname" ng-model="ctrl.Nickname" value="{{Nickname}}" ng-change="ctrl.setNickname()">
       </td>
     </tr>
     <tr>
-      <td class="column-wide-2">
-
-      </td>
-      <td class="column-wide-2">
-
+      <td colspan="2">
+        Chat:
+        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-change="ctrl.setChatMessage()">
+        <span class="flat-button b-important" ng-click="ctrl.chatSend()">Send</span>
       </td>
     </tr>
   </table>

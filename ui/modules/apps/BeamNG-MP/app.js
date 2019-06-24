@@ -6,13 +6,6 @@ angular.module('beamng.apps')
 		replace: true,
 		restrict: 'E',
 		scope: false,
-		/*link: function (scope, element, attrs) {
-        //var TAG = '[beamng.apps:CruiseControl]';
-				element.on('load', function () {
-					var svg = element[0].contentDocument
-            , joinBtn = angular.element(svg.getElementById('join_btn'))
-				}
-		},*/
 		controller: function ($scope, $element, $attrs) {
 			$scope.checkImg = "url(modules/apps/BeamNG-MP/checkmark.png)";
 			$scope.mainStyle = {appWidth: "100%", appHeight: "100%", inLeft: "auto", inRight: "4px", appShow: "visible", groupsShow: "hidden"};
@@ -23,6 +16,7 @@ angular.module('beamng.apps')
 				{port: 1001, ip: "192.168.0.1"}
 			];
 			$scope.ChatMessage = "";
+			$scope.Nickname = "";
 
 			this.init = function() {
 				var command = `extensions.freeroam_multiplayer.ready()`;
@@ -50,17 +44,20 @@ angular.module('beamng.apps')
 				bngApi.engineLua(command);
 			}
 
-			this.chatSend = function() {
-				var command = `extensions.freeroam_multiplayer.chatSend(`+$scope.ChatMessage+`)`;
-				print($scope.ChatMessage);
+			this.setNickname = function() {
+				var command = `extensions.freeroam_multiplayer.setNickname(${bngApi.serializeToLua({data: this.Nickname})})`;
 				bngApi.engineLua(command);
+			}
+
+			this.chatSend = function() {
+				//console.log("1 > "+this.ChatMessage);
+				bngApi.engineLua(`freeroam_multiplayer.chatSend(${bngApi.serializeToLua({data: this.ChatMessage})})`);
 				this.ChatMessage = "";
 			}
 
 			this.setChatMessage = function() {
-				var command = `extensions.freeroam_multiplayer.setChatMessage(${this.ChatMessage})`;
-				print(this.ChatMessage);
-				bngApi.engineLua(command);
+				//console.log("2 > "+this.ChatMessage);
+				bngApi.engineLua(`freeroam_multiplayer.setChatMessage(${bngApi.serializeToLua({data: this.ChatMessage})})`);
 			}
 
 			this.joinSession = function() {

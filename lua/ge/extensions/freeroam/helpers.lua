@@ -4,8 +4,8 @@ local M = {}
 local function split(inputstr, sep)
   --print()
   sep = sep or '%s'
-  print('Attempting to Split: '..inputstr)
-  print('Where there is a '..sep)
+  --print('Attempting to Split: '..inputstr)
+  --print('Where there is a '..sep)
   local t = {}
   for field, s in string.gmatch(inputstr, "([^"..sep.."]*)("..sep.."?)") do
     table.insert(t, field)
@@ -30,16 +30,29 @@ local function dump(o)
 end
 
 local function GetMap()
-  print(map.getMap())
+  print(dump(getGame()))
   return map.getMap()
 end
 
 local function GetPlayer()
-  player.obj = be:getPlayerVehicle(0)
+  --player.obj = be:getPlayerVehicle(0)
+  return be:getPlayerVehicle(0)
+end
 
+local function GetVehicles()
+	local result = {}
+	local nVehicles = be:getObjectCount()
+	for objectId=0,nVehicles-1,1 do
+	  local vehicleObj = be:getObject(objectId)
+	  table.insert(result, vehicleObj)
+	end
+	return result
 end
 
 M.split = split
 M.dump = dump
+M.GetMap = GetMap
+M.GetPlayer = GetPlayer
+M.GetVehicles = GetVehicles
 
 return M

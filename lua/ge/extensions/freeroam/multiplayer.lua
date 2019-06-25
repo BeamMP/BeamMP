@@ -1,4 +1,10 @@
 print("BeamNG-MP Lua system loaded.")
+
+--=============================================================================
+--== Mod Variables
+--=============================================================================
+
+local M = {}
 local uiWebServer = require('utils/simpleHttpServer')
 local websocket = require('libs/lua-websockets/websocket')
 local copas = require('libs/copas/copas')
@@ -12,45 +18,34 @@ local nick = ""
 -- the websocket counterpart
 local ws_client
 
+--=============================================================================
+--== Multiplayer Client and server handlers
+--=============================================================================
+
 local echo_handler = function(ws) -- Our Server
   while true do
     local message = ws:receive()
     if message then
-      print('BeamNG-MP > Socket Message: '..message)
+      print('BeamNG-MP Server > Socket Message: '..message)
       --ws:send(message)
 			local msg = helper.split(message, '|')
 			print(helper.dump(msg))
 			if msg[1] == 'JOIN' then
 				-- a client has asked to join the server, lets check they are using the correct map.
-				print('BeamNG-MP > A new player is trying to join')
+				print('BeamNG-MP Server > A new player is trying to join')
 				ws:broadcast('CHAT|'..msg[2]..' is joining the session.')
 				ws:send('MAP|freeroam')--..helper.GetMap())
 			elseif msg[1] == 'CONNECTING' then
 			-- a client is now joining having confirmed the map, we need to send them all current vehicle data
-				print('BeamNG-MP > The new player has confirmed the map, Send them the session data')
-				local vehs = helper.GetVehicles()
-				print(helper.dump(vehs))
-				print(vehs)
-				local peeps = helper.GetPlayer()
-				print(helper.dump(peeps))
-				print(peeps)
-				local map = helper.GetMap()
-				print(helper.dump(map))
-				print(map)
-				local state = getState()
-				print(helper.dump(state))
-				print(state)
-				local levelInfo = getObject("LevelInfo")
-				print(helper.dump(levelInfo))
-				print(levelInfo)
-				ws:send('SETUP|'..vehs)
+				print('BeamNG-MP Server > The new player has confirmed the map, Send them the session data')
+				ws:send('SETUP|DATA')
 			elseif msg[1] == 'CONNECTED' then
 			-- start sending out our game data again. We will be the point of sync for all players
-				print('BeamNG-MP > The new player has now synced with us. Now to unpause')
-				ws:send('Start Broadcast of session data and unpause')
+				print('BeamNG-MP Server > The new player has now synced with us. Now to unpause')
+				ws:broadcast('CHAT|'..msg[2]..' Has joined the game!')
 			elseif msg[1] == 'UPDATE' then
 			-- a client sendus new data about they session state, so we need to update our vehicles to match theirs
-				print('BeamNG-MP > A new player is trying to join')
+				print('BeamNG-MP Server > A new player is trying to join')
 				ws:broadcast('Update our game with client data')
 			elseif msg[1] == 'CHAT' then
 				print('Attempting to broadcast chat message')
@@ -76,12 +71,13 @@ local function receive_data_job(job) -- Our Client
 			-- Maybe in a new update? Socket.io?
 			local msg = helper.split(data_raw, '|')
 			print(helper.dump(msg))
-
-			print('BeamNG-MP > Socket Message: new data = '..msg[1]..' : '..msg[2])
+			print('BeamNG-MP Client > Socket Message: new data = '..msg[1]..' : '..msg[2])
 			if msg[1] == 'MAP' then
 				ui_message('Connection Successful. Setting up Session... (Map = '..msg[2]..')', 10, 0, 0)
 				ws_client:send("CONNECTING|Map=good")
 			elseif msg[1] == 'SETUP' then
+				ws_client:send("CONNECTED|"..user)
+				extensions.util_richPresence.set('Playing Multiplayer'); -- Little fancy thingy :P
 				--print(msg[2])
 			elseif msg[1] == 'UPDATE' then
 
@@ -91,12 +87,6 @@ local function receive_data_job(job) -- Our Client
 			end
     end
     print('receive coroutine done')
-end
-
-local M = {}
-
-local function ready()
-	print("BeamNG-MP UI Ready!")
 end
 
 local function joinSession(value)
@@ -161,7 +151,8 @@ local function hostSession(value)
 				ws_client = websocket.client.copas({timeout=0})
 				ws_client:connect('ws://localhost:3360')
 				extensions.core_jobsystem.create(receive_data_job)
-				ws_client:send("JOIN|Hey")
+				local user = nick or "Host"
+				ws_client:send("JOIN|"..user)
 			end)
 			print('BeamNG-MP Websockets hosted on '..listenHost..':3360')
 			ui_message('Session hosted on: '..listenHost..':3360', 10, 0, 0)
@@ -169,11 +160,19 @@ local function hostSession(value)
 	end
 end
 
-local function onUpdate()
+local function onUpdate(dt)
 	copas.step(0)
 	if webServerRunning then
 		uiWebServer.update()
 	end
+end
+
+--=============================================================================
+--== UI related stuff
+--=============================================================================
+
+local function ready()
+	print("BeamNG-MP UI Ready!")
 end
 
 local function setNickname(value)
@@ -198,6 +197,10 @@ local function chatSend(value)
 	end
 end
 
+--=============================================================================
+--== Module things
+--=============================================================================
+
 M.onUpdate = onUpdate
 M.ready = ready
 M.chatSend = chatSend
@@ -207,3 +210,7 @@ M.joinSession = joinSession
 M.hostSession = hostSession
 
 return M
+
+--=============================================================================
+--==
+--=============================================================================

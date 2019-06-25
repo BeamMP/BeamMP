@@ -49,3 +49,10 @@ setState(state)
 
 local levelInfo = getObject("LevelInfo")
 ```
+
+lua/ge/extensions/core/online.lua has the info relating to steam details.
+lua/ge/extensions/util/richPresence.lua for setting discord rich presence. WRONG IT IS ACTUALLY STEAM RICH PRESENCE!
+print(extensions.util_richPresence.set('Playing BeamNG.drive Multiplayer'));
+
+lua/ge/extensions/util/researchAdapter.lua This looks like either their attempt to make a multiplayer or is what it says on the tin and is for research.
+Either way this will be extremely helpful for us!

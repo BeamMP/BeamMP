@@ -1,4 +1,5 @@
 print("BeamNG-MP helpers loaded.")
+require('bullettime')
 local M = {}
 
 local function split(inputstr, sep)
@@ -29,30 +30,22 @@ local function dump(o)
    end
 end
 
-local function GetMap()
-  print(dump(getGame()))
-  return map.getMap()
+local function togglePause()
+  bullettime.togglePause()
 end
 
-local function GetPlayer()
-  --player.obj = be:getPlayerVehicle(0)
-  return be:getPlayerVehicle(0)
+local function getPause()
+  bullettime.getPause()
 end
 
-local function GetVehicles()
-	local result = {}
-	local nVehicles = be:getObjectCount()
-	for objectId=0,nVehicles-1,1 do
-	  local vehicleObj = be:getObject(objectId)
-	  table.insert(result, vehicleObj)
-	end
-	return result
+local function setPauseState(paused)
+  bullettime.pause(paused)
 end
 
 M.split = split
 M.dump = dump
-M.GetMap = GetMap
-M.GetPlayer = GetPlayer
-M.GetVehicles = GetVehicles
+M.togglePause = togglePause
+M.getPause = getPause
+M.setPauseState = setPauseState
 
 return M

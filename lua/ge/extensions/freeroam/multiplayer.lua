@@ -7,6 +7,7 @@ print("BeamNG-MP Lua system loaded.")
 local M = {}
 local uiWebServer = require('utils/simpleHttpServer')
 local websocket = require('libs/lua-websockets/websocket')
+local mp = require('libs/lua-MessagePack/MessagePack')
 local copas = require('libs/copas/copas')
 local helper = require('freeroam/helpers')
 
@@ -14,9 +15,73 @@ local listenHost = "0.0.0.0"
 local httpListenPort = 3359
 local chatMessage = ""
 local nick = ""
+local user = ""
 
 -- the websocket counterpart
 local ws_client
+local wsServer
+local InGame = false
+local pause = false
+
+--=============================================================================
+--== Vehicle Monitoring
+--=============================================================================
+
+lastVehicleState = {
+  steering = 0,
+  throttle = 0,
+  brake = 0,
+  parkingbrake = 0,
+  clutch = 0
+}
+
+local function getVehicleState()
+  local state = {}
+  state.type = "VehicleState"
+  state.client = ws_client
+  state.user = user
+
+  state.steering = lastVehicleState.steering
+  state.throttle = lastVehicleState.throttle
+  state.brake = lastVehicleState.brake
+  state.clutch = lastVehicleState.clutch
+  state.parkingbrake = lastVehicleState.parkingbrake
+
+  local vdata = map.objects[be:getPlayerVehicle(0):getID()]
+  state.pos = vdata.pos:toTable()
+  state.vel = vdata.vel:toTable()
+  state.dir = vdata.dirVec:toTable()
+  local dir = vdata.dirVec:normalized()
+  state.rot = math.deg(math.atan2(dir:dot(vec3(1, 0, 0)), dir:dot(vec3(0, -1, 0))))
+
+  state.view = Engine.getColorBufferBase64(320, 240)
+  return state
+end
+
+local function requestVehicleInput(key)
+  local command = "obj:queueGameEngineLua('lastVehicleState." .. key .. " = ' .. input.state." .. key .. ".val)"
+  local v = be:getPlayerVehicle(0)
+  if v then
+    be:getPlayerVehicle(0):queueLuaCommand(command)
+  end
+end
+
+local function requestVehicleInputs()
+  for k, v in pairs(lastVehicleState) do
+    requestVehicleInput(k)
+  end
+end
+
+local function issueVehicleInput(key, val)
+  local command = "input.event('" .. key .. "', " .. val .. ", 1)"
+  be:getPlayerVehicle(0):queueLuaCommand(command)
+end
+
+local function issueVehicleInputs(inputs)
+  for k, v in pairs(inputs) do
+    issueVehicleInput(k, v)
+  end
+end
 
 --=============================================================================
 --== Multiplayer Client and server handlers
@@ -26,27 +91,31 @@ local echo_handler = function(ws) -- Our Server
   while true do
     local message = ws:receive()
     if message then
-      print('BeamNG-MP Server > Socket Message: '..message)
+      --print('BeamNG-MP Server > Socket Message: '..message)
       --ws:send(message)
+      --print(message)
 			local msg = helper.split(message, '|')
-			print(helper.dump(msg))
+			--print(helper.dump(msg))
 			if msg[1] == 'JOIN' then
-				-- a client has asked to join the server, lets check they are using the correct map.
+				-- STEP 1 a client has asked to join the server, lets check they are using the correct map.
 				print('BeamNG-MP Server > A new player is trying to join')
 				ws:broadcast('CHAT|'..msg[2]..' is joining the session.')
-				ws:send('MAP|freeroam')--..helper.GetMap())
+				local map = getMissionFilename()
+				ws:send('MAP|'..map)
 			elseif msg[1] == 'CONNECTING' then
-			-- a client is now joining having confirmed the map, we need to send them all current vehicle data
-				print('BeamNG-MP Server > The new player has confirmed the map, Send them the session data')
+			-- STEP 2 a client is now joining having confirmed the map, we need to send them all current vehicle data
+				print('BeamNG-MP Server > The new player has confirmed the map, Send them the session data and pause all clients')
+        ws:broadcast('UPDATE|PAUSE|true')
 				ws:send('SETUP|DATA')
 			elseif msg[1] == 'CONNECTED' then
-			-- start sending out our game data again. We will be the point of sync for all players
+			-- STEP 3 start sending out our game data again. We will be the point of sync for all players
 				print('BeamNG-MP Server > The new player has now synced with us. Now to unpause')
 				ws:broadcast('CHAT|'..msg[2]..' Has joined the game!')
+        ws:broadcast('UPDATE|PAUSE|false')
 			elseif msg[1] == 'UPDATE' then
-			-- a client sendus new data about they session state, so we need to update our vehicles to match theirs
+			-- STEP 4 a client sendus new data about they session state, so we need to update our vehicles to match theirs
 				print('BeamNG-MP Server > A new player is trying to join')
-				ws:broadcast('Update our game with client data')
+				ws:broadcast('UPDATE|'..msg[2])
 			elseif msg[1] == 'CHAT' then
 				print('Attempting to broadcast chat message')
 				ws:broadcast('CHAT|'..msg[2])
@@ -66,21 +135,40 @@ local function receive_data_job(job) -- Our Client
       if not data_raw then
         return
       end
-      print('Client received ' .. tostring(data_raw))
+      --print('Client received ' .. tostring(data_raw))
 			-- now lets break up the message we received so that we can make use of it since we dont know of a way to subscribe to different channels.
 			-- Maybe in a new update? Socket.io?
 			local msg = helper.split(data_raw, '|')
-			print(helper.dump(msg))
-			print('BeamNG-MP Client > Socket Message: new data = '..msg[1]..' : '..msg[2])
+			--print(helper.dump(msg))
+			--print('BeamNG-MP Client > Socket Message: new data = '..msg[1]..' : '..msg[2])
 			if msg[1] == 'MAP' then
-				ui_message('Connection Successful. Setting up Session... (Map = '..msg[2]..')', 10, 0, 0)
-				ws_client:send("CONNECTING|Map=good")
+        -- STEP 1 before spending time on syncing our games lets make sure we are using the same map
+				if msg[2] == getMissionFilename() then
+					ui_message('Connection Successful. Setting up Session... (Map = '..msg[2]..')', 10, 0, 0)
+					ws_client:send("CONNECTING|Map=good")
+          InGame = true
+				else
+					ui_message('Connection Failed. Please use the map '..msg[2]..'', 10, 0, 0)
+				end
 			elseif msg[1] == 'SETUP' then
-				ws_client:send("CONNECTED|"..user)
+        -- STEP 2 so our client has checked the map and we are good. now lets sync our game with the other players.
+				ws_client:send("CONNECTED|"..user or "Client")
 				extensions.util_richPresence.set('Playing Multiplayer'); -- Little fancy thingy :P
 				--print(msg[2])
 			elseif msg[1] == 'UPDATE' then
+        -- STEP 3 handle updates that we receive here
+        if msg[2] == 'PAUSE' then
+          --print('Game requested to pause: '..msg[3])
+          --helpers.togglePause()
+          if msg[3] == 'true' then
+            pause = true
+          else
+            pause = false
+          end
+          helper.setPauseState(pause)
+        elseif msg[2] == "" then
 
+        end
 			elseif msg[1] == 'CHAT' then
 				print('New Chat Message: '..msg[2])
 				ui_message(msg[2], 10, 0, 0)
@@ -151,7 +239,7 @@ local function hostSession(value)
 				ws_client = websocket.client.copas({timeout=0})
 				ws_client:connect('ws://localhost:3360')
 				extensions.core_jobsystem.create(receive_data_job)
-				local user = nick or "Host"
+				user = nick or "Host"
 				ws_client:send("JOIN|"..user)
 			end)
 			print('BeamNG-MP Websockets hosted on '..listenHost..':3360')
@@ -160,11 +248,24 @@ local function hostSession(value)
 	end
 end
 
+local flip = true
 local function onUpdate(dt)
 	copas.step(0)
 	if webServerRunning then
 		uiWebServer.update()
 	end
+	if InGame then
+    if flip then -- allows us to run every other frame
+		  requestVehicleInputs()
+      local veh = mp.pack(getVehicleState())
+      print(veh)
+      --ws_client:send(veh) -- this allows us to get and send our vehicle states to the server and then to all players
+    end
+    flip = not flip
+	end
+  if pause then
+    helper.setPauseState(true)
+  end
 end
 
 --=============================================================================

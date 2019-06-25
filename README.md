@@ -8,7 +8,15 @@ A LUA implementation at attempting to bring local network multiplayer to BeamNG.
 
 
 # Installation
+In order to run this your self you will need to download this repository and zip the lua, scripts and ui folders up into one zip file so you have something like:
+BeamNG-MP.zip
+ |- lua/
+ |- scripts/
+ L- ui/
 
+Then put this in your mods folder typically located at Documents/BeamNG.drive/mods.
+
+Then your good to go, start your game, agree with your other players on a map and then host / join.
 
 # How will this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.

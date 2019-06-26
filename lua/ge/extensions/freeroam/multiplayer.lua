@@ -10,12 +10,14 @@ local websocket = require('libs/lua-websockets/websocket')
 local mp = require('libs/lua-MessagePack/MessagePack')
 local copas = require('libs/copas/copas')
 local helper = require('freeroam/helpers')
+local json = require('libs/lunajson/lunajson')
 
 local listenHost = "0.0.0.0"
 local httpListenPort = 3359
 local chatMessage = ""
 local nick = ""
 local user = ""
+local cid = helper.randomString(8)
 
 -- the websocket counterpart
 local ws_client
@@ -38,7 +40,7 @@ lastVehicleState = {
 local function getVehicleState()
   local state = {}
   state.type = "VehicleState"
-  state.client = ws_client
+  --state.client = ws_client  -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
   state.user = user
 
   state.steering = lastVehicleState.steering
@@ -54,7 +56,7 @@ local function getVehicleState()
   local dir = vdata.dirVec:normalized()
   state.rot = math.deg(math.atan2(dir:dot(vec3(1, 0, 0)), dir:dot(vec3(0, -1, 0))))
 
-  state.view = Engine.getColorBufferBase64(320, 240)
+  --state.view = Engine.getColorBufferBase64(320, 240)
   return state
 end
 
@@ -93,7 +95,7 @@ local echo_handler = function(ws) -- Our Server
     if message then
       --print('BeamNG-MP Server > Socket Message: '..message)
       --ws:send(message)
-      --print(message)
+      print(message)
 			local msg = helper.split(message, '|')
 			--print(helper.dump(msg))
 			if msg[1] == 'JOIN' then
@@ -115,7 +117,7 @@ local echo_handler = function(ws) -- Our Server
 			elseif msg[1] == 'UPDATE' then
 			-- STEP 4 a client sendus new data about they session state, so we need to update our vehicles to match theirs
 				print('BeamNG-MP Server > A new player is trying to join')
-				ws:broadcast('UPDATE|'..msg[2])
+				ws:broadcast(message)
 			elseif msg[1] == 'CHAT' then
 				print('Attempting to broadcast chat message')
 				ws:broadcast('CHAT|'..msg[2])
@@ -249,19 +251,30 @@ local function hostSession(value)
 end
 
 local flip = true
+local counter = 0
+local reset = true
 local function onUpdate(dt)
 	copas.step(0)
 	if webServerRunning then
 		uiWebServer.update()
 	end
-	if InGame then
-    if flip then -- allows us to run every other frame
-		  requestVehicleInputs()
-      local veh = mp.pack(getVehicleState())
-      print(veh)
-      --ws_client:send(veh) -- this allows us to get and send our vehicle states to the server and then to all players
+	if InGame then  -- this whole thing needs moving into a one second loop rather than every frame i think due to the C-call boundry issue thing with copas
+    if reset then -- Added 1 second check
+      counter = os.time() + 1
+      print('Counter = '..counter)
+      reset = false
     end
-    flip = not flip
+    if counter == os.time() then
+    --if flip then -- allows us to run every other frame
+      print('1 second')
+		  requestVehicleInputs()
+      local veh = getVehicleState()
+      local vehReady = mp.pack(veh)
+      print(vehReady)
+      ws_client:send('UPDATE|VEHCILE|'..cid..'|'..vehReady) -- this allows us to get and send our vehicle states to the server and then to all players
+      reset = true
+    end
+    --flip = not flip
 	end
   if pause then
     helper.setPauseState(true)

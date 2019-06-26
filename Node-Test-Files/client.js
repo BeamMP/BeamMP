@@ -1,4 +1,5 @@
 const WebSocket = require('ws')
+var msgpack = require('msgpack');
 const url = 'ws://192.168.0.1:3360'
 const connection = new WebSocket(url)
 
@@ -11,5 +12,13 @@ connection.onerror = (error) => {
 }
 
 connection.onmessage = (e) => {
-  console.log(e.data)
+  var str = e.data;
+  var msg = str.split(' ');
+  if (msg[0] == 'UPDATE') {
+    if (msg[1] == 'VEHICLE') {
+      console.log('Vehicle Update Message from: '+msg[2]+' ')
+      var d = msgpack.unpack(msg[3]);
+      console.log(d)
+    }
+  }
 }

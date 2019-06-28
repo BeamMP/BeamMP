@@ -17,11 +17,12 @@ local httpListenPort = 3359
 local chatMessage = ""
 local nick = ""
 local user = ""
-local cid = helper.randomString(8)
+local cid = ""
 
 -- the websocket counterpart
 local ws_client
 local wsServer
+local webServerRunning = false
 local InGame = false
 local pause = false
 
@@ -40,7 +41,19 @@ lastVehicleState = {
 local function getVehicleState()
   local state = {}
   state.type = "VehicleState"
-  --state.client = ws_client  -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
+
+  for i = 0, be:getObjectCount()-1 do
+    local veh = be:getObject(i)
+    --print(veh:getJBeamFilename()) --"pickup"
+    --print(veh.partConfig) -- sometimes it''s a .pc file, if it's customised it's json data
+    if veh.cid == nil then
+      state.model = veh:getJBeamFilename()
+      state.config = veh.partConfig
+      veh.cid = cid -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
+    end
+    state.client = cid -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
+  end
+
   state.user = user
 
   state.steering = lastVehicleState.steering
@@ -95,7 +108,7 @@ local echo_handler = function(ws) -- Our Server
     if message then
       --print('BeamNG-MP Server > Socket Message: '..message)
       --ws:send(message)
-      print(message)
+      --print(message)
 			local msg = helper.split(message, '|')
 			--print(helper.dump(msg))
 			if msg[1] == 'JOIN' then
@@ -116,7 +129,7 @@ local echo_handler = function(ws) -- Our Server
         ws:broadcast('UPDATE|PAUSE|false')
 			elseif msg[1] == 'UPDATE' then
 			-- STEP 4 a client sendus new data about they session state, so we need to update our vehicles to match theirs
-				print('BeamNG-MP Server > A new player is trying to join')
+				--print('BeamNG-MP Server > Received update from: '..msg[3])
 				ws:broadcast(message)
 			elseif msg[1] == 'CHAT' then
 				print('Attempting to broadcast chat message')
@@ -168,8 +181,13 @@ local function receive_data_job(job) -- Our Client
             pause = false
           end
           helper.setPauseState(pause)
-        elseif msg[2] == "" then
-
+        elseif msg[2] == "VEHICLE" then
+          --print(msg[3])
+          if msg[3] ~= cid then
+            print("We received an update from another player. Lets sync that")
+            local newState = mp.unpack(msg[4])
+            print(newState)
+          end
         end
 			elseif msg[1] == 'CHAT' then
 				print('New Chat Message: '..msg[2])
@@ -188,6 +206,8 @@ local function joinSession(value)
 		value.ip = "192.168.0.1" -- Preset to the host in my case
 		value.port = 3360
 		if value.ip ~= "" and value.port ~= 0 then
+      cid = helper.randomString(8)
+      print("Unique Client ID Generated: "..cid)
 			ui_message('Attempting to join session: '..value.ip..':'..value.port..'', 10, 0, 0)
 			extensions.core_jobsystem.create(function ()
 				ws_client = websocket.client.copas({timeout=0})
@@ -200,24 +220,20 @@ local function joinSession(value)
 	end
 end
 
-local webServerRunning = false
-
 local function hostSession(value)
 	print('BeamNG-MP Attempting to host multiplayer session.')
-	map.getMap()
-	--local map = get
 	if false then --if not value then
 		print("Host Session port or IP are blank.")
 	else
 		value = 3359
 		if value ~= 0 then
 			listenHost = "0.0.0.0"
-			httpListenPort = value
+			--httpListenPort = value
 			uiWebServer.start(listenHost, httpListenPort, '/', nil, function(req, path)
 				webServerRunning = true
 				return {
 					httpPort = 3359,--httpListenPort,
-					wsPort = 3360,--httpListenPort + 1,
+					wsPort = httpListenPort + 1,
 					host = listenHost,
 				}
 			end)
@@ -225,8 +241,7 @@ local function hostSession(value)
 
 			-- create a copas webserver and start listening
 			wsServer = websocket.server.copas.listen{
-				-- listen on port 8080
-			  port = 3360,
+			  port = httpListenPort + 1,
 			  -- the protocols field holds
 			  --   key: protocol name
 			  --   value: callback on new connection
@@ -238,6 +253,8 @@ local function hostSession(value)
 			  default = echo_handler
 			}
 			extensions.core_jobsystem.create(function ()
+        cid = helper.randomString(8)
+        print("Unique Client ID Generated: "..cid)
 				ws_client = websocket.client.copas({timeout=0})
 				ws_client:connect('ws://localhost:3360')
 				extensions.core_jobsystem.create(receive_data_job)
@@ -253,25 +270,26 @@ end
 local flip = true
 local counter = 0
 local reset = true
-local function onUpdate(dt)
+
+local function onUpdate()
 	copas.step(0)
 	if webServerRunning then
 		uiWebServer.update()
 	end
 	if InGame then  -- this whole thing needs moving into a one second loop rather than every frame i think due to the C-call boundry issue thing with copas
-    if reset then -- Added 1 second check
+    if reset then -- Added 1 second check which will help make sure it is non blocking too due to no wait
       counter = os.time() + 1
-      print('Counter = '..counter)
+      --print('Counter = '..counter)
       reset = false
     end
-    if counter == os.time() then
+    if counter == os.time() then -- runs only on the second
     --if flip then -- allows us to run every other frame
-      print('1 second')
+      --print('1 second')
 		  requestVehicleInputs()
       local veh = getVehicleState()
       local vehReady = mp.pack(veh)
-      print(vehReady)
-      ws_client:send('UPDATE|VEHCILE|'..cid..'|'..vehReady) -- this allows us to get and send our vehicle states to the server and then to all players
+      --print(vehReady)
+      ws_client:send('UPDATE|VEHICLE|'..cid..'|'..vehReady) -- this allows us to get and send our vehicle states to the server and then to all players
       reset = true
     end
     --flip = not flip

@@ -25,6 +25,7 @@ local wsServer
 local webServerRunning = false
 local InGame = false
 local pause = false
+local firstRun = true
 
 --=============================================================================
 --== Vehicle Monitoring
@@ -39,10 +40,11 @@ lastVehicleState = {
 }
 
 local function getVehicleState()
+  local player0 = be:getPlayerVehicle(0) -- Our clients vehicle
   local state = {}
   state.type = "VehicleState"
 
-  for i = 0, be:getObjectCount()-1 do
+  --[[for i = 0, be:getObjectCount()-1 do
     local veh = be:getObject(i)
     --print(veh:getJBeamFilename()) --"pickup"
     --print(veh.partConfig) -- sometimes it''s a .pc file, if it's customised it's json data
@@ -52,10 +54,20 @@ local function getVehicleState()
       veh.cid = cid -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
     end
     state.client = cid -- this and the user one below will be helpful for us to keep track of the vehicles and whos is whos.
+  end]]
+
+  state.model = player0:getJBeamFilename()
+  state.config = player0.partConfig
+  state.jbeam = player0.jbeam
+  state.color = tostring(player0.color)
+
+  if firstRun == true then
+    state.client = cid
+    player0.cid = cid
+    firstRun = false
   end
 
   state.user = user
-
   state.steering = lastVehicleState.steering
   state.throttle = lastVehicleState.throttle
   state.brake = lastVehicleState.brake
@@ -87,14 +99,68 @@ local function requestVehicleInputs()
   end
 end
 
-local function issueVehicleInput(key, val)
+local function issueVehicleInput(i, key, val)
   local command = "input.event('" .. key .. "', " .. val .. ", 1)"
-  be:getPlayerVehicle(0):queueLuaCommand(command)
+  print(command)
+  if i ~= nil and command ~= nil then
+    be:getPlayerVehicle(i):queueLuaCommand(command)
+  else
+    print('NIL VALUE DETECTED')
+  end
 end
 
-local function issueVehicleInputs(inputs)
-  for k, v in pairs(inputs) do
-    issueVehicleInput(k, v)
+local function checkedVehicleInputs(client, inputs)
+  for i = 0, be:getObjectCount()-1 do
+    local veh = be:getObject(i)
+    if veh:getJBeamFilename() == inputs.model and inputs.cid == veh.cid then
+      found = true
+      print('Vehicle found for client: '..client)
+      for k, v in pairs(inputs) do
+        local typeof=type(v)
+        if typeof=="table" then
+          print('TABLE VALUE')
+          print(i)
+          print(v)
+          for key, value in pairs(v) do
+          print(key)
+          print(value)
+            --issueVehicleInput(i, key, value)
+          end
+        else
+          print('NON TABLE VALUE')
+          print(k)
+          print(v)
+          issueVehicleInput(i, k, v)
+        end
+      end
+    end
+  end
+  if not found then -- the vehicle was not found so we need to make it and then update
+    print(inputs.model..' not found for client: '..client..' Creating instead.')
+    local spawnPos = vec3(inputs.pos) --vec3(player0:getPosition()) - vec3(player0:getDirectionVector()) * spawnGap * (active + i) * -1
+		local spawnRot = vec3(inputs.dir) --vec3(player0:getDirectionVector())
+    local up = vec3(0, 0, 1)
+    local mainColor = nil
+		mainColor = inputs.color
+		mainColor = stringToTable(mainColor, ", ")
+		mainColor = ColorF(mainColor[1], mainColor[2], mainColor[3], mainColor[4])
+    local vid = be:getPlayerVehicleID(0)
+    spawn.spawnVehicle(inputs.jbeam, inputs.config, vec3(spawnPos):toPoint3F(), quatFromDir(spawnRot, up), mainColor)
+    local veh = be:getObjectByID(vid)
+    if veh then
+      be:enterVehicle(0, veh)
+      return true
+    end
+  end
+end
+
+local function issueVehicleInputs(client, inputs)
+  local found = false
+  print(client..' Is wanting to update their '..inputs.model)
+  if pcall(checkedVehicleInputs(client, inputs)) then
+    print("Success")
+  else
+  	print("Failure")
   end
 end
 
@@ -146,11 +212,14 @@ end
 
 local function receive_data_job(job) -- Our Client
     while ws_client do
+      --onUpdate()
       local data_raw = ws_client:receive() --apparently always blocking so we need to use a coroutine
       if not data_raw then
         return
       end
-      --print('Client received ' .. tostring(data_raw))
+      if not string.match(data_raw, cid) then
+        print('Client received ' .. tostring(data_raw))
+      end
 			-- now lets break up the message we received so that we can make use of it since we dont know of a way to subscribe to different channels.
 			-- Maybe in a new update? Socket.io?
 			local msg = helper.split(data_raw, '|')
@@ -182,11 +251,12 @@ local function receive_data_job(job) -- Our Client
           end
           helper.setPauseState(pause)
         elseif msg[2] == "VEHICLE" then
-          --print(msg[3])
           if msg[3] ~= cid then
-            print("We received an update from another player. Lets sync that")
+            print("We received an update from player "..msg[3]..", Lets sync that")
             local newState = mp.unpack(msg[4])
             print(newState)
+            print(helper.dump(newState))
+            issueVehicleInputs(msg[3], newState)
           end
         end
 			elseif msg[1] == 'CHAT' then
@@ -214,7 +284,8 @@ local function joinSession(value)
 				ws_client:connect('ws://'..value.ip..':'..value.port..'')
 				extensions.core_jobsystem.create(receive_data_job)
 				local user = nick or "User"
-				ws_client:send("JOIN|"..user)
+        local map = getMissionFilename()
+				ws_client:send("JOIN|"..user.."|"..map)
 			end)
 		end
 	end
@@ -284,12 +355,14 @@ local function onUpdate()
     end
     if counter == os.time() then -- runs only on the second
     --if flip then -- allows us to run every other frame
-      --print('1 second')
+      --print('Vehicle Data Collection..')
 		  requestVehicleInputs()
+      --print('Vehicle Data Collected.')
       local veh = getVehicleState()
       local vehReady = mp.pack(veh)
       --print(vehReady)
       ws_client:send('UPDATE|VEHICLE|'..cid..'|'..vehReady) -- this allows us to get and send our vehicle states to the server and then to all players
+      --print('Vehicle Data Sent!')
       reset = true
     end
     --flip = not flip

@@ -113,8 +113,8 @@
     <tr>
       <td colspan="2">
         Join Session:
-        <input flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="ctrl.joinOptions.port" ng-change="ctrl.setPort()">
-        <input flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="ctrl.joinOptions.ip" ng-change="ctrl.setIP()">
+        <input flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="ctrl.joinOptions.port" ng-mouseenter="enterMouse()" ng-change="ctrl.setPort()">
+        <input flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="ctrl.joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="ctrl.setIP()">
         <span class="flat-button b-important" ng-click="ctrl.joinSession()">Join</span>
       </td>
     </tr>
@@ -128,13 +128,13 @@
     <tr>
       <td colspan="2">
         Nickname:
-        <input flex type="text" placeholder="Nickname" ng-model="ctrl.Nickname" value="{{Nickname}}" ng-change="ctrl.setNickname()">
+        <input flex type="text" placeholder="Nickname" ng-model="ctrl.Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setNickname()">
       </td>
     </tr>
     <tr>
       <td colspan="2">
         Chat:
-        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-change="ctrl.setChatMessage()">
+        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setChatMessage()">
         <span class="flat-button b-important" ng-click="ctrl.chatSend()">Send</span>
       </td>
     </tr>

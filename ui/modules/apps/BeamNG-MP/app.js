@@ -18,6 +18,10 @@ angular.module('beamng.apps')
 			$scope.ChatMessage = "";
 			$scope.Nickname = "";
 
+			$scope.enterMouse = function() {
+					bngApi.engineLua('setCEFFocus(true)');
+			}
+
 			this.init = function() {
 				var command = `extensions.freeroam_multiplayer.ready()`;
 				bngApi.engineLua(command);

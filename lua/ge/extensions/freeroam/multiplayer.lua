@@ -103,7 +103,9 @@ local function issueVehicleInput(i, key, val)
   local command = "input.event('" .. key .. "', " .. val .. ", 1)"
   print(command)
   if i ~= nil and command ~= nil then
-    be:getPlayerVehicle(i):queueLuaCommand(command)
+    local veh = be:getObject(i)
+    --be:getPlayerVehicle(i):queueLuaCommand(command)
+    veh:queueLuaCommand(command) -- Thank you to jojo38 for the solution here!
   else
     print('NIL VALUE DETECTED')
   end
@@ -127,10 +129,13 @@ local function checkedVehicleInputs(client, inputs)
             --issueVehicleInput(i, key, value)
           end
         else
-          print('NON TABLE VALUE')
-          print(k)
-          print(v)
-          issueVehicleInput(i, k, v)
+          --print('NON TABLE VALUE')
+          --print(k)
+          --print(v)
+          --if k == "config" then
+          if k == "throttle" or k == "clutch" or k == "brake" or k == "steering" or k == "parkingbrake" then -- TODO Add pos checking to syncronisation as well
+            issueVehicleInput(i, k, v)
+          end
         end
       end
     end
@@ -157,11 +162,7 @@ end
 local function issueVehicleInputs(client, inputs)
   local found = false
   print(client..' Is wanting to update their '..inputs.model)
-  if pcall(checkedVehicleInputs(client, inputs)) then
-    print("Success")
-  else
-  	print("Failure")
-  end
+  checkedVehicleInputs(client, inputs)
 end
 
 --=============================================================================
@@ -253,7 +254,7 @@ local function receive_data_job(job) -- Our Client
         elseif msg[2] == "VEHICLE" then
           if msg[3] ~= cid then
             print("We received an update from player "..msg[3]..", Lets sync that")
-            local newState = mp.unpack(msg[4])
+            local newState = jsonDecode(msg[4])--mp.unpack(msg[4])
             print(newState)
             print(helper.dump(newState))
             issueVehicleInputs(msg[3], newState)
@@ -353,18 +354,18 @@ local function onUpdate()
       --print('Counter = '..counter)
       reset = false
     end
-    if counter == os.time() then -- runs only on the second
+    --if counter == os.time() then -- runs only on the second
     --if flip then -- allows us to run every other frame
       --print('Vehicle Data Collection..')
 		  requestVehicleInputs()
       --print('Vehicle Data Collected.')
       local veh = getVehicleState()
-      local vehReady = mp.pack(veh)
+      local vehReady = jsonEncode(veh)--mp.pack(veh)
       --print(vehReady)
       ws_client:send('UPDATE|VEHICLE|'..cid..'|'..vehReady) -- this allows us to get and send our vehicle states to the server and then to all players
       --print('Vehicle Data Sent!')
       reset = true
-    end
+    --end
     --flip = not flip
 	end
   if pause then

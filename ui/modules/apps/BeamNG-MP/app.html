@@ -1,4 +1,4 @@
-<div class="bngApp multiplayer" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="ctrl.init()">
+<div class="bngApp multiplayer" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="init()">
   <style>
     table {
       width: 100%;
@@ -113,31 +113,30 @@
     <tr>
       <td colspan="2">
         Join Session:
-        <input flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="ctrl.joinOptions.port" ng-mouseenter="enterMouse()" ng-change="ctrl.setPort()">
-        <input flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="ctrl.joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="ctrl.setIP()">
-        <span class="flat-button b-important" ng-click="ctrl.joinSession()">Join</span>
+        <input id="PORT" flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="joinOptions.port" ng-mouseenter="enterMouse()" ng-change="setPort()">
+        <input id="IP" flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="setIP()">
+        <span class="flat-button b-important" ng-click="joinSession()">Join</span>
       </td>
     </tr>
     <tr>
-      <td colspan="2">
+      <td colspan="4">
         Host Session:
-        <!--<input flex type="number" value="3359" placeholder="3359"  min="3359" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">-->
-        <span class="flat-button b-important" ng-click="ctrl.hostSession()">Host</span>
+        <!--<input flex type="number" value="3359" placeholder="3359"  min="3359" max="4000" step="1" value="{{quantity}}" ng-model="port" ng-change="setPort()">-->
+        <span class="flat-button b-important" ng-click="hostSession()">Host</span>
       </td>
     </tr>
     <tr>
       <td colspan="2">
         Nickname:
-        <input flex type="text" placeholder="Nickname" ng-model="ctrl.Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setNickname()">
+        <input id="NICKNAME" flex type="text" placeholder="Nickname" ng-model="Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="setNickname()">
       </td>
     </tr>
     <tr>
       <td colspan="2">
         Chat:
-        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setChatMessage()">
-        <span class="flat-button b-important" ng-click="ctrl.chatSend()">Send</span>
+        <input id="CHATMESSAGE" flex type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
+        <span class="flat-button b-important" ng-click="chatSend()">Send</span>
       </td>
     </tr>
   </table>
-  <span class="flat-button b-hide" ng-click="ctrl.toggleUI()" ng-style="{'left': mainStyle.inLeft, 'right': mainStyle.inRight}">{{inSymbol}}</span>
 </div>

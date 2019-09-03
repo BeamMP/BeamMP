@@ -9,6 +9,8 @@
   	"left": "180px",
   	"bottom": "0px",
   	"width": "410px",
-    "height": "160px"
+    "height": "160px",
+    "min-width": "410px",
+    "min-height": "160px",
   }
 }

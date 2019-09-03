@@ -1,0 +1,143 @@
+<div class="bngApp multiplayer" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="ctrl.init()">
+  <style>
+    table {
+      width: 100%;
+    }
+    th {
+      text-align: left;
+      font-weight: normal;
+    }
+    td {
+      vertical-align: middle;
+    }
+    input[type=number] {
+      width: 58px;
+    }
+    .BeamNGMP {
+      height: 100%;
+    }
+    .title {
+      font-size: 1em;
+      font-weight: bold;
+      color: #BBBBBB;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .over-div {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      width: 50%;
+      height: auto;
+      font-size: 0.8em;
+      color: #000000;
+      visibility: hidden;
+    }
+    .over-div table {
+      display: inline-block;
+      position: relative;
+      left: -50%;
+      width: 240px;
+      background-color: #FFFFFF;
+    }
+    .over-div td {
+      display: inline-block;
+      margin: 0px;
+      padding: 0px;
+      border: 0px;
+      width: 50%;
+      float: left;
+      background-color: #FFFFFF;
+    }
+    .over-div td:hover {
+      background-color: #C8C8C8;
+    }
+    .flat-button {
+      display: inline-block;
+      padding: 0px 8px;
+      line-height: 1.5em;
+      text-align: center;
+      color: #000000;
+      background-color: #DADADA;
+      border: 1px solid #888888;
+    }
+    .flat-button:hover {
+      background-color: #C8C8C8;
+    }
+    .flat-button:active {
+      background-color: #A8A8A8;
+    }
+    .b-important {
+      font-weight: bold;
+    }
+    .b-important:hover {
+      background-color: #C8FFC8;
+    }
+    .b-important:active {
+      background-color: #A8FFA8;
+    }
+    .b-hide {
+      position: absolute;
+      padding: 0px;
+      top: 4px;
+      right: 4px;
+      width: 16px;
+      height: 16px;
+      font-size: 0.7em;
+    }
+    .b-check {
+      padding: 0px;
+      width: 20px;
+      height: 20px;
+      line-height: 1em;
+    }
+    .select {
+      display: inline-block;
+      margin: 0px;
+      width: 120px;
+      height: auto;
+      background-color: white;
+    }
+    .option {
+      width: 120px;
+      height: 20px;
+    }
+    .column-wide-2 {
+      width: 49%;
+    }
+  </style>
+  <table ng-style="{'visibility': mainStyle.appShow}">
+    <tr>
+      <th colspan="2"><span class="title">Multiplayer</span></th>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Join Session:
+        <input flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="ctrl.joinOptions.port" ng-mouseenter="enterMouse()" ng-change="ctrl.setPort()">
+        <input flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="ctrl.joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="ctrl.setIP()">
+        <span class="flat-button b-important" ng-click="ctrl.joinSession()">Join</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        Host Session:
+        <!--<input flex type="number" value="3359" placeholder="3359"  min="3359" max="4000" step="1" value="{{quantity}}" ng-model="ctrl.port" ng-change="ctrl.setPort()">-->
+        <span class="flat-button b-important" ng-click="ctrl.hostSession()">Host</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Nickname:
+        <input flex type="text" placeholder="Nickname" ng-model="ctrl.Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setNickname()">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Chat:
+        <input flex type="text" placeholder="Enter Message" ng-model="ctrl.ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="ctrl.setChatMessage()">
+        <span class="flat-button b-important" ng-click="ctrl.chatSend()">Send</span>
+      </td>
+    </tr>
+  </table>
+  <span class="flat-button b-hide" ng-click="ctrl.toggleUI()" ng-style="{'left': mainStyle.inLeft, 'right': mainStyle.inRight}">{{inSymbol}}</span>
+</div>

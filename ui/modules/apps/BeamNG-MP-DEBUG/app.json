@@ -1,0 +1,14 @@
+{
+  "name": "Multiplayer Debug Tool",
+  "author": "Titch2000",
+  "version": "0.1",
+  "description": "Host and Join multiplayer games",
+  "directive": "multiplayer-debug",
+  "domElement": "<multiplayer-debug></multiplayer-debug>",
+  "css": {
+  	"left": "180px",
+  	"bottom": "0px",
+  	"width": "410px",
+    "height": "160px"
+  }
+}

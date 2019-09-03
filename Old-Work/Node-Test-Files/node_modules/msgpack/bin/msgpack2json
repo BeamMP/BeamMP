@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+// Read MessagePack data from stdin and write JSON data to stdout.
+
+var msgpack = require('msgpack');
+var net = require('net');
+var sys = require('sys');
+
+var s = new net.Stream(0);
+s.addListener('data', function(b) {
+    sys.puts(JSON.stringify(msgpack.unpack(b)));
+});
+s.resume();
+
+// vim:ts=4 sw=4 et filetype=javascript

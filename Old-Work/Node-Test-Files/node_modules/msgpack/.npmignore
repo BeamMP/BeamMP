@@ -1,0 +1,11 @@
+README.html
+tags
+build
+src/.lock-wscript
+deps/msgpack/dist
+deps/msgpack/*.o
+deps/msgpack/*.lo
+deps/msgpack/.deps
+deps/msgpack/.libs
+test/packed-data
+node_modules

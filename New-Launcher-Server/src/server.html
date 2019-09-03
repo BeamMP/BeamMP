@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>BeamNG.drive Multiplayer Server</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body style="background-color: #252525;">
+    <div class="page main">
+      <span class="server-copyright">&copy; Titch2000 & JoJos38</span>
+      <ul id="console" class="server-console">
+
+      </ul>
+      <div class="server-command">
+        <input id="server-input" type="text" placeholder="Command"></input>
+        <button type="button" name="button" id="server-send">Send</button>
+      </div>
+    </div>
+    <!-- You can also require other files to run in this process -->
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script src="./server-renderer.js"></script>
+  </body>
+</html>

@@ -60,6 +60,7 @@
       color: #000000;
       background-color: #DADADA;
       border: 1px solid #888888;
+      min-width: 37px;
     }
     .flat-button:hover {
       background-color: #C8C8C8;
@@ -105,36 +106,38 @@
     .column-wide-2 {
       width: 49%;
     }
+    .error{
+      border-color: red;
+    }
   </style>
   <table ng-style="{'visibility': mainStyle.appShow}">
     <tr>
-      <th colspan="2"><span class="title">Multiplayer</span></th>
+      <th colspan="4"><span class="title">Multiplayer</span></th>
     </tr>
     <tr>
-      <td colspan="2">
-        Join Session:
-        <input id="PORT" flex type="number" value="3359" placeholder="3359" min="3359" max="4000" step="1" value="{{port}}" ng-model="joinOptions.port" ng-mouseenter="enterMouse()" ng-change="setPort()">
+      <td colspan="4">
+        Session Options:
+        <input id="PORT" flex type="number" value="4444" placeholder="4444" min="3359" max="40000" step="1" value="{{port}}" ng-model="joinOptions.port" ng-mouseenter="enterMouse()" ng-change="setPort()">
         <input id="IP" flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="setIP()">
-        <span class="flat-button b-important" ng-click="joinSession()">Join</span>
+        <input id="NICKNAME" flex style="width: 182px;" type="text" placeholder="Nickname" ng-model="Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="setNickname()">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="1" style="width: 85px;">
+        <span id="PING">Ping: </span>
+      </td>
+      <td colspan="2">
+        <span id="STATUS">Status: </span>
+      </td>
+      <td colspan="1" style="text-align: right;width: 114px;padding-right: 5px;">
+          <span class="flat-button b-important" ng-click="hostSession()">Host</span>
+          <span class="flat-button b-important" ng-click="joinSession()">Join</span>
       </td>
     </tr>
     <tr>
       <td colspan="4">
-        Host Session:
-        <!--<input flex type="number" value="3359" placeholder="3359"  min="3359" max="4000" step="1" value="{{quantity}}" ng-model="port" ng-change="setPort()">-->
-        <span class="flat-button b-important" ng-click="hostSession()">Host</span>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2">
-        Nickname:
-        <input id="NICKNAME" flex type="text" placeholder="Nickname" ng-model="Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="setNickname()">
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2">
         Chat:
-        <input id="CHATMESSAGE" flex type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
+        <input id="CHATMESSAGE" flex style="width: 455px;" type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
         <span class="flat-button b-important" ng-click="chatSend()">Send</span>
       </td>
     </tr>

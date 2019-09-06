@@ -8,6 +8,9 @@ registerCoreModule("Network")
 load("Settings")
 registerCoreModule("Settings")
 
+load("Helpers")
+registerCoreModule("Helpers")
+
 --load("DEBUG")
 --registerCoreModule("DEBUG")
 

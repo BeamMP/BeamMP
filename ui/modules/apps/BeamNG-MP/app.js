@@ -27,7 +27,6 @@ angular.module('beamng.apps')
 			}
 
 			$scope.joinSession = function() {
-				console.log("PRESSED")
 				var ip = document.getElementById("IP").value;
 				var port = document.getElementById("PORT").value;
 				var nickname = document.getElementById("NICKNAME").value;
@@ -46,7 +45,7 @@ angular.module('beamng.apps')
 				if (nickname.length < 3) {
 					console.log('Nickname is too short. At least 3 characters are required.')
 					bngApi.engineLua('UI.error("Your nickname is too short, min of 3 characters.")')
-					document.getElementById("NICKNAME").style.color = "red";
+					document.getElementById("NICKNAME").style.border = "1px solid red";
 					document.getElementById("statusText").innerHTML = "Status: nickname too short (3 chars min)"
 					ready = false;
 				}
@@ -54,7 +53,7 @@ angular.module('beamng.apps')
 				if (nickname.length > 30) {
 					console.log('Nickname is too long. A maximum of 30 characters is allowed.')
 					bngApi.engineLua('UI.error("Your nickname is too long, max 30 characters.")')
-					document.getElementById("NICKNAME").style.color = "red";
+					document.getElementById("NICKNAME").style.border = "1px solid red";
 					document.getElementById("statusText").innerHTML = "Status: nickname too long (30 chars max)"
 					ready = false;
 				}
@@ -62,7 +61,7 @@ angular.module('beamng.apps')
 				if (nickname.includes("\\")) {
 					console.log('Your nickname contain illegal character.')
 					bngApi.engineLua('UI.error("Your nickname contain illegal character.")')
-					document.getElementById("NICKNAME").style.color = "red";
+					document.getElementById("NICKNAME").style.border = "1px solid red";
 					document.getElementById("statusText").innerHTML = "Status: nickname can't contain backslash ( \\ )"
 					ready = false;
 				}
@@ -70,7 +69,7 @@ angular.module('beamng.apps')
 				if (nickname.includes("\"")) {
 					console.log('Your nickname contain illegal character.')
 					bngApi.engineLua('UI.error("Your nickname contain illegal character.")')
-					document.getElementById("NICKNAME").style.color = "red";
+					document.getElementById("NICKNAME").style.border = "1px solid red";
 					document.getElementById("statusText").innerHTML = "Status: nickname can't contain quotes ( \" )"
 					ready = false;
 				}
@@ -78,13 +77,13 @@ angular.module('beamng.apps')
 				if (nickname.includes("+")) {
 					console.log('Your nickname contain illegal character.')
 					bngApi.engineLua('UI.error("Your nickname contain illegal character.")')
-					document.getElementById("NICKNAME").style.color = "red";
+					document.getElementById("NICKNAME").style.border = "1px solid red";
 					document.getElementById("statusText").innerHTML = "Status: nickname can't contain plus ( + )"
 					ready = false;
 				}
 
 				if (ready) {
-					document.getElementById("NICKNAME").style.color = "black";
+					document.getElementById("NICKNAME").style.border = "";
 					bngApi.engineLua('UI.setNickname("'+ String(nickname) + '")')
 					bngApi.engineLua('UI.joinSession("'+ String(ip) + '",' + parseInt(port) + ')')
 				}

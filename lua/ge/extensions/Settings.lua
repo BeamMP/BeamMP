@@ -5,17 +5,20 @@
 
 local M = {}
 local Nickname = ''
+local PlayerID = ''
 
-local function SettingsReset()
-
+local function SettingsReset() -- Used for resetting the main settings like username, and such
+  Nickname = ''
+  PlayerID = ''
 end
 
-local function SessionReset()
-
+local function SessionReset() -- used for resetting current session specifics only
+  PlayerID = ''
 end
 
 M.SettingsReset = SettingsReset
 M.SessionReset = SessionReset
 M.Nickname = Nickname
+M.PlayerID = PlayerID
 
 return M

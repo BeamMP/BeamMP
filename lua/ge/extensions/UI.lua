@@ -37,6 +37,14 @@ local function setNickname(value)
 	--print('Chat Values (setChatMessage): '..value.data..' | '..chatMessage or "")
 end
 
+local function setStatus(tempStatus)
+	be:executeJS('document.getElementById("STATUS").innerHTML = "Status: '..tempStatus..'"') -- Set status
+end
+
+local function setPing(ping)
+	be:executeJS('document.getElementById("PING").innerHTML = "Ping : '..ping..'ms"') -- Set status
+end
+
 local function chatSend(value)
 	if not value then
 		println('Chat Value not set! '..value)
@@ -49,6 +57,8 @@ end
 
 local function joinSession(ip, port)
 	println("Attempting to join session on "..ip..':'..port)
+	Settings.PlayerID = Helpers.randomString(8)
+	Network.JoinSession(ip, port)
 end
 
 local function hostSession(param)
@@ -63,5 +73,7 @@ M.chatSend = chatSend
 M.joinSession = joinSession
 M.hostSession = hostSession
 M.setNickname = setNickname
+M.setStatus = setStatus
+M.setPing = setPing
 
 return M

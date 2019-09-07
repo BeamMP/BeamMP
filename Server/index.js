@@ -8,7 +8,7 @@ const udpport = tcpport + 1;
 const host = '192.168.1.195';
 
 const TCPserver = net.createServer();
-TCPserver.listen(tcpport, host, () => {
+TCPserver.listen(tcpport, () => {
   console.log('TCP Server listening on ' + host + ':' + tcpport);
 });
 

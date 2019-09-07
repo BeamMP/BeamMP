@@ -64,7 +64,9 @@ local function onUpdate(dt)
 		local received, status, partial = UDPSocket:receive() -- Receive data
 		if received ~= "" and received ~= nil then -- If data have been received then
 
-			println("Data received : "..received)
+			--println("Data received : "..received)
+			local packetLength = string.len(received)
+			local code = string.sub(received, 1, 4)
 
 			local i = 0
 			local processed = {}
@@ -95,14 +97,14 @@ local function onUpdate(dt)
 
 			elseif code == "U-VI" then --
 
-			end
-
-			if received == "PONG" then -- Ping request
+			elseif code == "PONG" then -- Ping request
 				pingStatus = "received"
 				if firstConnect then
 					onConnected()
 					firstConnect = false
 				end
+			else
+				println("Data received : "..received)
 			end
 		end
 	end
@@ -124,7 +126,7 @@ local function onUpdate(dt)
 		end
 
 		if pingStatus == "send" then -- Send the ping request
-			UDPSend("PING")
+			--UDPSend("PING")
 			pingStatus = "wait" -- Wait for server answer
 			sysTime = socket.gettime() -- Get send time
 		elseif pingStatus == "received" then -- When server answered

@@ -106,10 +106,10 @@ local function onUpdate(dt)
 
 			--print("-----------------------------------------------------")
 			--print("data :"..data)
-			--print("code :"..code)
+			print("code :"..code)
 			--print("whole :"..received)
 
-			println("Data received! > Code: "..code.." > Data: "..tostring(data))
+			--println("Data received! > Code: "..code.." > Data: "..tostring(data))
 
 			--==============================================================================
 
@@ -141,10 +141,10 @@ local function onUpdate(dt)
 				TCPSend("MAPS"..map)
 
 			elseif code == "U-VI" then
+				--println("Veh update received")
 				Updates.HandleUpdate(received)
-
-			elseif code == "1012" then -- Update connected players list
-				--playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list
+			else
+				println("Data received! > Code: "..code.." > Data: "..tostring(data))
 			end
 			--==============================================================================
 		end
@@ -188,8 +188,8 @@ local function onUpdate(dt)
 		end
 
 		if pingStatus == "send" then -- Send the ping request
-			println("Ping Check Sent")
-			TCPSend("PING")
+			--println("Ping Check Sent")
+			--TCPSend("PING")
 			pingStatus = "wait" -- Wait for server answer
 			sysTime = socket.gettime() -- Get send time
 		elseif pingStatus == "received" then -- When server answered

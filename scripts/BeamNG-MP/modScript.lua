@@ -1,5 +1,5 @@
-load("Helpers")
-registerCoreModule("Helpers") -- Helper Functions
+load("HelperFunctions")
+registerCoreModule("HelperFunctions") -- Helper Functions
 
 load("UI")
 registerCoreModule("UI") -- For all of our UI functions and handling

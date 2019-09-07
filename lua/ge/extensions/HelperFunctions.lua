@@ -1,4 +1,4 @@
-print("[BeamNG-MP] | Helpers loaded.")
+print("[BeamNG-MP] | Helper Functions loaded.")
 require('bullettime')
 local M = {}
 
@@ -54,11 +54,32 @@ local function setPauseState(paused)
   bullettime.pause(paused)
 end
 
+local function GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, useZ)
+  local x3 = 0
+  local y3 = 0
+  local z3 = 0
+  x3 = x1 - x2
+  y3 = y1 - y2
+  if not useZ then
+    z3 = z1 - z2
+  end
+  if x3 < 0 then
+    x3 = x3*-1
+  elseif y3 < 0 then
+    y3 = y3*-1
+  elseif z3 < 0 then
+    z3 = z3*-1
+  end
+  local dist = x3 + y3 + z3
+  return dist
+end
+
 M.split = split
 M.dump = dump
 M.randomString = randomString
 M.togglePause = togglePause
 M.getPause = getPause
 M.setPauseState = setPauseState
+M.GetDistanceBetweenCoords = GetDistanceBetweenCoords
 
 return M

@@ -11,7 +11,7 @@ local Timer = 0
 
 local function println(stringToPrint)
 	if stringToPrint ~= nil then
-		print("[BeamNG-MP] [UDP] | "..stringToPrint or "")
+		print("[BeamNG-MP] [VehicleData] | "..stringToPrint or "")
 	end
 end
 
@@ -89,6 +89,7 @@ local function onUpdate(dt)
       local state = getVehicleState()
       local vehReady = jsonEncode(state)
       -- Send All Updates depending on the chosen Protocol
+			--println("Veh update sent")
       if Settings.Protocol == "TCP" then
         if tcp == 2 then
           Network.TCPSend("U-VI"..Settings.ClientID..''..vehReady)

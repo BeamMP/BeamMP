@@ -31,18 +31,34 @@ local function updateVehicleInputs(client, inputs)
     local veh = be:getObject(i)
     if veh:getJBeamFilename() == inputs.model and inputs.cid == veh.cid then
       found = true
-      print('Vehicle found for client: '..client)
+      --print('Vehicle found for client: '..client)
       for k, v in pairs(inputs) do
         local typeof=type(v)
         if typeof=="table" then
-					println(k) -- should show pos, vel, dir
-          println(v[1])
+					--println(k) -- should show pos, vel, dir
+          --println(v[1])
           if k == "pos" then
-            veh:setPosition(Point3F(v[1], v[2], v[3]))
+            if Settings.UpdateMethod == 1 then
+              local vdata = map.objects[be:getPlayerVehicle(0):getID()]
+              local pos = vdata.pos:toTable()
+              if HelperFunctions.GetDistanceBetweenCoords(pos[1], pos[2], pos[3], v[1], v[2], v[3], true) > Settings.SmoothUpdateDist then
+                println("Dist is higher than "..Settings.SmoothUpdateDist..": "..HelperFunctions.GetDistanceBetweenCoords(pos[1], pos[2], pos[3], v[1], v[2], v[3], true))
+                veh:setPosition(Point3F(v[1], v[2], v[3]))
+              end
+            elseif Settings.UpdateMethod == 2 then
+              print(v[1])
+              local vdata2 = map.objects[be:getObject(i):getID()]
+              local pos = vdata2.pos:toTable()
+              print(pos[1])
+              if HelperFunctions.GetDistanceBetweenCoords(pos[1], pos[2], pos[3], v[1], v[2], v[3], true) > Settings.MaxVariationDist then
+                println("Vehicle is further than should be and beyond tolerance: "..HelperFunctions.GetDistanceBetweenCoords(pos[1], pos[2], pos[3], v[1], v[2], v[3], true).." Should be no more than "..Settings.MaxVariationDist)
+                veh:setPosition(Point3F(v[1], v[2], v[3]))
+              end
+            end
           elseif k == "dir" then
 
           elseif k == "vel" then
-
+            veh:setVelocity(Point3F(v[1], v[2], v[3])) -- Experimental
           end
           --print('TABLE VALUE')
           --print(i)
@@ -91,7 +107,7 @@ local function HandleUpdate(received)
 
     --println(code)
     --println(ClientID)
-    --println(Helpers.dump(data))
+    --println(HelperFunctions.dump(data))
 
   if code == "U-VI" then
     println(ClientID..' == '..Settings.ClientID..' ?')

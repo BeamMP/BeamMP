@@ -71,7 +71,7 @@ end
 
 local function joinSession(ip, port)
 	println("Attempting to join session on "..ip..':'..port)
-	Settings.PlayerID = Helpers.randomString(8)
+	Settings.PlayerID = HelperFunctions.randomString(8)
 	Network.JoinSession(ip, port)
 end
 

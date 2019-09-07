@@ -66,9 +66,11 @@ TCPserver.on('connection', function(sock) {
         //players.forEach(function(player, index, array) {
           //if (player.remoteAddress != sock.remoteAddress) {
             //console.log(player.remoteAddress+' != '+sock.remoteAddress+' Is not the same so we should send?')
-            sockets.forEach(function(sock, index, array) { // Send update to all clients
-              if (player.remoteAddress != sock.remoteAddress && player.remotePort != sock.remotePort) {
-                sock.write(data+'\n');
+            //console.log("Got Update to send!")
+            sockets.forEach(function(socket, index, array) { // Send update to all clients
+              //console.log(socket.remotePort+' != '+sock.remotePort+' Is not the same so we should send?')
+              if ((sock.remoteAddress != socket.remoteAddress && sock.remotePort != socket.remotePort) || (sock.remoteAddress == socket.remoteAddress && sock.remotePort != socket.remotePort)) {
+                socket.write(data+'\n');
               }
             });
           //}
@@ -121,4 +123,4 @@ UDPserver.on('message',function(msg,info){
   }
 });
 
-UDPserver.bind(udpport, host);
+UDPserver.bind(udpport);

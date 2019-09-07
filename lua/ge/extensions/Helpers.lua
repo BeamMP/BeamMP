@@ -1,4 +1,4 @@
-print("BeamNG-MP helpers loaded.")
+print("[BeamNG-MP] | Helpers loaded.")
 require('bullettime')
 local M = {}
 

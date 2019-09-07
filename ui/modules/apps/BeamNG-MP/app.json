@@ -9,10 +9,10 @@
   	"left": "180px",
   	"bottom": "0px",
   	"width": "570px",
-    "height": "120px",
+    "height": "100px",
     "min-width": "570px",
-    "min-height": "120px",
+    "min-height": "100px",
     "max-width": "570px",
-    "max-height": "120px",
+    "max-height": "100px",
   }
 }

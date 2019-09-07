@@ -1,15 +1,23 @@
--- For all of our UI functions and handling
-load("UI")
-registerCoreModule("UI")
+load("Helpers")
+registerCoreModule("Helpers") -- Helper Functions
 
-load("Network")
-registerCoreModule("Network")
+load("UI")
+registerCoreModule("UI") -- For all of our UI functions and handling
 
 load("Settings")
-registerCoreModule("Settings")
+registerCoreModule("Settings") -- Stores our session settings
 
-load("Helpers")
-registerCoreModule("Helpers")
+load("Updates")
+registerCoreModule("Updates") -- handles all vehicle updating things
+
+load("Network")
+registerCoreModule("Network") -- Handles all TCP related traffic
+
+load("NetworkUDP")
+registerCoreModule("NetworkUDP") -- All done over UDP
+
+load("VehicleGetter")
+registerCoreModule("VehicleGetter") -- Contains vehicle related things
 
 --load("DEBUG")
 --registerCoreModule("DEBUG")
@@ -22,9 +30,6 @@ registerCoreModule("playersList")
 
 load("updatesGE")
 registerCoreModule("updatesGE")
-
-load("vehicleGE")
-registerCoreModule("vehicleGE")
 
 load("inputsGE")
 registerCoreModule("inputsGE")

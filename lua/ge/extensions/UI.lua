@@ -19,12 +19,17 @@ end
 --== UI related stuff
 --=============================================================================
 
-local function ready() -- Only run on the calling from the UI
-	println("UI Ready!")
+local function ready(ui) -- Only run on the calling from the UI
+	println(ui.." UI Ready!")
 end
 
 local function error(message)
 	println("UI Error > "..message)
+	ui_message(''..message, 10, 0, 0)
+end
+
+local function message(message)
+	println("[Message] > "..message)
 	ui_message(''..message, 10, 0, 0)
 end
 
@@ -41,8 +46,17 @@ local function setStatus(tempStatus)
 	be:executeJS('document.getElementById("STATUS").innerHTML = "Status: '..tempStatus..'"') -- Set status
 end
 
+local function updateChatLog(message)
+	be:executeJS('UpdateChat("'..message..'")') -- Set status
+end
+
 local function setPing(ping)
-	be:executeJS('document.getElementById("PING").innerHTML = "Ping : '..ping..'ms"') -- Set status
+	be:executeJS('document.getElementById("PING").innerHTML = "Ping: '..ping..'ms"') -- Set status
+	be:executeJS('document.getElementById("TCPPING").innerHTML = "'..ping..'ms"')
+end
+
+local function setUDPPing(ping)
+	be:executeJS('document.getElementById("UDPPING").innerHTML = "'..ping..'ms"')
 end
 
 local function chatSend(value)
@@ -51,7 +65,7 @@ local function chatSend(value)
 		return
 	else
 		println('Chat: Message sent = '..value)
-		--ws_client:send('CHAT|'..nick..': '..value.data)
+		Network.SendChatMessage(value)
 	end
 end
 
@@ -61,19 +75,18 @@ local function joinSession(ip, port)
 	Network.JoinSession(ip, port)
 end
 
-local function hostSession(param)
-
-end
-
 M.onUpdate = onUpdate
 M.ready = ready
 M.error = error
 M.console = console
+M.message = message
 M.chatSend = chatSend
 M.joinSession = joinSession
-M.hostSession = hostSession
+--M.hostSession = hostSession
 M.setNickname = setNickname
 M.setStatus = setStatus
 M.setPing = setPing
+M.setUDPPing = setUDPPing
+M.updateChatLog = updateChatLog
 
 return M

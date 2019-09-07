@@ -123,22 +123,15 @@
       </td>
     </tr>
     <tr>
-      <td colspan="1" style="width: 85px;">
+      <td colspan="1" style="width: 100px;">
         <span id="PING">Ping: </span>
       </td>
       <td colspan="2">
         <span id="STATUS">Status: </span>
       </td>
       <td colspan="1" style="text-align: right;width: 114px;padding-right: 5px;">
-          <span class="flat-button b-important" ng-click="hostSession()">Host</span>
+          <!--<span class="flat-button b-important" ng-click="hostSession()">Host</span>-->
           <span class="flat-button b-important" ng-click="joinSession()">Join</span>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="4">
-        Chat:
-        <input id="CHATMESSAGE" flex style="width: 455px;" type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
-        <span class="flat-button b-important" ng-click="chatSend()">Send</span>
       </td>
     </tr>
   </table>

@@ -1,0 +1,14 @@
+{
+  "name": "beamng.drive-mp-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mitch Durso",
+  "license": "ISC",
+  "dependencies": {
+    "uuid": "^3.3.3"
+  }
+}

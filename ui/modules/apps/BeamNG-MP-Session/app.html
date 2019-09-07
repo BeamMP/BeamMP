@@ -1,4 +1,4 @@
-<div class="bngApp multiplayerdebug" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="ctrl.init()">
+<div class="bngApp multiplayersession" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="init()">
   <style>
     table {
       width: 100%;
@@ -60,6 +60,7 @@
       color: #000000;
       background-color: #DADADA;
       border: 1px solid #888888;
+      min-width: 37px;
     }
     .flat-button:hover {
       background-color: #C8C8C8;
@@ -105,49 +106,33 @@
     .column-wide-2 {
       width: 49%;
     }
+    .error{
+      border-color: red;
+    }
   </style>
   <table ng-style="{'visibility': mainStyle.appShow}">
     <tr>
-      <th colspan="2"><span class="title">Multiplayer DEBUG</span></th>
+      <th colspan="4"><span class="title">Multiplayer Session</span></th>
     </tr>
     <tr>
-      <td>
-        Item
+      <td colspan="1">
+        Session Members:
+        <ul id="MEMBERS">
+
+        </ul>
       </td>
-      <td>
-        State
-      </td>
-    </tr>
-    <tr>
-      <td>
-        TCP Ping
-      </td>
-      <td>
-        <span id="TCPPING"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        UDP Ping
-      </td>
-      <td>
-        <span id="UDPPING"></span>
+      <td colspan="2">
+        Session Chat
+        <ul id="CHAT">
+
+        </ul>
       </td>
     </tr>
     <tr>
-      <td>
-        Player ID
-      </td>
-      <td>
-        <span id="PID"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        Vehicle ID
-      </td>
-      <td>
-        <span id="VID"></span>
+      <td colspan="3">
+        Chat:
+        <input id="CHATMESSAGE" flex style="width: 455px;" type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
+        <span class="flat-button b-important" ng-click="chatSend()">Send</span>
       </td>
     </tr>
   </table>

@@ -4,6 +4,7 @@ A LUA implementation at attempting to bring local network multiplayer to BeamNG.
 # Contents
  - Installation
  - How will this work?
+ - Network Codes
  - Progression tracking.
 
 
@@ -29,6 +30,20 @@ Now the new client will be setting up the world its current vehicles and so on.
 
 once the new client is setup, all players will unpause and rely on web sockets to maintain an updated gameplay. mean while the host will periodically update the running configuration.
 
+# Network Codes
+  XXXX - All codes are 4 characters and can be translated to a different control
+
+  Server / Setup
+  - HOLA = Welcome / Connection Successful
+  - PING = Ping request
+  - USER = Username Setting
+  - MAPC = Map Checking
+  - MAPS = Map Setting
+  - CHAT = Chat Message
+  - KICK = You have been Kicked
+
+  Game / Session
+  - U-VI = Vehicle Inputs Update
 
 # Progression tracking
 you can see and keep track of progression here:

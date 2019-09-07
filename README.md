@@ -81,3 +81,5 @@ print(extensions.util_richPresence.set('Playing BeamNG.drive Multiplayer'));
 
 lua/ge/extensions/util/researchAdapter.lua This looks like either their attempt to make a multiplayer or is what it says on the tin and is for research.
 Either way this will be extremely helpful for us!
+
+Update: Actually is for this: https://github.com/BeamNG/BeamNGpy Still was helpful for communications insights.

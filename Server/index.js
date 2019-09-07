@@ -3,13 +3,13 @@ var map = "";
 
 const net = require('net');
 const uuidv4 = require('uuid/v4');
-const tcpport = 4444;
+const tcpport = 30813;
 const udpport = tcpport + 1;
 const host = '192.168.1.195';
 
 const TCPserver = net.createServer();
 TCPserver.listen(tcpport, () => {
-  console.log('TCP Server listening on ' + host + ':' + tcpport);
+  console.log('TCP Server listening on ' + TCPserver.address().address + ':' + tcpport);
 });
 
 let sockets = [];

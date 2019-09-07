@@ -35,6 +35,15 @@ local function updateVehicleInputs(client, inputs)
       for k, v in pairs(inputs) do
         local typeof=type(v)
         if typeof=="table" then
+					println(k) -- should show pos, vel, dir
+          println(v[1])
+          if k == "pos" then
+            veh:setPosition(Point3F(v[1], v[2], v[3]))
+          elseif k == "dir" then
+
+          elseif k == "vel" then
+
+          end
           --print('TABLE VALUE')
           --print(i)
           --print(v)
@@ -80,9 +89,9 @@ local function HandleUpdate(received)
   local ClientID = string.sub(received, 5, 12)
   local data = jsonDecode(string.sub(received, 13, packetLength))
 
-    println(code)
-    println(ClientID)
-    println(Helpers.dump(data))
+    --println(code)
+    --println(ClientID)
+    --println(Helpers.dump(data))
 
   if code == "U-VI" then
     println(ClientID..' == '..Settings.ClientID..' ?')

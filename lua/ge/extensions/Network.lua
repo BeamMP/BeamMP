@@ -47,6 +47,8 @@ local function disconnectFromServer()
 		TCPSocket:close()-- Disconnect from server
 		serverTimeoutTimer = 0 -- Reset timeout delay
 		connectionStatus = 0
+		pingStatus = "ready"
+		pingTimer = 0
 		UI.setStatus("Disconnected")
 	end
 end
@@ -140,7 +142,45 @@ local function onUpdate(dt)
 				local map = getMissionFilename()
 				TCPSend("MAPS"..map)
 
-			elseif code == "U-VI" then
+			elseif code == "1012" then -- Update connected players list
+				playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list
+
+			--==============================================================================
+
+			elseif code == "1020" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
+				vehicleGE.onServerVehicleSpawned(data)
+
+			elseif code == "1121" then -- Server vehicle removed
+				vehicleGE.onServerVehicleRemoved(serverVehicleID)
+
+			--==============================================================================
+
+			elseif code == "U-VI" then -- Update - Vehicle Inputs
+				if data and serverVehicleID then
+					inputsGE.applyInputs(data, serverVehicleID)
+				end
+
+			elseif code == "U-VE" then -- Update - Vehicle Electrics
+				if data and serverVehicleID then
+					electricsGE.applyElectrics(data, serverVehicleID)
+				end
+
+			elseif code == "U-VN" then -- Update - Vehicle Nodes
+				if data and serverVehicleID then
+					nodesGE.applyNodes(data, serverVehicleID)
+				end
+
+			elseif code == "U-VP" then -- Update - Vehicle Powertrain
+				if data and serverVehicleID then
+					powertrainGE.applyPowertrain(data, serverVehicleID)
+				end
+
+			elseif code == "U-VL" then -- Update - Vehicle Position / Location
+				if data and serverVehicleID then
+					positionGE.applyPos(data, serverVehicleID)
+				end
+
+			elseif code == "U-VI" then -- Update - Vehicle Inputs
 				--println("Veh update received")
 				Updates.HandleUpdate(received)
 			else
@@ -166,7 +206,7 @@ local function onUpdate(dt)
 			end
 		end
 		if serverTimeoutTimer > timeoutWarn and connectionStatus == 2 then -- If serverTimeoutTimer pass 7 seconds
-			UI.setStatus("No answer...", 0) -- Warning message
+			UI.setStatus("No answer... ("..serverTimeoutTimer..")", 0) -- Warning message
 		end
 --===================================================== CHECK SERVER TIMEOUT =====================================================
 

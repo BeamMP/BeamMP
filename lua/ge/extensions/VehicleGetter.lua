@@ -23,7 +23,7 @@ lastVehicleState = {
   clutch = 0
 }
 
-local function getVehicleState()
+local function getVehicleInputs()
   local player0 = be:getPlayerVehicle(0) -- Our clients vehicle
   local state = {}
   state.type = "VehicleState"
@@ -77,6 +77,21 @@ local function getVehicleState()
   return state
 end
 
+local function getVehicleElectrics()
+	local player0 = be:getPlayerVehicle(0) -- Our clients vehicle
+  local state = {}
+end
+
+local function getVehicleNodes()
+	local player0 = be:getPlayerVehicle(0) -- Our clients vehicle
+  local state = {}
+end
+
+local function getVehiclePowertrain()
+	local player0 = be:getPlayerVehicle(0) -- Our clients vehicle
+  local state = {}
+end
+
 local function onUpdate(dt)
   Timer = Timer + dt
   local tcp = tonumber(Network.GetTCPStatus())
@@ -86,19 +101,20 @@ local function onUpdate(dt)
     if Timer > 0.5 then
       Timer = 0
       -- Update all our data on our vehicle
-      local state = getVehicleState()
-      local vehReady = jsonEncode(state)
+      --local state = getVehicleInputs()
+      --local vehInputs = jsonEncode(state)
       -- Send All Updates depending on the chosen Protocol
 			--println("Veh update sent")
-      if Settings.Protocol == "TCP" then
-        if tcp == 2 then
-          Network.TCPSend("U-VI"..Settings.ClientID..''..vehReady)
-        end
-      elseif Settings.Protocol == "UDP" then
-        if udp == 2 then
-          NetworkUDP.UDPSend()
-        end
-      end
+      --if Settings.Protocol == "TCP" then
+        --if tcp == 2 then
+          --Network.TCPSend("U-VI"..Settings.ClientID..''..vehInputs)
+					--Network.TCPSend("U-VE"..Settings.ClientID..''..vehReady)
+        --end
+      --elseif Settings.Protocol == "UDP" then
+        --if udp == 2 then
+          --NetworkUDP.UDPSend()
+        --end
+      --end
     end
   end
 end

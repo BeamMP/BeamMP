@@ -14,18 +14,6 @@ local function println(stringToPrint)
 	end
 end
 
-local function issueVehicleInput(i, key, val)
-  local command = "input.event('" .. key .. "', " .. val .. ", 1)"
-  --print(command)
-  if i ~= nil and command ~= nil then
-    local veh = be:getObject(i)
-    --be:getPlayerVehicle(i):queueLuaCommand(command)
-    veh:queueLuaCommand(command) -- Thank you to jojo38 for the solution here!
-  else
-    print('NIL VALUE DETECTED')
-  end
-end
-
 local function updateVehicleInputs(client, inputs)
   for i = 0, be:getObjectCount()-1 do
     local veh = be:getObject(i)
@@ -74,7 +62,15 @@ local function updateVehicleInputs(client, inputs)
           --print(v)
           --if k == "config" then
           if k == "throttle" or k == "clutch" or k == "brake" or k == "steering" or k == "parkingbrake" then -- TODO Add pos checking to syncronisation as well
-            issueVehicleInput(i, k, v)
+						local command = "input.event('" .. key .. "', " .. val .. ", 1)"
+					  --print(command)
+					  if i ~= nil and command ~= nil then
+					    local veh = be:getObject(i)
+					    --be:getPlayerVehicle(i):queueLuaCommand(command)
+					    veh:queueLuaCommand(command) -- Thank you to jojo38 for the solution here!
+					  else
+					    print('NIL VALUE DETECTED')
+					  end
           end
         end
       end
@@ -97,6 +93,10 @@ local function updateVehicleInputs(client, inputs)
       return true
     end
   end
+end
+
+local function updateVehicleElectrics()
+
 end
 
 local function HandleUpdate(received)

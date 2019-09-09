@@ -19,7 +19,7 @@ local serverPlayerID = ""
 local sysTime = 0
 local pingStatus = "ready"
 local pingTimer = 0
-local timeoutMax = 10 --TODO: SET THE TIMER TO 30 SECONDS
+local timeoutMax = 30 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 5 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 -- ============= VARIABLES =============
 
@@ -148,13 +148,11 @@ local function onUpdate(dt)
 			end
 			--==============================================================================
 		end
-	end
 --====================================================== DATA RECEIVE ======================================================
 
 
 
 --===================================================== CHECK SERVER TIMEOUT =====================================================
-	if connectionStatus > 0 then -- If connected to the server
 		serverTimeoutTimer = serverTimeoutTimer + dt -- Time in seconds
 		if serverTimeoutTimer > timeoutMax then -- If serverTimeoutTimer haven't been set to 0 for 15 seconds it mean the server is not answering
 			if connectionStatus == 2 then -- If was connected to server then
@@ -175,11 +173,13 @@ local function onUpdate(dt)
 --================================ TWO SECONDS TIMER ================================
 		twoSecondsTimer = twoSecondsTimer + dt -- Time in seconds
 		if twoSecondsTimer > 2 then -- If twoSecondsTimer pass 2 seconds
-			TCPSend("PING") -- Still connected
+			TCPSend("BEAT") -- Still connected
 			twoSecondsTimer = 0	-- Reset timer
 		end
 --================================ TWO SECONDS TIMER ================================
 
+	end
+	if connectionStatus > 1 then
 --================================ CHECK PING ================================
 		pingTimer = pingTimer + dt
 		if pingTimer > 2 and pingStatus == "ready" then -- Ping every 2 seconds
@@ -189,7 +189,7 @@ local function onUpdate(dt)
 
 		if pingStatus == "send" then -- Send the ping request
 			--println("Ping Check Sent")
-			--TCPSend("PING")
+			TCPSend("PING")
 			pingStatus = "wait" -- Wait for server answer
 			sysTime = socket.gettime() -- Get send time
 		elseif pingStatus == "received" then -- When server answered

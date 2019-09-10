@@ -99,9 +99,13 @@ TCPserver.on('connection', function(sock) {
 
   sock.on('error', (err) => {
     // handle errors here
-    console.error("Sock Error");
-    console.error(err);
-    throw err;
+    if (err == "ECONNRESET") {
+      console.error("Connection Reset!")
+    } else {
+      console.error("Sock Error");
+      console.error(err);
+      throw err;
+    }
   });
 });
 

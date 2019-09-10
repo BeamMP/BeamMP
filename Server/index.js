@@ -62,18 +62,22 @@ TCPserver.on('connection', function(sock) {
         });
         break;
       case "U-VI":
+      case "U-VE":
+      case "U-VN":
+      case "U-VP":
+      case "U-VL":
         //console.log(data)
         //players.forEach(function(player, index, array) {
-          //if (player.remoteAddress != sock.remoteAddress) {
-            //console.log(player.remoteAddress+' != '+sock.remoteAddress+' Is not the same so we should send?')
-            //console.log("Got Update to send!")
-            sockets.forEach(function(socket, index, array) { // Send update to all clients
-              //console.log(socket.remotePort+' != '+sock.remotePort+' Is not the same so we should send?')
-              if ((sock.remoteAddress != socket.remoteAddress && sock.remotePort != socket.remotePort) || (sock.remoteAddress == socket.remoteAddress && sock.remotePort != socket.remotePort)) {
-                socket.write(data+'\n');
-              }
-            });
-          //}
+        //if (player.remoteAddress != sock.remoteAddress) {
+        //console.log(player.remoteAddress+' != '+sock.remoteAddress+' Is not the same so we should send?')
+        //console.log("Got Update to send!")
+        sockets.forEach(function(socket, index, array) { // Send update to all clients
+          //console.log(socket.remotePort+' != '+sock.remotePort+' Is not the same so we should send?')
+          if ((sock.remoteAddress != socket.remoteAddress && sock.remotePort != socket.remotePort) || (sock.remoteAddress == socket.remoteAddress && sock.remotePort != socket.remotePort)) {
+            socket.write(data+'\n');
+          }
+        });
+        //}
         //});
         break;
       default:
@@ -92,6 +96,20 @@ TCPserver.on('connection', function(sock) {
     if (index !== -1) sockets.splice(index, 1);
     console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
   });
+
+  sock.on('error', (err) => {
+    // handle errors here
+    console.error("Sock Error");
+    console.error(err);
+    throw err;
+  });
+});
+
+TCPserver.on('error', (err) => {
+  // handle errors here
+  console.error("TCPserver Error");
+  console.error(err);
+  throw err;
 });
 
 var dgram = require('dgram');
@@ -115,11 +133,11 @@ UDPserver.on('message',function(msg,info){
   var code = data.substring(0, 4);
   switch (code) {
     case "PING":
-      UDPsend("PONG", info)
-      break;
+    UDPsend("PONG", info)
+    break;
     default:
-      console.log('[UDP] Data received from client : ' + msg.toString());
-      console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
+    console.log('[UDP] Data received from client : ' + msg.toString());
+    console.log('Received %d bytes from %s:%d\n',msg.length, info.address, info.port);
   }
 });
 

@@ -55,6 +55,14 @@ extensions.core_jobsystem.create(function ()
 	ws_client:send("JOIN|"..user.."|"..map)
 end)
 
+local function updateUI(opt, data)
+	if opt == "updateTime" then
+		be:executeJS('document.getElementById("PID").innerHTML = "'..data..'ms"')
+	elseif opt == "runTime" then
+		be:executeJS('document.getElementById("VID").innerHTML = "'..data..'ms"')
+	end
+end
+
 
 
 
@@ -141,5 +149,6 @@ local function onUpdate()
 end
 
 M.onUpdate  = onUpdate
+M.updateUI = updateUI
 
 return M

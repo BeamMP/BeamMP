@@ -87,7 +87,14 @@ local function JoinSession(ip, port)
   -- We now work in the onUpdate function and setup our UDP client
 end
 
+local updateTime = 0
+
 local function onUpdate(dt)
+	local runTime = socket.gettime() -- Get update run time
+	local uTime = (socket.gettime() - updateTime)*1000 -- Calculate time between send and receive
+	local roundedUpdateTime = uTime + 0.5 - (uTime + 0.5) % 1 -- Round -- Get update cycle time
+	DEBUG.updateUI("updateTime", roundedUpdateTime)
+
 	-- Client Code
   if connectionStatus > 0 then -- If player is connecting or connected
 		local received, status, partial = TCPSocket:receive() -- Receive data
@@ -240,6 +247,10 @@ local function onUpdate(dt)
 		end
 --================================ CHECK PING ================================
 	end
+	local rTime = (socket.gettime() - runTime)*1000 -- Calculate time between send and receive
+	local roundedRunTime = rTime + 0.5 - (rTime + 0.5) % 1 -- Round
+	Debug.updateUI("runTime", roundedRunTime)
+	updateTime = socket.gettime()
 end
 
 --================================ Function return + Handling ================================

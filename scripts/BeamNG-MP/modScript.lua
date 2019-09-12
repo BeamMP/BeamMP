@@ -1,3 +1,6 @@
+load("Debug")
+registerCoreModule("Debug")
+
 load("HelperFunctions")
 registerCoreModule("HelperFunctions") -- Helper Functions
 
@@ -18,9 +21,6 @@ registerCoreModule("NetworkUDP") -- All done over UDP
 
 load("VehicleGetter")
 registerCoreModule("VehicleGetter") -- Contains vehicle related things
-
---load("DEBUG")
---registerCoreModule("DEBUG")
 
 --[[load("sessionControl")
 registerCoreModule("sessionControl")

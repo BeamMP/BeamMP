@@ -21,6 +21,7 @@ local pingStatus = "ready"
 local pingTimer = 0
 local timeoutMax = 30 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 5 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
+local maxUpdateTimes = 10
 -- ============= VARIABLES =============
 
 local function println(stringToPrint)
@@ -88,12 +89,29 @@ local function JoinSession(ip, port)
 end
 
 local updateTime = 0
+local Times = {}
 
 local function onUpdate(dt)
 	local runTime = socket.gettime() -- Get update run time
 	local uTime = (socket.gettime() - updateTime)*1000 -- Calculate time between send and receive
 	local roundedUpdateTime = uTime + 0.5 - (uTime + 0.5) % 1 -- Round -- Get update cycle time
-	DEBUG.updateUI("updateTime", roundedUpdateTime)
+	table.insert(Times, roundedUpdateTime)
+
+	if #Times > maxUpdateTimes then
+		table.remove(Times, 1)
+	end
+
+	local sum = 0
+	local averageUpdateTime = 0
+	local elements = #Times
+
+	for i = 1, elements do
+	    sum = sum + Times[i]
+	end
+
+	averageUpdateTime = sum / elements
+	averageUpdateTime = averageUpdateTime + 0.5 - (averageUpdateTime + 0.5) % 1 -- Round
+	DEBUG.updateUI("updateTime", averageUpdateTime)
 
 	-- Client Code
   if connectionStatus > 0 then -- If player is connecting or connected
@@ -242,6 +260,7 @@ local function onUpdate(dt)
 		elseif pingStatus == "received" then -- When server answered
 			local ping = (socket.gettime() - sysTime)*1000 -- Calculate time between send and receive
 			local roundedPing = ping + 0.5 - (ping + 0.5) % 1 -- Round
+			roundedPing = roundedPing - averageUpdateTime
 			UI.setPing(roundedPing) -- Set the ping
 			pingStatus = "ready" -- Ready for next ping
 		end

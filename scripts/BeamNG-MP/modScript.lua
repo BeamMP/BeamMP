@@ -26,7 +26,7 @@ registerCoreModule("VehicleGetter") -- Contains vehicle related things
 registerCoreModule("sessionControl")
 
 load("playersList")
-registerCoreModule("playersList")
+registerCoreModule("playersList")]]
 
 load("updatesGE")
 registerCoreModule("updatesGE")
@@ -44,4 +44,4 @@ load("powertrainGE")
 registerCoreModule("powertrainGE")
 
 load("nodesGE")
-registerCoreModule("nodesGE")]]
+registerCoreModule("nodesGE")

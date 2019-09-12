@@ -28,7 +28,7 @@ local electricsTickrate = 3
 
 local function onPlayerConnect()
 	-- Update everything for the new connected player
-	electricsGE.tick() 
+	electricsGE.tick()
 	nodesGE.tick()
 	positionGE.tick()
 	inputsGE.tick()
@@ -38,8 +38,8 @@ end
 
 
 local function onUpdate(dt)
-	if Network.getStatus() == 2 then -- If connected
-	
+	if tonumber(Network.GetTCPStatus()) == 2 then -- If connected
+
 		nodesDelay = nodesDelay + dt
 		if nodesDelay > nodesTickrate then
 			nodesDelay = 0 -- Reset the delay
@@ -51,21 +51,21 @@ local function onUpdate(dt)
 			positionDelay = 0 -- Reset the delay
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
-		
+
 		inputsDelay = inputsDelay + dt
 		if inputsDelay > inputsTickrate then
 			inputsDelay = 0 -- Reset the delay
 			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
-	
+
 		electricsDelay = electricsDelay + dt
 		if electricsDelay > electricsTickrate then
 			electricsDelay = 0 -- Reset the delay
 			electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
-	
-	
-	end	
+
+
+	end
 end
 
 

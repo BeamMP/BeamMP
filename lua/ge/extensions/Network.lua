@@ -180,9 +180,9 @@ local function onUpdate(dt)
 					positionGE.applyPos(data, serverVehicleID)
 				end
 
-			elseif code == "U-VI" then -- Update - Vehicle Inputs
+			--elseif code == "U-VI" then -- Update - Vehicle Inputs
 				--println("Veh update received")
-				Updates.HandleUpdate(received)
+				--Updates.HandleUpdate(received)
 			else
 				println("Data received! > Code: "..code.." > Data: "..tostring(data))
 			end

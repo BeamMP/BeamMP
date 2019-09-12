@@ -100,6 +100,7 @@ local function onUpdate(dt)
   if tcp > 0 and udp > 0 then
     if Timer > 0.5 then
       Timer = 0
+
       -- Update all our data on our vehicle
       --local state = getVehicleInputs()
       --local vehInputs = jsonEncode(state)

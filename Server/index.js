@@ -3,8 +3,14 @@ var map = "";
 
 const net = require('net');
 const uuidv4 = require('uuid/v4');
-const tcpport = 30813;
-const udpport = tcpport + 1;
+const args = require('minimist')(process.argv.slice(2));
+console.log(args.port)
+if (args.port) {
+  var tcpport = args.port;
+} else {
+  var tcpport = 30813;
+}
+var udpport = tcpport + 1;
 const host = '192.168.1.195';
 
 const TCPserver = net.createServer();
@@ -14,6 +20,7 @@ TCPserver.listen(tcpport, () => {
 
 let sockets = [];
 let players = [];
+let vehicles = [];
 
 TCPserver.on('connection', function(sock) {
   console.log('[TCP] CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
@@ -24,6 +31,7 @@ TCPserver.on('connection', function(sock) {
   player.remotePort = sock.remotePort;
   player.nickname = "";
   player.id = uuidv4();
+  player.currentVehID = 0;
 
   players.push(player);
 
@@ -40,7 +48,7 @@ TCPserver.on('connection', function(sock) {
     data = str.trim(); //replace(/\r?\n|\r/g, "");
     var code = data.substring(0, 4);
     var message = data.substr(4);
-    //console.log(code)
+    console.log(code)
     switch (code) {
       case "PING":
         console.log("Ping Received")
@@ -79,6 +87,20 @@ TCPserver.on('connection', function(sock) {
         });
         //}
         //});
+        break;
+      case "U-NV":
+        console.log(message)
+        var vid = uuidv4();
+
+        break;
+      case "C-VS": // Client has changed vehicle. lets update our records.
+        console.log(message)
+        players.forEach(function(player, index, array) {
+          if (player.currentVehID != message && player.remoteAddress == sock.remoteAddress && player.remotePort == sock.remotePort) {
+            console.log("Player Found ("+player.id+"), updating current vehile("+message+")");
+            player.currentVehID = message;
+          }
+        });
         break;
       default:
         console.log('Unknown / unhandled data: ' + sock.remoteAddress + ': ' + data);

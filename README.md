@@ -19,7 +19,9 @@ BeamNG-MP.zip
 ```
 Then put this in your mods folder typically located at Documents/BeamNG.drive/mods.
 
-Then your good to go, start your game, agree with your other players on a map and then host / join.
+You will also require the "Launcher" this little tool is what allows you to connect and play over the internet.
+It does however require you have java 64bit SE installed.
+--Then your good to go, start your game, agree with your other players on a map and then host / join.
 
 # How will this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.

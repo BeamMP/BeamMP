@@ -17,7 +17,7 @@ local config = {level = 1}
 
 
 
-local function tick()			
+local function tick()
 	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
@@ -30,10 +30,10 @@ end
 
 
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	if Network.getStatus() == 2 then -- If UDP is connected
+	if Network.GetTCPStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle		
-			--local compressed = LibDeflate:CompressDeflate(data, config)		
+		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			--local compressed = LibDeflate:CompressDeflate(data, config)
 			--local compressed_binary_data = msgpack.pack(compressed)
 			--local binary_data = msgpack.pack(data)
 			Network.send("2132"..serverVehicleID..data) -- Send data

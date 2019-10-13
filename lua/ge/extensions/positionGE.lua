@@ -22,7 +22,7 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if Network.getStatus() == 2 then -- If UDP connected
+	if Network.GetTCPStatus() == 2 then -- If UDP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			Network.send("2134"..serverVehicleID..data) -- Send it
@@ -40,9 +40,9 @@ local function applyPos(data, serverVehicleID)
 	-- 5 = rot.y
 	-- 6 = rot.z
 	-- 7 = rot.w
-	
+
 	--planetsVE.moveTo(2000, data[1], data[2], data[3])
-	
+
 	--[[
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)

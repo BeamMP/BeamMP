@@ -19,7 +19,7 @@ local serverPlayerID = ""
 local sysTime = 0
 local pingStatus = "ready"
 local pingTimer = 0
-local timeoutMax = 30 --TODO: SET THE TIMER TO 30 SECONDS
+local timeoutMax = 15 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 5 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local maxUpdateTimes = 10
 -- ============= VARIABLES =============
@@ -48,7 +48,7 @@ local function disconnectFromServer()
 		TCPSocket:close()-- Disconnect from server
 		serverTimeoutTimer = 0 -- Reset timeout delay
 		connectionStatus = 0
-		pingStatus = "ready"
+		pingStatus = "received"
 		pingTimer = 0
 		UI.setStatus("Disconnected")
 	end
@@ -72,7 +72,7 @@ end
 
 --======================================================================== ON PLAYER CONNECT ==========================================================================
 local function onPlayerConnect() -- Function called when a player connect to the server
-	--updatesGE.onPlayerConnect()
+	updatesGE.onPlayerConnect()
 end
 
 local function JoinSession(ip, port)
@@ -111,7 +111,7 @@ local function onUpdate(dt)
 
 	averageUpdateTime = sum / elements
 	averageUpdateTime = averageUpdateTime + 0.5 - (averageUpdateTime + 0.5) % 1 -- Round
-	DEBUG.updateUI("updateTime", averageUpdateTime)
+	Debug.updateUI("updateTime", averageUpdateTime)
 
 	-- Client Code
   if connectionStatus > 0 then -- If player is connecting or connected
@@ -131,12 +131,14 @@ local function onUpdate(dt)
 				data = string.sub(received, 5, packetLength)
 			end
 
-			--print("-----------------------------------------------------")
-			--print("data :"..data)
-			print("code :"..code)
-			--print("whole :"..received)
+			if code ~= "PONG" then
+			  print("-----------------------------------------------------")
+			  print("data :"..data)
+			  print("code :"..code)
+			  print("whole :"..received)
 
-			--println("Data received! > Code: "..code.." > Data: "..tostring(data))
+			  println("Data received! > Code: "..code.." > Data: "..tostring(data))
+			end
 
 			--==============================================================================
 
@@ -145,9 +147,17 @@ local function onUpdate(dt)
 				Settings.PlayerID = data
 
 			elseif code == "PONG" then -- Ping request
-				pingStatus = "received"
-				serverTimeoutTimer = 0 -- Reset timeout timer
 				UI.setStatus("Connected")
+				serverTimeoutTimer = 0 -- Reset timeout timer
+
+				local ping = (socket.gettime() - sysTime)*1000 -- Calculate time between send and receive
+				local roundedPing = ping + 0.5 - (ping + 0.5) % 1 -- Round
+				local roundedPing2 = roundedPing - averageUpdateTime
+				if roundedPing2 < 0 then
+					roundedPing2 = 0
+				end
+				UI.setPing(roundedPing.."/"..roundedPing2) -- Set the ping
+				pingStatus = "ready" -- Ready for next ping
 
 			elseif code == "KICK" then -- Server kicked the player for any reason
 				disconnectFromServer()
@@ -167,15 +177,18 @@ local function onUpdate(dt)
 				local map = getMissionFilename()
 				TCPSend("MAPS"..map)
 
+			elseif code == "JOIN" then
+				onPlayerConnect()
+
 			elseif code == "1012" then -- Update connected players list
 				playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list
 
 			--==============================================================================
 
-			elseif code == "1020" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
+		    elseif code == "U-VC" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
 				vehicleGE.onServerVehicleSpawned(data)
 
-			elseif code == "1121" then -- Server vehicle removed
+			elseif code == "U-VR" then -- Server vehicle removed
 				vehicleGE.onServerVehicleRemoved(serverVehicleID)
 
 			--==============================================================================
@@ -238,14 +251,15 @@ local function onUpdate(dt)
 --================================ TWO SECONDS TIMER ================================
 		twoSecondsTimer = twoSecondsTimer + dt -- Time in seconds
 		if twoSecondsTimer > 2 then -- If twoSecondsTimer pass 2 seconds
-			TCPSend("BEAT") -- Still connected
-			twoSecondsTimer = 0	-- Reset timer
+			--TCPSend("BEAT") -- Still connected
+			--twoSecondsTimer = 0	-- Reset timer
 		end
 --================================ TWO SECONDS TIMER ================================
 
 	end
 	if connectionStatus > 1 then
 --================================ CHECK PING ================================
+
 		pingTimer = pingTimer + dt
 		if pingTimer > 2 and pingStatus == "ready" then -- Ping every 2 seconds
 			pingStatus = "send" -- Set status to send
@@ -257,15 +271,10 @@ local function onUpdate(dt)
 			TCPSend("PING")
 			pingStatus = "wait" -- Wait for server answer
 			sysTime = socket.gettime() -- Get send time
-		elseif pingStatus == "received" then -- When server answered
-			local ping = (socket.gettime() - sysTime)*1000 -- Calculate time between send and receive
-			local roundedPing = ping + 0.5 - (ping + 0.5) % 1 -- Round
-			roundedPing = roundedPing - averageUpdateTime
-			UI.setPing(roundedPing) -- Set the ping
-			pingStatus = "ready" -- Ready for next ping
 		end
 --================================ CHECK PING ================================
 	end
+	-- ?????
 	local rTime = (socket.gettime() - runTime)*1000 -- Calculate time between send and receive
 	local roundedRunTime = rTime + 0.5 - (rTime + 0.5) % 1 -- Round
 	Debug.updateUI("runTime", roundedRunTime)

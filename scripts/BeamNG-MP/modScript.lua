@@ -19,8 +19,11 @@ registerCoreModule("Network") -- Handles all TCP related traffic
 load("NetworkUDP")
 registerCoreModule("NetworkUDP") -- All done over UDP
 
-load("VehicleGetter")
-registerCoreModule("VehicleGetter") -- Contains vehicle related things
+load("NetworkHandler")
+registerCoreModule("NetworkHandler") -- Handle all network sending wrappers
+
+load("vehicleGE")
+registerCoreModule("vehicleGE") -- Contains vehicle related things
 
 --[[load("sessionControl")
 registerCoreModule("sessionControl")

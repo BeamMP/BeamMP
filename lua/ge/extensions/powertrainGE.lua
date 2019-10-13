@@ -22,7 +22,7 @@ end
 
 
 local function sendPowertrain(data, gameVehicleID)
-	if Network.getStatus() == 2 then -- If UDP is connected
+	if Network.GetTCPStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			Network.send("2133"..serverVehicleID..data) -- Send data

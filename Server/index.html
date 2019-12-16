@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+</head>
+<body>
+  <h1>BeamNG.drive MP Development Tool!</h1>
+
+  <p>Make: <span id="Make"></span></p>
+  <p>Clutch: <span id="Clutch"></span></p>
+  <p>Throttle: <span id="Throttle"></span></p>
+  <p>Brake: <span id="Brake"></span></p>
+  <p>Steering: <span id="Steering"></span></p>
+  <p>POS: <span id="POS"></span></p>
+  <p>Time difference: <span id="time"></span></p>
+  <p><span id="data"></span></p>
+
+  <ul id="LOG">
+
+  </ul>
+
+  <!-- You can also require other files to run in this process -->
+  <script src="./renderer.js"></script>
+  <script>
+  var one = false
+  require('electron').ipcRenderer.on('update', (event, message) => {
+    if (!one) {
+      one = true;
+      console.log(message);
+    }
+    //console.log(message) // Prints 'whoooooooh!'
+    document.getElementById("Make").innerHTML=message.model;
+    document.getElementById("Clutch").innerHTML=message.clutch;
+    document.getElementById("Throttle").innerHTML=message.throttle;
+    document.getElementById("Brake").innerHTML=message.brake;
+    document.getElementById("Steering").innerHTML=message.steering;
+    document.getElementById("POS").innerHTML=message.pos;
+    var d = new Date();
+    var n = d.getTime();
+    var t = n - message.time;
+    console.log('(game = '+message.time+' - js = '+n+') = '+t)
+    document.getElementById("time").innerHTML=t;
+    document.getElementById("data").innerHTML=JSON.stringify(message);
+  });
+
+  require('electron').ipcRenderer.on('log', (event, message) => {
+    document.getElementById("LOG").innerHTML+="<li>"+message+"</li>"
+  })
+  </script>
+</body>
+</html>

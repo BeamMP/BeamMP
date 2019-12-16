@@ -124,9 +124,9 @@ local function onUpdate(dt)
 			local serverVehicleID = ""
 			local data = ""
 
-			if containVehicleID == "1" then
-				serverVehicleID = string.sub(received, 5, 10)
-				data = string.sub(received, 11, packetLength)
+			if containVehicleID == "-" then
+				serverVehicleID = string.sub(received, 5, 8)
+				data = string.sub(received, 9, packetLength)
 			else
 				data = string.sub(received, 5, packetLength)
 			end
@@ -135,6 +135,7 @@ local function onUpdate(dt)
 			  print("-----------------------------------------------------")
 			  print("data :"..data)
 			  print("code :"..code)
+				print("serverVehicleID :"..serverVehicleID)
 			  print("whole :"..received)
 
 			  println("Data received! > Code: "..code.." > Data: "..tostring(data))

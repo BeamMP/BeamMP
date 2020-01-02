@@ -29,6 +29,10 @@ local function println(stringToPrint)
 end
 
 local function TCPSend(code, data)
+	print("------------------------------------------------")
+	print(code)
+	print(data)
+	print("------------------------------------------------")
 	if connectionStatus == 2 then
 		if data then
 			return TCPSocket:send(code..data.."\n") -- Send data
@@ -117,6 +121,7 @@ local function onUpdate(dt)
   if connectionStatus > 0 then -- If player is connecting or connected
 		local received, status, partial = TCPSocket:receive() -- Receive data
 		if received ~= "" and received ~= nil then -- If data have been received then
+			--received =
 
 			local packetLength = string.len(received)
 			local code = string.sub(received, 1, 4)
@@ -172,6 +177,8 @@ local function onUpdate(dt)
 					NetworkUDP.CreateClient(Settings.IP, Settings.PORT+1)
 				else
 					UI.message("Map check failed. Please use: "..data)
+					disconnectFromServer()
+					UI.setStatus("Kicked (Please use the correct map)")
 				end
 
 			elseif code == "MAPS" then

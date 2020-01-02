@@ -123,7 +123,8 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	vehicleTable[8] = getServerVehicleID(gameVehicleID) or ""
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-    NetworkHandler.send("2020", stringToSend) -- Send table that contain all vehicle informations for each vehicle
+	--                    "2020"
+    NetworkHandler.send("U-VC", stringToSend) -- Send table that contain all vehicle informations for each vehicle
 end
 --=========================================== SEND VEHICLE DATA =============================================
 
@@ -229,9 +230,9 @@ local function onVehicleSwitched(oldID, newID)
 	println("Vehicle switched : "..oldID.." - "..newID)
 	if Network.GetTCPStatus() > 0 then -- If TCP is connecting or connected
 		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
-		--if newID then -- If it's not null
-			NetworkHandler.send("C-VS".."theoricalID") -- Send it to server
-		--end
+		if newID then -- If it's not null
+			NetworkHandler.send("C-VS"..newID) -- Send it to server
+		end
 	end
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================

@@ -46,6 +46,12 @@ once the new client is setup, all players will unpause and rely on web sockets t
 
   Game / Session
   - U-VI = Vehicle Inputs Update
+  - U-VD (2121) = Vehicle Destroyed (deleted) Update (Your telling this)
+  - U-VR = Vehicle Removed Update
+  - U-VS = Server Vehicle Spawned (You are receiving this)
+  - U-VC (2020) = Vehicle Config Update / Confirm
+  - C-VS =
+
 
 # Progression tracking
 you can see and keep track of progression here:

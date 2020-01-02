@@ -7,6 +7,11 @@ print("[BeamNG-MP] | NetworkHandler loaded.")
 local M = {}
 
 local function send(code, data)
+
+  	print("------------------------------------------------")
+  	print(code)
+  	print(data)
+  	print("------------------------------------------------")
   if data then
     if Settings.Protocol == "TCP" then -- Send item over TCP
       Network.TCPSend(code..data)

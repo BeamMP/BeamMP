@@ -19,10 +19,12 @@ angular.module('beamng.apps')
 			}
 
 			$scope.UpdateChat = function(msg) {
+				console.log("Chat Message: "+msg)
 				var node = document.createElement("LI");
 				var textnode = document.createTextNode(msg);
 				node.appendChild(textnode);
 				document.getElementById("CHAT").appendChild(node);
+				updateScroll();
 			}
 
 			$scope.chatSend = function() {

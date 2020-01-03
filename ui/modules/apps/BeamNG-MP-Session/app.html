@@ -109,26 +109,34 @@
     .error{
       border-color: red;
     }
+    ul#CHAT {
+      list-style: none;
+      padding-left: 0px;
+      max-height: 185px;
+      overflow-y: scroll;
+      max-width: 50%;
+      overflow-wrap: break-word;
+    }
   </style>
   <table ng-style="{'visibility': mainStyle.appShow}">
     <tr>
       <th colspan="4"><span class="title">Multiplayer Session</span></th>
     </tr>
     <tr>
-      <td colspan="1">
+      <td colspan="1" style="width: 50% !important;">
         Session Members:
         <ul id="MEMBERS">
 
         </ul>
       </td>
-      <td colspan="2">
+      <td colspan="2" style="width: 50% !important;">
         Session Chat
         <ul id="CHAT">
 
         </ul>
       </td>
     </tr>
-    <tr>
+    <tr style="bottom: 0; position: absolute;">
       <td colspan="3">
         Chat:
         <input id="CHATMESSAGE" flex style="width: 455px;" type="text" placeholder="Enter Message" ng-model="ChatMessage" value="{{ChatMessage}}" ng-mouseenter="enterMouse()" ng-change="setChatMessage()">
@@ -136,4 +144,10 @@
       </td>
     </tr>
   </table>
+  <script type="text/javascript">
+    function updateScroll(){
+      var element = document.getElementById("CHAT");
+      element.scrollTop = element.scrollHeight;
+    }
+  </script>
 </div>

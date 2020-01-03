@@ -47,7 +47,9 @@ local function setStatus(tempStatus)
 end
 
 local function updateChatLog(message)
-	be:executeJS('UpdateChat("'..message..'")') -- Set status
+	--be:executeJS('UpdateChat("'..message..'")') -- Set status
+	--TODO Make this acutally call the function in JS
+	be:executeJS('console.log("Chat Message: '..message..'"); var node = document.createElement("LI");	var textnode = document.createTextNode("'..message..'");	node.appendChild(textnode);	document.getElementById("CHAT").appendChild(node); updateScroll();')
 end
 
 local function setPing(ping)

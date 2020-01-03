@@ -49,8 +49,13 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - U-VD (2121) = Vehicle Destroyed (deleted) Update (Your telling this)
   - U-VR = Vehicle Removed Update
   - U-VS = Server Vehicle Spawned (You are receiving this)
-  - U-VC (2020) = Vehicle Config Update / Confirm
+  - U-VC (2020) = Vehicle Config Update / Confirm / Created
   - C-VS =
+
+# Ports
+ - TCP = 30813
+ - UDP = 30814
+ - WS  = 30815
 
 
 # Progression tracking

@@ -4,18 +4,45 @@ var map = "";
 const net = require('net');
 const uuidv4 = require('uuid/v4');
 const args = require('minimist')(process.argv.slice(2));
-console.log(args.port)
+//console.log(args.port)
 if (args.port) {
   var tcpport = args.port;
 } else {
   var tcpport = 30813;
 }
 var udpport = tcpport + 1;
+var wsport = tcpport + 2;
 const host = '192.168.1.195';
+
+//==========================================================
+//              WebSocket Server
+//==========================================================
+
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port: wsport });
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    console.log('[WS] received: %s', message);
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
+
+  ws.send('Welcome!');
+});
+console.log('[WS]  Server listening on 0.0.0.0:' + wsport);
+
+//==========================================================
+//              TCP Server
+//==========================================================
 
 const TCPserver = net.createServer();
 TCPserver.listen(tcpport, () => {
-  console.log('TCP Server listening on ' + TCPserver.address().address + ':' + tcpport);
+  console.log('[TCP] Server listening on 0.0.0.0:' + tcpport);
 });
 
 let sockets = [];
@@ -48,7 +75,12 @@ TCPserver.on('connection', function(sock) {
     data = str.trim(); //replace(/\r?\n|\r/g, "");
     var code = data.substring(0, 4);
     var message = data.substr(4);
+
     console.log(code)
+    if (data.length > 4) {
+      console.log(data.length)
+    }
+
     switch (code) {
       case "PING":
         console.log("Ping Received")
@@ -74,6 +106,7 @@ TCPserver.on('connection', function(sock) {
       case "U-VN":
       case "U-VP":
       case "U-VL":
+      case "U-VC":
         //console.log(data)
         //players.forEach(function(player, index, array) {
         //if (player.remoteAddress != sock.remoteAddress) {
@@ -138,6 +171,10 @@ TCPserver.on('error', (err) => {
   throw err;
 });
 
+//==========================================================
+//              UDP Server
+//==========================================================
+
 var dgram = require('dgram');
 var UDPserver = dgram.createSocket('udp4');
 
@@ -147,7 +184,7 @@ function UDPsend(message, info) {
 
 UDPserver.on('listening', function() {
   var address = UDPserver.address();
-  console.log('UDP Server listening on ' + address.address + ':' + address.port);
+  console.log('[UDP] Server listening on ' + address.address + ':' + address.port);
 });
 
 var UDPMembers = [];

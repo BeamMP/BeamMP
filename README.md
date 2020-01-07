@@ -54,6 +54,11 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - U-VR = Vehicle Removed Update
   - U-VS = Server Vehicle Spawned (You are receiving this)
   - U-VC (2020) = Vehicle Config Update / Confirm / Created
+  - U-VL (2134) = Vehicle Position Update (Coords)
+  - U-VP () = Vehicle Powertrain Update
+  - U-VN (2132) = Vehicle Notes Update
+  - U-VE (2131) = Vehicle Electrics Update
+  - U-VI () = Vehicle Inputs Update
   - C-VS =
 
 # Ports

@@ -93,10 +93,12 @@ local codes = {
     "PING",
     "HOLA",
     "PONG",
+    "PING",
     "CHAT",
     "MAPC",
     "MAPS",
-    "JOIN"
+    "JOIN",
+    "PLST"
   },
   ["update"] = {
     "U-VI",

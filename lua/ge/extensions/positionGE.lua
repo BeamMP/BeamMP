@@ -25,7 +25,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if Network.GetTCPStatus() == 2 then -- If UDP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send("2134"..serverVehicleID..data) -- Send it
+			NetworkHandler.send("U-VL"..serverVehicleID..data) -- Send it
 		end
 	end
 end

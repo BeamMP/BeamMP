@@ -27,46 +27,48 @@ local maxUpdateTimes = 10
 -- ============= VARIABLES =============
 
 local function println(stringToPrint)
-	print("[BeamNG-MP] [TCP] | "..stringToPrint)
+	if false then
+		print("[BeamNG-MP] [TCP] | "..tostring(stringToPrint))
+	end
 end
 
 local function TCPSend(code, data)
-	print("---------------- TCP Send --------------------------------")
-	print(code)
-	print(data)
+	println("---------------- TCP Send --------------------------------")
+	--println(code)
+	println(data)
 
 	if connectionStatus == 2 then
 		if data then
 			--local compressed = LibDeflate:CompressDeflate(data, compression_Level)
-			--print(compressed)
+			--println(compressed)
 			--local decompressed = LibDeflate:DecompressDeflate(compressed)
-			--print(decompressed)
+			--println(decompressed)
 			-- Packet Slplitting (Max size 8192b)
 			--Get data size
 			--local size = string.len(compressed)
-			--print("Byte Size (Compressed): "..size)
+			--println("Byte Size (Compressed): "..size)
 			local size = string.len(data)
-			print("Byte Size: "..size)
+			--println("Byte Size: "..size)
 
 			local DataToSend = HelperFunctions.LengthSplit(data, 1000)
 			for i,v in ipairs(DataToSend) do
-			  --print(i, v)
+			  --println(i, v)
 				if i == 1 then
- 				  TCPSocket:send(code.."["..size.."-"..i.."/"..#DataToSend.."]"..v.."\n") -- Send data
+ 				  TCPSocket:send(code.."("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
 	 			else
-	 				TCPSocket:send("["..size.."-"..i.."/"..#DataToSend.."]"..v.."\n") -- Send data
+	 				TCPSocket:send("("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
 	 			end
 			end
 
 
-			local tmp = tostring(code.."["..size.."-1/"..#DataToSend.."]"..data.."\n")
+			local tmp = tostring(code.."("..size.."-1/"..#DataToSend..")"..data.."\n")
 			local size2 = string.len(tmp)
-			print("Total Message Size: "..size2.." Total Packets: "..#DataToSend)
+			--println("Total Message Size: "..size2.." Total Packets: "..#DataToSend)
 
-			print("---------------- /TCP Send --------------------------------")
+			println("---------------- /TCP Send --------------------------------")
 			return
 		else
-			print("---------------- /TCP Send --------------------------------")
+			--println("---------------- /TCP Send --------------------------------")
 			return TCPSocket:send(code.."\n") -- Send data
 		end
 	end
@@ -131,7 +133,7 @@ local Times = {}
 local socketbuffer = ""
 
 local function onUpdate(dt)
-	--print("TimeKeep")
+	--println("TimeKeep")
   local bufferedMessage = false
 	local runTime = socket.gettime() -- Get update run time
 	local uTime = (socket.gettime() - updateTime)*1000 -- Calculate time between send and receive
@@ -173,63 +175,75 @@ local function onUpdate(dt)
 			--end
 
 			if code ~= "PONG" then
-				print("-----------------------------------------------------")
-				--print("code :"..code)
-				--print("serverVehicleID :"..serverVehicleID)
-				--print("data :"..data)
-				--print("whole :"..received)
+				println("-----------------------------------------------------")
+				--println("code :"..code)
+				--println("serverVehicleID :"..serverVehicleID)
+				--println("data :"..data)
+				--println("whole :"..received)
 
-				println("Data received! > Code: "..code.." > Data: "..tostring(data))
-				print("-----------------------------------------------------")
+				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
+				println("-----------------------------------------------------")
 			end
 
-			if data and not HelperFunctions.CheckGameCode(code) then
-				--print(HelperFunctions.CheckGameCode(code))
+			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
+				println("Not a network code ("..code..")")
+				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
-				--print(socketbuffer)
+				--println(socketbuffer)
 				if socketbuffer == "" then
 					packetLength = string.len(data)
-					local packetData = data:match("%[(.-)%]")
-					print("Packet Data: "..packetData)
+					local packetData = data:match("%((.-)%)")
+					println("Packet Data: "..packetData)
 					local ps = packetData:match("(.+)-")
 
-					data = string.gsub(data, "["..packetData.."]", "")
+					data = data:gsub('%(.-%)','')--gsub('%b()', '')
 					--data = LibDeflate:DecompressDeflate(data)
 					local strdatalen = string.len(data)
-					print("Remaining Data: "..data)
+					println("Remaining Data: "..data)
 					local md = ps - strdatalen
-					print("Data Missing: "..md)
+					println("Data Missing: "..md)
 					if md > 0 then
 						socketbuffer = {}
 						socketbuffer.packetSize = ps
 						socketbuffer.data = "" .. data
+						socketbuffer.code = code
 						bufferedMessage = true
 				  elseif md == 0 then
 						socketbuffer = ""
 					end
 					println(strdatalen)
-					print("-----------------------------------------------------")
+					println("-----------------------------------------------------")
 				else
 					if not HelperFunctions.CheckUpdateCode(code) and not HelperFunctions.CheckGameCode(code) then
-						local strdatalen = string.len(data)
+						local packetData = received:match("%((.-)%)")
+						println("Packet Data: "..packetData)
+						local ps = packetData:match("(.+)-")
+						println(received)
+						data = received:gsub('%(.-%)','')--gsub('%b()', '')
+						println(data)
+						println(socketbuffer.data .. data)
+						local strdatalen = string.len(socketbuffer.data .. data)
 						local md = socketbuffer.packetSize - strdatalen
-						print("Data Missing: "..md)
+						println("Data Missing: "..md)
 						if md > 0 then
 							socketbuffer.data = socketbuffer.data .. data
 							bufferedMessage = true
-					  elseif md == 0 then
+					  else--if md == 0 then
 							data = socketbuffer.data .. data
+							code = socketbuffer.code
 						  socketbuffer = ""
+							println(data)
 						end
-						println(strdatalen)
-						print("-----------------------------------------------------")
+						println("-----------------------------------------------------")
 					end
 				end
 			end
 
 			--==============================================================================
 			if not bufferedMessage then
-				println("Not a buffered message: "..data)
+				if code ~= "PONG" then
+					println("Not a buffered message: "..data)
+				end
 				if     code == "HOLA" then -- If server ready
 					onConnected()
 					Settings.PlayerID = data

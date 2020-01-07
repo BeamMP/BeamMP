@@ -140,15 +140,17 @@ end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(data)
+	print(data)
 	local decodedData     = jsonDecode(data)
+  print(HelperFunctions.dump(decodedData))
 	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
-	local serverVehicleID = decodedData[3] -- Server ID of the vehicle
-	local vehicleName     = decodedData[4] -- Vehicle name
-	local vehicleConfig   = jsonDecode(decodedData[5]) -- Vehicle config
-	local c               = jsonDecode(decodedData[6]) -- Vehicle color
-	local cP0             = jsonDecode(decodedData[7]) -- Vehicle colorPalette0
-	local cP1             = jsonDecode(decodedData[8]) -- Vehicle colorPalette1
+	local serverVehicleID = decodedData[1] .. decodedData[2] -- Server ID of the vehicle
+	local vehicleName     = decodedData[3] -- Vehicle name
+	local vehicleConfig   = jsonDecode(decodedData[4]) -- Vehicle config
+	local c               = jsonDecode(decodedData[5]) -- Vehicle color
+	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
+	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 
 	if Settings.PlayerID == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map

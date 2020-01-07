@@ -192,7 +192,7 @@ local function onUpdate(dt)
 				--println(socketbuffer)
 				if socketbuffer == "" then
 					packetLength = string.len(data)
-					local packetData = data:match("%((.-)%)")
+					local packetData = received:match("%((.-)%)")
 					println("Packet Data: "..packetData)
 					local ps = packetData:match("(.+)-")
 

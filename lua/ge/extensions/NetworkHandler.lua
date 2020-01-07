@@ -7,16 +7,11 @@ print("[BeamNG-MP] | NetworkHandler loaded.")
 local M = {}
 
 local function send(code, data)
-
-  	print("------------------------------------------------")
-  	print(code)
-  	print(data)
-  	print("------------------------------------------------")
   if data then
     if Settings.Protocol == "TCP" then -- Send item over TCP
-      Network.TCPSend(code..data)
+      Network.TCPSend(code, data)
     elseif Settings.Protocol == "UDP" then -- Send item over UDP
-      NetworkUDP.UDPSend(code..data)
+      NetworkUDP.UDPSend(code, data)
     end
   else
     if Settings.Protocol == "TCP" then -- Send item over TCP

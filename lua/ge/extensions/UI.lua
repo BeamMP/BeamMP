@@ -21,6 +21,11 @@ end
 
 local function ready(ui) -- Only run on the calling from the UI
 	println(ui.." UI Ready!")
+	if Steam.isWorking and Steam.accountLoggedIn then
+    UI.setNickname(Steam.playerName)
+		println("Found Steam, Using Player Name / Gamer Name from there: "..Steam.playerName)
+		be:executeJS('document.getElementById("NICKNAME").value = "'..Steam.playerName..'"') -- Set status
+  end
 end
 
 local function error(message)
@@ -50,6 +55,10 @@ local function updateChatLog(message)
 	--be:executeJS('UpdateChat("'..message..'")') -- Set status
 	--TODO Make this acutally call the function in JS
 	be:executeJS('console.log("Chat Message: '..message..'"); var node = document.createElement("LI");	var textnode = document.createTextNode("'..message..'");	node.appendChild(textnode);	document.getElementById("CHAT").appendChild(node); updateScroll();')
+end
+
+local function updatePlayerList(message)
+	be:executeJS('UpdateSession("'..message..'")') -- Set Player List
 end
 
 local function setPing(ping)
@@ -90,5 +99,6 @@ M.setStatus = setStatus
 M.setPing = setPing
 M.setUDPPing = setUDPPing
 M.updateChatLog = updateChatLog
+M.updatePlayerList = updatePlayerList
 
 return M

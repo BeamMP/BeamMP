@@ -43,6 +43,7 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - MAPS = Map Setting
   - CHAT = Chat Message
   - KICK = You have been Kicked
+  - PLST = Sending Player List to client
 
   Game / Session
   - U-VI = Vehicle Inputs Update

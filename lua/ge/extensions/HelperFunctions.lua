@@ -18,28 +18,28 @@ local function split(inputstr, sep)
 end
 
 local function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
+  if type(o) == 'table' then
+    local s = '{ '
+    for k,v in pairs(o) do
+      if type(k) ~= 'number' then k = '"'..k..'"' end
+      s = s .. '['..k..'] = ' .. dump(v) .. ','
+    end
+    return s .. '} '
+  else
+    return tostring(o)
+  end
 end
 
 local charset = {}  do -- [0-9a-zA-Z]
-    for c = 48, 57  do table.insert(charset, string.char(c)) end
-    for c = 65, 90  do table.insert(charset, string.char(c)) end
-    for c = 97, 122 do table.insert(charset, string.char(c)) end
+  for c = 48, 57  do table.insert(charset, string.char(c)) end
+  for c = 65, 90  do table.insert(charset, string.char(c)) end
+  for c = 97, 122 do table.insert(charset, string.char(c)) end
 end
 
 local function randomString(length)
-    if not length or length <= 0 then return '' end
-    math.randomseed(os.clock()^5)
-    return randomString(length - 1) .. charset[math.random(1, #charset)]
+  if not length or length <= 0 then return '' end
+  math.randomseed(os.clock()^5)
+  return randomString(length - 1) .. charset[math.random(1, #charset)]
 end
 
 local function togglePause()
@@ -74,6 +74,66 @@ local function GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, useZ)
   return dist
 end
 
+local function deleteAllVehicles()
+  if be:getObjectCount() == 0 then
+    return
+  end -- If no vehicle do nothing
+  commands.setFreeCamera()
+  for i = 0, be:getObjectCount() do -- For each vehicle
+    local veh = be:getObject(0) --  Get vehicle
+    if veh then -- For loop always return one empty vehicle ?
+      --onVehicleDestroyedAllowed = false
+      veh:delete()
+    end
+  end
+end
+
+local codes = {
+  ["game"] = {
+    "PING",
+    "HOLA",
+    "PONG",
+    "CHAT",
+    "MAPC",
+    "MAPS",
+    "JOIN"
+  },
+  ["update"] = {
+    "U-VI",
+    "U-VD",
+    "U-VR",
+    "U-VS",
+    "U-VC",
+    "C-VS"
+  }
+}
+
+local function CheckGameCode(c)
+  for _,v in pairs(codes.game) do
+    if v == c then
+      return true
+    end
+  end
+  return false
+end
+
+local function CheckUpdateCode(c)
+  for _,v in pairs(codes.update) do
+    if v == c then
+      return true
+    end
+  end
+  return false
+end
+
+local function LengthSplit (text, chunkSize)
+  local s = {}
+  for i=1, #text, chunkSize do
+    s[#s+1] = text:sub(i,i+chunkSize - 1)
+  end
+  return s
+end
+
 M.split = split
 M.dump = dump
 M.randomString = randomString
@@ -81,5 +141,9 @@ M.togglePause = togglePause
 M.getPause = getPause
 M.setPauseState = setPauseState
 M.GetDistanceBetweenCoords = GetDistanceBetweenCoords
+M.deleteAllVehicles = deleteAllVehicles
+M.CheckGameCode = CheckGameCode
+M.CheckUpdateCode = CheckUpdateCode
+M.LengthSplit = LengthSplit
 
 return M

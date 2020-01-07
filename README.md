@@ -23,6 +23,9 @@ You will also require the "Launcher" this little tool is what allows you to conn
 It does however require you have java 64bit SE installed.
 --Then your good to go, start your game, agree with your other players on a map and then host / join.
 
+# Servers
+Servers and their repository / source code has now moved to here: https://github.com/Starystars67/BeamNG-MP-Server/
+
 # How will this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.
 

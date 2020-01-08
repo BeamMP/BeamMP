@@ -17,7 +17,7 @@ local positionDelay = 0
 local positionTickrate = 0.5
 
 local inputsDelay = 0
-local inputsTickrate = 0.1
+local inputsTickrate = 0.5
 
 local electricsDelay = 0
 local electricsTickrate = 3

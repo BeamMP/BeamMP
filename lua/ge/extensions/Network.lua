@@ -218,21 +218,24 @@ local function onUpdate(dt)
 						local packetData = received:match("%((.-)%)")
 						println("Packet Data: "..packetData)
 						local ps = packetData:match("(.+)-")
-						println(received)
-						data = received:gsub('%(.-%)','')--gsub('%b()', '')
-						println(data)
-						println(socketbuffer.data .. data)
-						local strdatalen = string.len(socketbuffer.data .. data)
-						local md = socketbuffer.packetSize - strdatalen
-						println("Data Missing: "..md)
-						if md > 0 then
-							socketbuffer.data = socketbuffer.data .. data
-							bufferedMessage = true
-					  else--if md == 0 then
-							data = socketbuffer.data .. data
-							code = socketbuffer.code
-						  socketbuffer = ""
+						print("Is This packet part of the last? ["..ps.." = "..socketbuffer.packetSize.."]")
+						if ps == socketbuffer.packetSize then
+							println(received)
+							data = received:gsub('%(.-%)','')--gsub('%b()', '')
 							println(data)
+							println(socketbuffer.data .. data)
+							local strdatalen = string.len(socketbuffer.data .. data)
+							local md = socketbuffer.packetSize - strdatalen
+							println("Data Missing: "..md)
+							if md > 0 then
+								socketbuffer.data = socketbuffer.data .. data
+								bufferedMessage = true
+						  else--if md == 0 then
+								data = socketbuffer.data .. data
+								code = socketbuffer.code
+							  socketbuffer = ""
+								println(data)
+							end
 						end
 						println("-----------------------------------------------------")
 					end

@@ -151,7 +151,7 @@ local function onServerVehicleSpawned(data)
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
-
+	print("onServerVehicleSpawned")
 	if Settings.PlayerID == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map

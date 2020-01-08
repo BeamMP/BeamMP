@@ -98,7 +98,8 @@ local codes = {
     "MAPC",
     "MAPS",
     "JOIN",
-    "PLST"
+    "PLST",
+    "SMSG"
   },
   ["update"] = {
     "U-VI",

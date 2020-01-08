@@ -46,9 +46,9 @@ local function TCPSend(code, data)
 			local size = string.len(data)
 			--println("Byte Size: "..size)
 
-			local DataToSend = HelperFunctions.LengthSplit(data, 950)
+			local DataToSend = HelperFunctions.LengthSplit(data, 500)
 			for i,v in ipairs(DataToSend) do
-			  --println(i, v)
+			  print(i, v)
 				if i == 1 then
  				  TCPSocket:send(code.."("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
 	 			else
@@ -123,7 +123,7 @@ end
 local updateTime = 0
 local Times = {}
 
-local socketbuffer = ""
+socketbuffer = {}
 
 local function onUpdate(dt)
 	--println("TimeKeep")
@@ -172,14 +172,15 @@ local function onUpdate(dt)
 				println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
 				--println("data :"..data)
+				println("raw: "..received)
 				--println("whole :"..received)
 
 				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
-				println("-----------------------------------------------------")
+				println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 			end
 
 			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
-				println("Not a network code ("..code..")")
+				println("Not a network code: "..code.."")
 				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
 				--println(socketbuffer)
@@ -187,11 +188,11 @@ local function onUpdate(dt)
 				-- ADD SYSTEM TO CHECK IF THIS PACKET IS PART OF ONE WE ALREADY HAVE ELSE ADD IT TO A NEW ONE IF THIS IS THE BEGINNING
 				-- THIS WAY WE CAN HANDLE MULTIPLE SPLIT PACKETS AT ONCE RATHER THAN ONE AT A TIME AND ALL IN ORDER
 
-				if socketbuffer == "" then
-					packetLength = string.len(data)
-					local packetData = received:match("%((.-)%)")
+				local packetData = received:match("%((.-)%)")
+				local ps = packetData:match("(.+)-")
+
+				if socketbuffer[ps] == nil then
 					println("Packet Data: "..packetData)
-					local ps = packetData:match("(.+)-")
 
 					data = data:gsub('%(.-%)','')--gsub('%b()', '')
 					--data = LibDeflate:DecompressDeflate(data)
@@ -200,39 +201,37 @@ local function onUpdate(dt)
 					local md = ps - strdatalen
 					println("Data Missing: "..md)
 					if md > 0 then
-						socketbuffer = {}
-						socketbuffer.packetSize = ps
-						socketbuffer.data = "" .. data
-						socketbuffer.code = code
+						socketbuffer[ps] = {}
+						socketbuffer[ps].packetSize = ps
+						socketbuffer[ps].data = "" .. data
+						socketbuffer[ps].code = code
 						bufferedMessage = true
 				  elseif md == 0 then
-						socketbuffer = ""
+						socketbuffer[ps] = ""
 					end
 					println(strdatalen)
 					println("-----------------------------------------------------")
 					code = ""
 				else
 					if not HelperFunctions.CheckUpdateCode(code) and not HelperFunctions.CheckGameCode(code) then
-						local packetData = received:match("%((.-)%)")
 						println("Packet Data: "..packetData)
-						local ps = packetData:match("(.+)-")
-						print("Is This packet part of the last? ["..ps.." = "..socketbuffer.packetSize.."]")
-						if ps == socketbuffer.packetSize then
+						print("Is This packet part of the last? ["..ps.." = "..socketbuffer[ps].packetSize.."]")
+						if ps == socketbuffer[ps].packetSize then
 							println(received)
 							data = received:gsub('%(.-%)','')--gsub('%b()', '')
 							println(data)
-							println(socketbuffer.data .. data)
-							local strdatalen = string.len(socketbuffer.data .. data)
-							local md = socketbuffer.packetSize - strdatalen
+							println(socketbuffer[ps].data .. data)
+							local strdatalen = string.len(socketbuffer[ps].data .. data)
+							local md = socketbuffer[ps].packetSize - strdatalen
 							println("Data Missing: "..md)
 							if md > 0 then
-								socketbuffer.data = socketbuffer.data .. data
+								socketbuffer[ps].data = socketbuffer[ps].data .. data
 								bufferedMessage = true
 								code = ""
 						  else--if md == 0 then
-								data = socketbuffer.data .. data
-								code = socketbuffer.code
-							  socketbuffer = ""
+								data = socketbuffer[ps].data .. data
+								code = socketbuffer[ps].code
+							  socketbuffer[ps] = nil
 								println(data)
 							end
 						end
@@ -253,6 +252,9 @@ local function onUpdate(dt)
 				if     code == "HOLA" then -- If server ready
 					onConnected()
 					Settings.PlayerID = data
+
+				elseif code == "SMSG" then -- Message from server to display on screen
+					UI.message(data)
 
 				elseif code == "PONG" then -- Ping request
 					UI.setStatus("Connected")

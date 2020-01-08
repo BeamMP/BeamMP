@@ -18,8 +18,8 @@ local M = {}
 
 
 -- ============= VARIABLES =============
-local ownMap = {}
-local vehiclesMap = {}
+ownMap = {}
+vehiclesMap = {}
 local onVehicleSpawnedAllowed = true
 local onVehicleDestroyedAllowed = true
 local tempServerVehicleID = ""

@@ -47,6 +47,7 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - CHAT = Chat Message
   - KICK = You have been Kicked
   - PLST = Sending Player List to client
+  - SMSG = Screen Based Message
 
   Game / Session
   - U-VI = Vehicle Inputs Update

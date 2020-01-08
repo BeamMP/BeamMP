@@ -45,15 +45,17 @@ local function applyPos(data, serverVehicleID)
 
 	--planetsVE.moveTo(2000, data[1], data[2], data[3])
 
-	--[[
+	println("applyPos()")
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		local pr = jsonDecode(data) -- Decoded data
+		print(gameVehicleID)
+		print(pr)
 		veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
 		veh:queueLuaCommand("ElectricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end
-	--]]
+
 end
 
 

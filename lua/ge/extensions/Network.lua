@@ -27,16 +27,12 @@ local maxUpdateTimes = 10
 -- ============= VARIABLES =============
 
 local function println(stringToPrint)
-	if false then
+	if true then
 		print("[BeamNG-MP] [TCP] | "..tostring(stringToPrint))
 	end
 end
 
 local function TCPSend(code, data)
-	println("---------------- TCP Send --------------------------------")
-	--println(code)
-	println(data)
-
 	if connectionStatus == 2 then
 		if data then
 			--local compressed = LibDeflate:CompressDeflate(data, compression_Level)
@@ -50,7 +46,7 @@ local function TCPSend(code, data)
 			local size = string.len(data)
 			--println("Byte Size: "..size)
 
-			local DataToSend = HelperFunctions.LengthSplit(data, 1000)
+			local DataToSend = HelperFunctions.LengthSplit(data, 950)
 			for i,v in ipairs(DataToSend) do
 			  --println(i, v)
 				if i == 1 then
@@ -64,11 +60,8 @@ local function TCPSend(code, data)
 			local tmp = tostring(code.."("..size.."-1/"..#DataToSend..")"..data.."\n")
 			local size2 = string.len(tmp)
 			--println("Total Message Size: "..size2.." Total Packets: "..#DataToSend)
-
-			println("---------------- /TCP Send --------------------------------")
 			return
 		else
-			--println("---------------- /TCP Send --------------------------------")
 			return TCPSocket:send(code.."\n") -- Send data
 		end
 	end
@@ -176,7 +169,7 @@ local function onUpdate(dt)
 
 			if code ~= "PONG" then
 				println("-----------------------------------------------------")
-				--println("code :"..code)
+				println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
 				--println("data :"..data)
 				--println("whole :"..received)
@@ -190,6 +183,10 @@ local function onUpdate(dt)
 				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
 				--println(socketbuffer)
+
+				-- ADD SYSTEM TO CHECK IF THIS PACKET IS PART OF ONE WE ALREADY HAVE ELSE ADD IT TO A NEW ONE IF THIS IS THE BEGINNING
+				-- THIS WAY WE CAN HANDLE MULTIPLE SPLIT PACKETS AT ONCE RATHER THAN ONE AT A TIME AND ALL IN ORDER
+
 				if socketbuffer == "" then
 					packetLength = string.len(data)
 					local packetData = received:match("%((.-)%)")
@@ -213,6 +210,7 @@ local function onUpdate(dt)
 					end
 					println(strdatalen)
 					println("-----------------------------------------------------")
+					code = ""
 				else
 					if not HelperFunctions.CheckUpdateCode(code) and not HelperFunctions.CheckGameCode(code) then
 						local packetData = received:match("%((.-)%)")
@@ -230,6 +228,7 @@ local function onUpdate(dt)
 							if md > 0 then
 								socketbuffer.data = socketbuffer.data .. data
 								bufferedMessage = true
+								code = ""
 						  else--if md == 0 then
 								data = socketbuffer.data .. data
 								code = socketbuffer.code
@@ -239,6 +238,10 @@ local function onUpdate(dt)
 						end
 						println("-----------------------------------------------------")
 					end
+				end
+			else
+				if code ~= "PONG" then
+				  print("IS NETWORK CODE")
 				end
 			end
 
@@ -317,6 +320,7 @@ local function onUpdate(dt)
 					end
 
 				elseif code == "U-VE" then -- Update - Vehicle Electrics
+
 					if data and serverVehicleID then
 						electricsGE.applyElectrics(data, serverVehicleID)
 					end
@@ -332,6 +336,7 @@ local function onUpdate(dt)
 					end
 
 				elseif code == "U-VL" then -- Update - Vehicle Position / Location
+					serverVehicleID, data = data:match("(.+)%[(.+)")
 					if data and serverVehicleID then
 						positionGE.applyPos(data, serverVehicleID)
 					end

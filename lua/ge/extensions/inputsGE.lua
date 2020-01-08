@@ -26,7 +26,7 @@ local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			--Network.send("2130"..serverVehicleID..data) -- Send it
-			NetworkHandler.send("U-VI", data)
+			NetworkHandler.send("U-VI"..serverVehicleID..data) -- Send it
 		end
 	end
 end

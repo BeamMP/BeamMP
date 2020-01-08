@@ -27,7 +27,7 @@ local maxUpdateTimes = 10
 -- ============= VARIABLES =============
 
 local function println(stringToPrint)
-	if true then
+	if Settings.Debug then
 		print("[BeamNG-MP] [TCP] | "..tostring(stringToPrint))
 	end
 end
@@ -48,7 +48,7 @@ local function TCPSend(code, data)
 
 			local DataToSend = HelperFunctions.LengthSplit(data, 500)
 			for i,v in ipairs(DataToSend) do
-			  print(i, v)
+			  --print(i, v)
 				if i == 1 then
  				  TCPSocket:send(code.."("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
 	 			else
@@ -168,15 +168,15 @@ local function onUpdate(dt)
 			--end
 
 			if code ~= "PONG" then
-				println("-----------------------------------------------------")
-				println("code :"..code)
+				--println("-----------------------------------------------------")
+				--println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
 				--println("data :"..data)
-				println("raw: "..received)
+				--println("raw: "..received)
 				--println("whole :"..received)
 
 				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
-				println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+				--println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 			end
 
 			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
@@ -240,14 +240,14 @@ local function onUpdate(dt)
 				end
 			else
 				if code ~= "PONG" then
-				  print("IS NETWORK CODE")
+				  --print("IS NETWORK CODE")
 				end
 			end
 
 			--==============================================================================
 			if not bufferedMessage then
 				if code ~= "PONG" then
-					println("Not a buffered message: "..data)
+					--println("Not a buffered message: "..data)
 				end
 				if     code == "HOLA" then -- If server ready
 					onConnected()
@@ -317,22 +317,25 @@ local function onUpdate(dt)
 					--==============================================================================
 
 				elseif code == "U-VI" then -- Update - Vehicle Inputs
+					serverVehicleID, data = data:match("(.+)%[(.+)")
 					if data and serverVehicleID then
 						inputsGE.applyInputs(data, serverVehicleID)
 					end
 
 				elseif code == "U-VE" then -- Update - Vehicle Electrics
-
+					serverVehicleID, data = data:match("(.+)%[(.+)")
 					if data and serverVehicleID then
 						electricsGE.applyElectrics(data, serverVehicleID)
 					end
 
 				elseif code == "U-VN" then -- Update - Vehicle Nodes
+					serverVehicleID, data = data:match("(.+)%[(.+)")
 					if data and serverVehicleID then
 						nodesGE.applyNodes(data, serverVehicleID)
 					end
 
 				elseif code == "U-VP" then -- Update - Vehicle Powertrain
+					serverVehicleID, data = data:match("(.+)%[(.+)")
 					if data and serverVehicleID then
 						powertrainGE.applyPowertrain(data, serverVehicleID)
 					end
@@ -342,10 +345,6 @@ local function onUpdate(dt)
 					if data and serverVehicleID then
 						positionGE.applyPos(data, serverVehicleID)
 					end
-
-					--elseif code == "U-VI" then -- Update - Vehicle Inputs
-					--println("Veh update received")
-					--Updates.HandleUpdate(received)
 				else
 					println("Data received! > Code: "..code.." > Data: "..tostring(data))
 				end

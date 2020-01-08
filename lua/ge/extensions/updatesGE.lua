@@ -28,11 +28,11 @@ local electricsTickrate = 3
 
 local function onPlayerConnect()
 	-- Update everything for the new connected player
-	--electricsGE.tick()
+	electricsGE.tick()
 	--nodesGE.tick()
 	positionGE.tick()
-	--inputsGE.tick()
-	--powertrainGE.tick()
+	inputsGE.tick()
+	powertrainGE.tick()
 end
 
 
@@ -55,13 +55,13 @@ local function onUpdate(dt)
 		inputsDelay = inputsDelay + dt
 		if inputsDelay > inputsTickrate then
 			inputsDelay = 0 -- Reset the delay
-			--inputsGE.tick() -- Comment this line to disable inputs synchronization
+			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
 		electricsDelay = electricsDelay + dt
 		if electricsDelay > electricsTickrate then
 			electricsDelay = 0 -- Reset the delay
-			--electricsGE.tick() -- Comment this line to disable electrics synchronization
+			electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 
 

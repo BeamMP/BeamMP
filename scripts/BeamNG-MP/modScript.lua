@@ -25,10 +25,10 @@ registerCoreModule("NetworkHandler") -- Handle all network sending wrappers
 load("vehicleGE")
 registerCoreModule("vehicleGE") -- Contains vehicle related things
 
---[[load("sessionControl")
+load("sessionControl")
 registerCoreModule("sessionControl")
 
-load("playersList")
+--[[load("playersList")
 registerCoreModule("playersList")]]
 
 load("updatesGE")

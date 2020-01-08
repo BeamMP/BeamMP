@@ -42,7 +42,7 @@ end
 
 local function getGameVehicleID(serverVehicleID)
 	local invertedTable = tableInvert(vehiclesMap)
-	print("getGameVehicleID("..serverVehicleID..") = "..invertedTable[tostring(serverVehicleID)])
+	--print("getGameVehicleID("..serverVehicleID..") = "..invertedTable[tostring(serverVehicleID)])
 	return invertedTable[tostring(serverVehicleID)]
 end
 
@@ -217,7 +217,8 @@ local function onVehicleDestroyed(gameVehicleID)
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then
-				Network.send("2121"..serverVehicleID) -- Send it
+				           --"2121"
+				NetworkHandler.send("U-VR"..serverVehicleID) -- Send it
 			end
 		else
 			onVehicleDestroyedAllowed = true

@@ -42,6 +42,7 @@ end
 
 local function getGameVehicleID(serverVehicleID)
 	local invertedTable = tableInvert(vehiclesMap)
+	print("getGameVehicleID("..serverVehicleID..") = "..invertedTable[tostring(serverVehicleID)])
 	return invertedTable[tostring(serverVehicleID)]
 end
 
@@ -143,7 +144,7 @@ local function onServerVehicleSpawned(data)
 	--print(data)
 	local decodedData     = jsonDecode(data)
   --print(HelperFunctions.dump(decodedData))
-	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
+	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
 	local serverVehicleID = decodedData[1] .. decodedData[2] -- Server ID of the vehicle
 	local vehicleName     = decodedData[3] -- Vehicle name
@@ -175,10 +176,9 @@ local function onVehicleSpawned(gameVehicleID)
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 	if Network.GetTCPStatus() > 0 then -- If TCP is connecting or connected
 		if onVehicleSpawnedAllowed then -- If function is not coming from onServerVehicleSpawned then
-			insertVehicleMap(gameVehicleID, tostring(Settings.PlayerID..gameVehicleID)) -- Insert new vehicle ID in map
 			sendVehicle(gameVehicleID) -- Send it to the server without server ID so that we can get an ID set and also to send it to other players
 		else
-			insertVehicleMap(gameVehicleID, tostring(Settings.PlayerID..gameVehicleID)) -- Insert new vehicle ID in map
+			insertVehicleMap(gameVehicleID, tempServerVehicleID) -- Insert new vehicle ID in map
 			onVehicleSpawnedAllowed = true
 		end
 	end

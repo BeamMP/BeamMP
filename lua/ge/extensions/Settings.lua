@@ -1,4 +1,5 @@
 print("[BeamNG-MP] | Settings loaded.")
+local Version = "0.0.1"
 --====================================================================================
 -- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
@@ -36,5 +37,6 @@ M.ClientID = ClientID
 M.IP = IP
 M.PORT = PORT
 M.Protocol = Protocol
+M.Version = Version
 
 return M

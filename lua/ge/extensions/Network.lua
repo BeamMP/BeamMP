@@ -268,6 +268,14 @@ local function onUpdate(dt)
 					disconnectFromServer()
 					UI.setStatus("Kicked ("..data..")")
 
+				elseif code == "VCHK" then -- Server kicked the player for any reason
+					if data == Settings.Version then
+						UI.setStatus("Thank you for using the latest version.")
+					else
+						disconnectFromServer()
+						UI.setStatus("Kicked Wrong Version, Please update! (version: "..data..")")
+					end
+
 				elseif code == "CHAT" then
 					UI.updateChatLog(data)
 

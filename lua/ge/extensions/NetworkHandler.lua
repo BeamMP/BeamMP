@@ -8,10 +8,10 @@ local M = {}
 
 local function send(code, data)
   if data then
-    if Settings.Protocol == "TCP" then -- Send item over TCP
-      Network.TCPSend(code, data)
-    elseif Settings.Protocol == "UDP" then -- Send item over UDP
+    if HelperFunctions.CheckUpdateCode(code) and Settings.Protocol == "UDP" then
       NetworkUDP.UDPSend(code, data)
+    else
+      Network.TCPSend(code, data)
     end
   else
     if Settings.Protocol == "TCP" then -- Send item over TCP

@@ -14,7 +14,7 @@ local MaxVariationDist = 2 -- 2 for 2 grid squares our of sync
 local ClientID = HelperFunctions.randomString(8)
 local PORT = 4444
 local IP = "127.0.0.1"
-local Protocol = "TCP"
+local Protocol = "UDP"
 local Debug = false
 
 local function SettingsReset() -- Used for resetting the main settings like username, and such

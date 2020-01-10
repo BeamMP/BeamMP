@@ -102,12 +102,13 @@ local codes = {
     "SMSG"
   },
   ["update"] = {
-    "U-VI",
-    "U-VD",
     "U-VR",
-    "U-VS",
     "U-VC",
-    "C-VS"
+    "U-VL",
+    "U-VP",
+    "U-VN",
+    "U-VE",
+    "U-VI"
   }
 }
 

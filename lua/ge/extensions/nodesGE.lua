@@ -36,7 +36,7 @@ local function sendNodes(data, gameVehicleID) -- Update electrics values of all 
 			local compressed = LibDeflate:CompressDeflate(data, config)
 			--local compressed_binary_data = msgpack.pack(compressed)
 			--local binary_data = msgpack.pack(data)
-			NetworkHandler.send("U-VN"..serverVehicleID..compressed) -- Send data
+			NetworkHandler.send("U-VN", serverVehicleID..compressed) -- Send data
 			--print(TCP.send("21107"..compressed..serverVehicleID)) -- Send data
 		end
 	end

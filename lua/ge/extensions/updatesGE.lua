@@ -14,7 +14,7 @@ local nodesDelay = 0
 local nodesTickrate = 1 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 0.5
+local positionTickrate = 0.1
 
 local inputsDelay = 0
 local inputsTickrate = 0.5

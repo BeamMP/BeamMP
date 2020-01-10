@@ -87,6 +87,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function onUpdate(dt)
+	local bufferedMessage = false
 	if connectionStatus > 0 then -- If player is connecting or connected
 		local received, status, partial = UDPSocket:receive() -- Receive data
 		if received ~= "" and received ~= nil then -- If data have been received then
@@ -103,21 +104,20 @@ local function onUpdate(dt)
 			--else
 				data = string.sub(received, 5, packetLength)
 			--end
-println(received)
 			if code ~= "PONG" then
-				--println("-----------------------------------------------------")
+				println("-----------------------------------------------------")
 				--println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
 				--println("data :"..data)
 				--println("raw: "..received)
-				--println("whole :"..received)
+				println("whole :"..received)
 
 				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
-				--println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+				println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 			end
 
 			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
-				println("Not a network code: "..code.."")
+				println("Not a game code: "..code.."")
 				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
 				--println(socketbuffer)
@@ -162,14 +162,16 @@ println(received)
 							local md = socketbuffer[ps].packetSize - strdatalen
 							println("Data Missing: "..md)
 							if md > 0 then
+								println("We are still missing data...")
 								socketbuffer[ps].data = socketbuffer[ps].data .. data
 								bufferedMessage = true
 								code = ""
-						  else--if md == 0 then
+						  else --if md == 0 then
+								println("We have all the data! Onwards!")
 								data = socketbuffer[ps].data .. data
 								code = socketbuffer[ps].code
 							  socketbuffer[ps] = nil
-								println(data)
+								println("Code: "..code.." Data: "..data)
 							end
 						end
 						println("-----------------------------------------------------")

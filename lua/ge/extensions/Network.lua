@@ -180,7 +180,7 @@ local function onUpdate(dt)
 			end
 
 			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
-				println("Not a network code: "..code.."")
+				println("Not a game code: "..code.."")
 				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
 				--println(socketbuffer)

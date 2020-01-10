@@ -1,5 +1,5 @@
 print("[BeamNG-MP] | Settings loaded.")
-local Version = "0.0.2"
+local Version = "0.0.3"
 --====================================================================================
 -- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
@@ -17,6 +17,10 @@ local IP = "127.0.0.1"
 local Protocol = "UDP"
 local Debug = false
 
+local function println(stringToPrint)
+	print("[BeamNG-MP] [Settings] | "..tostring(stringToPrint))
+end
+
 local function SettingsReset() -- Used for resetting the main settings like username, and such
   Nickname = ''
   PlayerID = ''
@@ -27,8 +31,14 @@ local function SessionReset() -- used for resetting current session specifics on
   Network.disconnectFromServer()
 end
 
+local function SetProtocol(p)
+  Protocol = p
+  println("Protocol Changed To: "..Protocol)
+end
+
 M.SettingsReset = SettingsReset
 M.SessionReset = SessionReset
+M.SetProtocol = SetProtocol
 M.SmoothUpdateDist = SmoothUpdateDist
 M.UpdateMethod = UpdateMethod
 M.MaxVariationDist = MaxVariationDist

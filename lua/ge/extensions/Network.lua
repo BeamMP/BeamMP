@@ -80,6 +80,7 @@ local function disconnectFromServer()
 		pingStatus = "received"
 		pingTimer = 0
 		UI.setStatus("Disconnected")
+		UI.disconnectMsgToChat()
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================
@@ -89,6 +90,7 @@ end
 --============================================= ON CONNECTED ===============================================
 local function onConnected() -- Function called only 1 time when client successfully connect to server
 	UI.setStatus("Connected") -- TCP connected
+	UI.sendGreetingToChat(Settings.IP, Settings.PORT)
 	connectionStatus = 2
 	println("Connected")
 	TCPSend("USER"..Settings.Nickname) -- Send nickname to server
@@ -348,6 +350,8 @@ local function onUpdate(dt)
 				else
 					println("Data received! > Code: "..code.." > Data: "..tostring(data))
 				end
+			else
+				println("Data received unidentified! > Code: "..code.." > Data: "..tostring(data))
 			end
 		--==============================================================================
 	end

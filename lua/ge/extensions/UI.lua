@@ -33,9 +33,9 @@ local function error(message)
 	ui_message(''..message, 10, 0, 0)
 end
 
-local function message(message)
-	println("[Message] > "..message)
-	ui_message(''..message, 10, 0, 0)
+local function message(mess)
+	println("[Message] > "..mess)
+	ui_message(''..mess, 10, 0, 0)
 end
 
 local function console(message)
@@ -48,13 +48,23 @@ local function setNickname(value)
 end
 
 local function setStatus(tempStatus)
-	be:executeJS('document.getElementById("STATUS").innerHTML = "Status: '..tempStatus..'"') -- Set status
+	be:executeJS('setStatus("'..tempStatus..'")')
+end
+
+local function sendGreetingToChat(ip, port)
+	be:executeJS('greeting("'..tostring(ip)..':'..tostring(port)..'");')
 end
 
 local function updateChatLog(message)
-	--be:executeJS('UpdateChat("'..message..'")') -- Set status
-	--TODO Make this acutally call the function in JS
-	be:executeJS('console.log("Chat Message: '..message..'"); var node = document.createElement("LI");	var textnode = document.createTextNode("'..message..'");	node.appendChild(textnode);	document.getElementById("CHAT").appendChild(node); updateScroll();')
+	be:executeJS('addMessage("'..message..'");')
+end
+
+local function sendPlayerList(list)
+	be:executeJS('playerList(\''..list..'\');')
+end
+
+local function disconnectMsgToChat()
+	be:executeJS('addMessage("Disconnected from server"); setDisconnect(); clearPlayerList(); setOfflineInPlayerList();')
 end
 
 local function updatePlayerList(message)
@@ -62,12 +72,11 @@ local function updatePlayerList(message)
 end
 
 local function setPing(ping)
-	be:executeJS('document.getElementById("PING").innerHTML = "Ping: '..ping..'ms"') -- Set status
-	be:executeJS('document.getElementById("TCPPING").innerHTML = "'..ping..'ms"')
+	be:executeJS('setPing("'..ping..' ms")')
 end
 
 local function setUDPPing(ping)
-	be:executeJS('document.getElementById("UDPPING").innerHTML = "'..ping..'ms"')
+	--be:executeJS('document.getElementById("UDPPING").innerHTML = "'..ping..'ms"')
 end
 
 local function chatSend(value)
@@ -99,6 +108,8 @@ M.setStatus = setStatus
 M.setPing = setPing
 M.setUDPPing = setUDPPing
 M.updateChatLog = updateChatLog
-M.updatePlayerList = updatePlayerList
+M.sendGreetingToChat = sendGreetingToChat
+M.sendPlayerList = sendPlayerList
+M.disconnectMsgToChat = disconnectMsgToChat
 
 return M

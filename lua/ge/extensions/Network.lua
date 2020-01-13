@@ -303,7 +303,8 @@ local function onUpdate(dt)
 					onPlayerConnect()
 
 				elseif code == "PLST" then
-					UI.updatePlayerList(data)
+					--UI.updatePlayerList(data)
+					UI.sendPlayerList(data)
 
 				elseif code == "1012" then -- Update connected players list
 					playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list

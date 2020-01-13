@@ -2,9 +2,11 @@
       id="Servers"
       class="bngApp multiplayer"
       ng-style="{'width': '100%', 'height': '100%'}"
-      ng-init="init()"
-      style="overflow-y: scroll;">
+      ng-init="init()">
   <style>
+    input[type=number] {
+      width: 58px;
+    }
     .title {
       margin-top: 5px;
       margin-bottom: 5px;
@@ -60,26 +62,47 @@
       margin-top: 5px;
       margin-bottom:5px;
     }
+    .chatbox {
+      display: flex;
+    }
+    ul#CHAT {
+        list-style: none;
+        padding-left: 0px;
+        height: 149px;
+        overflow-y: scroll;
+        overflow-wrap: break-word;
+        margin-bottom: 5px;
+    }
   </style>
-  <div>
+  <div style="margin-left: 5px;">
     <p class="title">Multiplayer</p>
   </div>
-  <div ng-if="warnVis" id="error-log">
+  <div ng-if="warnVis" id="error-log" style="margin: 5px;">
     <p class="error">Nickname should be longer than 3 chars and cannot contain backslashes, quotes or plus signs!</p>
   </div>
-  <form id="form" style="margin-bottom:0;">
+  <form id="form" style="margin: 5px 5px 0px 5px;">
     <p style="margin-top: 3px; margin-bottom: 2px;">Server Information:</p>
     <input class="nomargin-input" name="IP" type="text" placeholder="Server IP address" ng-click="select()">
     <span class="nobotmargin"> : </span>
     <input class="nomargin-input" style="width: 50px;" name="PORT" type="text" placeholder="Port" ng-click="select()">
-    <input name="NICKNAME" class="nomargin-input" style="margin-left: 5px;" type="text" placeholder="Your nickname" ng-click="select()">
+    <input id="NICKNAME" name="NICKNAME" class="nomargin-input" style="margin-left: 5px;" type="text" placeholder="Your nickname" ng-click="select()">
     <button class="flat-button b-important" ng-click="connect()">Join</button>
     <button class="flat-button b-important" ng-click="disconnect()">Leave</button>
   </form>
-  <div>
+  <div style="margin: 5px;">
     <span>Ping: </span>
     <span id="PING" class="empty-span"></span>
     <span>Status: </span>
     <span id="STATUS" class="empty-span"></span>
   </div>
+  <div style="margin: 5px;">
+    <p id="players" style="margin: 0;">Session Members: </p>
+    <hr style="margin-top: 5;">
+    <ul id="CHAT"></ul>
+  </div>
+
+  <form class="chatbox">
+    <input id="CHATMESSAGE" style="width: 100%;margin: 5px;" type="text" ng-click="select()" placeholder="Chat Message.">
+    <span class="flat-button b-important" ng-click="chatSend()">Send</span>
+  </form>
 </div>

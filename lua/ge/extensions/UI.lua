@@ -21,6 +21,11 @@ end
 
 local function ready(ui) -- Only run on the calling from the UI
 	println(ui.." UI Ready!")
+	if Steam.isWorking and Steam.accountLoggedIn then
+    UI.setNickname(Steam.playerName)
+		println("Found Steam, Using Player Name / Gamer Name from there: "..Steam.playerName)
+		be:executeJS('document.getElementById("NICKNAME").value = "'..Steam.playerName..'"') -- Set status
+  end
 end
 
 local function error(message)
@@ -60,6 +65,10 @@ end
 
 local function disconnectMsgToChat()
 	be:executeJS('addMessage("Disconnected from server"); setDisconnect(); clearPlayerList(); setOfflineInPlayerList();')
+end
+
+local function updatePlayerList(message)
+	be:executeJS('UpdateSession("'..message..'")') -- Set Player List
 end
 
 local function setPing(ping)

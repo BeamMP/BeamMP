@@ -11,6 +11,7 @@ local M = {}
 
 local function tick()
 	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
+	--print(HelperFunctions.dump(ownMap))
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -24,8 +25,9 @@ end
 local function sendVehiclePosRot(data, gameVehicleID)
 	if Network.GetTCPStatus() == 2 then -- If UDP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		--print("SVID: "..tostring(serverVehicleID))
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send("2134"..serverVehicleID..data) -- Send it
+			NetworkHandler.send("U-VL"..serverVehicleID..data) -- Send it
 		end
 	end
 end
@@ -43,15 +45,15 @@ local function applyPos(data, serverVehicleID)
 
 	--planetsVE.moveTo(2000, data[1], data[2], data[3])
 
-	--[[
+	--print("applyPos("..data..", "..serverVehicleID..")")
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		local pr = jsonDecode(data) -- Decoded data
+		local pr = jsonDecode("["..data) -- Decoded data
 		veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
-		veh:queueLuaCommand("ElectricsVE.applyLatestElectrics()") -- Redefine electrics values
+		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end
-	--]]
+
 end
 
 

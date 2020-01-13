@@ -18,8 +18,8 @@ local M = {}
 
 
 -- ============= VARIABLES =============
-local ownMap = {}
-local vehiclesMap = {}
+ownMap = {}
+vehiclesMap = {}
 local onVehicleSpawnedAllowed = true
 local onVehicleDestroyedAllowed = true
 local tempServerVehicleID = ""
@@ -42,6 +42,7 @@ end
 
 local function getGameVehicleID(serverVehicleID)
 	local invertedTable = tableInvert(vehiclesMap)
+	--print("getGameVehicleID("..serverVehicleID..") = "..invertedTable[tostring(serverVehicleID)])
 	return invertedTable[tostring(serverVehicleID)]
 end
 
@@ -140,16 +141,18 @@ end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(data)
+	--print(data)
 	local decodedData     = jsonDecode(data)
-	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
+  --print(HelperFunctions.dump(decodedData))
+	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
-	local serverVehicleID = decodedData[3] -- Server ID of the vehicle
-	local vehicleName     = decodedData[4] -- Vehicle name
-	local vehicleConfig   = jsonDecode(decodedData[5]) -- Vehicle config
-	local c               = jsonDecode(decodedData[6]) -- Vehicle color
-	local cP0             = jsonDecode(decodedData[7]) -- Vehicle colorPalette0
-	local cP1             = jsonDecode(decodedData[8]) -- Vehicle colorPalette1
-
+	local serverVehicleID = decodedData[1] .. decodedData[2] -- Server ID of the vehicle
+	local vehicleName     = decodedData[3] -- Vehicle name
+	local vehicleConfig   = jsonDecode(decodedData[4]) -- Vehicle config
+	local c               = jsonDecode(decodedData[5]) -- Vehicle color
+	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
+	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
+	print("onServerVehicleSpawned")
 	if Settings.PlayerID == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
@@ -214,7 +217,8 @@ local function onVehicleDestroyed(gameVehicleID)
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then
-				Network.send("2121"..serverVehicleID) -- Send it
+				           --"2121"
+				NetworkHandler.send("U-VR"..serverVehicleID) -- Send it
 			end
 		else
 			onVehicleDestroyedAllowed = true

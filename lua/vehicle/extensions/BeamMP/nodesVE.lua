@@ -26,7 +26,7 @@ end
 
 
 local function applyNodes(data)
-	local decodedData = jsonDecode(data)
+	local decodedData = jsonDecode("["..data)
 	for cid, node in pairs(decodedData.nodes) do
 		cid = tonumber(cid) - 1
 		obj:setNodePosition(cid, vec3(node[1]):toFloat3())

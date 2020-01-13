@@ -25,7 +25,8 @@ local function sendPowertrain(data, gameVehicleID)
 	if Network.GetTCPStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send("2133"..serverVehicleID..data) -- Send data
+			            --2133
+			NetworkHandler.send("U-VP"..serverVehicleID..data) -- Send data
 			print("Powertrain sent")
 		end
 	end
@@ -34,11 +35,9 @@ end
 
 
 local function applyPowertrain(data, serverVehicleID)
-	print("Powertrain received")
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		print("ok")
 		veh:queueLuaCommand("powertrainVE.applyPowertrain(\'"..data.."\')")
 	end
 end

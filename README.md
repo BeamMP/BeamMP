@@ -23,6 +23,9 @@ You will also require the "Launcher" this little tool is what allows you to conn
 It does however require you have java 64bit SE installed.
 --Then your good to go, start your game, agree with your other players on a map and then host / join.
 
+# Servers
+Servers and their repository / source code has now moved to here: https://github.com/Starystars67/BeamNG-MP-Server/
+
 # How will this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.
 
@@ -43,14 +46,17 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - MAPS = Map Setting
   - CHAT = Chat Message
   - KICK = You have been Kicked
+  - PLST = Sending Player List to client
+  - SMSG = Screen Based Message
 
   Game / Session
-  - U-VI = Vehicle Inputs Update
-  - U-VD (2121) = Vehicle Destroyed (deleted) Update (Your telling this)
-  - U-VR = Vehicle Removed Update
-  - U-VS = Server Vehicle Spawned (You are receiving this)
+  - U-VR (2121) = Vehicle Destroyed (deleted) Update (Your telling this)
   - U-VC (2020) = Vehicle Config Update / Confirm / Created
-  - C-VS =
+  - U-VL (2134) = Vehicle Position Update (Coords)
+  - U-VP (2133) = Vehicle Powertrain Update
+  - U-VN (2132) = Vehicle Notes Update
+  - U-VE (2131) = Vehicle Electrics Update
+  - U-VI (2130) = Vehicle Inputs Update
 
 # Ports
  - TCP = 30813

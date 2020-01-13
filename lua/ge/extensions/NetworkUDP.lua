@@ -23,12 +23,37 @@ local function println(stringToPrint)
 	end
 end
 
-local function UDPSend(data)
+local function UDPSend(code, data)
 	if connectionStatus > 0 then
 		if data then
-			return UDPSocket:send(data) -- Send data
+			--local compressed = LibDeflate:CompressDeflate(data, compression_Level)
+			--println(compressed)
+			--local decompressed = LibDeflate:DecompressDeflate(compressed)
+			--println(decompressed)
+			-- Packet Slplitting (Max size 8192b)
+			--Get data size
+			--local size = string.len(compressed)
+			--println("Byte Size (Compressed): "..size)
+			local size = string.len(data)
+			--println("Byte Size: "..size)
+
+			local DataToSend = HelperFunctions.LengthSplit(data, 500)
+			for i,v in ipairs(DataToSend) do
+				--print(i, v)
+				if i == 1 then
+					UDPSocket:send(code.."("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
+				else
+					UDPSocket:send("("..size.."-"..i.."/"..#DataToSend..")"..v.."\n") -- Send data
+				end
+			end
+
+
+			local tmp = tostring(code.."("..size.."-1/"..#DataToSend..")"..data.."\n")
+			local size2 = string.len(tmp)
+			--println("Total Message Size: "..size2.." Total Packets: "..#DataToSend)
+			return
 		else
-			return UDPSocket:send(data) -- Send data
+			return UDPSocket:send(code.."\n") -- Send data
 		end
 	end
 end
@@ -40,12 +65,14 @@ end
 
 local function CreateClient(ip, port)
 	if connectionStatus == 0 then -- If disconnected
-		UDPSocket = socket.udp() -- Set socket to UDP
-		UDPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		UDPSocket:setpeername(ip, port); -- Connecting
+		UDPSocket = assert(socket.udp()) -- Set socket to UDP
+		UDPSocket:settimeout(0) -- Set timeout to 1 to avoid freezing or lockup
+		--print(assert(UDPSocket:setsockname("*",0))) -- Server Use Only??
+		print(assert(UDPSocket:setpeername(ip, port))); -- Connecting
 		connectionStatus = 1
+		print(UDPSocket:getpeername())
 		println("Connecting...")
-		--UDPSocket:send("test")
+		print(assert(UDPSocket:send("PING\n")))
 	end
 end
 
@@ -60,51 +87,160 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function onUpdate(dt)
+	local bufferedMessage = false
 	if connectionStatus > 0 then -- If player is connecting or connected
 		local received, status, partial = UDPSocket:receive() -- Receive data
 		if received ~= "" and received ~= nil then -- If data have been received then
 
-			--println("Data received : "..received)
 			local packetLength = string.len(received)
 			local code = string.sub(received, 1, 4)
+			local containVehicleID = string.sub(code, 2, 2)
+			local serverVehicleID = ""
+			local data = ""
 
-			local i = 0
-			local processed = {}
-			for w in received:gmatch("(.-)</>") do
-				processed[i] = w
-				i = i + 1
+			--if containVehicleID == "-" then
+				--serverVehicleID = string.sub(received, 5, 8)
+				--data = string.sub(received, 9, packetLength)
+			--else
+				data = string.sub(received, 5, packetLength)
+			--end
+			if code ~= "PONG" and code ~= "U-VL" and code ~= "U-VI" and code ~= "U-VE" then
+				println("-----------------------------------------------------")
+				--println("code :"..code)
+				--println("serverVehicleID :"..serverVehicleID)
+				--println("data :"..data)
+				--println("raw: "..received)
+				println("whole :"..received)
+
+				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
+				println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 			end
 
-			if processed[1] == nil then
-				println(processed[0]) -- code
-				println(processed[1]) -- number
-				println(processed[2]) -- splitted
-				println(processed[3]) -- length
-				println(processed[4]) -- ack
-				println(processed[5]) -- playerID
-				println(processed[6]) -- vehicleID
-				println(processed[7]) -- Data
-				if processed[4] then -- Check for our "<ack>" string within our reconstructed data from the server using UDP.
-					println("ACK packet received, sending back acknowledgement.") -- We have the ack string present. lets reply back to the server with our Client ID to say that we received it
-					UDPSocket.send("<ack>"..getPlayerServerID)
-				end
-			else -- our received data is part of a split message
-				println("We received some data that is part of a previous message. HANDLE THIS !!!")
-			end
+			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
+				println("Not a game code: "..code.."")
+				--println(HelperFunctions.CheckGameCode(code))
+				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
+				--println(socketbuffer)
 
-			if code == "new" then
+				-- ADD SYSTEM TO CHECK IF THIS PACKET IS PART OF ONE WE ALREADY HAVE ELSE ADD IT TO A NEW ONE IF THIS IS THE BEGINNING
+				-- THIS WAY WE CAN HANDLE MULTIPLE SPLIT PACKETS AT ONCE RATHER THAN ONE AT A TIME AND ALL IN ORDER
 
+				local packetData = received:match("%((.-)%)")
+				local ps = packetData:match("(.+)-")
 
-			elseif code == "U-VI" then --
+				if socketbuffer[ps] == nil then
+					println("Packet Data: "..packetData)
 
-			elseif code == "PONG" then -- Ping request
-				pingStatus = "received"
-				if firstConnect then
-					onConnected()
-					firstConnect = false
+					data = data:gsub('%(.-%)','')--gsub('%b()', '')
+					--data = LibDeflate:DecompressDeflate(data)
+					local strdatalen = string.len(data)
+					println("Remaining Data: "..data)
+					local md = ps - strdatalen
+					println("Data Missing: "..md)
+					if md > 0 then
+						socketbuffer[ps] = {}
+						socketbuffer[ps].packetSize = ps
+						socketbuffer[ps].data = "" .. data
+						socketbuffer[ps].code = code
+						bufferedMessage = true
+				  elseif md == 0 then
+						socketbuffer[ps] = ""
+					end
+					println(strdatalen)
+					println("-----------------------------------------------------")
+					code = ""
+				else
+					if not HelperFunctions.CheckUpdateCode(code) and not HelperFunctions.CheckGameCode(code) then
+						println("Packet Data: "..packetData)
+						print("Is This packet part of the last? ["..ps.." = "..socketbuffer[ps].packetSize.."]")
+						if ps == socketbuffer[ps].packetSize then
+							println(received)
+							data = received:gsub('%(.-%)','')--gsub('%b()', '')
+							println(data)
+							println(socketbuffer[ps].data .. data)
+							local strdatalen = string.len(socketbuffer[ps].data .. data)
+							local md = socketbuffer[ps].packetSize - strdatalen
+							println("Data Missing: "..md)
+							if md > 0 then
+								println("We are still missing data...")
+								socketbuffer[ps].data = socketbuffer[ps].data .. data
+								bufferedMessage = true
+								code = ""
+						  else --if md == 0 then
+								println("We have all the data! Onwards!")
+								data = socketbuffer[ps].data .. data
+								code = socketbuffer[ps].code
+							  socketbuffer[ps] = nil
+								println("Code: "..code.." Data: "..data)
+							end
+						end
+						println("-----------------------------------------------------")
+					end
 				end
 			else
-				println("Data received : "..received)
+				if code ~= "PONG" then
+				  --print("IS NETWORK CODE")
+				end
+			end
+
+			--==============================================================================
+			if not bufferedMessage then
+				if code == "U-VC" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
+					vehicleGE.onServerVehicleSpawned(data)
+
+				elseif code == "U-VR" then -- Server vehicle removed
+					vehicleGE.onServerVehicleRemoved(serverVehicleID)
+
+					--==============================================================================
+
+				elseif code == "U-VI" then -- Update - Vehicle Inputs
+					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					if data and serverVehicleID then
+						inputsGE.applyInputs("["..data, serverVehicleID)
+					end
+
+				elseif code == "U-VE" then -- Update - Vehicle Electrics
+					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					if data and serverVehicleID then
+						electricsGE.applyElectrics("["..tostring(data), serverVehicleID)
+					end
+
+				elseif code == "U-VN" then -- Update - Vehicle Nodes
+					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					if data and serverVehicleID then
+						nodesGE.applyNodes(data, serverVehicleID)
+					end
+
+				elseif code == "U-VP" then -- Update - Vehicle Powertrain
+					serverVehicleID, data = data:match("(.+)%{(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					if data and serverVehicleID then
+						powertrainGE.applyPowertrain("{"..data, serverVehicleID)
+					end
+
+				elseif code == "U-VL" then -- Update - Vehicle Position / Location
+					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					if data and serverVehicleID then
+						positionGE.applyPos(data, serverVehicleID)
+					end
+
+				elseif code == "PONG" then -- Ping request
+					pingStatus = "received"
+					if firstConnect then
+						onConnected()
+						firstConnect = false
+					end
+
+				else
+					println("Data received! > Code: "..code.." > Data: "..tostring(data))
+				end
 			end
 		end
 	end

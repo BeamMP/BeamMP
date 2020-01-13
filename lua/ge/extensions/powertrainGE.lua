@@ -35,11 +35,9 @@ end
 
 
 local function applyPowertrain(data, serverVehicleID)
-	print("Powertrain received")
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		print("ok")
 		veh:queueLuaCommand("powertrainVE.applyPowertrain(\'"..data.."\')")
 	end
 end

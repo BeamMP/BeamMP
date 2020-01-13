@@ -104,7 +104,7 @@ local function onUpdate(dt)
 			--else
 				data = string.sub(received, 5, packetLength)
 			--end
-			if code ~= "PONG" then
+			if code ~= "PONG" and code ~= "U-VL" and code ~= "U-VI" and code ~= "U-VE" then
 				println("-----------------------------------------------------")
 				--println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
@@ -195,30 +195,38 @@ local function onUpdate(dt)
 
 				elseif code == "U-VI" then -- Update - Vehicle Inputs
 					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
 					if data and serverVehicleID then
-						inputsGE.applyInputs(data, serverVehicleID)
+						inputsGE.applyInputs("["..data, serverVehicleID)
 					end
 
 				elseif code == "U-VE" then -- Update - Vehicle Electrics
 					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
 					if data and serverVehicleID then
-						electricsGE.applyElectrics(data, serverVehicleID)
+						electricsGE.applyElectrics("["..tostring(data), serverVehicleID)
 					end
 
 				elseif code == "U-VN" then -- Update - Vehicle Nodes
 					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
 					if data and serverVehicleID then
 						nodesGE.applyNodes(data, serverVehicleID)
 					end
 
 				elseif code == "U-VP" then -- Update - Vehicle Powertrain
-					serverVehicleID, data = data:match("(.+)%[(.+)")
+					serverVehicleID, data = data:match("(.+)%{(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
 					if data and serverVehicleID then
-						powertrainGE.applyPowertrain(data, serverVehicleID)
+						powertrainGE.applyPowertrain("{"..data, serverVehicleID)
 					end
 
 				elseif code == "U-VL" then -- Update - Vehicle Position / Location
 					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
 					if data and serverVehicleID then
 						positionGE.applyPos(data, serverVehicleID)
 					end

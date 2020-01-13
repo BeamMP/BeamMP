@@ -41,8 +41,6 @@ local function applyElectrics(data, serverVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		if not vehicleGE.isOwn() then
-			--print("ok")
-			--print("data")
 			veh:queueLuaCommand("electricsVE.applyElectrics(\'"..data.."\')")
 		end
 	end

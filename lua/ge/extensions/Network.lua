@@ -55,6 +55,7 @@ local function disconnectFromServer()
 		pingStatus = "received"
 		pingTimer = 0
 		UI.setStatus("Disconnected")
+		UI.disconnectMsgToChat()
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================
@@ -64,6 +65,7 @@ end
 --============================================= ON CONNECTED ===============================================
 local function onConnected() -- Function called only 1 time when client successfully connect to server
 	UI.setStatus("Connected") -- TCP connected
+	UI.sendGreetingToChat(Settings.IP, Settings.PORT)
 	connectionStatus = 2
 	println("Connected")
 	TCPSend("USER"..Settings.Nickname) -- Send nickname to server
@@ -143,7 +145,7 @@ local function onUpdate(dt)
 				print("serverVehicleID :"..serverVehicleID)
 			  print("whole :"..received)
 
-			  println("Data received! > Code: "..code.." > Data: "..tostring(data))
+			  println("Data received! > Code: "..code.." > Data: "..data)
 			end
 
 			--==============================================================================
@@ -162,8 +164,12 @@ local function onUpdate(dt)
 				if roundedPing2 < 0 then
 					roundedPing2 = 0
 				end
-				UI.setPing(roundedPing.."/"..roundedPing2) -- Set the ping
+				UI.setPing(math.floor(roundedPing/roundedPing2)) -- Set the ping
 				pingStatus = "ready" -- Ready for next ping
+
+			elseif code == "PLST" then
+				UI.error(data)
+				UI.sendPlayerList(data)
 
 			elseif code == "KICK" then -- Server kicked the player for any reason
 				disconnectFromServer()
@@ -230,7 +236,7 @@ local function onUpdate(dt)
 				--println("Veh update received")
 				--Updates.HandleUpdate(received)
 			else
-				println("Data received! > Code: "..code.." > Data: "..tostring(data))
+				println("Data received unidentified! > Code: "..code.." > Data: "..tostring(data))
 			end
 			--==============================================================================
 		end

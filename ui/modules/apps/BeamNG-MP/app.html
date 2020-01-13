@@ -1,60 +1,26 @@
-<div class="bngApp multiplayer" ng-style="{'width': mainStyle.appWidth, 'height': mainStyle.appHeight}" ng-init="init()">
+<div  ng-controller="Servers"
+      id="Servers"
+      class="bngApp multiplayer"
+      ng-style="{'width': '100%', 'height': '100%'}"
+      ng-init="init()"
+      style="overflow-y: scroll;">
   <style>
-    table {
-      width: 100%;
-    }
-    th {
-      text-align: left;
-      font-weight: normal;
-    }
-    td {
-      vertical-align: middle;
-    }
-    input[type=number] {
-      width: 58px;
-    }
-    .BeamNGMP {
-      height: 100%;
-    }
     .title {
+      margin-top: 5px;
+      margin-bottom: 5px;
       font-size: 1em;
       font-weight: bold;
       color: #BBBBBB;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
-    .over-div {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      width: 50%;
-      height: auto;
-      font-size: 0.8em;
-      color: #000000;
-      visibility: hidden;
-    }
-    .over-div table {
-      display: inline-block;
-      position: relative;
-      left: -50%;
-      width: 240px;
-      background-color: #FFFFFF;
-    }
-    .over-div td {
-      display: inline-block;
-      margin: 0px;
-      padding: 0px;
-      border: 0px;
-      width: 50%;
-      float: left;
-      background-color: #FFFFFF;
-    }
-    .over-div td:hover {
-      background-color: #C8C8C8;
-    }
     .flat-button {
       display: inline-block;
-      padding: 0px 8px;
+      padding: 2px 8px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      margin-left: 5px;
+      margin-right: 5px;
       line-height: 1.5em;
       text-align: center;
       color: #000000;
@@ -77,62 +43,43 @@
     .b-important:active {
       background-color: #A8FFA8;
     }
-    .b-hide {
-      position: absolute;
-      padding: 0px;
-      top: 4px;
-      right: 4px;
-      width: 16px;
-      height: 16px;
-      font-size: 0.7em;
+    .nomargin-input{
+      margin-bottom: 0;
+      width: 130px;
     }
-    .b-check {
-      padding: 0px;
-      width: 20px;
-      height: 20px;
-      line-height: 1em;
+    .nobotmargin{
+      margin-top: 8px;
+      margin-bottom: 0;
     }
-    .select {
+    .empty-span {
+      min-width: 30px;
       display: inline-block;
-      margin: 0px;
-      width: 120px;
-      height: auto;
-      background-color: white;
     }
-    .option {
-      width: 120px;
-      height: 20px;
-    }
-    .column-wide-2 {
-      width: 49%;
-    }
-    .error{
-      border-color: red;
+    .error {
+      color: red;
+      margin-top: 5px;
+      margin-bottom:5px;
     }
   </style>
-  <table ng-style="{'visibility': mainStyle.appShow}">
-    <tr>
-      <th colspan="4"><span class="title">Multiplayer</span></th>
-    </tr>
-    <tr>
-      <td colspan="4">
-        Session Options:
-        <input id="PORT" flex type="number" value="4444" placeholder="4444" min="3359" max="40000" step="1" value="{{port}}" ng-model="joinOptions.port" ng-mouseenter="enterMouse()" ng-change="setPort()">
-        <input id="IP" flex type="text" placeholder="192.168.0.1" value="{{ip}}" ng-model="joinOptions.ip" ng-mouseenter="enterMouse()" ng-click="enterMouse()" ng-change="setIP()">
-        <input id="NICKNAME" flex style="width: 182px;" type="text" placeholder="Nickname" ng-model="Nickname" value="{{Nickname}}" ng-mouseenter="enterMouse()" ng-change="setNickname()">
-      </td>
-    </tr>
-    <tr>
-      <td colspan="1" style="width: 100px;">
-        <span id="PING">Ping: </span>
-      </td>
-      <td colspan="2">
-        <span id="STATUS">Status: </span>
-      </td>
-      <td colspan="1" style="text-align: right;width: 114px;padding-right: 5px;">
-          <!--<span class="flat-button b-important" ng-click="hostSession()">Host</span>-->
-          <span class="flat-button b-important" ng-click="joinSession()">Join</span>
-      </td>
-    </tr>
-  </table>
+  <div>
+    <p class="title">Multiplayer</p>
+  </div>
+  <div ng-if="warnVis" id="error-log">
+    <p class="error">Nickname should be longer than 3 chars and cannot contain backslashes, quotes or plus signs!</p>
+  </div>
+  <form id="form" style="margin-bottom:0;">
+    <p style="margin-top: 3px; margin-bottom: 2px;">Server Information:</p>
+    <input class="nomargin-input" name="IP" type="text" placeholder="Server IP address" ng-click="select()">
+    <span class="nobotmargin"> : </span>
+    <input class="nomargin-input" style="width: 50px;" name="PORT" type="text" placeholder="Port" ng-click="select()">
+    <input name="NICKNAME" class="nomargin-input" style="margin-left: 5px;" type="text" placeholder="Your nickname" ng-click="select()">
+    <button class="flat-button b-important" ng-click="connect()">Join</button>
+    <button class="flat-button b-important" ng-click="disconnect()">Leave</button>
+  </form>
+  <div>
+    <span>Ping: </span>
+    <span id="PING" class="empty-span"></span>
+    <span>Status: </span>
+    <span id="STATUS" class="empty-span"></span>
+  </div>
 </div>

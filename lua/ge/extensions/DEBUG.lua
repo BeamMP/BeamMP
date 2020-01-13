@@ -57,9 +57,9 @@ end)
 
 local function updateUI(opt, data)
 	if opt == "updateTime" then
-		be:executeJS('document.getElementById("PID").innerHTML = "'..data..'ms"')
+		--be:executeJS('document.getElementById("PID").innerHTML = "'..data..'ms"')
 	elseif opt == "runTime" then
-		be:executeJS('document.getElementById("VID").innerHTML = "'..data..'ms"')
+		--be:executeJS('document.getElementById("VID").innerHTML = "'..data..'ms"')
 	end
 end
 

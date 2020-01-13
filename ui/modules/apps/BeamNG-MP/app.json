@@ -8,11 +8,7 @@
   "css": {
   	"left": "180px",
   	"bottom": "0px",
-  	"width": "570px",
-    "height": "100px",
-    "min-width": "570px",
-    "min-height": "100px",
-    "max-width": "570px",
-    "max-height": "100px",
+  	"width": "500px",
+    "height": "150px"
   }
 }

@@ -108,7 +108,8 @@ local codes = {
     "U-VP",
     "U-VN",
     "U-VE",
-    "U-VI"
+    "U-VI",
+    "U-VV"
   }
 }
 

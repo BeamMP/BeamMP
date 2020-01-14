@@ -57,6 +57,7 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - U-VN (2132) = Vehicle Notes Update
   - U-VE (2131) = Vehicle Electrics Update
   - U-VI (2130) = Vehicle Inputs Update
+  - U-VV = Vehicle Velocity Update
 
 # Ports
  - TCP = 30813

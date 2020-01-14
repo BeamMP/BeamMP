@@ -141,9 +141,12 @@ end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(data)
-	--print(data)
+	data:gsub("[\r\n]", "")
+	data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+	data = string.gsub(data, "%s+", "")
+	print(data)
 	local decodedData     = jsonDecode(data)
-  --print(HelperFunctions.dump(decodedData))
+  print(HelperFunctions.dump(decodedData))
 	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
 	local serverVehicleID = decodedData[1] .. decodedData[2] -- Server ID of the vehicle

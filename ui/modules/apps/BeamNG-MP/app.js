@@ -21,6 +21,12 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 		countUpdateInterval = setInterval(updateCount, 20000);
 	}
 
+	$scope.reset = function() {
+		connected = false;
+		players = [];
+		init();
+	}
+
 	$scope.select = function() {
 		bngApi.engineLua('setCEFFocus(true)');
 	}

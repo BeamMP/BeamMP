@@ -11,10 +11,13 @@ local M = {}
 
 -- ============= VARIABLES =============
 local nodesDelay = 0
-local nodesTickrate = 1 -- in seconds
+local nodesTickrate = 4 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 0.1
+local positionTickrate = 0.5
+
+--local velocityDelay = 0
+--local velocityTickrate = 0.1
 
 local inputsDelay = 0
 local inputsTickrate = 0.5
@@ -29,21 +32,22 @@ local electricsTickrate = 3
 local function onPlayerConnect()
 	-- Update everything for the new connected player
 	electricsGE.tick()
-	--nodesGE.tick()
+	nodesGE.tick()
 	positionGE.tick()
 	inputsGE.tick()
 	powertrainGE.tick()
+	--velocityGE.tick()
 end
 
 
 
 local function onUpdate(dt)
-	if tonumber(Network.GetTCPStatus()) == 2 then -- If connected
+	if 0 then --tonumber(Network.GetTCPStatus()) == 2 then -- If connected
 
 		nodesDelay = nodesDelay + dt
 		if nodesDelay > nodesTickrate then
 			nodesDelay = 0 -- Reset the delay
-			--nodesGE.tick() -- Comment this line to disable nodes synchronization
+			nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		positionDelay = positionDelay + dt
@@ -51,6 +55,12 @@ local function onUpdate(dt)
 			positionDelay = 0 -- Reset the delay
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
+
+		--velocityDelay = velocityDelay + dt
+		--if velocityDelay > velocityTickrate then
+			--velocityDelay = 0 -- Reset the delay
+			--velocityGE.tick() -- Comment this line to disable position synchronization
+		--end
 
 		inputsDelay = inputsDelay + dt
 		if inputsDelay > inputsTickrate then

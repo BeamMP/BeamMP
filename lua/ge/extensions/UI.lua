@@ -5,6 +5,7 @@
 
 local M = {}
 local Nickname = ''
+be:executeJS('reset()')
 
 
 -- ============= VARIABLES =============

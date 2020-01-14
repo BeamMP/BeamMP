@@ -10,8 +10,8 @@ registerCoreModule("UI") -- For all of our UI functions and handling
 load("Settings")
 registerCoreModule("Settings") -- Stores our session settings
 
-load("Updates")
-registerCoreModule("Updates") -- handles all vehicle updating things
+--load("Updates")
+--registerCoreModule("Updates") -- handles all vehicle updating things
 
 load("Network")
 registerCoreModule("Network") -- Handles all TCP related traffic
@@ -48,3 +48,6 @@ registerCoreModule("powertrainGE")
 
 load("nodesGE")
 registerCoreModule("nodesGE")
+
+load("velocityGE")
+registerCoreModule("velocityGE")

@@ -68,11 +68,11 @@ local function CreateClient(ip, port)
 		UDPSocket = assert(socket.udp()) -- Set socket to UDP
 		UDPSocket:settimeout(0) -- Set timeout to 1 to avoid freezing or lockup
 		--print(assert(UDPSocket:setsockname("*",0))) -- Server Use Only??
-		print(assert(UDPSocket:setpeername(ip, port))); -- Connecting
+		assert(UDPSocket:setpeername(ip, port)); -- Connecting
 		connectionStatus = 1
-		print(UDPSocket:getpeername())
+		UDPSocket:getpeername()
 		println("Connecting...")
-		print(assert(UDPSocket:send("PING\n")))
+		assert(UDPSocket:send("PING\n"))
 	end
 end
 
@@ -105,19 +105,19 @@ local function onUpdate(dt)
 				data = string.sub(received, 5, packetLength)
 			--end
 			if code ~= "PONG" and code ~= "U-VL" and code ~= "U-VI" and code ~= "U-VE" then
-				println("-----------------------------------------------------")
+				--println("-----------------------------------------------------")
 				--println("code :"..code)
 				--println("serverVehicleID :"..serverVehicleID)
 				--println("data :"..data)
 				--println("raw: "..received)
-				println("whole :"..received)
+				--println("whole :"..received)
 
 				--println("Data received! > Code: "..code.." > Data: "..tostring(data))
-				println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+				--println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 			end
 
 			if data and received:match("%((.-)%)") ~= nil and not HelperFunctions.CheckGameCode(code) then
-				println("Not a game code: "..code.."")
+				--println("Not a game code: "..code.."")
 				--println(HelperFunctions.CheckGameCode(code))
 				-- Okay So the code is not a network message code, Lets move onto game codes, this will require LibDeflate and decompression
 				--println(socketbuffer)
@@ -129,14 +129,14 @@ local function onUpdate(dt)
 				local ps = packetData:match("(.+)-")
 
 				if socketbuffer[ps] == nil then
-					println("Packet Data: "..packetData)
+					--println("Packet Data: "..packetData)
 
 					data = data:gsub('%(.-%)','')--gsub('%b()', '')
 					--data = LibDeflate:DecompressDeflate(data)
 					local strdatalen = string.len(data)
-					println("Remaining Data: "..data)
+					--println("Remaining Data: "..data)
 					local md = ps - strdatalen
-					println("Data Missing: "..md)
+					--println("Data Missing: "..md)
 					if md > 0 then
 						socketbuffer[ps] = {}
 						socketbuffer[ps].packetSize = ps
@@ -146,23 +146,23 @@ local function onUpdate(dt)
 				  elseif md == 0 then
 						socketbuffer[ps] = ""
 					end
-					println(strdatalen)
-					println("-----------------------------------------------------")
+					--println(strdatalen)
+					--println("-----------------------------------------------------")
 					code = ""
 				else
 					if not HelperFunctions.CheckUpdateCode(code) and not HelperFunctions.CheckGameCode(code) then
-						println("Packet Data: "..packetData)
-						print("Is This packet part of the last? ["..ps.." = "..socketbuffer[ps].packetSize.."]")
+						--println("Packet Data: "..packetData)
+						--print("Is This packet part of the last? ["..ps.." = "..socketbuffer[ps].packetSize.."]")
 						if ps == socketbuffer[ps].packetSize then
-							println(received)
+							--println(received)
 							data = received:gsub('%(.-%)','')--gsub('%b()', '')
-							println(data)
-							println(socketbuffer[ps].data .. data)
+							--println(data)
+							--println(socketbuffer[ps].data .. data)
 							local strdatalen = string.len(socketbuffer[ps].data .. data)
 							local md = socketbuffer[ps].packetSize - strdatalen
-							println("Data Missing: "..md)
+							--println("Data Missing: "..md)
 							if md > 0 then
-								println("We are still missing data...")
+								--println("We are still missing data...")
 								socketbuffer[ps].data = socketbuffer[ps].data .. data
 								bufferedMessage = true
 								code = ""
@@ -170,11 +170,12 @@ local function onUpdate(dt)
 								println("We have all the data! Onwards!")
 								data = socketbuffer[ps].data .. data
 								code = socketbuffer[ps].code
+								println("Code: "..code)
 							  socketbuffer[ps] = nil
-								println("Code: "..code.." Data: "..data)
+								--println("Code: "..code.." Data: "..data)
 							end
 						end
-						println("-----------------------------------------------------")
+						--println("-----------------------------------------------------")
 					end
 				end
 			else
@@ -186,12 +187,23 @@ local function onUpdate(dt)
 			--==============================================================================
 			if not bufferedMessage then
 				if code == "U-VC" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
+				  data:gsub("[\r\n]", "")
+				  data = string.gsub(data, '^%s*(.-)%s*$', '%1')
 					vehicleGE.onServerVehicleSpawned(data)
 
 				elseif code == "U-VR" then -- Server vehicle removed
 					vehicleGE.onServerVehicleRemoved(serverVehicleID)
 
 					--==============================================================================
+
+				elseif code == "U-VV" then -- Update - Vehicle Velocity
+					print(data)
+					serverVehicleID, data = data:match("(.+)%[(.+)")
+					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					if data and serverVehicleID then
+					  velocityGE.applyVelocity("["..data, serverVehicleID)
+					end
 
 				elseif code == "U-VI" then -- Update - Vehicle Inputs
 					serverVehicleID, data = data:match("(.+)%[(.+)")
@@ -210,10 +222,16 @@ local function onUpdate(dt)
 					end
 
 				elseif code == "U-VN" then -- Update - Vehicle Nodes
-					serverVehicleID, data = data:match("(.+)%[(.+)")
+					--print(code)
+					--print(data)
+					--print("----------------------")
+					serverVehicleID, data = data:match("(.+)%{(.+)")
 					data:gsub("[\r\n]", "")
+					data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					--print(serverVehicleID)
+					--print(data)
 					if data and serverVehicleID then
-						nodesGE.applyNodes(data, serverVehicleID)
+						nodesGE.applyNodes("{"..data, serverVehicleID)
 					end
 
 				elseif code == "U-VP" then -- Update - Vehicle Powertrain
@@ -239,7 +257,7 @@ local function onUpdate(dt)
 					end
 
 				else
-					println("Data received! > Code: "..code.." > Data: "..tostring(data))
+					println("Unhandled Data received! > Code: "..code.." > Data: "..tostring(data))
 				end
 			end
 		end

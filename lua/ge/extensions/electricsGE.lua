@@ -24,10 +24,10 @@ end
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
 	if Network.GetTCPStatus() == 2 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		print(serverVehicleID)
+		--print(serverVehicleID)
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			NetworkHandler.send("U-VE"..serverVehicleID..data) -- Send it
-			print("Electrics sent "..serverVehicleID)
+			--print("Electrics sent "..serverVehicleID)
 		end
 	end
 end

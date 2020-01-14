@@ -1,5 +1,5 @@
-var connected = false;
-var app = angular.module('beamng.apps');
+let connected = false;
+let app = angular.module('beamng.apps');
 app.directive('multiplayer', ['UiUnits', function (UiUnits) {
 	return {
 		templateUrl: 'modules/apps/BeamNG-MP/app.html',
@@ -14,18 +14,18 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP")');
-	}
+	};
 
 	$scope.select = function() {
 		bngApi.engineLua('setCEFFocus(true)');
-	}
+	};
 
 	$scope.connect = function() {
 		if (!connected) {
-			var inputs = document.getElementById("form").elements;
-			var ip = inputs["IP"].value;
-			var port = inputs["PORT"].value;
-			var nickname = inputs["NICKNAME"].value;
+			let inputs = document.getElementById("form").elements;
+			let ip = inputs["IP"].value;
+			let port = inputs["PORT"].value;
+			let nickname = inputs["NICKNAME"].value;
 			if(port === "") {
 			port = "4444"
 			}
@@ -33,8 +33,8 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 				ip = "localhost"
 			}
 			if (nickname.length < 3 || nickname.includes("\\") || nickname.includes("\"") || nickname.includes("'") || nickname.includes("+")) {
-				console.log('Nickname must be longer than 3 chars, cannot contain backslashes, quotes or a plus sign!')
-				bngApi.engineLua('UI.error("Illegal nickname.")')
+				console.log('Nickname must be longer than 3 chars, cannot contain backslashes, quotes or a plus sign!');
+				bngApi.engineLua('UI.error("Illegal nickname.")');
 				addWarning();
 			}
 			else {
@@ -43,13 +43,13 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 				connected = true;
 			}
 		}
-	}
+	};
 
 	$scope.disconnect = function() {
 		bngApi.engineLua('Network.disconnectFromServer()');
 		setPing("");
 		connected = false;
-	}
+	};
 
 	function addWarning() {
 		if (!$scope.warnVis) {

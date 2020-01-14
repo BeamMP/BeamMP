@@ -192,7 +192,10 @@ local function onUpdate(dt)
 					vehicleGE.onServerVehicleSpawned(data)
 
 				elseif code == "U-VR" then -- Server vehicle removed
-					vehicleGE.onServerVehicleRemoved(serverVehicleID)
+				  data:gsub("[\r\n]", "")
+				  data = string.gsub(data, '^%s*(.-)%s*$', '%1')
+					--println("U-VR > "..data)
+					vehicleGE.onServerVehicleRemoved(data)
 
 					--==============================================================================
 

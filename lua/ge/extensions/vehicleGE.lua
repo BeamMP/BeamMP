@@ -198,7 +198,7 @@ end
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
 local function onServerVehicleRemoved(serverVehicleID)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-		if gameVehicleID then
+	if gameVehicleID then
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh and gameVehicleID then
 			commands.setFreeCamera()
@@ -215,7 +215,7 @@ end
 
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
-	print("Vehicle destroyed : "..gameVehicleID)
+	println("Vehicle destroyed : "..gameVehicleID)
 	if Network.GetTCPStatus() > 0 then -- If TCP is connecting or connected
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID

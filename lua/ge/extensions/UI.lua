@@ -109,6 +109,7 @@ M.setPing = setPing
 M.setUDPPing = setUDPPing
 M.updateChatLog = updateChatLog
 M.sendGreetingToChat = sendGreetingToChat
+M.updatePlayerList = updatePlayerList
 M.sendPlayerList = sendPlayerList
 M.disconnectMsgToChat = disconnectMsgToChat
 

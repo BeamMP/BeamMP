@@ -129,7 +129,7 @@ socketbuffer = {}
 
 local function onUpdate(dt)
 	--println("TimeKeep")
-  local bufferedMessage = false
+    local bufferedMessage = false
 	local runTime = socket.gettime() -- Get update run time
 	local uTime = (socket.gettime() - updateTime)*1000 -- Calculate time between send and receive
 	local roundedUpdateTime = uTime + 0.5 - (uTime + 0.5) % 1 -- Round -- Get update cycle time
@@ -303,7 +303,7 @@ local function onUpdate(dt)
 					onPlayerConnect()
 
 				elseif code == "PLST" then
-					UI.updatePlayerList(data)
+					UI.sendPlayerList(data)
 
 				elseif code == "1012" then -- Update connected players list
 					playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list

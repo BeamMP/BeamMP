@@ -162,7 +162,7 @@ function playerList(list) {
 	let parsedList = JSON.parse(list);
 	let playersList = document.getElementById("players");
 	for (let i = 0; i < parsedList.length; i++) {
-		var node = document.createElement("span");
+		let node = document.createElement("span");
 		let text;
 		if (i===parsedList.length-1) {
 			text = document.createTextNode(parsedList[i].nickname);

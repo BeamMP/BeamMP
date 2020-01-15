@@ -36,7 +36,7 @@ local function sendNodes(data, gameVehicleID) -- Update electrics values of all 
 			local compressed = LibDeflate:CompressDeflate(data, config)
 			--local compressed_binary_data = msgpack.pack(compressed)
 			--local binary_data = msgpack.pack(data)
-			NetworkHandler.send("U-VN", serverVehicleID..compressed) -- Send data
+			NetworkHandler.send("U-VN", serverVehicleID..data) -- Send data
 			--print(TCP.send("21107"..compressed..serverVehicleID)) -- Send data
 		end
 	end
@@ -50,7 +50,7 @@ local function applyNodes(data, serverVehicleID)
 	if veh then
 		--print("ok !")
 		local decompressed = LibDeflate:DecompressDeflate(data)
-		veh:queueLuaCommand("nodesVE.applyNodes(\'"..decompressed.."\')") -- Send electrics values
+		veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send electrics values
 	end
 end
 

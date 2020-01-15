@@ -14,7 +14,7 @@ local nodesDelay = 0
 local nodesTickrate = 4 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 0.5
+local positionTickrate = 0.1
 
 --local velocityDelay = 0
 --local velocityTickrate = 0.1
@@ -27,7 +27,29 @@ local electricsTickrate = 3
 -- TODO: use common tickrate to increase performances this is just for debugging
 -- ============= VARIABLES =============
 
-
+local function setTickrate(opt, value)
+	if value then
+		if opt == "nodes" then
+			nodesTickrate = value
+		elseif opt == "position" then
+			positionTickrate = value
+		elseif opt == "inputs" then
+			inputsTickrate = value
+		elseif opt == "electrics" then
+			electricsTickrate = value
+		end
+	else
+		if opt == "nodes" then
+			return nodesTickrate
+		elseif opt == "position" then
+			return positionTickrate
+		elseif opt == "inputs" then
+			return inputsTickrate
+		elseif opt == "electrics" then
+			return electricsTickrate
+		end
+	end
+end
 
 local function onPlayerConnect()
 	-- Update everything for the new connected player
@@ -82,6 +104,7 @@ end
 
 M.onPlayerConnect = onPlayerConnect
 M.onUpdate        = onUpdate
+M.setTickrate         = setTickrate
 
 
 

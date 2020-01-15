@@ -216,7 +216,7 @@ end
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
 	println("Vehicle destroyed : "..gameVehicleID)
-	if Network.GetTCPStatus() > 0 then -- If TCP is connecting or connected
+	if Network.GetTCPStatus() > 0 and vehicleGE.isOwn(gameVehicleID) then -- If TCP is connecting or connected
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then

@@ -51,3 +51,6 @@ registerCoreModule("nodesGE")
 
 load("velocityGE")
 registerCoreModule("velocityGE")
+
+load("MPRichPresence")
+registerCoreModule("MPRichPresence")

@@ -154,7 +154,7 @@ function addMessage(msg) {
 
 function greeting(server) {
 	addMessage("You are now connected to " + server);
-	addMessage("Welcome to chat! Chat box is at the bottom of your screen. Message length limit is 150 characters.");
+	addMessage("Welcome to chat! Our message length limit is 150 characters.");
 }
 
 function playerList(list) {
@@ -177,7 +177,7 @@ function playerList(list) {
 function clearPlayerList() {
 	let playersList = document.getElementById("players");
 	while (playersList.children.length > 0) {
-		playerList.removeChild(playerList.children[0]);
+		playersList.removeChild(playersList.children[0]);
 	}
 }
 

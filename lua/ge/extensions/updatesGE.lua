@@ -69,7 +69,7 @@ local function onUpdate(dt)
 		nodesDelay = nodesDelay + dt
 		if nodesDelay > nodesTickrate then
 			nodesDelay = 0 -- Reset the delay
-			nodesGE.tick() -- Comment this line to disable nodes synchronization
+			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		positionDelay = positionDelay + dt

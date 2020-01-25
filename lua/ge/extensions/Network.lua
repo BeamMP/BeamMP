@@ -24,6 +24,9 @@ local pingTimer = 0
 local timeoutMax = 15 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 5 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local maxUpdateTimes = 10
+local isAdmin = false
+local timeSinceLastSENV = 0
+local shouldSendState = true;
 -- ============= VARIABLES =============
 
 local function println(stringToPrint)
@@ -53,6 +56,8 @@ local function disconnectFromServer()
 		UI.setStatus("Disconnected")
 		UI.disconnectMsgToChat()
 		SessionControl.disableOnlineModeRestrictions()
+		if admin then SessionControl.clearAdminRights() end
+		admin = false
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================
@@ -99,6 +104,7 @@ local Times = {}
 socketbuffer = {}
 
 local function onUpdate(dt)
+	timeSinceLastSENV = timeSinceLastSENV + dt
 	local bufferedMessage = false
 	local runTime = socket.gettime() -- Get update run time
 	local uTime = (socket.gettime() - updateTime)*1000 -- Calculate time between send and receive
@@ -165,7 +171,6 @@ local function onUpdate(dt)
 				end
 
 			elseif code == "CHAT" then
-				UI.console("Great, received back. Calling UI.updateChatLog")
 				UI.updateChatLog(data)
 
 			elseif code == "MAPC" then
@@ -182,17 +187,24 @@ local function onUpdate(dt)
 				TCPSend("MAPS"..map)
 
 			elseif code == "ENVT" then
-				local one, two, three, four = data:match("([^/]+)/([^/]+)/([^/]+)/([^/]+)")
-				local json = jsonDecode(one)
-				core_environment.setTimeOfDay({azimuthOverride = json["azimuthOverride"],
-											   nightScale = json["NightScale"],
-											   time = json["time"], dayLength = json["dayLength"],
-											   dayScale = json["dayScale"],
-											   play = json["play"]})
-				core_environment.setFogDensity(tonumber(two))
-				core_environment.setGravity(tonumber(three))
-				core_environment.setWindSpeed(tonumber(four))
-				UI.console(obj:getWind())
+				local json = jsonDecode(data)
+				if not admin then
+					SessionControl.disableOnlineModeRestrictions()
+					core_environment.setState(json)
+					SessionControl.setOnlineModeRestrictions()
+				else
+					shouldSendState = false
+					core_environment.setState(json)
+					shouldSendState = true
+				end
+
+			elseif code == "UIMS" then
+				ui_message(data, 5, "")
+
+			elseif code == "ADMN" then
+				ui_message("Congratz, you are now admin. Have fun!", 5, "")
+				isAdmin = true
+				SessionControl.iAmAdmin()
 
 			elseif code == "JOIN" then
 				onPlayerConnect()
@@ -268,6 +280,15 @@ local function GetTCPStatus()
 	return connectionStatus
 end
 
+local function updateWeatherOnline()
+	if timeSinceLastSENV > 0.25 and shouldSendState then
+		local state = core_environment.getState()
+		local json = jsonEncode(state)
+		TCPSend("SENV"..json)
+		timeSinceLastSENV = 0
+	end
+end
+
 M.onUpdate = onUpdate
 M.JoinSession = JoinSession
 M.TCPSend = TCPSend
@@ -275,5 +296,6 @@ M.SendChatMessage = SendChatMessage
 M.disconnectFromServer = disconnectFromServer
 M.connectionStatus = connectionStatus
 M.GetTCPStatus = GetTCPStatus
+M.updateWeatherOnline = updateWeatherOnline
 
 return M

@@ -77,9 +77,7 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 					msgTooLong();
 				}
 				else {
-					let msg = "ChatSend Pressed.";
-					bngApi.engineLua('UI.console("'+ String(msg) + '")');
-					bngApi.engineLua('UI.chatSend("'+ String(cm.value) + '")');
+					bngApi.engineLua('UI.console("ChatSend Pressed"); UI.chatSend("'+ String(cm.value) + '")');
 					cm.value = '';
 					count++;
 				}

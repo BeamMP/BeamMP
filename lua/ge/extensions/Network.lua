@@ -204,42 +204,6 @@ local function onUpdate(dt)
 			elseif code == "1012" then -- Update connected players list
 				playersList.setConnectedPlayers(jsonDecode(data)) -- Set connected players list
 
-			elseif code == "U-VC" then -- Spawn vehicle and sync vehicle id or only sync vehicle ID
-				vehicleGE.onServerVehicleSpawned(data)
-
-			elseif code == "U-VR" then -- Server vehicle removed
-				vehicleGE.onServerVehicleRemoved(serverVehicleID)
-
-			elseif code == "U-VI" then -- Update - Vehicle Inputs
-				serverVehicleID, data = data:match("(.+)%[(.+)")
-				if data and serverVehicleID then
-					inputsGE.applyInputs(data, serverVehicleID)
-				end
-
-			elseif code == "U-VE" then -- Update - Vehicle Electrics
-				serverVehicleID, data = data:match("(.+)%[(.+)")
-				if data and serverVehicleID then
-					electricsGE.applyElectrics(data, serverVehicleID)
-				end
-
-			elseif code == "U-VN" then -- Update - Vehicle Nodes
-				serverVehicleID, data = data:match("(.+)%[(.+)")
-				if data and serverVehicleID then
-					nodesGE.applyNodes(data, serverVehicleID)
-				end
-
-			elseif code == "U-VP" then -- Update - Vehicle Powertrain
-				serverVehicleID, data = data:match("(.+)%[(.+)")
-				if data and serverVehicleID then
-					powertrainGE.applyPowertrain(data, serverVehicleID)
-				end
-
-			elseif code == "U-VL" then -- Update - Vehicle Position / Location
-				serverVehicleID, data = data:match("(.+)%[(.+)")
-				if data and serverVehicleID then
-					positionGE.applyPos(data, serverVehicleID)
-				end
-
 			else
 				println("Data received! > Code: "..code.." > Data: "..tostring(data))
 			end

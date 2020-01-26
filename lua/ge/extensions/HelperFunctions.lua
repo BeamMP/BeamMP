@@ -1,5 +1,5 @@
 print("[BeamNG-MP] | Helper Functions loaded.")
-require('bullettime')
+
 local M = {}
 
 local function split(inputstr, sep)
@@ -40,18 +40,6 @@ local function randomString(length)
   if not length or length <= 0 then return '' end
   math.randomseed(os.clock()^5)
   return randomString(length - 1) .. charset[math.random(1, #charset)]
-end
-
-local function togglePause()
-  bullettime.togglePause()
-end
-
-local function getPause()
-  bullettime.getPause()
-end
-
-local function setPauseState(paused)
-  bullettime.pause(paused)
 end
 
 local function GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, useZ)
@@ -142,9 +130,6 @@ end
 M.split = split
 M.dump = dump
 M.randomString = randomString
-M.togglePause = togglePause
-M.getPause = getPause
-M.setPauseState = setPauseState
 M.GetDistanceBetweenCoords = GetDistanceBetweenCoords
 M.deleteAllVehicles = deleteAllVehicles
 M.CheckGameCode = CheckGameCode

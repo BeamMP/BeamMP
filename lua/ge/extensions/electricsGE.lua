@@ -15,6 +15,7 @@ local function tick() -- Update electrics values of all vehicles - The server ch
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
 			veh:queueLuaCommand("electricsVE.getElectrics()") -- Send electrics values
+			veh:queueLuaCommand("electricsVE.getGear()") -- Send gears values
 		end
 	end
 end
@@ -22,11 +23,10 @@ end
 
 
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
-	if Network.GetTCPStatus() == 2 then -- If TCP connected
+	if Network.getStatus() == 2 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		--print(serverVehicleID)
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			NetworkHandler.send("U-VE"..serverVehicleID..data) -- Send it
+			Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
 			--print("Electrics sent "..serverVehicleID)
 		end
 	end
@@ -36,7 +36,6 @@ end
 
 local function applyElectrics(data, serverVehicleID)
 	--print("gameVehicleID: "..vehicleGE.getGameVehicleID(serverVehicleID))
-	-- TODO parfois le gameVehicleID est incorrecte !
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
@@ -47,7 +46,34 @@ local function applyElectrics(data, serverVehicleID)
 end
 
 
+
+local function sendGear(data, gameVehicleID)
+	if Network.getStatus() == 2 then -- If TCP connected
+		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			Network.send(Network.buildPacket(0, 2135, serverVehicleID, data))
+			--print("Gear sent "..serverVehicleID)
+		end
+	end
+end
+
+
+
+local function applyGear(data, serverVehicleID)
+	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local veh = be:getObjectByID(gameVehicleID)
+	if veh then
+		if not vehicleGE.isOwn() then
+			veh:queueLuaCommand("electricsVE.applyGear(\'"..data.."\')")
+		end
+	end
+end
+
+
+
 M.tick 			 = tick
+M.sendGear		 = sendGear
+M.applyGear	 	 = applyGear
 M.sendElectrics  = sendElectrics
 M.applyElectrics = applyElectrics
 

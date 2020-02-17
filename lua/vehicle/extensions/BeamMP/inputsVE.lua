@@ -10,6 +10,7 @@ local M = {}
 
 
 -- ============= VARIABLES =============
+local lastInputs = {}
 local sendInputsDelay = 0
 -- ============= VARIABLES =============
 
@@ -22,7 +23,17 @@ local function getInputs()
 	eTable[3] = input.state.brake.val
 	eTable[4] = input.state.parkingbrake.val
 	eTable[5] = input.state.clutch.val
+	
+	if eTable[1] == lastInputs[1]
+	and eTable[2] == lastInputs[2]
+	and eTable[3] == lastInputs[3]
+	and eTable[4] == lastInputs[4]
+	and eTable[5] == lastInputs[5]
+	then return end
+
 	obj:queueGameEngineLua("inputsGE.sendInputs(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+
+	lastInputs = eTable
 end
 
 

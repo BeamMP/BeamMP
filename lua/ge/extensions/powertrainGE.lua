@@ -22,12 +22,10 @@ end
 
 
 local function sendPowertrain(data, gameVehicleID)
-	if Network.GetTCPStatus() == 2 then -- If UDP is connected
+	if Network.getStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			            --2133
-			NetworkHandler.send("U-VP"..serverVehicleID..data) -- Send data
-			print("Powertrain sent")
+			Network.send(Network.buildPacket(0, 2133, serverVehicleID, data))
 		end
 	end
 end

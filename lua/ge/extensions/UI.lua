@@ -23,10 +23,10 @@ end
 local function ready(ui) -- Only run on the calling from the UI
 	println(ui.." UI Ready!")
 	if Steam.isWorking and Steam.accountLoggedIn then
-    UI.setNickname(Steam.playerName)
+		Network.nickname = Steam.playerName
 		println("Found Steam, Using Player Name / Gamer Name from there: "..Steam.playerName)
 		be:executeJS('document.getElementById("NICKNAME").value = "'..Steam.playerName..'"') -- Set status
-  end
+	end
 end
 
 local function error(message)
@@ -44,7 +44,7 @@ local function console(message)
 end
 
 local function setNickname(value)
-	Settings.Nickname = value
+	Network.nickname = value
 	--print('Chat Values (setChatMessage): '..value.data..' | '..chatMessage or "")
 end
 
@@ -86,17 +86,18 @@ local function chatSend(value)
 		return
 	else
 		println('Chat: Message sent = '..value)
-		Network.SendChatMessage(value)
+		local toSend = Network.nickname..': '..value
+		Network.send(Network.buildPacket(1, 2106, 0, toSend))
+		updateChatLog(toSend)
 	end
 end
 
 local function joinSession(ip, port)
 	println("Attempting to join session on "..ip..':'..port)
-	Settings.PlayerID = HelperFunctions.randomString(8)
-	Network.JoinSession(ip, port)
+	--Settings.PlayerID = HelperFunctions.randomString(8)
+	Network.connectToServer(ip, port)
 end
 
-M.onUpdate = onUpdate
 M.ready = ready
 M.error = error
 M.console = console

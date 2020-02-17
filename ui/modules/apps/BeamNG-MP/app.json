@@ -1,14 +1,14 @@
 {
   "name": "Multiplayer",
   "author": "Titch2000",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Host and Join multiplayer games",
   "directive": "multiplayer",
   "domElement": "<multiplayer></multiplayer>",
   "css": {
   	"left": "180px",
   	"bottom": "0px",
-  	"width": "500px",
-    "height": "370px"
+  	"width": "560px",
+    "height": "230px"
   }
 }

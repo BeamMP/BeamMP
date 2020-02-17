@@ -49,6 +49,7 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 				addWarning();
 			}
 			else {
+				console.log("TEST" + nickname);
 				bngApi.engineLua('UI.setNickname("'+ nickname.substring(0, 30) + '")');
 				bngApi.engineLua('UI.joinSession("'+ ip + '","' + port + '")');
 				connected = true;
@@ -157,32 +158,28 @@ function greeting(server) {
 
 function playerList(list) {
 	clearPlayerList();
+	let playersList = document.getElementById("playerstable");
 	let parsedList = JSON.parse(list);
-	let playersList = document.getElementById("players");
+
 	for (let i = 0; i < parsedList.length; i++) {
-		let node = document.createElement("span");
-		let text;
-		if (i===parsedList.length-1) {
-			text = document.createTextNode(parsedList[i].nickname);
-		} else {
-			text = document.createTextNode(parsedList[i].nickname+", ");
-		}
-		node.appendChild(text);
-		playersList.appendChild(node);
+		var row = playersList.insertRow(playersList.rows.length);
+		var cell1 = row.insertCell(0);
+		cell1.textContent = parsedList[i];
 	}
 }
 
 function clearPlayerList() {
-	let playersList = document.getElementById("players");
-	while (playersList.children.length > 0) {
-		playersList.removeChild(playersList.children[0]);
+	let playersList = document.getElementById("playerstable");
+	var rowCount = playersList.rows.length - 1;
+	for(rowCount; rowCount >= 0; rowCount--) {
+		playersList.deleteRow(rowCount);
 	}
+	var row = playersList.insertRow(0);
+	var cell1 = row.insertCell(0);
+	cell1.textContent = "PLAYERS";
 }
 
 function setOfflineInPlayerList() {
 	let playersList = document.getElementById("players");
-	let node = document.createElement("span");
-	let text = document.createTextNode("OFFLINE");
-	node.appendChild(text);
-	playersList.appendChild(node);
+	playersList.textContent = "OFFLINE";
 }

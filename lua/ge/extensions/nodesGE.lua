@@ -10,14 +10,11 @@ local M = {}
 
 
 -- ============= VARIABLES =============
-local msgpack = require('libs/lua-MessagePack/MessagePack')
-local LibDeflate = require("LibDeflate")
-local config = {level = 1}
 -- ============= VARIABLES =============
 
 
 
-local function tick()
+local function tick()			
 	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
@@ -27,30 +24,22 @@ local function tick()
 	end
 end
 
-
-
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	if Network.GetTCPStatus() == 2 then -- If UDP is connected
+	if Network.getStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			local compressed = LibDeflate:CompressDeflate(data, config)
-			--local compressed_binary_data = msgpack.pack(compressed)
-			--local binary_data = msgpack.pack(data)
-			NetworkHandler.send("U-VN", serverVehicleID..data) -- Send data
-			--print(TCP.send("21107"..compressed..serverVehicleID)) -- Send data
+		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle		
+			--Network.send(Network.buildPacket(0, 2132, serverVehicleID, data))
 		end
 	end
 end
-
-
 
 local function applyNodes(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		--print("ok !")
-		local decompressed = LibDeflate:DecompressDeflate(data)
-		veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send electrics values
+		local pos = veh:getPosition()
+		--veh:setPositionRotation(pos.x, pos.y, pos.z, 0, 0, 0.01, math.random())
+		--veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send nodes values
 	end
 end
 

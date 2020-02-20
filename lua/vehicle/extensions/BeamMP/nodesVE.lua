@@ -25,11 +25,18 @@ end
 
 
 local function getNodes()
-
+	print("ok")
 	local pos = obj:getPosition()
 	local dist = distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
 	lastPos = pos
 	if (dist > 0.5) then return end
+
+
+	for _, node in pairs(v.data.nodes) do
+	local p=obj:getNodePosition(node.cid)
+	local np=float3(nodesVE.round(p.x, 3), nodesVE.round(p.y, 3), nodesVE.round(p.z, 3))
+	obj:setNodePosition(node.cid, np)
+	end
 
 	local save = {}
 	save.nodeCount = #v.data.nodes
@@ -37,7 +44,9 @@ local function getNodes()
 		for _, node in pairs(v.data.nodes) do
 			--print(obj:beamIsBroken(node.cid))
 			--if obj:beamIsBroken(node.cid) == false then
-				local d = {vec3(obj:getNodePosition(node.cid)):toTable()}
+				local pos = obj:getNodePosition(node.cid)
+				local roundedPos = {round(pos.x, 3), round(pos.y, 3), round(pos.z, 3)}
+				local d = roundedPos
 				if math.abs(obj:getOriginalNodeMass(node.cid) - obj:getNodeMass(node.cid)) > 0.1 then
 				table.insert(d, obj:getNodeMass(node.cid))
 			--else
@@ -46,6 +55,7 @@ local function getNodes()
 		end
 		save.nodes[node.cid + 1] = d
 	end
+	print(jsonEncode(save))
 	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 end
 
@@ -78,6 +88,14 @@ end
 
 
 
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+
+
+M.round      = round
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes

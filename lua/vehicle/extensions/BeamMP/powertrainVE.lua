@@ -44,7 +44,7 @@ end
 local function applyPowertrain(data)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
-		print("applied "..k.." - "..v)
+		--print("applied "..k.." - "..v)
 		powertrain.setDeviceModeNoEvent(k, v) -- Apply it
 	end
 end

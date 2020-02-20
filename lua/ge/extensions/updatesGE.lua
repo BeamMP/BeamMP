@@ -11,7 +11,7 @@ local M = {}
 
 -- ============= VARIABLES =============
 local nodesDelay = 0
-local nodesTickrate = 4 -- in seconds
+local nodesTickrate = 6 -- in seconds
 
 local positionDelay = 0
 local positionTickrate = 0.05
@@ -39,11 +39,11 @@ end
 
 local function onUpdate(dt)
 	if Network.getStatus() == 2 then -- If connected
-		--nodesDelay = nodesDelay + dt
-		--if nodesDelay > nodesTickrate then
-		--	nodesDelay = 0 -- Reset the delay
-		--	nodesGE.tick() -- Comment this line to disable nodes synchronization
-		--end
+		nodesDelay = nodesDelay + dt
+		if nodesDelay > nodesTickrate then
+			nodesDelay = 0 -- Reset the delay
+			nodesGE.tick() -- Comment this line to disable nodes synchronization
+		end
 
 		positionDelay = positionDelay + dt
 		if positionDelay > positionTickrate then

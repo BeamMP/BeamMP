@@ -156,7 +156,6 @@ end
 
 local function onUpdate(dt)
 --====================================================== DATA RECEIVE ======================================================
-
 	if connectionStatus > 0 then -- If player is connecting or connected	
 		while (true) do		
 			local received, status, partial = TCPSocket:receive() -- Receive data	

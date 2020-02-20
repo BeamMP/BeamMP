@@ -49,8 +49,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendGearNow = false
 	end
-	gearMem = e.gearIndex
-	
+	gearMem = e.gearIndex	
 end --ONUPDATE CLOSE
 
 

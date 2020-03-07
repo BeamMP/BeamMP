@@ -25,7 +25,6 @@ local function tick()
 end
 
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	print(data)
 	if Network.getStatus() == 2 then -- If UDP is connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle		

@@ -239,7 +239,7 @@ end
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================	
 local function onVehicleSwitched(oldID, newID)
-	print("Vehicle switched : "..oldID.." - "..newID)
+	--print("Vehicle switched : "..oldID.." - "..newID)
 	if Network.getStatus() > 0 then -- If TCP is connecting or connected
 		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newID then -- If it's not null
@@ -253,7 +253,7 @@ end
 
 --======================= ON VEHICLE RESETTED (CLIENT) =======================	
 local function onVehicleResetted(gameVehicleID)
-	print("Vehicle resetted : "..gameVehicleID)
+	--print("Vehicle resetted : "..gameVehicleID)
 	if Network.getStatus() > 0 then -- If TCP is connecting or connected
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
@@ -283,7 +283,6 @@ end
 
 local function onUpdate(dt)
 	if Network.getStatus() == 2 then
-		print(serialize(nicknameMap))
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing	
 		for i = 0, be:getObjectCount() do -- For each vehicle		
 			local veh = be:getObject(i) --  Get vehicle			

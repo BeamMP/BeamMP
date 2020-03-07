@@ -92,6 +92,7 @@
 			<span id="PING" class="empty-span"></span>
 			<span>Status: </span>
 			<span id="STATUS" class="empty-span"></span>
+			<button style="height:30px; float:right;" ng-click="chatClear()">Clear Chat</button>
 		  </div>
 		  <div>
 			<hr style="margin-bottom: -13px;">
@@ -99,7 +100,7 @@
 		  </div>
 		  <form class="chatbox">
 			<input id="CHATMESSAGE" style="width:100%; height:24px;" type="text" ng-click="select()" placeholder="Chat Message.">
-			<button style="height:30px;" ng-click="chatSend()">send</button>
+			<button style="height:30px;" ng-click="chatSend()">Send</button>
 		  </form>
 	  </div>
 	  <div style="width:100%; resize:both;">

@@ -22,7 +22,7 @@ local function getVehicleRotation()
 	lastPos = pos
 	
 	if (distance < 0.10) then -- When vehicle doesn't move
-		if timer < 50 then -- Send 50 times less packets
+		if timer < 40 then -- Send 40 times less packets
 			timer = timer + 1
 			return
 		else

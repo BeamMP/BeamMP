@@ -47,7 +47,13 @@ local function applyPos(data, serverVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		local pr = jsonDecode(data) -- Decoded data
-		veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
+		if counter < 1 then
+			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
+			counter = counter + 1
+		else
+			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
+			counter = 0
+		end			
 		--veh:setPosition(Point3F(pr[1], pr[2], pr[3])) -- Apply position
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end

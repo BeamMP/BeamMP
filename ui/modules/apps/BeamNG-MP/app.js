@@ -67,6 +67,10 @@ app.controller("Servers", ['$scope', 'bngApi', function ($scope, bngApi) {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
 
+	$scope.chatClear = function() {
+		chatClear();
+	};
+
 	$scope.chatSend = function() {
 		if (count > 12 || spamLocked) {
 			spamLimit();
@@ -137,6 +141,18 @@ function setDisconnect() {
 }
 
 function addMessage(msg) {
+	//getting current time and adding it to the message before displaying
+	var now = new Date();
+    var hour    = now.getHours();
+    var minute  = now.getMinutes();
+    var second  = now.getSeconds();
+    if(hour.toString().length == 1) hour = '0'+hour;
+    if(minute.toString().length == 1) minute = '0'+minute;
+    if(second.toString().length == 1) second = '0'+second;
+	var time = hour + ":" + minute + ":" + second;
+
+	msg = time + " - " + msg;
+
 	let node = document.createElement("li");
 	node.style.marginBottom = "4px";
 	let textnode = document.createTextNode(msg);
@@ -149,6 +165,12 @@ function addMessage(msg) {
 	}
 
 	chat.scrollTop = chat.scrollHeight;
+}
+
+function chatClear() {
+	let chat = document.getElementById("CHAT");
+	chat.innerHTML = '';
+	//console.log(chat.children.length);
 }
 
 function greeting(server) {
@@ -166,9 +188,30 @@ function playerList(list) {
 		var cell1 = row.insertCell(0);
 		cell1.textContent = parsedList[i];
 	}
+
+	if(players != null){
+		//get differences between playernames and send them as messages
+
+		var left = players.filter((item)=>{
+			return !parsedList.includes(item)
+		});
+
+		let joined = parsedList.filter((item)=>{
+			return !players.includes(item)
+		});
+
+		for(var i = 0; i< left.length;i++)
+			if(left[i].length>0) addMessage(left[i] + " left the server"); //the game would send an empty left message when joining a server
+
+		for(var i = 0; i< joined.length;i++)
+			addMessage(joined[i] + " joined the server");
+	}
+	players = parsedList; //store player list as an array for the next update
 }
 
+
 function clearPlayerList() {
+	//players = [];
 	let playersList = document.getElementById("playerstable");
 	var rowCount = playersList.rows.length - 1;
 	for(rowCount; rowCount >= 0; rowCount--) {
@@ -181,5 +224,5 @@ function clearPlayerList() {
 
 function setOfflineInPlayerList() {
 	let playersList = document.getElementById("players");
-	playersList.textContent = "OFFLINE";
+	if(playersList != null) playersList.textContent = "OFFLINE"; //added this cause it was throwing console errors
 }

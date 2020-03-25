@@ -1,0 +1,32 @@
+
+<md-content>
+
+	<div style="background:#2C2F33;">
+		<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
+			<input type="text" id="search" name="search" placeholder="Search"/>
+			<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>		
+			<md-button id="connect-button" class="button" ng-class="" ng-click="">Connect</md-button>	
+		</md-list-item>	  
+		<md-divider></md-divider>
+	</div>
+	
+	<table id="servers-table">
+		<col width="100">
+		<col width="auto">
+		<col width="200">
+		<col width="100">
+		<col width="100">
+		<tr id="header">
+			<th ng-click="multiplayermenu.sortTable(0, 'location', false)">Location</th>
+			<th ng-click="multiplayermenu.sortTable(1, 'description', false)">Description</th>
+			<th ng-click="multiplayermenu.sortTable(2, 'map', false)">Map</th>
+			<th ng-click="multiplayermenu.sortTable(3, 'players', true)">Players</th>
+			<th ng-click="multiplayermenu.sortTable(4, 'ping', true)">Ping</th>
+		</tr>
+
+	</table>
+  
+	<div id="footer"></div>
+
+  </div>
+</md-content>

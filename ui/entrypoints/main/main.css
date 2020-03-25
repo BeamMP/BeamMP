@@ -1,0 +1,1146 @@
+@font-face {
+  font-family: Open Sans Bold;
+  src: url(/ui/common/OpenSans-Bold.ttf);
+}
+@font-face {
+  font-family: Open Sans;
+  src: url(/ui/common/OpenSans-Regular.ttf);
+}
+@font-face {
+  font-family: Open Sans Extrabold;
+  src: url(/ui/common/OpenSans-ExtraBold.ttf);
+}
+@font-face {
+  font-family: Squada One;
+  src: url(/ui/common/SquadaOne-Regular.ttf);
+}
+
+@font-face {
+  font-family: Digital;
+  src: url(/ui/common/Segment7Standard.otf);
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url(/ui/common/Roboto-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'Roboto Bold';
+  src: url(/ui/common/Roboto-Bold.ttf);
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 300;
+  src: url(/ui/common/RobotoCondensed-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'Play';
+  src: url(/ui/common/Play-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'Play Bold';
+  src: url(/ui/common/Play-Bold.ttf);
+}
+
+@font-face {
+  font-family: 'News Cycle';
+  src: url(/ui/common/NewsCycle-Regular.ttf);
+}
+
+@font-face {
+  font-family: 'News Cycle Bold';
+  src: url(/ui/common/NewsCycle-Bold.ttf);
+}
+
+html, body {
+  background: none;
+  cursor: default;
+  font-family: 'Roboto';
+  height: 100%;
+  overflow: hidden !important;
+
+  -webkit-transition: none!important; transition: none!important;
+  -webkit-font-feature-settings: "kern" 1;
+}
+
+a svg {
+  pointer-events: none;
+}
+
+.bngApp {
+  color: white;
+  background: rgb(0, 0, 0);
+  background: rgba(0, 0, 0, 0.43);
+  box-sizing: border-box;
+  padding:2px;
+}
+
+.bngAppFont {
+  font-family: Squada One;
+  font-size: 1.2em;
+}
+
+.active md-icon {
+  color: orange!important;
+}
+
+
+app-container {
+  border: solid;
+}
+
+.md-virtual-repeat-offsetter {
+  right: 0 !important;
+}
+
+.stripedBackground {
+  background-image: url(/ui/images/stripedbackground.png);
+}
+
+.markEveryOddChild:nth-child(2n + 1) {
+  background-color: rgba(221, 221, 221, 0.5);
+}
+
+.markEveryEvenRow tr:nth-child(2n) {
+  background-color: rgba(221, 221, 221, 0.5);
+}
+
+* {
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+  -webkit-user-select: none;
+}
+
+.menu-navigation:focus {
+  outline: 6px solid rgb(252, 107, 3) !important;
+  outline-offset: -3px;
+  z-index: 99999;
+}
+
+
+*:focus { outline: none; }
+
+.filler {
+  width: 100%;
+  height: 100%;
+}
+
+.container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+
+.photo-mode-container .tl {
+  position: absolute; min-width: 100px; min-height: 100px;
+  top: 30px;             left: 30px;
+  border-top: 5px solid; border-left: 5px solid;
+}
+
+.photo-mode-container .tr {
+  position: absolute; min-width: 100px; min-height: 100px;
+  top: 30px;             right: 30px;
+  border-top: 5px solid; border-right: 5px solid;
+}
+
+.photo-mode-container .bl {
+  position: absolute; min-width: 100px; min-height: 100px;
+  bottom: 30px;             left: 30px;
+  border-bottom: 5px solid; border-left: 5px solid;
+}
+
+
+.photo-mode-container .br {
+  position: absolute; min-width: 100px; min-height: 100px;
+  bottom: 30px;             right: 30px;
+  border-bottom: 5px solid; border-right: 5px solid;
+}
+
+
+/* ------ material's overrides ------*/
+md-slider .md-focus-ring {
+  display: none ;
+}
+
+md-tooltip > .md-content{
+  font-size: 14px;
+}
+/* --------------------------------- */
+
+/* The buttons' background on focus, gets really annoying */
+.bng-no-focus:focus {
+  background: inherit!important;
+}
+
+
+.bng-hidden-input {
+  border:none;
+}
+
+.bng-hidden-input[disabled] {
+  background: inherit;
+}
+
+/* smaller sidebar */
+.smallsidenav  {
+  fill: #737373;
+  /* was 48 */
+  /*
+  min-width: 140px !important;
+  width: 140px !important;
+  max-width: 140px !important;
+  */
+  overflow:hidden;
+
+}
+
+.contentNav {
+  overflow-y:auto;
+  z-index: 1;
+}
+
+/* some heighfixes */
+md-switch.height32{
+	margin: 4px;
+}
+
+
+md-slider.height32{
+	height: 32px;
+}
+
+md-slider.height32 .md-track-container{
+	top: 15px;
+}
+
+md-slider.height32 .md-thumb{
+	top: -3px;
+}
+
+md-slider.height32 .md-focus-ring{
+	top: -8px;
+}
+
+md-slider.height32 .md-focus-thumb{
+	top: -8px;
+}
+
+md-select.height32{
+	margin: 1px;
+}
+
+md-select-label {
+  float: right;
+}
+
+md-select {
+  margin:0em;
+  color:black;
+  background:white;
+}
+
+md-slider {
+  margin-right: 0.8em;
+  margin-left: 0.8em;
+}
+
+.truncate {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+}
+
+.physics-disabled {
+  box-shadow: inset 0px 0px 40px black;
+  z-index:-9999;
+  position: absolute;
+  padding:50px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.physics-disabled-infocontainer{
+  position: absolute;
+  top: 80px;
+  right: 0;
+
+  font-size:18pt;
+  color: white;
+  text-shadow: -2px 1px 6px rgba(0,0,0,0.7);
+
+  background: rgba(128,128,128,0.3);
+
+  padding: 15px 30px;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+}
+
+.physics-disabled-infocontainer span{
+  margin-right: 15px;
+}
+
+.physics-disabled-infocontainer .icon {
+  -webkit-filter: drop-shadow(-2px 1px 6px rgba(0,0,0,0.5));
+  fill:black;
+  stroke:white;
+  fill-opacity:0.8;
+  stroke-opacity:0.8;
+  stroke-width:0.5;
+
+  background-color:rgba(255,255,255,0.9);
+  -webkit-border-radius:200px;
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+}
+
+.gfxSettingsLoading {
+  z-index: 99999;
+  position: absolute;
+  padding:50px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color:rgba(0,0,0,0.4);
+}
+
+.gfxSettingsLoading .icon {
+  -webkit-filter: drop-shadow( 0px 0px 15px white );
+  fill:white;
+}
+
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-thumb {
+  background: #666666;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #949494;
+}
+::-webkit-scrollbar-thumb:active {
+  background: #949494;
+}
+::-webkit-scrollbar-track {
+  background: #b9b9b9;
+}
+::-webkit-scrollbar-track:hover {
+  background: #b9b9b9;
+}
+::-webkit-scrollbar-track:active {
+  background: #b9b9b9;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.loadingHint {
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark {
+  color: white;
+}
+
+
+
+/* Material Icons Webfont */
+@font-face {
+  font-family: 'MIs';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+        url(/ui/common/MaterialIcons-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: fancy;
+  src: url(/ui/common/Roboto-Black.ttf);
+}
+
+.fancy {
+  font-family: fancy;
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(/ui/common/MaterialIcons-Regular.ttf) format('truetype');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  /*font-feature-settings: 'liga';*/
+}
+
+.md-sidenav-backdrop {
+    display: none !important;
+}
+
+.my-animation.ng-enter {
+  /* standard transition code */
+  transition: 2s linear all;
+  opacity:0;
+}
+.my-animation.ng-enter-stagger {
+  /* this will have a 100ms delay between each successive leave animation */
+  transition-delay: 3.1s;
+
+  /* in case the stagger doesn't work then the duration value
+   must be set to 0 to avoid an accidental CSS inheritance */
+  transition-duration: 1s;
+}
+.my-animation.ng-enter.ng-enter-active {
+  /* standard transition styles */
+  opacity:1;
+}
+
+v-pane-content > div { -webkit-transition: none!important; transition: none!important; }
+
+
+.bng-binding {
+  margin: 5px;
+  padding-left: 5px;
+  font-size: 1rem;
+}
+
+
+
+
+/** { animation-name: none!important; transition: none!important;}*/
+
+
+
+/* --------------------------------------------------------------------
+   -------------------------- [ ScenarioControl ] ---------------------
+   -------------------------------------------------------------------- */
+.contentNavScenarioControl {
+  width:100%;
+  max-width:none;
+  min-width:none;
+  display:block;
+  background-color: rgba(0,0,0,0.2);
+  color:white;
+}
+
+
+.contentNavScenarioControl .startScreen {
+  position:fixed;
+  top:10px;
+  left:200px;
+  right:100px;
+  bottom:10px;
+  max-width:800px;
+  background-color: rgba(0,0,0,0.4);
+  color:white;
+  border: 2px solid rgba(0,0,0,0.4);
+  /* -webkit-border-radius: 15px; */
+}
+
+.contentNavScenarioControl .endScreen {
+  position:fixed;
+  top:10px;
+  left:200px;
+  right:100px;
+  bottom:10px;
+  max-width:800px;
+  background-color: rgba(0,0,0,0.4);
+  color:white;
+  border: 2px solid rgba(0,0,0,0.4);
+  /* -webkit-border-radius: 15px; */
+}
+
+
+/* -=-=-=--=-=-=-=-=-=-=-=-=-=-=--=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+   ------------------------ [ Credits ] -------------------------------
+   -=-=-=--=-=-=-=-=-=-=-=-=-=-=--=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+@-webkit-keyframes bng-credits-roll {
+  0% {
+    top: 100%;
+    -webkit-transform: translate(0, 0);
+  }
+  100% {
+    top: 0;
+    -webkit-transform: translate(0, -100%);
+  }
+}
+
+@-webkit-keyframes bng-credits-endImg {
+  0% {
+    transform: translate(-50%, 0) scale(0.9);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1.2);
+    opacity: 1;
+  }
+}
+
+#bng-credits-wrapper {
+  width:100%;
+  height: 100%;
+  background: radial-gradient(ellipse at top left, #334455 0%, #000 100%);
+  text-align: center;
+  overflow: hidden;
+}
+
+.bng-credits-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  font-family: Roboto Condensed;
+  text-transform: uppercase;
+  color: #fff;
+  -webkit-animation: 90s bng-credits-roll linear forwards;
+}
+
+.bng-credits-end {
+  -webkit-animation: 3s bng-credits-endImg linear forwards;
+  -webkit-animation-delay: 90s;
+
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, 0) scale(0.8);
+  opacity: 0;
+}
+
+.bng-credits-content job {
+  display:block;
+  margin-top: 120px;
+  margin-bottom: 25px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.bng-credits-content name {
+  display:block;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+
+#bng-credits-wrapper:focus {
+  outline: none!important;
+}
+
+/* md-select item */
+  .md-select-menu-container.md-active md-select-menu { transition: none!important; }
+  .md-select-menu-container.md-active md-select-menu > * { opacity: 1; transition: none!important; }
+  .md-select-menu-container.md-leave { opacity: 0; transition: none!important; }
+
+  md-select.bng-select-fullwidth  .md-select-label { width: 100%; }
+  .bng-short-select-item { height: 32px; }
+
+
+
+/* alignment corners in app-editing */
+.app-alignment-dot {
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,255,255,1) 25%, rgba(255,255,200,0.3) 45%, rgba(255,255,155,0) 65%);
+  z-index: 23; /* Michael Jordan */
+}
+
+.app-alignment-dot.tl {
+  margin-left: -100px;
+  margin-top: -100px;
+}
+
+.app-alignment-dot.tr {
+  margin-right: -100px;
+  margin-top: -100px;
+}
+
+.app-alignment-dot.bl {
+  margin-left: -100px;
+  margin-bottom: -100px;
+}
+
+.app-alignment-dot.br {
+  margin-right: -100px;
+  margin-bottom: -100px;
+}
+
+.app-alignment-dot.c {
+  margin-left: -100px;
+  margin-top: -100px;
+}
+
+.bordered {
+  border: solid grey 1px;
+  box-sizing: border-box;
+  background-color: rgba(0,0,0,0.01);
+}
+
+
+/* Dashboard Menu */
+#dashmenu div {
+  max-height: 48px;
+}
+
+#dashmenu .md-button.md-icon-button {
+  border-radius:0;
+  min-height:0;
+  margin: 0;
+  line-height: inherit;
+  height: auto;
+}
+
+#dashmenu a {
+  min-height:0;
+}
+
+.dashboard-icons {
+  font-size: 4vh;
+  margin: 0.5vh 0;
+}
+
+@media (min-height: 1000px) {
+  .dashboard-icons {
+    font-size: 32px;
+    margin: 6px 0;
+  }
+}
+
+
+
+kbd > span {
+  text-transform: uppercase;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+/* override for less padding in 2-line list items */
+md-list-item.md-2-line.squeezed .md-list-item-text {
+  padding: 6px;
+  padding-top: 10px 0;
+}
+
+
+
+
+.gridMarkSelected md-grid-tile:hover md-grid-tile-footer {
+  background: rgba(128, 0, 0, 0.68);
+}
+.gridMarkSelected md-grid-tile:focus md-grid-tile-footer {
+  background: rgb(128, 0, 0);
+}
+.gridMarkSelected md-grid-tile:focus {
+  border: 2px solid rgba(128,0,0, 0.68);
+}
+.gridMarkSelected md-grid-tile {
+  outline: none;
+  border: 2px solid transparent;
+}
+
+/*no f*cking clue why this is need seperatly to the above
+(only for scenarios and vehicle details, rest works perfectly fine)*/
+.gridMarkSelected .selectedGridItem md-grid-tile-footer {
+  background: rgb(128, 0, 0);
+}
+.gridMarkSelected .selectedGridItem:hover md-grid-tile-footer {
+  background: rgb(128, 0, 0);
+}
+.gridMarkSelected .selectedGridItem {
+  border: 2px solid rgba(128,0,0, 0.68);
+}
+
+.bng-controls-aux-input {
+  width: 50px;
+  text-align: right;
+  margin-left: 15px;
+  padding-bottom: 0;
+}
+
+/* Simple table CSS (just to avoid having a completely ugly table) */
+table.simple-table {
+  border-width: 1px;
+  border-color: #464646;
+  border-collapse: collapse;
+}
+
+table.simple-table th {
+  text-align: left;
+  padding: 5px;
+  background-color: #f1f1f1;
+  font-weight:none;
+}
+
+table.simple-table td {
+  background-color: white;
+  padding-left:5px;
+}
+
+table.simple-table tbody tr {
+  border-bottom: 1px solid lightgrey;
+  background-color: blue;
+}
+
+table.simple-table td.number {
+  font-family: monospace;
+}
+
+.curveHelpText{
+  visibility: hidden;
+  background:#FFF;
+  opacity:0;
+  padding-left: 2px;
+  padding-right: 2px;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.curveHelp:hover .curveHelpText {
+  visibility: visible;
+  opacity:0.8;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+
+.bng-app {
+  user-select: none;
+}
+
+.bng-app.editable {
+  cursor: move;
+}
+
+.bng-app.editable .resizeHandle {
+  cursor: nw-resize;
+}
+
+.bng-app.editable:active {
+  box-shadow: inset 0 0 5px 5px black;
+}
+
+table.bng-list-table {
+  border-collapse: collapse;
+}
+
+table.bng-list-table td {
+  padding: 0.5em;
+  vertical-align: top;
+}
+
+
+/* ----------------------- TEST ONLY ------------------------- */
+  @font-face {
+  font-family: 'beamng-icons';
+  src: url(/ui/common/beamng-icons.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.bng-icon {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'beamng-icons' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Enable Ligatures ================ */
+  letter-spacing: 0;
+  -webkit-font-feature-settings: "liga";
+  -moz-font-feature-settings: "liga=1";
+  -moz-font-feature-settings: "liga";
+  -ms-font-feature-settings: "liga" 1;
+  font-feature-settings: "liga";
+  -webkit-font-variant-ligatures: discretionary-ligatures;
+  font-variant-ligatures: discretionary-ligatures;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bng-logo:before {
+  content: "\e900";
+}
+
+
+/* -- MISSION POPUP START -- */
+
+
+.mission-popups {
+  display: block;
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+}
+
+.mission-info {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 500px;
+  max-width: 100%;
+  color: white;
+  font-family: Play;
+  user-select: none;
+}
+.mission-info .header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  border-top: solid 4px #ff7700;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+.mission-info .header-title {
+  font-size: 1.5em;
+}
+.mission-info .header-subtitle {
+  font-size: 1.2em;
+  text-transform: capitalize;
+}
+.mission-info .header-icon {
+  width: 50px;
+  height: 50px;
+  fill: white;
+  stroke: none;
+  position: absolute;
+  left: -70px
+}
+.mission-info .body {
+  padding: 10px 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+.mission-info .row {
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+  line-height: 1.5em;
+}
+.mission-info .cell {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+.mission-info .cell.entry-label {
+  flex: 1;
+  /*font-size: 1.2em;*/
+  text-transform: uppercase;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+.mission-info .cell.entry-val {
+  flex: 1;
+}
+.mission-info .buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.mission-info .buttons .button {
+  background: rgba(0, 0, 0, 0.7);
+  border: solid 2px transparent;
+  padding: 5px 20px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  z-index:10;
+}
+
+
+.mission-info .buttons .button:focus,
+.mission-info .buttons .button:hover,
+.mission-info .buttons .button:active {
+  border-color: #ff7700;
+  color: #ff7700;
+  background-color: rgba(0, 0, 0, 0.8);
+  outline: none;
+}
+
+
+/* MISSION POPUPS END */
+
+
+
+
+
+
+
+
+/* very short fade-in */
+.moduleStartScreenFade.ng-enter {
+  transition:0.1s linear all;
+  opacity: 0;
+}
+.moduleStartScreenFade.ng-enter-active {
+  opacity: 1;
+}
+
+/* very short fade-out */
+.moduleStartScreenFade.ng-leave {
+  transition:0.3s linear all;
+  opacity: 1;
+}
+.moduleStartScreenFade.ng-leave-active {
+  opacity: 0;
+}
+
+
+
+
+
+
+
+
+.moduleBlendOnLeave.ng-leave {
+  transition: 2s;
+  opacity: 1;
+}
+.moduleBlendOnLeave.ng-leave-active {
+  opacity: 0;
+}
+
+
+
+/* ==== garage ======================================================================*/
+.font1 {
+  font-family: Play;
+}
+
+.font2 {
+  font-family: News Cycle;
+}
+
+.color1 {
+  color: white;
+}
+
+.color2 {
+  color: #b9b9ba;
+}
+
+.color3 {
+  color: #FF6700;
+}
+
+.color4 {
+  color: #C80000;
+}
+
+.bg-color1 {
+  background-color: white;
+}
+
+.bg-color2 {
+  background-color: #b9b9ba;
+}
+
+.bg-color3 {
+  background-color: #FF6700;
+}
+
+.bg-color4 {
+  background-color: #C80000;
+}
+
+.fill-color1 {
+  fill: white;
+}
+
+.fill-color2 {
+  fill: #b9b9ba;
+}
+
+.fill-color3 {
+  fill: #FF6700;
+}
+
+.fill-color4 {
+  fill: #C80000;
+}
+
+.hg-color3 {
+  background-color: rgba(255, 103, 0, 0.3);
+}
+
+
+.possibleActionKey {
+  padding: 10px;
+  margin-right: 20px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  background: rgba(0, 0, 0, 0.01); /* mouse focus hack */
+}
+
+.possibleActionKey:hover {
+  /*background-color: #FF6700;*/
+  -webkit-border-image: -webkit-linear-gradient(70deg, #FF6700 0%, transparent 35%, transparent 65%, #FF6700);
+  border-image-slice: 1;
+}
+
+
+
+
+
+
+.box {
+  position: relative;
+  width: inherit;
+}
+
+.box1_1:before{
+  content: "";
+  display: block;
+  padding-top: 100%;
+}
+
+.box16_19:before {
+  content: "";
+  display: block;
+  padding-top: 56.25%;
+}
+
+.display {
+  width: 100vw;
+}
+
+@media (min-device-aspect-ratio: 16/9) {
+  .display {
+    width: calc(100vh * 16/9);
+  }
+}
+
+/* ==== garage end ======================================================================*/
+
+/* image sliders start */
+.imageslider {
+  position: relative;
+  width: 100%;
+  width: 100%;
+  margin: auto;
+}
+.imageslideItem {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transition: 0.4s linear opacity;
+}
+
+.imageslideItem.ng-hide-add, .imageslideItem.ng-hide-remove {
+  transition: 0.4s linear opacity;
+}
+
+/* starting animations for remove */
+.imageslideItem.ng-hide-remove { opacity: 0; }
+/* terminal animations for remove */
+.imageslideItem.ng-hide-remove.ng-hide-remove-active { opacity: 1; }
+
+/* starting animations for add */
+.imageslideItem.ng-hide-add { opacity: 1; }
+/* terminal animations for add */
+.imageslideItem.ng-hide-add.ng-hide-add-active { opacity: 0; }
+
+/* image sliders end */
+
+
+.no-mouse {
+  pointer-events: none;
+}
+
+/* bng virtual repeat */
+.bng-v-list__item {
+  display: inline-block;
+}
+.bng-v-list {
+  overflow-y: auto;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* bng 16:9 box */
+.box {
+  margin: 0 auto;
+  width: inherit;
+}
+
+.box:before {
+  content: "";
+  display: block;
+  padding-top: 48%
+}
+
+
+
+
+.characterRealtimeDisplay-show {
+  padding: 16px;
+  height:100%;
+  width:100%;
+  background:rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+
+.box1_1 {
+  position: relative;
+  width: inherit;
+}
+.box1_1:before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+}

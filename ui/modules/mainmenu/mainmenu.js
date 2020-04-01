@@ -303,13 +303,13 @@ angular.module('beamng.stuff')
     // bngApi.engineLua("extensions.core_input_bindings.menuActive(false)");
   });
 
-  $scope.openRepo = function () {
-    window.location.href = 'http-external://www.beamng.com/resources/?ingame=2';
-  };
+  //$scope.openRepo = function () {
+    //window.location.href = 'http-external://www.beamng.com/resources/?ingame=2';
+  //};
 
-  $scope.startResearch = function () {
-    bngApi.engineLua('extensions.util_annotation.start()');
-  }
+  //$scope.startResearch = function () {
+    //bngApi.engineLua('extensions.util_annotation.start()');
+  //}
 }])
 
 .controller('MainMenuController', ['$scope', 'toastr', '$state', 'Settings', 'bngApi', '$http', '$filter', 'Utils', 'gamepadNav', function($scope, toastr, $state, Settings, bngApi, $http, $filter, Utils, gamepadNav) {
@@ -358,10 +358,10 @@ angular.module('beamng.stuff')
 
   $scope.quit = () => $scope.$emit('quit');
 
-  $scope.garage = function () {
-    var luaCmd = `loadGameModeModules(` + bngApi.serializeToLua(["ui_garage"]) + `)`;
-    bngApi.engineLua(luaCmd);
-  };
+  //$scope.garage = function () {
+    //var luaCmd = `loadGameModeModules(` + bngApi.serializeToLua(["ui_garage"]) + `)`;
+    //bngApi.engineLua(luaCmd);
+  //};
 
   bngApi.engineLua('core_online.requestState()');
 

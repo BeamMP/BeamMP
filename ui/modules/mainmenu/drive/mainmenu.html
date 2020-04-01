@@ -25,9 +25,9 @@
     </md-grid-tile>
 
 
-    <md-grid-tile  md-rowspan="2" md-colspan="4" class="tile play other" ui-sref="menu.playmodes" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" bng-nav-default-focus="true">
+    <md-grid-tile  md-rowspan="2" md-colspan="4" class="tile play other" ui-sref="menu.multiplayer" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" bng-nav-default-focus="true">
       <div layout="row" class="uppercase">
-        <span><md-icon class="material-icons mainmenuItems">layers</md-icon>{{ 'ui.mainmenu.play' | translate}}</span><br/>
+        <span><!--<md-icon class="material-icons mainmenuItems">layers</md-icon>-->Play Multiplayer</span><br/>
       </div>
     </md-grid-tile>
 
@@ -54,21 +54,23 @@
         <div ng-class="{'heading-long': (('ui.mainmenu.help' | translate).length) > 5}" class="heading" >{{ 'ui.mainmenu.help' | translate}}</div>
       </md-grid-tile>
 
+      <!--
       <md-grid-tile md-colspan="2" class="other tile" ng-class="{'other tile smaller': total !== 0}" ui-sref="{{values.onlineFeatures === 'disable' ? 'menu.mods.local' : 'menu.mods.repository'}}"
-      bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" ng-if="total > 0 || values.onlineFeatures !== 'disable'">
-      <div class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%">
-        <span ng-if="values.onlineFeatures === 'disable'" class="heading uppercase">{{ 'ui.mainmenu.mods' | translate}}</span>
-        <span ng-if="values.onlineFeatures === 'enable'" class="heading uppercase">{{ 'ui.mainmenu.repo' | translate}}</span>
-        <span ng-if="total !== 0" style="font-size: 0.6em;" translate="ui.modmanager.numActive" translate-values="numActiveObj()"></span>
-      </div>
-    </md-grid-tile>
-
+        bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" ng-if="total > 0 || values.onlineFeatures !== 'disable'">
+        <div class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%">
+          <span ng-if="values.onlineFeatures === 'disable'" class="heading uppercase">{{ 'ui.mainmenu.mods' | translate}}</span>
+          <span ng-if="values.onlineFeatures === 'enable'" class="heading uppercase">{{ 'ui.mainmenu.repo' | translate}}</span>
+          <span ng-if="total !== 0" style="font-size: 0.6em;" translate="ui.modmanager.numActive" translate-values="numActiveObj()"></span>
+        </div>
+      </md-grid-tile>
+ -->
+      <!--
       <md-grid-tile md-rowspan="1" md-colspan="2" class="other tile" ng-click="garage();" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
         <div class="uppercase">
           {{ 'ui.mainmenu.garage' | translate}}
         </div>
       </md-grid-tile>
-
+ -->
 
 
 
@@ -80,11 +82,11 @@
       </md-grid-tile> -->
 
 
-      <md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.replay" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <!--<md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.replay" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
         <div class="uppercase">
           {{ 'ui.dashboard.replay' | translate | uppercase}}
         </div>
-      </md-grid-tile>
+      </md-grid-tile>-->
 
     <!-- <md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.modwizard" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" ng-if="values.devMode">
       <div class="uppercase">
@@ -95,12 +97,6 @@
       <md-grid-tile md-colspan="2" class="other tile" ui-sref="credits" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
         <div class="uppercase">
           {{ 'ui.mainmenu.credits' | translate}}
-        </div>
-      </md-grid-tile>
-
-      <md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.multiplayer" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
-        <div class="uppercase">
-          Multiplayer
         </div>
       </md-grid-tile>
 

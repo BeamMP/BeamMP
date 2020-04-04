@@ -4,6 +4,7 @@
 --====================================================================================
 
 local M = {}
+local Servers = {}
 
 -- ============= VARIABLES =============
 local socket = require('socket')
@@ -53,10 +54,19 @@ local function getServers()
 	TCPSocket:send('B')
 end
 
+local function connectToServer(id, ip, port)
+	local server = "";
+	for i in ipairs(Servers) do
+		if Servers[i][id] ~= undefined then
+			server = Servers[i][id]
+		end
+	end
+	TCPSocket:send('C'..ip..':'..port)
+end
 
 local HandleNetwork = {
 	['A'] = function(params) oneSecondsTimer = 0; flip = false; end, -- Connection Alive Checking
-	['B'] = function(params) be:executeJS('receiveServers('..params..')') end
+	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')') end
 }
 
 local function onUpdate(dt)
@@ -95,5 +105,6 @@ end
 
 M.onUpdate = onUpdate
 M.getServers = getServers
+M.connectToServer = connectToServer
 
 return M

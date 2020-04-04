@@ -87,10 +87,22 @@ function(logger, $scope, $state, $timeout, bngApi) {
 	}
 
 	function select(row, table) {
+		var table = document.getElementById("serversTable");
 		deselect(table.selectedRow);
 		row.classList.add("highlight");
 		row.selected = true;
 		table.selectedRow = row;
+		console.log(row)
+		var id = row.getAttribute('data-id')
+		console.log(id)
+		var servers = JSON.parse(localStorage.getItem('servers'))
+		for (var i = 0; i < servers.length; i++) {
+			if (servers[i].hasOwnProperty(id)) {
+				console.log(servers[i][id])
+				var server = servers[i][id];
+				bngApi.engineLua(`CoreNetwork.connectToServer("${id}", "${server.ip}", "${server.port}")`);
+			}
+		}
 	}
 
 	function setColor(row) {
@@ -196,6 +208,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 
 	function receiveServers(data) {
 		console.log(data)
+		localStorage.setItem('servers', JSON.stringify(data))
 		var table = document.getElementById("serversTable");
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
@@ -218,6 +231,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 			</tr>
 			`*/
 			var row = table.insertRow(table.rows.length);
+			row.setAttribute('data-id', Object.keys(data[i])[0]);
 			row.insertCell(0).innerHTML = servData.location;
 			row.insertCell(1).innerHTML = servData.name;
 			row.insertCell(2).innerHTML = servData.map;

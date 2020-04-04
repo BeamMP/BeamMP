@@ -1,3 +1,4 @@
+var serversScope;
 angular.module('beamng.stuff')
 
 /**
@@ -16,7 +17,6 @@ function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
 
 	// --------- CUSTOM CODE --------- //
-	bngApi.engineLua('Network.connectToLauncher()');
 
 	vm.resetLauncherConnection = function() {
 		bngApi.engineLua('Network.disconnectFromLauncher()');
@@ -59,12 +59,10 @@ function(logger, $scope, $state, $timeout, bngApi) {
 	});
 }])
 
-
-
 .controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
 function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
-
+	bngApi.engineLua('CoreNetwork.getServers()');
 	vm.exit = function ($event) {
 		if ($event)
 			logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
@@ -160,28 +158,6 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		console.log("ok");
 	});
 
-	// TEMPORARY
-	var table = document.getElementById("servers-table");
-	for (var i = 0; i < 10; i++) {
-		var row = table.rows[i];
-		var servData = {};
-		servData.ip = "192.168.1.1";
-		servData.map = "test" + i;
-		servData.players = i;
-		servData.location = "AS" + i;
-		servData.description = "A test server " + i;
-		servData.maxPlayers = i;
-		servData.ping = i*10;
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = servData.location;
-		row.insertCell(1).innerHTML = servData.description;
-		row.insertCell(2).innerHTML = servData.map;
-		row.insertCell(3).innerHTML = servData.players + "/" + servData.maxPlayers;
-		row.insertCell(4).innerHTML = servData.ping;
-		row.servData = servData;
-		row.onclick = selectRow;
-	}
-
 	$scope.$on('addServer', function (event, data) {
 		var table = document.getElementById("servers-table");
 		var row = table.insertRow(table.rows.length);
@@ -200,6 +176,59 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		var row = src.closest('tr');
 		select(row, table);
 	};
+
+	function SmoothMapName(map) {
+		if (map != "Any Map") {
+			map = map.replace("/info.json","")
+			map = map.split('/').pop().replace(/\s*/g,'')
+			map = map.replace(/_/g," ")
+			map = map.replace(/-/g," ")
+			map = toTitleCase(map)
+		}
+		return map
+	}
+
+	function toTitleCase(str) {
+	    return str.replace(/\w\S*/g, function(txt){
+	        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	    });
+	}
+
+	function receiveServers(data) {
+		console.log(data)
+		var table = document.getElementById("serversTable");
+		for (var i = 0; i < data.length; i++) {
+			var v = data[i][Object.keys(data[i])[0]]
+			//var row = table.rows[i];
+			var servData = {};
+			servData.ip = v.ip;
+			servData.map = SmoothMapName(v.map);
+			servData.players = v.players;
+			servData.location = v.location;
+			servData.name = v.sname;
+			servData.maxPlayers = v.maxplayers;
+			servData.ping = '?';
+			/*var html = `
+			<tr>
+				<td>${servData.location}</td>
+				<td>${servData.name}</td>
+				<td>${servData.map}</td>
+				<td>${servData.players}/${servData.maxPlayers}</td>
+				<td>${servData.ping}</td>
+			</tr>
+			`*/
+			var row = table.insertRow(table.rows.length);
+			row.insertCell(0).innerHTML = servData.location;
+			row.insertCell(1).innerHTML = servData.name;
+			row.insertCell(2).innerHTML = servData.map;
+			row.insertCell(3).innerHTML = servData.players + "/" + servData.maxPlayers;
+			row.insertCell(4).innerHTML = servData.ping;
+			row.servData = servData;
+			row.onclick = selectRow;
+		}
+	};
+
+	serversScope = receiveServers;
 }])
 
 .controller('MultiplayerSettingsController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
@@ -245,3 +274,8 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		logger.debug('[MultiplayerDirectController] destroyed.');
 	});
 }]);
+
+
+function receiveServers(data) {
+	serversScope(data);
+}

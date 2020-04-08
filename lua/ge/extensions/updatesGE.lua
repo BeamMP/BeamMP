@@ -50,19 +50,19 @@ local function onUpdate(dt)
 			positionDelay = 0 -- Reset the delay
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
-		
+
 		inputsDelay = inputsDelay + dt
 		if inputsDelay > inputsTickrate then
 			inputsDelay = 0 -- Reset the delay
 			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
-	
+
 		electricsDelay = electricsDelay + dt
 		if electricsDelay > electricsTickrate then
 			electricsDelay = 0 -- Reset the delay
 			electricsGE.tick() -- Comment this line to disable electrics synchronization
-		end	
-	end	
+		end
+	end
 end
 
 

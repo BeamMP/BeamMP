@@ -9,10 +9,10 @@
 -- If the received vehicle is the one that have been spawned by the client (check using client ID) then
 	-- It sync the client in-game vehicle ID with the server ID
 -- Else
-	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one	
-	
-	
-	
+	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one
+
+
+
 local M = {}
 
 
@@ -25,10 +25,10 @@ local invertedVehiclesMap = {}
 local onVehicleSpawnedAllowed = true
 local onVehicleDestroyedAllowed = true
 -- ============= VARIABLES =============
-	
-	
 
---============== SOME FUNCTIONS ==============	
+
+
+--============== SOME FUNCTIONS ==============
 local function println(stringToPrint)
 	print("[BeamMP] | "..stringToPrint)
 end
@@ -61,53 +61,53 @@ end
 local function getOwnMap()
     return ownMap
 end
---============== SOME FUNCTIONS ==============	
-	
-	
+--============== SOME FUNCTIONS ==============
 
---============================ DELETE ALL VEHICLES ==============================		
+
+
+--============================ DELETE ALL VEHICLES ==============================
 local function deleteAllVehicles()
-	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing	
+	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 	commands.setFreeCamera()
-	for i = 0, be:getObjectCount() do -- For each vehicle		
-		local veh = be:getObject(0) --  Get vehicle			
+	for i = 0, be:getObjectCount() do -- For each vehicle
+		local veh = be:getObject(0) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?
 			onVehicleDestroyedAllowed = false
 			veh:delete()
 		end
-	end   
+	end
 end
---============================ DELETE ALL VEHICLES ==============================	
+--============================ DELETE ALL VEHICLES ==============================
 
 
-	
---============================ SEND ALL VEHICLES ==============================	
+
+--============================ SEND ALL VEHICLES ==============================
 local function sendAllVehicles()
-	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing	
-	for i = 0, be:getObjectCount() do -- For each vehicle		
-		local veh = be:getObject(i) --  Get vehicle			
-		if veh then -- For loop always return one empty vehicle ?	
-			veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..veh:getID()..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config	
+	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
+	for i = 0, be:getObjectCount() do -- For each vehicle
+		local veh = be:getObject(i) --  Get vehicle
+		if veh then -- For loop always return one empty vehicle ?
+			veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..veh:getID()..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config
 		end
-	end    
+	end
 end
---============================ SEND ALL VEHICLES ==============================	
+--============================ SEND ALL VEHICLES ==============================
 
 
 
---============================ SEND ONE VEHICLE ==============================	
-local function sendVehicle(gameVehicleID)		
+--============================ SEND ONE VEHICLE ==============================
+local function sendVehicle(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID) -- Get spawned vehicle ID
-	if veh then -- In case of bug	
-		veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..gameVehicleID..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config	
+	if veh then -- In case of bug
+		veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..gameVehicleID..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config
 		print("VEHICLE SENT")
-	end 
+	end
 end
---============================ SEND ONE VEHICLE ==============================	
+--============================ SEND ONE VEHICLE ==============================
 
 
 
---=========================================== SEND VEHICLE DATA =============================================	
+--=========================================== SEND VEHICLE DATA =============================================
 local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local vehicleTable    = {} -- Vehicle table
 	local veh             = be:getObjectByID(gameVehicleID)
@@ -115,7 +115,7 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local p0              = veh.colorPalette0
 	local p1              = veh.colorPalette1
 	local serverVehicleID = getServerVehicleID(gameVehicleID)
-	
+
 	vehicleTable[1] = Network.getPlayerServerID()
 	vehicleTable[2] = tostring(gameVehicleID)
 	vehicleTable[3] = veh:getJBeamFilename()
@@ -124,11 +124,11 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	vehicleTable[6] = jsonEncode({p0.x, p0.y, p0.z, p0.w})
 	vehicleTable[7] = jsonEncode({p1.x, p1.y, p1.z, p1.w})
 	vehicleTable[8] = getServerVehicleID(gameVehicleID) or ""
-	
+
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	Network.send(Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
 end
---=========================================== SEND VEHICLE DATA =============================================	
+--=========================================== SEND VEHICLE DATA =============================================
 
 
 
@@ -141,7 +141,7 @@ end
 
 
 
---================================= ON VEHICLE SPAWNED (SERVER) ===================================	
+--================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
@@ -159,7 +159,7 @@ local function onServerVehicleSpawned(data)
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
 		println("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
-	else 
+	else
 		if not vehicleName then return end
 		println("New vehicle : "..vehicleName)
 		tempServerVehicleID = serverVehicleID
@@ -167,14 +167,14 @@ local function onServerVehicleSpawned(data)
 		nicknameMap[tostring(spawnedVeh:getID())] = playerNickname
 		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
 	end
-	
+
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 end
---================================= ON VEHICLE SPAWNED (SERVER) ===================================	
+--================================= ON VEHICLE SPAWNED (SERVER) ===================================
 
 
 
---================================= ON VEHICLE SPAWNED (CLIENT) ===================================	
+--================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
 	print("Vehicle spawned : "..gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
@@ -190,11 +190,11 @@ local function onVehicleSpawned(gameVehicleID)
 		end
 	end
 end
---================================= ON VEHICLE SPAWNED (CLIENT) ===================================	
+--================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 
 
 
---================================= ON VEHICLE REMOVED (SERVER) ===================================	
+--================================= ON VEHICLE REMOVED (SERVER) ===================================
 local function onServerVehicleRemoved(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
@@ -215,11 +215,11 @@ local function onServerVehicleRemoved(serverVehicleID, data)
 		end
 	end
 end
---================================= ON VEHICLE REMOVED (SERVER) ===================================	
+--================================= ON VEHICLE REMOVED (SERVER) ===================================
 
 
 
---================================= ON VEHICLE REMOVED (CLIENT) ===================================	
+--================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
 	print("Vehicle destroyed : "..gameVehicleID)
 	if Network.getStatus() > 0 then -- If TCP is connecting or connected
@@ -228,16 +228,16 @@ local function onVehicleDestroyed(gameVehicleID)
 			if serverVehicleID then
 				Network.send(Network.buildPacket(1, 2121, serverVehicleID, ""))
 			end
-		else 
+		else
 			onVehicleDestroyedAllowed = true
 		end
 	end
 end
---================================= ON VEHICLE REMOVED (CLIENT) ===================================	
+--================================= ON VEHICLE REMOVED (CLIENT) ===================================
 
 
 
---======================= ON VEHICLE SWITCHED (CLIENT) =======================	
+--======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldID, newID)
 	--print("Vehicle switched : "..oldID.." - "..newID)
 	if Network.getStatus() > 0 then -- If TCP is connecting or connected
@@ -251,7 +251,7 @@ end
 
 
 
---======================= ON VEHICLE RESETTED (CLIENT) =======================	
+--======================= ON VEHICLE RESETTED (CLIENT) =======================
 local function onVehicleResetted(gameVehicleID)
 	--print("Vehicle resetted : "..gameVehicleID)
 	if Network.getStatus() > 0 then -- If TCP is connecting or connected
@@ -265,7 +265,7 @@ end
 
 
 
---======================= ON VEHICLE RESETTED (SERVER) =======================	
+--======================= ON VEHICLE RESETTED (SERVER) =======================
 local function onServerVehicleResetted(serverVehicleID)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
@@ -283,10 +283,10 @@ end
 
 local function onUpdate(dt)
 	if Network.getStatus() == 2 then
-		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing	
-		for i = 0, be:getObjectCount() do -- For each vehicle		
-			local veh = be:getObject(i) --  Get vehicle			
-			if veh then -- For loop always return one empty vehicle ?	
+		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
+		for i = 0, be:getObjectCount() do -- For each vehicle
+			local veh = be:getObject(i) --  Get vehicle
+			if veh then -- For loop always return one empty vehicle ?
 				if not isOwn(veh:getID()) then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0

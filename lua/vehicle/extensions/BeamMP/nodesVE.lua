@@ -62,13 +62,13 @@ end
 
 
 local function applyNodes(data)
-	
+
 	--obj:requestReset(RESET_PHYSICS)
-	
+
 	local decodedData = jsonDecode(data)
 	for cid, node in pairs(decodedData.nodes) do
 		cid = tonumber(cid) - 1
-		
+
 		local beam = v.data.beams[cid]
 		local beamPrecompression = beam.beamPrecompression or 1
 		local deformLimit = type(beam.deformLimit) == 'number' and beam.deformLimit or math.huge
@@ -77,12 +77,12 @@ local function applyNodes(data)
 			beam.beamDeform, deformLimit, type(beam.deformLimitExpansion) == 'number' and beam.deformLimitExpansion or deformLimit,
 			beamPrecompression
 		)
-		
+
 		obj:setNodePosition(cid, vec3(node[1]):toFloat3())
 		if #node > 1 then
 			obj:setNodeMass(cid, node[2])
 		end
-		
+
 	end
 end
 

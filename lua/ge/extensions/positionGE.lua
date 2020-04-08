@@ -34,7 +34,7 @@ end
 
 local counter = 0
 local function applyPos(data, serverVehicleID)
-	
+
 	-- 1 = pos.x
 	-- 2 = pos.y
 	-- 3 = pos.z
@@ -42,7 +42,7 @@ local function applyPos(data, serverVehicleID)
 	-- 5 = rot.y
 	-- 6 = rot.z
 	-- 7 = rot.w
-	
+
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
@@ -53,11 +53,11 @@ local function applyPos(data, serverVehicleID)
 		else
 			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
 			counter = 0
-		end			
+		end
 		--veh:setPosition(Point3F(pr[1], pr[2], pr[3])) -- Apply position
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end
-	
+
 end
 
 

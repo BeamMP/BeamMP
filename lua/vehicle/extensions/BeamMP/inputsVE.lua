@@ -23,7 +23,7 @@ local function getInputs()
 	eTable[3] = input.state.brake.val
 	eTable[4] = input.state.parkingbrake.val
 	eTable[5] = input.state.clutch.val
-	
+
 	if eTable[1] == lastInputs[1]
 	and eTable[2] == lastInputs[2]
 	and eTable[3] == lastInputs[3]

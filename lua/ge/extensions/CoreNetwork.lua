@@ -4,13 +4,16 @@
 --====================================================================================
 
 local M = {}
+print("CoreNetwork Loaded.")
 local Servers = {}
 
 -- ============= VARIABLES =============
 local socket = require('socket')
 local TCPSocket
+local Server = {};
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local oneSecondsTimer = 1
+local updateTimer = 0
 local flip = false
 local serverTimeoutTimer = 0
 local playersMap = {}
@@ -20,6 +23,7 @@ local pingStatus = "ready"
 local pingTimer = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
+local status = ""
 -- ============= VARIABLES =============
 
 --================================ CONNECT TO SERVER ================================
@@ -49,24 +53,72 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 connectToLauncher()
+--TorqueScript.setVar("$CEF_UI::reload") Need to find a way to reload
+reloadUI()
 
 local function getServers()
 	TCPSocket:send('B')
 end
 
-local function connectToServer(id, ip, port)
-	local server = "";
-	for i in ipairs(Servers) do
-		if Servers[i][id] ~= undefined then
-			server = Servers[i][id]
-		end
+local function setServer(id, ip, port)
+	Server.IP = ip;
+	Server.PORT = port;
+	Server.ID = id;
+end
+
+local function connectToServer(ip, port)
+	if ip ~= undefined and port ~= undefined then
+		TCPSocket:send('C'..ip..':'..port)
+	else
+		TCPSocket:send('C'..Server.IP..':'..Server.PORT)
 	end
-	TCPSocket:send('C'..ip..':'..port)
+	status = "LoadingResources"
+end
+
+local function LoadLevel(map)
+	print("MAP: "..map)
+	status = "LoadingMapNow"
+	if string.sub(map, 1, 1) == "/" then
+		print("Searching For Map...")
+		local levelName = string.gsub(map, '/info.json', '')
+		levelName = string.gsub(levelName, '/levels/', '')
+		for i, v in ipairs(core_levels.getList()) do
+			print(v.levelName)
+	    if v.levelName:lower() == levelName then
+				print("Loading Multiplayer Map...")
+				freeroam_freeroam.startFreeroamByName(v.levelName)
+	    end
+	  end
+		-- we got this far?!?!?! Guess we dont have the level
+		print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
+	else
+		-- Level Not a set map, lets give them the choice to select
+	end
+end
+
+local function getPlayerServerID()
+	return MPSettings.PlayerServerID
+end
+
+local function HandleU(params)
+	UI.updateLoading(params)
+	print(params)
+	local code = string.sub(params, 1, 1)
+	local data = string.sub(params, 2)
+	if params == "ldone" and status == "LoadingResources" then
+		TCPSocket:send('Mrequest')
+		status = "LoadingMap"
+	end
+	if code == "p" then
+		UI.setPing(data.."")
+	end
 end
 
 local HandleNetwork = {
 	['A'] = function(params) oneSecondsTimer = 0; flip = false; end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')') end
+	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')') end,
+	['U'] = function(params) HandleU(params) end,
+	['M'] = function(params) LoadLevel(params) end,
 }
 
 local function onUpdate(dt)
@@ -76,7 +128,6 @@ local function onUpdate(dt)
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil then break end
 			if received ~= "" and received ~= nil then -- If data have been received then
-				print(status)
 				print(received)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
@@ -88,8 +139,16 @@ local function onUpdate(dt)
 		end
 		--================================ TWO SECONDS TIMER ================================
 		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
+		updateTimer = updateTimer + dt -- Time in seconds
+		if updateTimer > 1 then
+			TCPSocket:send('Up')
+			updateTimer = 0
+		end
 		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 2 seconds
 			TCPSocket:send('A')
+			if status == "LoadingResources" then
+				TCPSocket:send('Ul')
+			end
 			flip = true
 			--oneSecondsTimer = 0	-- Reset timer
 		end
@@ -105,6 +164,8 @@ end
 
 M.onUpdate = onUpdate
 M.getServers = getServers
+M.setServer = setServer
 M.connectToServer = connectToServer
+M.getPlayerServerID = getPlayerServerID
 
 return M

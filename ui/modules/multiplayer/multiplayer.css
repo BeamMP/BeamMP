@@ -122,6 +122,25 @@
 	margin-bottom: 8px;
 }
 
+div#LoadingServer {
+    position: absolute;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    left: 0px;
+    top: 0px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+div#LoadingBody {
+    margin: 20%;
+    width: 60%;
+    background-color: #848484;
+    padding: 15px;
+    border-radius: 5px;
+}
+
 input[type="text"] {
   display: block;
   width: 400px;

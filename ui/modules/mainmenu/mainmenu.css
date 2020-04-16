@@ -32,17 +32,22 @@
 
 .mainmenu .tile {
   font-size: 4vh;
+  font-family: Play;
   cursor: pointer;
-  color: rgb(62, 62, 62);
+  color: rgb(255, 255, 255);
+  text-shadow: -4px 4px 8px #00000050;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.mainmenu .tile:focus div {
-  -webkit-animation: zoomIn 0.2s forwards;
+
+
+.mainmenu .tile:hover div {
+  -webkit-animation: zoomIn 0.25s forwards ease-out;
 }
 
 
 @-webkit-keyframes zoomIn {
-  100% { -webkit-transform: scale(0.9); }
+  100% { -webkit-transform: scale(1.1); }
 }
 
 .mainmenu .tile .blur-bg {
@@ -59,18 +64,22 @@
   z-index: 3;
 }
 
-.mainmenu .tile:focus {
+.mainmenu .tile:hover {
   color: white;
-  background-color: rgba(255, 103, 0, 0.8);
+  -webkit-animation: tileFocus 0.1s forwards ease-out;
+}
+
+@-webkit-keyframes tileFocus {
+  100% { background-color: rgba(255, 103, 0, 0.8); }
 }
 
 .mainmenu .tile.smaller {
   font-size: 3vh;
-  color: rgb(103, 103, 103);
+  color: rgb(190, 190, 190);
 }
 
 .mainmenu .tile.smaller .heading {
-  color: rgb(62, 62, 62);
+  color: rgb(255, 255, 255);
 }
 
 .mainmenu .tile.smaller .heading-long {
@@ -79,7 +88,7 @@
 
 .mainmenu .tile:focus.smaller {
   color: rgb(235, 235, 235);
-  font-family: Roboto;
+  font-family: Play;
 }
 
 .mainmenu .tile:focus.smaller .heading {
@@ -92,7 +101,7 @@
 
 .mainmenu .play {
   font-size: 7vh;
-  font-family: Roboto;
+  font-family: Play;
 }
 
 .mainmenu .repository {
@@ -177,7 +186,7 @@
 }
 
 .mainmenu .title {
-  background-color: rgba(255, 255, 255, 0.36);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .mainmenu .exit {
@@ -218,7 +227,7 @@
 }
 
 .mainmenu .other {
-  background-color: rgba(255, 255, 255, 0.77);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 
@@ -320,3 +329,87 @@
     -webkit-transition: 3s linear all;
     transition: 3s linear all;
 }
+
+.new-tile {
+  font-size: 3vh;
+  font-family: Play;
+  cursor: pointer;
+  color: rgb(255, 255, 255);
+  text-shadow: -3px 3px 6px #00000050;
+  background-color: rgba(0, 0, 0, 0.5);
+  filter: brightness(0.8);
+  transition: filter .3s;
+}
+
+.new-tile:hover {
+  filter: brightness(1.1);
+}
+
+
+
+.new-tile figure {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: flex-start;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 18px;
+  margin: 0;
+}
+
+.new-tile figure md-grid-tile-header {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+  color: #fff;
+  background: rgba(0,0,0,.18);
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 18px;
+}
+
+.new-tile figure md-grid-tile-header figcaption h2 {
+  margin: 0 0 0 0;
+}
+
+.new-tile figure md-grid-tile-header figcaption h3 {
+  margin: 0 0 0 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.new-tile:hover figure md-grid-tile-header figcaption h3  {
+  opacity: 1;
+}
+
+
+.main-menu-image {
+  position: absolute;
+  width: 40%;
+  height: 20%;
+  top: 0%;
+  left: 10%;
+
+}
+

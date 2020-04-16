@@ -1,0 +1,14 @@
+{
+  "name": "Multiplayer Session",
+  "author": "Titch2000",
+  "version": "0.2",
+  "description": "Host and Join multiplayer games",
+  "directive": "multiplayersession",
+  "domElement": "<multiplayersession></multiplayersession>",
+  "css": {
+  	"left": "50%",
+  	"top": "0px",
+  	"width": "560px",
+    "height": "40px"
+  }
+}

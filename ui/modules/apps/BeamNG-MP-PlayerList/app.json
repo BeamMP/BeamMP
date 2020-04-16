@@ -1,0 +1,14 @@
+{
+  "name": "PLAYERLIST",
+  "author": "meow",
+  "version": "0.69",
+  "description": "bleatbleatbleatbleat",
+  "directive": "multiplayerplayerlist",
+  "domElement": "<multiplayerplayerlist></multiplayerplayerlist>",
+  "css": {
+  	"left": "180px",
+  	"bottom": "0px",
+  	"width": "560px",
+    "height": "230px"
+  }
+}

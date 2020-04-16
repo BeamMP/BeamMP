@@ -13,15 +13,9 @@ angular.module('beamng.stuff')
 **/
 .controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
 function(logger, $scope, $state, $timeout, bngApi) {
-
 	var vm = this;
 
 	// --------- CUSTOM CODE --------- //
-
-	vm.resetLauncherConnection = function() {
-		bngApi.engineLua('Network.disconnectFromLauncher()');
-		bngApi.engineLua('Network.connectToLauncher()');
-	};
 
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
@@ -29,10 +23,19 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		console.log(src.value);
 	}
 
-	$scope.$on('setMenuStatus', function (event, text) {
-		document.getElementById("launcher-status").innerHTML = text;
-	});
+	vm.connect = function() {
+		logger.debug("Attempting to call connect to server.")
+		document.getElementById('LoadingServer').style.display = 'block'
+		bngApi.engineLua('CoreNetwork.connectToServer()');
+	}
 
+	vm.directConnect = function() {
+		console.log('Clicked')
+		var ip = document.getElementById('directip').value;
+		var port = document.getElementById('directport').value;
+		document.getElementById('LoadingServer').style.display = 'block';
+		bngApi.engineLua(`CoreNetwork.connectToServer("${ip}","${port}")`);
+	};
 
 	vm.stateName = $state.current.name;
 	bngApi.engineLua('settings.requestState()');
@@ -40,6 +43,11 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		vm.stateName = toState.name;
 	});
 	//bngApi.engineLua('core_gamestate.requestGameState();');   // if this isnt called the gamestate in menu doesnt update correctly.
+
+	$scope.$on('LoadingInfo', function (event, data) {
+		console.log(data.message)
+		document.getElementById('LoadingStatus').innerText = data.message;
+  });
 
 	vm.exit = function ($event) {
 		if ($event)
@@ -100,7 +108,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 			if (servers[i].hasOwnProperty(id)) {
 				console.log(servers[i][id])
 				var server = servers[i][id];
-				bngApi.engineLua(`CoreNetwork.connectToServer("${id}", "${server.ip}", "${server.port}")`);
+				bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}")`);
 			}
 		}
 	}
@@ -167,7 +175,9 @@ function(logger, $scope, $state, $timeout, bngApi) {
 }
 
 	$scope.$on('SteamInfo', function (event, data) {
-		console.log("ok");
+		$scope.$apply(function () {
+			$scope.steamData = data;
+		});
 	});
 
 	$scope.$on('addServer', function (event, data) {
@@ -212,33 +222,36 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		var table = document.getElementById("serversTable");
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
-			//var row = table.rows[i];
-			var servData = {};
-			servData.ip = v.ip;
-			servData.map = SmoothMapName(v.map);
-			servData.players = v.players;
-			servData.location = v.location;
-			servData.name = v.sname;
-			servData.maxPlayers = v.maxplayers;
-			servData.ping = '?';
-			/*var html = `
-			<tr>
-				<td>${servData.location}</td>
-				<td>${servData.name}</td>
-				<td>${servData.map}</td>
-				<td>${servData.players}/${servData.maxPlayers}</td>
-				<td>${servData.ping}</td>
-			</tr>
-			`*/
-			var row = table.insertRow(table.rows.length);
-			row.setAttribute('data-id', Object.keys(data[i])[0]);
-			row.insertCell(0).innerHTML = servData.location;
-			row.insertCell(1).innerHTML = servData.name;
-			row.insertCell(2).innerHTML = servData.map;
-			row.insertCell(3).innerHTML = servData.players + "/" + servData.maxPlayers;
-			row.insertCell(4).innerHTML = servData.ping;
-			row.servData = servData;
-			row.onclick = selectRow;
+			var ver = v.version.substr(0, v.version.indexOf('.'));
+			if (ver == "0") {
+				//var row = table.rows[i];
+				var servData = {};
+				servData.ip = v.ip;
+				servData.map = SmoothMapName(v.map);
+				servData.players = v.players;
+				servData.location = v.location;
+				servData.name = v.sname;
+				servData.maxPlayers = v.maxplayers;
+				servData.ping = '?';
+				/*var html = `
+				<tr>
+					<td>${servData.location}</td>
+					<td>${servData.name}</td>
+					<td>${servData.map}</td>
+					<td>${servData.players}/${servData.maxPlayers}</td>
+					<td>${servData.ping}</td>
+				</tr>
+				`*/
+				var row = table.insertRow(table.rows.length);
+				row.setAttribute('data-id', Object.keys(data[i])[0]);
+				row.insertCell(0).innerHTML = servData.location;
+				row.insertCell(1).innerHTML = servData.name;
+				row.insertCell(2).innerHTML = servData.map;
+				row.insertCell(3).innerHTML = servData.players + "/" + servData.maxPlayers;
+				row.insertCell(4).innerHTML = servData.ping;
+				row.servData = servData;
+				row.onclick = selectRow;
+			}
 		}
 	};
 

@@ -1,15 +1,15 @@
 
 <md-content>
 
-	
+
 	<div style="background:#2C2F33; padding-left:15px;">
 		<br />
-		<input type="text" id="ip" name="ip" placeholder="Server IP"/>
-		<input type="text" id="port" name="port" placeholder="Server Port"/>
-		<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>
-		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="">Connect</md-button>
+		<input type="text" id="directip" name="ip" placeholder="Server IP"/>
+		<input type="text" id="directport" name="port" placeholder="Server Port"/>
+		<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
+		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()">Connect</md-button>
 		<md-divider></md-divider>
-	</div>	
+	</div>
 	<div id="footer"></div>
 
 </md-content>

@@ -1,29 +1,35 @@
-load("CoreNetwork")
-registerCoreModule("CoreNetwork")
+load("MPSettings")
+registerCoreModule("MPsettings")
+
+load("UI")
+registerCoreModule("UI")
 
 --load("sessionControl")
 --registerCoreModule("sessionControl")
 
---load("updatesGE")
---registerCoreModule("updatesGE")
+load("updatesGE")
+registerCoreModule("updatesGE")
 
---load("vehicleGE")
---registerCoreModule("vehicleGE")
+load("vehicleGE")
+registerCoreModule("vehicleGE")
 
---load("inputsGE")
---registerCoreModule("inputsGE")
+load("inputsGE")
+registerCoreModule("inputsGE")
 
---load("electricsGE")
---registerCoreModule("electricsGE")
+load("electricsGE")
+registerCoreModule("electricsGE")
 
---load("positionGE")
---registerCoreModule("positionGE")
+load("positionGE")
+registerCoreModule("positionGE")
 
---load("powertrainGE")
---registerCoreModule("powertrainGE")
+load("powertrainGE")
+registerCoreModule("powertrainGE")
 
---load("nodesGE")
---registerCoreModule("nodesGE")
+load("nodesGE")
+registerCoreModule("nodesGE")
 
---load("UI")
---registerCoreModule("UI")
+load("CoreNetwork")
+registerCoreModule("CoreNetwork")
+
+load("GameNetwork")
+registerCoreModule("GameNetwork")

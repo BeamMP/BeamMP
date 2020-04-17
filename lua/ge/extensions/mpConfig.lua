@@ -1,5 +1,5 @@
 local M = {}
-print("MPSettings Loaded.")
+print("mpConfig Loaded.")
 
 -- MP VARIABLES
 local ShowNameTags = true
@@ -18,22 +18,6 @@ local inputsTickrate = 2 --0.05
 
 local electricsDelay = 0
 local electricsTickrate = 6
-
-
-
--- Variables
-M.ShowNameTags = ShowNameTags
-M.Nickname = Nickname
-M.PlayerServerID = PlayerServerID
-M.State = State
-M.nodesDelay = nodesDelay
-M.nodesTickrate = nodesTickrate
-M.positionDelay = positionDelay
-M.positionTickrate = positionTickrate
-M.inputsDelay = inputsDelay
-M.inputsTickrate = inputsTickrate
-M.electricsDelay = electricsDelay
-M.electricsTickrate = electricsTickrate
 
 local function SetShowNameTags(x)
   ShowNameTags = x
@@ -59,6 +43,19 @@ local function SetElectricsTickrate(x)
   electricsTickrate = x
 end
 
+-- Variables
+M.ShowNameTags = ShowNameTags
+M.Nickname = Nickname
+M.PlayerServerID = PlayerServerID
+M.State = State
+M.nodesDelay = nodesDelay
+M.nodesTickrate = nodesTickrate
+M.positionDelay = positionDelay
+M.positionTickrate = positionTickrate
+M.inputsDelay = inputsDelay
+M.inputsTickrate = inputsTickrate
+M.electricsDelay = electricsDelay
+M.electricsTickrate = electricsTickrate
 
 -- Functions
 M.SetShowNameTags = SetShowNameTags

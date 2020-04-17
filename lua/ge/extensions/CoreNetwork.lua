@@ -8,7 +8,7 @@ print("CoreNetwork Loaded.")
 local Servers = {}
 
 -- ============= VARIABLES =============
-local socket = require('socket')
+--local socket = require('socket')
 local TCPSocket
 local Server = {};
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
@@ -19,8 +19,6 @@ local serverTimeoutTimer = 0
 local playersMap = {}
 local serverPlayerID = ""
 local sysTime = 0
-local pingStatus = "ready"
-local pingTimer = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local status = ""
@@ -29,6 +27,7 @@ local status = ""
 --================================ CONNECT TO SERVER ================================
 local function connectToLauncher()
 	if launcherConnectionStatus == 0 then
+		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		--TCPSocket:setoption("tcp-nodelay", true)
 		keep = TCPSocket:setoption("keepalive",true)
@@ -87,6 +86,7 @@ local function LoadLevel(map)
 	    if v.levelName:lower() == levelName then
 				print("Loading Multiplayer Map...")
 				freeroam_freeroam.startFreeroamByName(v.levelName)
+				break;
 	    end
 	  end
 		-- we got this far?!?!?! Guess we dont have the level
@@ -97,12 +97,12 @@ local function LoadLevel(map)
 end
 
 local function getPlayerServerID()
-	return MPSettings.PlayerServerID
+	return mpConfig.PlayerServerID
 end
 
 local function HandleU(params)
 	UI.updateLoading(params)
-	print(params)
+	--print(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if params == "ldone" and status == "LoadingResources" then
@@ -129,7 +129,7 @@ local function onUpdate(dt)
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil then break end
 			if received ~= "" and received ~= nil then -- If data have been received then
-				print(received)
+				--print(received)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
@@ -153,7 +153,7 @@ local function onUpdate(dt)
 			flip = true
 			--oneSecondsTimer = 0	-- Reset timer
 		end
-		if oneSecondsTimer > 2 and flip then -- If oneSecondsTimer pass 2 seconds
+		if oneSecondsTimer > 2 and flip and dt > 20000 then -- If oneSecondsTimer pass 2 seconds
 			disconnectLauncher()
 			connectToLauncher()
 			flip = false
@@ -163,10 +163,26 @@ local function onUpdate(dt)
 	end
 end
 
+local function resetSession()
+	print("[CoreNetwork] Reset Session Called!")
+	TCPSocket:send('QS')
+	disconnectLauncher()
+	GameNetwork.disconnectLauncher()
+	connectToLauncher()
+end
+
+local function quitMP()
+	print("[CoreNetwork] Reset Session Called!")
+	TCPSocket:send('QG')
+end
+
 M.onUpdate = onUpdate
 M.getServers = getServers
 M.setServer = setServer
+M.resetSession = resetSession
+M.quitMP = quitMP
 M.connectToServer = connectToServer
+M.connectionStatus = launcherConnectionStatus
 M.getPlayerServerID = getPlayerServerID
 
 return M

@@ -7,17 +7,14 @@ local M = {}
 print("GameNetwork Loaded.")
 
 -- ============= VARIABLES =============
-local socket = require('socket')
+--local socket = require('socket')
 local TCPSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local oneSecondsTimer = 1
 local flip = false
-local serverTimeoutTimer = 0
 local playersMap = {}
 local serverPlayerID = ""
 local sysTime = 0
-local pingStatus = "ready"
-local pingTimer = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local status = ""
@@ -27,6 +24,7 @@ local status = ""
 local function connectToLauncher()
 	print("Connecting to the Launcher for Session Data")
 	if launcherConnectionStatus == 0 then
+		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		--TCPSocket:setoption("tcp-nodelay", true)
 		keep = TCPSocket:setoption("keepalive",true)
@@ -34,6 +32,7 @@ local function connectToLauncher()
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', 4445); -- Connecting
 		launcherConnectionStatus = 1
+		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end
 end
 --================================ CONNECT TO SERVER ================================
@@ -42,7 +41,6 @@ end
 local function disconnectLauncher()
 	if launcherConnectionStatus > 0 then -- If player were connected
 		TCPSocket:close()-- Disconnect from server
-		serverTimeoutTimer = 0 -- Reset timeout delay
 		launcherConnectionStatus = 0
 		oneSecondsTimer = 0
 	end
@@ -50,6 +48,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
+	print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data)
 end
 
@@ -60,7 +59,7 @@ local HandleNetwork = {
 	['Y'] = function(params) powertrainGE.handle(params) end,
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) vehicleGE.handle(params) end,
-	['P'] = function(params) MPSettings.PlayerServerID = params end,
+	['P'] = function(params) mpConfig.PlayerServerID = params end,
 }
 
 local oneSecondsTimer = 0
@@ -77,18 +76,32 @@ local function onUpdate(dt)
 				print(code.." -> "..data)
 				HandleNetwork[code](data)
 			end
-			oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
-			if oneSecondsTimer > 1 then -- If oneSecondsTimer pass 2 seconds
-				TCPSocket:send('TEST')
-				oneSecondsTimer = 0	-- Reset timer
-			end
+		end
+		--================================ TWO SECONDS TIMER ================================
+		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
+		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 1 seconds
+			TCPSocket:send('TEST')
+			print("ONE SEC TIMER REACHED, TIME OUT??")
+			oneSecondsTimer = 0	-- Reset timer
+			flip = true
+		end
+		if oneSecondsTimer > 2 and flip and dt > 5000 then -- If oneSecondsTimer pass 2 seconds
+			print("TWO SEC TIMER REACHED, TIME OUT MOST LIKELY??")
+			disconnectLauncher()
+			connectToLauncher()
+			flip = false
 		end
 	end
 end
 
+local function connectionStatus()
+	return launcherConnectionStatus
+end
+
 M.onUpdate = onUpdate
 M.connectToLauncher = connectToLauncher
+M.disconnectLauncher = disconnectLauncher
 M.send = sendData
-M.connectionStatus = launcherConnectionStatus
+M.connectionStatus = connectionStatus
 
 return M

@@ -19,29 +19,29 @@ end
 
 
 local function onUpdate(dt)
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
-		MPSettings.nodesDelay = MPSettings.nodesDelay + dt
-		if MPSettings.nodesDelay > MPSettings.nodesTickrate then
-			MPSettings.nodesDelay = 0 -- Reset the delay
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
+		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
+		if mpConfig.nodesDelay > mpConfig.nodesTickrate then
+			mpConfig.nodesDelay = 0 -- Reset the delay
 			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
-		MPSettings.positionDelay = MPSettings.positionDelay + dt
-		if MPSettings.positionDelay > MPSettings.positionTickrate then
-			MPSettings.positionDelay = 0 -- Reset the delay
-			MPSettings.positionGE.tick() -- Comment this line to disable position synchronization
+		mpConfig.positionDelay = mpConfig.positionDelay + dt
+		if mpConfig.positionDelay > mpConfig.positionTickrate then
+			mpConfig.positionDelay = 0 -- Reset the delay
+			mpConfig.positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
-		MPSettings.inputsDelay = MPSettings.inputsDelay + dt
-		if MPSettings.inputsDelay > MPSettings.inputsTickrate then
-			MPSettings.inputsDelay = 0 -- Reset the delay
-			MPSettings.inputsGE.tick() -- Comment this line to disable inputs synchronization
+		mpConfig.inputsDelay = mpConfig.inputsDelay + dt
+		if mpConfig.inputsDelay > mpConfig.inputsTickrate then
+			mpConfig.inputsDelay = 0 -- Reset the delay
+			mpConfig.inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
-		MPSettings.electricsDelay = MPSettings.electricsDelay + dt
-		if MPSettings.electricsDelay > MPSettings.electricsTickrate then
-			MPSettings.electricsDelay = 0 -- Reset the delay
-			MPSettings.electricsGE.tick() -- Comment this line to disable electrics synchronization
+		mpConfig.electricsDelay = mpConfig.electricsDelay + dt
+		if mpConfig.electricsDelay > mpConfig.electricsTickrate then
+			mpConfig.electricsDelay = 0 -- Reset the delay
+			mpConfig.electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 	end
 end

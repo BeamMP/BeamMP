@@ -241,8 +241,8 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	    url: '/mpdirect',
 	    templateUrl: 'modules/multiplayer/direct.partial.html',
 	    controller: 'MultiplayerDirectController as multiplayermenu'
-	  })	  
-	  
+	  })
+
 	  .state('menu.multiplayer.settings', {
 	    url: '/mpsettings',
 	    templateUrl: 'modules/multiplayer/settings.partial.html',
@@ -1261,12 +1261,12 @@ $scope.$on('requestUIInitialised', () => {
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
       { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
       { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
-      { translateid: 'ui.dashboard.mods',          icon: 'shop',                   state: 'menu.mods.local',   },
+      //{ translateid: 'ui.dashboard.mods',          icon: 'shop',                   state: 'menu.mods.local',   },
       { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
       { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
       { translateid: 'ui.dashboard.environment',   icon: 'cloud_queue',            state: 'menu.environment'   },
-      { translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("toggleTrackBuilder()") },
-      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      //{ translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("toggleTrackBuilder()") },
+      //{ translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
       { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},
@@ -1525,8 +1525,10 @@ $scope.$on('requestUIInitialised', () => {
   vm.quit = function () {
     if (vm.mainmenu) {
       bngApi.engineScript('quit();'); //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
+      bngApi.engineLua("CoreNetwork.quitMP()");
       bngApi.engineLua("TorqueScript.eval('quit();')");
     } else {
+      bngApi.engineLua("CoreNetwork.resetSession()");
       bngApi.engineLua("returnToMainMenu()");
     }
   };

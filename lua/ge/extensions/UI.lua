@@ -6,7 +6,7 @@
 local M = {}
 
 local function updateLoading(data)
-  print(data)
+  --print(data)
   local code = string.sub(data, 1, 1)
   local msg = string.sub(data, 2)
 
@@ -29,10 +29,12 @@ local function setPlayerCount(playerCount)
 	be:executeJS('setPlayerCount("'..playerCount..' ms")')
 end
 
-local function ready()
-  print("UI / Game Has now loaded")
+local function ready(src)
+  print("UI / Game Has now loaded ("..src..")")
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
-  GameNetwork.connectToLauncher()
+  if src == "MP-SESSION" then
+    GameNetwork.connectToLauncher()
+  end
 end
 
 M.updateLoading = updateLoading

@@ -180,7 +180,7 @@ local function onVehicleSpawned(gameVehicleID)
 	veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 	--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		sendVehicle(gameVehicleID) -- Send it to the server
 		if isOwn(gameVehicleID) then
 			veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
@@ -219,7 +219,7 @@ end
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
 	print("Vehicle destroyed : "..gameVehicleID)
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then
@@ -237,7 +237,7 @@ end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldID, newID)
 	--print("Vehicle switched : "..oldID.." - "..newID)
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newID then -- If it's not null
 			GameNetwork.send('Om:'..newID)--Network.buildPacket(1, 2122, newID, ""))
@@ -251,7 +251,7 @@ end
 --======================= ON VEHICLE RESETTED (CLIENT) =======================
 local function onVehicleResetted(gameVehicleID)
 	--print("Vehicle resetted : "..gameVehicleID)
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--Network.send(Network.buildPacket(1, 2123, serverVehicleID, ""))
@@ -285,7 +285,7 @@ local function handle(data)
 end
 
 local function onUpdate(dt)
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		for i = 0, be:getObjectCount() do -- For each vehicle
 			local veh = be:getObject(i) --  Get vehicle
@@ -295,7 +295,7 @@ local function onUpdate(dt)
 					pos.z = pos.z + 2.0
 					debugDrawer:drawTextAdvanced(
 						pos,
-						String(" "..nicknameMap[tostring(veh:getID())]),
+						String(" "..tostring(nicknameMap[tostring(veh:getID())])),
 						ColorF(1,1,1,1), true, false, -- Color / Background / Wtf
 						ColorI(0,0,0,255)
 					)

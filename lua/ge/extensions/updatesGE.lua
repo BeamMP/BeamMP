@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("updatesGE Initialising...")
 
 local function onPlayerConnect()
 	-- Update everything for the new connected player
@@ -52,4 +53,5 @@ M.onUpdate        = onUpdate
 
 
 
+print("updatesGE Loaded.")
 return M

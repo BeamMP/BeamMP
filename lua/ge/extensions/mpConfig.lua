@@ -1,5 +1,5 @@
 local M = {}
-print("mpConfig Loaded.")
+print("mpConfig Initialising...")
 
 -- MP VARIABLES
 local ShowNameTags = true
@@ -65,4 +65,5 @@ M.SetPositionTickrate = SetPositionTickrate
 M.SetInputsTickrate = SetInputsTickrate
 M.SetElectricsTickrate = SetElectricsTickrate
 
+print("mpConfig Loaded.")
 return M

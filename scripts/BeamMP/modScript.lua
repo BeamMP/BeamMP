@@ -1,6 +1,15 @@
 load("UI")
 registerCoreModule("UI")
 
+load("CoreNetwork")
+registerCoreModule("CoreNetwork")
+
+load("mpConfig")
+registerCoreModule("mpConfig")
+
+load("GameNetwork")
+registerCoreModule("GameNetwork")
+
 --load("sessionControl")
 --registerCoreModule("sessionControl")
 
@@ -24,12 +33,3 @@ registerCoreModule("nodesGE")
 
 load("updatesGE")
 registerCoreModule("updatesGE")
-
-load("CoreNetwork")
-registerCoreModule("CoreNetwork")
-
-load("mpConfig")
-registerCoreModule("mpConfig")
-
-load("GameNetwork")
-registerCoreModule("GameNetwork")

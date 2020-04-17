@@ -4,6 +4,7 @@
 --====================================================================================
 
 local M = {}
+print("UI Initialising...")
 
 local function updateLoading(data)
   --print(data)
@@ -43,4 +44,5 @@ M.setPing = setPing
 M.setStatus = setStatus
 M.setPlayerCount = setPlayerCount
 
+print("UI Loaded.")
 return M

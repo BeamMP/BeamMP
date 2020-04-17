@@ -4,7 +4,7 @@
 --====================================================================================
 
 local M = {}
-print("GameNetwork Loaded.")
+print("GameNetwork Initialising...")
 
 -- ============= VARIABLES =============
 --local socket = require('socket')
@@ -104,4 +104,5 @@ M.disconnectLauncher = disconnectLauncher
 M.send = sendData
 M.connectionStatus = connectionStatus
 
+print("GameNetwork Loaded.")
 return M

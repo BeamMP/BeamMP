@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("powertrainGE Initialising...")
 
 
 
@@ -51,4 +52,5 @@ M.applyPowertrain        = applyPowertrain
 
 
 
+print("powertrainGE Loaded.")
 return M

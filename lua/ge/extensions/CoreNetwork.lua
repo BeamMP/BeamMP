@@ -4,7 +4,7 @@
 --====================================================================================
 
 local M = {}
-print("CoreNetwork Loaded.")
+print("CoreNetwork Initialising...")
 local Servers = {}
 
 -- ============= VARIABLES =============
@@ -148,6 +148,7 @@ local function onUpdate(dt)
 		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 2 seconds
 			TCPSocket:send('A')
 			if status == "LoadingResources" then
+				print("Sending 'Ul'")
 				TCPSocket:send('Ul')
 			end
 			flip = true
@@ -185,4 +186,5 @@ M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.getPlayerServerID = getPlayerServerID
 
+print("CoreNetwork Loaded.")
 return M

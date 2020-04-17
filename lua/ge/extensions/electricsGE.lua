@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("electricsGE Initialising...")
 
 
 
@@ -81,5 +82,5 @@ M.sendElectrics  = sendElectrics
 M.applyElectrics = applyElectrics
 
 
-
+print("electricsGE Loaded.")
 return M

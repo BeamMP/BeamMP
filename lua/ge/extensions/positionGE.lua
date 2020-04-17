@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("positionGE Initialising...")
 
 
 
@@ -71,4 +72,5 @@ M.sendVehiclePosRot = sendVehiclePosRot
 
 
 
+print("positionGE Loaded.")
 return M

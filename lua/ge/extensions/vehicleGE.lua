@@ -14,7 +14,7 @@
 
 
 local M = {}
-
+print("vehicleGE Initialising...")
 
 
 -- ============= VARIABLES =============
@@ -327,5 +327,5 @@ M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
 
 
-
+print("vehicleGE Loaded.")
 return M

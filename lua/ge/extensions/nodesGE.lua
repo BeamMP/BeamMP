@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("nodesGE Initialising...")
 
 
 
@@ -56,4 +57,5 @@ M.applyNodes = applyNodes
 
 
 
+print("nodesGE Loaded.")
 return M

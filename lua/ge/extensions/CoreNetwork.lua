@@ -119,6 +119,7 @@ local HandleNetwork = {
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')') end,
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,
+	['V'] = function(params) vehicleGE.handle(params) end,
 }
 
 local function onUpdate(dt)

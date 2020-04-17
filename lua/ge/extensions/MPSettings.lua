@@ -11,10 +11,10 @@ local nodesDelay = 0
 local nodesTickrate = 6 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 0.016
+local positionTickrate = 2 --0.016
 
 local inputsDelay = 0
-local inputsTickrate = 0.05
+local inputsTickrate = 2 --0.05
 
 local electricsDelay = 0
 local electricsTickrate = 6

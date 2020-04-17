@@ -54,12 +54,13 @@ local function sendData(data)
 end
 
 local HandleNetwork = {
-	['I'] = function(params) inputsGE.handle(params) end,
-	['E'] = function(params) electricsGE.handle(params) end,
-	['N'] = function(params) nodesGE.handle(params) end,
-	['V'] = function(params) vehicleGE.handle(params) end,
-	['P'] = function(params) powertrainGE.handle(params) end,
-	['L'] = function(params) positionGE.handle(params) end,
+	['V'] = function(params) inputsGE.handle(params) end,
+	['W'] = function(params) electricsGE.handle(params) end,
+	['X'] = function(params) nodesGE.handle(params) end,
+	['Y'] = function(params) powertrainGE.handle(params) end,
+	['Z'] = function(params) positionGE.handle(params) end,
+	['O'] = function(params) vehicleGE.handle(params) end,
+	['P'] = function(params) MPSettings.PlayerServerID = params end,
 }
 
 local oneSecondsTimer = 0

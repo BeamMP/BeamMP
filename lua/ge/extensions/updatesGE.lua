@@ -7,25 +7,6 @@
 
 local M = {}
 
-
-
--- ============= VARIABLES =============
-local nodesDelay = 0
-local nodesTickrate = 6 -- in seconds
-
-local positionDelay = 0
-local positionTickrate = 0.05
-
-local inputsDelay = 0
-local inputsTickrate = 0.20
-
-local electricsDelay = 0
-local electricsTickrate = 6
--- TODO: use common tickrate to increase performances this is just for debugging
--- ============= VARIABLES =============
-
-
-
 local function onPlayerConnect()
 	-- Update everything for the new connected player
 	electricsGE.tick()
@@ -39,55 +20,33 @@ end
 
 local function onUpdate(dt)
 	if GameNetwork.connectionStatus == 1 then -- If TCP connected
-		nodesDelay = nodesDelay + dt
-		if nodesDelay > nodesTickrate then
-			nodesDelay = 0 -- Reset the delay
+		MPSettings.nodesDelay = MPSettings.nodesDelay + dt
+		if MPSettings.nodesDelay > MPSettings.nodesTickrate then
+			MPSettings.nodesDelay = 0 -- Reset the delay
 			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
-		positionDelay = positionDelay + dt
-		if positionDelay > positionTickrate then
-			positionDelay = 0 -- Reset the delay
-			positionGE.tick() -- Comment this line to disable position synchronization
+		MPSettings.positionDelay = MPSettings.positionDelay + dt
+		if MPSettings.positionDelay > MPSettings.positionTickrate then
+			MPSettings.positionDelay = 0 -- Reset the delay
+			MPSettings.positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
-		inputsDelay = inputsDelay + dt
-		if inputsDelay > inputsTickrate then
-			inputsDelay = 0 -- Reset the delay
-			inputsGE.tick() -- Comment this line to disable inputs synchronization
+		MPSettings.inputsDelay = MPSettings.inputsDelay + dt
+		if MPSettings.inputsDelay > MPSettings.inputsTickrate then
+			MPSettings.inputsDelay = 0 -- Reset the delay
+			MPSettings.inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
-		electricsDelay = electricsDelay + dt
-		if electricsDelay > electricsTickrate then
-			electricsDelay = 0 -- Reset the delay
-			electricsGE.tick() -- Comment this line to disable electrics synchronization
+		MPSettings.electricsDelay = MPSettings.electricsDelay + dt
+		if MPSettings.electricsDelay > MPSettings.electricsTickrate then
+			MPSettings.electricsDelay = 0 -- Reset the delay
+			MPSettings.electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 	end
 end
 
 
-
-local function setPositionTR(tickRate)
-	positionTickrate = tickRate
-end
-
-
-
-local function setNodeTR(tickRate)
-	nodesTickrate = tickRate
-end
-
-
-
-local function setInputsTR(tickRate)
-	inputsTickrate = tickRate
-end
-
-
-
-M.setInputsTR     = setInputsTR
-M.setNodeTR       = setNodeTR
-M.setPositionTR   = setPositionTR
 M.onPlayerConnect = onPlayerConnect
 M.onUpdate        = onUpdate
 

@@ -114,7 +114,6 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local c               = veh.color
 	local p0              = veh.colorPalette0
 	local p1              = veh.colorPalette1
-	local serverVehicleID = getServerVehicleID(gameVehicleID)
 
 	vehicleTable[1] = CoreNetwork.getPlayerServerID()
 	vehicleTable[2] = tostring(gameVehicleID)
@@ -126,7 +125,7 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	vehicleTable[8] = getServerVehicleID(gameVehicleID) or ""
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-	GameNetwork.send()--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
+	GameNetwork.send('Os:0:'..stringToSend)--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
 end
 --=========================================== SEND VEHICLE DATA =============================================
 
@@ -176,15 +175,13 @@ end
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
-	print("Vehicle spawned : "..gameVehicleID)
+	print("[BeamMP] Vehicle spawned : "..gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 	--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
 	if GameNetwork.connectionStatus == 1 then -- If TCP connected
 		sendVehicle(gameVehicleID) -- Send it to the server
-	end
-	if GameNetwork.connectionStatus == 1 then -- If TCP connected
 		if isOwn(gameVehicleID) then
 			veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
 		end
@@ -226,7 +223,7 @@ local function onVehicleDestroyed(gameVehicleID)
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then
-				GameNetwork.send()--Network.buildPacket(1, 2121, serverVehicleID, ""))
+				GameNetwork.send('Od:'..serverVehicleID)--Network.buildPacket(1, 2121, serverVehicleID, ""))
 			end
 		else
 			onVehicleDestroyedAllowed = true
@@ -243,7 +240,7 @@ local function onVehicleSwitched(oldID, newID)
 	if GameNetwork.connectionStatus == 1 then -- If TCP connected
 		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newID then -- If it's not null
-			GameNetwork.send()--Network.buildPacket(1, 2122, newID, ""))
+			GameNetwork.send('Om:'..newID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
 end
@@ -258,6 +255,7 @@ local function onVehicleResetted(gameVehicleID)
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--Network.send(Network.buildPacket(1, 2123, serverVehicleID, ""))
+			GameNetwork.send('Or:'..serverVehicleID)
 		end
 	end
 end
@@ -279,7 +277,12 @@ local function onServerVehicleResetted(serverVehicleID)
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 
-
+local function handle(data)
+	-- the data will be the first opt then the data followed
+	print(data)
+	local code = string.sub(received, 1, 1)
+	local data = string.sub(received, 2)
+end
 
 local function onUpdate(dt)
 	if GameNetwork.connectionStatus == 1 then -- If TCP connected

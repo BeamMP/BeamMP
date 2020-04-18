@@ -192,7 +192,7 @@ end
 
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
-local function onServerVehicleRemoved(serverVehicleID, data)
+local function onServerVehicleRemoved(serverVehicleID, playerServerID)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
@@ -220,7 +220,7 @@ end
 local function onVehicleDestroyed(gameVehicleID)
 	print("Vehicle destroyed : "..gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
-		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleDestroyed then
+		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
 			local serverVehicleID = getServerVehicleID(tostring(gameVehicleID)) -- Get the serverVehicleID
 			if serverVehicleID then
 				GameNetwork.send('Od:'..serverVehicleID)--Network.buildPacket(1, 2121, serverVehicleID, ""))
@@ -295,6 +295,14 @@ local function handle(rawData)
 		local serverVehicleID = rawData
 		--local data = string.match(rawData,":(.*)")
 		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
+		onServerVehicleResetted(serverVehicleID)
+	end
+
+	if code == "d" then
+		local serverVehicleID = rawData
+		--local data = string.match(rawData,":(.*)")
+		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
+		onServerVehicleRemoved(serverVehicleID)
 	end
 end
 

@@ -6,25 +6,33 @@ local ShowNameTags = true
 local Nickname = ""
 local PlayerServerID = -1
 
--- MP TICK SETTINGS
+-- MP TICK setTINGS
 local nodesDelay = 0
 local nodesTickrate = 6 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 2 --0.016
+local positionTickrate = 0.02 --0.016
 
 local inputsDelay = 0
-local inputsTickrate = 2 --0.05
+local inputsTickrate = 0.02 --0.05
 
 local electricsDelay = 0
-local electricsTickrate = 6
+local electricsTickrate = 0.02
 
-local function SetShowNameTags(x)
+local function setShowNameTags(x)
   ShowNameTags = x
 end
 
-local function SetNickname(x)
+local function getShowNameTags()
+  return ShowNameTags
+end
+
+local function setNickname(x)
   Nickname = x
+end
+
+local function getNickname()
+  return Nickname
 end
 
 local function setPlayerServerID(x)
@@ -36,20 +44,36 @@ local function getPlayerServerID()
 end
 
 
-local function SetNodesTickrate(x)
+local function setNodesTickrate(x)
   nodesTickrate = x
 end
 
-local function SetPositionTickrate(x)
+local function getNodesTickrate()
+  return nodesTickrate
+end
+
+local function setPositionTickrate(x)
   positionTickrate = x
 end
 
-local function SetInputsTickrate(x)
+local function getPositionTickrate()
+  return positionTickrate
+end
+
+local function setInputsTickrate(x)
   inputsTickrate = x
 end
 
-local function SetElectricsTickrate(x)
+local function getInputsTickrate()
+  return inputsTickrate
+end
+
+local function setElectricsTickrate(x)
   electricsTickrate = x
+end
+
+local function getElectricsTickrate()
+  return electricsTickrate
 end
 
 -- Variables
@@ -69,12 +93,18 @@ M.electricsDelay = electricsDelay
 M.electricsTickrate = electricsTickrate
 
 -- Functions
-M.SetShowNameTags = SetShowNameTags
-M.SetNickname = SetNickname
-M.SetNodesTickrate = SetNodesTickrate
-M.SetPositionTickrate = SetPositionTickrate
-M.SetInputsTickrate = SetInputsTickrate
-M.SetElectricsTickrate = SetElectricsTickrate
+M.setShowNameTags = setShowNameTags
+M.getShowNameTags = getShowNameTags
+M.setNickname = setNickname
+M.getNickname = getNickname
+M.setNodesTickrate = setNodesTickrate
+M.getNodesTickrate = getNodesTickrate
+M.setPositionTickrate = setPositionTickrate
+M.getPositionTickrate = getPositionTickrate
+M.setInputsTickrate = setInputsTickrate
+M.getInputsTickrate = getInputsTickrate
+M.setElectricsTickrate = setElectricsTickrate
+M.getElectricsTickrate = getElectricsTickrate
 
 print("mpConfig Loaded.")
 return M

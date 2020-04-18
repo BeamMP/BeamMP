@@ -72,7 +72,7 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				print(code.." -> "..data)
+				--print(code.." -> "..data)
 				HandleNetwork[code](data)
 			end
 		end

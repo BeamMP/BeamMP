@@ -22,25 +22,25 @@ end
 local function onUpdate(dt)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
-		if mpConfig.nodesDelay > mpConfig.nodesTickrate then
+		if mpConfig.nodesDelay > mpConfig.getNodesTickrate() then
 			mpConfig.nodesDelay = 0 -- Reset the delay
 			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		mpConfig.positionDelay = mpConfig.positionDelay + dt
-		if mpConfig.positionDelay > mpConfig.positionTickrate then
+		if mpConfig.positionDelay > mpConfig.getPositionTickrate() then
 			mpConfig.positionDelay = 0 -- Reset the delay
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
 		mpConfig.inputsDelay = mpConfig.inputsDelay + dt
-		if mpConfig.inputsDelay > mpConfig.inputsTickrate then
+		if mpConfig.inputsDelay > mpConfig.getInputsTickrate() then
 			mpConfig.inputsDelay = 0 -- Reset the delay
 			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
 		mpConfig.electricsDelay = mpConfig.electricsDelay + dt
-		if mpConfig.electricsDelay > mpConfig.electricsTickrate then
+		if mpConfig.electricsDelay > mpConfig.getElectricsTickrate() then
 			mpConfig.electricsDelay = 0 -- Reset the delay
 			electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end

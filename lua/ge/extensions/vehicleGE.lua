@@ -154,6 +154,7 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 	--local playerNickname  = decodedData[9]
 
+	print("onServerVehicleSpawned ID's:  "..mpConfig.getPlayerServerID().." == "..playerServerID)
 	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
@@ -282,13 +283,19 @@ local function handle(rawData)
 	print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
-	local playerNickname= string.match(rawData,"(%w+)%:")
-	rawData = rawData:gsub(playerNickname..":", "")
-	local serverVehicleID = string.match(rawData,"(%w+)%:")
-	local data = string.match(rawData,":(.*)")
-	print("serverVehicleID: "..serverVehicleID..", Data: "..data)
 	if code == "s" then
+		local playerNickname= string.match(rawData,"(%w+)%:")
+		rawData = rawData:gsub(playerNickname..":", "")
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleSpawned(playerNickname, serverVehicleID, data)
+	end
+
+	if code == "r" then
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		--local data = string.match(rawData,":(.*)")
+		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
 	end
 end
 

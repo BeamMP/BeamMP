@@ -47,7 +47,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-	print('[GameNetwork] Sending Data: '..data)
+	--print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data)
 end
 
@@ -58,7 +58,7 @@ local HandleNetwork = {
 	['Y'] = function(params) powertrainGE.handle(params) end,
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) vehicleGE.handle(params) end,
-	['P'] = function(params) mpConfig.PlayerServerID = params end,
+	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
 }
 
 local oneSecondsTimer = 0

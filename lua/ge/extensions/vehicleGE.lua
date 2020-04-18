@@ -277,11 +277,15 @@ local function onServerVehicleResetted(serverVehicleID)
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 
-local function handle(data)
+local function handle(rawData)
 	-- the data will be the first opt then the data followed
+	print('vehicleGE:'..rawData)
+	local code = string.sub(rawData, 1, 1)
+	local data = string.sub(rawData, 2)
 	print(data)
-	local code = string.sub(received, 1, 1)
-	local data = string.sub(received, 2)
+	local code = string.match(rawData, "(%w+)%.")
+	:
+	data
 end
 
 local function onUpdate(dt)

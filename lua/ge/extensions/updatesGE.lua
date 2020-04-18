@@ -30,19 +30,19 @@ local function onUpdate(dt)
 		mpConfig.positionDelay = mpConfig.positionDelay + dt
 		if mpConfig.positionDelay > mpConfig.positionTickrate then
 			mpConfig.positionDelay = 0 -- Reset the delay
-			mpConfig.positionGE.tick() -- Comment this line to disable position synchronization
+			positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
 		mpConfig.inputsDelay = mpConfig.inputsDelay + dt
 		if mpConfig.inputsDelay > mpConfig.inputsTickrate then
 			mpConfig.inputsDelay = 0 -- Reset the delay
-			mpConfig.inputsGE.tick() -- Comment this line to disable inputs synchronization
+			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
 		mpConfig.electricsDelay = mpConfig.electricsDelay + dt
 		if mpConfig.electricsDelay > mpConfig.electricsTickrate then
 			mpConfig.electricsDelay = 0 -- Reset the delay
-			mpConfig.electricsGE.tick() -- Comment this line to disable electrics synchronization
+			electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 	end
 end

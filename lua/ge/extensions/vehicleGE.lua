@@ -162,7 +162,6 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 	else
 		if not vehicleName then return end
 		println("New vehicle : "..vehicleName)
-		tempServerVehicleID = serverVehicleID
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), vec3(0,0,0), quat(0,0,0,0), ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]))
 		nicknameMap[tostring(spawnedVeh:getID())] = playerNickname
 		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
@@ -181,7 +180,7 @@ local function onVehicleSpawned(gameVehicleID)
 	veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 	--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
 		sendVehicle(gameVehicleID) -- Send it to the server
 		if isOwn(gameVehicleID) then
 			veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")

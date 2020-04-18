@@ -138,14 +138,14 @@ local function onUpdate(dt)
 		updateTimer = updateTimer + dt -- Time in seconds
 		if updateTimer > 1 then
 			TCPSocket:send('Up')
+			if status == "LoadingResources" then
+			  print("Sending 'Ul'")
+			  TCPSocket:send('Ul')
+			end
 			updateTimer = 0
 		end
 		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 2 seconds
 			TCPSocket:send('A')
-			if status == "LoadingResources" then
-				print("Sending 'Ul'")
-				TCPSocket:send('Ul')
-			end
 			flip = true
 			--oneSecondsTimer = 0	-- Reset timer
 		end

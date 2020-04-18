@@ -59,7 +59,7 @@ local function applyPos(data, serverVehicleID)
 end
 
 local function handle(rawData)
-	print("positionGE.handle: "..rawData)
+	--print("positionGE.handle: "..rawData)
 	rawData = string.sub(rawData,3)
 	local serverVehicleID = string.match(rawData,"(%w+)%:")
 	local data = string.match(rawData,":(.*)")

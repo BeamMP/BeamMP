@@ -40,7 +40,7 @@ local function applyInputs(data, serverVehicleID)
 end
 
 local function handle(rawData)
-	print("inputsGE.handle: "..rawData)
+	--print("inputsGE.handle: "..rawData)
 	rawData = string.sub(rawData,3)
 	local serverVehicleID = string.match(rawData,"(%w+)%:")
 	local data = string.match(rawData,":(.*)")

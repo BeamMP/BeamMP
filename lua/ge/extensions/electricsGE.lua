@@ -69,7 +69,7 @@ local function applyGear(data, serverVehicleID)
 end
 
 local function handle(rawData)
-	print("electricsGE.handle: "..rawData)
+	--print("electricsGE.handle: "..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "e" then

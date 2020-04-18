@@ -31,10 +31,6 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	end
 end
 
-local function handle(data)
-	print("positionGE.handle: "..data)
-end
-
 local counter = 0
 local function applyPos(data, serverVehicleID)
 
@@ -60,9 +56,17 @@ local function applyPos(data, serverVehicleID)
 		--veh:setPosition(Point3F(pr[1], pr[2], pr[3])) -- Apply position
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end
-
 end
 
+local function handle(rawData)
+	print("positionGE.handle: "..rawData)
+	rawData = string.sub(rawData,3)
+	local serverVehicleID = string.match(rawData,"(%w+)%:")
+	local data = string.match(rawData,":(.*)")
+	--print(serverVehicleID)
+	--print(data)
+	applyPos(data, serverVehicleID)
+end
 
 
 M.applyPos          = applyPos

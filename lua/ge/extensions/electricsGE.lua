@@ -58,10 +58,6 @@ local function sendGear(data, gameVehicleID)
 	end
 end
 
-local function handle(data)
-	print("electricsGE.handle: "..data)
-end
-
 local function applyGear(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
@@ -69,6 +65,21 @@ local function applyGear(data, serverVehicleID)
 		if not vehicleGE.isOwn() then
 			veh:queueLuaCommand("electricsVE.applyGear(\'"..data.."\')")
 		end
+	end
+end
+
+local function handle(rawData)
+	print("electricsGE.handle: "..rawData)
+	local code = string.sub(rawData, 1, 1)
+	local rawData = string.sub(rawData, 3)
+	if code == "e" then
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		applyElectrics(data, serverVehicleID)
+	elseif code == "g" then
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		applyGear(data, serverVehicleID)
 	end
 end
 

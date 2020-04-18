@@ -31,16 +31,22 @@ local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
 	end
 end
 
-local function handle(data)
-	print("inputsGE.handle: "..data)
-end
-
 local function applyInputs(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("inputsVE.applyInputs(\'"..data.."\')")
 	end
+end
+
+local function handle(rawData)
+	print("inputsGE.handle: "..rawData)
+	rawData = string.sub(rawData,3)
+	local serverVehicleID = string.match(rawData,"(%w+)%:")
+	local data = string.match(rawData,":(.*)")
+	--print(serverVehicleID)
+	--print(data)
+	applyInputs(data, serverVehicleID)
 end
 
 

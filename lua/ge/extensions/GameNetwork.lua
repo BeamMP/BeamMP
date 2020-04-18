@@ -13,7 +13,6 @@ local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2
 local oneSecondsTimer = 1
 local flip = false
 local playersMap = {}
-local serverPlayerID = ""
 local sysTime = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED

@@ -27,6 +27,15 @@ local function SetNickname(x)
   Nickname = x
 end
 
+local function setPlayerServerID(x)
+  PlayerServerID = x
+end
+
+local function getPlayerServerID()
+	return PlayerServerID
+end
+
+
 local function SetNodesTickrate(x)
   nodesTickrate = x
 end
@@ -47,6 +56,8 @@ end
 M.ShowNameTags = ShowNameTags
 M.Nickname = Nickname
 M.PlayerServerID = PlayerServerID
+M.getPlayerServerID = getPlayerServerID
+M.setPlayerServerID = setPlayerServerID
 M.State = State
 M.nodesDelay = nodesDelay
 M.nodesTickrate = nodesTickrate

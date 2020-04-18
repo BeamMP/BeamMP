@@ -17,7 +17,6 @@ local updateTimer = 0
 local flip = false
 local serverTimeoutTimer = 0
 local playersMap = {}
-local serverPlayerID = ""
 local sysTime = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
@@ -94,10 +93,6 @@ local function LoadLevel(map)
 	else
 		-- Level Not a set map, lets give them the choice to select
 	end
-end
-
-local function getPlayerServerID()
-	return mpConfig.PlayerServerID
 end
 
 local function HandleU(params)
@@ -184,7 +179,6 @@ M.resetSession = resetSession
 M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
-M.getPlayerServerID = getPlayerServerID
 
 print("CoreNetwork Loaded.")
 return M

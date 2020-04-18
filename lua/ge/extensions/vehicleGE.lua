@@ -115,7 +115,7 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local p0              = veh.colorPalette0
 	local p1              = veh.colorPalette1
 
-	vehicleTable[1] = CoreNetwork.getPlayerServerID()
+	vehicleTable[1] = mpConfig.getPlayerServerID()
 	vehicleTable[2] = tostring(gameVehicleID)
 	vehicleTable[3] = veh:getJBeamFilename()
 	vehicleTable[4] = vehicleConfig
@@ -152,8 +152,9 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
+	--local playerNickname  = decodedData[9]
 
-	if CoreNetwork.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
+	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
 		println("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)

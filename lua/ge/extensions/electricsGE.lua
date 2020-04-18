@@ -27,7 +27,7 @@ local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
+			GameNetwork.Send()--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
 			--print("Electrics sent "..serverVehicleID)
 		end
 	end

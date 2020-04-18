@@ -141,18 +141,17 @@ end
 
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
-local function onServerVehicleSpawned(data)
+local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
-	local serverVehicleID = decodedData[3] -- Server ID of the vehicle
-	local vehicleName     = decodedData[4] -- Vehicle name
-	local vehicleConfig   = jsonDecode(decodedData[5]) -- Vehicle config
-	local c               = jsonDecode(decodedData[6]) -- Vehicle color
-	local cP0             = jsonDecode(decodedData[7]) -- Vehicle colorPalette0
-	local cP1             = jsonDecode(decodedData[8]) -- Vehicle colorPalette1
-	local playerNickname  = decodedData[9]
+	--local serverVehicleID = decodedData[3] -- Server ID of the vehicle
+	local vehicleName     = decodedData[3] -- Vehicle name
+	local vehicleConfig   = jsonDecode(decodedData[4]) -- Vehicle config
+	local c               = jsonDecode(decodedData[5]) -- Vehicle color
+	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
+	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 
 	if CoreNetwork.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
@@ -281,11 +280,15 @@ local function handle(rawData)
 	-- the data will be the first opt then the data followed
 	print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
-	local data = string.sub(rawData, 2)
-	print(data)
-	local code = string.match(rawData, "(%w+)%.")
-	:
-	data
+	local rawData = string.sub(rawData, 3)
+	local playerNickname= string.match(rawData,"(%w+)%:")
+	rawData = rawData:gsub(playerNickname..":", "")
+	local serverVehicleID = string.match(rawData,"(%w+)%:")
+	local data = string.match(rawData,":(.*)")
+	print("serverVehicleID: "..serverVehicleID..", Data: "..data)
+	if code == "s" then
+		onServerVehicleSpawned(playerNickname, serverVehicleID, data)
+	end
 end
 
 local function onUpdate(dt)

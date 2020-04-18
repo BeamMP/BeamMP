@@ -178,6 +178,7 @@ local function onVehicleSpawned(gameVehicleID)
 	print("[BeamMP] Vehicle spawned : "..gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if first then
+		first = false
 		commands.setFreeCamera() -- Fix camera
 		veh:delete() -- Remove it
 		if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera

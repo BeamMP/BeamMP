@@ -95,6 +95,10 @@ local function LoadLevel(map)
 	end
 end
 
+local function onPlayerConnect() -- Function called when a player connect to the server
+	updatesGE.onPlayerConnect()
+end
+
 local function HandleU(params)
 	UI.updateLoading(params)
 	--print(params)
@@ -115,6 +119,13 @@ local HandleNetwork = {
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,
 	['V'] = function(params) vehicleGE.handle(params) end,
+
+	['K'] = function(params) quitMPWithMessage(params) end, -- Player Kicked Event
+	['E'] = function(params)  end, -- Event For another Resource
+	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
+	['J'] = function(params) onPlayerConnect() end, -- A player Joined
+	--[''] = function(params)  end, --
+	--[''] = function(params)  end, --
 }
 
 local function onUpdate(dt)
@@ -168,6 +179,11 @@ local function resetSession()
 end
 
 local function quitMP()
+	print("[CoreNetwork] Reset Session Called!")
+	TCPSocket:send('QG')
+end
+
+local function quitMPWithMessage()
 	print("[CoreNetwork] Reset Session Called!")
 	TCPSocket:send('QG')
 end

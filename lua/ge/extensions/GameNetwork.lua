@@ -19,6 +19,7 @@ local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREA
 local status = ""
 -- ============= VARIABLES =============
 
+
 --================================ CONNECT TO SERVER ================================
 local function connectToLauncher()
 	print("Connecting to the Launcher for Session Data")

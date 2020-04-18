@@ -1,0 +1,44 @@
+<div ng-mouseover="vehConf_parts.selectPart($event, entry.val)">
+  <bng-accordion ng-if="entry.parts && entry.val !== ''" class="vAccordion--default" multiple>
+    <bng-accordion-pane>
+      <bng-pane-header>
+        <div layout="row" layout-align="space-between center">
+          <div flex class="inputName" ng-click="vehConf_parts.toggleOpenSlot(entry.slot)">{{ ::entry.name }}</div>
+          <md-select  ng-model="entry.val" ng-change="vehConf_parts.write()" aria-label="_" ng-click="vehConf_parts.stopPropagation($event);" style="width:50%;">
+            <md-select-label style="width:100%"></md-select-label>
+            <md-option md-no-ink ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'name'] track by $index" ng-value="opt.val">
+              {{ ::opt.name }}
+            </md-option>
+          </md-select>
+          <!-- visibility toggle -->
+          <input ng-attr-id="{{:: entry}}" style="display: none" type="checkbox" ng-model="entry.highlight" ng-click="vehConf_parts.stopPropagation($event)" ng-change="vehConf_parts.highlightParts(entry)"></input>
+          <label ng-click="vehConf_parts.stopPropagation($event)" ng-attr-for="{{:: entry}}">
+            <md-icon class="material-icons md-default-theme" style="cursor: pointer" ng-style="{'color': (entry.highlight) ? '#6E6E6E' : '#D4D4D4'}">remove_red_eye</md-icon>
+          </label>
+
+        </div>
+      </bng-pane-header>
+      <bng-pane-body style="padding-left:30px;">
+        <div ng-repeat="entry in entry.parts track by entry.slot" ng-include="'vehicle-config-tree'">
+        </div>
+      </bng-pane-body>
+    </bng-accordion-pane>
+  </bng-accordion>
+
+  <div ng-if="!entry.parts || entry.val === ''"  layout="row" layout-align="space-between center">
+    <div flex class="inputName">{{:: entry.name}}</div>
+    <md-select flex ng-model="entry.val" ng-change="vehConf_parts.write()"
+            class="height32" style="width:100%;" aria-label="_">
+      <md-select-label style="width:100%; justify-content: space-between;"></md-select-label>
+      <md-option md-no-ink ng-value="opt.val" ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'name'] track by $index">
+        {{ ::opt.name }}
+      </md-option>
+    </md-select>
+    <!-- visibility toggle -->
+    <input ng-attr-id="{{:: entry}}" style="display: none" type="checkbox" ng-model="entry.highlight" ng-click="vehConf_parts.stopPropagation($event)" ng-change="vehConf_parts.highlightParts(entry)"></input>
+    <label ng-click="vehConf_parts.stopPropagation($event)" ng-attr-for="{{:: entry}}">
+      <md-icon class="material-icons md-default-theme" style="cursor: pointer" ng-style="{'color': (entry.highlight) ? '#6E6E6E' : '#D4D4D4'}">remove_red_eye</md-icon>
+    </label>
+
+  </div>
+</div>

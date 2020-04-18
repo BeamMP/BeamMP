@@ -20,8 +20,8 @@ local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local distance = nodesVE.distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
 	lastPos = pos
-	
-	if (distance < 0.10) then -- When vehicle doesn't move
+
+	if (distance < 0.02) then -- When vehicle doesn't move
 		if timer < 40 then -- Send 40 times less packets
 			timer = timer + 1
 			return
@@ -32,14 +32,14 @@ local function getVehicleRotation()
 
 	local tempTable = {}
 	local pos = obj:getPosition()
-	local rot = obj:getRotation()	
+	local rot = obj:getRotation()
 	tempTable[1] = pos.x
 	tempTable[2] = pos.y
 	tempTable[3] = pos.z
 	tempTable[4] = rot.x
 	tempTable[5] = rot.y
 	tempTable[6] = rot.z
-	tempTable[7] = rot.w	
+	tempTable[7] = rot.w
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 

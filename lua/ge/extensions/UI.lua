@@ -30,6 +30,10 @@ local function setPlayerCount(playerCount)
 	be:executeJS('setPlayerCount("'..playerCount..' ms")')
 end
 
+local function chatMessage(message)
+	be:executeJS('chatMessage("'..message..'")')
+end
+
 local function ready(src)
   print("UI / Game Has now loaded ("..src..")")
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
@@ -42,6 +46,7 @@ M.updateLoading = updateLoading
 M.ready = ready
 M.setPing = setPing
 M.setStatus = setStatus
+M.chatMessage = chatMessage
 M.setPlayerCount = setPlayerCount
 
 print("UI Loaded.")

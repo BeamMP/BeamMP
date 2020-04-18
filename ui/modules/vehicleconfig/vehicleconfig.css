@@ -1,0 +1,55 @@
+.contentNavVehicleconfig md-select {
+  padding: 0;
+  margin: 0;
+}
+
+.contentNavVehicleconfig .inputName {
+  font-size:95%;
+}
+
+.contentNavVehicleconfig .accordionText {
+  background-color:transparent !important;
+  cursor: pointer;
+  padding: 0;
+  margin:0;
+}
+
+.contentNavVehicleconfig .accordionHeader:hover {
+  background-color: rgba(158,158,158,0.2) !important;
+}
+
+
+
+
+.vAccordion--default v-pane-header::after, .vAccordion--default v-pane-header::before {
+  left: 0;
+}
+
+.vAccordion--default v-pane-header{
+  padding:5px 0 5px 15px;
+}
+
+
+/*Override vAccordinons css*/
+.contentNavVehicleconfig .vAccordion--default v-pane-content>div{
+  padding-bottom: 0 !important;
+}
+
+.contentNavVehicleconfig .vAccordion--default v-pane-header {
+  padding: 0 0 0 15px !important;
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+.contentNavVehicleconfig .vAccordion--default v-accordion {
+  margin-top: 0 !important;
+  padding-left: 0 !important;
+}
+
+.contentNavVehicleconfig md-tabs-wrapper md-prev-button {
+  background-image: none;
+}
+
+.contentNavVehicleconfig md-tabs-wrapper md-next-button {
+  background-image: none;
+}

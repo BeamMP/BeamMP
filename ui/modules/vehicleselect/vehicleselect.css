@@ -1,0 +1,21 @@
+.gridItem {
+  overflow: hidden;
+  padding: 0.25%;
+}
+
+.gridItem.VScroll {
+  width: 24.50%;
+}
+
+.gridItem .vehicleFooter {
+  color: white;
+  background-color: rgba(0,0,0,0.4);
+  width: 100%;
+  height: 28px;
+  position: relative;
+}
+
+.gridItem:hover .vehicleFooter {
+  background: rgb(128, 0, 0);
+}
+

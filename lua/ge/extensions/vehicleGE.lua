@@ -171,19 +171,25 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 end
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 
-
+local first = true
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
 	print("[BeamMP] Vehicle spawned : "..gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
-	veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
-	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
-	--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
-	if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
-		sendVehicle(gameVehicleID) -- Send it to the server
-		if isOwn(gameVehicleID) then
-			veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
+	if first then
+		commands.setFreeCamera() -- Fix camera
+		veh:delete() -- Remove it
+		if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+	else
+		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
+		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
+		--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
+		if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
+			sendVehicle(gameVehicleID) -- Send it to the server
+			if isOwn(gameVehicleID) then
+				veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
+			end
 		end
 	end
 end
@@ -250,7 +256,7 @@ end
 
 --======================= ON VEHICLE RESETTED (CLIENT) =======================
 local function onVehicleResetted(gameVehicleID)
-	--print("Vehicle resetted : "..gameVehicleID)
+	print("Vehicle resetted : "..gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null

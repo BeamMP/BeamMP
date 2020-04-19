@@ -15,7 +15,7 @@ local lastPos = vec3(0,0,0)
 
 
 
-function distance( x1, y1, z1, x2, y2, z2 )
+local function distance( x1, y1, z1, x2, y2, z2 )
 	local dx = x1 - x2
 	local dy = y1 - y2
 	local dz = z1 - z2
@@ -25,7 +25,7 @@ end
 
 
 local function getNodes()
-	print("ok")
+	--print("ok")
 	local pos = obj:getPosition()
 	local dist = distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
 	lastPos = pos
@@ -55,20 +55,24 @@ local function getNodes()
 		end
 		save.nodes[node.cid + 1] = d
 	end
-	print(jsonEncode(save))
+	--print(jsonEncode(save))
 	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 end
 
 
 
-local function applyNodes(data)
-	
+local function applyNodes(rawData)
+
 	--obj:requestReset(RESET_PHYSICS)
-	
+	local data = rawData
+	local End = data.length
+	print("End Char: "..string.sub(data, -5))
 	local decodedData = jsonDecode(data)
+	print(dump(decodedData))
+	print(decodedData)
 	for cid, node in pairs(decodedData.nodes) do
 		cid = tonumber(cid) - 1
-		
+
 		local beam = v.data.beams[cid]
 		local beamPrecompression = beam.beamPrecompression or 1
 		local deformLimit = type(beam.deformLimit) == 'number' and beam.deformLimit or math.huge
@@ -77,12 +81,12 @@ local function applyNodes(data)
 			beam.beamDeform, deformLimit, type(beam.deformLimitExpansion) == 'number' and beam.deformLimitExpansion or deformLimit,
 			beamPrecompression
 		)
-		
+
 		obj:setNodePosition(cid, vec3(node[1]):toFloat3())
 		if #node > 1 then
 			obj:setNodeMass(cid, node[2])
 		end
-		
+
 	end
 end
 

@@ -49,7 +49,7 @@ end
 
 local function sendData(data)
 	--print('[GameNetwork] Sending Data: '..data)
-	TCPSocket:send(data)
+	TCPSocket:send(data..'\n')
 end
 
 local function sendDataSplit(code, ID, data)
@@ -60,13 +60,13 @@ local function sendDataSplit(code, ID, data)
 	while size > maxSize do
 		print("Running: "..size)
 		local tdata = string.sub(data, 1, maxSize)
-		TCPSocket:send(code..ID..counter..":"..tdata)
+		TCPSocket:send(code..ID..counter..":"..tdata..'\n')
 		data = string.sub(data, 5001, size) --data:gsub(tdata, "")
 		size = string.len(data)
 		counter = counter + 1
 	end
 	print("Done: "..size)
-	TCPSocket:send(code..ID.."E:"..data)
+	TCPSocket:send(code..ID.."E:"..data..'\n')
 end
 
 local HandleNetwork = {

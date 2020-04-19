@@ -48,7 +48,7 @@ local function applyPos(data, serverVehicleID)
 		local pr = jsonDecode(data) -- Decoded data
 		if counter < 1 then
 			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
-			counter = counter + 1
+			--counter = counter + 1
 		else
 			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
 			counter = 0

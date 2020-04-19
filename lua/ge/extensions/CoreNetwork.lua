@@ -175,6 +175,7 @@ local function resetSession()
 	TCPSocket:send('QS')
 	disconnectLauncher()
 	GameNetwork.disconnectLauncher()
+	vehicleGE.onDisconnect()
 	connectToLauncher()
 end
 

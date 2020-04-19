@@ -19,6 +19,7 @@ print("vehicleGE Initialising...")
 
 -- ============= VARIABLES =============
 local ownMap = {}
+local first = true
 local vehiclesMap = {}
 local nicknameMap = {}
 local invertedVehiclesMap = {}
@@ -136,6 +137,7 @@ local function onDisconnect()
 	ownMap = {}
 	vehiclesMap = {}
 	invertedVehiclesMap = {}
+	first = true
 end
 
 
@@ -171,7 +173,7 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 end
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 
-local first = true
+
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
@@ -181,6 +183,7 @@ local function onVehicleSpawned(gameVehicleID)
 		first = false
 		commands.setFreeCamera() -- Fix camera
 		veh:delete() -- Remove it
+		print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
 		if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
 	else
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files

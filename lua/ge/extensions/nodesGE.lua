@@ -34,8 +34,12 @@ local function sendNodes(data, gameVehicleID) -- Update electrics values of all 
 	end
 end
 
-local function handle(data)
-	print("nodesGE.handle: "..data)
+local function handle(rawData)
+	print("nodesGE.handle: "..rawData)
+	rawData = string.sub(rawData,3)
+	local serverVehicleID = string.match(rawData,"(%w+)%:")
+	local data = string.match(rawData,":(.*)")
+	applyNodes(data, serverVehicleID)
 end
 
 local function applyNodes(data, serverVehicleID)
@@ -44,7 +48,7 @@ local function applyNodes(data, serverVehicleID)
 	if veh then
 		local pos = veh:getPosition()
 		--veh:setPositionRotation(pos.x, pos.y, pos.z, 0, 0, 0.01, math.random())
-		--veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send nodes values
+		veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send nodes values
 	end
 end
 

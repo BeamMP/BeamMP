@@ -78,7 +78,7 @@ local HandleNetwork = {
 }
 
 local oneSecondsTimer = 0
-local dataArray = []
+local dataArray = {}
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected

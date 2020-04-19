@@ -41,7 +41,7 @@ local function applyNodes(data, serverVehicleID)
 	if veh then
 		--local pos = veh:getPosition()
 		--veh:setPositionRotation(pos.x, pos.y, pos.z, 0, 0, 0.01, math.random())
-		veh:queueLuaCommand("nodesVE.applyNodes(\'"..libDeflate:DecompressZlib(data).."\')") -- Send nodes values
+		veh:queueLuaCommand("nodesVE.applyNodes(\'"..data.."\')") -- Send nodes values
 	end
 end
 

@@ -48,7 +48,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-	--print('[GameNetwork] Sending Data: '..data)
+  print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data..'\n')
 end
 
@@ -91,23 +91,33 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				--print(code.." -> "..data)
+				--print('\n'..code.." -> "..data)
 				if code == "X" then
 					--n:ID:part:data
 					data = string.sub(data, 2, string.len(data))
+					--print("Data: "..data)
 					local vid = string.match(data,"(%w+)%:")
-					data = data:gsub(vid..":", "")
+					--print("VID: "..vid.."")
+					data = string.sub(data, string.len(vid..":")+1, string.len(data))
+					--print("Data: "..data)
 					local part = string.match(data,"(%w+)%:")
-					data = data:gsub(part..":", "")
-					local nData = string.match(data,":(.*)")
+					--print("Part: "..part)
+					data = string.sub(data, string.len(part..":"), string.len(data))
+					--print("Data: "..data)
+					local nData = string.match(data, ":(.*)")
+					--print("Node Data: "..nData..'\n')
 					if part == "1"  or part == 1 then
 						dataArray[vid] = ""
-						dataArray[vid] = nData
+						--print("1: "..dataArray[vid])
+						dataArray[vid] = tostring(nData)
+						--print("1 (W Data): "..dataArray[vid])
 					else
-						dataArray[vid] = dataArray[vid] .. nData
+						--print("Append Nodes: "..dataArray[vid])
+						dataArray[vid] = tostring(dataArray[vid]..nData)
 					end
 					if part == "E" then
-						HandleNetwork[code]("n:"..dataArray[vid])
+						--print("Complete Node Data: "..dataArray[vid])
+						HandleNetwork[code]("n:"..vid..":"..dataArray[vid])
 					end
 				else
 					HandleNetwork[code](data)

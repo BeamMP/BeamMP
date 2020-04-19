@@ -30,9 +30,7 @@ local function sendNodes(data, gameVehicleID) -- Update electrics values of all 
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			local send = 'Xn:'..serverVehicleID..":"..libDeflate:CompressDeflate(data)
-			print(string.len(send))
-			GameNetwork.send(send)--Network.buildPacket(0, 2132, serverVehicleID, data))
+			GameNetwork.sendSplit('Xn:', serverVehicleID..":", data)--Network.buildPacket(0, 2132, serverVehicleID, data))
 		end
 	end
 end
@@ -43,7 +41,7 @@ local function applyNodes(data, serverVehicleID)
 	if veh then
 		--local pos = veh:getPosition()
 		--veh:setPositionRotation(pos.x, pos.y, pos.z, 0, 0, 0.01, math.random())
-		veh:queueLuaCommand("nodesVE.applyNodes(\'"..libDeflate:DecompressDeflate(data).."\')") -- Send nodes values
+		veh:queueLuaCommand("nodesVE.applyNodes(\'"..libDeflate:DecompressZlib(data).."\')") -- Send nodes values
 	end
 end
 

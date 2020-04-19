@@ -52,6 +52,21 @@ local function sendData(data)
 	TCPSocket:send(data)
 end
 
+local function sendDataSplit(code, ID, data)
+	--print('[GameNetwork] Sending Data: '..data)
+	local counter = 1 -- 1, 2, 3, n, E
+	local size = string.len(data)
+	local maxSize = 5000
+	while size > maxSize do
+		local tdata = string.sub(data, 1, maxSize)
+		TCPSocket:send(code..id..counter..":"..tdata)
+		data = string.sub(data, 5001, size) --data:gsub(tdata, "")
+		size = string.len(data)
+		counter = counter + 1
+	end
+	TCPSocket:send(code..id.."E:"..data)
+end
+
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,
 	['W'] = function(params) electricsGE.handle(params) end,
@@ -63,6 +78,7 @@ local HandleNetwork = {
 }
 
 local oneSecondsTimer = 0
+local dataArray = []
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
@@ -74,7 +90,26 @@ local function onUpdate(dt)
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
 				--print(code.." -> "..data)
-				HandleNetwork[code](data)
+				if code == "X" then
+					--n:ID:part:data
+					data = string.sub(data, 2, string.len(data))
+					local vid = string.match(data,"(%w+)%:")
+					data = data:gsub(vid..":", "")
+					local part = string.match(data,"(%w+)%:")
+					data = data:gsub(part..":", "")
+					local nData = string.match(data,":(.*)")
+					if part == "1"  or part == 1 then
+						dataArray[vid] = ""
+						dataArray[vid] = nData
+					else
+						dataArray[vid] = dataArray[vid] .. nData
+					end
+					if part == "E" then
+						HandleNetwork[code]("n:"..dataArray[vid])
+					end
+				else
+					HandleNetwork[code](data)
+				end
 			end
 		end
 		--================================ TWO SECONDS TIMER ================================
@@ -102,6 +137,7 @@ M.onUpdate = onUpdate
 M.connectToLauncher = connectToLauncher
 M.disconnectLauncher = disconnectLauncher
 M.send = sendData
+M.sendSplit = sendDataSplit
 M.connectionStatus = connectionStatus
 
 print("GameNetwork Loaded.")

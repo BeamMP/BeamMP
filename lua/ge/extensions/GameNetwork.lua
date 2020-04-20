@@ -48,7 +48,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-  --print('[GameNetwork] Sending Data: '..data)
+  print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data..'\n')
 end
 
@@ -91,7 +91,7 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				--print('\n'..code.." -> "..data)
+				print('\n'..code.." -> "..data)
 				if code == "X" then
 					--n:ID:part:data
 					data = string.sub(data, 2, string.len(data))

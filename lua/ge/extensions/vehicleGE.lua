@@ -295,8 +295,9 @@ local function handle(rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
-		local playerRole= string.match(rawData,"(%w+)%:")
-		rawData = rawData:gsub(playerRole..":", "")
+		local playerRole = "USER" 
+		--local playerRole= string.match(rawData,"(%w+)%:")
+		--rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname= string.match(rawData,"(%w+)%:")
 		rawData = rawData:gsub(playerNickname..":", "")
 		local serverVehicleID = string.match(rawData,"(%w+)%:")

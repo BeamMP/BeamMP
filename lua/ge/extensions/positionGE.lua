@@ -16,11 +16,18 @@ local function tick()
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
 			veh:queueLuaCommand("positionVE.getVehicleRotation()")
+			--veh:queueLuaCommand("positionVE.getVehicleVelocity()")
+			--veh:queueLuaCommand("positionVE.getVehicleAngularVelocity()")
 		end
 	end
 end
 
-
+local function distance( x1, y1, z1, x2, y2, z2 )
+	local dx = x1 - x2
+	local dy = y1 - y2
+	local dz = z1 - z2
+	return math.sqrt ( dx*dx + dy*dy + dz*dz)
+end
 
 local function sendVehiclePosRot(data, gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
@@ -31,29 +38,40 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	end
 end
 
-local counter = 0
+
 local function applyPos(data, serverVehicleID)
 
 	-- 1 = pos.x
 	-- 2 = pos.y
 	-- 3 = pos.z
-	-- 4 = rot.x
-	-- 5 = rot.y
-	-- 6 = rot.z
-	-- 7 = rot.w
+
+	-- 4 = vel.x
+	-- 5 = vel.y
+	-- 6 = vel.z
+
+	-- 7 = rot.x
+	-- 8 = rot.y
+	-- 9 = rot.z
 
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		local pr = jsonDecode(data) -- Decoded data
-		if counter < 1 then
+		local pos = veh:getPosition()
+		local diff = distance(pos.x, pos.y, pos.z, pr[1], pr[2], pr[3])
+		print("Diff: "..diff)
+		if diff > 0.5 then
 			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
-			--counter = counter + 1
 		else
-			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
-			counter = 0
+			vel = vec3(pr[4], pr[5], pr[6])
+			rot = vec3(pr[7], pr[8], pr[9])
+			--veh:queueLuaCommand("positionVE.setVehiclePosRot(" .. tostring(pos) .. "," .. tostring(rot) .. "," .. timestamp .. ")")
+
+			-- Apply velocities
+			veh:queueLuaCommand("velocityVE.setVelocity(\'"..vel.."\')")
+			-- TODO: shorten this line
+			veh:queueLuaCommand("velocityVE.setAngularVelocity(\'"..rot.."\')")
 		end
-		--veh:setPosition(Point3F(pr[1], pr[2], pr[3])) -- Apply position
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end
 end

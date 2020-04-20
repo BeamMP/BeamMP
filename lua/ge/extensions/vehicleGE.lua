@@ -301,7 +301,7 @@ local function handle(rawData)
 		rawData = rawData:gsub(playerNickname..":", "")
 		local serverVehicleID = string.match(rawData,"(%w+)%:")
 		local data = string.match(rawData,":(.*)")
-		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
+		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end
 
@@ -326,7 +326,7 @@ local function onUpdate(dt)
 		for i = 0, be:getObjectCount() do -- For each vehicle
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
-				if not isOwn(veh:getID()) then
+				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
 					local color = ""
@@ -340,6 +340,7 @@ local function onUpdate(dt)
 						GDEV = BeamNG Staff
 						MDEV = MP Dev
 					]]
+					--print(dump(nicknameMap[tostring(veh:getID())]))
 					if nicknameMap[tostring(veh:getID())].role == "USER" then
 						color = ColorF(255, 255, 255, 255)
 						tag = ""

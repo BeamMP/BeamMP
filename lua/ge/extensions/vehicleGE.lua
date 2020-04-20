@@ -143,7 +143,7 @@ end
 
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
-local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
+local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
@@ -165,7 +165,9 @@ local function onServerVehicleSpawned(playerNickname, serverVehicleID, data)
 		if not vehicleName then return end
 		println("New vehicle : "..vehicleName)
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), vec3(0,0,0), quat(0,0,0,0), ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]))
-		nicknameMap[tostring(spawnedVeh:getID())] = playerNickname
+		nicknameMap[tostring(spawnedVeh:getID())] = {}
+		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
+		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
 		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
 	end
 
@@ -293,12 +295,14 @@ local function handle(rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
+		local playerRole= string.match(rawData,"(%w+)%:")
+		rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname= string.match(rawData,"(%w+)%:")
 		rawData = rawData:gsub(playerNickname..":", "")
 		local serverVehicleID = string.match(rawData,"(%w+)%:")
 		local data = string.match(rawData,":(.*)")
 		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
-		onServerVehicleSpawned(playerNickname, serverVehicleID, data)
+		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end
 
 	if code == "r" then
@@ -325,10 +329,43 @@ local function onUpdate(dt)
 				if not isOwn(veh:getID()) then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
+					local color = ""
+					local tag = ""
+					--[[
+						USER = Default
+						EA = Early Access
+						YT = YouTuber
+						SUPPORT = Support
+						MOD = Moderator
+						GDEV = BeamNG Staff
+						MDEV = MP Dev
+					]]
+					if nicknameMap[tostring(veh:getID())].role == "USER" then
+						color = ColorF(255, 255, 255, 255)
+						tag = ""
+					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
+						color = ColorF(155, 89, 182, 255)
+						tag = " [Early Access]"
+					elseif nicknameMap[tostring(veh:getID())].role == "YT" then
+						color = ColorF(255, 0, 0, 255)
+						tag = " [YouTuber]"
+					elseif nicknameMap[tostring(veh:getID())].role == "SUPPORT" then
+						color = ColorF(68, 109, 184, 255)
+						tag = " [Support]"
+					elseif nicknameMap[tostring(veh:getID())].role == "MOD" then
+						color = ColorF(68, 109, 184, 255)
+						tag = " [Moderator]"
+					elseif nicknameMap[tostring(veh:getID())].role == "GDEV" then
+						color = ColorF(252, 107, 3, 255)
+						tag = " [BeamNG Staff]"
+					elseif nicknameMap[tostring(veh:getID())].role == "MDEV" then
+						color = ColorF(194, 55, 55, 255)
+						tag = " [MP DEV]"
+					end
 					debugDrawer:drawTextAdvanced(
 						pos,
-						String(" "..tostring(nicknameMap[tostring(veh:getID())])),
-						ColorF(1,1,1,1), true, false, -- Color / Background / Wtf
+						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..tag),
+					  color, true, false, -- Color / Background / Wtf
 						ColorI(0,0,0,255)
 					)
 				end

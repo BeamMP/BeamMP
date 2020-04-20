@@ -72,7 +72,7 @@ local function applyNodes(data)
 	local decodedData = jsonDecode(data)
 	--print(decodedData)
 
-  if not decodedData or decodedData.nodeCount ~= #v.data.nodes or decodedData.beamCount ~= #v.data.beams then
+  if not decodedData or decodedData.nodeCount ~= #v.data.nodes then --or decodedData.beamCount ~= #v.data.beams then
     log("E", "nodesVE", "unable to use nodes data.")
     return
   end

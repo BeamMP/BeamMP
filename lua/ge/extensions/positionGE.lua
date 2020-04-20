@@ -56,24 +56,25 @@ local function applyPos(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
+		--print(data)
 		local pr = jsonDecode(data) -- Decoded data
-		print(dump(pr))
+		--print(dump(pr))
 		local pos = veh:getPosition()
-		local diff = distance(pos.x, pos.y, pos.z, pr[1], pr[2], pr[3])
+		local diff = distance(pos.x, pos.y, pos.z, pr.pos.x, pr.pos.y, pr.pos.z)
 		--print("Diff: "..diff)
 		if diff > 105.5 then -- set to 0.5 for production
-			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
+			veh:setPosition(Point3F(pr.pos.x, pr.pos.y, pr.pos.z))
 		else
-			local vel = vec3(pr[4], pr[5], pr[6])
+			local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
 			--rot = vec3(pr[7], pr[8], pr[9])
 			--veh:queueLuaCommand("positionVE.setVehiclePosRot(" .. tostring(pos) .. "," .. tostring(rot) .. "," .. timestamp .. ")")
 
 			-- Apply velocities
-			veh:queueLuaCommand("velocityVE.setVelocity("..pr[4]..", "..pr[5]..", "..pr[6]..")")
+			veh:queueLuaCommand("velocityVE.setVelocity("..pr.vel.x..", "..pr.vel.y..", "..pr.vel.z..")")
 			-- TODO: shorten this line
 
 			print("velocityVE.setAngularVelocity(^)")
-			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr[7]..", "..pr[8]..", "..pr[9]..")")
+			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr.ang.x..", "..pr.ang.y..", "..pr.ang.z..")")
 		end
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end

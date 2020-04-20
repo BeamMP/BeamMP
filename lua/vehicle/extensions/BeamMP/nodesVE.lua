@@ -33,12 +33,12 @@ local function getNodes()
 
 	local save = {}
   save.nodeCount = #v.data.nodes
-  save.beamCount = #v.data.beams
-  --save.luaState = serialize(serializePackages("save"))
-  save.hydros = {}
+  --save.beamCount = #v.data.beams
+
+  --[[save.hydros = {}
   for _, h in pairs(hydros.hydros) do
     table.insert(save.hydros, h.state)
-  end
+  end]]
 
   save.nodes = {}
   for _, node in pairs(v.data.nodes) do
@@ -51,7 +51,7 @@ local function getNodes()
     save.nodes[node.cid + 1] = d
   end
 
-  save.beams = {}
+  --[[save.beams = {}
   for _, beam in pairs(v.data.beams) do
     local d = {
       obj:getBeamRestLength(beam.cid),
@@ -59,7 +59,7 @@ local function getNodes()
       obj:getBeamDeformation(beam.cid)
     }
     save.beams[beam.cid + 1] = d
-  end
+  end]]
 
 	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 end
@@ -77,9 +77,9 @@ local function applyNodes(data)
     return
   end
 
-  for k, h in pairs(decodedData.hydros) do
+  --[[for k, h in pairs(decodedData.hydros) do
     hydros.hydros[k].state = h
-  end
+  end]]
 
   for cid, node in pairs(decodedData.nodes) do
     cid = tonumber(cid) - 1
@@ -89,7 +89,7 @@ local function applyNodes(data)
     end
   end
 
-  for cid, beam in pairs(decodedData.beams) do
+  --[[for cid, beam in pairs(decodedData.beams) do
     cid = tonumber(cid) - 1
     obj:setBeamLength(cid, beam[1])
     if beam[2] == true then
@@ -100,12 +100,9 @@ local function applyNodes(data)
       --print('deformed: ' .. tostring(cid) .. ' = ' .. tostring(beam[3]))
       beamDeformed(cid, beam[3])
     end
-  end
+  end]]
 
-
-
-
-	for cid, node in pairs(decodedData.nodes) do
+	--[[for cid, node in pairs(decodedData.nodes) do
 		cid = tonumber(cid) - 1
 
 		local beam = v.data.beams[cid]
@@ -122,7 +119,7 @@ local function applyNodes(data)
 			obj:setNodeMass(cid, node[2])
 		end
 
-	end
+	end]]
 end
 
 

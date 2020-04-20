@@ -39,18 +39,19 @@ local function getVehicleRotation()
 	rot.y = obj:getRollAngularVelocity()
 	rot.z = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
-	tempTable['pos'].x = pos.x
-	tempTable['pos'].y = pos.y
-	tempTable['pos'].z = pos.z
+	tempTable['pos'].x = tonumber(pos.x)
+	tempTable['pos'].y = tonumber(pos.y)
+	tempTable['pos'].z = tonumber(pos.z)
 	tempTable['vel'] = {}
-	tempTable['vel'].x = vel.x
-	tempTable['vel'].y = vel.y
-	tempTable['vel'].z = vel.z
+	tempTable['vel'].x = tonumber(vel.x)
+	tempTable['vel'].y = tonumber(vel.y)
+	tempTable['vel'].z = tonumber(vel.z)
 	tempTable['ang'] = {}
-	tempTable['ang'].x = rot.x
-	tempTable['ang'].y = rot.y
-	tempTable['ang'].z = rot.z
+	tempTable['ang'].x = tonumber(rot.x)
+	tempTable['ang'].y = tonumber(rot.y)
+	tempTable['ang'].z = tonumber(rot.z)
 	--print(dump(tempTable))
+	--print("tempTable ^ ")
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 

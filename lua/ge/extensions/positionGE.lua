@@ -61,7 +61,7 @@ local function applyPos(data, serverVehicleID)
 		local pos = veh:getPosition()
 		local diff = distance(pos.x, pos.y, pos.z, pr[1], pr[2], pr[3])
 		--print("Diff: "..diff)
-		if diff > 5.5 then -- set to 0.5 for production
+		if diff > 105.5 then -- set to 0.5 for production
 			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
 		else
 			local vel = vec3(pr[4], pr[5], pr[6])

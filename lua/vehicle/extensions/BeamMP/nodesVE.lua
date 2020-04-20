@@ -76,7 +76,7 @@ local function applyNodes(data)
     log("E", "nodesVE", "unable to use nodes data.")
     return
   end
-
+  print("Node Data Good, Attempting to apply...")
   --[[for k, h in pairs(decodedData.hydros) do
     hydros.hydros[k].state = h
   end]]
@@ -120,6 +120,7 @@ local function applyNodes(data)
 		end
 
 	end]]
+  print("Node Data Should be applied!")
 end
 
 

@@ -342,25 +342,25 @@ local function onUpdate(dt)
 					]]
 					--print(dump(nicknameMap[tostring(veh:getID())]))
 					if nicknameMap[tostring(veh:getID())].role == "USER" then
-						color = ColorF(255, 255, 255, 255)
+						color = ColorF(255/255, 255/255, 255/255, 255/255)
 						tag = ""
 					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
-						color = ColorF(155, 89, 182, 255)
+						color = ColorF(155/255, 89/255, 182/255, 255/255)
 						tag = " [Early Access]"
 					elseif nicknameMap[tostring(veh:getID())].role == "YT" then
-						color = ColorF(255, 0, 0, 255)
+						color = ColorF(255/255, 0/255, 0/255, 255/255)
 						tag = " [YouTuber]"
 					elseif nicknameMap[tostring(veh:getID())].role == "SUPPORT" then
-						color = ColorF(68, 109, 184, 255)
+						color = ColorF(68/255, 109/255, 184/255, 255/255)
 						tag = " [Support]"
 					elseif nicknameMap[tostring(veh:getID())].role == "MOD" then
-						color = ColorF(68, 109, 184, 255)
+						color = ColorF(68/255, 109/255, 184/255, 255/255)
 						tag = " [Moderator]"
 					elseif nicknameMap[tostring(veh:getID())].role == "GDEV" then
-						color = ColorF(252, 107, 3, 255)
+						color = ColorF(252/255, 107/255, 3/255, 255/255)
 						tag = " [BeamNG Staff]"
 					elseif nicknameMap[tostring(veh:getID())].role == "MDEV" then
-						color = ColorF(194, 55, 55, 255)
+						color = ColorF(194/255, 55/255, 55/255, 255/255)
 						tag = " [MP DEV]"
 					end
 					debugDrawer:drawTextAdvanced(

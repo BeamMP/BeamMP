@@ -56,12 +56,12 @@ local function sendDataSplit(code, ID, data)
 	--print('[GameNetwork] Sending Data: '..data)
 	local counter = 1 -- 1, 2, 3, n, E
 	local size = string.len(data)
-	local maxSize = 5000
+	local maxSize = 6500
 	while size > maxSize do
 		print("Running: "..size)
 		local tdata = string.sub(data, 1, maxSize)
 		TCPSocket:send(code..ID..counter..":"..tdata..'\n')
-		data = string.sub(data, 5001, size) --data:gsub(tdata, "")
+		data = string.sub(data, 6501, size) --data:gsub(tdata, "")
 		size = string.len(data)
 		counter = counter + 1
 	end

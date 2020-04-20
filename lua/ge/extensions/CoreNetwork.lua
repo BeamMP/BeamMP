@@ -170,13 +170,16 @@ local function onUpdate(dt)
 	end
 end
 
-local function resetSession()
+local function resetSession(x)
 	print("[CoreNetwork] Reset Session Called!")
 	TCPSocket:send('QS')
 	disconnectLauncher()
 	GameNetwork.disconnectLauncher()
 	vehicleGE.onDisconnect()
 	connectToLauncher()
+	if x then
+		returnToMainMenu()
+	end
 end
 
 local function quitMP()

@@ -48,12 +48,12 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-  print('[GameNetwork] Sending Data: '..data)
+  --print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data..'\n')
 end
 
 local function sendDataSplit(code, ID, data)
-	print('[GameNetwork] Sending Data: '..data)
+	--print('[GameNetwork] Sending Data: '..data)
 	local counter = 1 -- 1, 2, 3, n, E
 	local size = string.len(data)
 	local maxSize = 5000
@@ -134,6 +134,7 @@ local function onUpdate(dt)
 		end
 		if oneSecondsTimer > 2 and flip and dt > 5000 then -- If oneSecondsTimer pass 2 seconds
 			print("TWO SEC TIMER REACHED, TIME OUT MOST LIKELY??")
+			CoreNetwork.resetSession(true)
 			disconnectLauncher()
 			connectToLauncher()
 			flip = false

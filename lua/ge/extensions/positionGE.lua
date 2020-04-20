@@ -59,18 +59,20 @@ local function applyPos(data, serverVehicleID)
 		local pr = jsonDecode(data) -- Decoded data
 		local pos = veh:getPosition()
 		local diff = distance(pos.x, pos.y, pos.z, pr[1], pr[2], pr[3])
-		print("Diff: "..diff)
-		if diff > 0.5 then
+		--print("Diff: "..diff)
+		if diff > 5.5 then -- set to 0.5 for production
 			veh:setPosition(Point3F(pr[1], pr[2], pr[3]))
 		else
-			vel = vec3(pr[4], pr[5], pr[6])
-			rot = vec3(pr[7], pr[8], pr[9])
+			local vel = vec3(pr[4], pr[5], pr[6])
+			--rot = vec3(pr[7], pr[8], pr[9])
 			--veh:queueLuaCommand("positionVE.setVehiclePosRot(" .. tostring(pos) .. "," .. tostring(rot) .. "," .. timestamp .. ")")
 
 			-- Apply velocities
-			veh:queueLuaCommand("velocityVE.setVelocity(\'"..vel.."\')")
+			veh:queueLuaCommand("velocityVE.setVelocity("..pr[4]..", "..pr[5]..", "..pr[6]..")")
 			-- TODO: shorten this line
-			veh:queueLuaCommand("velocityVE.setAngularVelocity(\'"..rot.."\')")
+			print(dump(pr))
+			print("velocityVE.setAngularVelocity(^)")
+			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr[7]..", "..pr[8]..", "..pr[9]..")")
 		end
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end

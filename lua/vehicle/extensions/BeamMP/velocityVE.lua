@@ -8,14 +8,19 @@ local M = {}
 --               Because all nodes accelerate at the same rate, the vehicle will not get ripped apart
 -- NOTE: - also affects parts that are detached from the car
 --       - very high values can cause instability
-local function setVelocity(vel)
+local function setVelocity(x, y, z)
 	-- could also use velocity difference for each node, but that would stop all moving parts like wheels
-	local velDiff = vel - vec3(obj:getVelocity())
+	local vel = vec3(x, y, z)
+	local vvel = vec3(obj:getVelocity())
+	local velDiff = vel - vvel
+	--print(velDiff)
+	--print("velDiff: ^, VEL: {"..x..", "..y..", "..z..",".."}, CVEL: {"..vvel.x..", "..vvel.y..", "..vvel.z..",".."}")
 
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local forceVec = velDiff*nodeWeight*2000 -- calculate force for desired acceleration
-
+		--print(forceVec)
+		--print("Applying Force: ^")
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 end

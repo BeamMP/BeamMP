@@ -11,7 +11,7 @@ print("updatesGE Initialising...")
 local function onPlayerConnect()
 	-- Update everything for the new connected player
 	electricsGE.tick()
-	nodesGE.tick()
+	--nodesGE.tick()
 	positionGE.tick()
 	inputsGE.tick()
 	powertrainGE.tick()

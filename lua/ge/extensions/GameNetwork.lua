@@ -127,7 +127,7 @@ local function onUpdate(dt)
 		--================================ TWO SECONDS TIMER ================================
 		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
 		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 1 seconds
-			TCPSocket:send('TEST')
+			TCPSocket:send('TEST\n')
 			print("ONE SEC TIMER REACHED, TIME OUT??")
 			oneSecondsTimer = 0	-- Reset timer
 			flip = true

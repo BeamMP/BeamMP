@@ -116,14 +116,16 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local p0              = veh.colorPalette0
 	local p1              = veh.colorPalette1
 
-	vehicleTable[1] = mpConfig.getPlayerServerID()
-	vehicleTable[2] = tostring(gameVehicleID)
-	vehicleTable[3] = veh:getJBeamFilename()
-	vehicleTable[4] = vehicleConfig
-	vehicleTable[5] = jsonEncode({c.x, c.y, c.z, c.w})
-	vehicleTable[6] = jsonEncode({p0.x, p0.y, p0.z, p0.w})
-	vehicleTable[7] = jsonEncode({p1.x, p1.y, p1.z, p1.w})
-	vehicleTable[8] = getServerVehicleID(gameVehicleID) or ""
+	vehicleTable[1]  = mpConfig.getPlayerServerID()
+	vehicleTable[2]  = tostring(gameVehicleID)
+	vehicleTable[3]  = veh:getJBeamFilename()
+	vehicleTable[4]  = vehicleConfig
+	vehicleTable[5]  = jsonEncode({c.x, c.y, c.z, c.w})
+	vehicleTable[6]  = jsonEncode({p0.x, p0.y, p0.z, p0.w})
+	vehicleTable[7]  = jsonEncode({p1.x, p1.y, p1.z, p1.w})
+	vehicleTable[8]  = getServerVehicleID(gameVehicleID) or ""
+	vehicleTable[9]  = jsonEncode(be:getObjectByID(gameVehicleID):getPosition())
+	vehicleTable[10] = jsonEncode(be:getObjectByID(gameVehicleID):getRotation())
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	GameNetwork.send('Os:0:'..stringToSend)--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
@@ -154,6 +156,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
+	local pos             = vec3(jsonDecode(decodedData[9]))
+	local rot             = quat(jsonDecode(decodedData[10]))
 	--local playerNickname  = decodedData[9]
 
 	print("onServerVehicleSpawned ID's:  "..mpConfig.getPlayerServerID().." == "..playerServerID)
@@ -164,7 +168,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	else
 		if not vehicleName then return end
 		println("New vehicle : "..vehicleName)
-		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), vec3(0,0,0), quat(0,0,0,0), ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]))
+		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]))
 		nicknameMap[tostring(spawnedVeh:getID())] = {}
 		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
 		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
@@ -295,9 +299,8 @@ local function handle(rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
-		local playerRole = "USER" 
-		--local playerRole= string.match(rawData,"(%w+)%:")
-		--rawData = rawData:gsub(playerRole..":", "")
+		local playerRole= string.match(rawData,"(%w+)%:")
+		rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname= string.match(rawData,"(%w+)%:")
 		rawData = rawData:gsub(playerNickname..":", "")
 		local serverVehicleID = string.match(rawData,"(%w+)%:")

@@ -24,7 +24,7 @@ local function onUpdate(dt)
 		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
 		if mpConfig.nodesDelay > mpConfig.getNodesTickrate() then
 			mpConfig.nodesDelay = 0 -- Reset the delay
-			nodesGE.tick() -- Comment this line to disable nodes synchronization
+			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		mpConfig.positionDelay = mpConfig.positionDelay + dt

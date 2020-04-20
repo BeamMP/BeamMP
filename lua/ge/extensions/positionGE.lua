@@ -57,6 +57,7 @@ local function applyPos(data, serverVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		local pr = jsonDecode(data) -- Decoded data
+		print(dump(pr))
 		local pos = veh:getPosition()
 		local diff = distance(pos.x, pos.y, pos.z, pr[1], pr[2], pr[3])
 		--print("Diff: "..diff)
@@ -70,7 +71,7 @@ local function applyPos(data, serverVehicleID)
 			-- Apply velocities
 			veh:queueLuaCommand("velocityVE.setVelocity("..pr[4]..", "..pr[5]..", "..pr[6]..")")
 			-- TODO: shorten this line
-			print(dump(pr))
+
 			print("velocityVE.setAngularVelocity(^)")
 			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr[7]..", "..pr[8]..", "..pr[9]..")")
 		end

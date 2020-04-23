@@ -55,7 +55,7 @@ end
 
 local function sendData(data)
   print('[GameNetwork] Sending Data: '..data)
-	TCPSocket:send(data..'\n')
+	TCPSocket:send(data..'')
 end
 
 local function sendDataSplit(code, ID, data)
@@ -66,13 +66,13 @@ local function sendDataSplit(code, ID, data)
 	while size > maxSize do
 		print("Running: "..size)
 		local tdata = string.sub(data, 1, maxSize)
-		BigDataSocket:send(code..ID..counter..":"..tdata..'\n')
+		BigDataSocket:send(code..ID..counter..":"..tdata..'')
 		data = string.sub(data, 6501, size) --data:gsub(tdata, "")
 		size = string.len(data)
 		counter = counter + 1
 	end
 	print("Done: "..size)
-	BigDataSocket:send(code..ID.."E:"..data..'\n')
+	BigDataSocket:send(code..ID.."E:"..data..'')
 end
 
 local HandleNetwork = {
@@ -133,7 +133,7 @@ local function onUpdate(dt)
 		--================================ TWO SECONDS TIMER ================================
 		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
 		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 1 seconds
-			TCPSocket:send('TEST\n')
+			TCPSocket:send('TEST')
 			print("ONE SEC TIMER REACHED, TIME OUT??")
 			oneSecondsTimer = 0	-- Reset timer
 			flip = true

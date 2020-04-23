@@ -91,7 +91,7 @@ local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
-			local received, status, partial = BigDataSocket:receive() -- Receive data
+			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil then break end
 			if received ~= "" and received ~= nil then -- If data have been received then
 				-- break it up into code + data
@@ -128,17 +128,6 @@ local function onUpdate(dt)
 				else
 					HandleNetwork[code](data)
 				end
-			end
-		end
-		while (true) do
-			local received, status, partial = TCPSocket:receive() -- Receive data
-			if received == nil then break end
-			if received ~= "" and received ~= nil then -- If data have been received then
-				-- break it up into code + data
-				local code = string.sub(received, 1, 1)
-				local data = string.sub(received, 2)
-				print('\n'..code.." -> "..data)
-				HandleNetwork[code](data)
 			end
 		end
 		--================================ TWO SECONDS TIMER ================================

@@ -9,6 +9,7 @@ print("GameNetwork Initialising...")
 -- ============= VARIABLES =============
 --local socket = require('socket')
 local TCPSocket
+local BigDataSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local oneSecondsTimer = 1
 local flip = false
@@ -26,11 +27,15 @@ local function connectToLauncher()
 	if launcherConnectionStatus == 0 then
 		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
+		BigDataSocket = socket.tcp() -- Set socket to TCP
 		--TCPSocket:setoption("tcp-nodelay", true)
 		keep = TCPSocket:setoption("keepalive",true)
+		keep2 = BigDataSocket:setoption("keepalive",true)
 
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', 4445); -- Connecting
+		BigDataSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
+		BigDataSocket:connect('127.0.0.1', 4446); -- Connecting
 		launcherConnectionStatus = 1
 		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end
@@ -41,6 +46,7 @@ end
 local function disconnectLauncher()
 	if launcherConnectionStatus > 0 then -- If player were connected
 		TCPSocket:close()-- Disconnect from server
+		BigDataSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		oneSecondsTimer = 0
 	end
@@ -60,13 +66,13 @@ local function sendDataSplit(code, ID, data)
 	while size > maxSize do
 		print("Running: "..size)
 		local tdata = string.sub(data, 1, maxSize)
-		TCPSocket:send(code..ID..counter..":"..tdata..'\n')
+		BigDataSocket:send(code..ID..counter..":"..tdata..'\n')
 		data = string.sub(data, 6501, size) --data:gsub(tdata, "")
 		size = string.len(data)
 		counter = counter + 1
 	end
 	print("Done: "..size)
-	TCPSocket:send(code..ID.."E:"..data..'\n')
+	BigDataSocket:send(code..ID.."E:"..data..'\n')
 end
 
 local HandleNetwork = {
@@ -85,7 +91,7 @@ local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
-			local received, status, partial = TCPSocket:receive() -- Receive data
+			local received, status, partial = BigDataSocket:receive() -- Receive data
 			if received == nil then break end
 			if received ~= "" and received ~= nil then -- If data have been received then
 				-- break it up into code + data
@@ -122,6 +128,17 @@ local function onUpdate(dt)
 				else
 					HandleNetwork[code](data)
 				end
+			end
+		end
+		while (true) do
+			local received, status, partial = TCPSocket:receive() -- Receive data
+			if received == nil then break end
+			if received ~= "" and received ~= nil then -- If data have been received then
+				-- break it up into code + data
+				local code = string.sub(received, 1, 1)
+				local data = string.sub(received, 2)
+				print('\n'..code.." -> "..data)
+				HandleNetwork[code](data)
 			end
 		end
 		--================================ TWO SECONDS TIMER ================================

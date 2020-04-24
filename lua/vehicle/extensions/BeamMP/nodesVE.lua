@@ -33,7 +33,7 @@ local function getNodes()
   local save = {}
   save.nodeCount = #v.data.nodes
   save.beamCount = #v.data.beams
-  save.luaState = serialize(serializePackages("save"))
+  --save.luaState = serialize(serializePackages("save"))
   save.hydros = {}
   for _, h in pairs(hydros.hydros) do
     table.insert(save.hydros, h.state)
@@ -110,7 +110,7 @@ local function applyNodes(data)
 	local save = jsonDecode(data)
 
   print("Applied "..string.len(data).." bytes!")
-  importPersistentData(save.luaState)
+  --importPersistentData(save.luaState)
 
   for k, h in pairs(save.hydros) do
     hydros.hydros[k].state = h

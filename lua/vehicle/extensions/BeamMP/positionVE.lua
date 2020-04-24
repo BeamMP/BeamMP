@@ -33,11 +33,11 @@ local function getVehicleRotation()
 	local tempTable = {}
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
-	--local rot = obj:getRotation()
-	local rot = {}
-	rot.x = obj:getPitchAngularVelocity()
-	rot.y = obj:getRollAngularVelocity()
-	rot.z = obj:getYawAngularVelocity()
+	local rot = obj:getRotation()
+	--local rot = {}
+	--rot.x = obj:getPitchAngularVelocity()
+	--rot.y = obj:getRollAngularVelocity()
+	--rot.z = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
 	tempTable['pos'].x = tonumber(pos.x)
 	tempTable['pos'].y = tonumber(pos.y)

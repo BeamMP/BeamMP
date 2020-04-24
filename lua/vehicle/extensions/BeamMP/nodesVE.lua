@@ -11,6 +11,11 @@ local M = {}
 
 -- ============= VARIABLES =============
 local lastPos = vec3(0,0,0)
+local latestData
+local dataToApply
+local requestReset = false
+local calculated = false
+local latestRot
 -- ============= VARIABLES =============
 
 
@@ -22,188 +27,140 @@ local function distance( x1, y1, z1, x2, y2, z2 )
 	return math.sqrt ( dx*dx + dy*dy + dz*dz)
 end
 
-local function Round(num, n)
-  local mult = 10^(n or 0)
-  return math.floor(num * mult + 0.5) / mult
+local function H(q1, q2)
+	w = q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z
+    x = q1.w*q2.x + q1.x*q2.w + q1.y*q2.z - q1.z*q2.y
+    y = q1.w*q2.y + q1.y*q2.w + q1.z*q2.x - q1.x*q2.z
+    z = q1.w*q2.z + q1.z*q2.w + q1.x*q2.y - q1.y*q2.x
+    return quat(x, y, z, w)
 end
 
+local function copysign(x, y)
+	if y >= 0 then
+		return math.abs(x)
+	else
+		return -math.abs(x)
+	end
+end
+
+local function round(num, numDecimalPlaces)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5) / mult
+end
+
+
+
 local function getNodes()
+	local save = {}
+	local r = obj:getRotation()
+	local rp = quat(-r.x, -r.y, -r.z, r.w)
 
-  -- TODO: color
-  local save = {}
-  save.nodeCount = #v.data.nodes
-  save.beamCount = #v.data.beams
-  --save.luaState = serialize(serializePackages("save"))
-  save.hydros = {}
-  for _, h in pairs(hydros.hydros) do
-    table.insert(save.hydros, h.state)
-  end
+	-- For each node calculate it's position at rotation 0
+	-- so that when the other user receive the data he
+	-- can calculate the theorical position by using the
+	-- obj:getRotation() of the user that sent the data
+	save.nodes = {}
+	for _, node in pairs(v.data.nodes) do
+		local pos = obj:getNodePosition(node.cid)
+		local p = quat(pos.x, pos.y, pos.z, 0)
+		local newPos = H(H(r, p), rp)
+		local d = {round(newPos.x, 4), round(newPos.y, 4), round(newPos.z, 4)}
+		save.nodes[node.cid + 1] = d
+	end
 
-  --[[save.nodes = {}
-  for _, node in pairs(v.data.nodes) do
-	  local Pos = obj:getNodePosition(node.cid)
-	  Pos.x = Round(Pos.x,3)
-	  Pos.y = Round(Pos.y,3)
-	  Pos.z = Round(Pos.z,3)
-    local d = {vec3(Pos):toTable()}
-
-    if math.abs(obj:getOriginalNodeMass(node.cid) - obj:getNodeMass(node.cid)) > 0.1 then
-      table.insert(d, obj:getNodeMass(node.cid))
-    end
-    save.nodes[node.cid + 1] = d
-  end
-  save.beams = {}
-  for _, beam in pairs(v.data.beams) do
-    local d = {
-      Round(obj:getBeamRestLength(beam.cid),3),
-      obj:beamIsBroken(beam.cid),
-      Round(obj:getBeamDeformation(beam.cid),3)
-    }
-    save.beams[beam.cid + 1] = d
-  end]]
-
-
-	--print("ok")
-	--local pos = obj:getPosition()
-	--local dist = distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
-	--lastPos = pos
-	--if (dist > 0.02) then return end
-
-	--local save = {}
-  --save.nodeCount = #v.data.nodes
-  --save.beamCount = #v.data.beams
-
-  --[[save.hydros = {}
-  for _, h in pairs(hydros.hydros) do
-    table.insert(save.hydros, h.state)
-  end]]
-
-  --[[save.nodes = {}
-  for _, node in pairs(v.data.nodes) do
-    local d = {
-      vec3(obj:getNodePosition(node.cid)):toTable()
-    }
-    if math.abs(obj:getOriginalNodeMass(node.cid) - obj:getNodeMass(node.cid)) > 0.1 then
-      table.insert(d, obj:getNodeMass(node.cid))
-    end
-    save.nodes[node.cid + 1] = d
-  end]]
-
-  --[[save.beams = {}
-  for _, beam in pairs(v.data.beams) do
-    local d = {
-      obj:getBeamRestLength(beam.cid),
-      obj:beamIsBroken(beam.cid),
-      obj:getBeamDeformation(beam.cid)
-    }
-    save.beams[beam.cid + 1] = d
-  end]]
-
+	save.beams = {}
+	for _, beam in pairs(v.data.beams) do
+		save.beams[beam.cid + 1] = round(obj:getBeamRestLength(beam.cid), 3)
+	end
 	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 end
 
 
 
 local function applyNodes(data)
+	latestData = jsonDecode(data)
+	dataToApply = jsonDecode(data)
+	calculated = false
+	if requestReset then
+		obj:requestReset(RESET_PHYSICS)
+		requestReset = false
+	end
+end
 
-	--obj:requestReset(RESET_PHYSICS)
-	local save = jsonDecode(data)
 
-  print("Applied "..string.len(data).." bytes!")
-  --importPersistentData(save.luaState)
 
-  for k, h in pairs(save.hydros) do
-    hydros.hydros[k].state = h
-  end
+local function requestRes()
+	requestReset = true
+end
 
-  --[[for cid, node in pairs(save.nodes) do
-    cid = tonumber(cid) - 1
-    obj:setNodePosition(cid, vec3(node[1]):toFloat3())
-    if #node > 1 then
-      obj:setNodeMass(cid, node[2])
-    end
-  end
 
-  for cid, beam in pairs(save.beams) do
-		cid = tonumber(cid) - 1
-		if beam[2] == true then
-			obj:breakBeam(cid)
-			beamstate.beamBroken(cid,1)
-		else
-			obj:setBeamLength(cid, beam[1])
-			if beam[3] > 0 then
-			--print('deformed: ' .. tostring(cid) .. ' = ' .. tostring(beam[3]))
-			beamstate.beamDeformed(cid, beam[3])
+
+local function onUpdate(dt) --ONUPDATE OPEN
+
+	local pos = obj:getPosition()
+	local dist = distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
+	lastPos = pos
+	if (dist < 0.07) then return end
+
+	if dataToApply and latestRot then
+		if not calculated then
+			if latestData then
+				-- Get the rotation
+				local r = quat(latestRot[7], latestRot[8], latestRot[9], latestRot[10])
+				-- Get the opposite except for w
+				local rp = quat(-latestRot[7], -latestRot[8], -latestRot[9], latestRot[10])
+				for index, node in pairs(latestData.nodes) do
+					local cid = index - 1
+					-- Get node pos from latest crash data
+					local pos = float3(node[1], node[2], node[3])
+					-- Put it as a quaternion with w = 0
+					local p = quat(pos.x, pos.y, pos.z, 0)
+					-- Should be newPos = H(H(r, p), rp) but for some reason the rotation is inverted
+					local newPos = H(H(rp, p), r)
+					dataToApply.nodes[index][1] = newPos.x
+					dataToApply.nodes[index][2] = newPos.y
+					dataToApply.nodes[index][3] = newPos.z
+				end
 			end
+			calculated = true
 		end
-  end]]
-
-  -- Old System
-
-  --[[if not decodedData or decodedData.nodeCount ~= #v.data.nodes then --or decodedData.beamCount ~= #v.data.beams then
-    log("E", "nodesVE", "unable to use nodes data.")
-    return
-  end
-  print("Node Data Good, Attempting to apply...")
-  --[[for k, h in pairs(decodedData.hydros) do
-    hydros.hydros[k].state = h
-  end]]
-
-  --[[for cid, node in pairs(decodedData.nodes) do
-    cid = tonumber(cid) - 1
-    obj:setNodePosition(cid, vec3(node[1]):toFloat3())
-    if #node > 1 then
-      obj:setNodeMass(cid, node[2])
-    end
-  end
-
-  --[[for cid, beam in pairs(decodedData.beams) do
-    cid = tonumber(cid) - 1
-    obj:setBeamLength(cid, beam[1])
-    if beam[2] == true then
-      obj:breakBeam(cid)
-    end
-    if beam[3] > 0 then
-      -- deformation: do not call c++ at all, its just used on the lua side anyways
-      --print('deformed: ' .. tostring(cid) .. ' = ' .. tostring(beam[3]))
-      beamDeformed(cid, beam[3])
-    end
-  end]]
-
-	--[[for cid, node in pairs(decodedData.nodes) do
-		cid = tonumber(cid) - 1
-
-		local beam = v.data.beams[cid]
-		local beamPrecompression = beam.beamPrecompression or 1
-		local deformLimit = type(beam.deformLimit) == 'number' and beam.deformLimit or math.huge
-		obj:setBeam(-1, beam.id1, beam.id2, beam.beamStrength, beam.beamSpring,
-			beam.beamDamp, type(beam.dampCutoffHz) == 'number' and beam.dampCutoffHz or 0,
-			beam.beamDeform, deformLimit, type(beam.deformLimitExpansion) == 'number' and beam.deformLimitExpansion or deformLimit,
-			beamPrecompression
-		)
-		--print(dump(node))
-		obj:setNodePosition(cid, vec3(node[1]):toFloat3())
-		if #node > 1 then
-			obj:setNodeMass(cid, node[2])
+		for index, node in pairs(dataToApply.nodes) do
+			cid = index - 1
+			obj:setNodePosition(cid, float3(node[1], node[2], node[3]))
 		end
-
-	end]]
-  print("Node Data Should be applied!")
+		for index, beam in pairs(dataToApply.beams) do
+			cid = index - 1
+			obj:setBeamLength(cid, beam)
+		end
+	end
 end
 
 
 
-function round(num, numDecimalPlaces)
-  local mult = 10^(numDecimalPlaces or 0)
-  return math.floor(num * mult + 0.5) / mult
+-- 1 = pos.x
+-- 2 = pos.y
+-- 3 = pos.z
+-- 4 = rot.x
+-- 5 = rot.y
+-- 6 = rot.z
+-- 7 = rot.w
+local function applyRotation(tempRot) -- Rotation in Quaternions
+	latestRot = jsonDecode(tempRot)
+	calculated = false
 end
 
 
 
-M.round      = round
-M.distance   = distance
-M.applyNodes = applyNodes
-M.getNodes   = getNodes
+M.H = H
+M.applyRotation = applyRotation
+M.toEulerAngles = toEulerAngles
+M.requestRes 	= requestRes
+M.round      	= round
+M.rotate    	= rotate
+M.distance   	= distance
+M.applyNodes 	= applyNodes
+M.getNodes   	= getNodes
+M.updateGFX	    = onUpdate
 
 
 

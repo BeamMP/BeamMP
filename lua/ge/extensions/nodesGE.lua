@@ -45,12 +45,28 @@ local function applyNodes(data, serverVehicleID)
 	end
 end
 
+local function applyRot(data, serverVehicleID)
+	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local veh = be:getObjectByID(gameVehicleID)
+	if veh then
+		veh:queueLuaCommand("nodesVE.applyRotation(\'"..data.."\')") -- Send nodes values
+	end
+end
+
 local function handle(rawData)
 	print("nodesGE.handle: "..rawData)
-	rawData = string.sub(rawData,3)
-	local serverVehicleID = string.match(rawData,"(%w+)%:")
-	local data = string.match(rawData,":(.*)")
-	applyNodes(data, serverVehicleID)
+	local code = string.sub(rawData, 1, 1)
+	if code == "p" then
+		rawData = string.sub(rawData,3)
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		applyRot(data, serverVehicleID)
+	else
+		rawData = string.sub(rawData,3)
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		applyNodes(data, serverVehicleID)
+	end
 end
 
 
@@ -59,6 +75,7 @@ M.tick   	   = tick
 M.handle     = handle
 M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
+M.applyRot   = applyRot
 
 
 

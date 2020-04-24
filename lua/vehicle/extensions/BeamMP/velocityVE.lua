@@ -3,6 +3,19 @@
 
 local M = {}
 
+function typeof(var)
+    local _type = type(var);
+    if(_type ~= "table" and _type ~= "userdata") then
+        return _type;
+    end
+    local _meta = getmetatable(var);
+    if(_meta ~= nil and _meta._NAME ~= nil) then
+        return _meta._NAME;
+    else
+        return _type;
+    end
+end
+
 -- Set vehicle velocity in m/s
 -- How it works: Apply enough force to each node, so it accelerates to the target speed in 1 physics tick.
 --               Because all nodes accelerate at the same rate, the vehicle will not get ripped apart
@@ -34,6 +47,12 @@ end
 --       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 --       - can become inaccurate if vehicles are very deformed
 local function setAngularVelocity(pitchAV, rollAV, yawAV)
+	if typeof(pitchAV) == "table" then
+		print("TABLE - setAV: "..dump(pitchAV))
+	else
+		print("pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
+	end
+
 	local toWorldAxisQuat = quat(obj:getRotation())
 
 	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()

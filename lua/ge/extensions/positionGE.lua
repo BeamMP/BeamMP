@@ -72,7 +72,7 @@ local function applyPos(data, serverVehicleID)
 			-- Apply velocities
 			veh:queueLuaCommand("velocityVE.setVelocity("..pr.vel.x..", "..pr.vel.y..", "..pr.vel.z..")")
 			-- TODO: shorten this line
-			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr.ang.x..", "..pr.ang.y..", "..pr.ang.z..")")
+			--veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr.ang.x..", "..pr.ang.y..", "..pr.ang.z..")")
 		end
 		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 	end

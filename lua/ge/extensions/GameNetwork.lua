@@ -54,7 +54,7 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-  print('[GameNetwork] Sending Data: '..data)
+  --print('[GameNetwork] Sending Data: '..data)
 	TCPSocket:send(data..'')
 end
 
@@ -80,7 +80,7 @@ local HandleNetwork = {
 	['W'] = function(params) electricsGE.handle(params) end,
 	['X'] = function(params) nodesGE.handle(params) end,
 	['Y'] = function(params) powertrainGE.handle(params) end,
-	['Z'] = function(params) positionGE.handle(params, socket.gettime()) end,
+	['Z'] = function(params) positionGE.handle(params) nodesGE.handle(params) end,
 	['O'] = function(params) vehicleGE.handle(params) end,
 	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
 }

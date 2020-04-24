@@ -49,9 +49,9 @@ local function applyPos(data, serverVehicleID)
 	-- 5 = vel.y
 	-- 6 = vel.z
 
-	-- 7 = rot.x
-	-- 8 = rot.y
-	-- 9 = rot.z
+	-- 7 = ang.x
+	-- 8 = ang.y
+	-- 9 = ang.z
 
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)

@@ -39,12 +39,12 @@ local function getNodes()
     table.insert(save.hydros, h.state)
   end
 
-  save.nodes = {}
+  --[[save.nodes = {}
   for _, node in pairs(v.data.nodes) do
-	local Pos = obj:getNodePosition(node.cid)
-	Pos.x = Round(Pos.x,3)
-	Pos.y = Round(Pos.y,3)
-	Pos.z = Round(Pos.z,3)
+	  local Pos = obj:getNodePosition(node.cid)
+	  Pos.x = Round(Pos.x,3)
+	  Pos.y = Round(Pos.y,3)
+	  Pos.z = Round(Pos.z,3)
     local d = {vec3(Pos):toTable()}
 
     if math.abs(obj:getOriginalNodeMass(node.cid) - obj:getNodeMass(node.cid)) > 0.1 then
@@ -60,7 +60,7 @@ local function getNodes()
       Round(obj:getBeamDeformation(beam.cid),3)
     }
     save.beams[beam.cid + 1] = d
-  end
+  end]]
 
 
 	--print("ok")
@@ -116,7 +116,7 @@ local function applyNodes(data)
     hydros.hydros[k].state = h
   end
 
-  for cid, node in pairs(save.nodes) do
+  --[[for cid, node in pairs(save.nodes) do
     cid = tonumber(cid) - 1
     obj:setNodePosition(cid, vec3(node[1]):toFloat3())
     if #node > 1 then
@@ -136,8 +136,9 @@ local function applyNodes(data)
 			beamstate.beamDeformed(cid, beam[3])
 			end
 		end
-  end
+  end]]
 
+  -- Old System
 
   --[[if not decodedData or decodedData.nodeCount ~= #v.data.nodes then --or decodedData.beamCount ~= #v.data.beams then
     log("E", "nodesVE", "unable to use nodes data.")

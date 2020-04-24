@@ -97,7 +97,7 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				--print('\n'..code.." -> "..data)
+				--print(code.." -> "..data)
 				if code == "X" then
 					--n:ID:part:data
 					data = string.sub(data, 2, string.len(data))

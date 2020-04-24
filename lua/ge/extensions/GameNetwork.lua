@@ -60,7 +60,7 @@ end
 
 local function sendDataSplit(code, ID, data)
 	--print('[GameNetwork] Sending Data: '..data)
-	local counter = 1 -- 1, 2, 3, n, E
+	local counter = 97 -- 1, 2, 3, n, E
 	local size = string.len(data)
 	local maxSize = 6500
 	while size > maxSize do
@@ -112,7 +112,7 @@ local function onUpdate(dt)
 					--print("Data: "..data)
 					local nData = string.match(data, ":(.*)")
 					--print("Node Data: "..nData..'\n')
-					if part == "1"  or part == 1 then
+					if (part - 96) == 1 then
 						dataArray[vid] = ""
 						--print("1: "..dataArray[vid])
 						dataArray[vid] = tostring(nData)

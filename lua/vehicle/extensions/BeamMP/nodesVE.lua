@@ -106,9 +106,9 @@ local function onUpdate(dt) --ONUPDATE OPEN
 		if not calculated then
 			if latestData then
 				-- Get the rotation
-				local r = quat(latestRot[7], latestRot[8], latestRot[9], latestRot[10])
+				local r = quat(latestRot.ang.x, latestRot.ang.y, latestRot.ang.z, latestRot.ang.w)
 				-- Get the opposite except for w
-				local rp = quat(-latestRot[7], -latestRot[8], -latestRot[9], latestRot[10])
+				local rp = quat(-latestRot.ang.x, -latestRot.ang.y, -latestRot.ang.z, latestRot.ang.w)
 				for index, node in pairs(latestData.nodes) do
 					local cid = index - 1
 					-- Get node pos from latest crash data

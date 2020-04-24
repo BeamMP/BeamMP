@@ -50,6 +50,7 @@ local function getVehicleRotation()
 	tempTable['ang'].x = tonumber(rot.x)
 	tempTable['ang'].y = tonumber(rot.y)
 	tempTable['ang'].z = tonumber(rot.z)
+	tempTable['ang'].w = tonumber(rot.w)
 	--print(dump(tempTable))
 	--print("tempTable ^ ")
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it

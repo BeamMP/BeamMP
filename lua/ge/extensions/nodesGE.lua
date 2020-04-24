@@ -54,7 +54,7 @@ local function applyRot(data, serverVehicleID)
 end
 
 local function handle(rawData)
-	print("nodesGE.handle: "..rawData)
+	--print("nodesGE.handle: "..rawData)
 	local code = string.sub(rawData, 1, 1)
 	if code == "p" then
 		rawData = string.sub(rawData,3)

@@ -8,7 +8,7 @@ local PlayerServerID = -1
 
 -- MP TICK setTINGS
 local nodesDelay = 0
-local nodesTickrate = 6 -- in seconds
+local nodesTickrate = 1.0 -- in seconds
 
 local positionDelay = 0
 local positionTickrate = 0.02 --0.016

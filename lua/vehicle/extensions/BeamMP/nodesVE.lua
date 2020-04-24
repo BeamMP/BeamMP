@@ -103,6 +103,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	--if (dist < 0.07) then return end
 
 	if dataToApply and latestRot then
+		print(latestRot)
 		if not calculated then
 			if latestData then
 				-- Get the rotation
@@ -160,7 +161,7 @@ M.rotate    	= rotate
 M.distance   	= distance
 M.applyNodes 	= applyNodes
 M.getNodes   	= getNodes
-M.updateGFX	    = onUpdate
+M.updateGFX	  = onUpdate
 
 
 

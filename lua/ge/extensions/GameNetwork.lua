@@ -80,7 +80,7 @@ local HandleNetwork = {
 	['W'] = function(params) electricsGE.handle(params) end,
 	['X'] = function(params) nodesGE.handle(params) end,
 	['Y'] = function(params) powertrainGE.handle(params) end,
-	['Z'] = function(params) --[[positionGE.handle(params)]] end,
+	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) vehicleGE.handle(params) end,
 	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
 }
@@ -106,13 +106,13 @@ local function onUpdate(dt)
 					--print("VID: "..vid.."")
 					data = string.sub(data, string.len(vid..":")+1, string.len(data))
 					--print("Data: "..data)
-					local part = string.byte(string.match(data,"(%w+)%:"))
+					local part = string.byte(string.match(data,"(%w+)%:")) - 96
 					--print("Part: "..part)
 					data = string.sub(data, string.len(part..":"), string.len(data))
 					--print("Data: "..data)
 					local nData = string.match(data, ":(.*)")
 					--print("Node Data: "..nData..'\n')
-					if (part - 96) == 1 then
+					if part == 1 then
 						dataArray[vid] = ""
 						--print("1: "..dataArray[vid])
 						dataArray[vid] = tostring(nData)

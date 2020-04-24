@@ -100,7 +100,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	local pos = obj:getPosition()
 	local dist = distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
 	lastPos = pos
-	if (dist < 0.07) then return end
+	--if (dist < 0.07) then return end
 
 	if dataToApply and latestRot then
 		if not calculated then

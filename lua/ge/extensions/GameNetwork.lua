@@ -64,14 +64,14 @@ local function sendDataSplit(code, ID, data)
 	local size = string.len(data)
 	local maxSize = 6500
 	while size > maxSize do
-		print("Running: "..size)
+		--print("Running: "..size)
 		local tdata = string.sub(data, 1, maxSize)
 		BigDataSocket:send(code..ID..string.char(counter)..":"..tdata..'')
 		data = string.sub(data, 6501, size) --data:gsub(tdata, "")
 		size = string.len(data)
 		counter = counter + 1
 	end
-	print("Done: "..size)
+	--print("Done: "..size)
 	BigDataSocket:send(code..ID.."E:"..data..'')
 end
 

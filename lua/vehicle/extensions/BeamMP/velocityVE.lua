@@ -58,7 +58,7 @@ local function ApplyVelocity(pitchDiff, rollDiff, yawDiff)
 	--local pitchDiff = PitchApply-- - obj:getPitchAngularVelocity()
 	--local rollDiff = 0--RollApply-- - obj:getRollAngularVelocity()
 	--local yawDiff = 0--YawApply-- - obj:getYawAngularVelocity()
-	print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
+	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local nodePos = vec3(node.pos)

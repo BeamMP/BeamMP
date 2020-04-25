@@ -21,14 +21,7 @@ local function getVehicleRotation()
 	local distance = nodesVE.distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
 	lastPos = pos
 
-	if (distance < 0.02) then -- When vehicle doesn't move
-		if timer < 40 then -- Send 40 times less packets
-			timer = timer + 1
-			return
-		else
-			timer = 0
-		end
-	end
+
 
 	local tempTable = {}
 	local pos = obj:getPosition()

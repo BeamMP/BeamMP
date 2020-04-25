@@ -67,10 +67,6 @@ local function ApplyVelocity()
 
 end
 
-local function onUpdate()
-
-end
-
 -- pos yaw makes it go to the right
 -- pos roll makes it roll from left to right
 -- pos pitch makes the nose go up
@@ -130,6 +126,5 @@ end
 M.updateGFX = UGFX
 M.setVelocity = setVelocity
 M.setAngularVelocity = setAngularVelocity
-M.updateGFX = onUpdate
 
 return M

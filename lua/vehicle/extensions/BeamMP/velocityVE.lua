@@ -6,10 +6,12 @@ local M = {}
 local RemoteYaw = 0
 local RemotePitch = 0
 local RemoteRoll = 0
+local RemoteRotation = quat(0, 0, 0, 0)
 local PitchApply = 0
 local RollApply = 0
 local YawApply = 0
-local isMine = true
+local isMine = 1
+local AdjustmentMultiplyer = 10
 
 local function typeof(var)
     local _type = type(var);
@@ -46,17 +48,17 @@ local function setVelocity(x, y, z)
 	end
 end
 
-local function ApplyVelocity()
+local function ApplyVelocity(pitchDiff, rollDiff, yawDiff)
 	--[[if typeof(pitchAV) == "table" then
 		print("TABLE - setAV: "..dump(pitchAV))
 	else
 		print("pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	end]]
 	local toWorldAxisQuat = quat(obj:getRotation())
-	local pitchDiff = PitchApply-- - obj:getPitchAngularVelocity()
-	local rollDiff = 0--RollApply-- - obj:getRollAngularVelocity()
-	local yawDiff = 0--YawApply-- - obj:getYawAngularVelocity()
-	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
+	--local pitchDiff = PitchApply-- - obj:getPitchAngularVelocity()
+	--local rollDiff = 0--RollApply-- - obj:getRollAngularVelocity()
+	--local yawDiff = 0--YawApply-- - obj:getYawAngularVelocity()
+	print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local nodePos = vec3(node.pos)
@@ -78,8 +80,8 @@ end
 --yaw goes negative from left to right
 
 local function UGFX()
-	if not isMine then
-		local dirVector = obj:getDirectionVector()
+	if isMine == 0 then
+		--[[local dirVector = obj:getDirectionVector()
 		local dirVectorUp = obj:getDirectionVectorUp()
 		local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
 		local pitch = dirVector.z
@@ -100,12 +102,14 @@ local function UGFX()
 		end
 		if RemotePitch ~=0 then
 			if RemotePitch - pitch > 0 then
-				PitchApply = -(pitch - RemotePitch)
+				PitchApply = (pitch - RemotePitch)
 			else
 				PitchApply = (pitch - RemotePitch)
 			end
-		end
-		ApplyVelocity()
+		end]]
+		local LocalRotation = obj:getRotation()
+		local t = (RemoteRotation/LocalRotation):toEulerYXZ()*AdjustmentMultiplyer
+		ApplyVelocity(t.x, t.y, t.z)
 	end
 end
 
@@ -123,10 +127,11 @@ end
 --       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 --       - can become inaccurate if vehicles are very deformed
 
-local function setAngularVelocity(pitchAV, rollAV, yawAV)
-	RemotePitch = pitchAV
-	RemoteRoll = rollAV
-	RemoteYaw = yawAV
+local function setAngularVelocity(x,y,z,w)--(pitchAV, rollAV, yawAV)
+	--RemotePitch = pitchAV
+	--RemoteRoll = rollAV
+	--RemoteYaw = yawAV
+	RemoteRotation = quat(x,y,z,w)
 end
 
 -- public interface

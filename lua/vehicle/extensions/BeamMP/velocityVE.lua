@@ -107,9 +107,12 @@ local function UGFX()
 				PitchApply = (pitch - RemotePitch)
 			end
 		end]]
-		local LocalRotation = obj:getRotation()
-		local t = (RemoteRotation/LocalRotation):toEulerYXZ()*AdjustmentMultiplyer
-		ApplyVelocity(t.x, t.y, t.z)
+		local LocalRotation = quat(obj:getRotation())
+		if RemoteRotation and LocalRotation then
+			local t = RemoteRotation/LocalRotation
+			t = t:toEulerYXZ()--*AdjustmentMultiplyer
+			ApplyVelocity(t.y, t.z, t.x)
+		end
 	end
 end
 

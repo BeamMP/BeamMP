@@ -55,9 +55,9 @@ local function ApplyVelocity(pitchDiff, rollDiff, yawDiff)
 		print("pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	end]]
 	local toWorldAxisQuat = quat(obj:getRotation())
-	--local pitchDiff = PitchApply-- - obj:getPitchAngularVelocity()
-	--local rollDiff = 0--RollApply-- - obj:getRollAngularVelocity()
-	--local yawDiff = 0--YawApply-- - obj:getYawAngularVelocity()
+	pitchDiff = pitchDiff - obj:getPitchAngularVelocity()
+	rollDiff = rollDiff - obj:getRollAngularVelocity()
+	yawDiff = yawDiff - obj:getYawAngularVelocity()
 	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)

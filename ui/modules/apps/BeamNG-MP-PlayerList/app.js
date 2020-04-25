@@ -1,5 +1,6 @@
 var connected = false;
 var players = [];
+var nickname = ""
 var app = angular.module('beamng.apps');
 app.directive('multiplayerplayerlist', ['UiUnits', function (UiUnits) {
 	return {
@@ -36,6 +37,8 @@ function playerList(list) {
 	let playersList = document.getElementById("playerstable");
 	let parsedList = JSON.parse(list);
 
+	console.log("Setting Elements for player list")
+
 	if(players != null){
 		//get differences between playernames and send them as messages
 
@@ -47,18 +50,19 @@ function playerList(list) {
 			return !players.includes(item)
 		});
 
-		for(var i = 0; i< left.length;i++)
-			if(left[i].length>0) addMessage(left[i] + " left the server"); //the game would send an empty left message when joining a server
+		//for(var i = 0; i< left.length;i++)
+			//if(left[i].length>0) addMessage(left[i] + " left the server"); //the game would send an empty left message when joining a server
 
-		for(var i = 0; i< joined.length;i++)
-			addMessage(joined[i] + " joined the server");
+		//for(var i = 0; i< joined.length;i++)
+			//addMessage(joined[i] + " joined the server");
 
-		if(joined.length>0 && left.length>0){ //update playerlist if someone joined or left
+		if(joined.length>0 || left.length>0){ //update playerlist if someone joined or left
 			clearPlayerList();
 			for (let i = 0; i < parsedList.length; i++) {
 				var row = playersList.insertRow(playersList.rows.length);
 				var cell1 = row.insertCell(0);//insert in first column
 				cell1.textContent = parsedList[i];
+				cell1.className = "playerlistName"
 
 				//adding button
 				var cell2 = row.insertCell(1);//insert in second column
@@ -91,6 +95,10 @@ function teleportToPlayer(targetPlayerName) {
 	console.log("teleportEvent");
 	addMessage("Teleporting to " + targetPlayerName);
 	//actually teleport the car lol
+}
+
+function setNickname(n) {
+	nickname = n
 }
 
 function setOfflineInPlayerList() {

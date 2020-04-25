@@ -20,12 +20,15 @@
 		padding:2px;
 		background-color: rgba(0, 0, 0, 0)
 	}
+	td.playerlistName {
+		padding: 2px 5px;
+	}
 	</style>
 	<div style="display:flex; resize:both;">
 		<div class="popout-list" id="list-container" style="width:100%; resize:both;">
 			<table id="playerstable" border="1" style="border-collapse: collapse; width:100%; background-color: rgba(0, 0, 0, 0.5)">
 				<tr><th colspan="2">Players</th></tr>
-				<tr><td>meow</td><td width="30px"><button onclick="teleportToPlayer('meow')">TP</button></td></tr>
+				<tr><td>Waiting for player to leave / join to update</td><td width="30px"><button onclick="teleportToPlayer('meow')">TP</button></td></tr>
 			</table>
 		</div>
 		<button class="show-button" id="show-button" onclick="toggleList()">Show Players</button>

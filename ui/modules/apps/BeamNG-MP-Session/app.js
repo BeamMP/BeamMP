@@ -12,6 +12,10 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 		bngApi.engineLua('UI.ready("MP-SESSION")');
 	};
 
+	$scope.mpquit = function() {
+		bngApi.engineLua('CoreNetwork.resetSession(1)');
+	};
+
 	$scope.reset = function() {
 		$scope.init();
 	};

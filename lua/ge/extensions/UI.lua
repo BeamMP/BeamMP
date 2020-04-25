@@ -4,6 +4,9 @@
 --====================================================================================
 
 local M = {}
+
+local players = {}
+
 print("UI Initialising...")
 
 local function updateLoading(data)
@@ -31,8 +34,30 @@ local function typeof(var)
     end
 end
 
+local function split(s, sep)
+    local fields = {}
+
+    local sep = sep or " "
+    local pattern = string.format("([^%s]+)", sep)
+    string.gsub(s, pattern, function(c) fields[#fields + 1] = c end)
+
+    return fields
+end
+
+local function updatePlayersList(playersString)
+  --print(playersString)
+  local players = split(playersString, ",")
+  --print(dump(players))
+  be:executeJS('playerList(\''..jsonEncode(players)..'\');')
+end
+
 local function setPing(ping)
 	be:executeJS('setPing("'..ping..' ms")')
+end
+
+local function setNickName(name)
+  print("My NickName: "..name)
+	be:executeJS('setNickname("'..name..'")')
 end
 
 local function setStatus(status)
@@ -40,7 +65,17 @@ local function setStatus(status)
 end
 
 local function setPlayerCount(playerCount)
-	be:executeJS('setPlayerCount("'..playerCount..' ms")')
+	be:executeJS('setPlayerCount("'..playerCount..'")')
+end
+
+local function error(message)
+	print("UI Error > "..message)
+	ui_message(''..message, 10, 0, 0)
+end
+
+local function message(mess)
+	print("[Message] > "..mess)
+	ui_message(''..mess, 10, 0, 0)
 end
 
 local function showNotification(type, text)
@@ -53,16 +88,6 @@ local function showNotification(type, text)
       message(text)
     end
   end
-end
-
-local function error(message)
-	println("UI Error > "..message)
-	ui_message(''..message, 10, 0, 0)
-end
-
-local function message(mess)
-	println("[Message] > "..mess)
-	ui_message(''..mess, 10, 0, 0)
 end
 
 local function chatMessage(message)
@@ -78,8 +103,10 @@ local function ready(src)
 end
 
 M.updateLoading = updateLoading
+M.updatePlayersList = updatePlayersList
 M.ready = ready
 M.setPing = setPing
+M.setNickName = setNickName
 M.setStatus = setStatus
 M.chatMessage = chatMessage
 M.setPlayerCount = setPlayerCount

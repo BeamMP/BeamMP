@@ -75,6 +75,27 @@ local function sendDataSplit(code, ID, data)
 	BigDataSocket:send(code..ID.."E:"..data..'')
 end
 
+local function onPlayerConnect() -- Function called when a player connect to the server
+	updatesGE.onPlayerConnect()
+end
+
+local function sessionData(data)
+	local code = string.sub(data, 1, 1)
+	local data = string.sub(data, 2)
+	if code == "s" then
+		print(data)
+		local players = string.match(data,"(.*)%:")
+		data = string.match(data, ":(.*)")
+		print(players)
+		print(data)
+		UI.updatePlayersList(data)
+		UI.setPlayerCount(players)
+	end
+	if code == "n" then
+		UI.setNickName(data)
+	end
+end
+
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,
 	['W'] = function(params) electricsGE.handle(params) end,
@@ -83,6 +104,11 @@ local HandleNetwork = {
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) vehicleGE.handle(params) end,
 	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
+	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
+	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
+	['S'] = function(params) sessionData(params) end, -- Update Session Data
+	['E'] = function(params)  end, -- Event For another Resource
+	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
 
 local oneSecondsTimer = 0

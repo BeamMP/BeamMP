@@ -34,6 +34,11 @@ local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
 	local rot = obj:getRotation()
+	local dirVector = obj:getDirectionVector()
+	local dirVectorUp = obj:getDirectionVectorUp()
+	local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
+	local pitch = dirVector.z
+	local yaw = dirVector.x
 	--local rot = {}
 	--rot.x = obj:getPitchAngularVelocity()
 	--rot.y = obj:getRollAngularVelocity()
@@ -47,9 +52,9 @@ local function getVehicleRotation()
 	tempTable['vel'].y = tonumber(vel.y)
 	tempTable['vel'].z = tonumber(vel.z)
 	tempTable['ang'] = {}
-	tempTable['ang'].x = tonumber(rot.x)
-	tempTable['ang'].y = tonumber(rot.y)
-	tempTable['ang'].z = tonumber(rot.z)
+	tempTable['ang'].x = tonumber(pitch)
+	tempTable['ang'].y = tonumber(roll)
+	tempTable['ang'].z = tonumber(yaw)
 	tempTable['ang'].w = tonumber(rot.w)
 	--print(dump(tempTable))
 	--print("tempTable ^ ")

@@ -3,6 +3,13 @@
 
 local M = {}
 
+local RemoteYaw = 0
+local RemotePitch = 0
+local RemoteRoll = 0
+local PitchApply = 0
+local RollApply = 0
+local YawApply = 0
+
 local function typeof(var)
     local _type = type(var);
     if(_type ~= "table" and _type ~= "userdata") then
@@ -38,26 +45,16 @@ local function setVelocity(x, y, z)
 	end
 end
 
--- Set vehicle angular velocity in rad/s
--- How it works: Calculate node tangential velocity relative to car center point at the desired angular velocity
---               and apply enough force to reach the calculated speed in 1 physics tick.
--- NOTE: - will rotate around vehicle position, not center of gravity (calculated COG moves with detached parts)
---         so can cause slight linear movement in some cases
---       - also affects parts that are detached from the car
---       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
---       - can become inaccurate if vehicles are very deformed
-local function setAngularVelocity(pitchAV, rollAV, yawAV)
-	if typeof(pitchAV) == "table" then
+local function ApplyVelocity()
+	--[[if typeof(pitchAV) == "table" then
 		print("TABLE - setAV: "..dump(pitchAV))
 	else
 		print("pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
-	end
-
+	end]]
 	local toWorldAxisQuat = quat(obj:getRotation())
-
-	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
-	local rollDiff = rollAV - obj:getRollAngularVelocity()
-	local yawDiff = yawAV - obj:getYawAngularVelocity()
+	local pitchDiff = PitchApply - obj:getPitchAngularVelocity()
+	local rollDiff = RollApply - obj:getRollAngularVelocity()
+	local yawDiff = YawApply - obj:getYawAngularVelocity()
 
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
@@ -65,7 +62,6 @@ local function setAngularVelocity(pitchAV, rollAV, yawAV)
 		local localTargetAcc = nodePos:cross(vec3(pitchDiff, rollDiff, yawDiff)) -- not sure why, but this works well
 		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
 		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
-
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 
@@ -75,7 +71,63 @@ local function onUpdate()
 
 end
 
+-- pos yaw makes it go to the right
+-- pos roll makes it roll from left to right
+-- pos pitch makes the nose go up
+
+
+--pitch is pos or growing when the nose is going up
+--roll is decreasing from left to right
+--yaw goes negative from left to right
+
+local function UGFX()
+	local dirVector = obj:getDirectionVector()
+	local dirVectorUp = obj:getDirectionVectorUp()
+	local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
+	local pitch = dirVector.z
+	local yaw = dirVector.x
+	if RemoteYaw ~=0 then
+		if RemoteYaw - yaw > 0 then
+			YawApply = -(RemoteYaw - yaw)
+		else
+			YawApply = (RemoteYaw - yaw)
+		end
+	end
+	if RemoteRoll ~=0 then
+		if RemoteRoll - roll > 0 then
+			RollApply = -(RemoteRoll - roll)
+		else
+			RollApply = (RemoteRoll - roll)
+		end
+	end
+	if RemotePitch ~=0 then
+		if RemotePitch - pitch > 0 then
+			PitchApply = (pitch - RemotePitch)
+		else
+			PitchApply = -(pitch - RemotePitch)
+		end
+	end
+	ApplyVelocity()
+end
+
+
+-- Set vehicle angular velocity in rad/s
+-- How it works: Calculate node tangential velocity relative to car center point at the desired angular velocity
+--               and apply enough force to reach the calculated speed in 1 physics tick.
+-- NOTE: - will rotate around vehicle position, not center of gravity (calculated COG moves with detached parts)
+--         so can cause slight linear movement in some cases
+--       - also affects parts that are detached from the car
+--       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
+--       - can become inaccurate if vehicles are very deformed
+
+local function setAngularVelocity(pitchAV, rollAV, yawAV)
+	RemotePitch = pitchAV
+	RemoteRoll = rollAV
+	RemoteYaw = yawAV
+end
+
 -- public interface
+M.updateGFX = UGFX
 M.setVelocity = setVelocity
 M.setAngularVelocity = setAngularVelocity
 M.updateGFX = onUpdate

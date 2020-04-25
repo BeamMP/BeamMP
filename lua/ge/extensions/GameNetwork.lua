@@ -76,7 +76,7 @@ local function sendDataSplit(code, ID, data)
 end
 
 local HandleNetwork = {
-	['V'] = function(params) --[[inputsGE.handle(params)]] end,
+	['V'] = function(params) inputsGE.handle(params) end,
 	['W'] = function(params) electricsGE.handle(params) end,
 	['X'] = function(params) nodesGE.handle(params) end,
 	['Y'] = function(params) powertrainGE.handle(params) end,

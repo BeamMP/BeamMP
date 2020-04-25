@@ -271,7 +271,21 @@ local function onVehicleResetted(gameVehicleID)
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--Network.send(Network.buildPacket(1, 2123, serverVehicleID, ""))
-			GameNetwork.send('Or:'..serverVehicleID)
+			local veh = be:getObjectByID(gameVehicleID)
+			local pos = veh:getPosition()
+			local rot = veh:getRotation()
+
+			local tempTable = {}
+			tempTable['pos'] = {}
+			tempTable['pos'].x = tonumber(pos.x)
+			tempTable['pos'].y = tonumber(pos.y)
+			tempTable['pos'].z = tonumber(pos.z)
+			tempTable['ang'] = {}
+			tempTable['ang'].x = tonumber(rot.x)
+			tempTable['ang'].y = tonumber(rot.y)
+			tempTable['ang'].z = tonumber(rot.z)
+			tempTable['ang'].w = tonumber(rot.w)
+			GameNetwork.send('Or:'..serverVehicleID..":\'"..jsonEncode(tempTable).."\'")
 		end
 	end
 end
@@ -280,12 +294,14 @@ end
 
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
-local function onServerVehicleResetted(serverVehicleID)
+local function onServerVehicleResetted(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh and gameVehicleID then
+			local pr = jsonDecode(data) -- Decoded data
 			veh:reset()
+			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")
@@ -310,10 +326,11 @@ local function handle(rawData)
 	end
 
 	if code == "r" then
-		local serverVehicleID = rawData
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
 		--local data = string.match(rawData,":(.*)")
 		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
-		onServerVehicleResetted(serverVehicleID)
+		onServerVehicleResetted(serverVehicleID, data)
 	end
 
 	if code == "d" then

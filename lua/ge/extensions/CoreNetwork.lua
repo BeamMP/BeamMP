@@ -123,7 +123,7 @@ local HandleNetwork = {
 	['K'] = function(params) quitMPWithMessage(params) end, -- Player Kicked Event
 	['E'] = function(params)  end, -- Event For another Resource
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
-	['J'] = function(params) onPlayerConnect() end, -- A player Joined
+	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
 	--[''] = function(params)  end, --
 	--[''] = function(params)  end, --
 }

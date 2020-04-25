@@ -3,7 +3,7 @@
 
 local M = {}
 
-function typeof(var)
+local function typeof(var)
     local _type = type(var);
     if(_type ~= "table" and _type ~= "userdata") then
         return _type;
@@ -68,10 +68,16 @@ local function setAngularVelocity(pitchAV, rollAV, yawAV)
 
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
+
+end
+
+local function onUpdate()
+
 end
 
 -- public interface
 M.setVelocity = setVelocity
 M.setAngularVelocity = setAngularVelocity
+M.updateGFX = onUpdate
 
 return M

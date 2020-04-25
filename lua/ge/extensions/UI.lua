@@ -18,6 +18,19 @@ local function updateLoading(data)
   end
 end
 
+local function typeof(var)
+    local _type = type(var);
+    if(_type ~= "table" and _type ~= "userdata") then
+        return _type;
+    end
+    local _meta = getmetatable(var);
+    if(_meta ~= nil and _meta._NAME ~= nil) then
+        return _meta._NAME;
+    else
+        return _type;
+    end
+end
+
 local function setPing(ping)
 	be:executeJS('setPing("'..ping..' ms")')
 end
@@ -28,6 +41,28 @@ end
 
 local function setPlayerCount(playerCount)
 	be:executeJS('setPlayerCount("'..playerCount..' ms")')
+end
+
+local function showNotification(type, text)
+  if text == nil then
+    message(type)
+  else
+    if type == "error" then
+      error(text)
+    else
+      message(text)
+    end
+  end
+end
+
+local function error(message)
+	println("UI Error > "..message)
+	ui_message(''..message, 10, 0, 0)
+end
+
+local function message(mess)
+	println("[Message] > "..mess)
+	ui_message(''..mess, 10, 0, 0)
 end
 
 local function chatMessage(message)
@@ -48,6 +83,7 @@ M.setPing = setPing
 M.setStatus = setStatus
 M.chatMessage = chatMessage
 M.setPlayerCount = setPlayerCount
+M.showNotification = showNotification
 
 print("UI Loaded.")
 return M

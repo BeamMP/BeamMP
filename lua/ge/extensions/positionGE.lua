@@ -65,6 +65,7 @@ local function applyPos(data, serverVehicleID)
 		if diff > 0.5 then -- set to 0.5 for production
 			veh:setPosition(Point3F(pr.pos.x, pr.pos.y, pr.pos.z))
 		else
+			veh:queueLuaCommand("velocityVE.setIsMine("..true..")")
 			local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
 			--rot = vec3(pr[7], pr[8], pr[9])
 			--veh:queueLuaCommand("positionVE.setVehiclePosRot(" .. tostring(pos) .. "," .. tostring(rot) .. "," .. timestamp .. ")")

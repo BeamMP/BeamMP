@@ -9,6 +9,7 @@ local RemoteRoll = 0
 local PitchApply = 0
 local RollApply = 0
 local YawApply = 0
+local isMine = true
 
 local function typeof(var)
     local _type = type(var);
@@ -52,10 +53,10 @@ local function ApplyVelocity()
 		print("pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	end]]
 	local toWorldAxisQuat = quat(obj:getRotation())
-	local pitchDiff = PitchApply - obj:getPitchAngularVelocity()
-	local rollDiff = RollApply - obj:getRollAngularVelocity()
-	local yawDiff = YawApply - obj:getYawAngularVelocity()
-
+	local pitchDiff = PitchApply-- - obj:getPitchAngularVelocity()
+	local rollDiff = 0--RollApply-- - obj:getRollAngularVelocity()
+	local yawDiff = 0--YawApply-- - obj:getYawAngularVelocity()
+	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local nodePos = vec3(node.pos)
@@ -77,33 +78,39 @@ end
 --yaw goes negative from left to right
 
 local function UGFX()
-	local dirVector = obj:getDirectionVector()
-	local dirVectorUp = obj:getDirectionVectorUp()
-	local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
-	local pitch = dirVector.z
-	local yaw = dirVector.x
-	if RemoteYaw ~=0 then
-		if RemoteYaw - yaw > 0 then
-			YawApply = -(RemoteYaw - yaw)
-		else
-			YawApply = (RemoteYaw - yaw)
+	if not isMine then
+		local dirVector = obj:getDirectionVector()
+		local dirVectorUp = obj:getDirectionVectorUp()
+		local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
+		local pitch = dirVector.z
+		local yaw = dirVector.x
+		if RemoteYaw ~=0 then
+			if RemoteYaw - yaw > 0 then
+				YawApply = -(RemoteYaw - yaw)
+			else
+				YawApply = (RemoteYaw - yaw)
+			end
 		end
-	end
-	if RemoteRoll ~=0 then
-		if RemoteRoll - roll > 0 then
-			RollApply = -(RemoteRoll - roll)
-		else
-			RollApply = (RemoteRoll - roll)
+		if RemoteRoll ~=0 then
+			if RemoteRoll - roll > 0 then
+				RollApply = -(RemoteRoll - roll)
+			else
+				RollApply = (RemoteRoll - roll)
+			end
 		end
-	end
-	if RemotePitch ~=0 then
-		if RemotePitch - pitch > 0 then
-			PitchApply = (pitch - RemotePitch)
-		else
-			PitchApply = -(pitch - RemotePitch)
+		if RemotePitch ~=0 then
+			if RemotePitch - pitch > 0 then
+				PitchApply = -(pitch - RemotePitch)
+			else
+				PitchApply = (pitch - RemotePitch)
+			end
 		end
+		ApplyVelocity()
 	end
-	ApplyVelocity()
+end
+
+local function setIsMine(x)
+	isMine = x
 end
 
 
@@ -126,5 +133,6 @@ end
 M.updateGFX = UGFX
 M.setVelocity = setVelocity
 M.setAngularVelocity = setAngularVelocity
+M.setIsMine = setIsMine
 
 return M

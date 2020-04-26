@@ -11,18 +11,13 @@ local M = {}
 
 -- ============= VARIABLES =============
 local timer = 0
-local lastPos = vec3(0,0,0)
 -- ============= VARIABLES =============
 
-
+local function updateGFX(dt)
+	timer = timer + dt
+end
 
 local function getVehicleRotation()
-	local pos = obj:getPosition()
-	local distance = nodesVE.distance(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z)
-	lastPos = pos
-
-
-
 	local tempTable = {}
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
@@ -32,10 +27,10 @@ local function getVehicleRotation()
 	local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
 	local pitch = dirVector.z
 	local yaw = dirVector.x
-	--local rot = {}
-	--rot.x = obj:getPitchAngularVelocity()
-	--rot.y = obj:getRollAngularVelocity()
-	--rot.z = obj:getYawAngularVelocity()
+	local rvel = {}
+	rvel.x = obj:getPitchAngularVelocity()
+	rvel.y = obj:getRollAngularVelocity()
+	rvel.z = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
 	tempTable['pos'].x = tonumber(pos.x)
 	tempTable['pos'].y = tonumber(pos.y)
@@ -49,13 +44,18 @@ local function getVehicleRotation()
 	tempTable['ang'].y = tonumber(rot.y)
 	tempTable['ang'].z = tonumber(rot.z)
 	tempTable['ang'].w = tonumber(rot.w)
+	tempTable['rvel'] = {}
+	tempTable['rvel'].x = tonumber(rvel.x)
+	tempTable['rvel'].y = tonumber(rvel.y)
+	tempTable['rvel'].z = tonumber(rvel.z)
+	tempTable['tim'] = timer
 	--print(dump(tempTable))
 	--print("tempTable ^ ")
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 
 
-
+M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation
 
 

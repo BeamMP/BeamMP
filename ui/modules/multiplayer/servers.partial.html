@@ -1,7 +1,15 @@
+<!-- DataTables CSS -->
+<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
+
+<!-- DataTables JavaScript -->
+<script src="js/dataTables/jquery.dataTables.min.js"></script>
+<script src="js/dataTables/dataTables.bootstrap.min.js"></script>
 
 <md-content>
-
-	<div style="background:#2C2F33;">
+	<div>
 		<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
 			<input type="text" id="search" name="search" placeholder="Search"/>
 			<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
@@ -30,3 +38,11 @@
 
   </div>
 </md-content>
+
+<script>
+  $(document).ready(function() {
+    $('#serversTable').DataTable({
+        responsive: true
+    });
+  });
+</script>

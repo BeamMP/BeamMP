@@ -1,31 +1,36 @@
 #top-bar {
-	background:#7289DA;
+	background:#404040b8;
 }
 #left-menu {
 	color:white;
-	background-color:#2C2F33;
+	background-color:#404040b8;
 }
 #bottom-bar {
 	color:white;
-	background-color:#2C2F33;
+	background-color:#404040b8;
 }
 #back {
 	width:100%;
 	height: 100%;
-	background: #353535;
+	/*background: #353535;*/
 }
 
 #footer {
 	position:fixed;
 	bottom:0;
-	background-color:#2C2F33;
-	height:60px;
+	background-color:#404040b8;
+	height:0px;
 	width:100%;
 }
 
 /*input {
 	margin-right:15px;
 }*/
+
+table#serversTable {
+    width: 100%;
+		color: white;
+}
 
 #servers-table {
 	width:100%;
@@ -35,7 +40,7 @@
 }
 
 #servers-table, th, td {
-	border-left: 1px solid #2C2F33;
+	/*border-left: 1px solid #2C2F33;*/
 	border-right: 1px solid #2C2F33;
 }
 
@@ -87,9 +92,9 @@
 }
 
 .button {
-	background-color: #7289DA;
+	background-color: rgb(212, 100, 26);
 	color: white;
-	border: 2px solid #555555;
+	/*border: 2px solid #555555;*/
 	margin:0px;
 	margin-bottom:20px;
 }
@@ -120,6 +125,10 @@
 #launcher-port {
 	width: 125px;
 	margin-bottom: 8px;
+}
+
+md-content {
+	background-color: rgba(101, 101, 101, 0.34);
 }
 
 div#LoadingServer {

@@ -1,0 +1,189 @@
+<!-- Horrible redo as soon as finished and working -->
+
+<div class="overviewContainer" style="display: none">
+    <div layout="column"  layout-align="start start" style=" box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); width:700px; margin: 50px">
+        <div class="md-header" layout="row" layout-align="space-between center" style="padding:5px; height:50px; max-height:50px;">
+            <div><h2 style="margin:0; color:white">Compose email</h2></div>
+            <div layout="row" layout-align="end center">
+            <md-button ng-click="cont.add.steam = changeProp(cont.add.steam, !userLogedInSteam());requestSteamInfoscope();" ng-style="{'cursor': (!userLogedInSteam() ? 'not-allowed' : 'pointer')}" aria-label="Add Steaminfo" style="border: 2px solid {{cont.add.steam ? 'rgb(139,195,74)' : 'rgb(255,152,0)'}};">
+                <img src="modules/mainmenu/steamicon.png" style=" width:20px; height:20px "/>
+                <md-tooltip md-direction="bottom">
+                    <span ng-if="userLogedInSteam()">Add Steaminfo</span>
+                    <span ng-if="!userLogedInSteam()">Please log into Steam first</span>
+                </md-tooltip>
+            </md-button>
+            <md-button ng-click="cont.add.hws = changeProp(cont.add.hws)" aria-label="Add Hardware Specs">
+                <ng-md-icon size=32 icon="memory" style="fill: {{cont.add.hws ? 'rgb(139,195,74)' : 'rgb(255,152,0)'}}"></ng-md-icon>
+                <md-tooltip md-direction="bottom">
+                     Add Hardware Specs
+                </md-tooltip>
+            </md-button>
+            <md-button ng-click="cont.add.log = changeProp(cont.add.log)" aria-label="Add Logfiles">
+                <ng-md-icon size=32 icon="attach_file" style="fill: {{cont.add.log ? 'rgb(139,195,74)' : 'rgb(255,152,0)'}}"></ng-md-icon>
+                <md-tooltip md-direction="bottom">
+                     Add Logfiles
+                </md-tooltip>
+            </md-button>
+            <md-button ng-click="cont.add.bench = changeProp(cont.add.bench, benchmarkExists)" aria-label="Add latest Benchmark" ng-style="{'cursor': (!benchmarkExists ? 'not-allowed' : 'pointer')}" >
+                <ng-md-icon size=32 icon="event_note" style="fill: {{cont.add.bench ? 'rgb(139,195,74)' : 'rgb(255,152,0)'}}"></ng-md-icon>
+                <md-tooltip md-direction="bottom">
+                    <span ng-if="!benchmarkExists">Please run a Benchmark first</span>
+                    <span ng-if="benchmarkExists">Add latest Benchmark</span>
+                </md-tooltip>
+            </md-button>
+            <md-button class="md-raised" ng-click="resetFields()" style="margin:10px;">Reset Input</md-button>
+            <md-button class="md-raised md-primary" ng-click="sendForm()" style="margin:10px;" ng-disabled="form.name.$invalid || form.email.$invalid || form.text.$invalid">Send</md-button>
+        </div>
+
+        </div>
+        <form style="padding:10px; width:100%" name="form">
+        <!--TODO: fix this to only use name and not both name and ng-model-->
+            <md-input-container>
+                <label>Your name</label>
+                <input type="text" name="name" ng-model="cont.info.name" autofocus required ng-disabled="userLogedInSteam() && cont.add.steam">
+            </md-input-container>
+            <div style="padding-bottom: 26px;">
+                <md-input-container style="padding-bottom: 0;">
+                    <label>Your email</label>
+                    <input type="email" name="email" ng-model="cont.info.email" id="cont.info.email" required>
+                </md-input-container>
+            </div>
+            <div>
+                <div layout="row" layout-align="start center">
+                    <span>Subject:</span>
+                    <md-select ng-model="cont.info.subject" id="cont.info.subject">
+                        <md-select-label>{{cont.info.subject}}</md-select-label>
+                        <md-option ng-value="opt" ng-repeat="opt in subjects">{{opt}}</md-option>
+                    </md-select>
+                </div>
+                <div ng-if="cont.info.subject" ng-switch="cont.info.subject">
+                    <div ng-switch-when="Performance" style="margin: 25px;">
+                        Have you checked our <a href="javascript:void(0)" ng-click="changeView(3)">Performancepage</a> yet?
+                    </div>
+                </div>
+            </div>
+            <textarea name="text" id="cont.info.text" ng-model="cont.info.text" style="width:100%;min-height:350px;resize:none; margin-bottom: 26px;" required ng-style="{'border-color': (form.text.$invalid && form.text.$dirty ? 'red' : 'black')}" ng-click="form.text.$setDirty();"></textarea>
+             <div style="margin-bottom:20px" ng-if="cont.add.hws">
+                    <span style="text-decoration: underline">Hardware:</span>
+                    <md-list class="questionAnswer">
+                      <md-list-item layout="row" ng-repeat="(k, v) in preview.hws" style="margin-bottom: 7px;">
+                        <div class="leftSide">{{k}}:</div>
+                        <div flex>
+                            {{v}}
+                        </div>
+                      </md-list-item>
+                    </md-list>
+                </div>
+                <div ng-if="cont.add.log" style="margin-bottom: 26px;">
+                    <span style="text-decoration: underline">Attachments:</span>
+                    <div ng-repeat="log in preview.logs" style="height:16px; padding:2px;">
+                        <img style="height:11px" src="modules/help/page_attach.png">
+                        <span style="font-style: italic;height:12px">{{log}}</span>
+                    </div>
+                    <div ng-repeat="screen in preview.screens" style="height:16px; padding:2px;">
+                        <img style="height:11px" src="modules/help/picture.png">
+                        <span style="font-style: italic;height:12px">{{screen}}</span>
+                    </div>
+                </div>
+                <div ng-if="cont.add.bench" style="margin-bottom: 26px;">
+                    <span style="text-decoration: underline">Benchmark:</span>
+                    <md-list class="questionAnswer">
+                      <md-list-item layout="row" style="margin-bottom: 7px;">
+                        <div class="leftSide">Score:</div>
+                        <div flex>
+                            {{preview.bench.maxMbeams | number : 3}} MBeams/s
+                        </div>
+                      </md-list-item>
+                      <md-list-item layout="row" style="margin-bottom: 7px;">
+                        <div class="leftSide">Max Realtime vehicles:</div>
+                        <div flex>
+                            {{preview.bench.maxRealtimeVehicles}}
+                        </div>
+                      </md-list-item>
+                      <md-list-item layout="row" style="margin-bottom: 7px;">
+                        <div class="leftSide">Test vehicle:</div>
+                        <div flex>
+                            {{preview.bench.testVehicle}}
+                        </div>
+                      </md-list-item>
+                    </md-list>
+                    <table border="0" class="vertKeytable">
+                        <tr>
+                            <th>Vehicles</th>
+                            <td ng-repeat="(i, t) in preview.bench.tests">{{t.vehicles}}</td>
+                        </tr>
+                        <tr>
+                            <th>MBeams/s</th>
+                            <td ng-repeat="(i, t) in preview.bench.tests">{{t.beamspersec | number : 2}}</td>
+                        </tr>
+                        <tr>
+                            <th>% Realtime</th>
+                            <td ng-repeat="(i, t) in preview.bench.tests">{{t.percentRealtime | number : 0 }}</td>
+                        </tr>
+                    </table>
+                </div>
+            <!-- <div layout="row" layout-align="space-around center" layout-wrap style="margin-bottom:15px;">
+                <md-checkbox ng-disabled="true" ng-model="cont.add.mods">
+                    <md-tooltip>
+                        Not working right now
+                    </md-tooltip>
+                    Add Modoverview
+                </md-checkbox>
+                <md-checkbox ng-disabled="true" ng-model="cont.add.runProces">
+                    <md-tooltip>
+                        Not working right now
+                    </md-tooltip>
+                    Add Running Processes
+                </md-checkbox>
+                <!-- <md-button class="md-raised" ng-disabled="true" style="margin:10px;" ng-click="benchmark()">Benchmark</md-button> 
+            </div> -->
+        </form>
+    </div>
+    <!-- <style type="text/css">
+    @media screen and (max-width: 1000px) 
+    {
+        .overviewContainer #formSpacer
+        {
+            display: none;
+        }
+    }
+    </style>
+    <div id="formSpacer" style="border-right: solid 1px rgba(158,158,158,0.7); height: 700px; margin-top:50px;"></div> -->
+
+    <!-- TODO: rewrite this to only use the preview data? -->
+    <!-- <div style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); width:700px; margin: 50px">
+        <div class="md-header md-default-theme apply-md questionHeader" style="height:48px"><h2 style="margin:0">Preview</h2></div>
+        <div style="padding:10px;">
+            <div ng-if="preview" style="overflow-y: auto; max-height: 700px;">
+                <div layout="column" style="margin-bottom:20px">
+                    <label>
+                        <span>To:</span>
+                        <span style="font-style: italic;">support@beamng.com</span>
+                    </label>
+                    <label for="cont.info.email">
+                        <span>From:</span>
+                        <span style="font-style: italic;">{{cont.info.email}}</span>
+                    </label>
+                    <label for="cont.info.subject">
+                        <span>Subject:</span>
+                        <span>{{cont.info.subject}}</span>
+                    </label>
+                </div>
+                <div style="margin-bottom:20px; min-height:200px">
+                    <pre style="overflow-wrap: break-word;">{{cont.info.text}}</pre>
+                </div>
+                <div>
+                    <pre>{{cont.info.name}}</pre>
+                </div>
+               
+            </div>
+        </div>
+    </div> -->
+
+</div>
+
+<!-- <pre>
+    {{benchmarkExists}}
+    {{cont}}
+</pre> -->
+

@@ -59,24 +59,15 @@ local function applyPos(data, serverVehicleID)
 		--print(data)
 		local pr = jsonDecode(data) -- Decoded data
 		--print(dump(pr))
-		local pos = veh:getPosition()
-		local diff = distance(pos.x, pos.y, pos.z, pr.pos.x, pr.pos.y, pr.pos.z)
-		--print("Diff: "..diff)
-		if diff > 0.5 then -- set to 0.5 for production
-			veh:setPosition(Point3F(pr.pos.x, pr.pos.y, pr.pos.z))
-		else
-			veh:queueLuaCommand("velocityVE.setIsMine(0)")
-			local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
-			--rot = vec3(pr[7], pr[8], pr[9])
-			--veh:queueLuaCommand("positionVE.setVehiclePosRot(" .. tostring(pos) .. "," .. tostring(rot) .. "," .. timestamp .. ")")
+		veh:queueLuaCommand("velocityVE.setIsMine(0)")
+		
+		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
+		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
+		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
+		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
+		local tim = pr.tim
 
-			-- Apply velocities
-			veh:queueLuaCommand("velocityVE.setVelocity("..pr.vel.x..", "..pr.vel.y..", "..pr.vel.z..")")
-			-- TODO: shorten this line
-			--print("Sending Rotation Data to VE")
-			veh:queueLuaCommand("velocityVE.setAngularVelocity("..pr.ang.x..", "..pr.ang.y..", "..pr.ang.z..", "..pr.ang.w..")")
-		end
-		veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(rot)..","..tostring(rvel)..","..tim..")")
 	end
 end
 
@@ -90,12 +81,19 @@ local function handle(rawData)
 	applyPos(data, serverVehicleID)
 end
 
+--TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
+--without resetting the vehicle
+local function setPosition(gameVehicleID, x, y, z)
+	local veh = be:getObjectByID(gameVehicleID)
+	veh:setPosition(Point3F(x, y, z))
+	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
+end
 
 M.applyPos          = applyPos
 M.tick              = tick
 M.handle            = handle
 M.sendVehiclePosRot = sendVehiclePosRot
-
+M.setPosition       = setPosition
 
 
 print("positionGE Loaded.")

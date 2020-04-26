@@ -13,7 +13,7 @@ local dequeue = require('dequeue')
 local maxBuffer = 0.2          -- How many seconds packets will be kept in buffer
 local posCorrectMul = 2        -- How much acceleration to use for correcting position error
 local maxPosError = 1          -- If position error is larger than this, teleport the vehicle
-local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
+local rotCorrectMul = 10        -- How much acceleration to use for correcting angle error
 
 local timer = 0
 local buffer = dequeue.new()
@@ -23,7 +23,7 @@ local function updateGFX(dt)
 	timer = timer + dt
 
 	-- Remove packets older than bufferTime from buffer, but keep at least 1
-	while buffer:length() > 1 and timer-buffer:peek_left().localTime > bufferTime do
+	while buffer:length() > 1 and timer-buffer:peek_left().localTime > maxBuffer do
 		buffer:pop_left()
 	end
 
@@ -53,9 +53,9 @@ local function updateGFX(dt)
 	local rvel = data.rvel
 
 	--DEBUG
-	local debugDrawer = obj.debugDrawProxy
-	debugDrawer:drawSphere(data.pos:toPoint3F(), 0.2, ColorF(1.0,0.0,0.0,0.8))
-	debugDrawer:drawSphere(pos:toPoint3F(), 0.2, ColorF(0.0,1.0,0.0,0.8))
+	--local debugDrawer = obj.debugDrawProxy
+	--debugDrawer:drawSphere(data.pos:toPoint3F(), 0.2, ColorF(1.0,0.0,0.0,0.8))
+	--debugDrawer:drawSphere(pos:toPoint3F(), 0.2, ColorF(0.0,1.0,0.0,0.8))
 
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())
@@ -75,7 +75,8 @@ local function updateGFX(dt)
 	end
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
-	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+	--velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+	velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
 end
 
 local function getVehicleRotation()

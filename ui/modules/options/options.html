@@ -1,0 +1,92 @@
+<md-content layout="column" class="filler" style="position: relatvie; background: transparent;">
+  <md-toolbar class="md-primary">
+    <h1 class="md-toolbar-tools">{{:: 'ui.options.options' | translate}}
+      <span>
+        &nbsp; > &nbsp;{{'ui.options.' + options.stateName.split('.')[2]  | translate}}
+      </span>
+    </h1>
+  </md-toolbar>
+
+  <div flex layout="row" style="overflow: auto;">
+    <md-content layout="column" style="border-right:1px solid #ddd;">
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.graphics') !== -1)}"
+        ui-sref="menu.options.graphics" style="text-align:left;">
+        <md-icon class="material-icons">desktop_windows</md-icon>
+        {{:: 'ui.options.graphics' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.userInterface') !== -1)}"
+        ui-sref="menu.options.userInterface"  style="text-align:left;">
+        <md-icon class="material-icons">web</md-icon>
+        {{:: 'ui.options.userInterface' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.language') !== -1)}"
+        ui-sref="menu.options.language"  style="text-align:left;">
+        <md-icon class="material-icons">translate</md-icon>
+        {{:: 'ui.options.language' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.audio') !== -1)}"
+        ui-sref="menu.options.audio"  style="text-align:left;">
+        <md-icon class="material-icons">volume_up</md-icon>
+        {{:: 'ui.options.audio' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.controls') !== -1)}"
+        ui-sref="menu.options.controls.bindings"  style="text-align:left;">
+        <md-icon class="material-icons">gamepad</md-icon>
+        {{:: 'ui.options.controls' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.gameplay') !== -1)}"
+        ui-sref="menu.options.gameplay"  style="text-align:left;">
+        <md-icon class="material-icons">extensions</md-icon>
+        {{:: 'ui.options.gameplay' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.camera') !== -1)}"
+        ui-sref="menu.options.camera"  style="text-align:left;">
+        <md-icon class="material-icons">videocam</md-icon>
+        {{:: 'ui.options.camera' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.other') !== -1)}"
+        ui-sref="menu.options.other"  style="text-align:left;">
+        <md-icon class="material-icons">more_horiz</md-icon>
+        {{:: 'ui.options.other' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.multiplayer') !== -1)}"
+        ui-sref="menu.options.multiplayer"  style="text-align:left;">
+        <md-icon class="material-icons">more_horiz</md-icon>
+        Multiplayer
+      </md-button>
+
+      <div flex="" style="max-height: none;"></div>
+
+      <md-button
+        ng-class="{'md-raised': (options.stateName.indexOf('options.licenses') !== -1)}"
+        ui-sref="menu.options.licenses"  style="text-align:left;">
+        {{:: 'ui.options.licenses' | translate}}
+      </md-button>
+    </md-content>
+
+    <div flex style="position: relative; max-width: 550px;">
+      <md-content ui-view class="container" style="overflow: auto;"></md-content>
+    </div>
+
+    <div ui-view="edit" layout="column"></div>
+
+  </div>
+
+</md-content>

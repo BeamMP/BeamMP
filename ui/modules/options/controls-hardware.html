@@ -1,0 +1,74 @@
+<md-content class="md-padding">
+  <center class="md-headline" translate="ui.controls.nDevicesDetected" translate-values='{nDevices: controlsHw.nDevices}'></center>
+  <div ng-repeat="(devName, ctrl) in controls.data.controllers" class="md-padding">
+    <div layout="row" layout-align="start center">
+      <span class="material-icons">{{ controlsHw.utils.deviceIcon(devName) }}</span> <span style="margin-left:5px" class="md-title"> {{ ctrl.productName }}</span>
+    </div>
+    <div class="md-caption">{{ ctrl.name }} - {{ ctrl.vidpid }} - player #{{ controls.data.players[devName]+1 }}</div>
+
+    <p ng-if="::ctrl.name.slice(0, 3) == 'whe'">
+        {{:: 'ui.controls.hint1' | translate}}
+    </p>
+
+    <p class="md-caption md-whiteframe-z1 md-padding" ng-if="::ctrl.name.slice(0, 3) == 'mou'">
+        {{:: 'ui.controls.hint2' | translate}}
+    </p>
+
+    <center ng-if="ctrl.name.slice(0,3) == 'key'" class="md-padding" style="min-height:40px; font-size: 125%;">
+      <hardware-key-control device="{{ ::ctrl.name }}"></hardware-key-control>
+    </center>
+
+    <div ng-if="::ctrl.name.slice(0, 3) != 'key'" layout layout-wrap class="md-padding">
+      <hardware-control ng-repeat="(key, c) in ::ctrl.controls" device="{{ ctrl.name }}" name="{{ key }}"
+                        flex="33" style="padding: 3px">
+      </hardware-control>
+    </div>
+    <md-divider></md-divider>
+  </div>
+
+      <md-card class="md-padding">
+        <md-list>
+          <md-list-item>
+            <h3 style="margin: 0" class="md-title">{{:: 'ui.controls.remotControlApp' | translate}}</h3>
+          </md-list-item>
+          <md-list-item md-no-ink>
+            <span flex>{{:: 'ui.controls.usePhoneOrTablet' | translate}}</span>
+            <md-checkbox ng-model="controlsHw.showAndroid" ng-change="controlsHw.androidToggled()" aria-label="_"></md-checkbox>
+          </md-list-item>
+
+        <md-list-item ng-if="controlsHw.showAndroid && controlsHw.remoteBlocked" layout="row">
+          <md-icon style="font-size:32px; height:32px; margin-right: 24px;">security</md-icon>
+          <div>{{:: 'ui.controls.firewallError' | translate}}</div>
+        </md-list-item>
+
+        <md-list-item ng-if="controlsHw.showAndroid" layout="row">
+          <div layout="column" layout-align="space-between start" style="padding-right: 10px; height: 300px;" flex>
+            <div style="text-align: justify;">
+              {{:: 'ui.controls.iosQRCode' | translate}}
+            </div>
+            <!-- The QR code link is in remoteController.lua -->
+            <div style="width: 180px; height: 180px;">
+              <qr-code color="black" style="width: 100%; height: 100%;" data="controlsHw.qrData2"></qr-code>
+            </div>
+            <a href="http-external://itunes.apple.com/ca/app/beamng.drive-remote-control/id1163096150" aria-label="IOS App Store link" style="height: 70px; padding: 12px;">
+              <object data="modules/options/app-store-badge.svg" type="image/svg+xml" aria-label="ios store badge" style="height: calc(100% - 24px); width: auto; pointer-events: none;"></object>
+            </a>
+          </div>
+          <div layout="column" layout-align="space-between start" style="padding-left: 10px; height: 300px;" flex>
+            <div style="text-align: justify;">
+              {{:: 'ui.controls.androidQRCode' | translate}}
+            </div>
+            <div style="width: 180px; height: 180px;">
+              <qr-code color="black" style="width: 100%; height: 100%;" data="controlsHw.qrData"></qr-code>
+            </div>
+            <a href="http-external://play.google.com/store/apps/details?id=com.beamng.remotecontrol" aria-label="google play store link" style="height: 70px;">
+              <img src="modules/options/google-play-badge.png" aria-label="google play badge" style="height: 100%; width: auto;">
+            </a>
+          </div>
+        </md-list-item>
+
+        </md-list>
+      </md-card>
+    </md-tab>
+  </md-tabs>
+</md-content>

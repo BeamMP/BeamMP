@@ -298,6 +298,12 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         controller: 'SettingsGameplayCtrl as opt'
       })
 
+      .state('menu.options.multiplayer', {
+        url: '/multiplayer',
+        templateUrl: 'modules/options/multiplayer.partial.html',
+        controller: 'SettingsGameplayCtrl as opt'
+      })
+
       .state('menu.options.licenses', {
         url: '/licenses',
         templateUrl: 'modules/options/licenses.partial.html',

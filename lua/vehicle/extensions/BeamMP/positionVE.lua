@@ -21,17 +21,17 @@ local buffer = dequeue.new()
 
 local function updateGFX(dt)
 	timer = timer + dt
-	
+
 	-- Remove packets older than bufferTime from buffer, but keep at least 1
 	while buffer:length() > 1 and timer-buffer:peek_left().localTime > bufferTime do
 		buffer:pop_left()
 	end
 
 	local data = buffer:peek_right()
-	
+
 	-- If there is no data in the buffer, skip everything
 	if not data then return end
-	
+
 	-- Average remote to local time difference over buffer
 	local avgTimeDiff = 0
 	for d in buffer:iter_left() do
@@ -40,8 +40,8 @@ local function updateGFX(dt)
 	avgTimeDiff = avgTimeDiff/buffer:length()
 
 	-- Calculate back to local time using the time at which the packet was sent and the average time difference
-	local calcLocalTime = d.remoteTime+avgTimeDiff
-	
+	local calcLocalTime = data.remoteTime+avgTimeDiff
+
 	-- Get difference between calculated and actual local time
 	-- If you add the ping delay to this, we would have a simple form of lag compensation
 	local timeDiff = timer - calcLocalTime
@@ -56,7 +56,7 @@ local function updateGFX(dt)
 	local debugDrawer = obj.debugDrawProxy
 	debugDrawer:drawSphere(data.pos:toPoint3F(), 0.2, ColorF(1.0,0.0,0.0,0.8))
 	debugDrawer:drawSphere(pos:toPoint3F(), 0.2, ColorF(0.0,1.0,0.0,0.8))
-	
+
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())
 
@@ -73,7 +73,7 @@ local function updateGFX(dt)
 		vel = vel + posError*posCorrectMul
 		rvel = rvel + rotError*rotCorrectMul
 	end
-	
+
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
 	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
 end
@@ -116,17 +116,17 @@ local function getVehicleRotation()
 end
 
 local function setVehiclePosRot(pos, vel, rot, rvel, tim)
-	
+
 	-- Package data for storing in buffer
 	local data = {
-		pos = pos
-		vel = vel or vec3(0,0,0)
-		rot = rot or quat(0,0,0,0)
-		rvel = rvel or vec3(0,0,0)
-		remoteTime = tim or 0
+		pos = pos,
+		vel = vel or vec3(0,0,0),
+		rot = rot or quat(0,0,0,0),
+		rvel = rvel or vec3(0,0,0),
+		remoteTime = tim or 0,
 		localTime = timer
 	}
-	
+
 	buffer:push_right(data)
 end
 

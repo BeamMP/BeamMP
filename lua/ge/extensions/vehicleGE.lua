@@ -318,7 +318,7 @@ local function handle(rawData)
 	if code == "s" then
 		local playerRole= string.match(rawData,"(%w+)%:")
 		rawData = rawData:gsub(playerRole..":", "")
-		local playerNickname= string.match(rawData,"(%w+)%:")
+		local playerNickname= string.match(rawData,"(.*)%:")
 		rawData = rawData:gsub(playerNickname..":", "")
 		local serverVehicleID = string.match(rawData,"(%w+)%:")
 		local data = string.match(rawData,":(.*)")
@@ -330,7 +330,7 @@ local function handle(rawData)
 		local serverVehicleID = string.match(rawData,"(%w+)%:")
 		local data = string.match(rawData,":(.*)")
 		--local data = string.match(rawData,":(.*)")
-		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
+		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleResetted(serverVehicleID, data)
 	end
 

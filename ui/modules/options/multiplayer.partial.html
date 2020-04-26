@@ -1,0 +1,22 @@
+<md-content>
+
+  <md-subheader class="md-no-sticky">Multiplayer</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
+    <md-checkbox ng-model="" ng-change="options.mpSetting('option', 'data')"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.noSteer.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.multiplayer.launcherPort' | translate }}</p>
+    <md-checkbox ng-model="" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.useSteamName.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>
+    <md-checkbox ng-model="" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+</md-content>

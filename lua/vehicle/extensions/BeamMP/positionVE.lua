@@ -71,12 +71,12 @@ local function updateGFX(dt)
 	else
 		-- Add correction forces to stop position and angle from drifting apart
 		vel = vel + posError*posCorrectMul
-		rvel = rvel + rotError*rotCorrectMul
+		rvel = rotError*rotCorrectMul
 	end
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
-	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
-	--velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
+	--velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+	velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
 end
 
 local function getVehicleRotation()
@@ -90,9 +90,9 @@ local function getVehicleRotation()
 	local pitch = dirVector.z
 	local yaw = dirVector.x
 	local rvel = {}
-	rvel.y = obj:getPitchAngularVelocity()
-	rvel.z = obj:getRollAngularVelocity()
-	rvel.x = obj:getYawAngularVelocity()
+	rvel.x = obj:getPitchAngularVelocity()
+	rvel.y = obj:getRollAngularVelocity()
+	rvel.z = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
 	tempTable['pos'].x = tonumber(pos.x)
 	tempTable['pos'].y = tonumber(pos.y)

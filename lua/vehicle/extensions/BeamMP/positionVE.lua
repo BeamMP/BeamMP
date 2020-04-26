@@ -39,9 +39,12 @@ local function updateGFX(dt)
 	end
 	avgTimeDiff = avgTimeDiff/buffer:length()
 
-	-- Get difference to local time by adding the smoothed 
+	-- Calculate back to local time using the time at which the packet was sent and the average time difference
+	local calcLocalTime = d.remoteTime+avgTimeDiff
+	
+	-- Get difference between calculated and actual local time
 	-- If you add the ping delay to this, we would have a simple form of lag compensation
-	local timeDiff = timer - d.remoteTime+avgTimeDiff
+	local timeDiff = timer - calcLocalTime
 
 	-- Extrapolate position where the car should be right now
 	local pos = data.pos + data.vel*timeDiff

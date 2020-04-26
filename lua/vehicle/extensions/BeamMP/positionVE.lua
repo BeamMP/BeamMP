@@ -49,7 +49,7 @@ local function updateGFX(dt)
 	-- Extrapolate position where the car should be right now
 	local pos = data.pos + data.vel*timeDiff
 	local vel = data.vel
-	local rot = data.rot + data.rvel*timeDiff
+	local rot = data.rot -- + data.rvel*timeDiff (TODO: rot is quat and rvel is vec3, so this doesn't work)
 	local rvel = data.rvel
 
 	local vehPos = vec3(obj:getPosition())

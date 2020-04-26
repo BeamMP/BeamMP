@@ -170,6 +170,7 @@ local function resetSession(x)
 	GameNetwork.disconnectLauncher()
 	vehicleGE.onDisconnect()
 	connectToLauncher()
+	UI.readyReset()
 	if x then
 		returnToMainMenu()
 	end

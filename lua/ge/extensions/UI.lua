@@ -94,17 +94,27 @@ local function chatMessage(message)
 	be:executeJS('chatMessage("'..message..'")')
 end
 
+local ready = true
+
 local function ready(src)
   print("UI / Game Has now loaded ("..src..")")
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
-  if src == "MP-SESSION" then
-    GameNetwork.connectToLauncher()
+  if src == "MP-SESSION" or src == "FIRSTVEH" then
+    if ready then
+      ready = false
+      GameNetwork.connectToLauncher()
+    end
   end
+end
+
+local function readyReset()
+  ready = true
 end
 
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
 M.ready = ready
+M.readyReset = readyReset
 M.setPing = setPing
 M.setNickName = setNickName
 M.setStatus = setStatus

@@ -191,6 +191,7 @@ local function onVehicleSpawned(gameVehicleID)
 		veh:delete() -- Remove it
 		print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
 		if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+		UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
 	else
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")

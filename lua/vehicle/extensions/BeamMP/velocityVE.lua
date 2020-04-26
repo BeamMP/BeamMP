@@ -3,15 +3,7 @@
 
 local M = {}
 
-local RemoteYaw = 0
-local RemotePitch = 0
-local RemoteRoll = 0
-local RemoteRotation = quat(0, 0, 0, 0)
-local PitchApply = 0
-local RollApply = 0
-local YawApply = 0
 local isMine = 1
-local AdjustmentMultiplyer = 10
 
 local function typeof(var)
     local _type = type(var);
@@ -48,23 +40,6 @@ local function setVelocity(x, y, z)
 	end
 end
 
-local function ApplyVelocity(pitchDiff, rollDiff, yawDiff)
-	local toWorldAxisQuat = quat(obj:getRotation())
-	pitchDiff = pitchDiff - obj:getPitchAngularVelocity()
-	rollDiff = rollDiff - obj:getRollAngularVelocity()
-	yawDiff = yawDiff - obj:getYawAngularVelocity()
-	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
-	for _, node in pairs(v.data.nodes) do
-		local nodeWeight = obj:getNodeMass(node.cid)
-		local nodePos = vec3(node.pos)
-		local localTargetAcc = nodePos:cross(vec3(pitchDiff, rollDiff, yawDiff)) -- not sure why, but this works well
-		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
-		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
-		obj:applyForceVector(node.cid, forceVec:toFloat3())
-	end
-
-end
-
 -- pos yaw makes it go to the right
 -- pos roll makes it roll from left to right
 -- pos pitch makes the nose go up
@@ -73,17 +48,6 @@ end
 --pitch is pos or growing when the nose is going up
 --roll is decreasing from left to right
 --yaw goes negative from left to right
-
-local function UGFX()
-	if isMine == 0 then
-		local LocalRotation = quat(obj:getRotation())
-		if RemoteRotation and LocalRotation then
-			local t = RemoteRotation/LocalRotation
-			t = t:toEulerYXZ()*AdjustmentMultiplyer
-			ApplyVelocity(t.y, t.z, t.x)
-		end
-	end
-end
 
 local function setIsMine(x)
 	isMine = x
@@ -99,12 +63,26 @@ end
 --       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 --       - can become inaccurate if vehicles are very deformed
 
-local function setAngularVelocity(x,y,z,w)
-	RemoteRotation = quat(x,y,z,w)
+local function setAngularVelocity(pitchAV, rollAV, yawAV)
+	--TODO: is this still needed?
+	if isMine ~= 0 then return end
+	
+	local toWorldAxisQuat = quat(obj:getRotation())
+	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
+	local rollDiff = rollAV - obj:getRollAngularVelocity()
+	local yawDiff = yawAV - obj:getYawAngularVelocity()
+	--print("pitchDiff: "..pitchDiff..", rollDiff: "..rollDiff..", yawDiff: "..yawDiff)
+	for _, node in pairs(v.data.nodes) do
+		local nodeWeight = obj:getNodeMass(node.cid)
+		local nodePos = vec3(node.pos)
+		local localTargetAcc = nodePos:cross(vec3(pitchDiff, rollDiff, yawDiff)) -- not sure why, but this works well
+		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
+		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
+		obj:applyForceVector(node.cid, forceVec:toFloat3())
+	end
 end
 
 -- public interface
-M.updateGFX = UGFX
 M.setVelocity = setVelocity
 M.setAngularVelocity = setAngularVelocity
 M.setIsMine = setIsMine

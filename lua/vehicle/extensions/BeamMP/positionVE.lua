@@ -75,8 +75,8 @@ local function updateGFX(dt)
 	end
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
-	--velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
-	velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
+	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+	--velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
 end
 
 local function getVehicleRotation()
@@ -90,9 +90,9 @@ local function getVehicleRotation()
 	local pitch = dirVector.z
 	local yaw = dirVector.x
 	local rvel = {}
-	rvel.x = obj:getPitchAngularVelocity()
-	rvel.y = obj:getRollAngularVelocity()
-	rvel.z = obj:getYawAngularVelocity()
+	rvel.y = obj:getPitchAngularVelocity()
+	rvel.z = obj:getRollAngularVelocity()
+	rvel.x = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
 	tempTable['pos'].x = tonumber(pos.x)
 	tempTable['pos'].y = tonumber(pos.y)

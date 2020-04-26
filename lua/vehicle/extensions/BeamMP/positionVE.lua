@@ -52,6 +52,11 @@ local function updateGFX(dt)
 	local rot = data.rot -- + data.rvel*timeDiff (TODO: rot is quat and rvel is vec3, so this doesn't work)
 	local rvel = data.rvel
 
+	--DEBUG
+	local debugDrawer = obj.debugDrawProxy
+	debugDrawer:drawSphere(data.pos:toPoint3F(), 0.2, ColorF(1.0,0.0,0.0,0.8))
+	debugDrawer:drawSphere(pos:toPoint3F(), 0.2, ColorF(0.0,1.0,0.0,0.8))
+	
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())
 

@@ -60,14 +60,14 @@ local function applyPos(data, serverVehicleID)
 		local pr = jsonDecode(data) -- Decoded data
 		--print(dump(pr))
 		veh:queueLuaCommand("velocityVE.setIsMine(0)")
-		
+
 		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
 		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(rot)..","..tostring(rvel)..","..tim..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..")")
 	end
 end
 

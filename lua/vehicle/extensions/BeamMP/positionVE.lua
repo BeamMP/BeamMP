@@ -75,8 +75,8 @@ local function updateGFX(dt)
 	end
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
-	--velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
-	velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
+	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+	--velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
 end
 
 local function getVehicleRotation()

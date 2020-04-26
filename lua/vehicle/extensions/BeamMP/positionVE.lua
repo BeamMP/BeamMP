@@ -33,7 +33,7 @@ local function updateGFX(dt)
 	if not data then return end
 	
 	-- Average remote to local time difference over buffer
-	local avgTimeDiff = vec3(0,0,0)
+	local avgTimeDiff = 0
 	for d in buffer:iter_left() do
 		avgTimeDiff = avgTimeDiff + d.localTime-d.remoteTime
 	end

@@ -54,8 +54,10 @@ local function updateGFX(dt)
 
 	--DEBUG
 	--local debugDrawer = obj.debugDrawProxy
-	--debugDrawer:drawSphere(data.pos:toPoint3F(), 0.2, ColorF(1.0,0.0,0.0,0.8))
-	--debugDrawer:drawSphere(pos:toPoint3F(), 0.2, ColorF(0.0,1.0,0.0,0.8))
+	--debugDrawer:drawSphere(data.pos, 0.2, ColorF(1.0,0.0,0.0,0.8))
+	--debugDrawer:drawSphere(0.4, data.pos:toFloat3(), color(0,0,255,255))
+	--debugDrawer:drawSphere(pos, 0.2, ColorF(0.0,1.0,0.0,0.8))
+	--debugDrawer:drawSphere(0.4, pos:toFloat3(), color(0,255,0,255))
 
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())
@@ -71,7 +73,7 @@ local function updateGFX(dt)
 	else
 		-- Add correction forces to stop position and angle from drifting apart
 		vel = vel + posError*posCorrectMul
-		rvel = rotError*rotCorrectMul
+		rvel = rvel + rotError*rotCorrectMul
 	end
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
@@ -90,9 +92,9 @@ local function getVehicleRotation()
 	local pitch = dirVector.z
 	local yaw = dirVector.x
 	local rvel = {}
-	rvel.x = obj:getPitchAngularVelocity()
-	rvel.y = obj:getRollAngularVelocity()
-	rvel.z = obj:getYawAngularVelocity()
+	rvel.y = obj:getPitchAngularVelocity()
+	rvel.z = obj:getRollAngularVelocity()
+	rvel.x = obj:getYawAngularVelocity()
 	tempTable['pos'] = {}
 	tempTable['pos'].x = tonumber(pos.x)
 	tempTable['pos'].y = tonumber(pos.y)

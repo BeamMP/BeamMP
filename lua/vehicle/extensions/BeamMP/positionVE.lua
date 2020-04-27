@@ -13,7 +13,7 @@ local dequeue = require('dequeue')
 local maxBuffer = 0.2          -- How many seconds packets will be kept in buffer
 local posCorrectMul = 2        -- How much acceleration to use for correcting position error
 local maxPosError = 1          -- If position error is larger than this, teleport the vehicle
-local rotCorrectMul = 10        -- How much acceleration to use for correcting angle error
+local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
 
 local timer = 0
 local buffer = dequeue.new()

@@ -302,7 +302,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 		if veh and gameVehicleID then
 			local pr = jsonDecode(data) -- Decoded data
 			veh:reset()
-			veh:setPosRot(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
+			veh:setPositionRotation(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")

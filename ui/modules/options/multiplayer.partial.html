@@ -4,19 +4,29 @@
 
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
-    <md-checkbox ng-model="" ng-change="options.mpSetting('option', 'data')"></md-checkbox>
+    <md-checkbox ng-model="options.data.values.showNameTags" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
+      <p flex="50">{{:: 'ui.options.multiplayer.launcherPort' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.launcherPort" min="4444" max="4466" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">{{ options.data.values.launcherPort }}</span>
+    <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">default</span>
   </md-list-item>
 
   <md-list-item md-no-ink>
-    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.noSteer.tooltip' | translate }}</md-tooltip>
-    <p>{{:: 'ui.options.multiplayer.launcherPort' | translate }}</p>
-    <md-checkbox ng-model="" ng-change="options.applyState()"></md-checkbox>
-  </md-list-item>
-
-  <md-list-item md-no-ink>
-    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.useSteamName.tooltip' | translate }}</md-tooltip>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.clearLauncherCache.tooltip' | translate }}</md-tooltip>
     <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>
-    <md-checkbox ng-model="" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
+
+  <md-list-item layout>
+     <md-button md-no-ink class="md-raised md-warn" flex ng-click="options.clearLauncherCache()">
+       <md-icon class="material-icons">check</md-icon> {{ ::'ui.multiplayer.clear' | translate }}
+     </md-button>
+   </md-list-item>
 
 </md-content>

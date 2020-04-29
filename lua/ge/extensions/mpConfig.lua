@@ -2,7 +2,6 @@ local M = {}
 print("mpConfig Initialising...")
 
 -- MP VARIABLES
-local ShowNameTags = true
 local Nickname = ""
 local PlayerServerID = -1
 
@@ -18,14 +17,6 @@ local inputsTickrate = 0.02 --0.05
 
 local electricsDelay = 0
 local electricsTickrate = 0.02
-
-local function setShowNameTags(x)
-  ShowNameTags = x
-end
-
-local function getShowNameTags()
-  return ShowNameTags
-end
 
 local function setNickname(x)
   Nickname = x
@@ -93,8 +84,6 @@ M.electricsDelay = electricsDelay
 M.electricsTickrate = electricsTickrate
 
 -- Functions
-M.setShowNameTags = setShowNameTags
-M.getShowNameTags = getShowNameTags
 M.setNickname = setNickname
 M.getNickname = getNickname
 M.setNodesTickrate = setNodesTickrate

@@ -821,9 +821,12 @@
     "ui.options.licenses": "Licenses",
     "ui.options.controls": "Controls",
 
-    "ui.options.multiplayer.nameTags": "Show player vehicle nametags by default",
+    "ui.options.multiplayer.nameTags": "Show player vehicle nametags",
     "ui.options.multiplayer.launcherPort": "Port that the launcher is running on",
     "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",
+    "ui.options.multiplayer.launcherPort.tooltip": "Set this to the custom port that the launcher was set to use.",
+    "ui.options.multiplayer.clearLauncherCache.tooltip": "Enabling this will clear the currently download mod cache of the launcher. Doing this will result in you having to download all mods for each server you join again.",
+    "ui.multiplayer.clear": "Clear Launcher Cache",
 
     "ui.options.userInterface": "User Interface",
     "ui.options.userInterface.editApps": "Customize UI apps",

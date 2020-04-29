@@ -352,7 +352,7 @@ local function onUpdate(dt)
 		for i = 0, be:getObjectCount() do -- For each vehicle
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
-				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil then
+				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil and settings.getValue("showNameTags") == true then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
 					local color = ""
@@ -376,6 +376,9 @@ local function onUpdate(dt)
 					elseif nicknameMap[tostring(veh:getID())].role == "YT" then
 						color = ColorF(255/255, 0/255, 0/255, 255/255)
 						tag = " [YouTuber]"
+					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
+						color = ColorF(210/255, 214/255, 109/255, 255/255)
+						tag = " [Events Team]"
 					elseif nicknameMap[tostring(veh:getID())].role == "SUPPORT" then
 						color = ColorF(68/255, 109/255, 184/255, 255/255)
 						tag = " [Support]"
@@ -393,7 +396,7 @@ local function onUpdate(dt)
 						pos,
 						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..tag),
 					  color, true, false, -- Color / Background / Wtf
-						ColorI(0,0,0,255)
+						ColorI(0,0,0,127)
 					)
 				end
 			end

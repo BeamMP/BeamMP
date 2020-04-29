@@ -108,6 +108,7 @@ local HandleNetwork = {
 	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params)  end, -- Event For another Resource
+	['T'] = function(params) CoreNetwork.resetSession('true') end, -- Event For another Resource
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
 

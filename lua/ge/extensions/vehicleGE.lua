@@ -222,9 +222,9 @@ local function onServerVehicleRemoved(serverVehicleID, playerServerID)
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleRemoved)")
 		--data = Network.split(data, ":")                                                                   -- TODO Solve How this works
-		if data[1] and data[2] then -- 1:host playerID - 2:host gameVehicleID
-			if CoreNetwork.getPlayerServerID() == data[1] then
-				be:getObjectByID(data[2]):delete()
+		if playerServerID and gameVehicleID then -- 1:host playerID - 2:host gameVehicleID
+			if CoreNetwork.getPlayerServerID() == playerServerID then
+				be:getObjectByID(gameVehicleID):delete()
 			end
 		end
 	end
@@ -287,6 +287,8 @@ local function onVehicleResetted(gameVehicleID)
 			tempTable['ang'].z = tonumber(rot.z)
 			tempTable['ang'].w = tonumber(rot.w)
 			GameNetwork.send('Or:'..serverVehicleID..":\'"..jsonEncode(tempTable).."\'")
+		else
+			GameNetwork.send('On:'..serverVehicleID)
 		end
 	end
 end
@@ -306,6 +308,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")
+		GameNetwork.send('On:'..serverVehicleID)
 	end
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
@@ -339,10 +342,10 @@ local function handle(rawData)
 	end
 
 	if code == "d" then
-		local serverVehicleID = rawData
-		--local data = string.match(rawData,":(.*)")
-		print("serverVehicleID: "..serverVehicleID..", Data: Nil")
-		onServerVehicleRemoved(serverVehicleID)
+		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local data = string.match(rawData,":(.*)")
+		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
+		onServerVehicleRemoved(serverVehicleID, data)
 	end
 end
 

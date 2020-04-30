@@ -54,6 +54,9 @@ local function applyPos(data, serverVehicleID)
 	-- 9 = ang.z
 
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	if gameVehicleID ~= -1 or not gameVehicleID then
+		GameNetwork.send('On:'..serverVehicleID)
+	end
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		--print(data)

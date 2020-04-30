@@ -55,6 +55,7 @@ end
 
 local function sendData(data)
   --print('[GameNetwork] Sending Data: '..data)
+	
 	TCPSocket:send(data..'')
 end
 

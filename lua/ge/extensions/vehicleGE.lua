@@ -287,8 +287,6 @@ local function onVehicleResetted(gameVehicleID)
 			tempTable['ang'].z = tonumber(rot.z)
 			tempTable['ang'].w = tonumber(rot.w)
 			GameNetwork.send('Or:'..serverVehicleID..":\'"..jsonEncode(tempTable).."\'")
-		else
-			GameNetwork.send('On:'..serverVehicleID)
 		end
 	end
 end

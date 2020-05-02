@@ -19,6 +19,7 @@ local electricsDelay = 0
 local electricsTickrate = 0.02
 
 local function setNickname(x)
+  print("Nickname Set To: "..x)
   Nickname = x
 end
 

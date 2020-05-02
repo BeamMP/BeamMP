@@ -55,7 +55,7 @@ end
 
 local function sendData(data)
   --print('[GameNetwork] Sending Data: '..data)
-	
+
 	TCPSocket:send(data..'')
 end
 
@@ -84,16 +84,17 @@ local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
 	if code == "s" then
-		print(data)
+		--print(data)
 		local players = string.match(data,"(.*)%:")
 		data = string.match(data, ":(.*)")
-		print(players)
-		print(data)
+		--print(players)
+		--print(data)
 		UI.updatePlayersList(data)
 		UI.setPlayerCount(players)
 	end
 	if code == "n" then
 		UI.setNickName(data)
+		mpConfig.setNickname(data)
 	end
 end
 

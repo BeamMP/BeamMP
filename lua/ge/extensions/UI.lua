@@ -90,8 +90,15 @@ local function showNotification(type, text)
   end
 end
 
-local function chatMessage(message)
-	be:executeJS('chatMessage("'..message..'")')
+local function chatMessage(rawMessage)
+  local message = string.sub(rawMessage, 2)
+	be:executeJS('addMessage("'..message..'")')
+end
+
+local function chatSend(msg)
+  local c = 'C:'..mpConfig.getNickname()..": "..msg
+  print(c)
+  GameNetwork.send(c)
 end
 
 local ready = true
@@ -119,6 +126,7 @@ M.setPing = setPing
 M.setNickName = setNickName
 M.setStatus = setStatus
 M.chatMessage = chatMessage
+M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 

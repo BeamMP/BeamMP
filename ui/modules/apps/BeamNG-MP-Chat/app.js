@@ -44,7 +44,7 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 					msgTooLong();
 				}
 				else {
-					bngApi.engineLua('UI.console("ChatSend Pressed"); UI.chatSend("'+ String(cm.value) + '")');
+					bngApi.engineLua('UI.chatSend("'+ String(cm.value) + '")');
 					cm.value = '';
 					count++;
 				}

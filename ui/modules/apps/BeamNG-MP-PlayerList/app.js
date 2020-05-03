@@ -37,7 +37,7 @@ function playerList(list) {
 	let playersList = document.getElementById("playerstable");
 	let parsedList = JSON.parse(list);
 
-	console.log("Setting Elements for player list")
+	//console.log("Setting Elements for player list")
 
 	if(players != null){
 		//get differences between playernames and send them as messages

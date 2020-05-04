@@ -54,7 +54,9 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
-  --print('[GameNetwork] Sending Data: '..data)
+	if settings.getValue("showDebugOutput") == true then
+    print('[GameNetwork] Sending Data: '..data)
+	end
 
 	TCPSocket:send(data..'')
 end

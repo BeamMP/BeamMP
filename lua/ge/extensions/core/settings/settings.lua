@@ -279,6 +279,7 @@ local settingsList = {       -- { storage, default_value }
 
   -- Multiplayer Settings
   showNameTags                             = { disk, true },
+  showDebugOutput                          = { disk, false },
   launcherPort                             = { disk, 4444 },
 }
 

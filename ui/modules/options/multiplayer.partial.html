@@ -7,6 +7,11 @@
     <md-checkbox ng-model="options.data.values.showNameTags" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.debugOutput' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.showDebugOutput" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
   <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
       <p flex="50">{{:: 'ui.options.multiplayer.launcherPort' | translate }}</p>
@@ -15,7 +20,7 @@
       ng-change="options.applyState()">
     </md-slider>
     <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">{{ options.data.values.launcherPort }}</span>
-    <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">default</span>
+    <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">4444 (Default)</span>
   </md-list-item>
 
   <md-list-item md-no-ink>

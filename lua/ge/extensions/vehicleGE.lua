@@ -340,10 +340,10 @@ local function handle(rawData)
 	end
 
 	if code == "d" then
-		local serverVehicleID = string.match(rawData,"(%w+)%:")
-		local data = string.match(rawData,":(.*)")
-		print("serverVehicleID: "..serverVehicleID..", Data: "..tostring(data))
-		onServerVehicleRemoved(serverVehicleID, data)
+		--local serverVehicleID = string.match(rawData,"(%w+)%:")
+		--local data = string.match(rawData,":(.*)")
+		--print("serverVehicleID: "..serverVehicleID..", Data: "..tostring(data))
+		onServerVehicleRemoved(rawData, rawData)
 	end
 end
 

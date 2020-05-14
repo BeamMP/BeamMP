@@ -286,7 +286,7 @@ local function onVehicleResetted(gameVehicleID)
 			tempTable['ang'].y = tonumber(rot.y)
 			tempTable['ang'].z = tonumber(rot.z)
 			tempTable['ang'].w = tonumber(rot.w)
-			GameNetwork.send('Or:'..serverVehicleID..":\'"..jsonEncode(tempTable).."\'")
+			GameNetwork.send('Or:'..serverVehicleID..":"..jsonEncode(tempTable).."")
 		end
 	end
 end
@@ -302,7 +302,13 @@ local function onServerVehicleResetted(serverVehicleID, data)
 		if veh and gameVehicleID then
 			local pr = jsonDecode(data) -- Decoded data
 			veh:reset()
-			veh:setPositionRotation(pr[1], pr[2], pr[3], pr[4], pr[5], pr[6], pr[7]) -- Apply position
+			if pr ~= nil then
+				veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w) -- Apply position
+			else
+				if settings.getValue("showDebugOutput") == true then
+			    print('[vehicleGE] pr == nil for onServerVehicleResetted()')
+				end
+			end
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")

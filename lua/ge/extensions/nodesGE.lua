@@ -7,7 +7,6 @@
 
 local M = {}
 print("nodesGE Initialising...")
-local libDeflate = require('LibDeflate')
 
 
 

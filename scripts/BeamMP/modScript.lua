@@ -28,8 +28,8 @@ registerCoreModule("positionGE")
 load("powertrainGE")
 registerCoreModule("powertrainGE")
 
-load("nodesGE")
-registerCoreModule("nodesGE")
-
 load("updatesGE")
 registerCoreModule("updatesGE")
+
+load("nodesGE")
+registerCoreModule("nodesGE")

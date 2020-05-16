@@ -340,7 +340,8 @@ local function handle(rawData)
 	end
 
 	if code == "r" then
-		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		--local data = string.match(rawData,":(.*)")
 		print("serverVehicleID: "..serverVehicleID..", Data: "..data)

@@ -350,7 +350,7 @@ local function handle(rawData)
 
 	if code == "d" then
 		local serverVehicleID = rawData -- TODO Finish this code to remove all for player ID if we do not get a -XXX id for the specific car (in the case it was not handled by the server)
-		if serverVehicleID.match("-") then
+		if serverVehicleID:match("-") then
 			print("serverVehicleID: "..serverVehicleID.." was removed on owners end.")
 			onServerVehicleRemoved(serverVehicleID)
 		else

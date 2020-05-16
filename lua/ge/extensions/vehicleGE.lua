@@ -148,7 +148,7 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
-	local playerServerID  = decodedData[1] -- Server ID of the player that sended the vehicle
+	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
 	--local serverVehicleID = decodedData[3] -- Server ID of the vehicle
 	local vehicleName     = decodedData[3] -- Vehicle name
@@ -209,7 +209,7 @@ end
 
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
-local function onServerVehicleRemoved(serverVehicleID, playerServerID)
+local function onServerVehicleRemoved(serverVehicleID)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
@@ -222,11 +222,11 @@ local function onServerVehicleRemoved(serverVehicleID, playerServerID)
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleRemoved)")
 		--data = Network.split(data, ":")                                                                   -- TODO Solve How this works
-		if playerServerID and gameVehicleID then -- 1:host playerID - 2:host gameVehicleID
+		--[[if playerServerID and gameVehicleID then -- 1:host playerID - 2:host gameVehicleID
 			if CoreNetwork.getPlayerServerID() == playerServerID then
 				be:getObjectByID(gameVehicleID):delete()
 			end
-		end
+		end]]
 	end
 end
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
@@ -312,7 +312,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")
-		GameNetwork.send('On:'..serverVehicleID)
+		--GameNetwork.send('On:'..serverVehicleID) -- Handled by server now.
 	end
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
@@ -330,8 +330,10 @@ local function handle(rawData)
 		playerNickname = playerNickname:sub(1, #playerNickname - 1)
 		print(playerNickname)
 		rawData = rawData:gsub(playerNickname..":", "")
-		local serverVehicleID = string.match(rawData,"(%w+)%:")
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		print(serverVehicleID)
+		print(rawData)
 		local data = string.match(rawData,":(.*)")
 		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
@@ -346,10 +348,14 @@ local function handle(rawData)
 	end
 
 	if code == "d" then
-		--local serverVehicleID = string.match(rawData,"(%w+)%:")
-		--local data = string.match(rawData,":(.*)")
-		--print("serverVehicleID: "..serverVehicleID..", Data: "..tostring(data))
-		onServerVehicleRemoved(rawData, rawData)
+		local serverVehicleID = rawData -- TODO Finish this code to remove all for player ID if we do not get a -XXX id for the specific car (in the case it was not handled by the server)
+		if serverVehicleID.match("-") then
+			print("serverVehicleID: "..serverVehicleID.." was removed on owners end.")
+			onServerVehicleRemoved(serverVehicleID)
+		else
+			print("serverVehicleID: "..serverVehicleID.." was removed on owners end.")
+			onServerVehicleRemoved(serverVehicleID)
+		end
 	end
 end
 

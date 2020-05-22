@@ -72,11 +72,11 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
 	if le == nil then	le = e end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
-		if DisallowedKey(k) and le[k] ~= v then
+		if DisallowedKey(k) and le[k] ~= v print("Storing Default Electrics") then
 			eTable[k] = v
 		end
 	end
-	if sendNow == true or e ~= le then
+	if sendNow == true then
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		le = e
 	end
@@ -155,9 +155,9 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-		print(tostring(decodedData))
+		print(data)
 		for k,v in pairs(decodedData) do
-			--print("Setting: "..k.." -> "..tostring(v))
+			print("Setting: "..k.." -> "..tostring(v))
 			if k == "lights_state" then
 				electrics.setLightsState(v) -- Apply lights values
 			elseif k == "lightbar" then

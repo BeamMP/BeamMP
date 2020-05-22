@@ -57,7 +57,14 @@ local function DisallowedKey(k)
 		"turboSpin",
 		"turboRPM",
 		"turboRpmRatio",
-		"tilt",
+		--"tilt",
+		"engineThrottle",
+		"throttle",
+		"break_input",
+		"break"
+		"clutch",
+		"clutchRatio",
+		"breaklights",
 	}
 	for i=1,#keys do
 		if k == keys[i] then

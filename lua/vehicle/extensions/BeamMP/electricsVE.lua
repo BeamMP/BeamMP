@@ -194,8 +194,6 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-		print("[electricsVE] Received:")
-		print(data)
 		for k,v in pairs(decodedData) do
 			print("Setting: "..k.." -> "..tostring(v))
 			if k == "hazard_enabled" then

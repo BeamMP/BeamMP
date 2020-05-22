@@ -111,8 +111,12 @@ local function applyElectrics(data)
 		if e.tailgate ~= decodedData[9] then
 			electrics.values.tailgate = decodedData[9]
 		end
-		electrics.setLightsState(decodedData[4]) -- Apply lights values
-		electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values
+		if e.lightbar ~= decodedData[4] then
+			electrics.setLightsState(decodedData[4]) -- Apply lights values
+		end
+		if e.lights_state ~= decodedData[4] then
+			electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values
+		end
 		-- Apply horn value
 		if decodedData[6] == 1 and e.horn == 0 then
 			electrics.horn(true)

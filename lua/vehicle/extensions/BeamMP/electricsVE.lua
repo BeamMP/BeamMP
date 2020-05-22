@@ -71,7 +71,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	local e = electrics.values
 	local eTable = {}
 	for k,v in pairs(e) do
-		if DisallowedKey(k) and eTable[k] ~= v then
+		if DisallowedKey(k) and le[k] ~= v then
 			eTable[k] = v
 		end
 	end

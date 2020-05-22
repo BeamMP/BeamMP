@@ -70,6 +70,10 @@ local function DisallowedKey(k)
 		"throttle_input",
 		"abs",
 		"lights",
+		"wheelaxleFR",
+		"wheelaxleFL",
+		"wheelaxleRR",
+		"wheelaxleRL",
 	}
 	for i=1,#keys do
 		if k == keys[i] then
@@ -207,7 +211,7 @@ local function applyElectrics(data)
 			electrics.horn(false)
 		end]]
 		for k,v in pairs(decodedData) do
-			print("Setting: "..k.." -> "..tostring(v))
+			--print("Setting: "..k.." -> "..tostring(v))
 			if k == "hazard_enabled" then
 				electrics.values.hazard = 0
 				electrics.set_warn_signal(decodedData[3])
@@ -222,6 +226,12 @@ local function applyElectrics(data)
 				electrics.setLightsState(v) -- Apply lights values
 			elseif k == "lightbar" then
 				electrics.set_lightbar_signal(v) -- Apply lightbar values
+			elseif k == "engineRunning" then
+				if v == 1 then
+					powertrain.getDevice("mainEngine"):activateStarter()
+				elseif v == 0 then
+					controller.mainController.setEngineIgnition(false)
+				end
 			else
 				electrics.values[k] = v
 			end

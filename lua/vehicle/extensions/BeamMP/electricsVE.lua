@@ -135,7 +135,13 @@ local function applyElectrics(data)
 			electrics.horn(false)
 		end]]
 	for k,v in pairs(decodedData) do
-		print("Setting: "..k.." -> "..v)
+		--print("Setting: "..k.." -> "..tostring(v))
+		if k == "wheelThermals" then
+
+		--elseif then
+		else
+			electrics.values[k] = v
+		end
 	end
 	latestData = data
 	--end

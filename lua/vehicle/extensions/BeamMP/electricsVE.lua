@@ -26,6 +26,20 @@ local sendGearNow = false
 local latestData
 -- ============= VARIABLES =============
 
+local function DisallowedKey(k)
+	local allow = true
+	local keys = {
+		"wheelThermals",
+		"virtualAirspeed"
+	}
+	for i=1,#keys do
+		if k == keys[i] then
+			allow = false
+		end
+	end
+	return allow
+end
+
 -- TODO : Change "allowed" thing and use if player own vehicle don't send any data instead
 
 local function onUpdate(dt) --ONUPDATE OPEN
@@ -57,13 +71,13 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	local e = electrics.values
 	local eTable = {}
 	for k,v in pairs(e) do
-		if k ~= "wheelThermals" then
+		if DisallowedKey(k) and eTable[k] ~= v then
 			eTable[k] = v
 		end
 	end
 	if sendNow == true or e ~= le then
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-		le = e
+		le = eTable
 	end
 
 	if sendGearNow == true or e.gearIndex ~= gearMem then
@@ -140,6 +154,7 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
+		print(decodedData)
 		for k,v in pairs(decodedData) do
 			--print("Setting: "..k.." -> "..tostring(v))
 			if k == "lights_state" then

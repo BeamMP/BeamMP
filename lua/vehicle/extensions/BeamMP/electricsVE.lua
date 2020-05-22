@@ -70,6 +70,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	taMem = e.tailgate]]
 	local e = electrics.values
 	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
+	if le == nil then	le = e end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
 		if DisallowedKey(k) and le[k] ~= v then
 			eTable[k] = v
@@ -154,7 +155,7 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-		print(decodedData)
+		print(tostring(decodedData))
 		for k,v in pairs(decodedData) do
 			--print("Setting: "..k.." -> "..tostring(v))
 			if k == "lights_state" then

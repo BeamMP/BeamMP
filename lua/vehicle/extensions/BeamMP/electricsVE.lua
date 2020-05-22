@@ -11,7 +11,6 @@ local M = {}
 
 -- ============= VARIABLES =============
 local le = {}
-local leTable = {}
 local slMem = -1
 local srMem = -1
 local hzMem = -1
@@ -28,14 +27,41 @@ local latestData
 -- ============= VARIABLES =============
 
 local function DisallowedKey(k)
-	local allow = true
+	local allow = false
 	local keys = {
 		"wheelThermals",
-		"virtualAirspeed"
+		"airflowspeed",
+		"airspeed",
+		"altitude",
+		"avgWheelAV",
+		"clutch_input",
+		"driveshaft",
+		"driveshaft_F",
+		"engineLoad",
+		"exhaustFlow",
+		"fuel",
+		"fuelVolume",
+		"oiltemp",
+		"rpm",
+		"rpmTacho",
+		"rpmspin",
+		"virtualAirspeed",
+		"watertemp",
+		"wheelspeed",
+		"turnsignal",
+		"hazard",
+		"signal_R",
+		"signal_L",
+		"radiatorFanSpin",
+		"turboBoost",
+		"turboSpin",
+		"turboRPM",
+		"turboRpmRatio",
+		"tilt",
 	}
 	for i=1,#keys do
 		if k == keys[i] then
-			allow = false
+			allow = true
 		end
 	end
 	return allow
@@ -71,28 +97,27 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	taMem = e.tailgate]]
 	local e = electrics.values
 	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
-	if le == nil then	le = e print("Storing Default Electrics") end -- Added to give the initial settings so we do not get attempt to access nil value
-	print("------------------------------------------")
+	if le == {} then
+		for k,v in pairs(e) do
+			le[k] = v
+		end
+		print("Storing Default Electrics")
+	end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
-		--print("IF "..tostring(DisallowedKey(k)).." and "..tostring(le[k]).." ~= "..tostring(v).." then")
 		if not DisallowedKey(k) and le[k] ~= v then
 			print("Change Detected: "..tostring(k)..": "..tostring(v))
 			eTable[k] = v
+			le[k] = v
+		end
+	end
+
+	if sendNow == true or #eTable > 0 then
+		sendNow = false
+		if #eTable > 0 then
+			print("[electricsVE] Sending: ")
 			dump(eTable)
 		end
-	end
-	print("------------------------------------------")
-	if eTable ~= {} then
-		--dump(eTable)
-	end
-	if sendNow == true or leTable ~= eTable then
-		if eTable ~= {} then
-			--print("[electricsVE] Sending: ")
-			--dump(eTable)
-		end
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-		le = e
-		leTable = eTable
 	end
 
 	if sendGearNow == true or e.gearIndex ~= gearMem then
@@ -173,19 +198,19 @@ local function applyElectrics(data)
 		print(data)
 		for k,v in pairs(decodedData) do
 			print("Setting: "..k.." -> "..tostring(v))
-			if k == "lights_state" then
-				electrics.setLightsState(v) -- Apply lights values
-			elseif k == "lightbar" then
-				electrics.set_lightbar_signal(v) -- Apply lightbar values
+			if k == "hazard_enabled" then
+				electrics.set_warn_signal(decodedData[3])
+				electrics.update(0) -- Update electrics values
 			elseif k == "signal_left_input" then
 				electrics.toggle_left_signal()
 				electrics.update(0) -- Update electrics values
 			elseif k == "signal_right_input" then
 				electrics.toggle_right_signal()
-				electrics.update(0) -- Update electrics values
-			elseif k == "hazard_enabled" then
-				electrics.set_warn_signal(decodedData[3])
-				electrics.update(0) -- Update electrics values
+				--electrics.update(0) -- Update electrics values
+			elseif k == "lights_state" then
+				electrics.setLightsState(v) -- Apply lights values
+			elseif k == "lightbar" then
+				electrics.set_lightbar_signal(v) -- Apply lightbar values
 			else
 				electrics.values[k] = v
 			end

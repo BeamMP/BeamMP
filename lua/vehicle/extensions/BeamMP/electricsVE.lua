@@ -10,7 +10,7 @@ local M = {}
 
 
 -- ============= VARIABLES =============
-local le = -1
+local le = {}
 local slMem = -1
 local srMem = -1
 local hzMem = -1
@@ -69,7 +69,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	tiMem = e.tilt
 	taMem = e.tailgate]]
 	local e = electrics.values
-	local eTable = {}
+	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
 	for k,v in pairs(e) do
 		if DisallowedKey(k) and le[k] ~= v then
 			eTable[k] = v
@@ -77,7 +77,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	end
 	if sendNow == true or e ~= le then
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-		le = eTable
+		le = e
 	end
 
 	if sendGearNow == true or e.gearIndex ~= gearMem then

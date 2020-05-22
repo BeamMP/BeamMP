@@ -55,8 +55,14 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	tiMem = e.tilt
 	taMem = e.tailgate]]
 	local e = electrics.values
+	local eTable = {}
+	for k,v in pairs(e) do
+		if k ~= "wheelThermals" then
+			eTable[k] = v
+		end
+	end
 	if sendNow == true or e ~= le then
-		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(e).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		le = e
 	end
 
@@ -96,8 +102,8 @@ local function applyElectrics(data)
 	-- 6 = horn
 	local decodedData = jsonDecode(data) -- Decode received data
 	local e = electrics.values
-		--[[if (decodedData) then -- If received data is correct
-		if decodedData[3] ~= e.hazard_enabled and decodedData[3] ~= nil then -- Apply hazard lights
+	if (decodedData) then -- If received data is correct
+		--[[if decodedData[3] ~= e.hazard_enabled and decodedData[3] ~= nil then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData[3])
 			electrics.update(0) -- Update electrics values
 		end
@@ -134,33 +140,43 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-	for k,v in pairs(decodedData) do
-		--print("Setting: "..k.." -> "..tostring(v))
-		if k == "wheelThermals" then
-
-		--elseif then
-		else
-			electrics.values[k] = v
+		for k,v in pairs(decodedData) do
+			--print("Setting: "..k.." -> "..tostring(v))
+			if k == "lights_state" then
+				electrics.setLightsState(v) -- Apply lights values
+			elseif k == "lightbar" then
+				electrics.set_lightbar_signal(v) -- Apply lightbar values
+			elseif k == "signal_left_input" then
+				electrics.toggle_left_signal()
+				electrics.update(0) -- Update electrics values
+			elseif k == "signal_right_input" then
+				electrics.toggle_right_signal()
+				electrics.update(0) -- Update electrics values
+			elseif k == "hazard_enabled" then
+				electrics.set_warn_signal(decodedData[3])
+				electrics.update(0) -- Update electrics values
+			else
+				electrics.values[k] = v
+			end
 		end
+		latestData = data
 	end
-	latestData = data
-	--end
 end
 
 
 
---local function applyLatestElectrics()
---	applyElectrics(latestData)
---end
+local function applyLatestElectrics()
+	applyElectrics(latestData)
+end
 
 
 
-M.applyGear			   = applyGear
-M.getGear			   = getGear
+M.applyGear			       = applyGear
+M.getGear			         = getGear
 M.getElectrics         = getElectrics
-M.applyElectrics	   = applyElectrics
---M.applyLatestElectrics = applyLatestElectrics
-M.updateGFX	    	   = onUpdate
+M.applyElectrics	     = applyElectrics
+M.applyLatestElectrics = applyLatestElectrics
+M.updateGFX	    	     = onUpdate
 
 
 

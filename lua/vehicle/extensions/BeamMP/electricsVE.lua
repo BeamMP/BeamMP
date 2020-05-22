@@ -11,6 +11,7 @@ local M = {}
 
 -- ============= VARIABLES =============
 local le = {}
+local leTable = {}
 local slMem = -1
 local srMem = -1
 local hzMem = -1
@@ -76,9 +77,11 @@ local function onUpdate(dt) --ONUPDATE OPEN
 			eTable[k] = v
 		end
 	end
-	if sendNow == true then
+	--dump(eTable)
+	if sendNow == true or leTable ~= eTable then
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		le = e
+		leTable = eTable
 	end
 
 	if sendGearNow == true or e.gearIndex ~= gearMem then

@@ -18,6 +18,7 @@ local lbMem = -1
 local hrMem = -9
 local exMem = -1
 local tiMem = -1
+local taMem = -1
 local gearMem = -1
 local sendNow = false -- When set to true, it send the electrics value at next update
 local sendGearNow = false
@@ -28,7 +29,7 @@ local latestData
 
 local function onUpdate(dt) --ONUPDATE OPEN
 	local e = electrics.values
-	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem then
+	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem or e.tailgate ~= taMem then
 		local eTable = {}
 		eTable[1] = e.signal_left_input   -- Left signal input
 		eTable[2] = e.signal_right_input  -- Right signal input
@@ -36,8 +37,9 @@ local function onUpdate(dt) --ONUPDATE OPEN
 		eTable[4] = e.lights_state        -- Lights input
 		eTable[5] = e.lightbar            -- Lightbar input
 		eTable[6] = e.horn	              -- Horn input
-		eTable[7] = e.extend              -- Flatbed extend input
-		eTable[8] = e.tilt                -- Flatbed tilt input
+		eTable[7] = e.extend              -- Flatbed extend value
+		eTable[8] = e.tilt                -- Flatbed tilt value
+		eTable[9] = e.tailgate            -- Tailgate value
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendNow = false
 
@@ -50,6 +52,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	hrMem = e.horn
 	exMem = e.extend
 	tiMem = e.tilt
+	taMem = e.tailgate
 
 	if sendGearNow == true or e.gearIndex ~= gearMem then
 		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
@@ -104,6 +107,9 @@ local function applyElectrics(data)
 		end
 		if e.tilt ~= decodedData[8] then
 			electrics.values.tilt = decodedData[8]
+		end
+		if e.tailgate ~= decodedData[9] then
+			electrics.values.tailgate = decodedData[9]
 		end
 		electrics.setLightsState(decodedData[4]) -- Apply lights values
 		electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values

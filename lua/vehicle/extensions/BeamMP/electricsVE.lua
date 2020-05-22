@@ -62,11 +62,12 @@ local function DisallowedKey(k)
 		"throttle",
 		"brake_input",
 		"brake",
-		"breaklights",
+		"brakelights",
 		"clutch",
 		"clutchRatio",
 		"steering",
 		"steering_input",
+		"throttle_input",
 	}
 	for i=1,#keys do
 		if k == keys[i] then

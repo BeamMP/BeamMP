@@ -77,8 +77,9 @@ local function onUpdate(dt) --ONUPDATE OPEN
 			eTable[k] = v
 		end
 	end
-	--dump(eTable)
 	if sendNow == true or leTable ~= eTable then
+		print("[electricsVE] Sending: ")
+		dump(eTable)
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		le = e
 		leTable = eTable
@@ -158,6 +159,7 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
+		print("[electricsVE] Received:")
 		print(data)
 		for k,v in pairs(decodedData) do
 			print("Setting: "..k.." -> "..tostring(v))

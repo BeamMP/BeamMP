@@ -68,6 +68,8 @@ local function DisallowedKey(k)
 		"steering",
 		"steering_input",
 		"throttle_input",
+		"abs",
+		"lights",
 	}
 	for i=1,#keys do
 		if k == keys[i] then
@@ -207,6 +209,7 @@ local function applyElectrics(data)
 		for k,v in pairs(decodedData) do
 			print("Setting: "..k.." -> "..tostring(v))
 			if k == "hazard_enabled" then
+				electrics.values.hazard = 0
 				electrics.set_warn_signal(decodedData[3])
 				electrics.update(0) -- Update electrics values
 			elseif k == "signal_left_input" then

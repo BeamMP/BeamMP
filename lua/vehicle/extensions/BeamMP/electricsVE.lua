@@ -16,6 +16,8 @@ local hzMem = -1
 local lsMem = -1
 local lbMem = -1
 local hrMem = -9
+local exMem = -1
+local tiMem = -1
 local gearMem = -1
 local sendNow = false -- When set to true, it send the electrics value at next update
 local sendGearNow = false
@@ -26,14 +28,16 @@ local latestData
 
 local function onUpdate(dt) --ONUPDATE OPEN
 	local e = electrics.values
-	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem then
-		local eTable = {}	
+	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem then
+		local eTable = {}
 		eTable[1] = e.signal_left_input   -- Left signal input
 		eTable[2] = e.signal_right_input  -- Right signal input
 		eTable[3] = e.hazard_enabled      -- Hazard light input
 		eTable[4] = e.lights_state        -- Lights input
 		eTable[5] = e.lightbar            -- Lightbar input
 		eTable[6] = e.horn	              -- Horn input
+		eTable[7] = e.extend              -- Flatbed extend input
+		eTable[8] = e.tilt                -- Flatbed tilt input
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendNow = false
 
@@ -44,12 +48,14 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	lsMem = e.lights_state
 	lbMem = e.lightbar
 	hrMem = e.horn
-	
+	exMem = e.extend
+	tiMem = e.tilt
+
 	if sendGearNow == true or e.gearIndex ~= gearMem then
 		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendGearNow = false
 	end
-	gearMem = e.gearIndex	
+	gearMem = e.gearIndex
 end --ONUPDATE CLOSE
 
 
@@ -78,29 +84,35 @@ local function applyElectrics(data)
 	-- 3 = hazard_enabled
 	-- 4 = lights_state
 	-- 5 = lightbar
-	-- 6 = horn	
+	-- 6 = horn
 	local decodedData = jsonDecode(data) -- Decode received data
-		local e = electrics.values	
+		local e = electrics.values
 		if (decodedData) then -- If received data is correct
 		if decodedData[3] ~= e.hazard_enabled then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData[3])
 			electrics.update(0) -- Update electrics values
-		end		
+		end
 		if e.signal_left_input  ~= decodedData[1] then -- Apply left signal value
-			electrics.toggle_left_signal() 
+			electrics.toggle_left_signal()
 			electrics.update(0) -- Update electrics values
 		end
 		if e.signal_right_input ~= decodedData[2] then -- Apply right signal value
 			electrics.toggle_right_signal()
-		end		
+		end
+		if e.extend ~= decodedData[7] then
+			electrics.values.extend = decodedData[7]
+		end
+		if e.tilt ~= decodedData[8] then
+			electrics.values.tilt = decodedData[8]
+		end
 		electrics.setLightsState(decodedData[4]) -- Apply lights values
-		electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values		
+		electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values
 		-- Apply horn value
 		if decodedData[6] == 1 and e.horn == 0 then
 			electrics.horn(true)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
-		end		
+		end
 		latestData = data
 	end
 end

@@ -54,11 +54,10 @@ end
 --====================== DISCONNECT FROM SERVER ======================
 
 local function sendData(data)
+	local r = TCPSocket:send(data..'')
 	if settings.getValue("showDebugOutput") == true then
-    print('[GameNetwork] Sending Data: '..data)
+    print('[GameNetwork] Sending Data ('..r..'): '..data)
 	end
-
-	TCPSocket:send(data..'')
 end
 
 local function sendDataSplit(code, ID, data)

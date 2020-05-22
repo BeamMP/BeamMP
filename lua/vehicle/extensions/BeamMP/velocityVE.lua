@@ -4,6 +4,7 @@
 local M = {}
 
 local isMine = 1
+local forceMultiplyer = 1000 -- was 2000
 
 local function typeof(var)
     local _type = type(var);
@@ -33,7 +34,7 @@ local function setVelocity(x, y, z)
 
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
-		local forceVec = velDiff*nodeWeight*2000 -- calculate force for desired acceleration
+		local forceVec = velDiff*nodeWeight*forceMultiplyer -- calculate force for desired acceleration
 		--print(forceVec)
 		--print("Applying Force: ^")
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
@@ -66,7 +67,7 @@ end
 local function setAngularVelocity(pitchAV, rollAV, yawAV)
 	--TODO: is this still needed?
 	if isMine ~= 0 then return end
-	
+
 	local toWorldAxisQuat = quat(obj:getRotation())
 	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
 	local rollDiff = rollAV - obj:getRollAngularVelocity()
@@ -77,7 +78,7 @@ local function setAngularVelocity(pitchAV, rollAV, yawAV)
 		local nodePos = vec3(node.pos)
 		local localTargetAcc = nodePos:cross(vec3(pitchDiff, rollDiff, yawDiff)) -- not sure why, but this works well
 		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
-		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
+		local forceVec = targetAcc*nodeWeight*forceMultiplyer -- calculate force for desired acceleration
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 end

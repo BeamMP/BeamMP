@@ -95,7 +95,7 @@ local function applyElectrics(data)
 	-- 5 = lightbar
 	-- 6 = horn
 	local decodedData = jsonDecode(data) -- Decode received data
-		local e = electrics.values
+	local e = electrics.values
 		--[[if (decodedData) then -- If received data is correct
 		if decodedData[3] ~= e.hazard_enabled and decodedData[3] ~= nil then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData[3])
@@ -134,18 +134,18 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-		for k,v in pairs(decodedData) do
-			print("Setting: "..k.." -> "..v)
-		end
-		latestData = data
+	for k,v in pairs(decodedData) do
+		print("Setting: "..k.." -> "..v)
 	end
+	latestData = data
+	--end
 end
 
 
 
-local function applyLatestElectrics()
-	applyElectrics(latestData)
-end
+--local function applyLatestElectrics()
+--	applyElectrics(latestData)
+--end
 
 
 
@@ -153,7 +153,7 @@ M.applyGear			   = applyGear
 M.getGear			   = getGear
 M.getElectrics         = getElectrics
 M.applyElectrics	   = applyElectrics
-M.applyLatestElectrics = applyLatestElectrics
+--M.applyLatestElectrics = applyLatestElectrics
 M.updateGFX	    	   = onUpdate
 
 

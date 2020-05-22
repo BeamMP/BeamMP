@@ -70,9 +70,9 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	taMem = e.tailgate]]
 	local e = electrics.values
 	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
-	if le == nil then	le = e end -- Added to give the initial settings so we do not get attempt to access nil value
+	if le == nil then	le = e print("Storing Default Electrics") end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
-		if DisallowedKey(k) and le[k] ~= v print("Storing Default Electrics") then
+		if DisallowedKey(k) and le[k] ~= v then
 			eTable[k] = v
 		end
 	end

@@ -61,7 +61,7 @@ local function DisallowedKey(k)
 		"engineThrottle",
 		"throttle",
 		"break_input",
-		"break"
+		"break",
 		"clutch",
 		"clutchRatio",
 		"breaklights",

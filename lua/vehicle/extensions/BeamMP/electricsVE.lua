@@ -72,14 +72,24 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	local e = electrics.values
 	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
 	if le == nil then	le = e print("Storing Default Electrics") end -- Added to give the initial settings so we do not get attempt to access nil value
+	print("------------------------------------------")
 	for k,v in pairs(e) do
-		if DisallowedKey(k) and le[k] ~= v then
+		--print("IF "..tostring(DisallowedKey(k)).." and "..tostring(le[k]).." ~= "..tostring(v).." then")
+		if not DisallowedKey(k) and le[k] ~= v then
+			print("Change Detected: "..tostring(k)..": "..tostring(v))
 			eTable[k] = v
+			dump(eTable)
 		end
 	end
+	print("------------------------------------------")
+	if eTable ~= {} then
+		--dump(eTable)
+	end
 	if sendNow == true or leTable ~= eTable then
-		print("[electricsVE] Sending: ")
-		dump(eTable)
+		if eTable ~= {} then
+			--print("[electricsVE] Sending: ")
+			--dump(eTable)
+		end
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		le = e
 		leTable = eTable

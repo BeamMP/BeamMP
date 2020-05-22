@@ -74,6 +74,22 @@ local function DisallowedKey(k)
 		"wheelaxleFL",
 		"wheelaxleRR",
 		"wheelaxleRL",
+		"axle_FR",
+		"axle_FL",
+		"axle_RR",
+		"axle_RL",
+		"throttleFactorRear",
+		"throttleFactorFront",
+		"esc",
+		"tcs",
+		"escActive",
+		"absActive",
+		"disp_N",
+		"regenThrottle",
+		"disp_1",
+		"tcsActive",
+		"clutchRatio1",
+		"lockupClutchRatio",
 	}
 	for i=1,#keys do
 		if k == keys[i] then

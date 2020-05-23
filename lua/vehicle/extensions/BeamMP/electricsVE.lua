@@ -90,6 +90,8 @@ local function DisallowedKey(k)
 		"tcsActive",
 		"clutchRatio1",
 		"lockupClutchRatio",
+		"throttleOverride",
+		"cruiseControlTarget",
 	}
 	for i=1,#keys do
 		if k == keys[i] then

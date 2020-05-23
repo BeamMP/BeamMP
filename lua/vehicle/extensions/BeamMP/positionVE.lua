@@ -10,7 +10,7 @@ local M = {}
 local dequeue = require('dequeue')
 
 -- ============= VARIABLES =============
-local maxBuffer = 0.2          -- How many seconds packets will be kept in buffer
+local maxBuffer = 0.4          -- How many seconds packets will be kept in buffer
 local posCorrectMul = 2        -- How much acceleration to use for correcting position error
 local maxPosError = 1          -- If position error is larger than this, teleport the vehicle
 local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
@@ -54,10 +54,8 @@ local function updateGFX(dt)
 
 	--DEBUG
 	--local debugDrawer = obj.debugDrawProxy
-	--debugDrawer:drawSphere(data.pos, 0.2, ColorF(1.0,0.0,0.0,0.8))
-	--debugDrawer:drawSphere(0.4, data.pos:toFloat3(), color(0,0,255,255))
-	--debugDrawer:drawSphere(pos, 0.2, ColorF(0.0,1.0,0.0,0.8))
-	--debugDrawer:drawSphere(0.4, pos:toFloat3(), color(0,255,0,255))
+	--debugDrawer:drawSphere(0.8, data.pos:toFloat3(), color(0,0,255,255))
+	--debugDrawer:drawSphere(0.8, pos:toFloat3(), color(0,255,0,255))
 
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())

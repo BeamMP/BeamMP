@@ -82,6 +82,7 @@ local function setAngularVelocity(pitchAV, rollAV, yawAV)
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 end
+print("New Version Loaded v3")
 
 -- public interface
 M.setVelocity = setVelocity

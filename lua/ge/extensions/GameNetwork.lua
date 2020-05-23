@@ -99,6 +99,24 @@ local function sessionData(data)
 	end
 end
 
+local eventTriggers = {}
+
+function AddEventHandler(n, f)
+	print("Adding Event Handler: Name = "..tostring(n))
+	table.insert(eventTriggers, {name = n, func = f})
+	dump(eventTriggers)
+end
+
+local function handleEvents(p)  --- E:<NAME>:data
+	local eventName = string.match(p,"(%w+)%:")
+	local data = p:gsub(eventName..":", "")
+	for i=1,#eventTriggers do
+		if eventTriggers[i].name == eventName then
+			eventTriggers[i].func(data)
+		end
+	end
+end
+
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,
 	['W'] = function(params) electricsGE.handle(params) end,
@@ -110,7 +128,7 @@ local HandleNetwork = {
 	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
 	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
-	['E'] = function(params)  end, -- Event For another Resource
+	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
 	['T'] = function(params) CoreNetwork.resetSession('true') end, -- Event For another Resource
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
@@ -188,6 +206,7 @@ M.disconnectLauncher = disconnectLauncher
 M.send = sendData
 M.sendSplit = sendDataSplit
 M.connectionStatus = connectionStatus
+M.CallEvent = handleEvents
 
 print("GameNetwork Loaded.")
 return M

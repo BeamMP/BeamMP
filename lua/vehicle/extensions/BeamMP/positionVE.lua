@@ -29,7 +29,7 @@ local function updateGFX(dt)
 	local packetTimeDiff = timeDiffSmoother.get(data.localTime-data.remoteTime, dt)
 	
 	-- Calculate back to local time using the time at which the packet was sent and the smoothed time difference
-	local calcLocalTime = data.remoteTime + packetTimeOffset
+	local calcLocalTime = data.remoteTime + packetTimeDiff
 	
 	-- Get difference between calculated and actual local time
 	local timeDiff = timer - calcLocalTime

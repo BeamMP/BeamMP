@@ -7,49 +7,40 @@
 
 local M = {}
 
-local dequeue = require('dequeue')
-
 -- ============= VARIABLES =============
-local maxBuffer = 0.4          -- How many seconds packets will be kept in buffer
+local timeDiffSmoother = newTemporalSmoothingNonLinear(1)
 local posCorrectMul = 2        -- How much acceleration to use for correcting position error
 local maxPosError = 1          -- If position error is larger than this, teleport the vehicle
 local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
 
 local timer = 0
-local buffer = dequeue.new()
+local data = nil
 -- ============= VARIABLES =============
 
 local function updateGFX(dt)
 	timer = timer + dt
 
-	-- Remove packets older than bufferTime from buffer, but keep at least 1
-	while buffer:length() > 1 and timer-buffer:peek_left().localTime > maxBuffer do
-		buffer:pop_left()
-	end
-
-	local data = buffer:peek_right()
-
-	-- If there is no data in the buffer, skip everything
+	-- If there is no data, skip everything
 	if not data then return end
-
-	-- Average remote to local time difference over buffer
-	local avgTimeDiff = 0
-	for d in buffer:iter_left() do
-		avgTimeDiff = avgTimeDiff + d.localTime-d.remoteTime
-	end
-	avgTimeDiff = avgTimeDiff/buffer:length()
-
-	-- Calculate back to local time using the time at which the packet was sent and the average time difference
-	local calcLocalTime = data.remoteTime+avgTimeDiff
-
+	
+	-- remoteTime + timeOffset + ping = localTime
+	
+	-- Smoothed difference between local and remote timestamps
+	local packetTimeDiff = timeDiffSmoother.get(data.localTime-data.remoteTime, dt)
+	
+	-- Calculate back to local time using the time at which the packet was sent and the smoothed time difference
+	local calcLocalTime = data.remoteTime + packetTimeOffset
+	
 	-- Get difference between calculated and actual local time
-	-- If you add the ping delay to this, we would have a simple form of lag compensation
 	local timeDiff = timer - calcLocalTime
+	
+	-- How far ahead the position needs to be predicted
+	local predictTime = timeDiff --+ ping
 
 	-- Extrapolate position where the car should be right now
-	local pos = data.pos + data.vel*timeDiff
+	local pos = data.pos + data.vel*predictTime
 	local vel = data.vel
-	local rot = data.rot -- + data.rvel*timeDiff (TODO: rot is quat and rvel is vec3, so this doesn't work)
+	local rot = data.rot * quatFromEuler(data.rvel*predictTime)
 	local rvel = data.rvel
 
 	--DEBUG
@@ -76,7 +67,6 @@ local function updateGFX(dt)
 
 	velocityVE.setVelocity(vel.x, vel.y, vel.z)
 	velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
-	--velocityVE.setAngularVelocity(rvel.x, rvel.y, rvel.z)
 end
 
 local function getVehicleRotation()
@@ -84,11 +74,6 @@ local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
 	local rot = obj:getRotation()
-	local dirVector = obj:getDirectionVector()
-	local dirVectorUp = obj:getDirectionVectorUp()
-	local roll = dirVectorUp.x * -dirVector.y + dirVectorUp.y * dirVector.x
-	local pitch = dirVector.z
-	local yaw = dirVector.x
 	local rvel = {}
 	rvel.y = obj:getPitchAngularVelocity()
 	rvel.z = obj:getRollAngularVelocity()
@@ -118,17 +103,29 @@ end
 
 local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 
-	-- Package data for storing in buffer
-	local data = {
+	local remoteDT = tim - data.remoteTime
+	
+	-- If packets arrive in wrong order, only keep newest one
+	if remoteDT <= 0 then
+		print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..data.remoteTime..", New Timestamp: "..tim)
+		return
+	end
+	
+	local acc = (vel - data.vel)/remoteDT
+	local racc = (rvel - data.rvel)/remoteDT
+	
+	-- Package data for storing
+	data = {
 		pos = pos,
 		vel = vel or vec3(0,0,0),
+		acc = acc or vec3(0,0,0),
 		rot = rot or quat(0,0,0,0),
 		rvel = rvel or vec3(0,0,0),
+		racc = racc or vec3(0,0,0),
 		remoteTime = tim or 0,
 		localTime = timer
 	}
 
-	buffer:push_right(data)
 end
 
 

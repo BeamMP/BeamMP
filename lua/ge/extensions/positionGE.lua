@@ -41,18 +41,6 @@ end
 
 local function applyPos(data, serverVehicleID)
 
-	-- 1 = pos.x
-	-- 2 = pos.y
-	-- 3 = pos.z
-
-	-- 4 = vel.x
-	-- 5 = vel.y
-	-- 6 = vel.z
-
-	-- 7 = ang.x
-	-- 8 = ang.y
-	-- 9 = ang.z
-
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
 		--GameNetwork.send('On:'..serverVehicleID)
@@ -62,15 +50,15 @@ local function applyPos(data, serverVehicleID)
 		--print(data)
 		local pr = jsonDecode(data) -- Decoded data
 		--print(dump(pr))
-		veh:queueLuaCommand("velocityVE.setIsMine(0)")
 
 		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
 		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
+		local realtime = Engine.Platform.getRealMilliseconds()
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..realtime..")")
 	end
 end
 

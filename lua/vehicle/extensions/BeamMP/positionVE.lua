@@ -9,13 +9,18 @@ local M = {}
 
 -- ============= VARIABLES =============
 local timeDiffSmoother = newTemporalSmoothingNonLinear(1)
-local posCorrectMul = 2        -- How much acceleration to use for correcting position error
-local maxPosError = 1          -- If position error is larger than this, teleport the vehicle
+local posCorrectMul = 5        -- How much acceleration to use for correcting position error
+local maxPosError = 10         -- If position error is larger than this, teleport the vehicle
 local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
 
 local timer = 0
 local data = nil
+local ping = 0
 -- ============= VARIABLES =============
+
+local function setPing(p)
+	ping = p
+end
 
 local function updateGFX(dt)
 	timer = timer + dt
@@ -23,10 +28,8 @@ local function updateGFX(dt)
 	-- If there is no data, skip everything
 	if not data then return end
 	
-	-- remoteTime + timeOffset + ping = localTime
-	
 	-- Smoothed difference between local and remote timestamps
-	local packetTimeDiff = timeDiffSmoother.get(data.localTime-data.remoteTime, dt)
+	local packetTimeDiff = timeDiffSmoother:get(data.localOffset, dt)
 	
 	-- Calculate back to local time using the time at which the packet was sent and the smoothed time difference
 	local calcLocalTime = data.remoteTime + packetTimeDiff
@@ -35,18 +38,19 @@ local function updateGFX(dt)
 	local timeDiff = timer - calcLocalTime
 	
 	-- How far ahead the position needs to be predicted
-	local predictTime = timeDiff --+ ping
+	local predictTime = timeDiff + ping
 
 	-- Extrapolate position where the car should be right now
-	local pos = data.pos + data.vel*predictTime
-	local vel = data.vel
-	local rot = data.rot * quatFromEuler(data.rvel*predictTime)
-	local rvel = data.rvel
+	local pos = data.pos + data.vel*predictTime + 0.5*data.acc*predictTime*predictTime
+	local vel = data.vel + data.acc*predictTime
+	local rvelAdd = data.rvel*predictTime + 0.5*data.racc*predictTime*predictTime
+	local rot = data.rot * quatFromEuler(rvelAdd.y, rvelAdd.z, rvelAdd.x)
+	local rvel = data.rvel + data.racc*predictTime
 
 	--DEBUG
-	--local debugDrawer = obj.debugDrawProxy
-	--debugDrawer:drawSphere(0.8, data.pos:toFloat3(), color(0,0,255,255))
-	--debugDrawer:drawSphere(0.8, pos:toFloat3(), color(0,255,0,255))
+	local debugDrawer = obj.debugDrawProxy
+	debugDrawer:drawSphere(0.8, data.pos:toFloat3(), color(0,0,255,255))
+	debugDrawer:drawSphere(0.8, pos:toFloat3(), color(0,255,0,255))
 
 	local vehPos = vec3(obj:getPosition())
 	local vehRot = quat(obj:getRotation())
@@ -101,18 +105,23 @@ local function getVehicleRotation()
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 
-local function setVehiclePosRot(pos, vel, rot, rvel, tim)
+local function setVehiclePosRot(pos, vel, rot, rvel, tim, realtime)
 
-	local remoteDT = tim - data.remoteTime
+	--local processDelay = Engine.Platform.getRealMilliseconds() - realtime
+	--print("Position packet processing delay: "..processDelay)
 	
-	-- If packets arrive in wrong order, only keep newest one
-	if remoteDT <= 0 then
-		print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..data.remoteTime..", New Timestamp: "..tim)
-		return
+	if data then
+		local remoteDT = tim - data.remoteTime
+		
+		-- If packets arrive in wrong order, only keep newest one
+		if remoteDT < 0 then
+			print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..data.remoteTime..", New Timestamp: "..tim)
+			--return
+		end
+		
+		local acc = (vel - data.vel)/remoteDT
+		local racc = (rvel - data.rvel)/remoteDT
 	end
-	
-	local acc = (vel - data.vel)/remoteDT
-	local racc = (rvel - data.rvel)/remoteDT
 	
 	-- Package data for storing
 	data = {
@@ -123,7 +132,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 		rvel = rvel or vec3(0,0,0),
 		racc = racc or vec3(0,0,0),
 		remoteTime = tim or 0,
-		localTime = timer
+		localOffset = timer-tim or 0
 	}
 
 end
@@ -133,6 +142,7 @@ end
 M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot = setVehiclePosRot
+M.setPing = setPing
 
 
 return M

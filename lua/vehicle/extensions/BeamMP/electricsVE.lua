@@ -139,7 +139,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
 		if not DisallowedKey(k) and le[k] ~= v then
-			print("Change Detected: "..tostring(k)..": "..tostring(v))
+			--print("Change Detected: "..tostring(k)..": "..tostring(v))
 			eTable[k] = v
 			le[k] = v
 		end

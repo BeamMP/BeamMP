@@ -51,7 +51,7 @@ once the new client is setup, all players will unpause and rely on web sockets t
   - O
     - d = Vehicle Destroyed, Format: Od:<ServerVehicleID>
     - s = Vehicle Spawned, Format: Os:0:<vehicleData>, 0 for the fact that it needs a serverVehicleID still.
-    - m = Vehicle Moved / Switched, Format: Om:<ServerVehicleID>
+    - m = Vehicle Moved / Switched, Format: Om:<ServerVehicleID>  -- UNUSED NOW
     - r = Vehicle Resetted, Format: Or:<ServerVehicleID>
 
 # Network Codes

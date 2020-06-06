@@ -264,6 +264,11 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     }
   };
 
+  vm.mpapply = function () {
+    console.log("[BeamMP] Attempting to send vehicle edits to all clients")
+    bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData('\"..obj:getID()..\"', '\"..jsonEncode(partmgmt.state.config)..\"')\")");
+  }
+
   function calcTree (config) {
     console.timeEnd('waitingForLua')
 
@@ -382,10 +387,10 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 .controller('Vehicleconfig_color', ["$scope", "bngApi", function ($scope, bngApi) {
   var vm = this;
   vm.updateColor = function (index, value) {
-    // console.log( `setVehicleColorPalette(${index-1}, "${value}");` );
-    // console.log('setVehicleColorPalette(' + (index-1) + ',"' + value + '");')
-    // console.log( `changeVehicleColor("${value}");` );
-    // console.log('changeVehicleColor("' + value  + '");');
+     console.log( `setVehicleColorPalette(${index-1}, "${value}");` );
+     console.log('setVehicleColorPalette(' + (index-1) + ',"' + value + '");')
+     console.log( `changeVehicleColor("${value}");` );
+     console.log('changeVehicleColor("' + value  + '");');
 
     if (index === 0) {
       bngApi.engineScript(`changeVehicleColor("${value}");`);

@@ -132,6 +132,41 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 end
 --=========================================== SEND VEHICLE DATA =============================================
 
+--=========================================== SEND MODIFIED VEHICLE DATA =============================================
+local function sendCustomVehicleData(gameVehicleID, vehicleConfig)
+	local vehicleTable    = {} -- Vehicle table
+	local veh             = be:getObjectByID(gameVehicleID)
+	local c               = veh.color
+	local p0              = veh.colorPalette0
+	local p1              = veh.colorPalette1
+
+	vehicleTable[1]  = mpConfig.getPlayerServerID()
+	vehicleTable[3]  = veh:getJBeamFilename()
+	vehicleTable[4]  = vehicleConfig
+	vehicleTable[5]  = jsonEncode({c.x, c.y, c.z, c.w})
+	vehicleTable[6]  = jsonEncode({p0.x, p0.y, p0.z, p0.w})
+	vehicleTable[7]  = jsonEncode({p1.x, p1.y, p1.z, p1.w})
+
+	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
+	GameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend)--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
+end
+--=========================================== SEND MODIFIED VEHICLE DATA =============================================
+
+local function UpdateVehicle(sid, data)
+	local gameVehicleID = getGameVehicleID(sid)
+	local veh = be:getObjectByID(gameVehicleID)
+	local decodedData     = jsonDecode(data)
+	local vehicleName     = decodedData[3] -- Vehicle name
+	local vehicleConfig   = decodedData[4] -- Vehicle config
+	local c               = jsonDecode(decodedData[5]) -- Vehicle color
+	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
+	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
+	if vehicleName == veh:getJBeamFilename() then
+		veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
+	else
+		print("RECEIVE MODIFIED DATA FOR A VEHICLE THAT IS NOT OF THE SAME TYPE!!!")
+	end
+end
 
 
 local function onDisconnect()
@@ -183,26 +218,30 @@ end
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
-	print("[BeamMP] Vehicle spawned : "..gameVehicleID)
-	local veh = be:getObjectByID(gameVehicleID)
-	if first then
-		first = false
-		commands.setFreeCamera() -- Fix camera
-		veh:delete() -- Remove it
-		print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
-		if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
-		UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
-		onMPSessionInit()
-	else
-		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
-		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
-		--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
-		if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
-			sendVehicle(gameVehicleID) -- Send it to the server
-			if isOwn(gameVehicleID) then
-				veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
+	if ownMap[tostring(gameVehicleID)] ~= 1 then
+		print("[BeamMP] Vehicle Spawned: "..gameVehicleID)
+		local veh = be:getObjectByID(gameVehicleID)
+		if first then
+			first = false
+			commands.setFreeCamera() -- Fix camera
+			veh:delete() -- Remove it
+			print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
+			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+			UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
+			onMPSessionInit()
+		else
+			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
+			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
+			--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
+			if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
+				sendVehicle(gameVehicleID) -- Send it to the server
+				if isOwn(gameVehicleID) then
+					veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
+				end
 			end
 		end
+	else
+		print("[BeamMP] Vehicle Edited: "..gameVehicleID)
 	end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -268,7 +307,7 @@ end
 
 --======================= ON VEHICLE RESETTED (CLIENT) =======================
 local function onVehicleResetted(gameVehicleID)
-	print("Vehicle resetted : "..gameVehicleID)
+	--print("Vehicle resetted : "..gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
@@ -320,7 +359,7 @@ end
 
 local function handle(rawData)
 	-- the data will be the first opt then the data followed
-	print('vehicleGE:'..rawData)
+	--print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
@@ -340,12 +379,21 @@ local function handle(rawData)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end
 
-	if code == "r" then
+	if code == "c" then -- This is for the customisation of a vehicle event
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		print(serverVehicleID)
+		print(rawData)
+		local data = string.match(rawData,":(.*)")
+		UpdateVehicle(serverVehicleID, data)
+	end
+
+	if code == "r" then -- This is for vehicle reset event
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		--local data = string.match(rawData,":(.*)")
-		print("serverVehicleID: "..serverVehicleID..", Data: "..data)
+		--print("serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleResetted(serverVehicleID, data)
 	end
 
@@ -435,6 +483,7 @@ M.deleteAllVehicles       = deleteAllVehicles
 M.sendAllVehicles         = sendAllVehicles
 M.sendVehicle             = sendVehicle
 M.sendVehicleData         = sendVehicleData
+M.sendCustomVehicleData   = sendCustomVehicleData
 M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted

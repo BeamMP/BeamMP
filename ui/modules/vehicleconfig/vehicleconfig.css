@@ -3,6 +3,10 @@
   margin: 0;
 }
 
+.md-success {
+    background-color: rgb(92, 244, 54) !important;
+}
+
 .contentNavVehicleconfig .inputName {
   font-size:95%;
 }

@@ -68,7 +68,9 @@ local function setAngularVelocity(pitchAV, rollAV, yawAV)
 end
 
 -- public interface
+M.addVelocity = addVelocity
 M.setVelocity = setVelocity
+M.addAngularVelocity = addAngularVelocity
 M.setAngularVelocity = setAngularVelocity
 
 return M

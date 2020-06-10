@@ -7,20 +7,46 @@
 
 local M = {}
 
+-- Smoothing for vectors, original temporalSmoothingNonLinear created by BeamNG
+local vectorSmoothing = {}
+vectorSmoothing.__index = vectorSmoothing
+
+function newVectorSmoothing(rate)
+  local data = {rate = rate or 10, state = vec3(0,0,0)}
+  setmetatable(data, vectorSmoothing)
+  return data
+end
+
+function vectorSmoothing:get(sample, dt)
+  local st = self.state
+  local dif = sample - st
+  st = st + dif * math.min(self.rate * dt, 1)
+  self.state = st
+  return st
+end
+
+function vectorSmoothing:set(sample)
+  self.state = sample
+end
+
 -- ============= VARIABLES =============
 -- Position
 local posCorrectMul = 5        -- How much acceleration to use for correcting position error
-local posForceMul = 0.2           -- How much acceleration is used to correct velocity (between 0 and 1)
+local posForceMul = 0.2        -- How much acceleration is used to correct velocity (between 0 and 1)
 
 -- Rotation
-local rotCorrectMul = 2        -- How much acceleration to use for correcting angle error
+local rotCorrectMul = 3        -- How much acceleration to use for correcting angle error
 local rotForceMul = 0.2        -- How much acceleration is used to correct angular velocity (between 0 and 1)
 
 -- Prediction
-local disableTimeMul = 1.2     -- At collision, position correction is disabled for ping*disableTimeMul to wait for data
-local maxAccErrorMul = 0.5     -- Which amount of acceleration error is detected as a collision
-local minAccError = 5          -- Minimum acceleration error to be detected as a collision
-local maxPosError = 10         -- If position error is larger than this, teleport the vehicle
+local disableTimeMul = 1.5     -- At collision, position correction is disabled for ping*disableTimeMul to wait for data
+local maxAccErrorMul = 1       -- Which amount of acceleration error is detected as a collision
+local minAccError = 30         -- Minimum acceleration error to be detected as a collision
+local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
+local remoteAccSmoother = newVectorSmoothing(5)
+local remoteRaccSmoother = newVectorSmoothing(5)
+local vehAccSmoother = newVectorSmoothing(10)
+local accErrorSmoother = newTemporalSmoothingNonLinear(20) -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
@@ -43,6 +69,9 @@ local remoteData = {
 	timer = 0,
 	timeOffset = 0
 }
+
+local debugDrawer = obj.debugDrawProxy
+
 -- ============= VARIABLES =============
 
 local function setPing(p)
@@ -55,7 +84,7 @@ local function updateGFX(dt)
 	-- Local vehicle data
 	local vehPos = vec3(obj:getPosition())
 	local vehVel = vec3(obj:getVelocity())
-	local vehAcc = (vehVel-(lastVehVel or vehVel))/dt
+	local vehAcc = vehAccSmoother:get((vehVel-(lastVehVel or vehVel))/dt, dt)
 	
 	local vehRot = quat(obj:getRotation())
 	local vehRvel = vec3(obj:getYawAngularVelocity(), obj:getPitchAngularVelocity(), obj:getRollAngularVelocity())
@@ -70,9 +99,17 @@ local function updateGFX(dt)
 	
 	-- Smoothed difference between local and remote timestamps
 	local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
+	local remoteAcc = remoteAccSmoother:get(remoteData.acc, dt)
+	local remoteRacc = remoteRaccSmoother:get(remoteData.racc, dt)
+	
+	if math.abs(timeOffset - remoteData.timeOffset) > 1 then
+		timeOffsetSmoother:set(remoteData.timeOffset)
+		timeOffset = remoteData.timeOffset
+	end
 	
 	-- If prediction is disabled, stop here
 	if remoteData.timer < disableUntil then
+		debugDrawer:drawSphere(2, obj:getPosition(), color(255,0,0,150))
 		return
 	end
 	
@@ -86,14 +123,13 @@ local function updateGFX(dt)
 	local predictTime = timeDiff + ping
 
 	-- Use received position, velocity, and acceleration to predict vehicle position
-	local pos = remoteData.pos + remoteData.vel*predictTime + 0.5*remoteData.acc*predictTime*predictTime
-	local vel = remoteData.vel + remoteData.acc*predictTime
-	local rotAdd = remoteData.rvel*predictTime + 0.5*remoteData.racc*predictTime*predictTime
+	local pos = remoteData.pos + remoteData.vel*predictTime + 0.5*remoteAcc*predictTime*predictTime
+	local vel = remoteData.vel + remoteAcc*predictTime
+	local rotAdd = remoteData.rvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
 	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
-	local rvel = remoteData.rvel + remoteData.racc*predictTime
+	local rvel = remoteData.rvel + remoteRacc*predictTime
 
 	--DEBUG
-	local debugDrawer = obj.debugDrawProxy
 	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
 	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
 	
@@ -103,7 +139,7 @@ local function updateGFX(dt)
 	
 	-- If position error is larger than limit, teleport the vehicle
 	if posError:length() > maxPosError then
-		--print("PosError = " .. tostring(posError))
+		print("PosError = " .. tostring(posError))
 
 		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		velocityVE.setVelocity(vel.x, vel.y, vel.z)
@@ -115,15 +151,20 @@ local function updateGFX(dt)
 	end
 	
 	local velError = vel - vehVel
-	local accError = lastAcc - vehAcc
+	local accErrorLen = accErrorSmoother:get((lastAcc - vehAcc):length(), dt)
 	
 	local rvelError = rvel - vehRvel
 	--local raccError = racc - vehRacc
 	
 	-- Disable prediction if acceleration error is larger than threshold
-	if accError:length() > max(minAccError, lastAcc:length()*maxAccErrorMul) then
+	if accErrorLen > math.max(minAccError, lastAcc:length()*maxAccErrorMul) then
 		disableUntil = remoteData.timer + predictTime*disableTimeMul
-		print("Prediction disabled for "..predictTime*disableTimeMul.." sec! accError "..accError:length().." > "..max(minAccError, lastAcc:length()*maxAccErrorMul))
+		accErrorSmoother:set(0)
+		
+		print("Prediction disabled! accError: "..accErrorLen.." > "..lastAcc:length()*maxAccErrorMul)
+		
+		lastAcc = nil
+		
 		return
 	end
 	
@@ -133,7 +174,7 @@ local function updateGFX(dt)
 	velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	velocityVE.addAngularVelocity(targetRacc.y, targetRacc.z, targetRacc.x)
 	
-	lastAcc = targetAcc
+	lastAcc = targetAcc / dt
 end
 
 local function getVehicleRotation()
@@ -181,7 +222,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, realtime)
 		print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..remoteData.timer..", New Timestamp: "..tim)
 		
 		-- Vehicle probably reset, so also reset disable time
-		if remoteData.timer < 1 then
+		if tim < 1 then
 			disableUntil = 0
 		end
 		

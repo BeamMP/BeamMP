@@ -29,6 +29,10 @@ local function vectorSmoothing:set(sample)
   self.state = sample
 end
 
+local function vectorSmoothing:reset()
+  self.state = vec3(0,0,0)
+end
+
 -- ============= VARIABLES =============
 -- Position
 local posCorrectMul = 5        -- How much acceleration to use for correcting position error
@@ -43,10 +47,10 @@ local disableTimeMul = 1.5     -- At collision, position correction is disabled 
 local maxAccErrorMul = 1       -- Which amount of acceleration error is detected as a collision
 local minAccError = 30         -- Minimum acceleration error to be detected as a collision
 local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
-local remoteAccSmoother = newVectorSmoothing(5)
+local remoteAccSmoother = newVectorSmoothing(10)
 local remoteRaccSmoother = newVectorSmoothing(5)
-local vehAccSmoother = newVectorSmoothing(10)
-local accErrorSmoother = newTemporalSmoothingNonLinear(20) -- Smoother for acceleration error
+local vehAccSmoother = newVectorSmoothing(20)
+local accErrorSmoother = newVectorSmoothing(20) -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
@@ -150,22 +154,25 @@ local function updateGFX(dt)
 		velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
 		
 		lastAcc = nil
+		
+		vehAccSmoother:reset()
+		accErrorSmoother:reset()
 	
 		return
 	end
 	
 	local velError = vel - vehVel
-	local accErrorLen = accErrorSmoother:get((lastAcc - vehAcc):length(), dt)
+	local accError = accErrorSmoother:get(lastAcc - vehAcc, dt)
 	
 	local rvelError = rvel - vehRvel
 	--local raccError = racc - vehRacc
 	
 	-- Disable prediction if acceleration error is larger than threshold
-	if accErrorLen > math.max(minAccError, lastAcc:length()*maxAccErrorMul) then
+	if accError:length() > math.max(minAccError, lastAcc:length()*maxAccErrorMul) then
 		disableUntil = remoteData.timer + predictTime*disableTimeMul
-		accErrorSmoother:set(0)
+		accErrorSmoother:reset()
 		
-		print("Prediction disabled! accError: "..accErrorLen.." > "..lastAcc:length()*maxAccErrorMul)
+		print("Prediction disabled! accError: "..accError:length().." > "..lastAcc:length()*maxAccErrorMul)
 		
 		lastAcc = nil
 		

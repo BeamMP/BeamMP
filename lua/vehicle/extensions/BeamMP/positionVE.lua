@@ -11,13 +11,13 @@ local M = {}
 local vectorSmoothing = {}
 vectorSmoothing.__index = vectorSmoothing
 
-local function newVectorSmoothing(rate)
+function newVectorSmoothing(rate)
   local data = {rate = rate or 10, state = vec3(0,0,0)}
   setmetatable(data, vectorSmoothing)
   return data
 end
 
-local function vectorSmoothing:get(sample, dt)
+function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
   st = st + dif * math.min(self.rate * dt, 1)
@@ -25,32 +25,32 @@ local function vectorSmoothing:get(sample, dt)
   return st
 end
 
-local function vectorSmoothing:set(sample)
+function vectorSmoothing:set(sample)
   self.state = sample
 end
 
-local function vectorSmoothing:reset()
+function vectorSmoothing:reset()
   self.state = vec3(0,0,0)
 end
 
 -- ============= VARIABLES =============
 -- Position
-local posCorrectMul = 5        -- How much acceleration to use for correcting position error
-local posForceMul = 0.2        -- How much acceleration is used to correct velocity (between 0 and 1)
+local posCorrectMul = 7        -- How much acceleration to use for correcting position error
+local posForceMul = 0.1        -- How much acceleration is used to correct velocity (between 0 and 1)
 
 -- Rotation
-local rotCorrectMul = 3        -- How much acceleration to use for correcting angle error
-local rotForceMul = 0.2        -- How much acceleration is used to correct angular velocity (between 0 and 1)
+local rotCorrectMul = 5        -- How much acceleration to use for correcting angle error
+local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (between 0 and 1)
 
 -- Prediction
-local disableTimeMul = 1.5     -- At collision, position correction is disabled for ping*disableTimeMul to wait for data
+local disableTimeMul = 0--1.5     -- At collision, position correction is disabled for ping*disableTimeMul to wait for data
 local maxAccErrorMul = 1       -- Which amount of acceleration error is detected as a collision
 local minAccError = 30         -- Minimum acceleration error to be detected as a collision
 local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
-local remoteAccSmoother = newVectorSmoothing(10)
-local remoteRaccSmoother = newVectorSmoothing(5)
-local vehAccSmoother = newVectorSmoothing(20)
-local accErrorSmoother = newVectorSmoothing(20) -- Smoother for acceleration error
+local remoteAccSmoother = newVectorSmoothing(5)             -- Smoother for acceleration calculated from received data
+local remoteRaccSmoother = newVectorSmoothing(5)            -- Smoother for angular acceleration calculated from received data
+local vehAccSmoother = newVectorSmoothing(20)               -- Smoother for acceleration of locally simulated vehicle
+local accErrorSmoother = newVectorSmoothing(20)             -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
@@ -170,11 +170,12 @@ local function updateGFX(dt)
 	-- Disable prediction if acceleration error is larger than threshold
 	if accError:length() > math.max(minAccError, lastAcc:length()*maxAccErrorMul) then
 		disableUntil = remoteData.timer + predictTime*disableTimeMul
-		accErrorSmoother:reset()
 		
 		print("Prediction disabled! accError: "..accError:length().." > "..lastAcc:length()*maxAccErrorMul)
 		
 		lastAcc = nil
+		
+		accErrorSmoother:reset()
 		
 		return
 	end
@@ -240,8 +241,8 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, realtime)
 		--return
 	end
 	
-	remoteData.acc = (vel - remoteData.vel)/remoteDT
-	remoteData.racc = (rvel - remoteData.rvel)/remoteDT
+	remoteData.acc = (vel - remoteData.vel)/math.max(remoteDT, 0.005)
+	remoteData.racc = (rvel - remoteData.rvel)/math.max(remoteDT, 0.005)
 	
 	remoteData.pos = pos
 	remoteData.vel = vel

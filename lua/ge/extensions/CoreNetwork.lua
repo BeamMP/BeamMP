@@ -58,17 +58,57 @@ local function getServers()
 	TCPSocket:send('B')
 end
 
-local function setServer(id, ip, port)
+local function setServer(id, ip, port, mods)
 	Server.IP = ip;
 	Server.PORT = port;
 	Server.ID = id;
+	Server.MODSTRING = mods
+	local mods = {}
+	for str in string.gmatch(Server.MODSTRING, "([^;]+)") do
+		table.insert(mods, str)
+	end
+	for k,v in pairs(mods) do
+		mods[k] = mods[k]:gsub("Resources/Client/","")
+		mods[k] = mods[k]:gsub(".zip","")
+		mods[k] = mods[k]:gsub(";","")
+	end
+	dump(mods)
+	mpmodmanager.setServerMods(mods)
+	for k,v in pairs(mods) do
+		core_modmanager.activateMod(string.lower(v))--'/mods/'..string.lower(v)..'.zip')
+	end
 end
 
-local function connectToServer(ip, port)
+local function SetMods(s)
+	local mods = {}
+	for str in string.gmatch(s, "([^;]+)") do
+		table.insert(mods, str)
+	end
+	for k,v in pairs(mods) do
+		mods[k] = mods[k]:gsub("Resources/Client/","")
+		mods[k] = mods[k]:gsub(".zip","")
+		mods[k] = mods[k]:gsub(";","")
+	end
+	dump(mods)
+	mpmodmanager.setServerMods(mods)
+end
+
+local function connectToServer(ip, port, modString)
 	if ip ~= undefined and port ~= undefined then
 		TCPSocket:send('C'..ip..':'..port)
 	else
 		TCPSocket:send('C'..Server.IP..':'..Server.PORT)
+		local mods = {}
+		for str in string.gmatch(Server.MODSTRING, "([^;]+)") do
+      table.insert(mods, str)
+    end
+		for k,v in pairs(mods) do
+			mods[k] = mods[k]:gsub("Resources/Client/","")
+			mods[k] = mods[k]:gsub(".zip","")
+			mods[k] = mods[k]:gsub(";","")
+		end
+		dump(mods)
+		mpmodmanager.setServerMods(mods)
 	end
 	status = "LoadingResources"
 end
@@ -76,6 +116,7 @@ end
 local function LoadLevel(map)
 	print("MAP: "..map)
 	status = "LoadingMapNow"
+	local found = false
 	if string.sub(map, 1, 1) == "/" then
 		print("Searching For Map...")
 		local levelName = string.gsub(map, '/info.json', '')
@@ -85,11 +126,14 @@ local function LoadLevel(map)
 	    if v.levelName:lower() == levelName then
 				print("Loading Multiplayer Map...")
 				freeroam_freeroam.startFreeroamByName(v.levelName)
+				found = true
 				break;
 	    end
 	  end
 		-- we got this far?!?!?! Guess we dont have the level
-		print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
+		if not found then
+			print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
+		end
 	else
 		-- Level Not a set map, lets give them the choice to select
 	end
@@ -115,6 +159,7 @@ local HandleNetwork = {
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,
 	['V'] = function(params) vehicleGE.handle(params) end,
+	['L'] = function(params) print(params) SetMods(params) end,
 
 	['K'] = function(params) quitMPWithMessage(params) end, -- Player Kicked Event
 	--[''] = function(params)  end, --
@@ -174,6 +219,8 @@ local function resetSession(x)
 	if x then
 		returnToMainMenu()
 	end
+	--mpmodmanager.setServerMods({})
+	mpmodmanager.cleanUpSessionMods()
 end
 
 local function quitMP()
@@ -186,6 +233,12 @@ local function quitMPWithMessage()
 	TCPSocket:send('QG')
 end
 
+local function modLoaded(modname)
+	if modname ~= "beammp" then 
+		TCPSocket:send('R'..modname)
+	end
+end
+
 M.onUpdate = onUpdate
 M.getServers = getServers
 M.setServer = setServer
@@ -193,6 +246,7 @@ M.resetSession = resetSession
 M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
+M.modLoaded = modLoaded
 
 print("CoreNetwork Loaded.")
 return M

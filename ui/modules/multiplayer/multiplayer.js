@@ -17,6 +17,15 @@ function(logger, $scope, $state, $timeout, bngApi) {
 
 	// --------- CUSTOM CODE --------- //
 
+	$scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+    //console.log("INIT")
+		//console.log(toState.url)
+		if (toState.url == "/multiplayer") {
+			// local://local/ui/#/menu/multiplayer/mpservers
+			document.getElementById('servers-btn').click();
+		}
+  });
+
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
 		console.log("ok");
@@ -27,6 +36,11 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		logger.debug("Attempting to call connect to server.")
 		document.getElementById('LoadingServer').style.display = 'block'
 		bngApi.engineLua('CoreNetwork.connectToServer()');
+	}
+
+	vm.refresh = function() {
+		logger.debug("Attempting to refresh server list.")
+		bngApi.engineLua('CoreNetwork.getServers()');
 	}
 
 	vm.directConnect = function() {
@@ -108,7 +122,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 			if (servers[i].hasOwnProperty(id)) {
 				console.log(servers[i][id])
 				var server = servers[i][id];
-				bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}")`);
+				bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}")`);
 			}
 		}
 	}
@@ -187,7 +201,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		row.insertCell(1).innerHTML = data.description;
 		row.insertCell(2).innerHTML = data.map;
 		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.ping;
+		row.insertCell(4).innerHTML = data.pps;
 		row.servData = data;
 		row.onclick = selectRow;
 	});
@@ -220,6 +234,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		console.log(data)
 		localStorage.setItem('servers', JSON.stringify(data))
 		var table = document.getElementById("serversTable");
+		table.innerHTML = "";
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
 			var ver = v.version.substr(0, v.version.indexOf('.'));
@@ -232,7 +247,7 @@ function(logger, $scope, $state, $timeout, bngApi) {
 				servData.location = v.location;
 				servData.name = v.sname;
 				servData.maxPlayers = v.maxplayers;
-				servData.ping = '?';
+				servData.ping = v.pps;
 				/*var html = `
 				<tr>
 					<td>${servData.location}</td>

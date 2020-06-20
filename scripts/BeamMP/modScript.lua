@@ -1,6 +1,9 @@
 load("UI")
 registerCoreModule("UI")
 
+load("mpmodmanager")
+registerCoreModule("mpmodmanager")
+
 load("CoreNetwork")
 registerCoreModule("CoreNetwork")
 

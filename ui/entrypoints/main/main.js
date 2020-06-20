@@ -1265,7 +1265,7 @@ $scope.$on('requestUIInitialised', () => {
   vm.menuEntries = {
     freeroam: [
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
-      { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
+      //{ translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
       { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
       //{ translateid: 'ui.dashboard.mods',          icon: 'shop',                   state: 'menu.mods.local',   },
       { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
@@ -1283,7 +1283,7 @@ $scope.$on('requestUIInitialised', () => {
 
     scenario: [
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
-      { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
+      //{ translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
       { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'},
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'},

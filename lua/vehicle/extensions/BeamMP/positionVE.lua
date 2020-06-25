@@ -35,7 +35,7 @@ end
 
 -- ============= VARIABLES =============
 -- Position
-local posCorrectMul = 7        -- How much acceleration to use for correcting position error
+local posCorrectMul = 5        -- How much acceleration to use for correcting position error
 local posForceMul = 0.1        -- How much acceleration is used to correct velocity (between 0 and 1)
 
 -- Rotation
@@ -45,12 +45,12 @@ local rotForceMul = 0.1        -- How much acceleration is used to correct angul
 -- Prediction
 local disableTimeMul = 0--1.5     -- At collision, position correction is disabled for ping*disableTimeMul to wait for data
 local maxAccErrorMul = 1       -- Which amount of acceleration error is detected as a collision
-local minAccError = 30         -- Minimum acceleration error to be detected as a collision
+local minAccError = 10         -- Minimum acceleration error to be detected as a collision
 local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
 local remoteAccSmoother = newVectorSmoothing(5)             -- Smoother for acceleration calculated from received data
 local remoteRaccSmoother = newVectorSmoothing(5)            -- Smoother for angular acceleration calculated from received data
-local vehAccSmoother = newVectorSmoothing(20)               -- Smoother for acceleration of locally simulated vehicle
-local accErrorSmoother = newVectorSmoothing(20)             -- Smoother for acceleration error
+local vehAccSmoother = newVectorSmoothing(5)                -- Smoother for acceleration of locally simulated vehicle
+local accErrorSmoother = newVectorSmoothing(5)              -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
@@ -85,14 +85,10 @@ end
 local function updateGFX(dt)
 	timer = timer + dt
 	
-	if remoteData.pos:length() < 1 or remoteData.timer < 1 then
-		return
-	end
-	
 	-- Local vehicle data
 	local vehPos = vec3(obj:getPosition())
 	local vehVel = vec3(obj:getVelocity())
-	local vehAcc = vehAccSmoother:get((vehVel-(lastVehVel or vehVel))/dt, dt)
+	local vehAcc = vehAccSmoother:get(vehVel-(lastVehVel or vehVel), dt)
 	
 	local vehRot = quat(obj:getRotation())
 	local vehRvel = vec3(obj:getYawAngularVelocity(), obj:getPitchAngularVelocity(), obj:getRollAngularVelocity())
@@ -186,7 +182,7 @@ local function updateGFX(dt)
 	velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	velocityVE.addAngularVelocity(targetRacc.y, targetRacc.z, targetRacc.x)
 	
-	lastAcc = targetAcc / dt
+	lastAcc = targetAcc
 end
 
 local function getVehicleRotation()
@@ -241,8 +237,8 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, realtime)
 		--return
 	end
 	
-	remoteData.acc = (vel - remoteData.vel)/math.max(remoteDT, 0.005)
-	remoteData.racc = (rvel - remoteData.rvel)/math.max(remoteDT, 0.005)
+	remoteData.acc = (vel - remoteData.vel)/math.max(remoteDT, 0.01)
+	remoteData.racc = (rvel - remoteData.rvel)/math.max(remoteDT, 0.01)
 	
 	remoteData.pos = pos
 	remoteData.vel = vel

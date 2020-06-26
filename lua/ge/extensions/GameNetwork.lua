@@ -49,6 +49,7 @@ local function disconnectLauncher()
 		BigDataSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		oneSecondsTimer = 0
+		flip = false
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================

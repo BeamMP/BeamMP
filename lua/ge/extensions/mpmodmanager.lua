@@ -82,15 +82,16 @@ local function onUpdate(dt)
 end
 
 local function modCheck(dt)
-  print("Checking Mods...")
+  --print("Checking Mods...")
   for modname,mdata in pairs(core_modmanager.getModList()) do
     if modname == "kjp12_awd_t-series" then--mdata.active then
       print(modname)
       dump(mdata)
       if not IsModAllowed(modname) then
         -- This mod is not allowed to be running
-        print("This mod should not be running: "..modname)
-        --core_modmanager.deactivateMod(modname)
+        --print("This mod should not be running: "..modname)
+        core_modmanager.deactivateMod(string.lower(v))
+        core_modmanager.deleteMod(string.lower(v))
       end
     end
   end
@@ -98,7 +99,7 @@ local function modCheck(dt)
 end
 
 local function setServerMods(mods)
-  print("Server Mods Set:")
+  --print("Server Mods Set:")
   dump(mods)
   serverMods = mods
 end

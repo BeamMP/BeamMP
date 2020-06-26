@@ -113,6 +113,8 @@ local function connectToServer(ip, port, modString)
 	status = "LoadingResources"
 end
 
+local mapLoadingFailedCount = 0
+
 local function LoadLevel(map)
 	print("MAP: "..map)
 	status = "LoadingMapNow"
@@ -127,12 +129,23 @@ local function LoadLevel(map)
 				print("Loading Multiplayer Map...")
 				freeroam_freeroam.startFreeroamByName(v.levelName)
 				found = true
+				mapLoadingFailedCount = 0
 				break;
 	    end
 	  end
 		-- we got this far?!?!?! Guess we dont have the level
 		if not found then
 			print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
+			print("TRYING TO LOAD IT AGAIN!")
+			if mapLoadingFailedCount >= 3 then
+				print("FAILED TO LOAD THE MAP! DID IT GET LOADED INTO THE GAME??")
+				print("GOING BACK...")
+				CoreNetwork.resetSession(true)
+			else
+				mapLoadingFailedCount = mapLoadingFailedCount + 1
+				print("Map Loading Attempt "..mapLoadingFailedCount)
+				LoadLevel(map)
+			end
 		end
 	else
 		-- Level Not a set map, lets give them the choice to select
@@ -216,6 +229,7 @@ local function resetSession(x)
 	vehicleGE.onDisconnect()
 	connectToLauncher()
 	UI.readyReset()
+	mapLoadingFailedCount = 0
 	if x then
 		returnToMainMenu()
 	end
@@ -234,7 +248,7 @@ local function quitMPWithMessage()
 end
 
 local function modLoaded(modname)
-	if modname ~= "beammp" then 
+	if modname ~= "beammp" then
 		TCPSocket:send('R'..modname)
 	end
 end

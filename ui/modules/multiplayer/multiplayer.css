@@ -161,6 +161,24 @@ input[type="text"] {
   margin-right: 15px;
 }
 
+.row {
+    width: 100%;
+    padding-top: 10px;
+		display: flex;
+}
+
+.col {
+	width: 50%;
+}
+
+tr#ServerInfoRow {
+    background-color: #3535357a;
+}
+
+ul.serverItemDetails {
+    list-style: none;
+}
+
 [placeholder]::-webkit-input-placeholder { color: rgba(255,255,255,.8); }
 [placeholder]:hover::-webkit-input-placeholder { color: rgba(255,255,255,.4); }
 [placeholder]:focus::-webkit-input-placeholder { color: transparent; }

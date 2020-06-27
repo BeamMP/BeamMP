@@ -237,6 +237,12 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	    controller: 'MultiplayerServersController as multiplayermenu'
 	  })
 
+  	.state('menu.multiplayer.favorites', {
+  	  url: '/mpfavorites',
+  	  templateUrl: 'modules/multiplayer/favorites.partial.html',
+  	  controller: 'MultiplayerFavoritesController as multiplayermenu'
+  	})
+
 	  .state('menu.multiplayer.direct', {
 	    url: '/mpdirect',
 	    templateUrl: 'modules/multiplayer/direct.partial.html',

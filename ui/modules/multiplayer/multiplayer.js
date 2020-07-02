@@ -594,6 +594,10 @@ function officialMark(o, s) {
 		return ""
 	}
 }
+function modCount(s) {
+	if(s.length==0) return 0;
+	return s.split(";").length-1;
+}
 function modList(s) {
 	var re = new RegExp("Resources/Client/", 'g');
 	s = s.replace(re, '');
@@ -605,7 +609,7 @@ function modList(s) {
 	return s
 }
 function returnDefault(data, type) {
-	if (data == undefined) {
+	if (data == undefined || data == null) {
 		switch (type) {
 			case "Number":
 				return 0
@@ -613,6 +617,7 @@ function returnDefault(data, type) {
 				return "Not set"
 		}
 	}
+	else return data;
 }
 function listPlayers(s) {
 	if (s != undefined) {
@@ -635,7 +640,7 @@ function format ( d ) {
 	      <div class="row">
 					<div class="col">
 						<ul class="serverItemDetails">
-							<li>Description: ${returnDefault(d.sdesc, "String")}</li>
+							<li>Description: ${d.sdesc}</li>
 							<li>Players: ${d.players}/${d.maxplayers}</li>
 							<li>Owner: ${d.owner}</li>
 								<li>Map: ${SmoothMapName(d.map)}</li>
@@ -644,7 +649,7 @@ function format ( d ) {
 					<div class="col">
 						<ul class="serverItemDetails">
 							<li>PPS: ${d.pps}</li>
-							<li>Mods: ${returnDefault(d.total, "Number")}</li>
+							<li>Mods: ${modCount(d.modlist)}</li>
 							<li>Mod Names: ${modList(d.modlist)}</li>
 							<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
 						</ul>

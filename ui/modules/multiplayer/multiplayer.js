@@ -651,8 +651,8 @@ function format ( d ) {
 					</div>
 				</div>
 				<div class="row" style="padding-left: 10px;">
-					<md-button id="addFav-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.addFav()" style="margin-left: 10px;">Add Favorite</md-button>
 					<md-button id="serverconnect-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect()" style="margin-left: 10px;">Connect</md-button>
+					<md-button id="addFav-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.addFav()" style="margin-left: 10px;">Add Favorite</md-button>
 				</div>
 				<div class="row">
 					<h4></h4>

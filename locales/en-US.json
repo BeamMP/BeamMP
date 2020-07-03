@@ -821,7 +821,8 @@
     "ui.options.licenses": "Licenses",
     "ui.options.controls": "Controls",
 
-    "ui.options.multiplayer.nameTags": "Show player vehicle nametags",
+    "ui.options.multiplayer.nameTags": "Show player nametags",
+    "ui.options.multiplayer.nameTagAlternate": "Alternate nametag colors",
     "ui.options.multiplayer.debugOutput": "Show debug messages in the console",
     "ui.options.multiplayer.launcherPort": "Port that the launcher is running on",
     "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",

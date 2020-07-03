@@ -1,15 +1,96 @@
 <md-content>
 
-  <md-subheader class="md-no-sticky">Multiplayer</md-subheader>
+  <md-subheader class="md-no-sticky">Nametags</md-subheader>
 
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
     <md-checkbox ng-model="options.data.values.showNameTags" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.nameTagAlternate' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.nameTagAlternate" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <p>Enable custom color stuffies</p>
+    <md-checkbox ng-model="options.data.values.nameTagColorPicker" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  
+  <md-list-item md-no-ink>
+	<p flex="25">Color R:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagColorR" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagColorR }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Color G:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagColorG" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagColorG }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Color B:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagColorB" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagColorB }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Color Alpha:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagColorA" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagColorA }}</span>
+  </md-list-item>
+
+
+  <md-list-item md-no-ink>
+	<p flex="25">Background R:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagBgR" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagBgR }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Background G:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagBgG" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagBgG }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Background B:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagBgB" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagBgB }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+	<p flex="25">Background Alpha:</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagBgA" min="0" max="255" step="2" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+	<span style="width:30px">{{ options.data.values.nameTagBgA }}</span>
+  </md-list-item>
+
+
+
+
+  <md-subheader class="md-no-sticky">Others</md-subheader>
 
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.debugOutput' | translate }}</p>
     <md-checkbox ng-model="options.data.values.showDebugOutput" ng-change="options.applyState()"></md-checkbox>
+	
   </md-list-item>
 
   <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">

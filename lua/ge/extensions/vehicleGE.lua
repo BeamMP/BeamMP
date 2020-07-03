@@ -418,7 +418,8 @@ local function onUpdate(dt)
 				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil and settings.getValue("showNameTags") == true then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
-					local color = ""
+					local forecolor = ""
+					local backcolor = ""
 					local tag = ""
 					--[[
 						USER = Default
@@ -431,35 +432,52 @@ local function onUpdate(dt)
 					]]
 					--print(dump(nicknameMap[tostring(veh:getID())]))
 					if nicknameMap[tostring(veh:getID())].role == "USER" then
-						color = ColorF(255/255, 255/255, 255/255, 255/255)
+						forecolor = ColorF(0, 0, 0, 1)
+						backcolor = ColorI(0, 0, 0, 127)
 						tag = ""
 					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
-						color = ColorF(155/255, 89/255, 182/255, 255/255)
+						forecolor = ColorF(155/255, 89/255, 182/255, 127/255)
+						backcolor = ColorI(69, 0, 150, 127)
 						tag = " [Early Access]"
 					elseif nicknameMap[tostring(veh:getID())].role == "YT" then
-						color = ColorF(255/255, 0/255, 0/255, 255/255)
+						forecolor = ColorF(255/255, 0, 0, 127/255)
+						backcolor = ColorI(200, 0, 0, 127)
 						tag = " [YouTuber]"
 					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
-						color = ColorF(210/255, 214/255, 109/255, 255/255)
+						forecolor = ColorF(210/255, 214/255, 109/255, 127/255)
 						tag = " [Events Team]"
 					elseif nicknameMap[tostring(veh:getID())].role == "SUPPORT" then
-						color = ColorF(68/255, 109/255, 184/255, 255/255)
+						forecolor = ColorF(68/255, 109/255, 184/255, 127/255)
 						tag = " [Support]"
 					elseif nicknameMap[tostring(veh:getID())].role == "MOD" then
-						color = ColorF(68/255, 109/255, 184/255, 255/255)
+						forecolor = ColorF(68/255, 109/255, 184/255, 127/255)
 						tag = " [Moderator]"
 					elseif nicknameMap[tostring(veh:getID())].role == "GDEV" then
-						color = ColorF(252/255, 107/255, 3/255, 255/255)
+						forecolor = ColorF(252/255, 107/255, 3/255, 127/255)
 						tag = " [BeamNG Staff]"
 					elseif nicknameMap[tostring(veh:getID())].role == "MDEV" then
-						color = ColorF(194/255, 55/255, 55/255, 255/255)
+						forecolor = ColorF(194/255, 55/255, 55/255, 127/255)
 						tag = " [MP DEV]"
 					end
+					
+					if	settings.getValue("nameTagAlternate") == true then
+						forecolor = ColorF(1,1,1,1)
+					else
+						backcolor = ColorI(0,0,0,127)
+					end
+					
+					
+					if settings.getValue("nameTagColorPicker") == true then
+					
+						forecolor = ColorF(settings.getValue("nameTagColorR")/255,settings.getValue("nameTagColorG")/255,settings.getValue("nameTagColorB")/255,settings.getValue("nameTagColorA")/255)
+						backcolor = ColorI(settings.getValue("nameTagBgR"),settings.getValue("nameTagBgG"),settings.getValue("nameTagBgB"),settings.getValue("nameTagBgA"))
+					end
+					
 					debugDrawer:drawTextAdvanced(
-						pos,
-						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..tag),
-					  color, true, false, -- Color / Background / Wtf
-						ColorI(0,0,0,127)
+						pos, -- Position in 3D
+						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..tag.." "), -- Text
+						forecolor, true, false, -- Foreground Color / Background / Wtf
+						backcolor -- Background Color
 					)
 				end
 			end

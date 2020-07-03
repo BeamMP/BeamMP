@@ -57,6 +57,9 @@ reloadUI()
 local function getServers()
 	TCPSocket:send('B')
 end
+local function cancelConnection()
+	TCPSocket:send('QS')
+end
 
 local function setServer(id, ip, port, mods)
 	Server.IP = ip;

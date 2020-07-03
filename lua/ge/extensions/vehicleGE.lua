@@ -418,8 +418,8 @@ local function onUpdate(dt)
 				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil and settings.getValue("showNameTags") == true then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
-					local forecolor = ""
-					local backcolor = ""
+					local forecolor = ColorF(1,1,1,1)
+					local backcolor = ColorI(0,0,0,127)
 					local tag = ""
 					--[[
 						USER = Default
@@ -465,20 +465,20 @@ local function onUpdate(dt)
 						backcolor = ColorI(194, 55, 55, 127)
 						tag = " [MP DEV]"
 					end
-					
+
 					if	settings.getValue("nameTagAlternate") == true then  -- Color the background instead of foreground
 						forecolor = ColorF(1,1,1,1)
 					else
 						backcolor = ColorI(0,0,0,127)
 					end
-					
-					
+
+
 					if settings.getValue("nameTagColorPicker") or false == true then  -- This part was used for debugging and is disabled in the settings HTML page
-					
+
 						forecolor = ColorF(settings.getValue("nameTagColorR")/255,settings.getValue("nameTagColorG")/255,settings.getValue("nameTagColorB")/255,settings.getValue("nameTagColorA")/255)
 						backcolor = ColorI(settings.getValue("nameTagBgR"),settings.getValue("nameTagBgG"),settings.getValue("nameTagBgB"),settings.getValue("nameTagBgA"))
 					end
-					
+
 					debugDrawer:drawTextAdvanced(
 						pos, -- Position in 3D
 						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..tag.." "), -- Text

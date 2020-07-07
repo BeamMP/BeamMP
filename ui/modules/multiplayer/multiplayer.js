@@ -624,7 +624,7 @@ function listPlayers(s) {
 		var re = new RegExp(";", 'g');
 		s = s.replace(re, ', ');
 		s = s.substring(0, s.length -2);
-		return s
+		return "Current players: " + s
 	} else {
 		return "No players..."
 	}

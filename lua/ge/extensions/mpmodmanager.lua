@@ -46,12 +46,12 @@ end
 local function onUpdate(dt)
   if timer >= 1 then
     timer = 0
-    print("Checking Mods...")
+    --print("Checking Mods...")
     try {
        function()
          for modname,mdata in pairs(core_modmanager.getModList()) do
            if mdata.active then
-             print("Active Mod:"..modname)
+             --print("Active Mod:"..modname)
              if not IsModAllowed(modname) then
                -- This mod is not allowed to be running
                print("This mod should not be running: "..modname)

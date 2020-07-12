@@ -50,7 +50,7 @@ local function addAngularVelocity(pitchAV, rollAV, yawAV)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local nodePos = vec3(node.pos)
-		local localTargetAcc = nodePos:cross(vec3(pitchAV, rollAV, yawAV)) -- TODO: this way of calculating tangential velocity might be inaccurate for large vehicles
+		local localTargetAcc = nodePos:cross(vec3(pitchAV, rollAV, yawAV)) -- TODO: might be inaccurate for large vehicles
 		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
 		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
@@ -59,7 +59,6 @@ end
 
 -- Instantly set vehicle angular velocity in rad/s
 local function setAngularVelocity(pitchAV, rollAV, yawAV)
-	local toWorldAxisQuat = quat(obj:getRotation())
 	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
 	local rollDiff = rollAV - obj:getRollAngularVelocity()
 	local yawDiff = yawAV - obj:getYawAngularVelocity()

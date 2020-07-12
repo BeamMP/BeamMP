@@ -56,9 +56,8 @@ local function applyPos(data, serverVehicleID)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
-		local realtime = Engine.Platform.getRealMilliseconds()
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..realtime..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..")")
 	end
 end
 

@@ -43,7 +43,7 @@ local rotCorrectMul = 5        -- How much velocity to use for correcting angle 
 local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (between 0 and 1)
 
 -- Prediction
-local maxAccError = 1          -- Which amount of acceleration error is detected as a collision
+local maxPredict = 1           -- Timeout for prediction in seconds
 local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
 local remoteVelSmoother = newVectorSmoothing(1)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(1)            -- Smoother for received angular velocity
@@ -63,7 +63,7 @@ local lastVehRvel = nil
 local lastAcc = nil
 
 local remoteData = {
-	pos = vec3(0,0,0),
+	pos = nil,
 	vel = vec3(0,0,0),
 	acc = vec3(0,0,0),
 	rot = quat(0,0,0,0),
@@ -83,6 +83,10 @@ end
 
 local function updateGFX(dt)
 	timer = timer + dt
+	
+	if not remoteData.pos then
+		return
+	end
 	
 	-- Local vehicle data
 	local vehPos = vec3(obj:getPosition())
@@ -109,6 +113,11 @@ local function updateGFX(dt)
 	
 	-- How far ahead the position needs to be predicted
 	local predictTime = timer - calcLocalTime + ping
+	
+	if predictTime > maxPredict then
+		print("Prediction timeout! Vehicle ID: "..obj:getID())
+		return
+	end
 	
 	-- More prediction = slower smoothing
 	local smootherDT = dt / guardZero(math.abs(predictTime))
@@ -158,7 +167,7 @@ local function updateGFX(dt)
 	local targetAcc = (velError + posError*posCorrectMul)*posForceMul
 	local targetRacc = (rvelError + rotError*rotCorrectMul)*rotForceMul
 	
-	local targetAccMul = 1-math.max(math.min(targetAcc:dot(accError)/accError:squaredLength(),1),0)
+	--local targetAccMul = 1-math.max(math.min(targetAcc:dot(accError)/accError:squaredLength(),1),0)
 	
 	velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	velocityVE.addAngularVelocity(targetRacc.y, targetRacc.z, targetRacc.x)

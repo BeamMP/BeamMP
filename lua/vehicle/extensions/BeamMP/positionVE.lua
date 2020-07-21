@@ -35,23 +35,26 @@ end
 
 -- ============= VARIABLES =============
 -- Position
-local posCorrectMul = 5        -- How much velocity to use for correcting position error
-local posForceMul = 0.1        -- How much acceleration is used to correct velocity (between 0 and 1)
+local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
+local posForceMul = 0.1        -- How much acceleration is used to correct velocity (0.1 = 10% per frame, 1 = instant)
+local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
 
 -- Rotation
-local rotCorrectMul = 5        -- How much velocity to use for correcting angle error
-local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (between 0 and 1)
+local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
+local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (0.1 = 10% per frame, 1 = instant)
+local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
 
 -- Prediction
-local maxPredict = 1           -- Timeout for prediction in seconds
-local maxPosError = 5          -- If position error is larger than this, teleport the vehicle
-local remoteVelSmoother = newVectorSmoothing(1)             -- Smoother for received velocity
-local remoteRvelSmoother = newVectorSmoothing(1)            -- Smoother for received angular velocity
-local remoteAccSmoother = newVectorSmoothing(1)             -- Smoother for acceleration calculated from received data
-local remoteRaccSmoother = newVectorSmoothing(1)            -- Smoother for angular acceleration calculated from received data
+local maxPredict = 1           -- Timeout for prediction (s)
+local maxPosError = 2          -- Max allowed continuous position error (m)
+local teleportThreshold = 3    -- Max accumulated position error before teleporting vehicle (5 = 5m for 1s, 10m for 0.5s, ...)
+local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
+local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
+local remoteAccSmoother = newVectorSmoothing(2)             -- Smoother for acceleration calculated from received data
+local remoteRaccSmoother = newVectorSmoothing(2)            -- Smoother for angular acceleration calculated from received data
 local vehAccSmoother = newVectorSmoothing(5)                -- Smoother for acceleration of locally simulated vehicle
 local accErrorSmoother = newVectorSmoothing(1)              -- Smoother for acceleration error
-local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
+local timeOffsetSmoother = newTemporalSmoothingNonLinear(2) -- Smoother for getting average time offset
 
 -- Persistent data
 local timer = 0
@@ -61,6 +64,8 @@ local lastVehVel = nil
 local lastVehRvel = nil
 
 local lastAcc = nil
+
+local accPosError = 0
 
 local remoteData = {
 	pos = nil,
@@ -74,6 +79,9 @@ local remoteData = {
 }
 
 local debugDrawer = obj.debugDrawProxy
+
+local abs = math.abs
+local max = math.max
 
 -- ============= VARIABLES =============
 
@@ -103,7 +111,7 @@ local function updateGFX(dt)
 	-- Smoothed difference between local and remote timestamps
 	local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
 	
-	if math.abs(timeOffset - remoteData.timeOffset) > 1 then
+	if abs(timeOffset - remoteData.timeOffset) > 1 then
 		timeOffsetSmoother:set(remoteData.timeOffset)
 		timeOffset = remoteData.timeOffset
 	end
@@ -115,12 +123,12 @@ local function updateGFX(dt)
 	local predictTime = timer - calcLocalTime + ping
 	
 	if predictTime > maxPredict then
-		print("Prediction timeout! Vehicle ID: "..obj:getID())
+		--print("Prediction timeout! Vehicle ID: "..obj:getID())
 		return
 	end
 	
 	-- More prediction = slower smoothing
-	local smootherDT = dt / guardZero(math.abs(predictTime))
+	local smootherDT = dt / guardZero(abs(predictTime))
 	
 	local remoteVel = remoteVelSmoother:get(remoteData.vel, smootherDT)
 	local remoteRvel = remoteRvelSmoother:get(remoteData.rvel, smootherDT)
@@ -142,13 +150,25 @@ local function updateGFX(dt)
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
 	
+	local posErrLen = posError:length()
+	if posErrLen > maxPosError then
+		accPosError = accPosError + posErrLen*dt
+	else
+		accPosError = 0
+	end
+	
 	-- If position error is larger than limit, teleport the vehicle
-	if posError:length() > maxPosError then
-		print("PosError = " .. tostring(posError))
-
+	if accPosError > teleportThreshold then
 		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
-		velocityVE.setVelocity(vel.x, vel.y, vel.z)
-		velocityVE.setAngularVelocity(rvel.y, rvel.z, rvel.x)
+		--obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
+		
+		--velocityVE.setVelocity(vel.x, vel.y, vel.z)
+		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
+		
+		remoteVelSmoother:set(vel)
+		remoteRvelSmoother:set(rvel)
+		remoteAccSmoother:reset()
+		remoteRaccSmoother:reset()
 		
 		lastAcc = nil
 		
@@ -169,8 +189,13 @@ local function updateGFX(dt)
 	
 	--local targetAccMul = 1-math.max(math.min(targetAcc:dot(accError)/accError:squaredLength(),1),0)
 	
-	velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
-	velocityVE.addAngularVelocity(targetRacc.y, targetRacc.z, targetRacc.x)
+	--print("targetAcc: "..targetAcc:length())
+	--print("targetRacc: "..targetRacc:length())
+	if targetRacc:length() > minRotForce then
+		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.y, targetRacc.z, targetRacc.x)
+	elseif targetAcc:length() > minPosForce then
+		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
+	end
 	
 	lastAcc = targetAcc
 end
@@ -218,8 +243,8 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 		--return
 	end
 	
-	remoteData.acc = (vel - remoteData.vel)/math.max(remoteDT, 0.01)
-	remoteData.racc = (rvel - remoteData.rvel)/math.max(remoteDT, 0.01)
+	remoteData.acc = (vel - remoteData.vel)/max(remoteDT, 0.005)
+	remoteData.racc = (rvel - remoteData.rvel)/max(remoteDT, 0.005)
 	
 	remoteData.pos = pos
 	remoteData.vel = vel

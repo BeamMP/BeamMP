@@ -14,7 +14,7 @@ local function addVelocity(x, y, z)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local forceVec = vel*nodeWeight*2000 -- calculate force for desired acceleration
-		
+			
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 end
@@ -44,26 +44,33 @@ end
 --       - also affects parts that are detached from the car
 --       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 --       - can become inaccurate if vehicles are very deformed
-local function addAngularVelocity(pitchAV, rollAV, yawAV)
+local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
+	local vel = vec3(x, y, z)
+	local av = vec3(pitchAV, rollAV, yawAV)
 	local toWorldAxisQuat = quat(obj:getRotation())
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	for _, node in pairs(v.data.nodes) do
 		local nodeWeight = obj:getNodeMass(node.cid)
 		local nodePos = vec3(node.pos)
-		local localTargetAcc = nodePos:cross(vec3(pitchAV, rollAV, yawAV)) -- TODO: might be inaccurate for large vehicles
-		local targetAcc = localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
+		local localTargetAcc = nodePos:cross(av) -- TODO: might be inaccurate for large vehicles
+		local targetAcc = vel + localTargetAcc:rotated(toWorldAxisQuat) -- rotate force vector to world axis
 		local forceVec = targetAcc*nodeWeight*2000 -- calculate force for desired acceleration
+		
 		obj:applyForceVector(node.cid, forceVec:toFloat3())
 	end
 end
 
 -- Instantly set vehicle angular velocity in rad/s
-local function setAngularVelocity(pitchAV, rollAV, yawAV)
+local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
+	local vel = vec3(x, y, z)
+	local vvel = vec3(obj:getVelocity())
+	local velDiff = vel - vvel
+	
 	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
 	local rollDiff = rollAV - obj:getRollAngularVelocity()
 	local yawDiff = yawAV - obj:getYawAngularVelocity()
 	
-	addAngularVelocity(pitchDiff, rollDiff, yawDiff)
+	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, pitchDiff, rollDiff, yawDiff)
 end
 
 -- public interface

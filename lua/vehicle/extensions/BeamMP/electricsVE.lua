@@ -139,7 +139,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	end -- Added to give the initial settings so we do not get attempt to access nil value
 	for k,v in pairs(e) do
 		if not DisallowedKey(k) and le[k] ~= v then
-			--print("Change Detected: "..tostring(k)..": "..tostring(v))
+			--print("Change Detected: "..tostring(k)..": "..tostring(le[k]).." -> "..tostring(v))
 			eTable[k] = v
 			le[k] = v
 		end
@@ -164,7 +164,19 @@ end --ONUPDATE CLOSE
 
 
 local function applyGear(data)
-	if (data) then controller.mainController.shiftToGearIndex(tonumber(data)) end
+	if (data) then
+		local gear = tonumber(data)
+		
+		-- workaround for automatic and dct gearboxes
+		local gearbox = powertrain.getDevice("gearbox")
+		if gearbox and (gearbox.type == "automaticGearbox" or gearbox.type == "dctGearbox") then
+			if gear >= 1 then
+				gear = 2
+			end
+		end
+		
+		controller.mainController.shiftToGearIndex(gear)
+	end
 end
 
 
@@ -189,7 +201,7 @@ local function applyElectrics(data)
 	-- 5 = lightbar
 	-- 6 = horn
 	local decodedData = jsonDecode(data) -- Decode received data
-	local e = electrics.values
+	--local e = electrics.values
 	if (decodedData) then -- If received data is correct
 		--[[if decodedData[3] ~= e.hazard_enabled and decodedData[3] ~= nil then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData[3])
@@ -228,30 +240,41 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
+		
 		for k,v in pairs(decodedData) do
-			--print("Setting: "..k.." -> "..tostring(v))
+			print("Setting: "..k.." -> "..tostring(v))
+			
+			electrics.values[k] = v
+				
 			if k == "hazard_enabled" then
-				electrics.values.hazard = 0
-				electrics.set_warn_signal(decodedData[3])
-				electrics.update(0) -- Update electrics values
+				--electrics.values.hazard = 0
+				electrics.set_warn_signal(v)
+				--electrics.update(0) -- Update electrics values
 			elseif k == "signal_left_input" then
 				electrics.toggle_left_signal()
-				electrics.update(0) -- Update electrics values
+				--electrics.update(0) -- Update electrics values
 			elseif k == "signal_right_input" then
 				electrics.toggle_right_signal()
 				--electrics.update(0) -- Update electrics values
 			elseif k == "lights_state" then
 				electrics.setLightsState(v) -- Apply lights values
+			elseif k == "fog" then
+				electrics.set_fog_lights(v)
 			elseif k == "lightbar" then
 				electrics.set_lightbar_signal(v) -- Apply lightbar values
 			elseif k == "engineRunning" then
-				if v == 1 then
-					powertrain.getDevice("mainEngine"):activateStarter()
-				elseif v == 0 then
+				if v > 0.99 then
+					controller.mainController.setStarter(true)
+				else
 					controller.mainController.setEngineIgnition(false)
 				end
-			else
-				electrics.values[k] = v
+			elseif k == "horn" then
+				if v > 0.99 then
+					electrics.horn(true)
+				else
+					electrics.horn(false)
+				end
+			else 
 			end
 		end
 		latestData = data

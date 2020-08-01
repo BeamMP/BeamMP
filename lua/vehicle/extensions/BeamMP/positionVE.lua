@@ -38,11 +38,13 @@ end
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 0.1        -- How much acceleration is used to correct velocity (0.1 = 10% per frame, 1 = instant)
 local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
+local maxAcc = 1000            -- Maximum acceleration (m/s^2)
 
 -- Rotation
 local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (0.1 = 10% per frame, 1 = instant)
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
+local maxRacc = 1000           -- Maximum angular acceleration (rad/s^2)
 
 -- Prediction
 local maxPredict = 1           -- Timeout for prediction (s)
@@ -234,7 +236,7 @@ end
 
 local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 
-	local remoteDT = tim - remoteData.timer
+	local remoteDT = guardZero(tim - remoteData.timer)
 	
 	-- If packets arrive in wrong order, print warning message
 	if remoteDT < 0 then
@@ -243,13 +245,24 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 		--return
 	end
 	
-	remoteData.acc = (vel - remoteData.vel)/max(remoteDT, 0.005)
-	remoteData.racc = (rvel - remoteData.rvel)/max(remoteDT, 0.005)
+	-- Sanity checks for acceleration
+	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
+		remoteData.acc = (vel - remoteData.vel)/remoteDT
+		remoteData.vel = vel
+	else
+		print("Acceleration too high! Vehicle ID: "..obj:getID())
+		remoteData.acc = vec3(0,0,0)
+	end
+	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
+		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
+		remoteData.rvel = rvel
+	else
+		print("Angular acceleration too high! Vehicle ID: "..obj:getID())
+		remoteData.racc = vec3(0,0,0)
+	end
 	
 	remoteData.pos = pos
-	remoteData.vel = vel
 	remoteData.rot = rot
-	remoteData.rvel = rvel
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim
 

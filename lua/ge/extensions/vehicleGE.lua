@@ -214,7 +214,6 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		nicknameMap[tostring(spawnedVeh:getID())] = {}
 		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
 		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
-		spawnedVeh.isMP = true -- THis does not seem to work :(
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
@@ -229,13 +228,13 @@ local function onVehicleSpawned(gameVehicleID)
 	if ownMap[tostring(gameVehicleID)] ~= 1 and vehiclesMap[tostring(gameVehicleID)] == nil then
 		print("[BeamMP] Vehicle Spawned: "..gameVehicleID)
 		local veh = be:getObjectByID(gameVehicleID)
-		if false then  -- if first then
+		if first then  -- if first then
 			first = false
-			commands.setFreeCamera() -- Fix camera
+			--commands.setFreeCamera() -- Fix camera
 			--veh:delete() -- Remove it  -- Temp Removed for 0.20 FIx
-			print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
-			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
-			UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
+			--print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
+			--if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+			--UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
 			--onMPSessionInit()
 		else
 			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files

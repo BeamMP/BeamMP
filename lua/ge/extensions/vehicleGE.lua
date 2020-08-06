@@ -226,9 +226,6 @@ end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
-	print(veh.isMP)
-	print(ownMap[tostring(gameVehicleID)])
-	print(vehiclesMap[tostring(gameVehicleID)])
 	if ownMap[tostring(gameVehicleID)] ~= 1 and vehiclesMap[tostring(gameVehicleID)] == nil then
 		print("[BeamMP] Vehicle Spawned: "..gameVehicleID)
 		local veh = be:getObjectByID(gameVehicleID)

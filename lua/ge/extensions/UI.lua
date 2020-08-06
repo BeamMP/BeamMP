@@ -103,7 +103,7 @@ end
 
 local ready = true
 
-local function ready(src)
+local function ready(src, v)
   print("UI / Game Has now loaded ("..src..")")
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
   if src == "MP-SESSION" or src == "FIRSTVEH" then
@@ -111,6 +111,12 @@ local function ready(src)
       ready = false
       GameNetwork.connectToLauncher()
     end
+  end
+  if src == "MP-SESSION" then
+    commands.setFreeCamera() -- Fix camera
+    local veh = be:getPlayerVehicle(0)
+    veh:delete() -- 0.20 Fix?
+    if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
   end
 end
 

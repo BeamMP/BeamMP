@@ -7,9 +7,15 @@
 
 local M = {}
 
-local function applyPartConfig(data)
-	local decodedData = jsonDecode(data) -- Decode received data
-	partmgmt.setConfig(decodedData)
+--local function applyPartConfig(data) -- Pre 0.20
+	--local decodedData = jsonDecode(data) -- Decode received data
+	--partmgmt.setConfig(decodedData)
+--end
+
+local function applyPartConfig(data) -- Post 0.20
+    local decodedData = jsonDecode(data) -- Decode received data
+    tableMerge(v.config, decodedData)
+    obj:respawn(serialize(v.config))
 end
 
 M.applyPartConfig = applyPartConfig

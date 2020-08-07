@@ -62,6 +62,10 @@ end
 local function getOwnMap()
     return ownMap
 end
+
+local function getVehicleMap()
+    return vehiclesMap
+end
 --============== SOME FUNCTIONS ==============
 
 
@@ -88,7 +92,7 @@ local function sendAllVehicles()
 	for i = 0, be:getObjectCount() do -- For each vehicle
 		local veh = be:getObject(i) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?
-			veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..veh:getID()..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config
+			veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..veh:getID()..", '\"..jsonEncode(v.config)..\"')\")") -- Get config
 		end
 	end
 end
@@ -100,7 +104,7 @@ end
 local function sendVehicle(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID) -- Get spawned vehicle ID
 	if veh then -- In case of bug
-		veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..gameVehicleID..", '\"..jsonEncode(partmgmt.state.config)..\"')\")") -- Get config
+		veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendVehicleData("..gameVehicleID..", '\"..jsonEncode(v.config)..\"')\")") -- Get config
 		print("VEHICLE SENT")
 	end
 end
@@ -203,11 +207,14 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	else
 		if not vehicleName then return end
 		println("New vehicle : "..vehicleName)
-		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]))
+		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
+		print("New Vehicles ID : "..spawnedVeh:getID())
+		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
+		dump(vehiclesMap[spawnedVeh:getID()])
 		nicknameMap[tostring(spawnedVeh:getID())] = {}
 		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
 		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
-		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
+		spawnedVeh.isMP = true -- THis does not seem to work :(
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
@@ -218,22 +225,23 @@ end
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
-	if ownMap[tostring(gameVehicleID)] ~= 1 then
+	local veh = be:getObjectByID(gameVehicleID)
+	if ownMap[tostring(gameVehicleID)] ~= 1 and vehiclesMap[tostring(gameVehicleID)] == nil then
 		print("[BeamMP] Vehicle Spawned: "..gameVehicleID)
 		local veh = be:getObjectByID(gameVehicleID)
-		if first then
+		if false then  -- if first then
 			first = false
 			commands.setFreeCamera() -- Fix camera
-			veh:delete() -- Remove it
+			--veh:delete() -- Remove it  -- Temp Removed for 0.20 FIx
 			print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
 			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
 			UI.ready("FIRSTVEH") -- Solve session setup without UI sending ready status
-			onMPSessionInit()
+			--onMPSessionInit()
 		else
 			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 			--if Network.getStatus() > 0 and not getServerVehicleID(gameVehicleID) then -- If is connecting or connected
-			if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) then -- If TCP connected
+			if GameNetwork.connectionStatus() == 1 and not getServerVehicleID(gameVehicleID) and veh.isMP ~= "1"  then -- If TCP connected
 				sendVehicle(gameVehicleID) -- Send it to the server
 				if isOwn(gameVehicleID) then
 					veh:queueLuaCommand("powertrainVE.sendAllPowertrain()")
@@ -359,7 +367,7 @@ end
 
 local function handle(rawData)
 	-- the data will be the first opt then the data followed
-	--print('vehicleGE:'..rawData)
+	print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
@@ -499,6 +507,7 @@ M.onVehicleSwitched       = onVehicleSwitched
 M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
+M.getVehicleMap           = getVehicleMap
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed

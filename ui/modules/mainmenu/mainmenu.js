@@ -6,7 +6,7 @@ angular.module('beamng.stuff')
     template: `
       <div ng-click="showBuildInfo = !showBuildInfo">
         <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
-        <div ng-show='showBuildInfo'>Alpha v{{ ::versionStr }}<br/>{{ ::buildInfoStr }}<br/>MP-Version beta 3.0</div>
+        <div ng-show='showBuildInfo'>Alpha v{{ ::versionStr }}<br/>{{ ::buildInfoStr }}<br/>MP-Version beta 3.1</div>
       </div>`,
     link: function (scope, element, attrs) {
       scope.showBuildInfo = false;

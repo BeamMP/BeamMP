@@ -102,14 +102,30 @@ local function chatSend(msg)
 end
 
 local ready = true
+local deletenext = false
 
 local function ready(src)
   print("UI / Game Has now loaded ("..src..")")
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
+
+  if src == "FIRSTVEH" then
+    deletenext = true
+  end
+  if src == "MP-SESSION" and deletenext then
+    core_vehicles.removeCurrent(); -- 0.20 Fix
+    commands.setFreeCamera() -- Fix camera
+
+    deletenext = false
+  end
+
   if src == "MP-SESSION" or src == "FIRSTVEH" then
     if ready then
       ready = false
       GameNetwork.connectToLauncher()
+    end
+
+    if CoreNetwork.Server.NAME ~= nil then
+      setStatus("Server : "..CoreNetwork.Server.NAME)
     end
   end
 end

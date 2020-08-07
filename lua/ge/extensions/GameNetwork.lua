@@ -18,6 +18,7 @@ local sysTime = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local status = ""
+local keep2
 -- ============= VARIABLES =============
 
 

@@ -60,7 +60,8 @@ local timeOffsetSmoother = newTemporalSmoothingNonLinear(2) -- Smoother for gett
 
 -- Persistent data
 local timer = 0
-local ping = 0
+local ownPing = 0
+local lastDT = 0
 
 local lastVehVel = nil
 local lastVehRvel = nil
@@ -88,11 +89,15 @@ local max = math.max
 -- ============= VARIABLES =============
 
 local function setPing(p)
-	ping = p
+	if p < 0.99 or p > 1.01 then
+		ownPing = p
+	end
 end
 
 local function updateGFX(dt)
 	timer = timer + dt
+	
+	lastDT = dt
 	
 	if not remoteData.pos then
 		return
@@ -122,7 +127,7 @@ local function updateGFX(dt)
 	local calcLocalTime = remoteData.timer + timeOffset
 	
 	-- How far ahead the position needs to be predicted
-	local predictTime = timer - calcLocalTime + ping
+	local predictTime = timer - calcLocalTime
 	
 	if predictTime > maxPredict then
 		--print("Prediction timeout! Vehicle ID: "..obj:getID())
@@ -183,6 +188,8 @@ local function updateGFX(dt)
 	local velError = vel - vehVel
 	local accError = accErrorSmoother:get((lastAcc or vehAcc) - vehAcc, dt)
 	
+	--print("AccError: "..tostring(accError))
+	
 	local rvelError = rvel - vehRvel
 	--local raccError = racc - vehRacc
 	
@@ -229,12 +236,13 @@ local function getVehicleRotation()
 	tempTable['rvel'].y = tonumber(rvel.y)
 	tempTable['rvel'].z = tonumber(rvel.z)
 	tempTable['tim'] = timer
+	tempTable['ping'] = ownPing+lastDT
 	--print(dump(tempTable))
 	--print("tempTable ^ ")
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 
-local function setVehiclePosRot(pos, vel, rot, rvel, tim)
+local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 
 	local remoteDT = guardZero(tim - remoteData.timer)
 	
@@ -264,8 +272,10 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim)
 	remoteData.pos = pos
 	remoteData.rot = rot
 	remoteData.timer = tim
-	remoteData.timeOffset = timer-tim
-
+	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
+	
+	print("OwnPing = "..ownPing.." Ping = "..ping)
+	
 end
 
 

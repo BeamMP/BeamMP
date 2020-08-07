@@ -56,8 +56,9 @@ local function applyPos(data, serverVehicleID)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
+		local ping = pr.ping
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..ping..")")
 	end
 end
 
@@ -80,11 +81,22 @@ local function setPosition(gameVehicleID, x, y, z)
 	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
 
+local function setPing(ping)
+	local p = ping/1000
+	for i = 0, be:getObjectCount()-1 do
+		local veh = be:getObject(i)
+		if veh then
+			veh:queueLuaCommand("positionVE.setPing("..p..")")
+		end
+	end
+end
+
 M.applyPos          = applyPos
 M.tick              = tick
 M.handle            = handle
 M.sendVehiclePosRot = sendVehiclePosRot
 M.setPosition       = setPosition
+M.setPing           = setPing
 
 
 print("positionGE Loaded.")

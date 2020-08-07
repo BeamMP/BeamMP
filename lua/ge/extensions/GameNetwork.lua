@@ -33,9 +33,9 @@ local function connectToLauncher()
 		keep2 = BigDataSocket:setoption("keepalive",true)
 
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', 4445); -- Connecting
+		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort")+1 or 4445); -- Connecting
 		BigDataSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		BigDataSocket:connect('127.0.0.1', 4446); -- Connecting
+		BigDataSocket:connect('127.0.0.1', settings.getValue("launcherPort")+2 or 4446); -- Connecting
 		launcherConnectionStatus = 1
 		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end

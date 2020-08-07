@@ -32,7 +32,7 @@ local function connectToLauncher()
 		keep = TCPSocket:setoption("keepalive",true)
 
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', 4444); -- Connecting
+		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort") or 4444); -- Connecting
 		launcherConnectionStatus = 1
 		--send(buildPacket(1, 2000, 0, Network.nickname..":"..getMissionFilename())) -- Send connection packet
 	end
@@ -166,6 +166,7 @@ local function HandleU(params)
 	end
 	if code == "p" then
 		UI.setPing(data.."")
+		positionGE.setPing(data)
 	end
 end
 

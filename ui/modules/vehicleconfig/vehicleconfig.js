@@ -8,39 +8,45 @@ angular.module('beamng.stuff')
  * Helper functions for editing a vehicle's configuration
  */
 .factory('VehicleConfig', ['logger', '$q', 'bngApi', 'Utils', function (logger, $q, bngApi, Utils) {
-  var prefix = '';
-
-  var _generateTreeBranch = function (d, des, simple, depth) {
+  var _generateTreeBranch = function (data, part, simple, depth) {
     var res = [];
-    depth = depth || 0;
+    if(depth>200) return;
 
-    for (var child in d) {
-      var slot = d[child];
+    for (var slotType in part.slots) {
+      var slot = part.slots[slotType];
       var element = {
-        name: des[child].replace(prefix, ''),
-        slot: slot[0].partType,
+        name: slot.description,
+        slot: slotType,
         val: '',
         options: [],
         highlight: true
       };
-      if(slot[0].coreSlot === undefined) {
+      if(slot.coreSlot === undefined) {
         element.options.push({name: 'Empty', val: ''});
       } else {
         element.open = true;
       }
 
-      var help = element.options;
-      for (var item=0; item<slot.length; item++) {
-        help[help.length] = {
-          name: slot[item].name.replace('prefix', ''),
-          val: slot[item].partName
-        };
-        if (slot[item].active) {
-          element.val = slot[item].partName;
-          if (slot[item].parts)
-            element.parts = _generateTreeBranch(slot[item].parts, des, simple, depth + 1);
-          if (simple && element.parts !== undefined && element.parts.length === 0)
-            delete element.parts;
+      var elOptions = element.options;
+      if(data.slotMap[slotType] !== undefined) {
+        for (var i=0; i < data.slotMap[slotType].length; i++) {
+          var slotPartName = data.slotMap[slotType][i]
+          var slotPart = data.availableParts[slotPartName]
+          if(slotPart === undefined) {
+            console.error('slot part not found: ', slotPartName)
+          } else {
+            elOptions[elOptions.length] = {
+              name: slotPart.description,
+              val: slotPartName
+            };
+            if (data.chosenParts[slotType] == slotPartName) {
+              element.val = slotPartName;
+              if (slotPart.slots)
+                element.parts = _generateTreeBranch(data, slotPart, simple, depth + 1);
+              if (simple && element.parts !== undefined && element.parts.length === 0)
+                delete element.parts;
+            }
+          }
         }
       }
       if (!simple || element.options.length > 2 || (element.options.length > 1 && element.options[0].val !== '') || depth < 1) {
@@ -50,32 +56,10 @@ angular.module('beamng.stuff')
     return res;
   };
 
-  var _getPrefix = function (des) {
-    var strings = [];
-
-    Object.keys(des).map(function (x) { strings.push(des[x]); });
-
-    var max = Math.max.apply(null, strings.map(function (x) { return x.length; }));
-
-    for (var i=0; i<max; i++) {
-      for (var key in des) {
-        if (des[key].indexOf(prefix) !== 0) {
-          return strings[0].substring(0, (i-2));
-        }
-      }
-      prefix = strings[0].substring(0, i);
-    }
-    return '';
-  };
 
   return {
-    get prefix () {
-      return prefix;
-    },
-
     generateTree: function (data, simple) {
-      prefix = _getPrefix(data.slotDescriptions);
-      return _generateTreeBranch(data.slotMap, data.slotDescriptions, simple);
+      return _generateTreeBranch(data, data.availableParts[data.mainPartName], simple);
     },
 
     generateConfig: function (d, res) {
@@ -109,7 +93,7 @@ angular.module('beamng.stuff')
     loadConfigList: function () {
       var d = $q.defer();
 
-      bngApi.activeObjectLua('partmgmt.getConfigList()', (configs) => {
+      bngApi.engineLua('extensions.core_vehicle_partmgmt.getConfigList()', (configs) => {
         var list = configs.map((elem) => elem.slice(0, -3));
         d.resolve(list);
       });
@@ -176,11 +160,11 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
         flattenedParts.push(obj);
       })
     }
-    bngApi.activeObjectLua(`partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`);
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`);
   };
 
   $scope.$on('VehicleFocusChanged', function(event, data) {
-    bngApi.activeObjectLua('partmgmt.vehicleResetted()');
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
   })
 
   // LICENSE PLATE STUFF
@@ -227,20 +211,20 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   vm.selectPart = function (event, element) {
     event.stopPropagation();
     logger.vehicleconfig.debug(`Selecting part ${element} (subparts: ${vm.selectSubParts})`);
-    bngApi.activeObjectLua(`partmgmt.selectPart("${element}", ${vm.selectSubParts})`);
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.selectPart("${element}", ${vm.selectSubParts})`);
   };
 
   vm.deselectPart = function (sticky) {
     var flattenedParts = [];
-    if (vm.d.data.length > 0) {
+    if (vm.d && vm.d.data.length > 0) {
       for (var key in vm.d.data) {
         processPart(vm.d.data[key], function(obj) {
           flattenedParts.push(obj);
         })
       }
       logger.vehicleconfig.debug(`Reset part selection`);
-      // bngApi.activeObjectLua('partmgmt.selectReset()');
-      bngApi.activeObjectLua(`partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`);
+      // bngApi.engineLua('extensions.core_vehicle_partmgmt.selectReset()');
+      bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`);
     }
   };
 
@@ -250,9 +234,9 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     logger.vehicleconfig.debug(`Setting configuration`, newConfig);
     setTimeout(() => {
       // make async so html has more time to update render parts
-      bngApi.activeObjectLua(`partmgmt.setPartsConfig(${bngApi.serializeToLua(newConfig)})`);
+      bngApi.engineLua(`extensions.core_vehicle_partmgmt.setPartsConfig(${bngApi.serializeToLua(newConfig)})`);
     });
-    console.time('waitingForLua')
+    //console.time('waitingForLua')
   };
 
   vm.reset = function () {
@@ -260,42 +244,50 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
       logger.vehicleconfig.debug(`Resetting to loaded configuration`, data);
       vm.load(loadedConfig);
     } else {
-      bngApi.activeObjectLua(`partmgmt.setPartsConfig(${bngApi.serializeToLua(initConfig)})`);
+      $scope.$evalAsync(function () {
+        calcTreesync(initConfig)
+        var newConfig = VehicleConfig.generateConfig(vm.d.data);
+        bngApi.engineLua(`extensions.core_vehicle_partmgmt.setPartsConfig(${bngApi.serializeToLua(newConfig)})`);
+      })
     }
   };
 
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
-    bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData('\"..obj:getID()..\"', '\"..jsonEncode(partmgmt.state.config)..\"')\")");
+    bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData('\"..obj:getID()..\"', '\"..jsonEncode(v.config)..\"')\")");
+  }
+
+  function calcTreesync (config) {
+    if (init) {
+      init = false;
+      initConfig = config;
+    }
+
+    var tree = VehicleConfig.generateTree(config, vm.simple);
+    tree.sort(VehicleConfig.treeSort);
+    var configArray = [];
+    var variable_categories = {};
+
+    for (var o in config.variables) {
+      var v = config.variables[o];
+      if (!variable_categories[v.category])
+        variable_categories[v.category] = true;
+      v.valDis = VehicleConfig.varValToDisVal(v);
+      configArray.push(v);
+    }
+    // console.table(configArray)
+
+    vm.d.data = tree;
+    vm.d.variables = $filter('orderBy')(configArray, 'name');
+    vm.d.variable_categories = Object.keys(variable_categories);
+    // loadOpenSlots();
   }
 
   function calcTree (config) {
-    console.timeEnd('waitingForLua')
+    //console.timeEnd('waitingForLua')
 
     $scope.$evalAsync(function () {
-      if (init) {
-        init = false;
-        initConfig = config;
-      }
-
-      var tree = VehicleConfig.generateTree(config, vm.simple);
-      tree.sort(VehicleConfig.treeSort);
-      var configArray = [];
-      var variable_categories = {};
-
-      for (var o in config.variables) {
-        var v = config.variables[o];
-        if (!variable_categories[v.category])
-          variable_categories[v.category] = true;
-        v.valDis = VehicleConfig.varValToDisVal(v);
-        configArray.push(v);
-      }
-      // console.table(configArray)
-
-      vm.d.data = tree;
-      vm.d.variables = $filter('orderBy')(configArray, 'name');
-      vm.d.variable_categories = Object.keys(variable_categories);
-      // loadOpenSlots();
+      calcTreesync(config)
     });
   }
 
@@ -304,7 +296,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     calcTree(initConfig);
   };
 
-  $scope.$on('VehicleconfigChange', (event, config) => calcTree(config));
+  $scope.$on('VehicleConfigChange', (event, config) => calcTree(config));
 
 
   $scope.$on('$destroy', () => {
@@ -312,7 +304,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   });
 
   // Initial data load
-  bngApi.activeObjectLua('partmgmt.vehicleResetted()');
+  bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
 
 }])
 
@@ -342,7 +334,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     setTimeout(() => {
       // make async so html has more time to update render parts
       var vars = VehicleConfig.getVariablesConfig(vm.d.variables);
-      bngApi.activeObjectLua(`partmgmt.setConfigVars(${bngApi.serializeToLua(vars)})`);
+      bngApi.engineLua(`extensions.core_vehicle_partmgmt.setConfigVars(${bngApi.serializeToLua(vars)})`);
     });
   };
 
@@ -359,7 +351,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     vm.tuningVariablesChanged(); // got to call this, since the change didn't come from the inputs.
   };
 
-  bngApi.activeObjectLua('partmgmt.vehicleResetted()');
+  bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
 
   function calcTree (config) {
     $scope.$evalAsync(function () {
@@ -381,22 +373,13 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     });
   }
 
-  $scope.$on('VehicleconfigChange', (event, config) => calcTree(config));
+  $scope.$on('VehicleConfigChange', (event, config) => calcTree(config));
 }])
 
 .controller('Vehicleconfig_color', ["$scope", "bngApi", function ($scope, bngApi) {
   var vm = this;
   vm.updateColor = function (index, value) {
-     console.log( `setVehicleColorPalette(${index-1}, "${value}");` );
-     console.log('setVehicleColorPalette(' + (index-1) + ',"' + value + '");')
-     console.log( `changeVehicleColor("${value}");` );
-     console.log('changeVehicleColor("' + value  + '");');
-
-    if (index === 0) {
-      bngApi.engineScript(`changeVehicleColor("${value}");`);
-    } else {
-      bngApi.engineScript(`setVehicleColorPalette(${index-1}, "${value}");`);
-    }
+    bngApi.engineLua(`core_vehicle_colors.setVehicleColor(${index}, "${value}");`);
   };
 
   function fetchDefinedColors () {
@@ -408,7 +391,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
     for (var i=1; i<vm.color.length; i++) {
       // yes this is needed, since otherwise we crate a function inside the for loop and thanks to clojure i would always be 4
-      bngApi.engineScript(`getVehicleColorPalette(${i-1});`, ((id) =>
+      bngApi.engineLua(`getVehicleColorPalette(${i-1})`, ((id) =>
         (res) => {
           vm.color[id] = res || vm.color[id];
         }
@@ -439,7 +422,31 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   var vm = this;
 
   vm.save = function (configName) {
-    bngApi.activeObjectLua(`partmgmt.saveLocal("${configName}.pc")`);
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`);
+
+    $scope.$emit('hide_ui', true);
+
+    // This function starts a chain to hide the UI, set up the camera and take a screenshot.
+    // This is done in such way to be able to queue the commands, so that are being executed in the correct order
+    // Taking advantage of the small delay that occurs when queueing commands from JS to LUA and viceversa
+    // This helps avoid timing issue with the UI, which could be visible in the thumbnail.
+    // Every step that needs to be run precisely after another is separated into its own stage.
+    // See lua/ge/extensions/core/vehicles/partmgmt.lua
+
+    setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100);
+
+    // Stage 1
+    $scope.$on('saveLocalScreenshot_stage1', function () {
+      // Stage 2 (Screenshot - LUA)
+      bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot_stage2("${configName}")`);
+    });
+
+    // Stage 3 (Reset)
+    $scope.$on('saveLocalScreenshot_stage3', function () {
+      bngApi.engineLua(`setCameraFov(60)`);
+      bngApi.engineLua(`commands.setGameCamera()`);
+      $scope.$emit('hide_ui', false);
+    });
   };
 
   /**
@@ -452,7 +459,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
    */
   vm.load = function ($event, config) {
     loadedConfig = config;
-    bngApi.activeObjectLua(`partmgmt.loadLocal("${config}.pc")`);
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.loadLocal("${config}.pc")`);
     $event.stopPropagation();
   };
 

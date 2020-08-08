@@ -102,7 +102,7 @@ local function chatSend(msg)
 end
 
 local ready = true
-local deletenext = false
+local deletenext = true
 
 local function ready(src)
   print("UI / Game Has now loaded ("..src..")")
@@ -111,8 +111,13 @@ local function ready(src)
   if src == "FIRSTVEH" then
     deletenext = true
   end
-  if src == "MP-SESSION" and deletenext then
-    core_vehicles.removeCurrent(); -- 0.20 Fix
+  if src == "MP-SESSION" then
+    if deletenext then
+      print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
+      core_vehicles.removeCurrent(); -- 0.20 Fix
+      deletenext = false
+    end
+
     commands.setFreeCamera() -- Fix camera
 
     deletenext = false
@@ -132,6 +137,7 @@ end
 
 local function readyReset()
   ready = true
+  deletenext = true
 end
 
 M.updateLoading = updateLoading

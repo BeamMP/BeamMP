@@ -149,6 +149,9 @@
     "ui.fonts.mono": "Roboto Mono",
     "ui.fonts.fallback": "Roboto",
 
+    "ui.startscreen.warning": "Warning: Photosensitivity Risk",
+    "ui.startscreen.warningdetails": "This game may potentially trigger seizures for people with photosensitive epilepsy. Player discretion is advised.",
+
     "ui.common.search": "Search",
     "ui.common.continue": "Continue",
     "ui.common.apply": "Apply",

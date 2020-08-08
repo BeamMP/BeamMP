@@ -55,6 +55,7 @@ connectToLauncher()
 reloadUI()
 
 local function getServers()
+	print("Sending Request For Server List...")
 	TCPSocket:send('B')
 end
 local function cancelConnection()
@@ -171,7 +172,7 @@ end
 
 local HandleNetwork = {
 	['A'] = function(params) oneSecondsTimer = 0; flip = false; end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')') end,
+	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); print("Server List Received.") end,
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,
 	['V'] = function(params) vehicleGE.handle(params) end,

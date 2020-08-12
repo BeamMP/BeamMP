@@ -119,6 +119,8 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	local c               = veh.color
 	local p0              = veh.colorPalette0
 	local p1              = veh.colorPalette1
+	local pos             = veh:getPosition()
+	local rot             = veh:getRotation()
 
 	vehicleTable[1]  = mpConfig.getPlayerServerID()
 	vehicleTable[2]  = tostring(gameVehicleID)
@@ -128,8 +130,8 @@ local function sendVehicleData(gameVehicleID, vehicleConfig)
 	vehicleTable[6]  = jsonEncode({p0.x, p0.y, p0.z, p0.w})
 	vehicleTable[7]  = jsonEncode({p1.x, p1.y, p1.z, p1.w})
 	vehicleTable[8]  = getServerVehicleID(gameVehicleID) or ""
-	vehicleTable[9]  = jsonEncode(be:getObjectByID(gameVehicleID):getPosition())
-	vehicleTable[10] = jsonEncode(be:getObjectByID(gameVehicleID):getRotation())
+	vehicleTable[9]  = jsonEncode({pos.x, pos.y, pos.z})
+	vehicleTable[10] = jsonEncode({rot.x, rot.y, rot.z, rot.w})
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	GameNetwork.send('Os:0:'..stringToSend)--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle

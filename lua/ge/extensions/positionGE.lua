@@ -56,7 +56,7 @@ local function applyPos(data, serverVehicleID)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
-		local ping = pr.ping
+		local ping = pr.ping or 0
 
 		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..ping..")")
 	end

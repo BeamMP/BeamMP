@@ -129,7 +129,7 @@ local function LoadLevel(map)
 		local levelName = string.gsub(map, '/info.json', '')
 		levelName = string.gsub(levelName, '/levels/', '')
 		print("")
-		found = freeroam_freeroam.startFreeroamByName(v.levelName)
+		found = freeroam_freeroam.startFreeroamByName(levelName)
 		if found then
 			print("Loading Multiplayer Map...")
 			mapLoadingFailedCount = 0
@@ -146,14 +146,14 @@ local function LoadLevel(map)
 	  end]]
 		freeroam_freeroam.startFreeroam(map)
 		-- we got this far?!?!?! Guess we dont have the level
-		if not found then
+		if false then --if not found then
 			print("")
 			print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
 			print("TRYING TO LOAD IT AGAIN!")
 			if mapLoadingFailedCount >= 3 then
 				print("FAILED TO LOAD THE MAP! DID IT GET LOADED INTO THE GAME??")
 				print("GOING BACK...")
-				CoreNetwork.resetSession(true)
+				--CoreNetwork.resetSession(true)
 			else
 				mapLoadingFailedCount = mapLoadingFailedCount + 1
 				print("Map Loading Attempt "..mapLoadingFailedCount)

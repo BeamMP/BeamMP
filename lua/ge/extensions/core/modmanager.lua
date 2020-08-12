@@ -303,8 +303,17 @@ local function updateZIPEntry(filename)
       d.orgZipFilename = d.orgZipFilename..'.zip'
       d.unpackedPath = filename
 
-      if #FS:findFilesByRootPattern( "/"..filename..'levels/', "*.mis", 1, true, false ) > 0 then d.modType = 'terrain' end
-      if #FS:findFilesByRootPattern( "/"..filename..'vehicles/', "*", 0, true, true ) > 0 then d.modType = 'vehicle' end
+      --if #FS:findFilesByRootPattern( "/"..filename..'levels/', "*.mis", 1, true, false ) > 0 then d.modType = 'terrain' end
+      --if #FS:findFilesByRootPattern( "/"..filename..'vehicles/', "*", 0, true, true ) > 0 then d.modType = 'vehicle' end
+      oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
+      lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
+      vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
+      if #oldLvlFiles > 0 or #lvlFiles > 0 then d.modType = 'terrain' end
+      if #vehFiles > 0 then d.modType = 'vehicle' end
+      -- not sure if it's actually usefull do to the folowing as it happen only when mod is new
+      -- arrayConcat(filesInZIP, oldLvlFiles)
+      -- arrayConcat(filesInZIP, lvlFiles)
+      -- arrayConcat(filesInZIP, vehFiles)
     end
 
     d.modname = modname
@@ -354,6 +363,17 @@ local function updateZIPEntry(filename)
     end
   end
   zip:close()
+
+  --if you only have vanila and unpacked, the level list do not get refreshed
+  if filename:find('/unpacked/') and filename:endswith('/') then
+    if FS:directoryExists(filename.."levels/") then
+      filesInZIP[#filesInZIP+1] = "/levels/" --dirty hack to refresh level list
+    end
+    if FS:directoryExists(filename.."vehicles/") then
+      filesInZIP[#filesInZIP+1] = "/vehicles/foo/bar.jbeam" --dirty hack to refresh veh list
+    end
+  end
+
   return mods[modname], filesInZIP
 end
 
@@ -640,7 +660,7 @@ local function test()
 end
 local function testZips()
   print('testZips')
-  local fileList = FS:findFilesByPattern( "/mods", "*.zip", -1, true, false )
+  local fileList = FS:findFiles( "/mods", "*.zip", -1, true, false )
   for k,v in pairs(fileList) do
     print( "ZIP file: " .. v )
 
@@ -1065,6 +1085,33 @@ local function modIsUnpacked(modname)
   return mods[modname].unpackedPath ~= nil
 end
 
+-- returns the modname and the info of the filename
+local gamePath = FS:getGamePath() -- these never change at runtime
+local userPath = FS:getUserPath()
+local function getModForFilename(filename_virtual)
+  local realPath = FS:getFileRealPath(filename_virtual)
+  if string.startswith(realPath, gamePath) then
+    -- no mods allowed in game path
+    return
+  end
+  if string.startswith(realPath, userPath) then
+    local modPath = realPath:sub(string.len(userPath))
+    modPath = modPath:gsub("\\", "/")
+    local zipPos = modPath:find('.zip')
+    if zipPos ~= -1 then
+      modPath = modPath:sub(1, zipPos + 3)
+    else
+      -- not a zip, thus not a mod. unpacked mods not supported right now
+      return
+    end
+
+    for modname, mod in pairs(mods) do
+      if mod.fullpath == modPath then
+        return modname, mod
+      end
+    end
+  end
+end
 local function check4Update()
   checkStartup = true
 end
@@ -1176,6 +1223,8 @@ M.getConflict = getConflict
 M.getModDB = getModDB
 M.modIsUnpacked = modIsUnpacked
 M.check4Update = check4Update
+
+M.getModForFilename = getModForFilename
 
 M.disableAutoMount = disableAutoMount
 M.enableAutoMount = enableAutoMount

@@ -121,7 +121,7 @@ angular.module('beamng.stuff')
 			if (servers[i].hasOwnProperty(id)) {
 				//console.log(servers[i][id])
 				var server = servers[i][id];
-				bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}")`);
+				bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.sname}")`);
 			}
 		}
 	}

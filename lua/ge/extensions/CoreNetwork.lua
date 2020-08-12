@@ -62,11 +62,12 @@ local function cancelConnection()
 	TCPSocket:send('QS')
 end
 
-local function setServer(id, ip, port, mods)
+local function setServer(id, ip, port, mods, name)
 	Server.IP = ip;
 	Server.PORT = port;
 	Server.ID = id;
 	Server.MODSTRING = mods
+	Server.NAME = name
 	local mods = {}
 	for str in string.gmatch(Server.MODSTRING, "([^;]+)") do
 		table.insert(mods, str)
@@ -127,7 +128,13 @@ local function LoadLevel(map)
 		print("Searching For Map...")
 		local levelName = string.gsub(map, '/info.json', '')
 		levelName = string.gsub(levelName, '/levels/', '')
-		for i, v in ipairs(core_levels.getList()) do
+		print("")
+		found = freeroam_freeroam.startFreeroamByName(v.levelName)
+		if found then
+			print("Loading Multiplayer Map...")
+			mapLoadingFailedCount = 0
+		end
+		--[[for i, v in ipairs(core_levels.getList()) do
 			print(v.levelName)
 	    if v.levelName:lower() == levelName then
 				print("Loading Multiplayer Map...")
@@ -136,9 +143,11 @@ local function LoadLevel(map)
 				mapLoadingFailedCount = 0
 				break;
 	    end
-	  end
+	  end]]
+		freeroam_freeroam.startFreeroam(map)
 		-- we got this far?!?!?! Guess we dont have the level
 		if not found then
+			print("")
 			print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
 			print("TRYING TO LOAD IT AGAIN!")
 			if mapLoadingFailedCount >= 3 then
@@ -166,6 +175,7 @@ local function HandleU(params)
 		status = "LoadingMap"
 	end
 	if code == "p" then
+
 		UI.setPing(data.."")
 	end
 end
@@ -234,6 +244,7 @@ local function resetSession(x)
 	connectToLauncher()
 	UI.readyReset()
 	mapLoadingFailedCount = 0
+	status = ""
 	if x then
 		returnToMainMenu()
 	end
@@ -265,6 +276,7 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
+M.Server = Server
 
 print("CoreNetwork Loaded.")
 return M

@@ -1,12 +1,13 @@
 <div ng-controller="Session" id="Session" class="bngApp multiplayersession" ng-init="init()" ng-style="background-color: rgba(0, 0, 0, 0.5)">
   <div class="col col-wide">
-    <span><span id="Session-Status">Server: BeamMP Development Server</span></span>
+    <span><span id="Session-Status">Server: NAME NOT LOADED/FOUND</span></span>
   </div>
   <div class="col col-right">
     <span>Players: <span id="Session-PlayerCount">0/10</span></span>
     <span>Ping: <span id="Session-Ping">12ms?</span></span>
     <button type="button" name="button" class="QuitButton" ng-click="mpquit()">Quit</button>
   </div>
+  <span id="TEMPAREA" style="display:none;"></span>
   <style>
     div#Session {
       display: -webkit-box;
@@ -18,6 +19,8 @@
     }
     .col-wide {
       padding: 3px 0px 0px 5px;
+      overflow: hidden;
+      width: 66%;
     }
     .col-right {
       position: absolute;

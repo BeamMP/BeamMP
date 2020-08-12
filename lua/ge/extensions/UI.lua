@@ -61,7 +61,7 @@ local function setNickName(name)
 end
 
 local function setStatus(status)
-	be:executeJS('setStatus("'..status..' ms")')
+	be:executeJS('setStatus("'..status..'")')
 end
 
 local function setPlayerCount(playerCount)

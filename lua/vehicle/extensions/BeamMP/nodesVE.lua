@@ -143,7 +143,7 @@ local function applyNodes(data)
   --[[if not decodedData or decodedData.nodeCount ~= #v.data.nodes then --or decodedData.beamCount ~= #v.data.beams then
     log("E", "nodesVE", "unable to use nodes data.")
     return
-  end
+  end]]
   print("Node Data Good, Attempting to apply...")
   --[[for k, h in pairs(decodedData.hydros) do
     hydros.hydros[k].state = h
@@ -155,7 +155,7 @@ local function applyNodes(data)
     if #node > 1 then
       obj:setNodeMass(cid, node[2])
     end
-  end
+  end]]
 
   --[[for cid, beam in pairs(decodedData.beams) do
     cid = tonumber(cid) - 1

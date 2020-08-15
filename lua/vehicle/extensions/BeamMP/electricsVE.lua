@@ -24,6 +24,8 @@ local gearMem = -1
 local sendNow = false -- When set to true, it send the electrics value at next update
 local sendGearNow = false
 local latestData
+local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
+local eChanged = false
 -- ============= VARIABLES =============
 
 local function DisallowedKey(k)
@@ -130,35 +132,33 @@ local function onUpdate(dt) --ONUPDATE OPEN
 	tiMem = e.tilt
 	taMem = e.tailgate]]
 	local e = electrics.values
-	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
-	if le == {} then
-		for k,v in pairs(e) do
+	for k,v in pairs(e) do
+		if le[k] == nil then
 			le[k] = v
 		end
-		print("Storing Default Electrics")
-	end -- Added to give the initial settings so we do not get attempt to access nil value
-	for k,v in pairs(e) do
+		
 		if not DisallowedKey(k) and le[k] ~= v then
 			--print("Change Detected: "..tostring(k)..": "..tostring(le[k]).." -> "..tostring(v))
 			eTable[k] = v
 			le[k] = v
+			eChanged = true
 		end
 	end
 
-	if sendNow == true or #eTable > 0 then
+	if sendNow == true and eChanged == true then
 		sendNow = false
-		if #eTable > 0 then
-			print("[electricsVE] Sending: ")
-			dump(eTable)
-		end
+		eChanged = false
+		--print("[electricsVE] Sending: ")
+		--dump(eTable)
 		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		eTable = {}
 	end
 
-	if sendGearNow == true or e.gearIndex ~= gearMem then
+	if sendGearNow == true and e.gearIndex ~= gearMem then
 		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendGearNow = false
+		gearMem = e.gearIndex
 	end
-	gearMem = e.gearIndex
 end --ONUPDATE CLOSE
 
 

@@ -14,7 +14,6 @@ local sendNow = false -- When set to true, it send the electrics value at next u
 local allowed  = true -- Allow or not the user to send electrics value at next update
 local getElectricsDelay = 0
 local latestData
-local initDone = false
 -- ============= VARIABLES =============
 
 local function sendAllPowertrain()
@@ -48,28 +47,25 @@ local function applyPowertrain(data)
 	end
 end
 
-local function updateGFX()
-	if initDone then return end
-	
+local function onInit()
 	for _, device in pairs(powertrain.getDevices()) do
 		
 		local setMode = device.setMode
 		
-		device.setMode = function(device, mode)
-				print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
-				
-				sendPowertrain(device.name, mode)
-				
-				return setMode(device, mode)
+		device.setMode = function(device, mode, ...)
+			print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
+			
+			sendPowertrain(device.name, mode)
+			
+			return setMode(device, mode, ...)
 		end
 	end
 	
 	print("Hooked powertrain device mode updates")
-	
-	initDone = true
 end
 
-M.updateGFX          = updateGFX
+M.onInit             = onInit
+M.onExtensionLoaded  = onInit
 M.sendPowertrain     = sendPowertrain
 M.sendAllPowertrain  = sendAllPowertrain
 M.applyPowertrain    = applyPowertrain

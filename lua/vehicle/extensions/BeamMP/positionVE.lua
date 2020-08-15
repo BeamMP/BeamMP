@@ -36,27 +36,27 @@ end
 -- ============= VARIABLES =============
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
-local posForceMul = 0.1        -- How much acceleration is used to correct velocity (0.1 = 10% per frame, 1 = instant)
+local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
-local maxAcc = 1000            -- Maximum acceleration (m/s^2)
+local maxAcc = 500             -- Maximum acceleration (m/s^2)
 
 -- Rotation
 local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
-local rotForceMul = 0.1        -- How much acceleration is used to correct angular velocity (0.1 = 10% per frame, 1 = instant)
+local rotForceMul = 5          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
-local maxRacc = 1000           -- Maximum angular acceleration (rad/s^2)
+local maxRacc = 100            -- Maximum angular acceleration (rad/s^2)
 
 -- Prediction
 local maxPredict = 1           -- Timeout for prediction (s)
 local maxPosError = 2          -- Max allowed continuous position error (m)
-local teleportThreshold = 3    -- Max accumulated position error before teleporting vehicle (5 = 5m for 1s, 10m for 0.5s, ...)
+local maxAccError = 20
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
 local remoteAccSmoother = newVectorSmoothing(2)             -- Smoother for acceleration calculated from received data
 local remoteRaccSmoother = newVectorSmoothing(2)            -- Smoother for angular acceleration calculated from received data
-local vehAccSmoother = newVectorSmoothing(5)                -- Smoother for acceleration of locally simulated vehicle
-local accErrorSmoother = newVectorSmoothing(1)              -- Smoother for acceleration error
-local timeOffsetSmoother = newTemporalSmoothingNonLinear(2) -- Smoother for getting average time offset
+local vehAccSmoother = newVectorSmoothing(10)               -- Smoother for acceleration of locally simulated vehicle
+local accErrorSmoother = newVectorSmoothing(2)              -- Smoother for acceleration error
+local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
 local timer = 0
@@ -68,7 +68,7 @@ local lastVehRvel = nil
 
 local lastAcc = nil
 
-local accPosError = 0
+local tpTimer = 0
 
 local remoteData = {
 	pos = nil,
@@ -84,11 +84,13 @@ local remoteData = {
 local debugDrawer = obj.debugDrawProxy
 
 local abs = math.abs
+local min = math.min
 local max = math.max
 
 -- ============= VARIABLES =============
 
 local function setPing(p)
+	-- some ping packets seem to go missing on local servers
 	if p < 0.99 or p > 1.01 then
 		ownPing = p
 	end
@@ -151,21 +153,22 @@ local function updateGFX(dt)
 
 	--DEBUG
 	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
+	debugDrawer:drawLine(remoteData.pos:toFloat3(), remoteData.pos:toFloat3()+remoteData.vel:toFloat3(), color(0,0,255,255))
 	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
+	debugDrawer:drawLine(pos:toFloat3(), pos:toFloat3()+vel:toFloat3(), color(0,255,0,255))
 	
 	-- Error correction
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
 	
-	local posErrLen = posError:length()
-	if posErrLen > maxPosError then
-		accPosError = accPosError + posErrLen*dt
+	if posError:length() > maxPosError then
+		tpTimer = tpTimer + dt
 	else
-		accPosError = 0
+		tpTimer = 0
 	end
 	
 	-- If position error is larger than limit, teleport the vehicle
-	if accPosError > teleportThreshold then
+	if tpTimer > max(predictTime,0)*1.2 then
 		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		--obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
 		
@@ -193,10 +196,10 @@ local function updateGFX(dt)
 	local rvelError = rvel - vehRvel
 	--local raccError = racc - vehRacc
 	
-	local targetAcc = (velError + posError*posCorrectMul)*posForceMul
-	local targetRacc = (rvelError + rotError*rotCorrectMul)*rotForceMul
+	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)
+	local targetRacc = (rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1)
 	
-	--local targetAccMul = 1-math.max(math.min(targetAcc:dot(accError)/accError:squaredLength(),1),0)
+	local targetAccMul = 1-max(min(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError),1),0)
 	
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
@@ -244,14 +247,14 @@ end
 
 local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 
-	local remoteDT = guardZero(tim - remoteData.timer)
+	local remoteDT = max(tim - remoteData.timer, 0.001)
 	
 	-- If packets arrive in wrong order, print warning message
-	if remoteDT < 0 then
-		print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..remoteData.timer..", New Timestamp: "..tim)
+	--if remoteDT < 0 then
+		--print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..remoteData.timer..", New Timestamp: "..tim)
 		
 		--return
-	end
+	--end
 	
 	-- Sanity checks for acceleration
 	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
@@ -260,6 +263,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 	else
 		print("Acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.acc = vec3(0,0,0)
+		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
 	end
 	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
 		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
@@ -267,6 +271,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 	else
 		print("Angular acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.racc = vec3(0,0,0)
+		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
 	end
 	
 	remoteData.pos = pos
@@ -274,7 +279,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	
-	print("OwnPing = "..ownPing.." Ping = "..ping)
+	--print("OwnPing = "..ownPing.." Ping = "..ping)
 	
 end
 

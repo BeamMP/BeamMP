@@ -14,9 +14,8 @@ local sendNow = false -- When set to true, it send the electrics value at next u
 local allowed  = true -- Allow or not the user to send electrics value at next update
 local getElectricsDelay = 0
 local latestData
+local initDone = false
 -- ============= VARIABLES =============
-
-
 
 local function sendAllPowertrain()
 	local tableToSend = {} -- Create table with gameVehicleID
@@ -45,12 +44,35 @@ local function applyPowertrain(data)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
 		--print("applied "..k.." - "..v)
-		powertrain.setDeviceModeNoEvent(k, v) -- Apply it
+		powertrain.setDeviceMode(k, v) -- Apply it
 	end
 end
 
+local function updateGFX()
+	if initDone then return end
+	
+	for _, device in pairs(powertrain.getDevices()) do
+		local hook = {func = device.setMode}
+	
+		setmetatable(hook, {
+			__call = function(self, device, mode)
+				print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
+				
+				sendPowertrain(device.name, mode)
+				
+				return hook.func(device, mode)
+			end
+		})
+		
+		device.setMode = hook
+	end
+	
+	print("Hooked powertrain device mode updates")
+	
+	initDone = true
+end
 
-
+M.updateGFX          = updateGFX
 M.sendPowertrain     = sendPowertrain
 M.sendAllPowertrain  = sendAllPowertrain
 M.applyPowertrain    = applyPowertrain

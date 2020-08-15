@@ -52,19 +52,16 @@ local function updateGFX()
 	if initDone then return end
 	
 	for _, device in pairs(powertrain.getDevices()) do
-		local hook = {func = device.setMode}
-	
-		setmetatable(hook, {
-			__call = function(self, device, mode)
+		
+		local setMode = device.setMode
+		
+		device.setMode = function(device, mode)
 				print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
 				
 				sendPowertrain(device.name, mode)
 				
-				return hook.func(device, mode)
-			end
-		})
-		
-		device.setMode = hook
+				return setMode(device, mode)
+		end
 	end
 	
 	print("Hooked powertrain device mode updates")

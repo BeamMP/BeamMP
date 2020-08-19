@@ -36,13 +36,13 @@ end
 -- ============= VARIABLES =============
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
-local posForceMul = 5          -- How much acceleration is used to correct velocity
+local posForceMul = 10         -- How much acceleration is used to correct velocity
 local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
 local maxAcc = 1000            -- Maximum acceleration (m/s^2)
 
 -- Rotation
 local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
-local rotForceMul = 5          -- How much acceleration is used to correct angular velocity
+local rotForceMul = 10         -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
 local maxRacc = 1000           -- Maximum angular acceleration (rad/s^2)
 
@@ -52,8 +52,8 @@ local maxPosError = 2          -- Max allowed continuous position error (m)
 local maxAccError = 20         -- If difference between target acceleration and actual acceleration larger than this, there was probably a collision (m/s^2)
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
-local remoteAccSmoother = newVectorSmoothing(1)             -- Smoother for acceleration calculated from received data
-local remoteRaccSmoother = newVectorSmoothing(1)            -- Smoother for angular acceleration calculated from received data
+local remoteAccSmoother = newVectorSmoothing(2)             -- Smoother for acceleration calculated from received data
+local remoteRaccSmoother = newVectorSmoothing(2)            -- Smoother for angular acceleration calculated from received data
 local vehAccSmoother = newVectorSmoothing(10)               -- Smoother for acceleration of locally simulated vehicle
 local accErrorSmoother = newVectorSmoothing(2)              -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset

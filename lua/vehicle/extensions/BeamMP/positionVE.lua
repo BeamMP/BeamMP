@@ -38,22 +38,22 @@ end
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
-local maxAcc = 500             -- Maximum acceleration (m/s^2)
+local maxAcc = 1000            -- Maximum acceleration (m/s^2)
 
 -- Rotation
 local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 5          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
-local maxRacc = 100            -- Maximum angular acceleration (rad/s^2)
+local maxRacc = 1000           -- Maximum angular acceleration (rad/s^2)
 
 -- Prediction
 local maxPredict = 1           -- Timeout for prediction (s)
 local maxPosError = 2          -- Max allowed continuous position error (m)
-local maxAccError = 20
+local maxAccError = 20         -- If difference between target acceleration and actual acceleration larger than this, there was probably a collision (m/s^2)
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
-local remoteAccSmoother = newVectorSmoothing(2)             -- Smoother for acceleration calculated from received data
-local remoteRaccSmoother = newVectorSmoothing(2)            -- Smoother for angular acceleration calculated from received data
+local remoteAccSmoother = newVectorSmoothing(1)             -- Smoother for acceleration calculated from received data
+local remoteRaccSmoother = newVectorSmoothing(1)            -- Smoother for angular acceleration calculated from received data
 local vehAccSmoother = newVectorSmoothing(10)               -- Smoother for acceleration of locally simulated vehicle
 local accErrorSmoother = newVectorSmoothing(2)              -- Smoother for acceleration error
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
@@ -163,20 +163,23 @@ local function updateGFX(dt)
 	
 	if posError:length() > maxPosError then
 		tpTimer = tpTimer + dt
+		posError = posError:normalized()*maxPosError
 	else
 		tpTimer = 0
 	end
 	
 	-- If position error is larger than limit, teleport the vehicle
-	if tpTimer > max(predictTime,0)*1.2 then
+	if tpTimer > abs(predictTime)*1.2 then
 		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		--obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
 		
-		--velocityVE.setVelocity(vel.x, vel.y, vel.z)
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
 		
-		remoteVelSmoother:set(vel)
-		remoteRvelSmoother:set(rvel)
+		remoteVelSmoother:set(remoteData.vel)
+		remoteRvelSmoother:set(remoteData.rvel)
+		
+		remoteData.acc = vec3(0,0,0)
+		remoteData.racc = vec3(0,0,0)
 		remoteAccSmoother:reset()
 		remoteRaccSmoother:reset()
 		

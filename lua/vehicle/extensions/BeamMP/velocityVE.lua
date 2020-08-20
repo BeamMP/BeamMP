@@ -41,8 +41,10 @@ local function onInit()
 	physicsFPS = obj:getPhysicsFPS() or 2000
 	
 	-- Store connected beams for each node
+	connectedBeams = {}
 	for _, b in pairs(v.data.beams) do
-		if b.beamType ~= 7 then -- exclude type BEAM_SUPPORT
+		-- exclude types BEAM_PRESSURED, BEAM_LBEAM, and BEAM_SUPPORT
+		if b.beamType ~= 3 and b.beamType ~= 4 and b.beamType ~= 7 then
 			if connectedBeams[b.id1] == nil then 
 				connectedBeams[b.id1] = {}
 			end

@@ -342,31 +342,38 @@ end
 
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
+local lastResetID = ""
 local function onServerVehicleResetted(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if gameVehicleID then
-		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
-		if veh and gameVehicleID then
-			local pr = jsonDecode(data) -- Decoded data
-			veh:reset()
-			if pr ~= nil then
-				veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w) -- Apply position
-			else
-				if settings.getValue("showDebugOutput") == true then
-			    print('[vehicleGE] pr == nil for onServerVehicleResetted()')
+	if lastResetID ~= serverVehicleID then
+		if gameVehicleID then
+			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
+			if veh and gameVehicleID then
+				lastResetID = serverVehicleID
+				local pr = jsonDecode(data) -- Decoded data
+				veh:reset()
+				println("Vehicle "..serverVehicleID.." Reset!")
+				if pr ~= nil then
+					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w) -- Apply position
+				else
+					if settings.getValue("showDebugOutput") == true then
+				    print('[vehicleGE] pr == nil for onServerVehicleResetted()')
+					end
 				end
 			end
+		else
+			println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")
+			--GameNetwork.send('On:'..serverVehicleID) -- Handled by server now.
 		end
 	else
-		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleResetted)")
-		--GameNetwork.send('On:'..serverVehicleID) -- Handled by server now.
+		--println("Currently On Timeout before reset for this vehicle...")
 	end
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 
 local function handle(rawData)
 	-- the data will be the first opt then the data followed
-	print('vehicleGE:'..rawData)
+	--print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	if code == "s" then
@@ -416,6 +423,8 @@ local function handle(rawData)
 	end
 end
 
+local oneSecCounter = 0
+
 local function onUpdate(dt)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
@@ -463,6 +472,10 @@ local function onUpdate(dt)
 						forecolor = ColorF(68/255, 109/255, 184/255, 255/255)
 						backcolor = ColorI(68, 109, 184, 127)
 						tag = " [Moderator]"
+					elseif nicknameMap[tostring(veh:getID())].role == "ADM" then
+						forecolor = ColorF(218/255, 0/255, 78/255, 255/255)
+						backcolor = ColorI(218, 0, 78, 127)
+						tag = " [Admin]"
 					elseif nicknameMap[tostring(veh:getID())].role == "GDEV" then
 						forecolor = ColorF(252/255, 107/255, 3/255, 255/255)
 						backcolor = ColorI(252, 107, 3, 127)
@@ -494,6 +507,13 @@ local function onUpdate(dt)
 					)
 				end
 			end
+		end
+
+		oneSecCounter = oneSecCounter + dt
+		if oneSecCounter > 3 then
+			oneSecCounter = 0
+			lastResetID = ""
+			--print("Resetting Timer: "..oneSecCounter)
 		end
 	end
 end

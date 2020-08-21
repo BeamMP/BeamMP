@@ -11,7 +11,7 @@ print("updatesGE Initialising...")
 local function onPlayerConnect()
 	-- Update everything for the new connected player
 	electricsGE.tick()
-	nodesGE.tick()
+	--nodesGE.tick()
 	positionGE.tick()
 	inputsGE.tick()
 	powertrainGE.tick()
@@ -24,7 +24,7 @@ local function onUpdate(dt)
 		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
 		if mpConfig.nodesDelay > mpConfig.getNodesTickrate() then
 			mpConfig.nodesDelay = 0 -- Reset the delay
-			nodesGE.tick() -- Comment this line to disable nodes synchronization
+			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		mpConfig.positionDelay = mpConfig.positionDelay + dt

@@ -104,61 +104,63 @@ end
 -- TODO : Change "allowed" thing and use if player own vehicle don't send any data instead
 
 local function onUpdate(dt) --ONUPDATE OPEN
-	--[[local e = electrics.values
-	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem or e.tailgate ~= taMem then
-		local eTable = {}
-		eTable[1] = e.signal_left_input   -- Left signal input
-		eTable[2] = e.signal_right_input  -- Right signal input
-		eTable[3] = e.hazard_enabled      -- Hazard light input
-		eTable[4] = e.lights_state        -- Lights input
-		eTable[5] = e.lightbar            -- Lightbar input
-		eTable[6] = e.horn	              -- Horn input
-		eTable[7] = e.extend              -- Flatbed extend value
-		eTable[8] = e.tilt                -- Flatbed tilt value
-		eTable[9] = e.tailgate            -- Tailgate value
-		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-		sendNow = false
+	if v.isMyMpVeh == nil then
+		--[[local e = electrics.values
+		if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem or e.tailgate ~= taMem then
+			local eTable = {}
+			eTable[1] = e.signal_left_input   -- Left signal input
+			eTable[2] = e.signal_right_input  -- Right signal input
+			eTable[3] = e.hazard_enabled      -- Hazard light input
+			eTable[4] = e.lights_state        -- Lights input
+			eTable[5] = e.lightbar            -- Lightbar input
+			eTable[6] = e.horn	              -- Horn input
+			eTable[7] = e.extend              -- Flatbed extend value
+			eTable[8] = e.tilt                -- Flatbed tilt value
+			eTable[9] = e.tailgate            -- Tailgate value
+			obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+			sendNow = false
 
-	end
-	slMem = e.signal_left_input
-	srMem = e.signal_right_input
-	hzMem = e.hazard_enabled
-	lsMem = e.lights_state
-	lbMem = e.lightbar
-	hrMem = e.horn
-	exMem = e.extend
-	tiMem = e.tilt
-	taMem = e.tailgate]]
-	local e = electrics.values
-	local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
-	if le == {} then
+		end
+		slMem = e.signal_left_input
+		srMem = e.signal_right_input
+		hzMem = e.hazard_enabled
+		lsMem = e.lights_state
+		lbMem = e.lightbar
+		hrMem = e.horn
+		exMem = e.extend
+		tiMem = e.tilt
+		taMem = e.tailgate]]
+		local e = electrics.values
+		local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
+		if le == {} then
+			for k,v in pairs(e) do
+				le[k] = v
+			end
+			print("Storing Default Electrics")
+		end -- Added to give the initial settings so we do not get attempt to access nil value
 		for k,v in pairs(e) do
-			le[k] = v
+			if not DisallowedKey(k) and le[k] ~= v then
+				--print("Change Detected: "..tostring(k)..": "..tostring(v))
+				eTable[k] = v
+				le[k] = v
+			end
 		end
-		print("Storing Default Electrics")
-	end -- Added to give the initial settings so we do not get attempt to access nil value
-	for k,v in pairs(e) do
-		if not DisallowedKey(k) and le[k] ~= v then
-			--print("Change Detected: "..tostring(k)..": "..tostring(v))
-			eTable[k] = v
-			le[k] = v
-		end
-	end
 
-	if sendNow == true or #eTable > 0 then
-		sendNow = false
-		if #eTable > 0 then
-			print("[electricsVE] Sending: ")
-			dump(eTable)
+		if sendNow == true or #eTable > 0 then
+			sendNow = false
+			if #eTable > 0 then
+				print("[electricsVE] Sending: ")
+				dump(eTable)
+			end
+			obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		end
-		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-	end
 
-	if sendGearNow == true or e.gearIndex ~= gearMem then
-		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
-		sendGearNow = false
+		if sendGearNow == true or e.gearIndex ~= gearMem then
+			obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
+			sendGearNow = false
+		end
+		gearMem = e.gearIndex
 	end
-	gearMem = e.gearIndex
 end --ONUPDATE CLOSE
 
 

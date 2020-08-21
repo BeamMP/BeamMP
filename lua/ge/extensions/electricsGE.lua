@@ -9,6 +9,8 @@ local M = {}
 print("electricsGE Initialising...")
 
 
+local lastElectrics = ""
+local lastGear = ""
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
 	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
@@ -27,8 +29,11 @@ local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			GameNetwork.send('We:'..serverVehicleID..":"..data)--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
-			--print("Electrics sent "..serverVehicleID)
+			if data ~= lastElectrics then
+				GameNetwork.send('We:'..serverVehicleID..":"..data)--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
+				lastElectrics = data
+				--print("Electrics sent "..serverVehicleID)
+			end
 		end
 	end
 end
@@ -52,8 +57,11 @@ local function sendGear(data, gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			GameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
-			--print("Gear sent "..serverVehicleID)
+			if data ~= lastGear then
+				GameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
+				lastGear = data
+				--print("Gear sent "..serverVehicleID)
+			end
 		end
 	end
 end

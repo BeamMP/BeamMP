@@ -41,6 +41,18 @@ end
 
 local function applyPos(data, serverVehicleID)
 
+	-- 1 = pos.x
+	-- 2 = pos.y
+	-- 3 = pos.z
+
+	-- 4 = vel.x
+	-- 5 = vel.y
+	-- 6 = vel.z
+
+	-- 7 = ang.x
+	-- 8 = ang.y
+	-- 9 = ang.z
+
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
 		--GameNetwork.send('On:'..serverVehicleID)
@@ -50,6 +62,7 @@ local function applyPos(data, serverVehicleID)
 		--print(data)
 		local pr = jsonDecode(data) -- Decoded data
 		--print(dump(pr))
+		veh:queueLuaCommand("velocityVE.setVehicleType('remote')")
 
 		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
 		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
@@ -73,14 +86,6 @@ local function handle(rawData)
 	applyPos(data, serverVehicleID)
 end
 
---TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
---without resetting the vehicle
-local function setPosition(gameVehicleID, x, y, z)
-	local veh = be:getObjectByID(gameVehicleID)
-	veh:setPosition(Point3F(x, y, z))
-	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
-end
-
 local function setPing(ping)
 	local p = ping/1000
 	for i = 0, be:getObjectCount()-1 do
@@ -89,6 +94,14 @@ local function setPing(ping)
 			veh:queueLuaCommand("positionVE.setPing("..p..")")
 		end
 	end
+end
+
+--TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
+--without resetting the vehicle
+local function setPosition(gameVehicleID, x, y, z)
+	local veh = be:getObjectByID(gameVehicleID)
+	veh:setPosition(Point3F(x, y, z))
+	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
 
 M.applyPos          = applyPos

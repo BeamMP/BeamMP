@@ -82,6 +82,7 @@ local remoteData = {
 }
 
 local debugDrawer = obj.debugDrawProxy
+local DEBUG = false
 
 local abs = math.abs
 local min = math.min
@@ -98,52 +99,52 @@ end
 
 local function updateGFX(dt)
 	timer = timer + dt
-	
+
 	lastDT = dt
-	
+
 	if not remoteData.pos then
 		return
 	end
-	
+
 	-- Local vehicle data
 	local vehPos = vec3(obj:getPosition())
 	local vehVel = vec3(obj:getVelocity())
 	local vehAcc = vehAccSmoother:get(vehVel-(lastVehVel or vehVel), dt)
-	
+
 	local vehRot = quat(obj:getRotation())
 	local vehRvel = vec3(obj:getYawAngularVelocity(), obj:getPitchAngularVelocity(), obj:getRollAngularVelocity())
 	--local vehRacc = (vehRvel-(lastVehRvel or vehRvel))/dt
-	
+
 	lastVehVel = vehVel
 	--lastVehRvel = vehRvel
-	
+
 	-- Smoothed difference between local and remote timestamps
 	local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
-	
+
 	if abs(timeOffset - remoteData.timeOffset) > 1 then
 		timeOffsetSmoother:set(remoteData.timeOffset)
 		timeOffset = remoteData.timeOffset
 	end
-	
+
 	-- Calculate back to local time using the remote timestamp and the smoothed time difference
 	local calcLocalTime = remoteData.timer + timeOffset
-	
+
 	-- How far ahead the position needs to be predicted
 	local predictTime = timer - calcLocalTime
-	
+
 	if predictTime > maxPredict then
 		--print("Prediction timeout! Vehicle ID: "..obj:getID())
 		return
 	end
-	
+
 	-- More prediction = slower smoothing
 	local smootherDT = dt / guardZero(abs(predictTime))
-	
+
 	local remoteVel = remoteVelSmoother:get(remoteData.vel, smootherDT)
 	local remoteRvel = remoteRvelSmoother:get(remoteData.rvel, smootherDT)
 	local remoteAcc = remoteAccSmoother:get(remoteData.acc, smootherDT)
 	local remoteRacc = remoteRaccSmoother:get(remoteData.racc, smootherDT)
-	
+
 	-- Use received position, and smoothed velocity and acceleration to predict vehicle position
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
@@ -152,58 +153,60 @@ local function updateGFX(dt)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
 	--DEBUG
-	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
-	debugDrawer:drawLine(remoteData.pos:toFloat3(), remoteData.pos:toFloat3()+remoteData.vel:toFloat3(), color(0,0,255,255))
-	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
-	debugDrawer:drawLine(pos:toFloat3(), pos:toFloat3()+vel:toFloat3(), color(0,255,0,255))
-	
+  if DEBUG then
+  	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
+  	debugDrawer:drawLine(remoteData.pos:toFloat3(), remoteData.pos:toFloat3()+remoteData.vel:toFloat3(), color(0,0,255,255))
+  	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
+  	debugDrawer:drawLine(pos:toFloat3(), pos:toFloat3()+vel:toFloat3(), color(0,255,0,255))
+  end
+
 	-- Error correction
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
-	
+
 	if posError:length() > maxPosError then
 		tpTimer = tpTimer + dt
 		posError = posError:normalized()*maxPosError
 	else
 		tpTimer = 0
 	end
-	
+
 	-- If position error is larger than limit, teleport the vehicle
 	if tpTimer > abs(predictTime)*1.2 then
 		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		--obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
-		
+
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
-		
+
 		remoteVelSmoother:set(remoteData.vel)
 		remoteRvelSmoother:set(remoteData.rvel)
-		
+
 		remoteData.acc = vec3(0,0,0)
 		remoteData.racc = vec3(0,0,0)
 		remoteAccSmoother:reset()
 		remoteRaccSmoother:reset()
-		
+
 		lastAcc = nil
-		
+
 		vehAccSmoother:reset()
 		accErrorSmoother:reset()
-	
+
 		return
 	end
-	
+
 	local velError = vel - vehVel
 	local accError = accErrorSmoother:get((lastAcc or vehAcc) - vehAcc, dt)
-	
+
 	--print("AccError: "..tostring(accError))
-	
+
 	local rvelError = rvel - vehRvel
 	--local raccError = racc - vehRacc
-	
+
 	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)
 	local targetRacc = (rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1)
-	
+
 	local targetAccMul = 1-max(min(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError),1),0)
-	
+
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if targetRacc:length() > minRotForce then
@@ -211,7 +214,7 @@ local function updateGFX(dt)
 	elseif targetAcc:length() > minPosForce then
 		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	end
-	
+
 	lastAcc = targetAcc
 end
 
@@ -251,14 +254,14 @@ end
 local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)
-	
+
 	-- If packets arrive in wrong order, print warning message
 	--if remoteDT < 0 then
 		--print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..remoteData.timer..", New Timestamp: "..tim)
-		
+
 		--return
 	--end
-	
+
 	-- Sanity checks for acceleration
 	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
 		remoteData.acc = (vel - remoteData.vel)/remoteDT
@@ -276,22 +279,25 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 		remoteData.racc = vec3(0,0,0)
 		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
 	end
-	
+
 	remoteData.pos = pos
 	remoteData.rot = rot
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
-	
+
 	--print("OwnPing = "..ownPing.." Ping = "..ping)
-	
+
 end
 
-
+local function setDEBUG(x)
+  DEBUG = x
+end
 
 M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot = setVehiclePosRot
 M.setPing = setPing
+M.setDEBUG = setDEBUG
 
 
 return M

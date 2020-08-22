@@ -52,7 +52,6 @@ local function handle(rawData)
 end
 
 
-
 M.tick                   = tick
 M.handle                 = handle
 M.sendPowertrain         = sendPowertrain

@@ -1098,7 +1098,7 @@ local function getModForFilename(filename_virtual)
     local modPath = realPath:sub(string.len(userPath))
     modPath = modPath:gsub("\\", "/")
     local zipPos = modPath:find('.zip')
-    if zipPos ~= -1 then
+    if zipPos then
       modPath = modPath:sub(1, zipPos + 3)
     else
       -- not a zip, thus not a mod. unpacked mods not supported right now

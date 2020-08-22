@@ -136,7 +136,7 @@ local function onUpdate(dt) --ONUPDATE OPEN
 		if le[k] == nil then
 			le[k] = v
 		end
-		
+
 		if not DisallowedKey(k) and le[k] ~= v then
 			--print("Change Detected: "..tostring(k)..": "..tostring(le[k]).." -> "..tostring(v))
 			eTable[k] = v
@@ -166,7 +166,7 @@ end --ONUPDATE CLOSE
 local function applyGear(data)
 	if (data) then
 		local gear = tonumber(data)
-		
+
 		-- workaround for automatic and dct gearboxes
 		local gearbox = powertrain.getDevice("gearbox")
 		if gearbox and (gearbox.type == "automaticGearbox" or gearbox.type == "dctGearbox") then
@@ -174,7 +174,7 @@ local function applyGear(data)
 				gear = 2
 			end
 		end
-		
+
 		controller.mainController.shiftToGearIndex(gear)
 	end
 end
@@ -240,12 +240,12 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
-		
+
 		for k,v in pairs(decodedData) do
-			print("Setting: "..k.." -> "..tostring(v))
-			
+			--print("Setting: "..k.." -> "..tostring(v))
+
 			electrics.values[k] = v
-				
+
 			if k == "hazard_enabled" then
 				--electrics.values.hazard = 0
 				electrics.set_warn_signal(v)
@@ -274,7 +274,7 @@ local function applyElectrics(data)
 				else
 					electrics.horn(false)
 				end
-			else 
+			else
 			end
 		end
 		latestData = data

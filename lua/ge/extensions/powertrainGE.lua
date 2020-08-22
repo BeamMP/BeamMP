@@ -31,10 +31,6 @@ local function sendPowertrain(data, gameVehicleID)
 	end
 end
 
-local function handle(data)
-	print("powertrainGE.handle: "..data)
-end
-
 local function applyPowertrain(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
@@ -43,6 +39,17 @@ local function applyPowertrain(data, serverVehicleID)
 	end
 end
 
+local function handle(rawData)
+	--print("powertrainGE.handle: "..rawData)
+	local code = string.sub(rawData, 1, 1)
+	local rawData = string.sub(rawData, 3)
+	if code == "p" then
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		applyPowertrain(data, serverVehicleID)
+	end
+end
 
 
 M.tick                   = tick

@@ -24,6 +24,8 @@ local gearMem = -1
 local sendNow = false -- When set to true, it send the electrics value at next update
 local sendGearNow = false
 local latestData
+local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
+local eChanged = false
 -- ============= VARIABLES =============
 
 local function DisallowedKey(k)
@@ -104,61 +106,57 @@ end
 -- TODO : Change "allowed" thing and use if player own vehicle don't send any data instead
 
 local function onUpdate(dt) --ONUPDATE OPEN
-	if v.isMyMpVeh == nil then
-		--[[local e = electrics.values
-		if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem or e.tailgate ~= taMem then
-			local eTable = {}
-			eTable[1] = e.signal_left_input   -- Left signal input
-			eTable[2] = e.signal_right_input  -- Right signal input
-			eTable[3] = e.hazard_enabled      -- Hazard light input
-			eTable[4] = e.lights_state        -- Lights input
-			eTable[5] = e.lightbar            -- Lightbar input
-			eTable[6] = e.horn	              -- Horn input
-			eTable[7] = e.extend              -- Flatbed extend value
-			eTable[8] = e.tilt                -- Flatbed tilt value
-			eTable[9] = e.tailgate            -- Tailgate value
-			obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
-			sendNow = false
+	--[[local e = electrics.values
+	if sendNow == true or e.signal_left_input ~= slMem or e.signal_right_input ~= srMem or e.hazard_enabled ~= hzMem or e.lights_state ~= lsMem or e.lightbar ~= lbMem or e.horn ~= hrMem or e.extend ~= exMem or e.tilt ~= tiMem or e.tailgate ~= taMem then
+		local eTable = {}
+		eTable[1] = e.signal_left_input   -- Left signal input
+		eTable[2] = e.signal_right_input  -- Right signal input
+		eTable[3] = e.hazard_enabled      -- Hazard light input
+		eTable[4] = e.lights_state        -- Lights input
+		eTable[5] = e.lightbar            -- Lightbar input
+		eTable[6] = e.horn	              -- Horn input
+		eTable[7] = e.extend              -- Flatbed extend value
+		eTable[8] = e.tilt                -- Flatbed tilt value
+		eTable[9] = e.tailgate            -- Tailgate value
+		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		sendNow = false
 
-		end
-		slMem = e.signal_left_input
-		srMem = e.signal_right_input
-		hzMem = e.hazard_enabled
-		lsMem = e.lights_state
-		lbMem = e.lightbar
-		hrMem = e.horn
-		exMem = e.extend
-		tiMem = e.tilt
-		taMem = e.tailgate]]
-		local e = electrics.values
-		local eTable = {} -- This holds the data that is different from the last frame to be sent since it is different
-		if le == {} then
-			for k,v in pairs(e) do
-				le[k] = v
-			end
-			print("Storing Default Electrics")
-		end -- Added to give the initial settings so we do not get attempt to access nil value
-		for k,v in pairs(e) do
-			if not DisallowedKey(k) and le[k] ~= v then
-				--print("Change Detected: "..tostring(k)..": "..tostring(v))
-				eTable[k] = v
-				le[k] = v
-			end
+	end
+	slMem = e.signal_left_input
+	srMem = e.signal_right_input
+	hzMem = e.hazard_enabled
+	lsMem = e.lights_state
+	lbMem = e.lightbar
+	hrMem = e.horn
+	exMem = e.extend
+	tiMem = e.tilt
+	taMem = e.tailgate]]
+	local e = electrics.values
+	for k,v in pairs(e) do
+		if le[k] == nil then
+			le[k] = v
 		end
 
-		if sendNow == true or #eTable > 0 then
-			sendNow = false
-			if #eTable > 0 then
-				print("[electricsVE] Sending: ")
-				dump(eTable)
-			end
-			obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		if not DisallowedKey(k) and le[k] ~= v then
+			--print("Change Detected: "..tostring(k)..": "..tostring(le[k]).." -> "..tostring(v))
+			eTable[k] = v
+			le[k] = v
+			eChanged = true
 		end
+	end
 
-		if sendGearNow == true or e.gearIndex ~= gearMem then
-			obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
-			sendGearNow = false
-		end
+	if sendNow == true and eChanged == true then
+		sendNow = false
+		eChanged = false
+		--print("[electricsVE] Sending: ")
+		--dump(eTable)
+		obj:queueGameEngineLua("electricsGE.sendElectrics(\'"..jsonEncode(eTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		eTable = {}
+	end
+
+	if sendGearNow == true and e.gearIndex ~= gearMem then
+		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
+		sendGearNow = false
 		gearMem = e.gearIndex
 	end
 end --ONUPDATE CLOSE
@@ -166,7 +164,19 @@ end --ONUPDATE CLOSE
 
 
 local function applyGear(data)
-	if (data) then controller.mainController.shiftToGearIndex(tonumber(data)) end
+	if (data) then
+		local gear = tonumber(data)
+
+		-- workaround for automatic and dct gearboxes
+		local gearbox = powertrain.getDevice("gearbox")
+		if gearbox and (gearbox.type == "automaticGearbox" or gearbox.type == "dctGearbox") then
+			if gear >= 1 then
+				gear = 2
+			end
+		end
+
+		controller.mainController.shiftToGearIndex(gear)
+	end
 end
 
 
@@ -191,7 +201,7 @@ local function applyElectrics(data)
 	-- 5 = lightbar
 	-- 6 = horn
 	local decodedData = jsonDecode(data) -- Decode received data
-	local e = electrics.values
+	--local e = electrics.values
 	if (decodedData) then -- If received data is correct
 		--[[if decodedData[3] ~= e.hazard_enabled and decodedData[3] ~= nil then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData[3])
@@ -230,30 +240,41 @@ local function applyElectrics(data)
 		elseif decodedData[6] == 0 and e.horn == 1 then
 			electrics.horn(false)
 		end]]
+
 		for k,v in pairs(decodedData) do
 			--print("Setting: "..k.." -> "..tostring(v))
+
+			electrics.values[k] = v
+
 			if k == "hazard_enabled" then
-				electrics.values.hazard = 0
-				electrics.set_warn_signal(decodedData[3])
-				electrics.update(0) -- Update electrics values
+				--electrics.values.hazard = 0
+				electrics.set_warn_signal(v)
+				--electrics.update(0) -- Update electrics values
 			elseif k == "signal_left_input" then
 				electrics.toggle_left_signal()
-				electrics.update(0) -- Update electrics values
+				--electrics.update(0) -- Update electrics values
 			elseif k == "signal_right_input" then
 				electrics.toggle_right_signal()
 				--electrics.update(0) -- Update electrics values
 			elseif k == "lights_state" then
 				electrics.setLightsState(v) -- Apply lights values
+			elseif k == "fog" then
+				electrics.set_fog_lights(v)
 			elseif k == "lightbar" then
 				electrics.set_lightbar_signal(v) -- Apply lightbar values
 			elseif k == "engineRunning" then
-				if v == 1 then
-					powertrain.getDevice("mainEngine"):activateStarter()
-				elseif v == 0 then
+				if v > 0.99 then
+					controller.mainController.setStarter(true)
+				else
 					controller.mainController.setEngineIgnition(false)
 				end
+			elseif k == "horn" then
+				if v > 0.99 then
+					electrics.horn(true)
+				else
+					electrics.horn(false)
+				end
 			else
-				electrics.values[k] = v
 			end
 		end
 		latestData = data

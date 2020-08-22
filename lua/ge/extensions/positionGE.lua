@@ -62,15 +62,16 @@ local function applyPos(data, serverVehicleID)
 		--print(data)
 		local pr = jsonDecode(data) -- Decoded data
 		--print(dump(pr))
-		veh:queueLuaCommand("velocityVE.setIsMine(0)")
+		veh:queueLuaCommand("velocityVE.setVehicleType('remote')")
 
 		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
 		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
 		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
 		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 		local tim = pr.tim
+		local ping = pr.ping or 0
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..ping..")")
 	end
 end
 
@@ -83,6 +84,16 @@ local function handle(rawData)
 	--print(serverVehicleID)
 	--print(data)
 	applyPos(data, serverVehicleID)
+end
+
+local function setPing(ping)
+	local p = ping/1000
+	for i = 0, be:getObjectCount()-1 do
+		local veh = be:getObject(i)
+		if veh then
+			veh:queueLuaCommand("positionVE.setPing("..p..")")
+		end
+	end
 end
 
 --TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
@@ -98,6 +109,7 @@ M.tick              = tick
 M.handle            = handle
 M.sendVehiclePosRot = sendVehiclePosRot
 M.setPosition       = setPosition
+M.setPing           = setPing
 
 
 print("positionGE Loaded.")

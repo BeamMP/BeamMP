@@ -15,7 +15,15 @@ local function findConnectedNodesRecursive(parentID)
 	isConnectedNode[parentID] = true
 	
 	-- Apparently normal for loop is twice as fast as ipairs()
-	local beams = connectedBeams[parentID]
+	local beams = connectedBeams[parentID] or {}
+	
+	if #beams == 0 then
+		print("No beams connected to node! Using all nodes.")
+		for _, n in pairs(v.data.nodes) do
+			isConnectedNode[n.cid] = true
+		end
+	end
+	
 	for i=1, #beams do
 		local bid = beams[i]
 		if not obj:beamIsBroken(bid) then
@@ -142,6 +150,7 @@ end
 -- public interface
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit
+M.onReset            = findConnectedNodes
 M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity

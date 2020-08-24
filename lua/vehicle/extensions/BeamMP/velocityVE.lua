@@ -5,6 +5,7 @@ local M = {}
 
 local connectedBeams = {}
 local isConnectedNode = {}
+local parentNode = nil
 local beamsChanged = false
 local physicsFPS = 0
 
@@ -16,13 +17,6 @@ local function findConnectedNodesRecursive(parentID)
 
 	-- Apparently normal for loop is twice as fast as ipairs()
 	local beams = connectedBeams[parentID] or {}
-
-	if #beams == 0 then
-	    print("No beams connected to node! Using all nodes.")
-	    for _, n in pairs(v.data.nodes) do
-	        isConnectedNode[n.cid] = true
-	    end
-	end
 
 	for i=1, #beams do
 		local bid = beams[i]
@@ -40,8 +34,8 @@ end
 
 local function findConnectedNodes()
 	isConnectedNode = {}
-	findConnectedNodesRecursive(v.data.refNodes[0].ref)
-
+	findConnectedNodesRecursive(parentNode)
+	
 	beamsChanged = false
 end
 
@@ -63,18 +57,42 @@ local function onInit()
 			table.insert(connectedBeams[b.id2], b.cid)
 		end
 	end
+	
+	-- Choose ref node with connected beams as parent node
+	local refNodes = v.data.refNodes[0]
+	
+	if connectedBeams[refNodes.ref] then
+		parentNode = refNodes.ref
+	elseif connectedBeams[refNodes.back] then
+		parentNode = refNodes.back
+	elseif connectedBeams[refNodes.left] then
+		parentNode = refNodes.left
+	elseif connectedBeams[refNodes.up] then
+		parentNode = refNodes.up
+	end
+	
+	if parentNode then
+		-- TODO: find less hacky way to get beamBroke events
+		local beamBroke = powertrain.beamBroke
+		powertrain.beamBroke = function(id, ...)
+			beamsChanged = true
 
-	-- TODO: find less hacky way to get beamBroke events
-	local beamBroke = powertrain.beamBroke
-	powertrain.beamBroke = function(id, ...)
-		beamsChanged = true
-
-		return beamBroke(id, ...)
+			return beamBroke(id, ...)
+		end
+		
+		findConnectedNodes()
+		
+		M.onReset = findConnectedNodes
+	else
+		print("Vehicle has no connections to ref nodes! Using all nodes.")
+	    for _, n in pairs(v.data.nodes) do
+	        isConnectedNode[n.cid] = true
+	    end
+		
+		M.onReset = nop
 	end
 
-	findConnectedNodes()
-
-	print("velocityVE init, physicsFPS: "..physicsFPS)
+	print("velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..parentNode)
 end
 
 -- Add velocity to vehicle in m/s
@@ -155,7 +173,7 @@ end
 -- public interface
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit
-M.onReset            = findConnectedNodes
+M.onReset            = nop
 M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity

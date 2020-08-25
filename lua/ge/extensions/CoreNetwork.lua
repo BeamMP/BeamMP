@@ -6,6 +6,7 @@
 local M = {}
 print("CoreNetwork Initialising...")
 local Servers = {}
+local LauncherVersion = ""
 
 -- ============= VARIABLES =============
 --local socket = require('socket')
@@ -16,6 +17,7 @@ local oneSecondsTimer = 1
 local updateTimer = 0
 local flip = false
 local serverTimeoutTimer = 0
+local MapLoadingTimeout = 0
 local playersMap = {}
 local sysTime = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
@@ -56,6 +58,7 @@ reloadUI()
 
 local function getServers()
 	print("Sending Request For Server List...")
+	TCPSocket:send('Z')
 	TCPSocket:send('B')
 end
 local function cancelConnection()
@@ -117,54 +120,14 @@ local function connectToServer(ip, port, modString)
 	end
 	status = "LoadingResources"
 end
-
-local mapLoadingFailedCount = 0
-
+local Found = false
 local function LoadLevel(map)
-	print("MAP: "..map)
+	MapLoadingTimeout = 0
+	Found = false
 	status = "LoadingMapNow"
 	local found = false
-	if string.sub(map, 1, 1) == "/" then
-		print("Searching For Map...")
-		local levelName = string.gsub(map, '/info.json', '')
-		levelName = string.gsub(levelName, '/levels/', '')
-		print("")
-		found = freeroam_freeroam.startFreeroamByName(levelName)
-		if found then
-			print("Loading Multiplayer Map...")
-			mapLoadingFailedCount = 0
-		end
-		--[[for i, v in ipairs(core_levels.getList()) do
-			print(v.levelName)
-	    if v.levelName:lower() == levelName then
-				print("Loading Multiplayer Map...")
-				freeroam_freeroam.startFreeroamByName(v.levelName)
-				found = true
-				mapLoadingFailedCount = 0
-				break;
-	    end
-	  end]]
-		if not found then
-			freeroam_freeroam.startFreeroam(map)
-		end
-		-- we got this far?!?!?! Guess we dont have the level
-		if false then --if not found then
-			print("")
-			print("MAP NOT FOUND!!!!!... DID WE MISS SOMETHING??")
-			print("TRYING TO LOAD IT AGAIN!")
-			if mapLoadingFailedCount >= 3 then
-				print("FAILED TO LOAD THE MAP! DID IT GET LOADED INTO THE GAME??")
-				print("GOING BACK...")
-				--CoreNetwork.resetSession(true)
-			else
-				mapLoadingFailedCount = mapLoadingFailedCount + 1
-				print("Map Loading Attempt "..mapLoadingFailedCount)
-				LoadLevel(map)
-			end
-		end
-	else
-		-- Level Not a set map, lets give them the choice to select
-	end
+	print("MAP: "..map)
+	freeroam_freeroam.startFreeroam(map)
 end
 
 local function HandleU(params)
@@ -192,6 +155,8 @@ local HandleNetwork = {
 	['L'] = function(params) print(params) SetMods(params) end,
 
 	['K'] = function(params) quitMPWithMessage(params) end, -- Player Kicked Event
+
+	['Z'] = function(params) LauncherVersion = params; be:executeJS('setClientVersion('..params..')'); print("LauncherVersion: "..params..".") end, -- Tell the UI what the launcher version is.
 	--[''] = function(params)  end, --
 	--[''] = function(params)  end, --
 }
@@ -234,7 +199,22 @@ local function onUpdate(dt)
 			flip = false
 			--oneSecondsTimer = 0	-- Reset timer
 		end
-		--================================ TWO SECONDS TIMER ================================
+		--================================ FIVE SECONDS TIMER ================================
+		if status == "LoadingMapNow" then
+			if MapLoadingTimeout > 5 then
+				if Found == false then
+					if scenetree.MissionGroup == nil then --if not found then
+						print("FAILED TO LOAD THE MAP! DID IT GET LOADED INTO THE GAME??")
+						print("GOING BACK...")
+						Lua:requestReload()
+					else
+						Found = true
+					end
+				end
+			else
+				MapLoadingTimeout = MapLoadingTimeout + dt
+			end
+		end
 	end
 end
 
@@ -246,7 +226,6 @@ local function resetSession(x)
 	vehicleGE.onDisconnect()
 	connectToLauncher()
 	UI.readyReset()
-	mapLoadingFailedCount = 0
 	status = ""
 	if x then
 		returnToMainMenu()
@@ -282,4 +261,6 @@ M.modLoaded = modLoaded
 M.Server = Server
 
 print("CoreNetwork Loaded.")
+core_gamestate.requestExitLoadingScreen('MP')
+returnToMainMenu()
 return M

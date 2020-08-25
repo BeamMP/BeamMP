@@ -208,6 +208,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		println("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 		if not vehicleName then return end
+		if getGameVehicleID(serverVehicleID) ~= nil then return end
 		println("New vehicle : "..vehicleName)
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
 		print("New Vehicles ID : "..spawnedVeh:getID())
@@ -267,6 +268,8 @@ local function onServerVehicleRemoved(serverVehicleID)
 			commands.setFreeCamera() -- Fix camera
 			veh:delete() -- Remove it
 			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+			vehiclesMap[gameVehicleID] = nil
+			invertedVehiclesMap[serverVehicleID] = nil
 		end
 	else
 		println("gameVehicleID for serverVehicleID "..serverVehicleID.." not found. (onServerVehicleRemoved)")

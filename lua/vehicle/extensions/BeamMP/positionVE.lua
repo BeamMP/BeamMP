@@ -39,7 +39,7 @@ local posCorrectMul = 5        -- How much velocity to use for correcting positi
 local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
 local maxAcc = 500             -- Maximum acceleration (m/s^2)
-local maxPosError = 2          -- Max allowed continuous position error (m)
+local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
@@ -51,8 +51,8 @@ local maxRotError = 2          -- Max allowed rotation error (rad)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
 
 -- Prediction
-local maxPredict = 0.5         -- Maximum prediction limit (s)
-local packetTimeout = 0.2      -- Stop prediction if no packet received within this time (s)
+local maxPredict = 0.3         -- Maximum prediction limit (s)
+local packetTimeout = 0.1      -- Stop prediction if no packet received within this time (s)
 
 -- Smoothing
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
@@ -160,6 +160,7 @@ local function updateGFX(dt)
   	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,255))
   	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
   	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,255))
+	debugDrawer:drawText(pos:toFloat3(), color(0,0,0,255), string.format("Prediction: %.0f ms", predictTime*1000))
   end
 
 	-- Error correction

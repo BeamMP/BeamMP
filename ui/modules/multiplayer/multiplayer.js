@@ -1,4 +1,6 @@
-var serversScope, selectRowScope, connectScope;
+var serversScope, selectRowScope, connectScope, setVersion;
+var launcherVersion = "";
+var showOutdated = false;
 angular.module('beamng.stuff')
 
 /**
@@ -41,6 +43,12 @@ angular.module('beamng.stuff')
 
 	vm.refresh = function() {
 		logger.debug("Attempting to refresh server list.")
+		bngApi.engineLua('CoreNetwork.getServers()');
+	}
+
+	vm.toggleOutdated = function() {
+		logger.debug(`Toggling Outdated Servers: ${showOutdated}`)
+		showOutdated = !showOutdated;
 		bngApi.engineLua('CoreNetwork.getServers()');
 	}
 
@@ -219,8 +227,9 @@ angular.module('beamng.stuff')
 		table.innerHTML = "";
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
-			var ver = v.version.substr(0, v.version.indexOf('.'));
-			if (ver == "0") {
+			//var ver = v.version.substr(0, v.version.indexOf('.'));
+			console.log(`${v.cversion} == ${launcherVersion}`)
+			if (v.cversion == launcherVersion || showOutdated) {
 				//var row = table.rows[i];
 				var servData = {};
 				servData.ip = v.ip;
@@ -432,8 +441,14 @@ angular.module('beamng.stuff')
 		}
 	};
 
+	function setClientVersion(v) {
+		console.log(v);
+	};
+
+
 	selectRowScope = selectRow
 	serversScope = receiveServers;
+	setVersion = setClientVersion;
 }])
 
 .controller('MultiplayerSettingsController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
@@ -484,6 +499,10 @@ function(logger, $scope, $state, $timeout, bngApi) {
 function receiveServers(data) {
 	serversScope(data);
 }
+
+function setClientVersion(v) {
+	launcherVersion = v;
+};
 
 function toTitleCase(str) {
 	return str.replace(/\w\S*/g, function(txt){
@@ -672,7 +691,7 @@ window.onload = function() {
 	if (window.jQuery) {
 		// jQuery is loaded
 		//alert("Yeah!");
-		console.log("DT Setup?")
+		//console.log("DT Setup?")
 		var table = $('#serversTable').DataTable({
 			responsive: true,
 			"columns": [

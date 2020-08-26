@@ -109,6 +109,11 @@ table#serversTable {
 	float:right;
 }
 
+#toggleOutdated {
+	margin-bottom: 17px;
+	color: white;
+}
+
 #direct-connect-button {
 	width: 425px;
 }

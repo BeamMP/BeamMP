@@ -109,7 +109,12 @@ function AddEventHandler(n, f)
 	dump(eventTriggers)
 end
 
+function TriggerServerEvent(n, d)
+	TCPSocket:send('E:'..n..':'..d)
+end
+
 local function handleEvents(p)  --- E:<NAME>:data
+	print(p)
 	local eventName = string.match(p,"(%w+)%:")
 	local data = p:gsub(eventName..":", "")
 	for i=1,#eventTriggers do
@@ -172,7 +177,7 @@ local function onUpdate(dt)
 						dataArray[vid] = tostring(dataArray[vid]..nData)
 					end
 					if part == "E" then
-						--print("Complete Node Data: "..dataArray[vid])
+						print("Complete Event Data: "..dataArray[vid])
 						HandleNetwork[code]("n:"..vid..":"..dataArray[vid])
 					end
 				else

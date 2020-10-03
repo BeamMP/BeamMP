@@ -9,7 +9,7 @@ print("GameNetwork Initialising...")
 -- ============= VARIABLES =============
 --local socket = require('socket')
 local TCPSocket
-local BigDataSocket
+--local BigDataSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local oneSecondsTimer = 1
 local flip = false
@@ -28,15 +28,15 @@ local function connectToLauncher()
 	if launcherConnectionStatus == 0 then
 		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
-		BigDataSocket = socket.tcp() -- Set socket to TCP
+		--BigDataSocket = socket.tcp() -- Set socket to TCP
 		--TCPSocket:setoption("tcp-nodelay", true)
 		keep = TCPSocket:setoption("keepalive",true)
-		keep2 = BigDataSocket:setoption("keepalive",true)
+		--keep2 = BigDataSocket:setoption("keepalive",true)
 
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort")+1 or 4445); -- Connecting
-		BigDataSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		BigDataSocket:connect('127.0.0.1', settings.getValue("launcherPort")+2 or 4446); -- Connecting
+		--BigDataSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
+		--BigDataSocket:connect('127.0.0.1', settings.getValue("launcherPort")+2 or 4446); -- Connecting
 		launcherConnectionStatus = 1
 		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end
@@ -47,7 +47,7 @@ end
 local function disconnectLauncher()
 	if launcherConnectionStatus > 0 then -- If player were connected
 		TCPSocket:close()-- Disconnect from server
-		BigDataSocket:close()-- Disconnect from server
+		--BigDataSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		oneSecondsTimer = 0
 		flip = false
@@ -62,8 +62,8 @@ local function sendData(data)
 	end
 end
 
-local function sendDataSplit(code, ID, data)
-	--print('[GameNetwork] Sending Data: '..data)
+--[[local function sendDataSplit(code, ID, data)
+	print('[GameNetwork BD] Sending Data: '..data)
 	local counter = 97 -- 1, 2, 3, n, E
 	local size = string.len(data)
 	local maxSize = 6500
@@ -77,7 +77,7 @@ local function sendDataSplit(code, ID, data)
 	end
 	--print("Done: "..size)
 	BigDataSocket:send(code..ID.."E:"..data..'')
-end
+end]]
 
 local function onPlayerConnect() -- Function called when a player connect to the server
 	updatesGE.onPlayerConnect()

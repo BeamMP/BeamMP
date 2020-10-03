@@ -384,14 +384,18 @@ local function handle(rawData)
 	if code == "s" then
 		local playerRole = string.match(rawData,"(%w+)%:")
 		print(playerRole)
+
 		rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname = string.match(rawData,"^.-:")
 		playerNickname = playerNickname:sub(1, #playerNickname - 1)
 		print(playerNickname)
-		rawData = rawData:gsub(playerNickname..":", "")
+
+		--rawData = rawData:gsub(""..playerNickname..":", "") -- Removed because it did not work when there was a - in the username.
+		rawData = rawData:sub((#playerNickname + 2), #rawData)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		print(serverVehicleID)
+
 		print(rawData)
 		local data = string.match(rawData,":(.*)")
 		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: "..data)

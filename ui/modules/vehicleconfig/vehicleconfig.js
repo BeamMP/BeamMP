@@ -21,13 +21,8 @@ angular.module('beamng.stuff')
         options: [],
         highlight: true
       };
-      if(slot.coreSlot === undefined) {
-        element.options.push({name: 'Empty', val: ''});
-      } else {
-        element.open = true;
-      }
-
       var elOptions = element.options;
+      var optionCount = 0;
       if(data.slotMap[slotType] !== undefined) {
         for (var i=0; i < data.slotMap[slotType].length; i++) {
           var slotPartName = data.slotMap[slotType][i]
@@ -39,6 +34,7 @@ angular.module('beamng.stuff')
               name: slotPart.description,
               val: slotPartName
             };
+            optionCount++;
             if (data.chosenParts[slotType] == slotPartName) {
               element.val = slotPartName;
               if (slotPart.slots)
@@ -49,6 +45,12 @@ angular.module('beamng.stuff')
           }
         }
       }
+      if(slot.coreSlot === undefined && optionCount > 0) {
+        element.options.unshift({name: 'Empty', val: ''});
+      } else {
+        element.open = true;
+      }
+
       if (!simple || element.options.length > 2 || (element.options.length > 1 && element.options[0].val !== '') || depth < 1) {
         res.push(element);
       }
@@ -194,7 +196,18 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   vm.d = {};
   vm.stickyPartSelection = false;
   vm.selectSubParts = true;
+  vm.applyPartChangesAutomatically = true;
   vm.simple = false;
+  vm.partSearchString = '';
+  vm.partSearchQuery = {};
+  vm.searchMode = false;
+  vm.searchResString = '';
+  vm.searchResults = [];
+  vm.partsChanged = false;
+
+  vm.searchHistory = [];
+  vm.searchHistoryPosition = 0;
+  vm.searchHistoryBrowsing = false;
 
   var initConfig = null
     , loadedConfig = null
@@ -228,6 +241,19 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     }
   };
 
+  vm.partConfigChanged = function(part) {
+    if(!vm.applyPartChangesAutomatically) {
+      // only mark as changed
+      part.changed = true;
+      vm.partsChanged = true;
+      return;
+    }
+    vm.write();
+  }
+
+  vm.applySettingChanged = function() {
+    localStorage.setItem('applyPartChangesAutomatically', JSON.stringify(vm.applyPartChangesAutomatically));
+  }
 
   vm.write = function () {
     var newConfig = VehicleConfig.generateConfig(vm.d.data);
@@ -252,6 +278,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     }
   };
 
+
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
     bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData('\"..obj:getID()..\"', '\"..jsonEncode(v.config)..\"')\")");
@@ -262,6 +289,8 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
       init = false;
       initConfig = config;
     }
+    vm.partsChanged = false;
+    //console.log("config = ", config)
 
     var tree = VehicleConfig.generateTree(config, vm.simple);
     tree.sort(VehicleConfig.treeSort);
@@ -281,6 +310,8 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     vm.d.variables = $filter('orderBy')(configArray, 'name');
     vm.d.variable_categories = Object.keys(variable_categories);
     // loadOpenSlots();
+
+    //console.log('tree = ', tree)
   }
 
   function calcTree (config) {
@@ -288,16 +319,200 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
     $scope.$evalAsync(function () {
       calcTreesync(config)
+      //console.log("tree = ", vm.d.data)
+      filterTree();
     });
   }
 
+  var queryModes = {
+    "or": function(a, b) { return a || b; },
+    "and": function(a, b) { return a && b; },
+  }
+
+  // applies filters against mod info
+  function filterPartByName(partName, queryArgs) {
+    var part = initConfig.availableParts[partName]
+    if(!part) return
+
+    var modMatch = false;
+    if(queryArgs['mod'] !== undefined) {
+      if(part.modName !== undefined)    modMatch = modMatch || part.modName.toLowerCase().indexOf(queryArgs['mod']) != -1
+      if(part.modTagLine !== undefined) modMatch = modMatch || part.modTagLine.toLowerCase().indexOf(queryArgs['mod']) != -1
+      if(part.modTitle !== undefined)   modMatch = modMatch || part.modTitle.toLowerCase().indexOf(queryArgs['mod']) != -1
+    }
+
+    if(queryArgs['author'] !== undefined) {
+      if(part.modName !== undefined)    modMatch = modMatch || part.authors.toLowerCase().indexOf(queryArgs['author']) != -1
+    }
+
+    return modMatch
+  }
+
+  function filterTreeNode(searchResults, treeNode, queryArgs) {
+
+    // match this part first
+    var matched = false;
+    if(queryArgs['mode'] == 'or') matched = false;
+    else if(queryArgs['mode'] == 'and') matched = true;
+
+    if(queryArgs['name'] && treeNode.name !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.name.toLowerCase().indexOf(queryArgs['name']) != -1);
+    if(queryArgs['slot'] && treeNode.slot !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.slot.toLowerCase().indexOf(queryArgs['slot']) != -1);
+    //if(!matched && treeNode.slot !== undefined) matched = matched || treeNode.slot.toLowerCase().indexOf(queryArgs) != -1;
+    if(queryArgs['name'] && !matched) {
+      for (var optIdx in treeNode.options) {
+        var option = treeNode.options[optIdx];
+        if(option.name !== undefined) matched = queryModes[queryArgs['mode']](matched, option.name.toLowerCase().indexOf(queryArgs['name']) != -1);
+      }
+    }
+    if(queryArgs['partname'] && !matched) {
+      for (var optIdx in treeNode.options) {
+        var option = treeNode.options[optIdx];
+        if(option.val !== undefined) matched = queryModes[queryArgs['mode']](matched, option.val.toLowerCase().indexOf(queryArgs['partname']) != -1);
+      }
+    }
+
+    // mod filters
+    if(queryArgs['mod'] || queryArgs['author']) {
+      filterPartByName(treeNode.val, queryArgs)
+      for (var optIdx in treeNode.options) {
+        var option = treeNode.options[optIdx];
+        if(option.val !== undefined) {
+          matched = queryModes[queryArgs['mode']](matched,
+            filterPartByName(option.val, queryArgs)
+          );
+        }
+      }
+    }
+
+    if(matched) searchResults.push(treeNode)
+
+    // match child parts
+    for (var partIdx in treeNode.parts) {
+      filterTreeNode(searchResults, treeNode.parts[partIdx], queryArgs);
+    }
+  }
+
+  function saveSearchHistory() {
+    localStorage.setItem('partSearchHistory', JSON.stringify(vm.searchHistory));
+  }
+
+  function loadSearchHistory() {
+    var res = localStorage.getItem('partSearchHistory')
+    if(res !== null) {
+      vm.searchHistory = JSON.parse(res) || [];
+    }
+  }
+
+  function filterTree() {
+    var queryString = vm.partSearchString.toLowerCase()
+    var queryArgs = {}
+    queryArgs['mode'] = 'or';
+    vm.searchResString = '';
+
+    // default: search all
+    if (queryString.indexOf(':') == -1) {
+      queryArgs['name'] = queryString;
+    } else {
+      var parsedargs = 0;
+      var args = queryString.split(/[ ,]+/);
+      for(i = 0; i < args.length; i++) {
+        if (args[i].indexOf(':') != -1) {
+          var args2 = args[i].split(/:/);
+          if(args2.length == 2 && args2[1].trim() != '') {
+            queryArgs[args2[0]] = args2[1]
+            parsedargs++;
+          } else {
+            vm.searchResString += 'invalid search format: ' + args[i] + '\n';
+          }
+        } else {
+          vm.searchResString += 'unknown search argument: ' + args[i] + '\n';
+        }
+      }
+      if(parsedargs > 1) queryArgs['mode'] = 'and';
+    }
+
+    vm.searchResults = [];
+    if(queryString != '' && queryString.length < 3) {
+      vm.searchResString = "Search term too short";
+      return;
+    }
+    vm.partSearchQuery = queryArgs
+
+    // add to search history
+    if (queryString.trim() !== '' && !vm.searchHistoryBrowsing) {
+      var lastHistory = vm.searchHistory[vm.searchHistory.length - 1] || ""
+      if(queryString.indexOf(lastHistory) != -1) {
+        vm.searchHistory[vm.searchHistory.length - 1] = queryString
+      } else if(lastHistory.indexOf(queryString) != -1) {
+        // removing chars do not change the last item
+      } else {
+        vm.searchHistory.push(queryString);
+      }
+      saveSearchHistory();
+      //console.log("Search history: ", vm.searchHistory)
+    }
+
+
+    //console.log("queryArgs = ", queryArgs)
+
+    for (var partIdx in vm.d.data) {
+      var part = vm.d.data[partIdx];
+      filterTreeNode(vm.searchResults, part, queryArgs);
+    }
+    if(vm.searchResults.length == 0) {
+      vm.searchResString = "No results found";
+    }
+    //console.log("> searchResults: ", vm.searchResults);
+  }
 
   vm.recalcTree = function () {
     calcTree(initConfig);
   };
+  vm.startSearch = function() {
+    vm.searchMode = true;
+  };
+  vm.stopSearch = function() {
+    vm.searchMode = false;
+    vm.partSearchString = '';
+    vm.partSearchQuery = {}
+    vm.searchResults = [];
+  };
 
+  vm.onKeyDown = function(event) {
+    //console.log("Search onKeyDown: ", event)
+    if(vm.searchHistory.length > 0 && event.key == "ArrowDown") {
+      vm.searchHistoryBrowsing = true;
+      vm.searchHistoryPosition++;
+      if(vm.searchHistoryPosition >= vm.searchHistory.length) vm.searchHistoryPosition = 0;
+      vm.partSearchString = vm.searchHistory[vm.searchHistoryPosition]
+      filterTree();
+      event.preventDefault();
+
+    } else if(vm.searchHistory.length > 0 && event.key == "ArrowUp") {
+      vm.searchHistoryBrowsing = true;
+      vm.searchHistoryPosition--;
+      if(vm.searchHistoryPosition < 0) vm.searchHistoryPosition = vm.searchHistory.length - 1;
+      vm.partSearchString = vm.searchHistory[vm.searchHistoryPosition]
+      filterTree();
+      event.preventDefault();
+
+    } else if(event.key == "k" && event.ctrlKey == true) {
+      console.log("Search history cleaned");
+      localStorage.removeItem('partSearchHistory')
+      vm.searchHistory = [];
+      vm.searchHistoryPosition = 0;
+      vm.searchHistoryBrowsing = false;
+      event.preventDefault();
+
+    } else {
+      vm.searchHistoryBrowsing = false;
+    }
+  }
+
+  vm.filterChanged = function() {
+    filterTree();
+  };
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config));
-
 
   $scope.$on('$destroy', () => {
     vm.deselectPart(false);
@@ -305,9 +520,21 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
   // Initial data load
   bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
+  loadSearchHistory();
 
+  var applyPartChangesAutomatically = localStorage.getItem('applyPartChangesAutomatically')
+  if(applyPartChangesAutomatically !== null) {
+    vm.applyPartChangesAutomatically = JSON.parse(applyPartChangesAutomatically) || false;
+  }
 }])
-
+.filter('highlightResults', function($sce) {
+  return function(text, search) {
+    if (!search) {
+      return $sce.trustAsHtml(text);
+    }
+    return $sce.trustAsHtml(unescape(escape(text).replace(new RegExp(escape(search), 'gi'), ' <span class="highlightResults">$&</span>')));
+  }
+})
 .controller('Vehicleconfig_tuning', ["logger", "RateLimiter", "VehicleConfig", "bngApi", "$scope", "$filter", function (logger,RateLimiter, VehicleConfig, bngApi, $scope, $filter) {
   var vm = this;
 
@@ -420,33 +647,31 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
 .controller('Vehicleconfig_save', ["$scope", "VehicleConfig", "bngApi", function ($scope, VehicleConfig, bngApi) {
   var vm = this;
+  vm.saveThumbnail = true;
 
   vm.save = function (configName) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`);
 
-    $scope.$emit('hide_ui', true);
+    if (vm.saveThumbnail == true) {
+      $scope.$emit('hide_ui', true);
 
-    // This function starts a chain to hide the UI, set up the camera and take a screenshot.
-    // This is done in such way to be able to queue the commands, so that are being executed in the correct order
-    // Taking advantage of the small delay that occurs when queueing commands from JS to LUA and viceversa
-    // This helps avoid timing issue with the UI, which could be visible in the thumbnail.
-    // Every step that needs to be run precisely after another is separated into its own stage.
-    // See lua/ge/extensions/core/vehicles/partmgmt.lua
+      // This function starts a chain to hide the UI, set up the camera and take a screenshot.
+      // See lua/ge/extensions/core/vehicles/partmgmt.lua
+      setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100);
 
-    setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100);
+      // Stage 1
+      $scope.$on('saveLocalScreenshot_stage1', function () {
+        // Stage 2 (Screenshot - LUA)
+        bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot_stage2("${configName}")`);
+      });
 
-    // Stage 1
-    $scope.$on('saveLocalScreenshot_stage1', function () {
-      // Stage 2 (Screenshot - LUA)
-      bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot_stage2("${configName}")`);
-    });
-
-    // Stage 3 (Reset)
-    $scope.$on('saveLocalScreenshot_stage3', function () {
-      bngApi.engineLua(`setCameraFov(60)`);
-      bngApi.engineLua(`commands.setGameCamera()`);
-      $scope.$emit('hide_ui', false);
-    });
+      // Stage 3 (Reset)
+      $scope.$on('saveLocalScreenshot_stage3', function () {
+        bngApi.engineLua(`setCameraFov(60)`);
+        bngApi.engineLua(`commands.setGameCamera()`);
+        $scope.$emit('hide_ui', false);
+      });
+    };
   };
 
   /**

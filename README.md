@@ -11,27 +11,11 @@ A LUA implementation at attempting to bring local network multiplayer to BeamNG.
 
 
 # Installation
-In order to run this your self you will need to download this repository and zip the lua, scripts and ui folders up into one zip file so you have something like:
-<br><br>
-```
-BeamNG-MP.zip
-  ├─ lua/
-  ├─ scripts/
-  └─ ui/
-```
-Then put this in your mods folder typically located at Documents/BeamNG.drive/mods.
-
-You will also require the "Bridge" downloadable from here: https://github.com/Starystars67/BeamNG-MP-Bridge/releases
-
-A handy tutorial has been made here:
-
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=EvL77tTGgJU
-" target="_blank"><img src="http://img.youtube.com/vi/EvL77tTGgJU/0.jpg"
-alt="BeamNG-MP Install Tutorial" width="240" height="180" border="10" /></a>
+The BeamMP mod has been made as simple as it gets. Just head over to our website https://beammp.com and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. Done :)
 
 # Servers
-Servers and their repository / source code has now moved to here: https://github.com/Starystars67/BeamNG-MP-Server/
-Please check out the wiki tab in the above link to setup your own server.
+The server source is closed however you are able to run your own. This is currently available to server boosters and donators only until it reaches a version 1 status at which point it will be made public and free to all!
+Please check out our wiki for how to setup your own server.
 
 # How does this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.

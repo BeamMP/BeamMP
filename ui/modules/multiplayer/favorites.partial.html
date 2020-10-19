@@ -1,0 +1,53 @@
+<!-- DataTables CSS --
+<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
+
+<!-- DataTables JavaScript -->
+<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
+<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
+
+<md-content>
+	<div>
+		<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
+			<input type="text" id="search" name="search" placeholder="Search"/>
+			<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
+			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refresh()">Refresh</md-button>
+			<md-button id="connect-button" class="button" ng-class="" ng-click="multiplayer.connect()">Connect</md-button>
+		</md-list-item>
+		<md-divider></md-divider>
+	</div>
+
+	<table id="serversTable">
+		<thead>
+			<tr id="header">
+				<th>Location</th>
+				<th>Description</th>
+				<th>Map</th>
+				<th>Players</th>
+				<th>PPS</th>
+			</tr>
+		</thead>
+		<tbody id="serversTableBody">
+			<tr>
+				<td colspan="5">
+						<center>Favorites</center>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="5">
+						<center>COMING SOON</center>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div id="footer">
+		<span id="TEMPAREA" style="display:none;"></span>
+  </div>
+</md-content>
+
+<script>
+
+</script>

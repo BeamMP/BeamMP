@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="CreatorConsole" ng-controller="IndexController">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>BeamNG - Creator Console</title>
+
+  <!-- jquery is is kinda fucked when used in electron -->
+  <!-- http://stackoverflow.com/questions/32621988/electron-jquery-is-not-defined -->
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+  <script src="js/angular.min.js"></script>
+  <script src="js/angular-flot.js"></script>
+  <script src="js/angular-ui-router.min.js"></script>
+
+  <script src="js/main.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/vehicle.js"></script>
+  <script src="js/config.jst"></script>
+
+  <!-- Bootstrap Core CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- MetisMenu CSS -->
+  <link href="css/metisMenu.min.css" rel="stylesheet">
+
+  <!-- Timeline CSS -->
+  <link href="css/timeline.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="css/startmin.css" rel="stylesheet">
+
+  <!-- Morris Charts CSS -->
+  <link href="css/morris.css" rel="stylesheet">
+
+  <!-- Custom Fonts -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+
+<style>
+#reconnectScreen {
+  position: fixed; /* or absolute */
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1 !important;
+  background-color:rgba(0,0,0,0.5);
+}
+.reconnectScreenText {
+  position: fixed; /* or absolute */
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+  color:white;
+  font-family:monospace;
+}
+</style>
+
+<div id="reconnectScreen" ng-if="$root.engineConnectionState != 'connected'">
+  <div class="reconnectScreenText">
+    <center>
+      <div style="font-size:10vh;" class="fa fa-spinner fa-spin"></div><br/>
+      <div style="font-size:2vh;margin:3vh;">... reconnecting ...</div>
+    </center>
+  </div>
+</div>
+
+<div id="wrapper" ng-if="$root.engineConnectionState == 'connected'">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="">BeamNG Creator console</a>
+      
+    </div>
+
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+
+
+    <ul class="nav navbar-right navbar-top-links">
+      <li ng-if="$root.engineConnectionState == 'connected'"><a href="#" style="color:green;"><i class="fa fa-toggle-on fa-fw" ></i> connected</a></li>
+      <li ng-if="$root.engineConnectionState != 'connected'"><a href="#" style="color:red;"><i class="fa fa-toggle-on fa-fw" ></i> disconnected</a></li>
+    </ul>
+    <!-- /.navbar-top-links -->
+
+    <div class="navbar-default sidebar" role="navigation">
+      <div class="sidebar-nav navbar-collapse">
+        <ul class="nav" id="side-menu">
+          <li class="sidebar-search">
+            <div class="input-group custom-search-form">
+              <input type="text" class="form-control" placeholder="Search...">
+              <span class="input-group-btn">
+                <button class="btn btn-primary" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+            </span>
+            </div>
+            <!-- /input-group -->
+          </li>
+          <li>
+            <a href ui-sref="dashboard" class="active"><i class="fa fa-dashboard fa-fw"></i>
+              Dashboard
+              <i ng-if="$root.engineConnectionState == 'connected'" class="fa fa-check fa-fw" style="color:green;"></i>
+              <i ng-if="$root.engineConnectionState != 'connected'" class="fa fa-spinner fa-spin" style="color:red;"></i>
+            </a>
+            
+          </li>
+          <li class="active" ng-if="$root.vehicleCount > 0">
+            <a href="#"><i class="fa fa-automobile fa-fw"></i>
+            <span ng-if="$root.vehicleCount == 1">Vehicle</span>
+            <span ng-if="$root.vehicleCount > 1">Vehicles</span>
+            <span class="fa arrow"></span></a>
+            <ul class="nav nav-second-level">
+              <li ng-repeat="(vid, v) in $root.instances" ng-if="vid != 'engine'">
+                <a ui-sref="vehicle({id: vid})">
+                  {{v.name}} ({{vid}})
+                  <i ng-if="v.state == 'connected'" class="fa fa-check fa-fw" style="color:green;"></i>
+                  <i ng-if="v.state != 'connected'" class="fa fa-spinner fa-spin" style="color:red;"></i>
+
+                </a>
+              </li>
+            </ul>
+            <!-- /.nav-second-level -->
+<!--
+          <pre>
+{{$root.instances | json}}
+          </pre>
+-->
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="page-wrapper" ui-view>
+  </div>
+  <!-- /#page-wrapper -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- jQuery -->
+<script src="js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+
+<!-- Metis Menu Plugin JavaScript -->
+<script src="js/metisMenu.min.js"></script>
+
+<script src="js/flot/excanvas.min.js"></script>
+<script src="js/flot/jquery.flot.js"></script>
+<script src="js/flot/jquery.flot.pie.js"></script>
+<script src="js/flot/jquery.flot.resize.js"></script>
+<script src="js/flot/jquery.flot.time.js"></script>
+<script src="js/flot/jquery.flot.tooltip.min.js"></script>
+<!-- Morris Charts JavaScript  -->
+<!-- 
+<script src="js/raphael.min.js"></script>
+<script src="js/morris.min.js"></script>
+<script src="js/morris-data.js"></script>
+  -->
+
+<!-- Custom Theme JavaScript -->
+<script src="js/startmin.js"></script>
+<script>if (window.module) module = window.module;</script>
+</body>
+</html>

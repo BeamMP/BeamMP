@@ -1,0 +1,50 @@
+
+.contentNavOptions2 {
+  width:600px;
+  max-width:600px;
+  min-width:600px;
+  background-color: white;
+}
+
+
+.contentNavOptions2 md-checkbox {
+}
+
+.contentNavOptions2 .optionRow {
+  align-items:center;
+  padding:0;
+  margin:0;
+  margin-left:15px;
+  margin-right:20px;
+}
+
+.contentNavOptions2 .height32 {
+  height: 32px;
+}
+
+.contentNavOptions2 .inlineCheckbox {
+  display:inline !important;
+}
+
+.contentNavOptions2 h4 {
+  margin: 0.6em 0;
+}
+
+.contentNavOptions2 .optCombo {
+  /*background-color:#ddd;*/
+  border-bottom:1px solid #aaa;
+  padding:3px;
+}
+
+.contentNavOptions2 input {
+  border: 0;
+  background: transparent;
+}
+
+.contentNavOptions2 .optCombo md-select-label {
+  border:0 !important;
+}
+
+.contentNavOptions2 .section {
+  margin-bottom: 40px;
+}

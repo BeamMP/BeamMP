@@ -1,0 +1,17 @@
+<div class="overviewContainer" layout="row" layout-align="center start">
+  <div style="width: 100%;">
+    <bng-accordion flex class="vAccordion--default">
+      <bng-accordion-pane is-open="openTabs[$index]" ng-repeat="item in changelog track by $index">
+        <bng-pane-header class="md-title md-padding">
+          <div flex layout="row">
+            <span flex>{{item.title}}</span> 
+            <div style="font-size:small">{{item.date}}</div>
+          </div>
+        </bng-pane-header>
+        <bng-pane-body class="md-padding">
+          <div ng-bind-html="item.html"></div>
+        </bng-pane-body>
+      </bng-accordion-pane>
+    </bng-accordion>
+  </div>
+</div>

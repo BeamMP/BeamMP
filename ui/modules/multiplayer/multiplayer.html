@@ -1,0 +1,58 @@
+<link type="text/css" rel="stylesheet" href="modules/multiplayer/multiplayer.css">
+
+<div id="LoadingServer" style="display: none;">
+    <div id="LoadingBody">
+        <h1>Connecting</h1>
+        <span id="LoadingStatus">Loading...</span>
+    </div>
+</div>
+
+<md-content id="back" layout="column">
+
+    <md-toolbar class="md-primary" id="top-bar">
+        <md-list-item layout="row" class="">
+            <h1 class="md-toolbar-tools" style="width:auto;">Multiplayer</h1>
+            <!--<p id="launcher-status" style="text-align:right; margin-right:10px;">Launcher Disconnected</p>-->
+			      <!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
+        </md-list-item>
+    </md-toolbar>
+
+    <div flex layout="row" style="overflow: auto;">
+        <md-content layout="column" id="left-menu">
+            <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.servers') !== -1)}" ui-sref="menu.multiplayer.servers" style="text-align:left;">
+                <md-icon class="material-icons">desktop_windows</md-icon>
+                Servers
+            </md-button>
+
+            <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
+                <md-icon class="material-icons">star</md-icon>
+                Favorites
+            </md-button>
+
+            <md-button id="direct-connect-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
+                <md-icon class="material-icons">web</md-icon>
+                Direct Connect
+            </md-button>
+
+            <!--<md-button id="settings-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.settings') !== -1)}" ui-sref="menu.multiplayer.settings" style="text-align:left;">
+                <md-icon class="material-icons">more_horiz</md-icon>
+                Settings
+            </md-button>-->
+
+			<md-divider></md-divider>
+
+            <div flex="" style="max-height: none;"></div>
+        </md-content>
+
+        <div flex style="position: relative;">
+            <md-content ui-view class="container" style="background: transparent; overflow: auto; /*margin-bottom: 45px;*/"></md-content>
+        </div>
+
+        <div ui-view="edit" layout="column"></div>
+    </div>
+</md-content>
+
+<!-- jQuery -->
+<script>
+  if (window.module) module = window.module;
+</script>

@@ -6,8 +6,11 @@
 
 
 local M = {}
+print("electricsGE Initialising...")
 
 
+local lastElectrics = ""
+local lastGear = ""
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
 	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
@@ -23,11 +26,14 @@ end
 
 
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
-	if Network.getStatus() == 2 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
-			--print("Electrics sent "..serverVehicleID)
+			if data ~= lastElectrics then
+				GameNetwork.send('We:'..serverVehicleID..":"..data)--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
+				lastElectrics = data
+				--print("Electrics sent "..serverVehicleID)
+			end
 		end
 	end
 end
@@ -48,16 +54,17 @@ end
 
 
 local function sendGear(data, gameVehicleID)
-	if Network.getStatus() == 2 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send(Network.buildPacket(0, 2135, serverVehicleID, data))
-			--print("Gear sent "..serverVehicleID)
+			if data ~= lastGear then
+				GameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
+				lastGear = data
+				--print("Gear sent "..serverVehicleID)
+			end
 		end
 	end
 end
-
-
 
 local function applyGear(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
@@ -69,9 +76,27 @@ local function applyGear(data, serverVehicleID)
 	end
 end
 
+local function handle(rawData)
+	--print("electricsGE.handle: "..rawData)
+	local code = string.sub(rawData, 1, 1)
+	local rawData = string.sub(rawData, 3)
+	if code == "e" then -- Electrics (indicators, lights etc...)
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		applyElectrics(data, serverVehicleID)
+	elseif code == "g" then -- Gears
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		applyGear(data, serverVehicleID)
+	end
+end
+
 
 
 M.tick 			 = tick
+M.handle     	 = handle
 M.sendGear		 = sendGear
 M.applyGear	 	 = applyGear
 M.sendElectrics  = sendElectrics
@@ -79,4 +104,5 @@ M.applyElectrics = applyElectrics
 
 
 
+print("electricsGE Loaded.")
 return M

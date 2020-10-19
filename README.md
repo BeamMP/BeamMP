@@ -7,7 +7,7 @@ A LUA implementation at attempting to bring local network multiplayer to BeamNG.
  - Network Codes
  - Progression tracking.
  - Troubleshooting - connecting to and playing on servers
- - Discord link 
+ - Discord link
 
 
 # Installation
@@ -26,7 +26,7 @@ You will also require the "Bridge" downloadable from here: https://github.com/St
 A handy tutorial has been made here:
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=EvL77tTGgJU
-" target="_blank"><img src="http://img.youtube.com/vi/EvL77tTGgJU/0.jpg" 
+" target="_blank"><img src="http://img.youtube.com/vi/EvL77tTGgJU/0.jpg"
 alt="BeamNG-MP Install Tutorial" width="240" height="180" border="10" /></a>
 
 # Servers
@@ -41,6 +41,18 @@ Joining clients will check that they can match that configuration file. if they 
 Now the new client will be setting up the world its current vehicles and so on.
 
 once the new client is setup, all players will unpause and rely on web sockets to maintain an updated gameplay. mean while the host will periodically update the running configuration.
+
+# New Network Codes
+  Format: Capital Letter Followed by option (Lowercase) then data or whatever else
+
+  Server / Setup
+
+  Game / Session
+  - O
+    - d = Vehicle Destroyed, Format: Od:<ServerVehicleID>
+    - s = Vehicle Spawned, Format: Os:0:<vehicleData>, 0 for the fact that it needs a serverVehicleID still.
+    - m = Vehicle Moved / Switched, Format: Om:<ServerVehicleID>  -- UNUSED NOW
+    - r = Vehicle Resetted, Format: Or:<ServerVehicleID>
 
 # Network Codes
   XXXX - All codes are 4 characters and can be translated to a different control

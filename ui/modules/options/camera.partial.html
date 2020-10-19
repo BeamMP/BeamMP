@@ -1,0 +1,210 @@
+<md-content>
+
+  <md-subheader class="md-no-sticky">{{:: 'ui.options.general' | translate }}</md-subheader>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+      <md-tooltip md-direction="right">{{:: 'ui.options.camera.transitionHint' | translate}}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.transitionTime' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraTransitionTime" min="0" max="1000" step="10" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.cameraTransitionTime > 0" style="margin-left:15px">{{ options.data.values.cameraTransitionTime.toFixed(0) }} ms</span>
+    <span ng-if="options.data.values.cameraTransitionTime == 0" style="margin-left:15px">disabled</span>
+  </md-list-item>
+
+  <!--
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraCollisionTooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.camera.cameraCollision' | translate }}</p>
+    <md-checkbox aria-label="_" ng-model="options.data.values.cameraCollision" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  -->
+
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">{{:: 'ui.options.camera.order' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink ng-if="!app.gameState">
+      <span style="margin-left:auto; margin-right:auto">{{:: 'ui.options.camera.emptyListHint' | translate }}</span>
+  </md-list-item>
+  <div layout="row" style="margin-left:16px; margin-right:16px; line-height:24px" ng-repeat="cam in opt.cameraConfig track by $index" ng-if="!cam.hidden" layout-align="center center">
+    <span flex="5">
+      <md-tooltip md-direction="right">{{:: 'ui.options.camera.switchHint' | translate}}</md-tooltip>
+      <binding ng-click="opt.setCameraById($index)" ng-if="cam.slotId && opt.cameraBindings[cam.slotId]" dark="true" action="{{ opt.cameraBindings[cam.slotId].action }}" style="cursor: pointer;"></binding>
+      <span ng-click="opt.setCameraById($index)" ng-if="cam.slotId && !opt.cameraBindings[cam.slotId]" style="cursor: pointer;">{{cam.slotId}}</span>
+    </span>
+    <md-button ng-disabled="$index == 0"                 style="margin:0; margin-left: 12px; width:18px" class="md-icon-button md-warn" ng-click="opt.changeOrder($index, -1)">
+      <md-icon class="material-icons">keyboard_arrow_up</md-icon>
+    </md-button>
+    <md-button ng-disabled="$index == opt.lastSlotId" style="margin:0; margin-right:10px; width:18px" class="md-icon-button md-warn" ng-click="opt.changeOrder($index, 1)">
+      <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+    </md-button>
+    <span flex style="cursor: pointer; text-transform: capitalize" ng-click="opt.toggleEnabledCameraById($index)">
+      {{ cam.name }}
+    </span>
+    <small ng-if="$index == opt.defaultId">(default)</small>
+    <md-checkbox aria-label="_" ng-model="cam.enabled" ng-change="opt.toggleEnabledCameraById($index)"></md-checkbox>
+    <span flex="5">
+      <md-icon  ng-if="opt.focusedCamId == $index" class="material-icons">videocam</md-icon>
+      <md-tooltip ng-disabled="true"md-direction="right">{{:: 'ui.options.camera.current' | translate}}</md-tooltip>
+    </span>
+  </div>
+  <md-list-item md-no-ink layout="row" layout-align="end center">
+    <md-button ng-if="app.gameState" ng-click="opt.resetConfiguration()" class="md-warn md-raised">{{:: 'ui.options.camera.resetConfiguration' | translate }}</md-button>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader style="text-transform: capitalize" class="md-no-sticky">{{:: 'ui.options.camera' | translate }}: orbit</md-subheader>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraOrbitRelaxationHint' | translate}}</md-tooltip>
+    <p flex="40">{{:: 'ui.options.camera.cameraOrbitRelaxation' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraOrbitRelaxation" min="0.5" max="6" step="0.5" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.cameraOrbitRelaxation.toFixed(1) }}</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraOrbitFovModifierHint' | translate}}</md-tooltip>
+    <p flex="40">{{:: 'ui.options.camera.cameraOrbitFovModifier' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraOrbitFovModifier" min="-20" max="20" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px"><span ng-if="options.data.values.cameraOrbitFovModifier >= 0">+</span> {{ options.data.values.cameraOrbitFovModifier}} deg</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraOrbitMaxDynamicFovHint' | translate}}</md-tooltip>
+    <p flex="40">{{:: 'ui.options.camera.cameraOrbitMaxDynamicFov' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraOrbitMaxDynamicFov" min="0" max="75" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">+ {{ options.data.values.cameraOrbitMaxDynamicFov}} deg</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.couplerCameraModifierHint' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.camera.couplerCameraModifier' | translate }}</p>
+    <md-checkbox aria-label="_" ng-model="options.data.values.couplerCameraModifier" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader style="text-transform: capitalize" class="md-no-sticky">{{:: 'ui.options.camera' | translate }}: chase</md-subheader>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraChaseRollSmoothingHint' | translate}}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.cameraChaseRollSmoothing' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraChaseRollSmoothing" min="0" max="100" step="0.1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.cameraChaseRollSmoothing > 0" style="margin-left:15px">{{ options.data.values.cameraChaseRollSmoothing.toFixed(1) }} %</span>
+    <span ng-if="options.data.values.cameraChaseRollSmoothing == 0" style="margin-left:15px">no</span>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader style="text-transform: capitalize" class="md-no-sticky">{{:: 'ui.options.camera' | translate }}: driver</md-subheader>
+
+  <md-list-item  layout-align="center" layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <div layout="row" flex="95" style="padding-left: 20px; padding-right: 20px; background-color: #ececec;">
+      <p bng-translate='ui.options.camera.cameraDriverControls'></p>
+      <p bng-translate='ui.options.camera.cameraDriverControls2'></p>
+    </div>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraDriverFovHint' | translate}}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.cameraDriverFov' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraDriverFov" min="2" max="150" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.cameraDriverFov | number: 1}} deg</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraDriverPhysicsHint' | translate}}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.cameraDriverPhysics' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraDriverPhysics" min="0" max="100" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.cameraDriverPhysics}} %</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraDriverStableHorizonHint' | translate}}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.cameraDriverStableHorizon' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraDriverStableHorizon" min="0" max="100" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.cameraDriverStableHorizon}} %</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraDriverAutocenterHint' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.camera.cameraDriverAutocenter' | translate }}</p>
+    <md-checkbox aria-label="_" ng-model="options.data.values.cameraDriverAutocenter" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraDriverAllowSeatAdjustmentsHint' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.camera.cameraDriverAllowSeatAdjustments' | translate }}</p>
+    <md-checkbox aria-label="_" ng-model="options.data.values.cameraDriverAllowSeatAdjustments" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item  ng-if="options.data.values.cameraDriverAllowSeatAdjustments" layout-align="center" layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <div layout="row" flex="95" style="padding-left: 20px; padding-right: 20px; background-color: #ececec;">
+      <p bng-translate='ui.options.camera.cameraDriverSeatControls'></p>
+      <p bng-translate='ui.options.camera.cameraDriverSeatControls2'></p>
+    </div>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+      <span flex="95">{{::'ui.options.camera.cameraDriverResetSeat' | translate}}</span>
+    <md-button flex="5" class="md-icon-button md-warn" ng-click="opt.resetSeat()">
+      <md-icon class="material-icons">undo</md-icon>
+    </md-button>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+      <span flex="95">{{::'ui.options.camera.cameraDriverResetSeatAll' | translate}}</span>
+    <md-button flex="5" class="md-icon-button md-warn" ng-click="opt.resetSeatAll()">
+      <md-icon class="material-icons">undo</md-icon>
+    </md-button>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader style="text-transform: capitalize" class="md-no-sticky">{{:: 'ui.options.camera' | translate }}: external</md-subheader>
+
+  <md-list-item  layout-align="center" layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <div layout="row" flex="95" style="padding-left: 20px; padding-right: 20px; background-color: #ececec;">
+      <p bng-translate='ui.options.camera.cameraExternalControls'></p>
+      <p bng-translate='ui.options.camera.cameraExternalControls2'></p>
+    </div>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <p flex="30">{{:: 'ui.options.camera.cameraFanVsTV' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraFanVsTV" min="0" max="1" step="0.05" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.cameraFanVsTV == 0" style="margin-left:15px">Always Fan</span>
+    <span ng-if="options.data.values.cameraFanVsTV > 0 && options.data.values.cameraFanVsTV < 0.2" style="margin-left:15px">Mostly Fan</span>
+    <span ng-if="options.data.values.cameraFanVsTV >= 0.2 && options.data.values.cameraFanVsTV < 0.5" style="margin-left:15px">Frequently Fan</span>
+    <span ng-if="options.data.values.cameraFanVsTV == 0.5" style="margin-left:15px">Evenly split</span>
+    <span ng-if="options.data.values.cameraFanVsTV > 0.5 && options.data.values.cameraFanVsTV <= 0.8" style="margin-left:15px">Frequently TV</span>
+    <span ng-if="options.data.values.cameraFanVsTV > 0.8 && options.data.values.cameraFanVsTV < 1" style="margin-left:15px">Mostly TV</span>
+    <span ng-if="options.data.values.cameraFanVsTV == 1" style="margin-left:15px">Always TV</span>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.camera.cameraTVSpeedTooltip' | translate }}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.camera.cameraTVSpeed' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.cameraTVSpeed" min="0" max="2" step="0.1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.cameraTVSpeed == 0" style="margin-left:15px">Stationary</span>
+    <span ng-if="options.data.values.cameraTVSpeed > 0 && options.data.values.cameraTVSpeed < 0.3" style="margin-left:15px">Pigeon-slow</span>
+    <span ng-if="options.data.values.cameraTVSpeed >= 0.3 && options.data.values.cameraTVSpeed < 1" style="margin-left:15px">Slower</span>
+    <span ng-if="options.data.values.cameraTVSpeed == 1" style="margin-left:15px">Default</span>
+    <span ng-if="options.data.values.cameraTVSpeed > 1 && options.data.values.cameraTVSpeed <= 1.5" style="margin-left:15px">Quicker</span>
+    <span ng-if="options.data.values.cameraTVSpeed > 1.5 && options.data.values.cameraTVSpeed <= 2" style="margin-left:15px">Much quicker</span>
+  </md-list-item>
+
+</md-content>

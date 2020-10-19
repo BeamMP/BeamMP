@@ -1,0 +1,6 @@
+<md-content class="md-padding" style="height:100%; overflow:auto; box-sizing:border-box" layout="row" layout-wrap layout-align="space-around start">
+  <div ng-repeat="c in vehConf_color.color track by $index" style="width: 48%">
+    <ng-color ng-model="c" ng-change="vehConf_color.updateColor($index, c)" presets-editable="true" show-preview="false" pre-col="{{ vehConf_color.carColorPresets }}"></ng-color>
+  </div>
+  <div ng-if="::vehConf_color.color.length % 2 === 1" style="width: 48%"></div>
+</md-content>

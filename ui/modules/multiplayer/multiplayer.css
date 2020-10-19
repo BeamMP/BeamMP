@@ -1,0 +1,197 @@
+#top-bar {
+	background:#404040b8;
+}
+#left-menu {
+	color:white;
+	background-color:#404040b8;
+}
+#bottom-bar {
+	color:white;
+	background-color:#404040b8;
+}
+#back {
+	width:100%;
+	height: 100%;
+	/*background: #353535;*/
+}
+
+#footer {
+	position:fixed;
+	bottom:0;
+	background-color:#404040b8;
+	height:0px;
+	width:100%;
+}
+
+/*input {
+	margin-right:15px;
+}*/
+
+table#serversTable {
+    width: 100%;
+		color: white;
+}
+
+#servers-table {
+	width:100%;
+	border-collapse: collapse;
+	color:white;
+	height:200px;
+}
+
+#servers-table, th, td {
+	/*border-left: 1px solid #2C2F33;*/
+	border-right: 1px solid #2C2F33;
+}
+
+#servers-table th {
+	background-color: #2C2F33;
+	color: white;
+	transition: 0.15s;
+}
+
+#servers-table th:hover {
+	background-color: #3C3F43;
+}
+
+#servers-table td {
+	padding-left: 10px;
+}
+
+#servers-table tr {
+	height:40px;
+	transition:0.3s;
+}
+
+/* Even table rows */
+#servers-table tr:nth-child(even) {
+	background-color: #808080;
+}
+
+/* Odd table rows */
+#servers-table tr:nth-child(odd) {
+	background-color: #696969;
+}
+
+#servers-table tr:hover {
+	background-color:#555555;
+}
+
+.highlight {
+	background-color: #99AAB5 !important;
+}
+
+
+.button {
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 15px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button {
+	background-color: rgb(212, 100, 26);
+	color: white;
+	/*border: 2px solid #555555;*/
+	margin:0px;
+	margin-bottom:20px;
+}
+
+.button:hover {
+	background-color: white;
+}
+
+#connect-button {
+	width:200px;
+	margin-left:auto;
+	float:right;
+}
+
+#toggleOutdated {
+	margin-bottom: 17px;
+	color: white;
+}
+
+#direct-connect-button {
+	width: 425px;
+}
+
+#launcher-connect-button {
+	width: 250px;
+	margin: 0 10px 0 0;
+	background: #576EBF;
+}
+#launcher-connect-button:hover {
+	background-color: #374EAF;
+}
+
+#launcher-port {
+	width: 125px;
+	margin-bottom: 8px;
+}
+
+md-content {
+	background-color: rgba(101, 101, 101, 0.34);
+}
+
+div#LoadingServer {
+    position: absolute;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    left: 0px;
+    top: 0px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+div#LoadingBody {
+    margin: 20%;
+    width: 60%;
+    background-color: #848484;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+input[type="text"] {
+  display: block;
+  width: 400px;
+  margin: 0 0 20px;
+  padding: 8px 12px 10px 12px;
+  border: 1px solid rgba(0,0,0,.5);
+  background: rgba(0,0,0,.25);
+  color:white;
+  margin-right: 15px;
+}
+
+.row {
+    width: 100%;
+    padding-top: 10px;
+		display: flex;
+}
+
+.col {
+	width: 50%;
+}
+
+tr#ServerInfoRow {
+    background-color: #3535357a;
+}
+
+ul.serverItemDetails {
+    list-style: none;
+}
+
+[placeholder]::-webkit-input-placeholder { color: rgba(255,255,255,.8); }
+[placeholder]:hover::-webkit-input-placeholder { color: rgba(255,255,255,.4); }
+[placeholder]:focus::-webkit-input-placeholder { color: transparent; }
+
+[placeholder]::-moz-placeholder { color: rgba(255,255,255,.8); }
+[placeholder]:hover::-moz-placeholder { color: rgba(255,255,255,.4); }
+[placeholder]:focus::-moz-placeholder { color: transparent; }
+
+[placeholder]:-ms-input-placeholder { color: rgba(255,255,255,.8); }
+[placeholder]:hover:-ms-input-placeholder { color: rgba(255,255,255,.4); }
+[placeholder]:focus:-ms-input-placeholder { color: transparent; }

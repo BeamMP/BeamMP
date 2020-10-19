@@ -1,0 +1,12 @@
+<md-content layout="column" class="container">
+  <md-toolbar style="position: relative;">
+    <md-tabs class="md-primary" style="border-radius: 0; position: absolute; bottom: 0; left: 0; right: 0;" md-stretch-tabs="always" md-no-ink>
+      <md-tab label="{{:: 'ui.controls.bindings' | translate}}" ui-sref="menu.options.controls.bindings"></md-tab>
+      <md-tab label="{{:: 'ui.controls.filters' | translate}}" ui-sref="menu.options.controls.filters"></md-tab>
+      <md-tab label="{{:: 'ui.controls.ffb' | translate}}" ui-sref="menu.options.controls.ffb"></md-tab>
+      <md-tab label="{{:: 'ui.controls.hardware' | translate}}" ui-sref="menu.options.controls.hardware"></md-tab>
+    </md-tabs>
+  </md-toolbar>
+
+  <div ui-view flex style="overflow: auto"></div>
+</md-content>

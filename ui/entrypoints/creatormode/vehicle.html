@@ -1,0 +1,104 @@
+<!-- DataTables CSS -->
+<link href="css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link href="css/dataTables/dataTables.responsive.css" rel="stylesheet">
+
+<!-- DataTables JavaScript -->
+<script src="js/dataTables/jquery.dataTables.min.js"></script>
+<script src="js/dataTables/dataTables.bootstrap.min.js"></script>
+
+    <div class="row">
+  <div class="col-lg-12">
+    <h1 class="page-header">Vehicle: {{id}} - {{$root.instances[id].name}} ({{$root.instances[id].jbeam}})</h1>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<!--
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-default" ng-if="$root.engineConnectionState == 'connected'">
+        <pre>
+            {{logs | json}}
+        </pre>
+    </div>
+  </div>
+</div>
+-->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-default" ng-if="$root.engineConnectionState == 'connected'">
+      <div class="panel-heading">
+        <i class="fa fa-list fa-fw"></i> Lua console
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <textarea style="max-height:400px;width:100%;border:0;font-family:monospace;" cols="50" rows="30" ng-model="execResult" placeholder="Please execute a command below" readonly></textarea>
+        <form ng-submit="runVehicleLua(execQuery)">
+        <input type="text" ng-model="execQuery" style="width:100%">
+        </form>
+      </div>
+      <!-- /.panel-body -->
+    </div>
+    <!-- /.panel -->
+
+    <div class="panel panel-default" ng-if="$root.engineConnectionState == 'connected'">
+      <div class="panel-heading">
+        <i class="fa fa-codepen fa-fw"></i> Console examples
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <a href ng-click="runVehicleLua('print(_VERSION)')">Lua version</a>,
+        <a href ng-click="runVehicleLua('bdebug.state.debugEnabled=false;bdebug.meshVisChange(1, true);')">Disable Debug</a>,
+        <a href ng-click="runVehicleLua('bdebug.state.debugEnabled=true;bdebug.state.vehicle.beamVis=\'type\';bdebug.state.vehicle.nodeVis=\'simple\';bdebug.meshVisChange(0.3, true);')">Enable Debug</a>,
+      </div>
+      <!-- /.panel-body -->
+    </div>
+
+  </div>
+  <!-- /.col-lg-4 -->
+</div>
+<!-- /.row -->
+
+<!-- /.row -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+         <i class="fa fa-list fa-fw"></i> Log
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <div class="dataTable_wrapper">
+          <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>source</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd" ng-repeat="(_, log) in logs">
+                <td>{{log[0]}}</td>
+                <td>{{log[1]}}</td>
+                <td>{{log[2]}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#dataTables-example').DataTable({
+        responsive: true
+    });
+  });
+</script>

@@ -1,0 +1,15 @@
+{
+  "name": "Multiplayer Player List",
+  "author": "meow",
+  "version": "0.70",
+  "description": "The playerlist for the multiplayer session.",
+  "directive": "multiplayerplayerlist",
+  "domElement": "<multiplayerplayerlist></multiplayerplayerlist>",
+  "css": {
+  	"right": "0px",
+  	"top": "90px",
+    "min-width": "240px",
+  	"width": "auto",
+    "height": "927px"
+  }
+}

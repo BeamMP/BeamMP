@@ -1,0 +1,54 @@
+<md-content id="bng-credits-wrapper" tabindex="0" ng-keypress="credits.exit($event)">
+
+  <audio autoplay loop preload style="display:none"
+         id="bng-credits-playback">
+    <source src="modules/credits/lonle.ogg"/>
+  </audio>
+
+  <div class="bng-credits-content">
+    <img src="modules/credits/beammp.png">
+
+    <div>
+      <job>BeamMP Mod Developers</job>
+      <div>
+        <name>
+		    <span>Titch2000</span>
+        </name>
+        <name>
+  		   <span>Anonymous275</span>
+        </name>
+        <name>
+    		<span>Jojos38</span>
+        </name>
+      </div>
+    </div>
+
+    <div>
+      <job>BeamMP Contributors</job>
+      <div>
+        <name>
+		    <span>stefan750</span>
+        </name>
+        <name>
+  		   <span>deerboi</span>
+        </name>
+      </div>
+    </div>
+
+    <img src="modules/credits/beamngdrive.png" style="margin-top: 150px;">
+
+    <div ng-repeat="contrib in credits.contributors">
+      <job>{{ ::contrib.translateId | translate }}</job>
+      <div ng-repeat="member in contrib.members">
+        <name>
+          {{ ::member.first }}
+		    <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
+          {{ ::member.last }}
+
+        </name>
+      </div>
+    </div>
+  </div>
+
+  <img src="modules/credits/beamngdrive.png" class="bng-credits-end">
+</md-content>

@@ -12,7 +12,6 @@
 	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one
 
 
-
 local M = {}
 print("vehicleGE Initialising...")
 
@@ -84,6 +83,7 @@ end
 local function getOwnMap()
     return ownMap
 end
+
 
 local function getVehicleMap()
     return vehiclesMap
@@ -281,6 +281,7 @@ end
 
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
+
 local function onServerVehicleRemoved(serverVehicleID)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
@@ -369,6 +370,7 @@ end
 
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
+
 local function onServerVehicleResetted(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if lastResetID ~= serverVehicleID then
@@ -454,6 +456,7 @@ end
 
 
 local function onUpdate(dt)
+
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		for i = 0, be:getObjectCount() do -- For each vehicle
@@ -548,6 +551,7 @@ M.sendCustomVehicleData   = sendCustomVehicleData
 M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
+
 
 
 print("vehicleGE Loaded.")

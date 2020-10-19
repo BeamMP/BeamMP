@@ -40,6 +40,7 @@ end
 
 
 local function applyPos(data, serverVehicleID)
+
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
 		--GameNetwork.send('On:'..serverVehicleID)
@@ -97,6 +98,7 @@ M.handle            = handle
 M.sendVehiclePosRot = sendVehiclePosRot
 M.setPosition       = setPosition
 M.setPing           = setPing
+
 
 
 print("positionGE Loaded.")

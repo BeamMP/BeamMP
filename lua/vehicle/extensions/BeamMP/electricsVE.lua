@@ -214,6 +214,7 @@ local function applyElectrics(data)
 		if e.signal_right_input ~= decodedData[2] and decodedData[2] ~= nil then -- Apply right signal value
 			electrics.toggle_right_signal()
 		end
+
 		if e.extend ~= decodedData[7] and decodedData[7] ~= nil then
 			electrics.values.extend = decodedData[7]
 		end
@@ -234,6 +235,7 @@ local function applyElectrics(data)
 		if e.lightbar ~= decodedData[5] and decodedData[5] ~= nil then
 			electrics.set_lightbar_signal(decodedData[5]) -- Apply lightbar values
 		end
+
 		-- Apply horn value
 		if decodedData[6] == 1 and e.horn == 0 then
 			electrics.horn(true)

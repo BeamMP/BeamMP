@@ -237,6 +237,7 @@ end
 
 -- adds / updates a file in the DB
 local function updateZIPEntry(filename)
+  --log('I', 'updateZIPEntry', "filename : "..dumps(filename))
   local modname = getModNameFromPath(filename)
   local zip = ZipArchive()
   zip:openArchiveName( filename, "R" )
@@ -303,8 +304,6 @@ local function updateZIPEntry(filename)
       d.orgZipFilename = d.orgZipFilename..'.zip'
       d.unpackedPath = filename
 
-      --if #FS:findFilesByRootPattern( "/"..filename..'levels/', "*.mis", 1, true, false ) > 0 then d.modType = 'terrain' end
-      --if #FS:findFilesByRootPattern( "/"..filename..'vehicles/', "*", 0, true, true ) > 0 then d.modType = 'vehicle' end
       oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
       lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
       vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
@@ -513,7 +512,7 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
       local mod, modFiles = updateZIPEntry(filename)
       if mod and isSafeMode() then mod.active = false end
       if mod and mod.active ~= false then
-        log('D', 'initDB', 'MP mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
+        log('D', 'initDB', 'mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
         addMountEntryToList(mountList, filename, mod.mountPoint)
         newMountedFiles = arrayConcat(newMountedFiles,modFiles)
         job.yield()
@@ -732,7 +731,6 @@ local function activateMod(modname)
     mountEntry(mods[modname].fullpath, mods[modname].mountPoint)
   end
   mods[modname].active = true
-  log('I', 'MP activateMod', 'mod loaded: ' .. tostring(modname))
   extensions.hook('onModActivated', deepcopy(mods[modname]))
   stateChanged()
 end
@@ -948,7 +946,7 @@ local function workOffChangedMod(filename, type)
     if mod and mod.active ~= false then
       log('D', 'onFileChanged', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
-      CoreNetwork.modLoaded(mod.modname)
+	  CoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////					
     end
     FS:triggerFilesChanged(files) -- alert c++ of changed files
     stateChanged()
@@ -1112,6 +1110,7 @@ local function getModForFilename(filename_virtual)
     end
   end
 end
+
 local function check4Update()
   checkStartup = true
 end
@@ -1185,10 +1184,11 @@ local function updateZipMod(oldFileName,newFileName)
   end
 end
 
+-- ///////////////////////////////////////////////////////////////////
 local function getModList()
   return mods
-end
-
+end						   
+-- ///////////////////////////////////////////////////////////////////
 -- public interface
 M.isReady = isReady
 M.onFileChanged = onFileChanged
@@ -1228,7 +1228,5 @@ M.getModForFilename = getModForFilename
 
 M.disableAutoMount = disableAutoMount
 M.enableAutoMount = enableAutoMount
-
-M.getModList = getModList
 
 return M

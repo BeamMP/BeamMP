@@ -80,12 +80,12 @@ local function handle(rawData)
 	--print("electricsGE.handle: "..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
-	if code == "e" then
+	if code == "e" then -- Electrics (indicators, lights etc...)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		applyElectrics(data, serverVehicleID)
-	elseif code == "g" then
+	elseif code == "g" then -- Gears
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
@@ -96,7 +96,7 @@ end
 
 
 M.tick 			 = tick
-M.handle     = handle
+M.handle     	 = handle
 M.sendGear		 = sendGear
 M.applyGear	 	 = applyGear
 M.sendElectrics  = sendElectrics

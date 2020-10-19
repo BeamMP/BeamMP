@@ -1,3 +1,6 @@
+-- FIXME
+-- This should be removed?
+
 local M = {}
 print("mpConfig Initialising...")
 
@@ -5,7 +8,7 @@ print("mpConfig Initialising...")
 local Nickname = ""
 local PlayerServerID = -1
 
--- MP TICK setTINGS
+-- MP TICK SETTINGS
 local nodesDelay = 0
 local nodesTickrate = 1.0 -- in seconds
 

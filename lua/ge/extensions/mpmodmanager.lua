@@ -1,5 +1,5 @@
 local M = {}
-print("mpmodmanager Initialising...")
+print("mpmodmanager initialising...")
 
 -- TRY CATCH FROM: https://gist.github.com/cwarden/1207556/a3c7caa194cad0c22871ac650159b40a88ecd702
 function catch(what)

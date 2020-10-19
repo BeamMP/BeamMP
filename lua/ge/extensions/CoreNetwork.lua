@@ -1,69 +1,74 @@
 --====================================================================================
--- All work by Titch2000.
+-- All work by Titch2000 and jojos38.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
+
+
 local M = {}
-print("CoreNetwork Initialising...")
-local Servers = {}
-local LauncherVersion = ""
+print("CoreNetwork initialising...")
+
+
 
 -- ============= VARIABLES =============
---local socket = require('socket')
 local TCPSocket
-local Server = {};
+local Server = {} -- Store the server we are on
+local Servers = {} -- Store all the servers
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
-local oneSecondsTimer = 1
+local secondsTimer = 1
 local updateTimer = 0
 local flip = false
 local serverTimeoutTimer = 0
 local MapLoadingTimeout = 0
-local playersMap = {}
-local sysTime = 0
-local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
-local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local status = ""
+local LauncherVersion = ""
 -- ============= VARIABLES =============
 
---================================ CONNECT TO SERVER ================================
-local function connectToLauncher()
-	if launcherConnectionStatus == 0 then
-		local socket = require('socket')
-		TCPSocket = socket.tcp() -- Set socket to TCP
-		--TCPSocket:setoption("tcp-nodelay", true)
-		keep = TCPSocket:setoption("keepalive",true)
 
+
+--================================ CONNECT TO LAUNCHER ================================
+local function connectToLauncher()
+	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
+		local socket = require('socket')
+		TCPSocket = socket.tcp()
+		TCPSocket:setoption("keepalive",true) -- Keepalive to avoid connection closing too quickly
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort") or 4444);
+		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort")); -- FIXME Better way to save settings and config
 		launcherConnectionStatus = 1
-		--send(buildPacket(1, 2000, 0, Network.nickname..":"..getMissionFilename())) -- Send connection packet
 	end
 end
---================================ CONNECT TO SERVER ================================
+connectToLauncher()
+reloadUI()
+--================================ CONNECT TO LAUNCHER ================================
+
+
 
 --====================== DISCONNECT FROM SERVER ======================
 local function disconnectLauncher()
-	if launcherConnectionStatus > 0 then -- If player were connected
+	if launcherConnectionStatus > 0 then -- If player was connected
 		TCPSocket:close()-- Disconnect from server
-		serverTimeoutTimer = 0 -- Reset timeout delay
 		launcherConnectionStatus = 0
+		serverTimeoutTimer = 0 -- Reset timeout delay
 		oneSecondsTimer = 0
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================
 
-connectToLauncher()
---TorqueScript.setVar("$CEF_UI::reload") Need to find a way to reload
-reloadUI()
+
 
 local function getServers()
-	print("Sending Request For Server List...")
+	print("Getting the servers list")
 	TCPSocket:send('Z')
 	TCPSocket:send('B')
 end
+
+
+
 local function cancelConnection()
 	TCPSocket:send('QS')
 end
+
+
 
 local function setServer(id, ip, port, mods, name)
 	Server.IP = ip;
@@ -76,9 +81,7 @@ local function setServer(id, ip, port, mods, name)
 		table.insert(mods, str)
 	end
 	for k,v in pairs(mods) do
-		mods[k] = mods[k]:gsub("Resources/Client/","")
-		mods[k] = mods[k]:gsub(".zip","")
-		mods[k] = mods[k]:gsub(";","")
+		mods[k] = mods[k]:gsub("Resources/Client/",""):gsub(".zip",""):gsub(";","")
 	end
 	dump(mods)
 	mpmodmanager.setServerMods(mods)
@@ -86,6 +89,8 @@ local function setServer(id, ip, port, mods, name)
 		core_modmanager.activateMod(string.lower(v))--'/mods/'..string.lower(v)..'.zip')
 	end
 end
+
+
 
 local function SetMods(s)
 	local mods = {}
@@ -152,14 +157,13 @@ local HandleNetwork = {
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,
 	['V'] = function(params) vehicleGE.handle(params) end,
-	['L'] = function(params) print(params) SetMods(params) end,
-
+	['L'] = function(params) SetMods(params) end,
 	['K'] = function(params) quitMPWithMessage(params) end, -- Player Kicked Event
-
 	['Z'] = function(params) LauncherVersion = params; be:executeJS('setClientVersion('..params..')'); print("LauncherVersion: "..params..".") end, -- Tell the UI what the launcher version is.
-	--[''] = function(params)  end, --
-	--[''] = function(params)  end, --
+	-- [''] = function(params)  end, --
 }
+
+
 
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
@@ -178,34 +182,34 @@ local function onUpdate(dt)
 			end
 		end
 		--================================ TWO SECONDS TIMER ================================
-		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
+		secondsTimer = secondsTimer + dt -- Time in seconds
 		updateTimer = updateTimer + dt -- Time in seconds
 		if updateTimer > 1 then
-			TCPSocket:send('Up')
+			TCPSocket:send('Up') -- Update ping (keepalive)
 			if status == "LoadingResources" then
-			  print("Sending 'Ul'")
-			  TCPSocket:send('Ul')
+			  --print("Sending 'Ul'")
+			  TCPSocket:send('Ul') -- Ask the launcher for an loading screen update
 			end
 			updateTimer = 0
 		end
-		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 2 seconds
+		-- Called only once (using flip)
+		if secondsTimer > 1 and not flip then
 			TCPSocket:send('A')
 			flip = true
-			--oneSecondsTimer = 0	-- Reset timer
 		end
-		if oneSecondsTimer > 2 and flip and dt > 20000 then -- If oneSecondsTimer pass 2 seconds
+		-- If secondsTImer is more than 2 seconds and the game tick time is greater
+		-- than 20000 then our game is running very slow and or has timed out / crashed.
+		if secondsTimer > 2 and flip and dt > 20000 then
 			disconnectLauncher()
 			connectToLauncher()
 			flip = false
-			--oneSecondsTimer = 0	-- Reset timer
 		end
 		--================================ FIVE SECONDS TIMER ================================
 		if status == "LoadingMapNow" then
 			if MapLoadingTimeout > 5 then
-				if Found == false then
+				if not Found then
 					if scenetree.MissionGroup == nil then --if not found then
-						print("FAILED TO LOAD THE MAP! DID IT GET LOADED INTO THE GAME??")
-						print("GOING BACK...")
+						print("Failed to load the map, did the mod get loaded? -> Going back")
 						Lua:requestReload()
 					else
 						Found = true
@@ -220,32 +224,29 @@ end
 
 local function resetSession(x)
 	print("[CoreNetwork] Reset Session Called!")
-	TCPSocket:send('QS')
+	TCPSocket:send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	GameNetwork.disconnectLauncher()
 	vehicleGE.onDisconnect()
 	connectToLauncher()
 	UI.readyReset()
-	status = ""
-	if x then
-		returnToMainMenu()
-	end
-	--mpmodmanager.setServerMods({})
+	status = "" -- Reset status
+	if x then returnToMainMenu() end
 	mpmodmanager.cleanUpSessionMods()
 end
 
 local function quitMP()
 	print("[CoreNetwork] Reset Session Called!")
-	TCPSocket:send('QG')
+	TCPSocket:send('QG') -- Quit game
 end
 
 local function quitMPWithMessage()
 	print("[CoreNetwork] Reset Session Called!")
-	TCPSocket:send('QG')
+	TCPSocket:send('QG') -- Quit game
 end
 
 local function modLoaded(modname)
-	if modname ~= "beammp" then
+	if modname ~= "beammp" then -- We don't want to check beammp mod
 		TCPSocket:send('R'..modname)
 	end
 end
@@ -263,4 +264,5 @@ M.Server = Server
 print("CoreNetwork Loaded.")
 core_gamestate.requestExitLoadingScreen('MP')
 returnToMainMenu()
+
 return M

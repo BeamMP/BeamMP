@@ -26,7 +26,7 @@ local function sendPowertrain(data, gameVehicleID)
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			GameNetwork.send('Yp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2133, serverVehicleID, data))
+			GameNetwork.send('Yp:'..serverVehicleID..":"..data) -- Send powertrain to server
 		end
 	end
 end

@@ -40,19 +40,6 @@ end
 
 
 local function applyPos(data, serverVehicleID)
-
-	-- 1 = pos.x
-	-- 2 = pos.y
-	-- 3 = pos.z
-
-	-- 4 = vel.x
-	-- 5 = vel.y
-	-- 6 = vel.z
-
-	-- 7 = ang.x
-	-- 8 = ang.y
-	-- 9 = ang.z
-
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
 		--GameNetwork.send('On:'..serverVehicleID)

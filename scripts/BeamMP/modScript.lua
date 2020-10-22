@@ -13,12 +13,6 @@ registerCoreModule("mpConfig")
 load("GameNetwork")
 registerCoreModule("GameNetwork")
 
-load("vehicleSupport")
-registerCoreModule("vehicleSupport")
-
---load("sessionControl")
---registerCoreModule("sessionControl")
-
 load("vehicleGE")
 registerCoreModule("vehicleGE")
 

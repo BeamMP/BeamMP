@@ -226,7 +226,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	print("onServerVehicleSpawned ID's:  "..mpConfig.getPlayerServerID().." == "..playerServerID)
 	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
-		isOwn(gameVehicleID) = 1 -- Insert vehicle in own map
+		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
 		println("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 		if not vehicleName then return end
@@ -404,7 +404,7 @@ local function handle(rawData)
 	--print('vehicleGE:'..rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
-	if code == "s" then -- On server vehicle spawn	
+	if code == "s" then -- On server vehicle spawn
 		-- Get the player role from the data
 		local playerRole = string.match(rawData,"(%w+)%:")
 
@@ -420,11 +420,11 @@ local function handle(rawData)
 
 		-- Get the vehicle data from the data
 		local data = string.match(rawData,":(.*)")
-		
+
 		-- Print data and send it
 		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: "..data)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
-		
+
 	elseif code == "c" then -- This is for the customisation of a vehicle event
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
@@ -432,7 +432,7 @@ local function handle(rawData)
 		print(rawData)
 		local data = string.match(rawData,":(.*)")
 		UpdateVehicle(serverVehicleID, data)
-	
+
 	elseif code == "r" then -- This is for vehicle reset event
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)

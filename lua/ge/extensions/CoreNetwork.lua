@@ -49,7 +49,7 @@ local function disconnectLauncher()
 		TCPSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		serverTimeoutTimer = 0 -- Reset timeout delay
-		oneSecondsTimer = 0
+		secondsTimer = 0
 	end
 end
 --====================== DISCONNECT FROM SERVER ======================
@@ -152,7 +152,7 @@ local function HandleU(params)
 end
 
 local HandleNetwork = {
-	['A'] = function(params) oneSecondsTimer = 0; flip = false; end, -- Connection Alive Checking
+	['A'] = function(params) secondsTimer = 0; flip = false; end, -- Connection Alive Checking
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); print("Server List Received.") end,
 	['U'] = function(params) HandleU(params) end,
 	['M'] = function(params) LoadLevel(params) end,

@@ -946,7 +946,7 @@ local function workOffChangedMod(filename, type)
     if mod and mod.active ~= false then
       log('D', 'onFileChanged', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
-	  CoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////					
+	  CoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////
     end
     FS:triggerFilesChanged(files) -- alert c++ of changed files
     stateChanged()
@@ -1187,8 +1187,10 @@ end
 -- ///////////////////////////////////////////////////////////////////
 local function getModList()
   return mods
-end						   
+end
+M.getModList = getModList			   
 -- ///////////////////////////////////////////////////////////////////
+
 -- public interface
 M.isReady = isReady
 M.onFileChanged = onFileChanged

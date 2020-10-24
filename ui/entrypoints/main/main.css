@@ -1144,3 +1144,16 @@ table.bng-list-table td {
   display: block;
   padding-top: 100%;
 }
+
+/* ----------------------------- for news link */
+
+.tile a {
+  background-color: rgba(0,0,0,0);
+  text-decoration: none;
+  color: white;
+}
+
+.tile a:visited {
+  background-color: rgba(0,0,0,0);
+  color: white;
+}

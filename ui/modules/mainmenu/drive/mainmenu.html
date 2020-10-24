@@ -105,7 +105,15 @@
         {{ 'ui.mainmenu.exit' | translate}}
       </div>
     </md-grid-tile>
-
+	
+	
+	<md-grid-tile md-colspan="2" class="other tile" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <a class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%;" onclick="openForumLink()">
+        <span ng-class="{'heading-long': (('ui.mainmenu.news' | translate).length) > 5}" class="heading" >FORUM</span>
+      </a>
+    </md-grid-tile>
+	
+	
     <md-grid-tile ui-sref="iconViewer" ng-if="!app.shipping" md-colspan="1" class="other tile" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
       <div class="uppercase">
          Icons

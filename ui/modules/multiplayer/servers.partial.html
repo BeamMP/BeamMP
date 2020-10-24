@@ -11,13 +11,15 @@
 <md-content>
 	<div>
 		<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
-			<input type="text" id="search" name="search" placeholder="Search"/>
-			<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
-			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refresh()">Refresh</md-button>
-			<div>
-				<md-checkbox id="toggleOutdated" ng-change="multiplayer.toggleOutdated()">Show Outdated Servers</md-checkbox>
-			</div>
-			<!--<md-button id="connect-button" class="button" ng-class="" ng-click="multiplayer.connect()">Connect</md-button>-->
+			<input type="text" id="search" name="search" placeholder="Search" oninput="displayServers()"/>
+			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
+
+			<input type="checkbox" id="check_hasPlayers" name="check_hasPlayers" style="margin-left:15px;" onclick="displayServers()"/>
+				<label for="check_hasPlayers" style="margin-right:15px; color: white;">Not empty</label>
+			<input type="checkbox" id="check_notFull" name="check_notFull" onclick="displayServers()"/>
+				<label for="check_notFull" style="color: white;">Not full</label>
+
+			<md-button id="connect-button" class="button" ng-class="" ng-click="multiplayer.connect()">{{:: 'ui.multiplayer.connect' | translate}}</md-button>
 		</md-list-item>
 		<md-divider></md-divider>
 	</div>
@@ -25,10 +27,10 @@
 	<table id="serversTable">
 		<thead>
 			<tr id="header">
-				<th>Location</th>
-				<th>Description</th>
-				<th>Map</th>
-				<th>Players</th>
+				<th>{{:: 'ui.multiplayer.location' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.description' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.map' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.players' | translate}}</th>
 				<th>PPS</th>
 			</tr>
 		</thead>
@@ -39,7 +41,7 @@
 
 	<div id="footer">
 		<span id="TEMPAREA" style="display:none;"></span>
-  </div>
+	</div>
 </md-content>
 
 <script>

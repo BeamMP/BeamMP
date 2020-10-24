@@ -2,16 +2,31 @@
 
 <div id="LoadingServer" style="display: none;">
     <div id="LoadingBody">
-        <h1>Connecting</h1>
-        <span id="LoadingStatus">Loading...</span>
+        <h1>{{:: 'ui.multiplayer.connecting' | translate}}</h1>
+        <span id="LoadingStatus">{{:: 'ui.multiplayer.loading' | translate}}</span>
     </div>
+</div>
+
+<div id="addCustomFav" style="display: none;">
+
+	<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
+		<h1>Add custom server :</h1>
+		<md-button id="" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </md-button>
+	</md-list-item>
+
+	<center>
+		<input type="text" id="customFavName" name="customFavName" placeholder="Custom server"/>
+		<input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP"/>
+		<input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814"/>
+		<md-button id="" class="button" ng-click="multiplayer.addCustomServer()">Save</md-button>
+	</center>
 </div>
 
 <md-content id="back" layout="column">
 
     <md-toolbar class="md-primary" id="top-bar">
         <md-list-item layout="row" class="">
-            <h1 class="md-toolbar-tools" style="width:auto;">Multiplayer</h1>
+            <h1 class="md-toolbar-tools" style="width:auto;">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
             <!--<p id="launcher-status" style="text-align:right; margin-right:10px;">Launcher Disconnected</p>-->
 			      <!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
         </md-list-item>
@@ -21,17 +36,17 @@
         <md-content layout="column" id="left-menu">
             <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.servers') !== -1)}" ui-sref="menu.multiplayer.servers" style="text-align:left;">
                 <md-icon class="material-icons">desktop_windows</md-icon>
-                Servers
+				{{:: 'ui.multiplayer.servers' | translate}}
             </md-button>
 
             <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
                 <md-icon class="material-icons">star</md-icon>
-                Favorites
+				{{:: 'ui.multiplayer.favorites' | translate}}
             </md-button>
 
             <md-button id="direct-connect-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
                 <md-icon class="material-icons">web</md-icon>
-                Direct Connect
+				{{:: 'ui.multiplayer.direct_connect' | translate}}
             </md-button>
 
             <!--<md-button id="settings-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.settings') !== -1)}" ui-sref="menu.multiplayer.settings" style="text-align:left;">
@@ -45,7 +60,7 @@
         </md-content>
 
         <div flex style="position: relative;">
-            <md-content ui-view class="container" style="background: transparent; overflow: auto; /*margin-bottom: 45px;*/"></md-content>
+            <md-content ui-view class="container" style="background: transparent; overflow: auto;"></md-content>
         </div>
 
         <div ui-view="edit" layout="column"></div>

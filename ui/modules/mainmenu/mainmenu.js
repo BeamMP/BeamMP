@@ -261,6 +261,7 @@ angular.module('beamng.stuff')
 .controller('MenuController', ['$scope', 'bngApi', 'Utils', '$state', function ($scope, bngApi, Utils, $state) {
   'use strict';
   var vm = this;
+  bngApiScope = bngApi;
 
   vm.showView = false;
 
@@ -407,3 +408,7 @@ angular.module('beamng.stuff')
 
   bngApi.engineLua('core_hardwareinfo.requestInfo()');
 }]);
+
+function openForumLink(){
+	bngApiScope.engineLua(`openWebBrowser("http://forum.beammp.com")`);
+}

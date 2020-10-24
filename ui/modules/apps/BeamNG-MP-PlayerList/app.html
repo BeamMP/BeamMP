@@ -1,36 +1,45 @@
 <div ng-controller="PlayerList" id="PlayerList" class="multiplayerPlayerList" ng-init="init()" ng-style="background-color: rgba(0, 0, 0, 0)">
 	<style>
-	.popout-list {
-		display: none;
-		margin-right: 80px;
-		//background-color: rgba(0, 0, 0, 0.5)
-	}
-	.show-button {
-		color: white;
-		border: 0px;
-		width: 80px;
-		height: 140px;
-		position: absolute;
-		right: 0;
-		background-color: rgba(0, 0, 0, 0.5)
-	}
-	.multiplayerPlayerList {
-		color: white;
-		box-sizing: border-box;
-		padding:2px;
-		background-color: rgba(0, 0, 0, 0)
-	}
-	td.playerlistName {
-		padding: 2px 5px;
-	}
+		.popout-list {
+			display: none;
+			margin-right: 25px;
+			background-color: rgba(0, 0, 0, 0.5);
+			width:100%;
+			resize:both;
+		}
+		.plist-show-button {
+			color: white;
+			font-weight: bold;
+			border: 0px;
+			width: 25px;
+			height: 160px;
+			position: absolute;
+			right: 0;
+			background-color: rgba(0, 0, 0, 0.5)
+		}
+		.tp-button {
+			color: white;
+			border: 0px;
+			//width: 25px;
+			//height: 155px;
+			//position: absolute;
+			//right: 0;
+			background-color: rgba(0, 0, 0, 0.5)
+		}
+		.multiplayerPlayerList {
+			color: white;
+			box-sizing: border-box;
+			padding:2px;
+			background-color: rgba(0, 0, 0, 0)
+		}
 	</style>
 	<div style="display:flex; resize:both;">
-		<div class="popout-list" id="list-container" style="width:100%; resize:both;">
-			<table id="playerstable" border="1" style="border-collapse: collapse; width:100%; background-color: rgba(0, 0, 0, 0.5)">
+		<div class="popout-list" id="plist-container">
+			<table id="playerstable" border="1" style="border-collapse: collapse; width:100%;">
 				<tr><th colspan="2">Players</th></tr>
-				<tr><td>Waiting for player to leave / join to update</td><td width="30px"><button onclick="teleportToPlayer('meow')">TP</button></td></tr>
+				<tr><td>No players.. something is wrong</td><td width="30px"><button class="tp-button" onclick="teleportToPlayer('meow')">TP</button></td></tr>
 			</table>
 		</div>
-		<button class="show-button" id="show-button" onclick="toggleList()">Show Players</button>
+		<button class="plist-show-button" id="plist-show-button" onclick="toggleList()">P l a y e r s</button>
 	</div>
 </div>

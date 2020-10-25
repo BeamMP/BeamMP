@@ -53,7 +53,7 @@ local function onInit()
 		local setMode = device.setMode
 
 		device.setMode = function(device, mode, ...)
-			print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
+			--print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
 
 			sendPowertrain(device.name, mode)
 

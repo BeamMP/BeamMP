@@ -243,12 +243,14 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		--if decodedData[9] == "null" then print("oh no meow 3:") return end
 
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
-		print("New Vehicles ID : "..spawnedVeh:getID())
-		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
-		dump(vehiclesMap[spawnedVeh:getID()])
-		nicknameMap[tostring(spawnedVeh:getID())] = {}
-		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
-		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
+		local spawnedVehID = spawnedVeh:getID()
+		print("New Vehicles ID : "..spawnedVehID)
+		insertVehicleMap(spawnedVehID, serverVehicleID) -- Insert new vehicle ID in map
+		dump(vehiclesMap[spawnedVehID])
+		nicknameMap[tostring(spawnedVehID)] = {}
+		nicknameMap[tostring(spawnedVehID)].nickname = playerNickname
+		nicknameMap[tostring(spawnedVehID)].role = playerRole
+		core_vehicles.setPlateText(playerNickname, spawnedVehID)
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
@@ -501,7 +503,7 @@ local function onUpdate(dt)
 			if veh ~= nil then
 				--print("veh:")
 				localPos = veh:getPosition()
-				print(tostring(localPos.x).." "..tostring(localPos.y).." "..tostring(localPos.z))
+				--print(tostring(localPos.x).." "..tostring(localPos.y).." "..tostring(localPos.z))
 			end
 		end
 
@@ -527,9 +529,6 @@ local function onUpdate(dt)
 							end
 						end
 					end
-
-					dump(localPos)
-					print(dist)
 
 					debugDrawer:drawTextAdvanced(
 						pos, -- Position in 3D

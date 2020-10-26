@@ -1,27 +1,37 @@
 <div ng-controller="Session" id="Session" class="bngApp multiplayersession" ng-init="init()" ng-style="background-color: rgba(0, 0, 0, 0.5)">
-  <div class="col col-wide">
-    <span><span id="Session-Status" style="text-overflow: ellipsis"></span></span>
-  </div>
-  <div class="col col-right">
-    <span>Players: <span id="Session-PlayerCount">0/10</span></span>
-    <span>Ping: <span id="Session-Ping">?</span></span>
-    <button type="button" name="button" class="QuitButton" ng-click="mpquit()">Quit</button>
-  </div>
-  <style>
-    div#Session {
-      display: -webkit-box;
-      height: 31px;
-      padding: 2px;
-    }
-    button.QuitButton {
-      width: 55px;
-    }
-    .col-wide {
-      padding: 3px 0px 0px 5px;
-    }
-    .col-right {
-      position: absolute;
-      right: 2px;
-    }
-  </style>
+	<div class="outerDiv">
+		<div class="col col-wide">
+			<span id="Session-Status"></span>
+		</div>
+		<div class="col col-right">
+			<span>Players: <span id="Session-PlayerCount">0/10</span></span>
+			<span>Ping: <span id="Session-Ping">?</span></span>
+			<button type="button" name="button" class="QuitButton" ng-click="mpquit()">Quit</button>
+		</div>
+	</div>
+	<style>
+	div#Session {
+		display: -webkit-box;
+		height: 31px;
+		padding: 2px;
+	}
+	button.QuitButton {
+		width: 55px;
+	}
+	.col-wide {
+		overflow: hidden;
+		white-space: nowrap;
+		flex:1 1;
+		margin: 2px;
+	}
+	.col-right {
+		white-space: nowrap;
+		flex:0 0;
+	}
+	.outerDiv{
+		display:flex;
+		width:100%;
+		align-items:center;
+	}
+	</style>
 </div>

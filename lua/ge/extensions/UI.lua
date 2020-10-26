@@ -97,6 +97,7 @@ end
 local function chatMessage(rawMessage)
   local message = string.sub(rawMessage, 2)
 	be:executeJS('addMessage("'..message..'")')
+	TriggerClientEvent("ChatMessageReceived", message)
 end
 
 local function chatSend(msg)

@@ -31,15 +31,15 @@ local syncVehIDs = {}
 local activeVehicle = nil
 
 local roleToInfo = {
-	['USER'] = {forecolor = ColorF(1, 1, 1, 1), backcolor = ColorI(0, 0, 0, 127), tag = ""},
-	['EA'] = {forecolor = ColorF(155/255, 89/255, 182/255, 255/255), backcolor = ColorI(69, 0, 150, 127), tag = " [Early Access]"},
-	['YT'] = {forecolor = ColorF(255/255, 0, 0, 255/255), backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]"},
-	['ET'] = {forecolor = ColorF(210/255, 214/255, 109/255, 255/255), backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]"},
-	['SUPPORT'] = {forecolor = ColorF(68/255, 109/255, 184/255, 255/255), backcolor = ColorI(68, 109, 184, 127), tag = " [Support]"},
-	['MOD'] = {forecolor = ColorF(68/255, 109/255, 184/255, 255/255), backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]"},
-	['ADM'] = {forecolor = ColorF(218/255, 0/255, 78/255, 255/255), backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]"},
-	['GDEV'] = {forecolor = ColorF(252/255, 107/255, 3/255, 255/255), backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]"},
-	['MDEV'] = {forecolor = ColorF(194/255, 55/255, 55/255, 255/255), backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]"}
+	['USER'] = { backcolor = ColorI(0, 0, 0, 127), tag = "" },
+	['EA'] = { backcolor = ColorI(69, 0, 150, 127), tag = " [Early Access]" },
+	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]" },
+	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]" },
+	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Support]" },
+	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]" },
+	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]" },
+	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]" },
+	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]" }
 }
 --[[
 	USER = Default
@@ -93,6 +93,21 @@ end
 local function getVehicleMap()
     return vehiclesMap
 end
+
+local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
+	local nicknameSimple = {}
+	for k,v in pairs(nicknameMap) do
+		nicknameSimple[k] = v.nickname
+		--print("carID"..tostring(k).." is owned by "..nicknameSimple[k])
+	end
+	local thisNick =  mpConfig.getNickname()
+	--dump(nicknameMap)
+	--dump(nicknameSimple)
+	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
+
+    return nicknameSimple
+end
+
 --============== SOME FUNCTIONS ==============
 
 
@@ -533,7 +548,7 @@ local function onUpdate(dt)
 					debugDrawer:drawTextAdvanced(
 						pos, -- Position in 3D
 						String(" "..tostring(nicknameMap[vehIDstr].nickname)..roleInfo.tag..dist.." "), -- Text
-						roleInfo.forecolor, true, false, -- Foreground Color / Background / Wtf
+						ColorF(1, 1, 1, 1), true, false, -- Foreground Color / Background / Wtf
 						roleInfo.backcolor -- Background Color
 					)
 				end
@@ -568,6 +583,7 @@ M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
 M.getVehicleMap           = getVehicleMap
+M.getNicknameMap          = getNicknameMap
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed

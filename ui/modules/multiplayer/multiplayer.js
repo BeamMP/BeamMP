@@ -248,7 +248,7 @@ angular.module('beamng.stuff')
 
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
-			if(v.version == launcherVersion){
+			if(v.cversion == launcherVersion){
 				v.strippedName = stripCustomFormatting(v.sname);
 				serverArray.push(v);
 			}
@@ -478,7 +478,7 @@ angular.module('beamng.stuff')
 
 		for (var i = 0; i < data.length; i++) {
 			var v = data[i][Object.keys(data[i])[0]]
-			if(v.version == launcherVersion){
+			if(v.cversion == launcherVersion){
 				v.strippedName = stripCustomFormatting(v.sname);
 				serverArray.push(v);
 			}

@@ -62,11 +62,7 @@ function interpolateRGB(colors, numOfSteps, step)
 	local i = math.floor(h * table.getn(colors))
 	local p = h * table.getn(colors) - i
 	local q = 1 - p
-
-
 	local colorsIndex = i % table.getn(colors) + 1
-	
-	local p = step % timePeriod;
 	
 	local r = colors[colorsIndex].r * (1.0 - p) + ( colors[colorsIndex+1].r * p );
 	local g = colors[colorsIndex].g * (1.0 - p) + ( colors[colorsIndex+1].g * p );
@@ -82,7 +78,6 @@ function interpolateHSL(colors, numOfSteps, step)
 	local p = h * table.getn(colors) - i
 	local q = 1 - p
 	local colorsIndex = i % table.getn(colors) + 1
-	local p = step % timePeriod;
 
 	local h1, s1, l1 = rgbToHsl(colors[colorsIndex].r, colors[colorsIndex].g, colors[colorsIndex].b)
 

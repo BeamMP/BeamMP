@@ -733,6 +733,20 @@ local function activateMod(modname)
   mods[modname].active = true
   extensions.hook('onModActivated', deepcopy(mods[modname]))
   stateChanged()
+
+  local dir, basefilename, ext = path.splitWithoutExt(mods[modname].fullpath)
+
+  local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
+  print(mods[modname].filename)
+  print("Loaded mod " .. basefilename)
+
+  local status, ret = pcall(dofile, modscriptpath)
+  if not status then
+    log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
+    log('E', 'initDB.modScript', dumps(ret))
+  end
+  
+  loadCoreExtensions()
 end
 
 local function activateModId(modID)

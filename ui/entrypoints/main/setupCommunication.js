@@ -45,7 +45,7 @@ if (location.protocol !== 'local:') {
       if(d.id == -1) {
         switch (d.api) {
           case 'jsHook':
-            if (HookManager) {
+            if (HookManager!==null) {
               HookManager.trigger.apply(undefined, d.data);
             }
             break;

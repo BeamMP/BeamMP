@@ -249,11 +249,6 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	    controller: 'MultiplayerDirectController as multiplayermenu'
 	  })
 
-	  .state('menu.multiplayer.settings', {
-	    url: '/mpsettings',
-	    templateUrl: 'modules/multiplayer/settings.partial.html',
-	    controller: 'MultiplayerSettingsController as multiplayermenu'
-	  })
 
     .state('menu.options', {
       url: '/options',

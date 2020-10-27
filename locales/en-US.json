@@ -187,6 +187,7 @@
     "ui.common.showDetails": "Show Details",
     "ui.common.default": "Default",
     "ui.common.info": "Info",
+    "ui.common.sync": "Sync",
 
     "ui.common.enable": "Enable",
     "ui.common.disable": "Disable",
@@ -826,10 +827,12 @@
 
     "ui.options.multiplayer.nameTags": "Show player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Alternate nametag colors",
+	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",
     "ui.options.multiplayer.debugOutput": "Show debug messages in the console",
-    "ui.options.multiplayer.launcherPort": "Port that the launcher is running on",
-    "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",
+    "ui.options.multiplayer.launcherPort": "Launcher port:[br]Don't change unless you have to",
+    "ui.options.multiplayer.launcherPortWarn": "Don't change unless you have to",
     "ui.options.multiplayer.launcherPort.tooltip": "Set this to the custom port that the launcher was set to use.",
+    "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",
     "ui.options.multiplayer.clearLauncherCache.tooltip": "Enabling this will clear the currently download mod cache of the launcher. Doing this will result in you having to download all mods for each server you join again.",
     "ui.multiplayer.clear": "Clear Launcher Cache",
 
@@ -2867,5 +2870,29 @@
     "vehicle.fire.fuelTankRuptured": "Fuel tank ruptured",
     "vehicle.turbocharger.overheating": "Turbo is overheating",
     "vehicle.main.instability": "Instability detected in '{{vehicle}}'. Simulation paused preemptively",
-    "vehicle.core.spawnError":"This is often caused by broken mods or corrupt core files. Please check in Safe Mode [url=https://documentation.beamng.com/troubleshooting/safe_mode.html][Click here for Safe Mode instructions][/url]If persists, perform a Clean Installation [url=https://documentation.beamng.com/troubleshooting/clean_install.html][Click here Clean Install instructions][/url]"
+    "vehicle.core.spawnError":"This is often caused by broken mods or corrupt core files. Please check in Safe Mode [url=https://documentation.beamng.com/troubleshooting/safe_mode.html][Click here for Safe Mode instructions][/url]If persists, perform a Clean Installation [url=https://documentation.beamng.com/troubleshooting/clean_install.html][Click here Clean Install instructions][/url]",
+	
+	
+	
+	"ui.options.multiplayer.nameTagTitle": "Nametags",
+	"ui.options.multiplayer.others": "Others",
+
+
+	"ui.multiplayer.multiplayer": "Multiplayer",
+	"ui.multiplayer.connecting": "Connecting",
+	"ui.multiplayer.loading": "Loading...",
+	"ui.multiplayer.servers": "Servers",
+	"ui.multiplayer.favorites": "Favorites",
+	"ui.multiplayer.direct_connect": "Direct connect",
+	"ui.multiplayer.refresh": "Refresh",
+	"ui.multiplayer.connect": "Connect",
+
+	"ui.multiplayer.addCustomServer": "Add Custom Server",
+
+	"ui.multiplayer.location": "Location",
+	"ui.multiplayer.description": "Title",
+	"ui.multiplayer.map": "Map",
+	"ui.multiplayer.players": "Players"
+
+
 }

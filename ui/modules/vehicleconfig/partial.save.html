@@ -9,7 +9,19 @@
         {{ vehConf_save.configList.indexOf(vehConf_save.saveName) === -1 ? 'save' : 'overwrite' | translate}}
       </md-button></div>
     </div>
-    <small>({{::'ui.vehicleconfig.mouseOverUi' | translate}})</small>
+	
+	<div layout="row" layout-align="space-between stretch" class="">
+
+		<small style="width:70%;">({{::'ui.vehicleconfig.mouseOverUi' | translate}})</small>
+	
+		<md-checkbox flex ng-model="vehConf_tuning.saveConfigScreenshot" style="width=50px;">
+		<md-tooltip md-direction="right">
+			Save a screenshot of your config
+		</md-tooltip md-no-ink>
+			Save screenshot
+		</md-checkbox>
+
+	</div>
   </div>
 
   <md-list layout="column" style="overflow: auto;">

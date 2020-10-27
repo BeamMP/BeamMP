@@ -33,7 +33,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp()
 		TCPSocket:setoption("keepalive",true) -- Keepalive to avoid connection closing too quickly
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort")); -- FIXME Better way to save settings and config
+		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)); -- FIXME Better way to save settings and config
 		launcherConnectionStatus = 1
 	end
 end
@@ -109,6 +109,7 @@ end
 local function connectToServer(ip, port, modString)
 	if ip ~= undefined and port ~= undefined then
 		TCPSocket:send('C'..ip..':'..port)
+		Server.NAME = nil
 	else
 		TCPSocket:send('C'..Server.IP..':'..Server.PORT)
 		local mods = {}

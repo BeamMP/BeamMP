@@ -76,20 +76,24 @@
   </md-list-item>
 
   <md-divider></md-divider>
-  <md-subheader class="md-no-sticky">{{:: 'ui.options.physics' | translate }}</md-subheader>
-
-  <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.physics.noCollisions' | translate }}</p>
-    <md-checkbox ng-model="options.data.values.disableDynamicCollision" ng-change="options.applyState()"></md-checkbox>
-  </md-list-item>
-
-  <div class="md-padding" ng-if="options.data.values.disableDynamicCollision" layout="column" layout-align="center center">
-    <strong style="color:#dd3333">WARNING:</strong>
-    <span style="color:#dd3333">Vehicles won't collide with each other or with its own parts</span>
-    <span layout="column" layout-align="center center">Use only as a last resort for better framerates (remember to check the tips provided in Help &gt; Performance)</span>
+  
+  <div id="collisionsContainer">
+	<md-subheader class="md-no-sticky">{{:: 'ui.options.physics' | translate }}</md-subheader>
+	
+	<md-list-item md-no-ink>
+	  <p>{{:: 'ui.options.physics.noCollisions' | translate }}</p>
+	  <md-checkbox ng-model="options.data.values.disableDynamicCollision" ng-change="options.applyState()"></md-checkbox>
+	</md-list-item>
+	
+	<div class="md-padding" ng-if="options.data.values.disableDynamicCollision" layout="column" layout-align="center center">
+	  <strong style="color:#dd3333">WARNING:</strong>
+	  <span style="color:#dd3333">Vehicles won't collide with each other or with its own parts</span>
+	  <span layout="column" layout-align="center center">Use only as a last resort for better framerates (remember to check the tips provided in Help &gt; Performance)</span>
+	<md-divider></md-divider>
+    </div>
   </div>
 
-  <md-divider></md-divider>
+  
   <md-subheader class="md-no-sticky">{{:: 'ui.options.traffic' | translate }}</md-subheader>
   
   <md-list-item md-no-ink>

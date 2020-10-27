@@ -77,6 +77,14 @@ table#serversTable {
 	background-color:#555555;
 }
 
+.description-table {
+	border-spacing: 22px 2px;
+}
+
+.description-table td{
+	border-right: 0px;
+}
+
 .highlight {
 	background-color: #99AAB5 !important;
 }
@@ -103,15 +111,17 @@ table#serversTable {
 	background-color: white;
 }
 
+.close-button {
+	width:50px;
+	margin-left:auto;
+	float:right;
+	margin-right:5px;
+}
+
 #connect-button {
 	width:200px;
 	margin-left:auto;
 	float:right;
-}
-
-#toggleOutdated {
-	margin-bottom: 17px;
-	color: white;
 }
 
 #direct-connect-button {
@@ -154,6 +164,27 @@ div#LoadingBody {
     padding: 15px;
     border-radius: 5px;
 }
+
+div#addCustomFav {
+	color: white;
+	background-color: rgba(0, 0, 0, 0.75);
+	
+	position: absolute;
+    z-index: 100;
+
+	top: 40%;
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	left:50%;
+	
+	
+    background-color: #848484;
+    padding: 15px;
+    border-radius: 5px;
+}
+
 
 input[type="text"] {
   display: block;

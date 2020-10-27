@@ -154,28 +154,28 @@ local function onUpdate(dt) --ONUPDATE OPEN
 		eTable = {}
 	end
 
-	if sendGearNow == true and e.gearIndex ~= gearMem then
-		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gearIndex.."\', \'"..obj:getID().."\')") -- Send it to GE lua
+	if sendGearNow == true and e.gear ~= gearMem then
+		obj:queueGameEngineLua("electricsGE.sendGear(\'"..e.gear.."\', \'"..obj:getID().."\')") -- Send it to GE lua
 		sendGearNow = false
-		gearMem = e.gearIndex
+		gearMem = e.gear
 	end
 end --ONUPDATE CLOSE
 
 
 
 local function applyGear(data)
-	if (data) then
-		local gear = tonumber(data)
+	if not (data) then return end
 
-		-- workaround for automatic and dct gearboxes
-		local gearbox = powertrain.getDevice("gearbox")
-		if gearbox and (gearbox.type == "automaticGearbox" or gearbox.type == "dctGearbox") then
-			if gear >= 1 then
-				gear = 2
-			end
-		end
-
-		controller.mainController.shiftToGearIndex(gear)
+	if data == "R" then
+		controller.mainController.shiftToGearIndex(-1)
+	elseif data == "N" then
+		controller.mainController.shiftToGearIndex(0)
+	elseif data == "P" then
+		controller.mainController.shiftToGearIndex(1)
+	elseif data == "D" then
+		controller.mainController.shiftToGearIndex(2)
+	else
+		controller.mainController.shiftToGearIndex(tonumber(data))
 	end
 end
 

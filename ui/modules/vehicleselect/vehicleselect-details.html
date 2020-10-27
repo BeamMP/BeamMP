@@ -89,6 +89,6 @@
 
   <div layout-md="column" layout="row">
     <md-button flex class="md-raised md-primary" ng-click="vehicle.launchConfig(true)" ng-if="!vehicle.mode.hide.spawnNew" ng-disabled="vehicle.disableSpawnNew(app.gameState)">Spawn New</md-button>
-    <!--<md-button flex class="md-raised md-accent" ng-click="vehicle.launchConfig(false)">{{vehicle.mode.selectButton ? (vehicle.mode.selectButton | translate ) : "Replace Current"}}</md-button>-->
+    <md-button flex class="md-raised md-accent" ng-click="vehicle.launchConfig(false)">{{vehicle.mode.selectButton ? (vehicle.mode.selectButton | translate ) : "Replace Current"}}</md-button>
   </div>
 </md-content>

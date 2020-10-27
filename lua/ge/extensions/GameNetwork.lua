@@ -29,7 +29,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		keep = TCPSocket:setoption("keepalive",true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', settings.getValue("launcherPort")+1); -- Connecting
+		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
 		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end
@@ -100,20 +100,27 @@ function AddEventHandler(n, f)
 	dump(eventTriggers)
 end
 
-function TriggerServerEvent(n, d)
-	TCPSocket:send('E:'..n..':'..d)
-end
-
 local function handleEvents(p)  --- E:<NAME>:data
-	print(p)
+	print("triggered event string: "..p)
 	local eventName = string.match(p,"(%w+)%:")
 	local data = p:gsub(eventName..":", "")
+	print("triggered event name: "..eventName)
+	print("triggered event data: "..data)
 	for i=1,#eventTriggers do
 		if eventTriggers[i].name == eventName then
 			eventTriggers[i].func(data)
 		end
 	end
 end
+
+function TriggerServerEvent(n, d)
+	TCPSocket:send('E:'..n..':'..d)
+end
+
+function TriggerClientEvent(n, d)
+	handleEvents(n..':'..d)
+end
+
 
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,

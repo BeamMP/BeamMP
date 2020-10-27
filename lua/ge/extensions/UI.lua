@@ -52,11 +52,15 @@ local function updatePlayersList(playersString)
 end
 
 local function setPing(ping)
-	be:executeJS('setPing("'..ping..' ms")')
+	if tonumber(ping) > -1 then
+		be:executeJS('setPing("'..ping..' ms")')
+	else
+		--print("ping is -1")
+	end
 end
 
 local function setNickName(name)
-  print("My NickName: "..name)
+  --print("My Nickname: "..name)
 	be:executeJS('setNickname("'..name..'")')
 end
 
@@ -68,14 +72,14 @@ local function setPlayerCount(playerCount)
 	be:executeJS('setPlayerCount("'..playerCount..'")')
 end
 
-local function error(message)
-	print("UI Error > "..message)
-	ui_message(''..message, 10, 0, 0)
+local function error(text)
+	print("UI Error > "..text)
+	ui_message(''..text, 10, 0, 0)
 end
 
-local function message(mess)
-	print("[Message] > "..mess)
-	ui_message(''..mess, 10, 0, 0)
+local function message(text)
+	print("[Message] > "..text)
+	ui_message(''..text, 10, 0, 0)
 end
 
 local function showNotification(type, text)
@@ -93,6 +97,7 @@ end
 local function chatMessage(rawMessage)
   local message = string.sub(rawMessage, 2)
 	be:executeJS('addMessage("'..message..'")')
+	TriggerClientEvent("ChatMessageReceived", message)
 end
 
 local function chatSend(msg)
@@ -124,14 +129,14 @@ local function ready(src)
   end
 
   if src == "MP-SESSION" or src == "FIRSTVEH" then
-    if ready then
-      ready = false
-      GameNetwork.connectToLauncher()
-    end
+	if ready then
+	  ready = false
+	  GameNetwork.connectToLauncher()
+	end
 
-    if CoreNetwork.Server.NAME ~= nil then
-      setStatus("Server : "..CoreNetwork.Server.NAME)
-    end
+	if CoreNetwork.Server ~= nil and CoreNetwork.Server.NAME ~= nil then
+	  setStatus("Server: "..CoreNetwork.Server.NAME)
+	end
   end
 end
 

@@ -12,6 +12,7 @@
 	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one
 
 
+
 local M = {}
 print("vehicleGE Initialising...")
 
@@ -25,16 +26,20 @@ local vehiclesMap = {}
 local nicknameMap = {}
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
+local syncTimer = 0
+local syncVehIDs = {}
+local activeVehicle = nil
+
 local roleToInfo = {
-	['USER'] = {forecolor = ColorF(1, 1, 1, 1), backcolor = ColorI(0, 0, 0, 127), tag = ""},
-	['EA'] = {forecolor = ColorF(155/255, 89/255, 182/255, 255/255), backcolor = ColorI(69, 0, 150, 127), tag = " [Early Access]"},
-	['YT'] = {forecolor = ColorF(255/255, 0, 0, 255/255), backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]"},
-	['ET'] = {forecolor = ColorF(210/255, 214/255, 109/255, 255/255), backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]"},
-	['SUPPORT'] = {forecolor = ColorF(68/255, 109/255, 184/255, 255/255), backcolor = ColorI(68, 109, 184, 127), tag = " [Support]"},
-	['MOD'] = {forecolor = ColorF(68/255, 109/255, 184/255, 255/255), backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]"},
-	['ADM'] = {forecolor = ColorF(218/255, 0/255, 78/255, 255/255), backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]"},
-	['GDEV'] = {forecolor = ColorF(252/255, 107/255, 3/255, 255/255), backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]"},
-	['MDEV'] = {forecolor = ColorF(194/255, 55/255, 55/255, 255/255), backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]"}
+	['USER'] = { backcolor = ColorI(0, 0, 0, 127), tag = "" },
+	['EA'] = { backcolor = ColorI(69, 0, 150, 127), tag = " [Early Access]" },
+	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]" },
+	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]" },
+	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Support]" },
+	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]" },
+	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]" },
+	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]" },
+	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]" }
 }
 --[[
 	USER = Default
@@ -46,6 +51,7 @@ local roleToInfo = {
 	GDEV = BeamNG Staff
 	MDEV = MP Dev
 ]]
+
 -- ============= VARIABLES =============
 
 
@@ -84,10 +90,24 @@ local function getOwnMap()
     return ownMap
 end
 
-
 local function getVehicleMap()
     return vehiclesMap
 end
+
+local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
+	local nicknameSimple = {}
+	for k,v in pairs(nicknameMap) do
+		nicknameSimple[k] = v.nickname
+		--print("carID"..tostring(k).." is owned by "..nicknameSimple[k])
+	end
+	local thisNick =  mpConfig.getNickname()
+	--dump(nicknameMap)
+	--dump(nicknameSimple)
+	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
+
+    return nicknameSimple
+end
+
 --============== SOME FUNCTIONS ==============
 
 
@@ -177,6 +197,10 @@ local function sendCustomVehicleData(gameVehicleID, vehicleConfig)
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	GameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend)--Network.buildPacket(1, 2020, 0, stringToSend))	-- Send table that contain all vehicle informations for each vehicle
+
+	syncTimer = 0
+	syncVehIDs[gameVehicleID] = 0
+	print("clearing id "..gameVehicleID.." from the sync table")
 end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
@@ -212,7 +236,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
-	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sended the vehicle
+	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sent the vehicle
 	--local serverVehicleID = decodedData[3] -- Server ID of the vehicle
 	local vehicleName     = decodedData[3] -- Vehicle name
 	local vehicleConfig   = jsonDecode(decodedData[4]) -- Vehicle config
@@ -221,7 +245,6 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 	local pos             = vec3(jsonDecode(decodedData[9]))
 	local rot             = quat(jsonDecode(decodedData[10]))
-	--local playerNickname  = decodedData[9]
 
 	print("onServerVehicleSpawned ID's:  "..mpConfig.getPlayerServerID().." == "..playerServerID)
 	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
@@ -232,13 +255,17 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		if not vehicleName then return end
 		if getGameVehicleID(serverVehicleID) ~= nil then return end
 		println("New vehicle : "..vehicleName)
+		--if decodedData[9] == "null" then print("oh no meow 3:") return end
+
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
-		print("New Vehicles ID : "..spawnedVeh:getID())
-		insertVehicleMap(spawnedVeh:getID(), serverVehicleID) -- Insert new vehicle ID in map
-		dump(vehiclesMap[spawnedVeh:getID()])
-		nicknameMap[tostring(spawnedVeh:getID())] = {}
-		nicknameMap[tostring(spawnedVeh:getID())].nickname = playerNickname
-		nicknameMap[tostring(spawnedVeh:getID())].role = playerRole
+		local spawnedVehID = spawnedVeh:getID()
+		print("New Vehicles ID : "..spawnedVehID)
+		insertVehicleMap(spawnedVehID, serverVehicleID) -- Insert new vehicle ID in map
+		dump(vehiclesMap[spawnedVehID])
+		nicknameMap[tostring(spawnedVehID)] = {}
+		nicknameMap[tostring(spawnedVehID)].nickname = playerNickname
+		nicknameMap[tostring(spawnedVehID)].role = playerRole
+		core_vehicles.setPlateText(playerNickname, spawnedVehID)
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
@@ -274,6 +301,8 @@ local function onVehicleSpawned(gameVehicleID)
 		end
 	else
 		print("[BeamMP] Vehicle Edited: "..gameVehicleID)
+		syncTimer=0
+		syncVehIDs[gameVehicleID] = 1
 	end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -370,7 +399,6 @@ end
 
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
-
 local function onServerVehicleResetted(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if lastResetID ~= serverVehicleID then
@@ -453,85 +481,101 @@ local function handle(rawData)
 	end
 end
 
+local function removeRequest(gameVehicleID)
+	if isOwn(gameVehicleID) then
+		core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")
+		print("[BeamMP] request to remove car id "..gameVehicleID.." DONE")
+	else
+		print("[BeamMP] request to remove car id "..gameVehicleID.." DENIED")
+	end
+end
+
+local function setCurrentVehicle(gameVehicleID)
+	if activeVehicle ~= gameVehicleID then
+		println("Current vehicle: "..gameVehicleID)
+	end
+	activeVehicle = gameVehicleID
+end
 
 
 local function onUpdate(dt)
-
 	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
+		local shouldSync = false
+
+		local localPos = nil
+		for i = 0, be:getObjectCount() do -- Find at least one local player car
+			local veh = be:getObject(i)
+			if veh and isOwn(veh:getID()) then
+				localPos = veh:getPosition()
+			end
+		end
+
+		if activeVehicle ~= nil then
+			--print("currveh:")
+			--print(tostring(currentVehicle))
+			local veh = be:getObjectByID(tonumber(activeVehicle))
+			if veh ~= nil then
+				--print("veh:")
+				localPos = veh:getPosition()
+				--print(tostring(localPos.x).." "..tostring(localPos.y).." "..tostring(localPos.z))
+			end
+		end
+
 		for i = 0, be:getObjectCount() do -- For each vehicle
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
-				if not isOwn(veh:getID()) and nicknameMap[tostring(veh:getID())] ~= nil and settings.getValue("showNameTags") then
+				local gameVehicleID = veh:getID()
+				local vehIDstr = tostring(gameVehicleID)
+				if not isOwn(gameVehicleID) and nicknameMap[vehIDstr] ~= nil and settings.getValue("showNameTags") then
 					local pos = veh:getPosition()
 					pos.z = pos.z + 2.0
-					--[[if nicknameMap[tostring(veh:getID())].role == "USER" then
-						forecolor = ColorF(1, 1, 1, 1)
-						backcolor = ColorI(0, 0, 0, 127)
-						tag = ""
-					elseif nicknameMap[tostring(veh:getID())].role == "EA" then
-						forecolor = ColorF(155/255, 89/255, 182/255, 255/255)
-						backcolor = ColorI(69, 0, 150, 127)
-						tag = " [Early Access]"
-					elseif nicknameMap[tostring(veh:getID())].role == "YT" then
-						forecolor = ColorF(255/255, 0, 0, 255/255)
-						backcolor = ColorI(200, 0, 0, 127)
-						tag = " [YouTuber]"
-					elseif nicknameMap[tostring(veh:getID())].role == "ET" then
-						forecolor = ColorF(210/255, 214/255, 109/255, 255/255)
-						backcolor = ColorI(210, 214, 109, 127)
-						tag = " [Events Team]"
-					elseif nicknameMap[tostring(veh:getID())].role == "SUPPORT" then
-						forecolor = ColorF(68/255, 109/255, 184/255, 255/255)
-						backcolor = ColorI(68, 109, 184, 127)
-						tag = " [Support]"
-					elseif nicknameMap[tostring(veh:getID())].role == "MOD" then
-						forecolor = ColorF(68/255, 109/255, 184/255, 255/255)
-						backcolor = ColorI(68, 109, 184, 127)
-						tag = " [Moderator]"
-					elseif nicknameMap[tostring(veh:getID())].role == "ADM" then
-						forecolor = ColorF(218/255, 0/255, 78/255, 255/255)
-						backcolor = ColorI(218, 0, 78, 127)
-						tag = " [Admin]"
-					elseif nicknameMap[tostring(veh:getID())].role == "GDEV" then
-						forecolor = ColorF(252/255, 107/255, 3/255, 255/255)
-						backcolor = ColorI(252, 107, 3, 127)
-						tag = " [BeamNG Staff]"
-					elseif nicknameMap[tostring(veh:getID())].role == "MDEV" then
-						forecolor = ColorF(194/255, 55/255, 55/255, 255/255)
-						backcolor = ColorI(194, 55, 55, 127)
-						tag = " [MP DEV]"
-					end --]]
+					local dist = ""
+					local roleInfo = roleToInfo[nicknameMap[vehIDstr].role] or roleToInfo['USER']
 
-					local roleInfo = roleToInfo[nicknameMap[tostring(veh:getID())].role] or roleToInfo['USER']
-
-					if	settings.getValue("nameTagAlternate") then  -- Color the background instead of foreground
-						roleInfo.forecolor = ColorF(1,1,1,1)
-					else
-						roleInfo.backcolor = ColorI(0,0,0,127)
+					if localPos ~= nil and activeVehicle ~= vehIDstr and settings.getValue("nameTagShowDistance") then
+						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z-2.0, 2))
+						if distfloat > 10 then
+							if settings.getValue("uiUnitLength") == "imperial" then
+								distfloat = distfloat * 3.28084
+								dist = " "..tostring(math.floor(distfloat)).." ft"
+							else
+								dist = " "..tostring(math.floor(distfloat)).." m"
+							end
+						end
 					end
 
 					debugDrawer:drawTextAdvanced(
 						pos, -- Position in 3D
-						String(" "..tostring(nicknameMap[tostring(veh:getID())].nickname)..roleInfo.tag.." "), -- Text
-						roleInfo.forecolor, true, false, -- Foreground Color / Background / Wtf
+						String(" "..tostring(nicknameMap[vehIDstr].nickname)..roleInfo.tag..dist.." "), -- Text
+						ColorF(1, 1, 1, 1), true, false, -- Foreground Color / Background / Wtf
 						roleInfo.backcolor -- Background Color
 					)
 				end
-			end
-		end
 
-		-- Used to avoid people from spamming vehicle reset
-		oneSecCounter = oneSecCounter + dt
-		if oneSecCounter > 3 then
-			oneSecCounter = 0
-			lastResetID = ""
+
+				if syncVehIDs[gameVehicleID] ~= nil and syncVehIDs[gameVehicleID] ~= 0 then
+
+					print("veh id "..gameVehicleID.." has value "..syncVehIDs[gameVehicleID].." in the sync table")
+
+					syncTimer = syncTimer+dt
+					if syncTimer > 10 then
+						shouldSync = true
+						syncTimer = 0
+					end
+					if shouldSync then
+						print("[BeamMP] Autosyncing car ID "..gameVehicleID)
+						veh:queueLuaCommand("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData("..gameVehicleID..", '\"..jsonEncode(v.config)..\"')\")")
+						syncVehIDs[gameVehicleID] = nil
+					end
+				end
+			end
 		end
 	end
 end
 
-
-
+M.setCurrentVehicle		  = setCurrentVehicle
+M.removeRequest			  = removeRequest
 M.onUpdate                = onUpdate
 M.handle                  = handle
 M.onVehicleSwitched       = onVehicleSwitched
@@ -539,6 +583,7 @@ M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
 M.getVehicleMap           = getVehicleMap
+M.getNicknameMap          = getNicknameMap
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed
@@ -551,7 +596,7 @@ M.sendCustomVehicleData   = sendCustomVehicleData
 M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
-
+M.onServerVehicleResetted = onServerVehicleResetted
 
 
 print("vehicleGE Loaded.")

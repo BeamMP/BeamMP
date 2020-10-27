@@ -21,6 +21,9 @@ local inputsTickrate = 0.02 --0.05
 local electricsDelay = 0
 local electricsTickrate = 0.02
 
+local pauseDisabled = false
+
+
 local function setNickname(x)
   print("Nickname Set To: "..x)
   Nickname = x
@@ -71,6 +74,14 @@ local function getElectricsTickrate()
   return electricsTickrate
 end
 
+local function setPauseDisabled(x)
+  pauseDisabled = x
+end
+
+local function getPauseDisabled()
+  return pauseDisabled
+end
+
 -- Variables
 M.ShowNameTags = ShowNameTags
 M.Nickname = Nickname
@@ -98,6 +109,9 @@ M.setInputsTickrate = setInputsTickrate
 M.getInputsTickrate = getInputsTickrate
 M.setElectricsTickrate = setElectricsTickrate
 M.getElectricsTickrate = getElectricsTickrate
+
+M.setPauseDisabled    = setPauseDisabled
+M.getPauseDisabled    = getPauseDisabled
 
 print("mpConfig Loaded.")
 return M

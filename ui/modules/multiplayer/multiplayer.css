@@ -168,7 +168,7 @@ div#LoadingBody {
 div#addCustomFav {
 	color: white;
 	background-color: rgba(0, 0, 0, 0.75);
-	
+
 	position: absolute;
     z-index: 100;
 
@@ -178,8 +178,8 @@ div#addCustomFav {
 	-ms-transform: translateX(-50%);
 	transform: translateX(-50%);
 	left:50%;
-	
-	
+
+
     background-color: #848484;
     padding: 15px;
     border-radius: 5px;
@@ -213,6 +213,42 @@ tr#ServerInfoRow {
 
 ul.serverItemDetails {
     list-style: none;
+}
+
+md-checkbox .md-container {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-100%);
+    transform: translateY(-100%);
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    left: 0;
+    right: auto
+}
+
+md-checkbox {
+    box-sizing: border-box;
+    display: block;
+    margin: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    outline: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    padding-left: 18px;
+    padding-right: 0;
+    position: relative;
+    line-height: 26px;
+    min-width: 18px;
+    color: white;
+    min-height: 18px;
+}
+
+md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
+    padding-top: 0px;
 }
 
 [placeholder]::-webkit-input-placeholder { color: rgba(255,255,255,.8); }

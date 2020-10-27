@@ -90,6 +90,22 @@ angular.module('beamng.stuff')
 	});
 	//bngApi.engineLua('core_gamestate.requestGameState();');   // if this isnt called the gamestate in menu doesnt update correctly.
 
+	vm.pasteClipboardToDirectIP = function() {
+		bngApi.engineLua('getClipboard()', function (str) {
+			$scope.$evalAsync(() =>  {
+				if(!str.includes('.')) return;
+
+				var split = str.split(':');
+
+				document.getElementById('directip').value = split[0];
+				if (split.length==2) document.getElementById('directport').value = split[1];
+			});
+		});
+		
+	};
+
+	//vm.displayServers = displayServerScope();
+
 	$scope.$on('LoadingInfo', function (event, data) {
 		if (document.getElementById('LoadingStatus').innerText != data.message) console.log(data.message)
 		if (data.message == "done") document.getElementById('LoadingStatus').innerText = "Done";
@@ -115,6 +131,13 @@ angular.module('beamng.stuff')
 }])
 .controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
+	
+	vm.check_isEmpty = false;
+	vm.check_isNotEmpty = false;
+	vm.check_isNotFull = false;
+	vm.check_modSlider = false;
+	vm.slider_maxModSize = 500; //should be almost a terabyte
+
 	bngApiScope = bngApi;
 	bngApi.engineLua('CoreNetwork.getServers()');
 	vm.exit = function ($event) {
@@ -269,8 +292,12 @@ angular.module('beamng.stuff')
 		var servers = JSON.parse(localStorage.getItem('servers'))
 		for (var i = 0; i < servers.length; i++) {
 			var filtered = servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
-			if(filtered && document.getElementById("check_hasPlayers").checked && servers[i].players==0) filtered = false;
-			if(filtered && document.getElementById("check_notFull").checked && servers[i].players==servers[i].maxplayers) filtered = false;
+
+			if(filtered && vm.check_isEmpty && servers[i].players>0) filtered = false;
+			if(filtered && vm.check_isNotEmpty && servers[i].players==0) filtered = false;
+			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
+			
+			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
 			
 			if(filtered){
 				var bgcolor = 'rgba(0,0,0,0)!important';
@@ -289,7 +316,9 @@ angular.module('beamng.stuff')
 			}
 		}
 	};
-	
+
+	vm.displayServers = displayServers;
+
 	function formatServerDetailsRow ( d ) {
     // `d` is the original data object for the row
 		console.log(d)
@@ -336,6 +365,13 @@ angular.module('beamng.stuff')
 }])
 .controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
+	
+	vm.check_isEmpty = false;
+	vm.check_isNotEmpty = false;
+	vm.check_isNotFull = false;
+	vm.check_modSlider = false;
+	vm.slider_maxModSize = 500; //should be almost a terabyte
+
 	bngApiScope = bngApi;
 	bngApi.engineLua('CoreNetwork.getServers()');
 	vm.exit = function ($event) {
@@ -523,15 +559,18 @@ angular.module('beamng.stuff')
 
 		for (var i = 0; i < servers.length; i++) {
 			var filtered = servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
-			if(filtered && document.getElementById("check_hasPlayers").checked && servers[i].players==0) filtered = false;
-			if(filtered && document.getElementById("check_notFull").checked && servers[i].players==servers[i].maxplayers) filtered = false;
+			if(filtered && vm.check_isEmpty && servers[i].players>0) filtered = false;
+			if(filtered && vm.check_isNotEmpty && servers[i].players==0) filtered = false;
+			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
+
+			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
 
 			if(filtered){
 				var bgcolor = 'rgba(0,0,0,0)!important';
 				if (servers[i].official) bgcolor = 'rgba(255,106,0,0.25)!important';
 
-				console.log(servers[i].id);
-				console.log(servers[i].favid);
+				//console.log(servers[i].id);
+				//console.log(servers[i].favid);
 
 				var html = `
 				<tr data-id="${servers[i].id},${servers[i].favid}" ng-onclick(selectRow(e)>
@@ -547,8 +586,10 @@ angular.module('beamng.stuff')
 		}
 	};
 
+	vm.displayServers = displayServers;
+
 	function setClientVersion(v) {
-		console.log(v);
+		launcherVersion = v;
 	};
 	function formatServerDetailsRow ( d ) {
     // `d` is the original data object for the row
@@ -595,28 +636,6 @@ angular.module('beamng.stuff')
 	showDetailsScope = formatServerDetailsRow;
 }])
 
-.controller('MultiplayerSettingsController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
-function(logger, $scope, $state, $timeout, bngApi) {
-	var vm = this;
-	bngApiScope = bngApi;
-
-	vm.exit = function ($event) {
-		if ($event)
-		logger.debug('[MultiplayerSettingsController] exiting by keypress event %o', $event);
-		$state.go('menu.mainmenu');
-	};
-
-	var timeOut = $timeout(function() {
-		if (vm.loadingPage === true) {
-			vm.loadTimeout = true;
-		}
-	}, 10000);
-
-	$scope.$on('$destroy', function () {
-		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerSettingsController] destroyed.');
-	});
-}])
 
 .controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
 function(logger, $scope, $state, $timeout, bngApi) {

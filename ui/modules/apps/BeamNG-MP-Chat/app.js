@@ -15,7 +15,7 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	let spamLocked = false;
 
 	$scope.init = function() {
-		bngApi.engineLua('UI.ready("CHAT")');
+		//bngApi.engineLua('UI.ready("CHAT")');
 		countUpdateInterval = setInterval(updateCount, 20000);
 	};
 
@@ -124,6 +124,6 @@ function chatClear() {
 }
 
 function greeting(server) {
-	addMessage("You are now connected to " + server);
-	addMessage("Welcome to chat! Our message length limit is 150 characters.");
+	addMessage("You are now connected to " + stripCustomFormatting(sanitizeString(server)));
+	addMessage("Welcome to our chat!");
 }

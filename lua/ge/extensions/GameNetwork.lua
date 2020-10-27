@@ -90,31 +90,6 @@ local function sessionData(data)
 		UI.setNickName(data)
 		mpConfig.setNickname(data)
 	end
-	if code == "e" then -- environment setting
-		local collision = string.sub(data, 3, 3)
-		local pausing = string.sub(data, 4, 4)
-		--local gravity = string.sub(data, 4)
-
-		-- collision
-		if collision == "1" then
-			be:setDynamicCollisionEnabled(true)
-			be:executeJS('collisionVisible(false)')
-		end
-		if collision == "0" then
-			be:setDynamicCollisionEnabled(false)
-			be:executeJS('collisionVisible(false)')
-		end
-
-		-- pausing
-		if pausing == "1" then
-			mpConfig.setPauseDisabled(true)
-		end
-		if pausing == "0" then
-			mpConfig.setPauseDisabled(false)
-		end
-
-		-- gravity
-	end
 end
 
 local eventTriggers = {}

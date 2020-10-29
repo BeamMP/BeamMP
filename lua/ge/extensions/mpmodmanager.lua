@@ -41,6 +41,7 @@ local function cleanUpSessionMods()
     core_modmanager.deactivateMod(string.lower(v))
     core_modmanager.deleteMod(string.lower(v))
   end
+  Lua:requestReload() -- reload Lua to make sure we don't have any leftover GE files
 end
 
 local function onUpdate(dt)

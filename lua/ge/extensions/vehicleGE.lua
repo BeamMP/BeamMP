@@ -208,18 +208,25 @@ local function UpdateVehicle(sid, data)
 	local gameVehicleID = getGameVehicleID(sid)
 	local veh = be:getObjectByID(gameVehicleID)
 	local decodedData     = jsonDecode(data)
+	dump(decodedData)
 	local vehicleName     = decodedData[3] -- Vehicle name
 	local vehicleConfig   = decodedData[4] -- Vehicle config
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 	if vehicleName == veh:getJBeamFilename() then
-		veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
+		print("[BeamMP] Updating Vehicle Config Due to Edit!")
+		--veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
+		local decodedCfg = jsonDecode(vehicleConfig) -- Decode received data
+		print(gameVehicleID)
+		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
+		--dump(playerVehicle)
+		tableMerge(playerVehicle.config, decodedCfg)
+		veh:respawn(serialize(playerVehicle.config))
 	else
 		print("RECEIVE MODIFIED DATA FOR A VEHICLE THAT IS NOT OF THE SAME TYPE!!!")
 	end
 end
-
 
 local function onDisconnect()
 	-- Clear ownMap and vehiclesMap
@@ -235,6 +242,7 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
+	dump(decodedData)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sent the vehicle
 	--local serverVehicleID = decodedData[3] -- Server ID of the vehicle

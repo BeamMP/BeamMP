@@ -28,7 +28,7 @@ local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local syncTimer = 0
 local syncVehIDs = {}
-local activeVehicle = nil
+local activeVehicle = 0
 
 local roleToInfo = {
 	['USER'] = { backcolor = ColorI(0, 0, 0, 127), tag = "" },
@@ -205,21 +205,30 @@ end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
 local function UpdateVehicle(sid, data)
+	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local gameVehicleID = getGameVehicleID(sid)
 	local veh = be:getObjectByID(gameVehicleID)
 	local decodedData     = jsonDecode(data)
+	--dump(decodedData)
 	local vehicleName     = decodedData[3] -- Vehicle name
 	local vehicleConfig   = decodedData[4] -- Vehicle config
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
 	if vehicleName == veh:getJBeamFilename() then
-		veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
+		print("[BeamMP] Updating Vehicle Config Due to Edit!")
+		--veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
+		local decodedCfg = jsonDecode(vehicleConfig) -- Decode received data
+		print(gameVehicleID)
+		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
+		--dump(playerVehicle)
+		tableMerge(playerVehicle.config, decodedCfg)
+		veh:respawn(serialize(playerVehicle.config))
+		if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	else
 		print("RECEIVE MODIFIED DATA FOR A VEHICLE THAT IS NOT OF THE SAME TYPE!!!")
 	end
 end
-
 
 local function onDisconnect()
 	-- Clear ownMap and vehiclesMap
@@ -235,6 +244,7 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
+	dump(decodedData)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sent the vehicle
 	--local serverVehicleID = decodedData[3] -- Server ID of the vehicle
@@ -556,7 +566,7 @@ local function onUpdate(dt)
 
 				if syncVehIDs[gameVehicleID] ~= nil and syncVehIDs[gameVehicleID] ~= 0 then
 
-					print("veh id "..gameVehicleID.." has value "..syncVehIDs[gameVehicleID].." in the sync table")
+					--print("veh id "..gameVehicleID.." has value "..syncVehIDs[gameVehicleID].." in the sync table")
 
 					syncTimer = syncTimer+dt
 					if syncTimer > 10 then

@@ -8,9 +8,10 @@
 local M = {}
 
 local function applyPartConfig(data) -- Post 0.20
-	local decodedData = jsonDecode(data) -- Decode received data
-	tableMerge(v.config, decodedData)
-	obj:respawn(serialize(v.config))
+	print("[BeamMP] THIS IS FUNCTION IS DEPRECIATED & WILL BE REMOVED SOON!")
+	--local decodedData = jsonDecode(data) -- Decode received data
+	--tableMerge(v.config, decodedData)
+	--obj:respawn(v.config)
 end
 
 local function updateGFX(dt)

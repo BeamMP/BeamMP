@@ -215,7 +215,7 @@ local function UpdateVehicle(sid, data)
 	local c               = jsonDecode(decodedData[5]) -- Vehicle color
 	local cP0             = jsonDecode(decodedData[6]) -- Vehicle colorPalette0
 	local cP1             = jsonDecode(decodedData[7]) -- Vehicle colorPalette1
-	if vehicleName == veh:getJBeamFilename() then
+	if vehicleName == veh:getJBeamFilename() and settings.getValue("showSyncConfigUpdates") then
 		print("[BeamMP] Updating Vehicle Config Due to Edit!")
 		--veh:queueLuaCommand("vehicleVE.applyPartConfig(\'"..vehicleConfig.."\')") -- Get config
 		local decodedCfg = jsonDecode(vehicleConfig) -- Decode received data

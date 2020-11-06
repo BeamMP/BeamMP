@@ -25,7 +25,7 @@ local function sendAllPowertrain()
 		if mode then -- If mode is not null
 			tableToSend[name] = mode -- Add device to the table
 		end
-    end
+  end
 	obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
 end
 

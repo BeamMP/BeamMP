@@ -21,6 +21,9 @@ local inputsTickrate = 0.02 --0.05
 local electricsDelay = 0
 local electricsTickrate = 0.02
 
+local powertrainDelay = 0
+local powertrainTickrate = 0.02
+
 local pauseDisabled = false
 
 
@@ -74,6 +77,14 @@ local function getElectricsTickrate()
   return electricsTickrate
 end
 
+local function setPowertrainTickrate(x)
+  powertrainTickrate = x
+end
+
+local function getPowertrainTickrate()
+  return powertrainTickrate
+end
+
 local function setPauseDisabled(x)
   pauseDisabled = x
 end
@@ -97,6 +108,8 @@ M.inputsDelay = inputsDelay
 M.inputsTickrate = inputsTickrate
 M.electricsDelay = electricsDelay
 M.electricsTickrate = electricsTickrate
+M.powertrainDelay = powertrainDelay
+M.powertrainTickrate = powertrainTickrate
 
 -- Functions
 M.setNickname = setNickname
@@ -109,6 +122,8 @@ M.setInputsTickrate = setInputsTickrate
 M.getInputsTickrate = getInputsTickrate
 M.setElectricsTickrate = setElectricsTickrate
 M.getElectricsTickrate = getElectricsTickrate
+M.setPowertrainTickrate = setPowertrainTickrate
+M.getPowertrainTickrate = getPowertrainTickrate
 
 M.setPauseDisabled    = setPauseDisabled
 M.getPauseDisabled    = getPauseDisabled

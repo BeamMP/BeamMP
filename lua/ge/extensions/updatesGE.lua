@@ -20,7 +20,7 @@ end
 
 
 local function onUpdate(dt)
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
 		if mpConfig.nodesDelay > mpConfig.getNodesTickrate() then
 			mpConfig.nodesDelay = 0 -- Reset the delay

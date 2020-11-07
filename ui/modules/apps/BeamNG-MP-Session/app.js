@@ -13,7 +13,7 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	};
 
 	$scope.mpquit = function() {
-		bngApi.engineLua('CoreNetwork.resetSession(1)');
+		bngApi.engineLua('MPCoreNetwork.resetSession(1)');
 	};
 
 	$scope.reset = function() {

@@ -1,0 +1,252 @@
+--====================================================================================
+-- All work by Titch2000 and jojos38.
+-- You have no permission to edit, redistribute or upload. Contact us for more info!
+--====================================================================================
+
+
+
+local M = {}
+print("Loading MPCoreNetwork")
+
+
+
+-- ============= VARIABLES =============
+local TCPLauncherSocket -- Launcher socket
+local currentServer -- Store the server we are on
+local Servers = {} -- Store all the servers
+local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
+local secondsTimer = 0
+local serverTimeoutTimer = 0
+local MapLoadingTimeout = 0
+local status = ""
+local launcherVersion = ""
+local mapLoaded = false
+--[[
+Z -> The client ask to the launcher his version
+B -> The client ask for the servers list to the launcher
+QG -> The client tell the launcher that he is leaving
+C -> The client ask for the mods to the server
+--]]
+-- ============= VARIABLES =============
+
+
+
+local function connectToLauncher()
+	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
+		print("Connecting to launcher")
+		local socket = require('socket')
+		TCPLauncherSocket = socket.tcp()
+		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
+		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
+		TCPLauncherSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444));
+		launcherConnectionStatus = 1
+	end
+end
+
+
+
+local function disconnectLauncher()
+	if launcherConnectionStatus > 0 then -- If player was connected
+		print("Disconnecting from launcher")
+		TCPLauncherSocket:close()-- Disconnect from server
+		launcherConnectionStatus = 0
+		serverTimeoutTimer = 0 -- Reset timeout delay
+		secondsTimer = 0
+	end
+end
+
+
+
+local function getServers()
+	print("Getting the servers list")
+	TCPLauncherSocket:send('Z')
+	TCPLauncherSocket:send('B')
+end
+
+
+
+local function setMods(modsString)
+	local mods = {}
+	if (modsString) then
+		for mod in string.gmatch(modsString, "([^;]+)") do
+			local modFileName = mod:gsub("Resources/Client/",""):gsub(".zip",""):gsub(";","")
+			table.insert(mods, modFileName)
+		end
+	end
+	MPModManager.setServerMods(mods)
+end
+
+
+
+local function setCurrentServer(id, ip, port, modsString, name)
+	currentServer = {
+		ip		   = ip,
+		port	   = port,
+		id		   = id,
+		modsstring = modsString,
+		name	   = name
+	}
+	setMods(modString)
+end
+
+
+
+-- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
+local function connectToServer(ip, port)
+	local ipString
+	if ip and port then -- Direct connect
+		ipString = ip..':'..port
+		TCPLauncherSocket:send('C'..ipString)
+	else -- Server list connect
+		ipString = currentServer.ip..':'..currentServer.port
+		TCPLauncherSocket:send('C'..ipString)
+    end
+	print("Connecting to server "..ipString)
+	status = "LoadingResources"
+end
+
+
+
+local function LoadLevel(map)
+	-- Map loading has a 5 seconds timeout in case it doesn't work
+	MapLoadingTimeout = 0
+	mapLoaded = false
+	status = "LoadingMapNow"
+	freeroam_freeroam.startFreeroam(map)
+end
+
+
+
+local function HandleU(params)
+	UI.updateLoading(params)
+	local code = string.sub(params, 1, 1)
+	local data = string.sub(params, 2)
+	if params == "ldone" and status == "LoadingResources" then
+		TCPLauncherSocket:send('Mrequest')
+		status = "LoadingMap"
+	end
+	if code == "p" then
+		UI.setPing(data.."")
+		positionGE.setPing(data)
+	end
+end
+
+
+
+local HandleNetwork = {
+	['A'] = function(params) secondsTimer = 0; end, -- Connection Alive Checking
+	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
+	['U'] = function(params) HandleU(params) end, -- UI
+	['M'] = function(params) LoadLevel(params) end,
+	['V'] = function(params) vehicleGE.handle(params) end,
+	['L'] = function(params) setMods(params) end,
+	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
+	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')'); end, -- Tell the UI what the launcher version is.
+	-- [''] = function(params)  end, --
+}
+
+
+
+local function onUpdate(dt)
+	--====================================================== DATA RECEIVE ======================================================
+	if launcherConnectionStatus > 0 then -- If player is connecting or connected
+		while (true) do
+			local received, status, partial = TCPLauncherSocket:receive() -- Receive data
+			if not received then break end
+			if received ~= "" then -- If data have been received then
+				-- break it up into code + data
+				local code = string.sub(received, 1, 1)
+				local data = string.sub(received, 2)
+				HandleNetwork[code](data)
+			end
+		end
+		
+		--================================ SECONDS TIMER ================================
+		secondsTimer = secondsTimer + dt -- Time in seconds
+		if secondsTimer > 1 then
+			TCPLauncherSocket:send('A') -- Launcher heartbeat		
+			if status == "LoadingResources" then TCPLauncherSocket:send('Ul') -- Ask the launcher for a loading screen update
+			else TCPLauncherSocket:send('Up') end -- Server heartbeat 
+			secondsTimer = 0
+		end
+		-- If secondsTImer is more than 2 seconds and the game tick time is greater
+		-- than 20000 then our game is running very slow and or has timed out / crashed.
+		if secondsTimer > 2 and dt > 20000 then
+			print("Timed out")
+			disconnectLauncher()
+			connectToLauncher()
+		end
+		--================================ MAP LOADING TIMER ================================
+		if status == "LoadingMapNow" then
+			if MapLoadingTimeout > 5 then
+				if not mapLoaded then -- If map is not loaded yet
+					if not scenetree.MissionGroup then -- If not found then
+						print("Failed to load the map, did the mod get loaded?")
+						Lua:requestReload()
+					else
+						status = "Playing"
+						mapLoaded = true
+					end
+				end
+			else
+				MapLoadingTimeout = MapLoadingTimeout + dt
+			end
+		end
+	end
+end
+
+
+
+local function resetSession(goBack)
+	print("Reset Session Called!")
+	TCPLauncherSocket:send('QS') -- Tell the launcher that we quit server / session
+	disconnectLauncher()
+	MPGameNetwork.disconnectLauncher()
+	vehicleGE.onDisconnect()
+	connectToLauncher()
+	UI.readyReset()
+	status = "" -- Reset status
+	if goBack then returnToMainMenu() end
+	MPModManager.cleanUpSessionMods()
+end
+
+
+
+local function quitMP()
+	print("Reset Session Called!")
+	TCPLauncherSocket:send('QG') -- Quit game
+end
+
+
+
+local function modLoaded(modname)
+	if modname ~= "beammp" then -- We don't want to check beammp mod
+		TCPLauncherSocket:send('R'..modname)
+	end
+end
+
+
+
+local function onInit()
+	connectToLauncher()
+	reloadUI()
+	core_gamestate.requestExitLoadingScreen('MP')
+	returnToMainMenu()
+end
+
+
+
+M.onUpdate = onUpdate
+M.getServers = getServers
+M.setCurrentServer = setCurrentServer
+M.resetSession = resetSession
+M.quitMP = quitMP
+M.connectToServer = connectToServer
+M.connectionStatus = launcherConnectionStatus
+M.modLoaded = modLoaded
+M.currentServer = currentServer
+M.onInit = onInit
+
+
+
+return M

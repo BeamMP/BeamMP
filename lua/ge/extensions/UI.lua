@@ -103,7 +103,7 @@ end
 local function chatSend(msg)
   local c = 'C:'..mpConfig.getNickname()..": "..msg
   print(c)
-  GameNetwork.send(c)
+  MPGameNetwork.send(c)
 end
 
 local ready = true
@@ -131,11 +131,11 @@ local function ready(src)
   if src == "MP-SESSION" or src == "FIRSTVEH" then
 	if ready then
 	  ready = false
-	  GameNetwork.connectToLauncher()
+	  MPGameNetwork.connectToLauncher()
 	end
 
-	if CoreNetwork.Server ~= nil and CoreNetwork.Server.NAME ~= nil then
-	  setStatus("Server: "..CoreNetwork.Server.NAME)
+	if MPCoreNetwork.Server ~= nil and MPCoreNetwork.Server.name ~= nil then
+	  setStatus("Server: "..MPCoreNetwork.Server.name)
 	end
   end
 end

@@ -36,14 +36,14 @@ angular.module('beamng.stuff')
 	vm.connect = function() {
 		logger.debug("Attempting to call connect to server.")
 		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('CoreNetwork.connectToServer()');
+		bngApi.engineLua('MPCoreNetwork.connectToServer()');
 	}
 
 	connectScope = vm.connect;
 
 	vm.refreshList = function() {
 		logger.debug("Attempting to refresh server list.")
-		bngApi.engineLua('CoreNetwork.getServers()');
+		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
 
 	vm.directConnect = function() {
@@ -51,7 +51,7 @@ angular.module('beamng.stuff')
 		var ip = document.getElementById('directip').value;
 		var port = document.getElementById('directport').value;
 		document.getElementById('LoadingServer').style.display = 'block';
-		bngApi.engineLua(`CoreNetwork.connectToServer("${ip}","${port}")`);
+		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
 	vm.closePopup =  function() {
@@ -139,7 +139,7 @@ angular.module('beamng.stuff')
 	vm.slider_maxModSize = 500; //should be almost a terabyte
 
 	bngApiScope = bngApi;
-	bngApi.engineLua('CoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 	vm.exit = function ($event) {
 		if ($event)
 		logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
@@ -175,7 +175,7 @@ angular.module('beamng.stuff')
 			var servers = JSON.parse(localStorage.getItem('servers'))
 			var server = servers[id];
 			highlightedServer = servers[id];
-			bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
+			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
 	}
 
@@ -264,6 +264,10 @@ angular.module('beamng.stuff')
 		var row = src.closest('tr');
 		select(row, table);
 	};
+
+	$scope.$on('receiveServers', function (data) {
+		console.log("TEST");
+	});
 
 	function receiveServers(data) {
 		console.log(data)
@@ -373,7 +377,7 @@ angular.module('beamng.stuff')
 	vm.slider_maxModSize = 500; //should be almost a terabyte
 
 	bngApiScope = bngApi;
-	bngApi.engineLua('CoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 	vm.exit = function ($event) {
 		if ($event)
 		logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
@@ -419,7 +423,7 @@ angular.module('beamng.stuff')
 			}
 
 			highlightedServer = server;
-			bngApi.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
+			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
 	}
 
@@ -1013,7 +1017,7 @@ function removeFav() {
 	console.log(highlightedServer);
 
 	localStorage.setItem('favorites', JSON.stringify(favArray))
-	bngApiScope.engineLua('CoreNetwork.getServers()');
+	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
 function addFav(fname, fip, fport) {
@@ -1075,7 +1079,7 @@ function addFav(fname, fip, fport) {
 	console.log(favArray);
 
 	localStorage.setItem('favorites', JSON.stringify(favArray))
-	bngApiScope.engineLua('CoreNetwork.getServers()');
+	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
 function findPlayer(pname, join=false){
@@ -1088,9 +1092,9 @@ function findPlayer(pname, join=false){
 				var names = server.playerslist.split(';').filter(function (item) { return item.toLowerCase().includes(pname); });
 				console.log("found player '" +names[0]+ "'\n on server ID:" +id+ "\n Title: " +stripCustomFormatting(server.sname));
 				if(join){
-					bngApiScope.engineLua(`CoreNetwork.setServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.sname}")`);
+					bngApiScope.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.sname}")`);
 					if (document.getElementById('LoadingServer') !== null) document.getElementById('LoadingServer').style.display = 'block';
-					bngApiScope.engineLua('CoreNetwork.connectToServer()');
+					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
 				}
 				return id;
 			}

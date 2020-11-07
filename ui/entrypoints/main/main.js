@@ -1532,10 +1532,10 @@ $scope.$on('requestUIInitialised', () => {
   vm.quit = function () {
     if (vm.mainmenu) {
       bngApi.engineScript('quit();'); //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
-      bngApi.engineLua("CoreNetwork.quitMP()");
+      bngApi.engineLua("MPCoreNetwork.quitMP()");
       bngApi.engineLua("TorqueScript.eval('quit();')");
     } else {
-      bngApi.engineLua("CoreNetwork.resetSession()");
+      bngApi.engineLua("MPCoreNetwork.resetSession()");
       bngApi.engineLua("returnToMainMenu()");
     }
   };

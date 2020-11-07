@@ -1,79 +1,68 @@
 --====================================================================================
--- All work by Titch2000.
+-- All work by Titch2000 and jojos38.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
+
+
 local M = {}
-print("GameNetwork Initialising...")
+print("Loading MPGameNetwork")
+
+
 
 -- ============= VARIABLES =============
---local socket = require('socket')
 local TCPSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local oneSecondsTimer = 1
-local flip = false
 local playersMap = {}
 local sysTime = 0
 local timeoutMax = 60 --TODO: SET THE TIMER TO 30 SECONDS
 local timeoutWarn = 10 --TODO: SET THE TIMER TO 5 SECONDS ONCE WE ARE MORE STREAMLINED
 local status = ""
-local keep2
+local eventTriggers = {}
 -- ============= VARIABLES =============
 
 
---================================ CONNECT TO SERVER ================================
+
+
 local function connectToLauncher()
 	print("Connecting to the Launcher for Session Data")
-	if launcherConnectionStatus == 0 then
+	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
-		keep = TCPSocket:setoption("keepalive",true)
+		TCPSocket:setoption("keepalive",true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
-		print("[GameNetwork] Status Changed: "..launcherConnectionStatus)
 	end
 end
---================================ CONNECT TO SERVER ================================
 
---====================== DISCONNECT FROM SERVER ======================
+
+
 local function disconnectLauncher()
 	if launcherConnectionStatus > 0 then -- If player were connected
 		TCPSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		oneSecondsTimer = 0
-		flip = false
 	end
 end
---====================== DISCONNECT FROM SERVER ======================
+
+
 
 local function sendData(data)
 	local r = TCPSocket:send(data..'')
 	if settings.getValue("showDebugOutput") == true then
-    print('[GameNetwork] Sending Data ('..r..'): '..data)
+    print('[MPGameNetwork] Sending Data ('..r..'): '..data)
 	end
 end
 
---[[local function sendDataSplit(code, ID, data)
-	print('[GameNetwork BD] Sending Data: '..data)
-	local counter = 97 -- 1, 2, 3, n, E
-	local size = string.len(data)
-	local maxSize = 6500
-	while size > maxSize do
-		--print("Running: "..size)
-		local tdata = string.sub(data, 1, maxSize)
-		BigDataSocket:send(code..ID..string.char(counter)..":"..tdata..'')
-		data = string.sub(data, 6501, size) --data:gsub(tdata, "")
-		size = string.len(data)
-		counter = counter + 1
-	end
-	--print("Done: "..size)
-	BigDataSocket:send(code..ID.."E:"..data..'')
-end]]
+
 
 local function onPlayerConnect() -- Function called when a player connect to the server
 	updatesGE.onPlayerConnect()
 end
+
+
 
 local function sessionData(data)
 	local code = string.sub(data, 1, 1)
@@ -92,13 +81,15 @@ local function sessionData(data)
 	end
 end
 
-local eventTriggers = {}
+
 
 function AddEventHandler(n, f)
 	print("Adding Event Handler: Name = "..tostring(n))
 	table.insert(eventTriggers, {name = n, func = f})
 	dump(eventTriggers)
 end
+
+
 
 local function handleEvents(p)  --- E:<NAME>:data
 	print("triggered event string: "..p)
@@ -134,7 +125,7 @@ local HandleNetwork = {
 	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
-	['T'] = function(params) CoreNetwork.resetSession('true') end, -- Event For another Resource
+	['T'] = function(params) MPCoreNetwork.resetSession('true') end, -- Event For another Resource
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
 
@@ -146,7 +137,7 @@ local function onUpdate(dt)
 		while (true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil then break end
-			if received ~= "" and received ~= nil then -- If data have been received then
+			if received ~= "" then -- If data have been received then
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
@@ -183,21 +174,6 @@ local function onUpdate(dt)
 				end
 			end
 		end
-		--================================ TWO SECONDS TIMER ================================
-		oneSecondsTimer = oneSecondsTimer + dt -- Time in seconds
-		if oneSecondsTimer > 1 and not flip then -- If oneSecondsTimer pass 1 seconds
-			TCPSocket:send('TEST')
-			print("[GE] ONE SEC TIMER REACHED, TIME OUT??")
-			oneSecondsTimer = 0	-- Reset timer
-			flip = true
-		end
-		if oneSecondsTimer > 2 and flip and dt > 5000 then -- If oneSecondsTimer pass 2 seconds
-			print("TWO SEC TIMER REACHED, TIME OUT MOST LIKELY??")
-			CoreNetwork.resetSession(true)
-			disconnectLauncher()
-			connectToLauncher()
-			flip = false
-		end
 	end
 end
 
@@ -213,5 +189,5 @@ M.sendSplit = sendDataSplit
 M.connectionStatus = connectionStatus
 M.CallEvent = handleEvents
 
-print("GameNetwork Loaded.")
+print("MPGameNetwork Loaded.")
 return M

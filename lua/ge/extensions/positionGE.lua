@@ -30,10 +30,10 @@ local function distance( x1, y1, z1, x2, y2, z2 )
 end
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			GameNetwork.send('Zp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2134, serverVehicleID, data))
+			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2134, serverVehicleID, data))
 		end
 	end
 end
@@ -43,7 +43,7 @@ local function applyPos(data, serverVehicleID)
 
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
-		--GameNetwork.send('On:'..serverVehicleID)
+		--MPGameNetwork.send('On:'..serverVehicleID)
 	--end
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then

@@ -1,17 +1,17 @@
 load("UI")
 registerCoreModule("UI")
 
-load("mpmodmanager")
-registerCoreModule("mpmodmanager")
+load("MPModManager")
+registerCoreModule("MPModManager")
 
-load("CoreNetwork")
-registerCoreModule("CoreNetwork")
+load("MPCoreNetwork")
+registerCoreModule("MPCoreNetwork")
 
 load("mpConfig")
 registerCoreModule("mpConfig")
 
-load("GameNetwork")
-registerCoreModule("GameNetwork")
+load("MPGameNetwork")
+registerCoreModule("MPGameNetwork")
 
 load("vehicleGE")
 registerCoreModule("vehicleGE")

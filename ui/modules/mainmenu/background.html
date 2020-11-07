@@ -1,0 +1,16 @@
+<link type="text/css" rel="stylesheet" href="modules/mainmenu/mainmenu.css">
+
+<div class="contentNavMainmenu">
+    <div style="width:100%; height:100%; position: relative;">
+      <video ng-if="bgImageCtrl.videoSrc !== undefined" muted autoplay loop class="video">
+        <source ng-src="{{bgImageCtrl.videoSrc}}">
+      </video>
+    </div>
+
+    <div style="position: absolute; top: 0; left: 0; right:0; bottom: 0;" ui-view layout ng-show="bgImageCtrl.onBackgroundLoaded"></div>
+
+    <div class="backBtn" ui-sref="menu.mainmenu" ng-if="showBack" layout="row" layout-align="center center">
+      <md-icon class="material-icons" style="font-size: 1em;">keyboard_backspace</md-icon>
+      {{ 'ui.mainmenu.background.back' | translate}}
+    </div>
+</div>

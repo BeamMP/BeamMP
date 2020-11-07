@@ -6,30 +6,12 @@
 
 
 local M = {}
-
-
-
--- ============= VARIABLES =============
-local nodesDelay = 0
-local nodesTickrate = 6 -- in seconds
-
-local positionDelay = 0
-local positionTickrate = 0.05
-
-local inputsDelay = 0
-local inputsTickrate = 0.20
-
-local electricsDelay = 0
-local electricsTickrate = 6
--- TODO: use common tickrate to increase performances this is just for debugging
--- ============= VARIABLES =============
-
-
+print("updatesGE Initialising...")
 
 local function onPlayerConnect()
 	-- Update everything for the new connected player
-	electricsGE.tick() 
-	nodesGE.tick()
+	electricsGE.tick()
+	--nodesGE.tick()
 	positionGE.tick()
 	inputsGE.tick()
 	powertrainGE.tick()
@@ -38,59 +20,45 @@ end
 
 
 local function onUpdate(dt)
-	if Network.getStatus() == 2 then -- If connected
-		nodesDelay = nodesDelay + dt
-		if nodesDelay > nodesTickrate then
-			nodesDelay = 0 -- Reset the delay
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
+		mpConfig.nodesDelay = mpConfig.nodesDelay + dt
+		if mpConfig.nodesDelay > mpConfig.getNodesTickrate() then
+			mpConfig.nodesDelay = 0 -- Reset the delay
 			--nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
-		positionDelay = positionDelay + dt
-		if positionDelay > positionTickrate then
-			positionDelay = 0 -- Reset the delay
+		mpConfig.positionDelay = mpConfig.positionDelay + dt
+		if mpConfig.positionDelay > mpConfig.getPositionTickrate() then
+			mpConfig.positionDelay = 0 -- Reset the delay
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
-		inputsDelay = inputsDelay + dt
-		if inputsDelay > inputsTickrate then
-			inputsDelay = 0 -- Reset the delay
+		mpConfig.inputsDelay = mpConfig.inputsDelay + dt
+		if mpConfig.inputsDelay > mpConfig.getInputsTickrate() then
+			mpConfig.inputsDelay = 0 -- Reset the delay
 			inputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
-		electricsDelay = electricsDelay + dt
-		if electricsDelay > electricsTickrate then
-			electricsDelay = 0 -- Reset the delay
+		mpConfig.electricsDelay = mpConfig.electricsDelay + dt
+		if mpConfig.electricsDelay > mpConfig.getElectricsTickrate() then
+			mpConfig.electricsDelay = 0 -- Reset the delay
 			electricsGE.tick() -- Comment this line to disable electrics synchronization
+		end
+
+		mpConfig.powertrainDelay = mpConfig.powertrainDelay + dt
+		if mpConfig.powertrainDelay > mpConfig.getPowertrainTickrate() then
+			mpConfig.powertrainDelay = 0 -- Reset the delay
+			powertrainGE.tick() -- Comment this line to disable position synchronization
 		end
 	end
 end
 
 
-
-local function setPositionTR(tickRate)
-	positionTickrate = tickRate
-end
-
-
-
-local function setNodeTR(tickRate)
-	nodesTickrate = tickRate
-end
-
-
-
-local function setInputsTR(tickRate)
-	inputsTickrate = tickRate
-end
-
-
-
-M.setInputsTR     = setInputsTR
-M.setNodeTR       = setNodeTR
-M.setPositionTR   = setPositionTR
 M.onPlayerConnect = onPlayerConnect
 M.onUpdate        = onUpdate
 
 
 
+
+print("updatesGE Loaded.")
 return M

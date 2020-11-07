@@ -1,0 +1,92 @@
+<md-content>
+
+  <md-subheader class="md-no-sticky">{{ 'ui.options.general' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.userInterface.showCustomVehicles' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.showPcs" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item layout class="bng-short-select-item">
+    <p flex="40">{{ 'ui.options.userInterface.unitSystem' | translate }}</p>
+    <md-select aria-label="_" flex ng-model="opt.specialUiUnit.system" ng-change="opt.specialUiUnit.applyState()">
+      <md-select-label style="width:100%;"></md-select-label>
+      <md-option md-no-ink ng-repeat="(key, value) in opt.specialUiUnit.highLvlOpt" ng-value="key">
+        {{ ::value | translate}}
+      </md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item ng-if="opt.specialUiUnit.system == 'custom'" ng-repeat="uiUnit in opt.specialUiUnit.settable track by $index"
+      class="bng-short-select-item md-no-proxy" style="padding-left: 50px;" ng-init="m = options.data.options[uiUnit].modes">
+    <p flex="40">{{ opt.specialUiUnit.names[$index] | translate }}</p>
+    <md-select aria-label="_" flex ng-model="options.data.values[uiUnit]"  ng-change="options.applyState()">
+      <md-option md-no-ink ng-repeat="opt in m.keys track by $index" ng-value="opt">
+        {{ m.values[$index] | translate }}
+      </md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.modAutoUpdates' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.modAutoUpdates" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.modNumParallelDownload' | translate }}</p>
+    <md-select aria-label="_" flex ng-model="options.data.values.modNumParallelDownload" ng-change="options.applyState()">
+      <md-select-label style="width:100%;"></md-select-label>
+      <md-option md-no-ink value="1">1</md-option>
+      <md-option md-no-ink value="2">2</md-option>
+      <md-option md-no-ink value="3">3</md-option>
+      <md-option md-no-ink value="10">10</md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.userInterface.garageAutoSave' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.autoSaveInGarage" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.userInterface.disableRichPresence' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.disableRichPresence" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink layout="row" layout-align="end center">
+    <small><binding action="appedit"></binding></small>
+    <md-button ng-disabled="!app.gameState" ui-sref="appedit" class="md-primary md-raised">{{ 'ui.options.userInterface.editApps' | translate }}</md-button>
+  </md-list-item>
+
+
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">{{ 'ui.options.advanced' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.userInterface.enableAdvanced' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.devMode" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink ng-if="opt.internal">
+    <p>{{ 'ui.options.userInterface.externalUi' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.externalUi" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+
+  <md-divider></md-divider>
+  <md-subheader>{{ 'ui.options.theme' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{ 'ui.options.theme.dark' | translate }}</p>
+    <md-checkbox ng-model="opt.uiConfig.dark" ng-change="opt.paletteChanged()"></md-checkbox>
+  </md-list-item>
+  <md-list-item class="bng-short-select-item" layout ng-repeat="palette in ['primary', 'accent', 'warn', 'background']">
+    <p flex="40">{{ ('ui.options.theme.' + palette) | translate }}</p>
+    <md-select flex ng-model="opt.uiConfig[palette]" ng-change="opt.paletteChanged()" aria-label="_" style="background-color:{{ opt.colorPaletteToRgbStr(opt.uiConfig[palette], palette)}}">
+      <md-option md-no-ink ng-repeat="(k, v) in ::opt.palettes" ng-value="k" style="background-color:{{ opt.colorPaletteToRgbStr(k, palette)}}" ></md-option>
+    </md-select>
+  </md-list-item>
+  <md-list-item md-no-ink layout="row" layout-align="end center">
+    <md-button ng-click="opt.resetTheme()" class="md-warn md-raised">{{ 'ui.options.theme.reset' | translate }}</md-button>
+  </md-list-item>
+</md-content>

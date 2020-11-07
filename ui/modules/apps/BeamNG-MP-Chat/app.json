@@ -1,0 +1,14 @@
+{
+  "name": "Multiplayer Chat",
+  "author": "Titch2000",
+  "version": "0.2",
+  "description": "Chat while in multiplayer servers",
+  "directive": "multiplayerchat",
+  "domElement": "<multiplayerchat></multiplayerchat>",
+  "css": {
+  	"left": "180px",
+  	"bottom": "0px",
+  	"width": "550px",
+    "height": "170px"
+  }
+}

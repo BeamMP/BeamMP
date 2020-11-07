@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("powertrainGE Initialising...")
 
 
 
@@ -22,15 +23,13 @@ end
 
 
 local function sendPowertrain(data, gameVehicleID)
-	if Network.getStatus() == 2 then -- If UDP is connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send(Network.buildPacket(0, 2133, serverVehicleID, data))
+			GameNetwork.send('Yp:'..serverVehicleID..":"..data) -- Send powertrain to server
 		end
 	end
 end
-
-
 
 local function applyPowertrain(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
@@ -40,12 +39,26 @@ local function applyPowertrain(data, serverVehicleID)
 	end
 end
 
+local function handle(rawData)
+	--print("powertrainGE.handle: "..rawData)
+	local code = string.sub(rawData, 1, 1)
+	local rawData = string.sub(rawData, 3)
+	if code == "p" then
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		applyPowertrain(data, serverVehicleID)
+	end
+end
 
 
 M.tick                   = tick
+M.handle                 = handle
 M.sendPowertrain         = sendPowertrain
 M.applyPowertrain        = applyPowertrain
 
 
 
+
+print("powertrainGE Loaded.")
 return M

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="250"
+   version="1.1"
+   width="250"
+   viewBox="0 0 250 250"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="x_dpad_up.svg">
+  <metadata
+     id="metadata19">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs17" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview15"
+     showgrid="false"
+     inkscape:zoom="2.6700352"
+     inkscape:cx="144.10055"
+     inkscape:cy="115.711"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="fills" />
+  <g
+     id="RenderLayer_LineSet"
+     inkscape:groupmode="lineset"
+     inkscape:label="RenderLayer_LineSet">
+    <g
+       id="fills"
+       inkscape:groupmode="layer"
+       inkscape:label="fills">
+      <path
+         d="m 164.48034,86.268713 0,-86.03172405 -39.10581,0 -39.105817,0 0,86.03172405 -86.03172405,0 0,39.105817 0,39.10581 86.03172405,0 0,86.03172 39.105817,0 39.10581,0 0,-86.03172 86.03172,0 0,-39.10581 0,-39.105817 -86.03172,0 z"
+         fill_rule="evenodd"
+         id="path6"
+         style="fill:#000000;fill-opacity:1;stroke:none"
+         inkscape:connector-curvature="0" />
+      <path
+         d=" M 102.941, 67.647 147.059, 67.647 125.000, 23.529 102.941, 67.647  z"
+         fill="rgb(255, 255, 255)"
+         fill-opacity="1.0"
+         fill_rule="evenodd"
+         stroke="none"
+         id="path8" />
+    </g>
+    <g
+       id="strokes"
+       inkscape:groupmode="layer"
+       inkscape:label="strokes">
+      <path
+         d=" M 102.941, 67.647 112.941, 67.647 122.941, 67.647 132.941, 67.647 142.941, 67.647 147.059, 67.647 142.587, 58.703 138.115, 49.759 133.642, 40.814 129.170, 31.870 125.000, 23.529 120.528, 32.474 116.056, 41.418 111.584, 50.362 107.111, 59.307 102.941, 67.647 "
+         fill="none"
+         stroke="rgb(12, 12, 12)"
+         stroke-linecap="butt"
+         stroke-linejoin="round"
+         stroke-opacity="1.0"
+         stroke-width="0.0"
+         id="path11" />
+      <path
+         d=" M 161.765, 88.235 161.765, 78.235 161.765, 68.235 161.765, 58.235 161.765, 48.235 161.765, 38.235 161.765, 28.235 161.765, 18.235 161.765, 8.235 161.765, 7.353 151.765, 7.353 141.765, 7.353 131.765, 7.353 125.000, 7.353 115.000, 7.353 105.000, 7.353 95.000, 7.353 88.235, 7.353 88.235, 17.353 88.235, 27.353 88.235, 37.353 88.235, 47.353 88.235, 57.353 88.235, 67.353 88.235, 77.353 88.235, 87.353 88.235, 88.235 78.235, 88.235 68.235, 88.235 58.235, 88.235 48.235, 88.235 38.235, 88.235 28.235, 88.235 18.235, 88.235 8.235, 88.235 7.353, 88.235 7.353, 98.235 7.353, 108.235 7.353, 118.235 7.353, 125.000 7.353, 135.000 7.353, 145.000 7.353, 155.000 7.353, 161.765 17.353, 161.765 27.353, 161.765 37.353, 161.765 47.353, 161.765 57.353, 161.765 67.353, 161.765 77.353, 161.765 87.353, 161.765 88.235, 161.765 88.235, 171.765 88.235, 181.765 88.235, 191.765 88.235, 201.765 88.235, 211.765 88.235, 221.765 88.235, 231.765 88.235, 241.765 88.235, 242.647 98.235, 242.647 108.235, 242.647 118.235, 242.647 125.000, 242.647 135.000, 242.647 145.000, 242.647 155.000, 242.647 161.765, 242.647 161.765, 232.647 161.765, 222.647 161.765, 212.647 161.765, 202.647 161.765, 192.647 161.765, 182.647 161.765, 172.647 161.765, 162.647 161.765, 161.765 171.765, 161.765 181.765, 161.765 191.765, 161.765 201.765, 161.765 211.765, 161.765 221.765, 161.765 231.765, 161.765 241.765, 161.765 242.647, 161.765 242.647, 151.765 242.647, 141.765 242.647, 131.765 242.647, 125.000 242.647, 115.000 242.647, 105.000 242.647, 95.000 242.647, 88.235 232.647, 88.235 222.647, 88.235 212.647, 88.235 202.647, 88.235 192.647, 88.235 182.647, 88.235 172.647, 88.235 162.647, 88.235 161.765, 88.235 "
+         fill="none"
+         stroke="rgb(12, 12, 12)"
+         stroke-linecap="butt"
+         stroke-linejoin="round"
+         stroke-opacity="1.0"
+         stroke-width="0.0"
+         id="path13" />
+    </g>
+  </g>
+</svg>

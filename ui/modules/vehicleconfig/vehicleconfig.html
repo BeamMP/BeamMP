@@ -1,0 +1,36 @@
+<link rel="stylesheet" type="text/css" href="modules/vehicleconfig/vehicleconfig.css">
+
+<style>
+  md-tab-content, md-tab-content > div {
+    height:100%;
+    box-sizing: border-box;
+    overflow:hidden;
+  }
+
+  .contentNavVehicleconfig {
+    min-width:500px;
+    max-width:700px;
+    width: 27%;
+    height: 100%
+  }
+</style>
+
+<md-content layout="column" class="contentNavVehicleconfig" style="width: 600px;">
+  <md-toolbar class="md-primary">
+    <h1 class="md-toolbar-tools">
+      <span flex>{{ ::'ui.vehicleconfig.vehicleconfig' | translate }}</span>
+    <!--<md-button md-no-ink class="md-icon-button md-default" aria-label="Download mods!" ui-sref="menu.mods.repository">
+      <md-tooltip>Download mods!</md-tooltip>
+      <md-icon class="material-icons">add_to_photos</md-icon>
+    </md-button>-->
+    </h1>
+  </md-toolbar>
+  <md-tabs md-selected="model.selected" md-dynamic-height="false" style="bottom:auto" layout="column" class="md-primary" md-no-ink md-stretch-tabs="always" md-no-pagination="false">
+    <md-tab label="{{::'ui.vehicleconfig.parts' | translate}}" md-on-deselect="vehicleconfig.deselectPart(false)" ui-sref="menu.vehicleconfig.parts"></md-tab>
+    <md-tab label="{{::'ui.vehicleconfig.tuning' | translate}}" ui-sref="menu.vehicleconfig.tuning"></md-tab>
+    <md-tab label="{{ ::'ui.vehicleconfig.color' | translate }}" ui-sref="menu.vehicleconfig.color"></md-tab>
+    <md-tab label="{{ ::'ui.vehicleconfig.save' | translate }} & {{ ::'ui.vehicleconfig.load' | translate }}" ui-sref="menu.vehicleconfig.save"></md-tab>
+  </md-tabs>
+
+  <div ui-view flex style="overflow: auto"></div>
+</md-content>

@@ -1,0 +1,238 @@
+<md-content>
+
+  <md-subheader class="md-no-sticky">{{:: 'ui.options.general' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.gameplay.controlOnBlur' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.unfocusedInput" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.noSteer.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.gameplay.noSteer' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.disableSteeringwheel" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.gameplay.useSteamName.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.gameplay.useSteamName' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.useSteamName" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">Replay</md-subheader>
+
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Interpolate vehicle position</p>
+    <md-checkbox ng-model="options.data.values.interpolatePosition" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>^ use alt</p>
+    <md-checkbox ng-model="options.data.values.interpolateAlternative" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Interpolate all alt</p>
+    <md-checkbox ng-model="options.data.values.interpolateFull" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Misc lua</p>
+    <md-checkbox ng-model="options.data.values.interpolateLua" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item ng-hide="options.shipping" layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <p flex="30">Compression level</p>
+    <md-slider flex
+      ng-model="options.data.values.replayLevel" min="-1" max="22" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.replayLevel }}</span>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>Enable full vehicle transparency playback</p>
+    <md-checkbox ng-model="options.data.values.replayAlpha" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay A curve</p>
+    <md-checkbox ng-model="options.data.values.replayA" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay B delta</p>
+    <md-checkbox ng-model="options.data.values.replayB" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay C deltadelta</p>
+    <md-checkbox ng-model="options.data.values.replayC" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay D zstd</p>
+    <md-checkbox ng-model="options.data.values.replayD" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay E sort</p>
+    <md-checkbox ng-model="options.data.values.replayE" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay F warning zigzag</p>
+    <md-checkbox ng-model="options.data.values.replayF" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay G warning curved</p>
+    <md-checkbox ng-model="options.data.values.replayG" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay H warning global</p>
+    <md-checkbox ng-model="options.data.values.replayH" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay I warning global big</p>
+    <md-checkbox ng-model="options.data.values.replayI" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay J warning zigzag short</p>
+    <md-checkbox ng-model="options.data.values.replayJ" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay K warning curved all</p>
+    <md-checkbox ng-model="options.data.values.replayK" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay L delta reconstruction</p>
+    <md-checkbox ng-model="options.data.values.replayL" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay M warning delta reconstruction</p>
+    <md-checkbox ng-model="options.data.values.replayM" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay N rotation</p>
+    <md-checkbox ng-model="options.data.values.replayN" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay O zigzag</p>
+    <md-checkbox ng-model="options.data.values.replayO" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay P rotation interp</p>
+    <md-checkbox ng-model="options.data.values.replayP" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay Q</p>
+    <md-checkbox ng-model="options.data.values.replayQ" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item ng-hide="options.shipping" md-no-ink>
+    <p>Enable replay R</p>
+    <md-checkbox ng-model="options.data.values.replayR" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">{{:: 'ui.options.utilities' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.utilities.outgaugeSupport' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.outgaugeEnabled" ng-change="options.applyState()"></md-checkbox>
+    <md-tooltip md-direction="right">OutGauge is a special protocol to drive external utilities. Please reload your vehicle if you change any of the OutGauge options.</md-tooltip>
+  </md-list-item>
+  <md-list-item md-no-ink ng-show="options.data.values.outgaugeEnabled">
+    <md-tooltip md-direction="right">Please reload your vehicle if you change any of the OutGauge options.</md-tooltip>
+    <md-input-container>
+      <label>IP</label>
+      <input flex type="text" ng-model="options.data.values.outgaugeIP" ng-change="options.applyState()">
+    </md-input-container>
+    <md-input-container>
+      <label>Port</label>
+      <input flex type="text" ng-model="options.data.values.outgaugePort" ng-change="options.applyState()">
+    </md-input-container>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.utilities.highPerformancePlan' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.HighPerformancePlan" ng-change="options.applyState()"></md-checkbox>
+    <md-tooltip md-direction="right">This will force your PC to enable the High Performance Plan of your OS on startup.</md-tooltip>
+  </md-list-item>
+
+  <!-- disabled until buggy ffb is fixed
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.utilities.g27ShiftLed' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.rpmLedsEnabled" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  -->
+
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">{{:: 'ui.options.motionSim' | translate }}</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.motionSim.enabled' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.motionSimEnabled" ng-change="options.applyState()"></md-checkbox>
+    <md-tooltip md-direction="right">Enable to make the game send motion platform data</md-tooltip>
+  </md-list-item>
+  <md-list-item md-no-ink ng-show="options.data.values.motionSimEnabled">
+    <md-input-container>
+      <label>IP</label>
+      <input flex type="text" ng-model="options.data.values.motionSimIP" ng-change="options.applyState()">
+    </md-input-container>
+    <md-input-container>
+      <label>Port</label>
+      <input flex type="text" ng-model="options.data.values.motionSimPort" ng-change="options.applyState()">
+    </md-input-container>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.motionSimEnabled">
+    <p flex="30">{{:: 'ui.options.motionSim.updateRate' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.motionSimHz" min="50" max="2000" step="50" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.motionSimHz }}</span>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.motionSimEnabled">
+    <p flex="300">{{:: 'ui.options.motionSim.accelerationSmoothing' | translate }}</p>
+
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.motionSimEnabled">
+    <p flex="30">{{:: 'ui.options.motionSim.accelerationSmoothingX' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.motionSimAccelerationSmoothingX" min="0" max="200" step="5" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.motionSimAccelerationSmoothingX }}</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.motionSimEnabled">
+    <p flex="30">{{:: 'ui.options.motionSim.accelerationSmoothingY' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.motionSimAccelerationSmoothingY" min="0" max="200" step="5" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.motionSimAccelerationSmoothingY }}</span>
+  </md-list-item>
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.motionSimEnabled">
+    <p flex="30">{{:: 'ui.options.motionSim.accelerationSmoothingZ' | translate }}</p>
+    <md-slider flex
+      ng-model="options.data.values.motionSimAccelerationSmoothingZ" min="0" max="200" step="5" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ options.data.values.motionSimAccelerationSmoothingZ }}</span>
+  </md-list-item>
+
+  <md-divider></md-divider>
+  <md-subheader class="md-no-sticky">{{ 'ui.options.online' | translate }}</md-subheader>
+
+  <div style="padding: 15px; padding-top: 0;" flex="40">
+    <p bng-translate="ui.mainmenu.onlineFeatures.featureDescription"></p>
+    <md-checkbox style="display: inline-block;" ng-model="options.online" ng-change="options.applyState()" style="display: inline;">{{:: 'ui.mainmenu.onlineConsent'  | translate}}</md-checkbox>
+  </div>
+
+  <md-subheader class="md-no-sticky">{{ 'ui.options.telemetry' | translate }}</md-subheader>
+
+  <div style="padding: 15px; padding-top: 0;" flex="40">
+    <p bng-translate="ui.mainmenu.telemetry.featureDescription"></p>
+    <div style="display: inline-block; margin-bottom: 1em;"><md-checkbox style="display: inline-block; padding-top: 1em;" ng-change="options.applyState()" ng-model="options.telemetry" ng-disabled="!options.online" style="display: inline;"></md-checkbox><div style="display: inline-block;" bng-translate="ui.mainmenu.telemetryConsent"></div></div>
+  </div>
+
+</md-content>

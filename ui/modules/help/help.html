@@ -1,0 +1,9 @@
+<link rel="stylesheet" type="text/css" href="modules/help/help.css">
+
+<md-content style="width: 100%; height:100%; max-width: 1500px;" class="contentNavHelp">
+  <md-tabs class="md-primary helpPages" md-selected="currentView" md-stretch-tabs="always">
+    <md-tab label="{{ ::card.title | translate }}" ng-repeat="card in tabs">
+      <md-content class="md-padding" ng-include="card.html"></md-content>
+    </md-tab>
+  </md-tabs>
+</md-content>

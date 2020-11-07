@@ -6,6 +6,7 @@
 
 
 local M = {}
+print("inputsGE Initialising...")
 
 
 
@@ -22,15 +23,13 @@ end
 
 
 local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
-	if Network.getStatus() == 2 then -- If TCP connected
+	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			Network.send(Network.buildPacket(0, 2130, serverVehicleID, data))
+			GameNetwork.send('Vi:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2130, serverVehicleID, data))
 		end
 	end
 end
-
-
 
 local function applyInputs(data, serverVehicleID)
 	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
@@ -40,12 +39,26 @@ local function applyInputs(data, serverVehicleID)
 	end
 end
 
+local function handle(rawData)
+	--print("inputsGE.handle: "..rawData)
+	rawData = string.sub(rawData,3)
+	local serverVehicleID = string.match(rawData,"^.-:")
+	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+	local data = string.match(rawData,":(.*)")
+	--print(serverVehicleID)
+	--print(data)
+	applyInputs(data, serverVehicleID)
+end
+
 
 
 M.tick        = tick
+M.handle      = handle
 M.sendInputs  = sendInputs
 M.applyInputs = applyInputs
 
 
 
+
+print("inputsGE Loaded.")
 return M

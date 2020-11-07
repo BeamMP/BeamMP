@@ -1,0 +1,46 @@
+<md-content class="md-padding">
+  <h3 class="md-title">{{:: 'ui.controls.configuration' | translate}}</h3>
+
+  <div ng-if="!controlsFfb.ffbBound" layout="row" layout-align="start center">
+    <span class="material-icons" style="font-size:1.8em;">info</span>
+    <span style="margin-left:10px">{{:: 'ui.controls.ffbConfigMissing' | translate}}</span>
+  </div>
+
+  <md-list-item  layout="row">
+    <div ng-if="controlsFfb.ffbBound" flex layout="row" layout-align="start center" layout-wrap>
+      <div ng-repeat="device in controls.data.bindings" layout layout-wrap>
+        <div class="bng-binding" ng-repeat="binding in device.contents.bindings | filter: {'action': 'steering'}"
+             ng-click="controlsFfb.select('steering', device.devname, binding.control)"
+             style="cursor:pointer">
+          <binding dark="true" key="binding.control" device=":: device.devname">
+          <md-tooltip>{{:: 'ui.controls.editBinding' | translate}}</md-tooltip>
+        </div>
+      </div>
+    </div>
+    <md-icon class="material-icons" style="cursor:pointer" ng-click="controlsFfb.select('steering', null, null)">
+      add_circle <md-tooltip md-direction="">{{:: 'ui.controls.createBinding' | translate}}</md-tooltip>
+    </md-icon>
+  </md-list-item>
+
+  <md-divider></md-divider>
+
+  <h3 class="md-title">{{:: 'ui.controls.availableHardware' | translate}}</h3>
+
+  <div ng-if="!controlsFfb.ffbCapable" layout layout-align="start center">
+    <span class="material-icons" style="font-size:1.8em;">info</span>
+    <span style="margin-left:10px">{{:: 'ui.controls.ffbHardwareMissing' | translate}}</span>
+  </div>
+
+  <div ng-repeat="(_, ctrl) in ::controls.data.controllers">
+    <div ng-repeat="(name, idx) in ctrl.ffbAxes">
+      <md-list-item layout layout-wrap>
+        <strong style="text-transform: capitalize;">{{ name }}</strong>&nbsp;
+        <small style="padding-left:5px; color: grey; font-weight:100!important">({{:: ctrl.productName }}, IDX #{{:: idx }})</small>
+      </md-list-item>
+    </div>
+  </div>
+
+  <md-divider></md-divider>
+  <div class="md-padding" bng-translate="ui.controls.steering_wiki"></div>
+
+</md-content>

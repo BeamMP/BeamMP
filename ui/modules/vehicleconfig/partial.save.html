@@ -1,0 +1,33 @@
+<md-content style="box-sizing:border-box; height: 100%;" layout="column">
+  <div class="md-padding">
+    <div layout="row" layout-align="center center">
+      <md-input-container flex>
+        <label>{{ ::'ui.vehicleconfig.filename' | translate }}</label>
+        <input ng-model="vehConf_save.saveName" ng-model-options="{debounce: 50}">
+      </md-input-container>
+      <div><md-button ng-disabled="!vehConf_save.saveName" ng-click="vehConf_save.save(vehConf_save.saveName)" ng-class="{'md-warn': vehConf_save.configList.indexOf(vehConf_save.saveName) !== -1, 'md-primary': vehConf_save.configList.indexOf(vehConf_save.saveName) === -1}" class="md-raised" md-no-ink>
+        {{ vehConf_save.configList.indexOf(vehConf_save.saveName) === -1 ? 'save' : 'overwrite' | translate}}
+      </md-button></div>
+    </div>
+	
+	<div layout="row" layout-align="space-between stretch" class="">
+
+		<small style="width:70%;">({{::'ui.vehicleconfig.mouseOverUi' | translate}})</small>
+	
+		<md-checkbox flex ng-model="vehConf_tuning.saveConfigScreenshot" style="width=50px;">
+		<md-tooltip md-direction="right">
+			Save a screenshot of your config
+		</md-tooltip md-no-ink>
+			Save screenshot
+		</md-checkbox>
+
+	</div>
+  </div>
+
+  <md-list layout="column" style="overflow: auto;">
+    <div ng-repeat="item in vehConf_save.configList | filter : vehConf_save.saveName track by $index" layout="row" layout-align="center center" style="padding: 5px 15px; outline:none; cursor: pointer; min-height: 50px;" ng-click="vehConf_save.saveName = item" class="markEveryOddChild">
+      <div flex>{{item}}</div>
+      <md-button md-no-ink ng-click="vehConf_save.load($event, item)" class="md-raised md-primary" flex="20">{{ :: 'ui.vehicleconfig.load' | translate}}</md-button>
+    </div>
+  </md-list>
+</md-content>

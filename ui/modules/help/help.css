@@ -1,0 +1,104 @@
+.helpPages {
+  height: 100%;
+}
+
+
+.contentNavHelp {
+  width:100%;
+  display:block;
+}
+
+.overviewContainer .card {
+    min-width: 600px;
+    float: left;
+    max-width: 700px;
+    width: 100%;
+}
+
+.overviewContainer .md-title {
+  background-color:#ddd;
+}
+
+.overviewContainer img {
+  width: 100%;
+}
+
+.overviewContainer ul img {
+  width: 50%;
+}
+
+
+.contentNavHelp .quickstart md-icon {
+  color: rgb(158,158,158);
+  color: rgba(158,158,158,0.7);
+}
+
+.contentNavHelp .quickstart md-icon:hover {
+  color: rgb(80,80,80);
+  cursor: pointer;
+}
+
+.contentNavHelp .quickstart .whatsoeverDecide {
+  border-right: solid 1px rgba(158,158,158,0.7);
+}
+
+.contentNavHelp .quickstart .decideElement {
+  padding: 0 25px 0 25px;
+  margin-top: 5px;
+}
+
+.contentNavHelp .quickstart .fuckThisSpacer {
+  margin-bottom: 40px;
+}
+
+.contentNavHelp .quickstart img {
+  width: 500px;
+}
+
+
+.contentNavHelp .overviewItem:hover {
+  background-color: rgba(158,158,158,0.2);
+  cursor: pointer;
+}
+
+.contentNavHelp .overviewItemHoverPrevent:hover {
+  background-color: transparent;
+}
+
+.contentNavHelp .imgContainer {
+  height: 100px;
+  width: 100px;
+  padding: 25px;
+}
+
+.contentNavHelp .overviewContainer .leftSide {
+  width: 150px;
+}
+
+.contentNavHelp .overviewContainer .leftSideNum {
+  width: 40px;
+}
+
+.overviewContainer .greenBubble {
+  border-radius:10px;
+  background-color:#ddffdd;
+  border: 1px solid #ccc;
+  margin:10px;
+  padding:20px;
+  font-size:1.5em;
+  font-family:monospace;
+  text-align:center;
+}
+
+.overviewContainer .vertKeytable {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.overviewContainer .vertKeytable tr td {
+  padding: 4px;
+}
+
+.overviewContainer .vertKeytable tr td:nth-child(2n) {
+  background-color: rgba(221, 221, 221, 0.5);
+}

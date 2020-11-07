@@ -1,0 +1,75 @@
+<!-- DataTables CSS --
+<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
+
+<!-- DataTables JavaScript -->
+<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
+<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
+
+<md-content>
+	<div layout="row" layout-padding="">
+			<input type="text" id="search" name="search" placeholder="Search" oninput="displayServers()"/>
+			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
+
+			<md-checkbox ng-model="multiplayermenu.check_isEmpty" ng-change="multiplayermenu.displayServers();">
+			<md-tooltip md-direction="right">
+			Only show empty servers
+			</md-tooltip md-no-ink>
+			Empty only
+			</md-checkbox>
+
+			<md-checkbox ng-model="multiplayermenu.check_isNotEmpty" ng-change="multiplayermenu.displayServers();">
+			<md-tooltip md-direction="right">
+			Only show not empty servers
+			</md-tooltip md-no-ink>
+			Not empty
+			</md-checkbox>
+
+			<md-checkbox ng-model="multiplayermenu.check_isNotFull" ng-change="multiplayermenu.displayServers();">
+			<md-tooltip md-direction="right">
+			Only show not full servers
+			</md-tooltip md-no-ink>
+			Not full
+			</md-checkbox>
+
+			<md-checkbox ng-model="multiplayermenu.check_modSlider" ng-change="multiplayermenu.displayServers();">
+			<md-tooltip md-direction="right">
+			Enable mod size limiter
+			</md-tooltip md-no-ink>
+			Mod size slider
+			</md-checkbox>
+
+			<md-slider flex ng-if="multiplayermenu.check_modSlider"
+				ng-model="multiplayermenu.slider_maxModSize" min="0" max="5000" step="50" aria-label="_"
+				ng-change="multiplayermenu.displayServers();">
+			</md-slider>
+			<span ng-if="multiplayermenu.check_modSlider" style="margin: 0px 15px; padding-top: 13px; color: white;">{{ multiplayermenu.slider_maxModSize }} MB</span>
+
+		<md-divider></md-divider>
+	</div>
+
+	<table id="serversTable">
+		<thead>
+			<tr id="header">
+				<th>{{:: 'ui.multiplayer.location' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.description' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.map' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.players' | translate}}</th>
+				<th>PPS</th>
+			</tr>
+		</thead>
+		<tbody id="serversTableBody">
+
+		</tbody>
+	</table>
+
+	<div id="footer">
+		<span id="TEMPAREA" style="display:none;"></span>
+	</div>
+</md-content>
+
+<script>
+
+</script>

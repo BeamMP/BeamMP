@@ -1,0 +1,39 @@
+<md-content layout="column" class="contentNavVehicleconfig" style="width: 600px;">
+      <md-content style="height:100%; overflow:hidden; box-sizing:border-box"; layout="column">
+        <div flex class="md-padding" style="overflow-y:auto" ng-mouseleave="vehConf_parts.deselectPart(vehConf_parts.stickyPartSelection)">
+          <div ng-repeat="entry in vehConf_parts.d.data track by entry.slot" ng-include="'vehicle-config-tree'" >
+          </div>
+        </div>
+
+        <div layout="flex" layout-align="start center">
+          <md-input-container flex>
+            <label>{{ :: 'ui.vehicleconfig.licensePlate' | translate}}</label>
+            <input ng-model="vehConf_parts.licensePlate">
+          </md-input-container>
+          <md-button class="md-icon-button" md-no-ink ng-click="vehConf_parts.genLicensePlate()" aria-label="_">
+            <md-icon class="material-icons">cached</md-icon>
+            <md-tooltip md-direction="left">{{ ::'ui.vehicleconfig.licensePlateGen' | translate }}</md-tooltip>
+          </md-button>
+          <md-button class="md-icon-button" md-no-ink ng-click="vehConf_parts.updateLicensePlate()" aria-label="_">
+            <md-icon class="material-icons">check</md-icon>
+            <md-tooltip md-direction="left">{{ ::'ui.vehicleconfig.updateLicensePlate' | translate }}</md-tooltip>
+          </md-button>
+        </div>
+
+        <div layout="row" layout-align="start center" class="md-whiteframe-z3">
+          <md-checkbox ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
+            {{ :: 'ui.vehicleconfig.subparts' | translate}}
+          </md-checkbox>
+          <md-checkbox ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
+            {{ :: 'ui.vehicleconfig.simpleTree' | translate}}
+          </md-checkbox>
+          <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-raised md-warn">
+             {{ :: 'ui.common.reset' | translate}}
+          </md-button>
+          <md-button ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-success">
+             {{ :: 'ui.common.sync' | translate}}
+          </md-button>
+        </div>
+      </md-content>
+
+</md-content>

@@ -1,0 +1,132 @@
+<account-info id='account-info' class="loadingHint" ></account-info>
+
+<div ng-if="!shipping" style="font-weight: bold;width:400px;position:fixed;padding-left:5px;top:5px;left:5px;font-size:60px;font-family:Roboto;margin:0;background-color:rgba(255,255,255,0.8);border-radius:20px;">DEV RELEASE</div>
+
+<div bng-nav-root>
+
+  <div layout="column" id="versioninfo" layout-align="end end" style="max-width: 400px; max-height: 400px;">
+    <online-message style="min-height: 100px; overflow-y: hidden;"></online-message>
+    <version-info style="cursor: pointer; width: calc(100% - 16px); padding: 8px;" class="loadingHint"></version-info>
+  </div>
+
+  <center class="mainmenu">
+
+   <md-grid-list
+    class="grid"
+    md-cols="6"
+    md-row-height="13:12"
+    md-gutter="2vh">
+
+    <md-grid-tile class="title" md-colspan="6">
+      <!--
+      <object data="images/drive.svg" style="max-width: 90%; max-height: 75%; pointer-events: none;"></object>
+      -->
+      <logo src="::product"></logo>
+    </md-grid-tile>
+
+
+    <md-grid-tile  md-rowspan="2" md-colspan="4" class="tile play other" ui-sref="menu.multiplayer" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" bng-nav-default-focus="true">
+      <div layout="row" class="uppercase">
+        <span><md-icon class="material-icons mainmenuItems">people_outline</md-icon> Play MP</span><br/>
+      </div>
+    </md-grid-tile>
+
+
+
+    <md-grid-tile md-rowspan="1" md-colspan="2" class="other tile" ui-sref="menu.options.graphics" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <div class="uppercase">
+        {{ 'ui.mainmenu.options' | translate}}
+      </div>
+    </md-grid-tile>
+
+
+      <md-grid-tile md-colspan="1" class="other tile smaller" ui-sref="menu.help({pageIndex: 'changelog'})" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%">
+          <span ng-class="{'heading-long': (('ui.mainmenu.news' | translate).length) > 5}" class="heading" >{{ 'ui.mainmenu.news' | translate }}</span>
+          <span style="font-size: 0.7em;" ng-if="dateShort !== undefined">{{:: dateShort}}</span>
+        </div>
+      </md-grid-tile>
+
+
+
+
+      <md-grid-tile md-rowspan="1" class="other tile" ui-sref="menu.help" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div ng-class="{'heading-long': (('ui.mainmenu.help' | translate).length) > 5}" class="heading" >{{ 'ui.mainmenu.help' | translate}}</div>
+      </md-grid-tile>
+
+      <!--
+      <md-grid-tile md-colspan="2" class="other tile" ng-class="{'other tile smaller': total !== 0}" ui-sref="{{values.onlineFeatures === 'disable' ? 'menu.mods.local' : 'menu.mods.repository'}}"
+        bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" ng-if="total > 0 || values.onlineFeatures !== 'disable'">
+        <div class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%">
+          <span ng-if="values.onlineFeatures === 'disable'" class="heading uppercase">{{ 'ui.mainmenu.mods' | translate}}</span>
+          <span ng-if="values.onlineFeatures === 'enable'" class="heading uppercase">{{ 'ui.mainmenu.repo' | translate}}</span>
+          <span ng-if="total !== 0" style="font-size: 0.6em;" translate="ui.modmanager.numActive" translate-values="numActiveObj()"></span>
+        </div>
+      </md-grid-tile>
+ -->
+      <!--
+      <md-grid-tile md-rowspan="1" md-colspan="2" class="other tile" ng-click="garage();" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div class="uppercase">
+          {{ 'ui.mainmenu.garage' | translate}}
+        </div>
+      </md-grid-tile>
+ -->
+
+
+
+
+      <!-- <md-grid-tile md-colspan="2" class="tile other" ui-sref="menu.mods.repository" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div class="uppercase">
+          {{ 'ui.mainmenu.repo' | translate}}
+        </div>
+      </md-grid-tile> -->
+
+
+      <!--<md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.replay" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div class="uppercase">
+          {{ 'ui.dashboard.replay' | translate | uppercase}}
+        </div>
+      </md-grid-tile>-->
+
+    <!-- <md-grid-tile md-colspan="2" class="other tile" ui-sref="menu.modwizard" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}" ng-if="values.devMode">
+      <div class="uppercase">
+        {{ 'ui.mainmenu.modwizard' | translate}}
+      </div>
+    </md-grid-tile>  -->
+
+      <md-grid-tile md-colspan="2" class="other tile" ui-sref="credits" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+        <div class="uppercase">
+          {{ 'ui.mainmenu.credits' | translate}}
+        </div>
+      </md-grid-tile>
+
+    <md-grid-tile md-colspan="2" class="other tile" ng-click="quit();" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <div class="uppercase">
+        {{ 'ui.mainmenu.exit' | translate}}
+      </div>
+    </md-grid-tile>
+	
+	
+	<md-grid-tile md-colspan="2" class="other tile" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <a class="blur-fg" layout="column" layout-align="center center" style="height: 100%; width: 100%;" onclick="openForumLink()">
+        <span ng-class="{'heading-long': (('ui.mainmenu.news' | translate).length) > 5}" class="heading" >FORUM</span>
+      </a>
+    </md-grid-tile>
+	
+	
+    <md-grid-tile ui-sref="iconViewer" ng-if="!app.shipping" md-colspan="1" class="other tile" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <div class="uppercase">
+         Icons
+      </div>
+    </md-grid-tile>
+
+    <md-grid-tile ui-sref="menu.menu2view" ng-if="!app.shipping" md-colspan="1" class="other tile" bng-nav-item bng-sound="{focus: 'event:UI_MainMouseOver', click: 'event:UI_MainSelect'}">
+      <div class="uppercase">
+         UI V3
+      </div>
+    </md-grid-tile>
+
+  </md-grid-list>
+  </center>
+
+</div>

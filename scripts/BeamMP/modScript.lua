@@ -1,11 +1,17 @@
-load("Network")
-registerCoreModule("Network")
+load("UI")
+registerCoreModule("UI")
 
-load("sessionControl")
-registerCoreModule("sessionControl")
+load("mpmodmanager")
+registerCoreModule("mpmodmanager")
 
-load("updatesGE")
-registerCoreModule("updatesGE")
+load("CoreNetwork")
+registerCoreModule("CoreNetwork")
+
+load("mpConfig")
+registerCoreModule("mpConfig")
+
+load("GameNetwork")
+registerCoreModule("GameNetwork")
 
 load("vehicleGE")
 registerCoreModule("vehicleGE")
@@ -22,8 +28,8 @@ registerCoreModule("positionGE")
 load("powertrainGE")
 registerCoreModule("powertrainGE")
 
+load("updatesGE")
+registerCoreModule("updatesGE")
+
 load("nodesGE")
 registerCoreModule("nodesGE")
-
-load("UI")
-registerCoreModule("UI")

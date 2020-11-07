@@ -1,0 +1,92 @@
+<div  ng-controller="Chat"
+id="Chat"
+class="bngApp multiplayerChat"
+ng-style="{'width': '100%', 'height': '100%'}"
+ng-init="init()">
+<style>
+  input[type=number] {
+    width: 58px;
+  }
+  .title {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #BBBBBB;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .flat-button {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    line-height: 1.5em;
+    text-align: center;
+    color: #000000;
+    background-color: #DADADA;
+    border: 1px solid #888888;
+    min-width: 37px;
+  }
+  .flat-button:hover {
+    background-color: #C8C8C8;
+  }
+  .flat-button:active {
+    background-color: #A8A8A8;
+  }
+  .b-important {
+    font-weight: bold;
+  }
+  .b-important:hover {
+    background-color: #C8FFC8;
+  }
+  .b-important:active {
+    background-color: #A8FFA8;
+  }
+  .nomargin-input{
+    margin-bottom: 0;
+    width: 130px;
+  }
+  .nobotmargin{
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+  .empty-span {
+    min-width: 30px;
+    display: inline-block;
+  }
+  .error {
+    color: red;
+    margin-top: 5px;
+    margin-bottom:5px;
+  }
+  .chatbox {
+    display: flex;
+  }
+  ul#CHAT {
+    list-style: none;
+    padding-left: 0px;
+    height: 149px;
+    overflow-y: scroll;
+    overflow-wrap: break-word;
+    margin-bottom: 5px;
+  }
+</style>
+
+<div style="display:flex;">
+  <div style="margin-left:0px; margin-right resize:both; width:100%; min-height:100%;">
+    <!--<div>
+      <button style="height:30px; float:right;" ng-click="chatClear()">Clear Chat</button>
+    </div>-->
+    <div>
+      <hr style="margin-bottom: -13px;">
+      <ul style="height:110px;" id="CHAT"></ul>
+    </div>
+    <form class="chatbox">
+      <input id="CHATMESSAGE" style="width:100%; height:24px;" type="text" ng-click="select()" placeholder="Chat Message.">
+      <button style="height:30px;" ng-click="chatSend()">Send</button>
+    </form>
+  </div>
+</div>
+
+</div>

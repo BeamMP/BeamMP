@@ -9,6 +9,7 @@ app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 }]);
 app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
+		//console.log(`CALLING READY: UI.ready("MP-SESSION")`)
 		bngApi.engineLua('UI.ready("MP-SESSION")');
 	};
 
@@ -23,20 +24,19 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.select = function() {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
+
+	$scope.$on('setPing', function (event, ping) {
+    document.getElementById("Session-Ping").innerHTML = ping;
+	});
+
+	$scope.$on('setStatus', function (event, status) {
+    document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status));
+	});
+
+	$scope.$on('setPlayerCount', function (event, count) {
+    document.getElementById("Session-PlayerCount").innerHTML = count;
+	});
 }]);
-
-
-function setPing(ping) {
-	document.getElementById("Session-Ping").innerHTML = ping;
-}
-
-function setStatus(status) {
-	document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status));
-}
-
-function setPlayerCount(count) {
-	document.getElementById("Session-PlayerCount").innerHTML = count;
-}
 
 function sanitizeString(str) {  // VERY basic sanitization.
     console.log(str)

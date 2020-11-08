@@ -1657,15 +1657,22 @@ angular.module('beamng.stuff')
     $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
   });
 
-  vm.showConnectionIssues = false;
+  vm.showConnectionIssues = true;
 
   $scope.$on('app:showConnectionIssues', function (event, value, callback) {
     vm.showConnectionIssues = value;
-    Utils.waitForCefAndAngular(() => {
+    /*Utils.waitForCefAndAngular(() => {
       if (callback !== undefined && typeof callback === 'function') {
         callback(vm.showConnectionIssues);
       }
-    });
+    });*/
+    /*console.log(value)
+    var showIssuesElement = document.getElementById('showConnectionIssues');
+    if (value) {
+      showIssuesElement.style.display = 'block'
+    } else {
+      showIssuesElement.style.display = 'none'
+    }*/
   });
 
   vm.isWaiting = false;

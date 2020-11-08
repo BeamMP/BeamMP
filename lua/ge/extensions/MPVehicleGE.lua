@@ -406,7 +406,7 @@ end
 
 
 
-local function syncVehicles() -- FIXME
+local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do
 		local veh = be:getObject(k) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?

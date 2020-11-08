@@ -57,14 +57,6 @@ end
 
 
 
-local function getServers()
-	print("Getting the servers list")
-	TCPLauncherSocket:send('Z')
-	TCPLauncherSocket:send('B')
-end
-
-
-
 local function setMods(modsString)
 	local mods = {}
 	if (modsString) then
@@ -74,6 +66,20 @@ local function setMods(modsString)
 		end
 	end
 	MPModManager.setServerMods(mods)
+end
+
+
+
+local function getServers()
+	print("Getting the servers list")
+	TCPLauncherSocket:send('Z')
+	TCPLauncherSocket:send('B')
+end
+
+
+
+local function getCurrentServer()    
+    return currentServer    
 end
 
 
@@ -126,7 +132,7 @@ local function HandleU(params)
 		status = "LoadingMap"
 	end
 	if code == "p" then
-		--UI.setPing(data.."") -- FIXME
+		UI.setPing(data.."")
 		positionGE.setPing(data)
 	end
 end
@@ -236,6 +242,7 @@ end
 
 M.onUpdate = onUpdate
 M.getServers = getServers
+M.getCurrentServer = getCurrentServer
 M.setCurrentServer = setCurrentServer
 M.resetSession = resetSession
 M.quitMP = quitMP

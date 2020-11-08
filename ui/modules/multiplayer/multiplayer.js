@@ -168,6 +168,10 @@ angular.module('beamng.stuff')
 	}
 
 	function select(row, table) {
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
 		var table = document.getElementById("serversTable");
 		deselect(table.selectedRow);
 		row.classList.add("highlight");
@@ -448,6 +452,10 @@ angular.module('beamng.stuff')
 	}
 
 	function select(row, table) {
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
 		var table = document.getElementById("serversTable");
 		deselect(table.selectedRow);
 		row.classList.add("highlight");

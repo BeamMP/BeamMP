@@ -249,7 +249,6 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
-M.currentServer = currentServer
 M.onInit = onInit
 
 

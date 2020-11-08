@@ -304,15 +304,19 @@ local function onVehicleResetted(gameVehicleID)
 			local veh = be:getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
 			local rot = veh:getRotation()
-			local tempTable = {}
-			tempTable = {pos={}, ang={}} -- FIXME
-			tempTable.pos.x = pos.x
-			tempTable.pos.y = pos.y
-			tempTable.pos.z = pos.z
-			tempTable.ang.x = rot.x
-			tempTable.ang.y = rot.y
-			tempTable.ang.z = rot.z
-			tempTable.ang.w = rot.w
+			local tempTable = {
+				pos = {
+					x = pos.x,
+					y = pos.y,
+					z = pos.z
+				},
+				rot = {
+					x = rot.x,
+					y = rot.y,
+					z = rot.z,
+					w = rot.w
+				}
+			}
 			MPGameNetwork.send('Or:'..serverVehicleID..":"..jsonEncode(tempTable).."")
 		end
 	end
@@ -333,7 +337,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 				veh:reset()
 				print("Vehicle "..serverVehicleID.." resetted by server")
 				if pr then
-					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w) -- Apply position
+					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w) -- Apply position
 				else
 				    print('onServerVehicleResetted data corrupted')
 				end

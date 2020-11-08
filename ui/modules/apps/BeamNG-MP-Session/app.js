@@ -30,7 +30,8 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	});
 
 	$scope.$on('setStatus', function (event, status) {
-    document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status));
+    //document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status)); // REMOVE COLORS FROM SERVER NAME
+		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
 	});
 
 	$scope.$on('setPlayerCount', function (event, count) {
@@ -39,11 +40,11 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 }]);
 
 function sanitizeString(str) {  // VERY basic sanitization.
-    console.log(str)
+    //console.log(str)
 		str = str.replace(/<script.*?<\/script>/g, '');
 		str = str.replace(/<button.*?<\/button>/g, '');
 		str = str.replace(/<iframe.*?<\/iframe>/g, '');
 		str = str.replace(/<a.*?<\/a>/g, '');
-    console.log(str)
+    //console.log(str)
     return str
 }

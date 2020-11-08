@@ -40,10 +40,10 @@ function setPlayerCount(count) {
 
 function sanitizeString(str) {  // VERY basic sanitization.
     console.log(str)
-	str = str.replace(/<script.*?<\/script>/g, '');
-	str = str.replace(/<button.*?<\/button>/g, '');
-	str = str.replace(/<iframe.*?<\/iframe>/g, '');
-	str = str.replace(/<a.*?<\/a>/g, '');
+		str = str.replace(/<script.*?<\/script>/g, '');
+		str = str.replace(/<button.*?<\/button>/g, '');
+		str = str.replace(/<iframe.*?<\/iframe>/g, '');
+		str = str.replace(/<a.*?<\/a>/g, '');
     console.log(str)
     return str
 }

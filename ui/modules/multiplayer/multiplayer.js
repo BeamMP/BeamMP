@@ -64,8 +64,6 @@ angular.module('beamng.stuff')
 	};
 
 	vm.addCustomServer = function() {
-
-
 		var valid = (document.getElementById('customFavIP').value.length > 0) && (document.getElementById('customFavPort').value.length > 0) && !isNaN(document.getElementById('customFavPort').value)
 
 		if (!valid) return;
@@ -101,7 +99,7 @@ angular.module('beamng.stuff')
 				if (split.length==2) document.getElementById('directport').value = split[1];
 			});
 		});
-		
+
 	};
 
 	//vm.displayServers = displayServerScope();
@@ -131,7 +129,7 @@ angular.module('beamng.stuff')
 }])
 .controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
-	
+
 	vm.check_isEmpty = false;
 	vm.check_isNotEmpty = false;
 	vm.check_isNotFull = false;
@@ -163,6 +161,12 @@ angular.module('beamng.stuff')
 		row.selected = false;
 	}
 
+	vm.connect = function() {
+		logger.debug("Attempting to call connect to server.")
+		document.getElementById('LoadingServer').style.display = 'block'
+		bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	}
+
 	function select(row, table) {
 		var table = document.getElementById("serversTable");
 		deselect(table.selectedRow);
@@ -175,6 +179,29 @@ angular.module('beamng.stuff')
 			var servers = JSON.parse(localStorage.getItem('servers'))
 			var server = servers[id];
 			highlightedServer = servers[id];
+			//$(showDetailsScope(server)).insertAfter($(e.currentTarget)).show();
+			var serverInfoRow = showDetailsScope(server);
+			var serverInfoRow = document.createElement("tr");
+			serverInfoRow.innerHTML = showDetailsScope(server);
+			serverInfoRow.setAttribute("id", "ServerInfoRow");
+			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
+
+			var connectToServerButton = document.getElementById('serverconnect-button');
+      var createClickHandler = function() {
+        return function() {
+					vm.connect()
+        };
+      };
+      connectToServerButton.onclick = createClickHandler();
+
+			var addServer2FavButton = document.getElementById('addFav-button');
+      var createClickHandler2 = function() {
+        return function() {
+					addFav()
+        };
+      };
+      addServer2FavButton.onclick = createClickHandler2();
+
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
 	}
@@ -258,16 +285,11 @@ angular.module('beamng.stuff')
 		row.onclick = selectRow;
 	});
 
-	function selectRow(event) {
+	vm.selectRow = function(row) {
+		console.log("[2] ROW CLICKED, DATA: ")
 		var table = document.getElementById("servers-table");
-		var src = event.srcElement;
-		var row = src.closest('tr');
 		select(row, table);
 	};
-
-	$scope.$on('receiveServers', function (data) {
-		console.log("TEST");
-	});
 
 	function receiveServers(data) {
 		console.log(data)
@@ -300,25 +322,46 @@ angular.module('beamng.stuff')
 			if(filtered && vm.check_isEmpty && servers[i].players>0) filtered = false;
 			if(filtered && vm.check_isNotEmpty && servers[i].players==0) filtered = false;
 			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
-			
+
 			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
-			
+
 			if(filtered){
 				var bgcolor = 'rgba(0,0,0,0)!important';
 				if (servers[i].official) bgcolor = 'rgba(255,106,0,0.25)!important';
 
 				var html = `
-				<tr data-id="${i}" ng-onclick(selectRow(e)>
-				<td style="background-color:${bgcolor};">${servers[i].location}</td>
-				<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
-				<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
-				<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
-				<td style="background-color:${bgcolor};">${servers[i].pps}</td>
+				<tr data-id="${i}">
+					<td style="background-color:${bgcolor};">${servers[i].location}</td>
+					<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
+					<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
+					<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
+					<td style="background-color:${bgcolor};">${servers[i].pps}</td>
 				</tr>
 				`;
-				$('#serversTableBody').append(html);
+
+				//document.getElementById('TEMPNODE').innerHTML = html;
+
+				//console.log("APPENDING NOW?")
+				//$('#serversTableBody').append(html);
+				document.getElementById('serversTableBody').innerHTML += html
 			}
 		}
+
+		///////////////////////////////////////////////////////////////////////////
+		// This adds the on click handler for the dynamically created element.
+		var table = document.getElementById("serversTableBody");
+    var rows = table.getElementsByTagName("tr");
+    for (i = 0; i < rows.length; i++) {
+      var currentRow = table.rows[i];
+      var createClickHandler =
+      function(row) {
+        return function() {
+					//console.log(row.getAttribute('data-id'))
+					vm.selectRow(row, row.getAttribute('data-id'))
+        };
+      };
+      currentRow.onclick = createClickHandler(currentRow);
+    }
 	};
 
 	vm.displayServers = displayServers;
@@ -327,7 +370,6 @@ angular.module('beamng.stuff')
     // `d` is the original data object for the row
 		console.log(d)
     return `
-		<tr id="ServerInfoRow">
 			<td colspan="5">
 				<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
 					<div class="row">
@@ -357,19 +399,17 @@ angular.module('beamng.stuff')
 
 					<p>${listPlayers(d.playerslist)}</p>
 				</div>
-	    </td>
-		</tr>`;
+	    </td>`;
 	};
 
-	selectRowScope = selectRow;
 	serversScope = receiveServers;
-	selectRowScope = selectRow;
+	//selectRowScope = selectRow;
 	displayServerScope = displayServers;
 	showDetailsScope = formatServerDetailsRow;
 }])
 .controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
-	
+
 	vm.check_isEmpty = false;
 	vm.check_isNotEmpty = false;
 	vm.check_isNotFull = false;
@@ -390,6 +430,12 @@ angular.module('beamng.stuff')
 		}
 	}, 10000);
 
+	vm.connect = function() {
+		logger.debug("Attempting to call connect to server.")
+		document.getElementById('LoadingServer').style.display = 'block'
+		bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	}
+
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerServersController] destroyed.');
@@ -407,7 +453,7 @@ angular.module('beamng.stuff')
 		row.classList.add("highlight");
 		row.selected = true;
 		table.selectedRow = row;
-		//console.log(row)
+		console.log(row)
 		var id = row.getAttribute("data-id")
 		console.log(id);
 		if (id !== null) {
@@ -423,6 +469,29 @@ angular.module('beamng.stuff')
 			}
 
 			highlightedServer = server;
+
+			var serverInfoRow = showDetailsScope(server);
+			var serverInfoRow = document.createElement("tr");
+			serverInfoRow.innerHTML = showDetailsScope(server);
+			serverInfoRow.setAttribute("id", "ServerInfoRow");
+			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
+
+			var connectToServerButton = document.getElementById('serverconnect-button');
+      var createClickHandler = function() {
+        return function() {
+					vm.connect()
+        };
+      };
+      connectToServerButton.onclick = createClickHandler();
+
+			var remServer2FavButton = document.getElementById('removeFav-button');
+      var createClickHandler2 = function() {
+        return function() {
+					removeFav()
+        };
+      };
+      remServer2FavButton.onclick = createClickHandler2();
+
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
 	}
@@ -506,10 +575,10 @@ angular.module('beamng.stuff')
 		row.onclick = selectRow;
 	});
 
-	function selectRow(event) {
+	//function selectRow(event) {
+	vm.selectRow = function(row) {
+		console.log("[1] ROW CLICKED, DATA: ")
 		var table = document.getElementById("servers-table");
-		var src = event.srcElement;
-		var row = src.closest('tr');
 		select(row, table);
 	};
 
@@ -585,9 +654,26 @@ angular.module('beamng.stuff')
 				<td style="background-color:${bgcolor};">${servers[i].pps}</td>
 				</tr>
 				`;
-				$('#serversTableBody').append(html);
+				//$('#serversTableBody').append(html);
+				document.getElementById('serversTableBody').innerHTML += html
 			}
 		}
+
+		///////////////////////////////////////////////////////////////////////////
+		// This adds the on click handler for the dynamically created element.
+		var table = document.getElementById("serversTableBody");
+    var rows = table.getElementsByTagName("tr");
+    for (i = 0; i < rows.length; i++) {
+      var currentRow = table.rows[i];
+      var createClickHandler =
+      function(row) {
+        return function() {
+					//console.log(row.getAttribute('data-id'))
+					vm.selectRow(row, row.getAttribute('data-id'))
+        };
+      };
+      currentRow.onclick = createClickHandler(currentRow);
+    }
 	};
 
 	vm.displayServers = displayServers;
@@ -599,7 +685,6 @@ angular.module('beamng.stuff')
     // `d` is the original data object for the row
 		console.log(d)
     return `
-		<tr id="ServerInfoRow">
 			<td colspan="5">
 				<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
 					<div class="row">
@@ -629,11 +714,10 @@ angular.module('beamng.stuff')
 
 					<p>${listPlayers(d.playerslist)}</p>
 				</div>
-	    </td>
-		</tr>`;
+	    </td>`;
 	};
 
-	selectRowScope = selectRow;
+	//selectRowScope = selectRow;
 	serversScope = receiveServers;
 	setVersion = setClientVersion;
 	displayServerScope = displayServers;
@@ -794,8 +878,11 @@ function formatDescriptionName(string) {
         tmpStr = string.substring( indexes[i], indexes[i + 1] );
         final.appendChild( applyDescCode(tmpStr, apply) );
     }
-		$('#TEMPAREA').html(final);
-    return $('#TEMPAREA').html();;
+		//$('#TEMPAREA').html(final);
+		document.getElementById('TEMPAREA').innerHTML = final;
+		var innerHTML = [...final.childNodes].map( n=> n.outerHTML ).join('\n')
+		//console.log(innerHTML)
+    return innerHTML; //$('#TEMPAREA').html();
 }
 function applyCode(string, codes) {
     var elem = document.createElement('span');
@@ -840,8 +927,11 @@ function formatServerName(string) {
         tmpStr = string.substring( indexes[i], indexes[i + 1] );
         final.appendChild( applyCode(tmpStr, apply) );
     }
-		$('#TEMPAREA').html(final);
-    return $('#TEMPAREA').html();;
+		//$('#TEMPAREA').html(final);
+		document.getElementById('TEMPAREA').innerHTML = final;
+		var innerHTML = [...final.childNodes].map( n=> n.outerHTML ).join('\n')
+		//console.log(innerHTML)
+    return innerHTML; //$('#TEMPAREA').html();
 }
 function officialMark(o, s) {
 	if (o) {
@@ -893,7 +983,7 @@ function listPlayers(s) {
 
 
 
-window.onload = function() {
+/*window.onload = function() {
 	if (window.jQuery) {
 		// jQuery is loaded
 		//alert("Yeah!");
@@ -948,8 +1038,8 @@ window.onload = function() {
 		$(document).on('click', '#removeFav-button', function(e) {
 			removeFav();
 		});
-		
-		
+
+
 		// Event listener for connecting to a selected server
 		$(document).on('click', '#serverconnect-button', function(e) {
 			connectScope();
@@ -957,11 +1047,11 @@ window.onload = function() {
 	} else {
 		//alert("jQuery is not loaded");
 	}
-}
+}*/
 
-$(document).on('click', '#serversTableBody > tr', function(e) {
-	selectRowScope(e.originalEvent)
-});
+//$(document).on('click', '#serversTableBody > tr', function(e) {
+	//selectRowScope(e.originalEvent)
+//});
 
 
 var serverStyleArray = [
@@ -1006,11 +1096,11 @@ function removeFav() {
 		for(var i in favjson)
 			if(favArray.filter(s=>s.ip == favjson[i].ip).filter(s=>s.port == favjson[i].port).length==0)
 				favArray.push(favjson[i]);
-	
+
 	for(var i in favArray)
 		if(favArray[i].ip == highlightedServer.ip
 		&& favArray[i].port == highlightedServer.port
-		&& favArray[i].sname == highlightedServer.sname) 
+		&& favArray[i].sname == highlightedServer.sname)
 			favArray.splice(i, 1);
 
 

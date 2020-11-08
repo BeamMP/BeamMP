@@ -1180,7 +1180,7 @@ angular.module('beamng.stuff')
 
   bngApi.engineLua('extensions.hook("onUIInitialised")');
 
-$scope.$on('requestUIInitialised', () => {
+  $scope.$on('requestUIInitialised', () => {
     bngApi.engineLua('core_gamestate.onUIInitialised()');
   })
 
@@ -1657,7 +1657,16 @@ $scope.$on('requestUIInitialised', () => {
     $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
   });
 
+  vm.showConnectionIssues = false;
 
+  $scope.$on('app:showConnectionIssues', function (event, value, callback) {
+    vm.showConnectionIssues = value;
+    Utils.waitForCefAndAngular(() => {
+      if (callback !== undefined && typeof callback === 'function') {
+        callback(vm.showConnectionIssues);
+      }
+    });
+  });
 
   vm.isWaiting = false;
 

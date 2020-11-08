@@ -33,12 +33,12 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		chatClear();
 	};
 
-	$scope.useCustomChatWindow = function(setting) {
+	$scope.$on('useCustomChatWindow', function (setting) {
 		if (setting == true) {
 			var chatWindow = document.getElementById("MainChatBoxWindow");
 			chatWindow.style.display = "none";
 		}
-	}
+	})
 
 	$scope.chatSend = function() {
 		if (count > 12 || spamLocked) {

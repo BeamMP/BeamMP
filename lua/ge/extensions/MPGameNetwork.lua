@@ -83,6 +83,9 @@ local function handleEvents(p)  --- E:<NAME>:data
 	end
 end
 
+function TriggerServerEvent(n, d)
+	TCPSocket:send('E:'..n..':'..d)
+end
 
 
 function TriggerClientEvent(code, data)

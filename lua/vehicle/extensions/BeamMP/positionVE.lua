@@ -11,13 +11,13 @@ local M = {}
 local vectorSmoothing = {}
 vectorSmoothing.__index = vectorSmoothing
 
-function newVectorSmoothing(rate)
+local function newVectorSmoothing(rate)
   local data = {rate = rate or 10, state = vec3(0,0,0)}
   setmetatable(data, vectorSmoothing)
   return data
 end
 
-function vectorSmoothing:get(sample, dt)
+local function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
   st = st + dif * math.min(self.rate * dt, 1)
@@ -25,11 +25,11 @@ function vectorSmoothing:get(sample, dt)
   return st
 end
 
-function vectorSmoothing:set(sample)
+local function vectorSmoothing:set(sample)
   self.state = sample
 end
 
-function vectorSmoothing:reset()
+local function vectorSmoothing:reset()
   self.state = vec3(0,0,0)
 end
 

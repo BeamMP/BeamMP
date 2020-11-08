@@ -52,17 +52,14 @@ local function updatePlayersList(playersString)
 end
 
 local function setPing(ping)
-	if tonumber(ping) > -1 then
-		--be:executeJS('setPing("'..ping..' ms")')
-    guihooks.trigger("setPing", ""..ping.." ms")
-    guihooks.trigger("app:showConnectionIssues", false)
+	if tonumber(ping) == -1 then
+		--print("ping is -1")
+		guihooks.trigger("app:showConnectionIssues", false)
+	elseif tonumber(ping) == -2 then
+		guihooks.trigger("app:showConnectionIssues", true)
 	else
-		--print("ping is: "..ping)
-    if ping == "?" then
-      guihooks.trigger("app:showConnectionIssues", true)
-    else
-      guihooks.trigger("app:showConnectionIssues", false)
-    end
+		guihooks.trigger("setPing", ""..ping.." ms")
+		guihooks.trigger("app:showConnectionIssues", false)
 	end
 end
 

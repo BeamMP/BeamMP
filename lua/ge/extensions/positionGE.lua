@@ -16,11 +16,11 @@ local function tick()
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
 			veh:queueLuaCommand("positionVE.getVehicleRotation()")
-			--veh:queueLuaCommand("positionVE.getVehicleVelocity()")
-			--veh:queueLuaCommand("positionVE.getVehicleAngularVelocity()")
 		end
 	end
 end
+
+
 
 local function distance( x1, y1, z1, x2, y2, z2 )
 	local dx = x1 - x2
@@ -29,8 +29,10 @@ local function distance( x1, y1, z1, x2, y2, z2 )
 	return math.sqrt ( dx*dx + dy*dy + dz*dz)
 end
 
+
+
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2134, serverVehicleID, data))
@@ -39,40 +41,27 @@ local function sendVehiclePosRot(data, gameVehicleID)
 end
 
 
-local function applyPos(data, serverVehicleID)
 
+local function applyPos(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
-	--if gameVehicleID ~= -1 or not gameVehicleID then
-		--MPGameNetwork.send('On:'..serverVehicleID)
-	--end
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		--print(data)
-		local pr = jsonDecode(data) -- Decoded data
-		--print(dump(pr))
 		veh:queueLuaCommand("velocityVE.setVehicleType('remote')")
-
-		local pos = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
-		local vel = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
-		local ang = quat(pr.ang.x, pr.ang.y, pr.ang.z, pr.ang.w)
-		local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
-		local tim = pr.tim
-		local ping = pr.ping or 0
-
-		veh:queueLuaCommand("positionVE.setVehiclePosRot("..tostring(pos)..","..tostring(vel)..","..tostring(ang)..","..tostring(rvel)..","..tim..","..ping..")")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
 end
 
+
+
 local function handle(rawData)
-	--print("positionGE.handle: "..rawData)
 	rawData = string.sub(rawData,3)
 	local serverVehicleID = string.match(rawData,"^.-:")
 	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 	local data = string.match(rawData,":(.*)")
-	--print(serverVehicleID)
-	--print(data)
 	applyPos(data, serverVehicleID)
 end
+
+
 
 local function setPing(ping)
 	local p = ping/1000
@@ -84,6 +73,8 @@ local function setPing(ping)
 	end
 end
 
+
+
 --TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
 --without resetting the vehicle
 local function setPosition(gameVehicleID, x, y, z)
@@ -91,6 +82,8 @@ local function setPosition(gameVehicleID, x, y, z)
 	veh:setPosition(Point3F(x, y, z))
 	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
+
+
 
 M.applyPos          = applyPos
 M.tick              = tick
@@ -101,5 +94,4 @@ M.setPing           = setPing
 
 
 
-print("positionGE Loaded.")
 return M

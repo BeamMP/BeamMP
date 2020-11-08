@@ -300,7 +300,7 @@ angular.module('beamng.stuff')
   vm.showData = (title, performance) => (vm.selectedConfig[title] !== undefined ? Vehicles.showData(title, true, performance) : false);
 
   vm.launchConfig = function (spawnNew) {
-	if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+	if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
 	vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, true);
   };
 
@@ -623,9 +623,9 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
 
   };
   vm.removeCurrentVehicle = function() {
-	//bngApi.engineLua("vehicleGE.removeRequest('\"..obj:getID()..\"'\)");
+	//bngApi.engineLua("MPVehicleGE.removeRequest('\"..obj:getID()..\"'\)");
 
-	if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+	if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
 	else bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")');
 
     $state.go('menu');

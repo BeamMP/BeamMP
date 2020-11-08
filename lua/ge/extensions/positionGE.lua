@@ -11,7 +11,7 @@ print("positionGE Initialising...")
 
 
 local function tick()
-	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -31,8 +31,8 @@ end
 
 local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2134, serverVehicleID, data))
 		end
 	end
@@ -41,7 +41,7 @@ end
 
 local function applyPos(data, serverVehicleID)
 
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	--if gameVehicleID ~= -1 or not gameVehicleID then
 		--MPGameNetwork.send('On:'..serverVehicleID)
 	--end

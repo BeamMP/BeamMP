@@ -243,7 +243,7 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
-	dump(decodedData)
+	--dump(decodedData)
 	local playerServerID  = decodedData[1] -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData[2] -- gameVehicleID of the player that sent the vehicle
 	local vehicleName     = decodedData[3] -- Vehicle name
@@ -458,7 +458,7 @@ local function handle(rawData)
 		local data = string.match(rawData,":(.*)")
 
 		-- Print data and send it
-		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: "..data)
+		print("Player Name: "..playerNickname..", PlayerRole: "..playerRole..", serverVehicleID: "..serverVehicleID..", Data: ...")--..data)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 
 	elseif code == "c" then -- This is for the customisation of a vehicle event

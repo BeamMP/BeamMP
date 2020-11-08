@@ -287,10 +287,7 @@ angular.module('beamng.stuff')
 
 	vm.selectRow = function(row) {
 		console.log("[2] ROW CLICKED, DATA: ")
-		//console.log(row)
 		var table = document.getElementById("servers-table");
-		//var src = event.srcElement;
-		//var row = src.closest('tr');
 		select(row, table);
 	};
 
@@ -433,6 +430,12 @@ angular.module('beamng.stuff')
 		}
 	}, 10000);
 
+	vm.connect = function() {
+		logger.debug("Attempting to call connect to server.")
+		document.getElementById('LoadingServer').style.display = 'block'
+		bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	}
+
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerServersController] destroyed.');
@@ -450,7 +453,7 @@ angular.module('beamng.stuff')
 		row.classList.add("highlight");
 		row.selected = true;
 		table.selectedRow = row;
-		//console.log(row)
+		console.log(row)
 		var id = row.getAttribute("data-id")
 		console.log(id);
 		if (id !== null) {
@@ -466,6 +469,29 @@ angular.module('beamng.stuff')
 			}
 
 			highlightedServer = server;
+
+			var serverInfoRow = showDetailsScope(server);
+			var serverInfoRow = document.createElement("tr");
+			serverInfoRow.innerHTML = showDetailsScope(server);
+			serverInfoRow.setAttribute("id", "ServerInfoRow");
+			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
+
+			var connectToServerButton = document.getElementById('serverconnect-button');
+      var createClickHandler = function() {
+        return function() {
+					vm.connect()
+        };
+      };
+      connectToServerButton.onclick = createClickHandler();
+
+			var remServer2FavButton = document.getElementById('removeFav-button');
+      var createClickHandler2 = function() {
+        return function() {
+					removeFav()
+        };
+      };
+      remServer2FavButton.onclick = createClickHandler2();
+
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
 	}
@@ -550,12 +576,9 @@ angular.module('beamng.stuff')
 	});
 
 	//function selectRow(event) {
-	$scope.selectRow = function(event) {
+	vm.selectRow = function(row) {
 		console.log("[1] ROW CLICKED, DATA: ")
-		console.log(event)
 		var table = document.getElementById("servers-table");
-		var src = event.srcElement;
-		var row = src.closest('tr');
 		select(row, table);
 	};
 
@@ -635,6 +658,22 @@ angular.module('beamng.stuff')
 				document.getElementById('serversTableBody').innerHTML += html
 			}
 		}
+
+		///////////////////////////////////////////////////////////////////////////
+		// This adds the on click handler for the dynamically created element.
+		var table = document.getElementById("serversTableBody");
+    var rows = table.getElementsByTagName("tr");
+    for (i = 0; i < rows.length; i++) {
+      var currentRow = table.rows[i];
+      var createClickHandler =
+      function(row) {
+        return function() {
+					//console.log(row.getAttribute('data-id'))
+					vm.selectRow(row, row.getAttribute('data-id'))
+        };
+      };
+      currentRow.onclick = createClickHandler(currentRow);
+    }
 	};
 
 	vm.displayServers = displayServers;
@@ -646,7 +685,6 @@ angular.module('beamng.stuff')
     // `d` is the original data object for the row
 		console.log(d)
     return `
-		<tr id="ServerInfoRow">
 			<td colspan="5">
 				<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
 					<div class="row">
@@ -676,8 +714,7 @@ angular.module('beamng.stuff')
 
 					<p>${listPlayers(d.playerslist)}</p>
 				</div>
-	    </td>
-		</tr>`;
+	    </td>`;
 	};
 
 	//selectRowScope = selectRow;

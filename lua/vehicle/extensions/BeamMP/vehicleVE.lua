@@ -16,7 +16,7 @@ end
 
 local function updateGFX(dt)
 	if playerInfo.firstPlayerSeated then
-		obj:queueGameEngineLua("vehicleGE.setCurrentVehicle(\'"..obj:getID().."\')")
+		obj:queueGameEngineLua("MPVehicleGE.setCurrentVehicle(\'"..obj:getID().."\')")
 		--print("current car: "..obj:getID())
 	end
 end

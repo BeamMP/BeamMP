@@ -11,7 +11,7 @@ print("powertrainGE Initialising...")
 
 
 local function tick()
-	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -24,15 +24,15 @@ end
 
 local function sendPowertrain(data, gameVehicleID)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Yp:'..serverVehicleID..":"..data) -- Send powertrain to server
 		end
 	end
 end
 
 local function applyPowertrain(data, serverVehicleID)
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("powertrainVE.applyPowertrain(\'"..data.."\')")

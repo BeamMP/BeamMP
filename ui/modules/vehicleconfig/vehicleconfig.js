@@ -281,7 +281,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
-    bngApi.activeObjectLua("obj:queueGameEngineLua(\"vehicleGE.sendCustomVehicleData('\"..obj:getID()..\"', '\"..jsonEncode(v.config)..\"')\")");
+    bngApi.engineLua("MPVehicleGE.sendCustomVehicleData(be:getPlayerVehicle(0):getID())");
   }
 
   function calcTreesync (config) {

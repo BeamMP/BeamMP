@@ -13,8 +13,8 @@ registerCoreModule("mpConfig")
 load("MPGameNetwork")
 registerCoreModule("MPGameNetwork")
 
-load("vehicleGE")
-registerCoreModule("vehicleGE")
+load("MPVehicleGE")
+registerCoreModule("MPVehicleGE")
 
 load("inputsGE")
 registerCoreModule("inputsGE")

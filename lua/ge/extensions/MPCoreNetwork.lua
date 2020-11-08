@@ -89,6 +89,9 @@ local function setCurrentServer(id, ip, port, modsString, name)
 	setMods(modString)
 end
 
+local function getCurrentServer()
+	return currentServer
+end
 
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
@@ -138,7 +141,7 @@ local HandleNetwork = {
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
 	['U'] = function(params) HandleU(params) end, -- UI
 	['M'] = function(params) LoadLevel(params) end,
-	['V'] = function(params) vehicleGE.handle(params) end,
+	['V'] = function(params) MPVehicleGE.handle(params) end,
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
 	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')'); end, -- Tell the UI what the launcher version is.
@@ -152,21 +155,19 @@ local function onUpdate(dt)
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
 			local received, status, partial = TCPLauncherSocket:receive() -- Receive data
-			if not received then break end
-			if received ~= "" then -- If data have been received then
-				-- break it up into code + data
-				local code = string.sub(received, 1, 1)
-				local data = string.sub(received, 2)
-				HandleNetwork[code](data)
-			end
+			if received == nil or received == "" then break end
+			-- break it up into code + data
+			local code = string.sub(received, 1, 1)
+			local data = string.sub(received, 2)
+			HandleNetwork[code](data)
 		end
-		
+
 		--================================ SECONDS TIMER ================================
 		secondsTimer = secondsTimer + dt -- Time in seconds
 		if secondsTimer > 1 then
-			TCPLauncherSocket:send('A') -- Launcher heartbeat		
+			TCPLauncherSocket:send('A') -- Launcher heartbeat
 			if status == "LoadingResources" then TCPLauncherSocket:send('Ul') -- Ask the launcher for a loading screen update
-			else TCPLauncherSocket:send('Up') end -- Server heartbeat 
+			else TCPLauncherSocket:send('Up') end -- Server heartbeat
 			secondsTimer = 0
 		end
 		-- If secondsTImer is more than 2 seconds and the game tick time is greater
@@ -202,7 +203,7 @@ local function resetSession(goBack)
 	TCPLauncherSocket:send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
-	vehicleGE.onDisconnect()
+	MPVehicleGE.onDisconnect()
 	connectToLauncher()
 	UI.readyReset()
 	status = "" -- Reset status
@@ -244,7 +245,8 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
-M.currentServer = currentServer
+M.currentServer = currentServer -- THIS DOES NOT SEEM TO ACTUALLY BE ACCESSIBLE
+M.getCurrentServer = getCurrentServer
 M.onInit = onInit
 
 

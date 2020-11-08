@@ -55,8 +55,14 @@ local function setPing(ping)
 	if tonumber(ping) > -1 then
 		--be:executeJS('setPing("'..ping..' ms")')
     guihooks.trigger("setPing", ""..ping.." ms")
+    guihooks.trigger("app:showConnectionIssues", false)
 	else
-		--print("ping is -1")
+		--print("ping is: "..ping)
+    if ping == "?" then
+      guihooks.trigger("app:showConnectionIssues", true)
+    else
+      guihooks.trigger("app:showConnectionIssues", false)
+    end
 	end
 end
 

@@ -89,9 +89,6 @@ local function setCurrentServer(id, ip, port, modsString, name)
 	setMods(modString)
 end
 
-local function getCurrentServer()
-	return currentServer
-end
 
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
@@ -129,7 +126,7 @@ local function HandleU(params)
 		status = "LoadingMap"
 	end
 	if code == "p" then
-		UI.setPing(data.."")
+		--UI.setPing(data.."") -- FIXME
 		positionGE.setPing(data)
 	end
 end
@@ -161,13 +158,13 @@ local function onUpdate(dt)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)
 		end
-
+		
 		--================================ SECONDS TIMER ================================
 		secondsTimer = secondsTimer + dt -- Time in seconds
 		if secondsTimer > 1 then
-			TCPLauncherSocket:send('A') -- Launcher heartbeat
+			TCPLauncherSocket:send('A') -- Launcher heartbeat		
 			if status == "LoadingResources" then TCPLauncherSocket:send('Ul') -- Ask the launcher for a loading screen update
-			else TCPLauncherSocket:send('Up') end -- Server heartbeat
+			else TCPLauncherSocket:send('Up') end -- Server heartbeat 
 			secondsTimer = 0
 		end
 		-- If secondsTImer is more than 2 seconds and the game tick time is greater
@@ -245,8 +242,7 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
-M.currentServer = currentServer -- THIS DOES NOT SEEM TO ACTUALLY BE ACCESSIBLE
-M.getCurrentServer = getCurrentServer
+M.currentServer = currentServer
 M.onInit = onInit
 
 

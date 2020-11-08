@@ -23,6 +23,7 @@ local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
+local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local onVehicleSpawnedAllowed = true
@@ -144,8 +145,6 @@ end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
 local function updateVehicle(serverID, data)
-	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
-	
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then print("gameVehicleID for "..serverID.." not found") return end
 	
@@ -156,13 +155,13 @@ local function updateVehicle(serverID, data)
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
 	if vehicleName == veh:getJBeamFilename() and settings.getValue("showSyncConfigUpdates") then
+		latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		print("Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
 		tableMerge(playerVehicle.config, vehicleConfig)
 		veh:respawn(serialize(playerVehicle.config))
-		if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	else
-		print("The received data is not for the same vehicle")
+		print("The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
 	end
 end
 
@@ -178,8 +177,6 @@ end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
-	onVehicleSpawnedAllowed = false
-
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
 	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
@@ -198,6 +195,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
 		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
+		onVehicleSpawnedAllowed = false
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
 		local spawnedVehID = spawnedVeh:getID()
 		print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
@@ -232,7 +230,11 @@ local function onVehicleSpawned(gameVehicleID)
 	else
 		print("Vehicle "..gameVehicleID.." was edited")
 		syncTimer = 0
-		vehiclesToSync[gameVehicleID] = 1
+		vehiclesToSync[gameVehicleID] = 1.
+		if latestVeh then
+			be:enterVehicle(0, latestVeh)
+			latestVeh = nil
+		end -- Camera fix
 	end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -355,7 +357,6 @@ local HandleNetwork = {
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1) -- Get the serverVehicleID
 		local data = string.match(rawData,":(.*)") -- Get the vehicle data
-		print("OKOKOK "..data)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
 	['r'] = function(rawData) 
@@ -405,7 +406,7 @@ end
 
 
 
-local function syncVehicles()
+local function syncVehicles() -- FIXME
 	for k,v in pairs(vehiclesToSync) do
 		local veh = be:getObject(k) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?

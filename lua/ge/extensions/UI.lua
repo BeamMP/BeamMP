@@ -53,8 +53,7 @@ end
 
 local function setPing(ping)
 	if tonumber(ping) > -1 then
-		--be:executeJS('setPing("'..ping..' ms")')
-    guihooks.trigger("setPing", ""..ping.." ms")
+		be:executeJS('setPing("'..ping..' ms")')
 	else
 		--print("ping is -1")
 	end
@@ -66,13 +65,11 @@ local function setNickName(name)
 end
 
 local function setStatus(status)
-	--be:executeJS('setStatus("'..status..'")')
-  guihooks.trigger("setStatus", status)
+	be:executeJS('setStatus("'..status..'")')
 end
 
 local function setPlayerCount(playerCount)
-	--be:executeJS('setPlayerCount("'..playerCount..'")')
-  guihooks.trigger("setPlayerCount", playerCount)
+	be:executeJS('setPlayerCount("'..playerCount..'")')
 end
 
 local function error(text)
@@ -132,20 +129,14 @@ local function ready(src)
   end
 
   if src == "MP-SESSION" or src == "FIRSTVEH" then
-  	if ready then
-  	  ready = false
-  	  MPGameNetwork.connectToLauncher()
-  	end
+	if ready then
+	  ready = false
+	  MPGameNetwork.connectToLauncher()
+	end
 
-    local Server = MPCoreNetwork.getCurrentServer()
-    --print("---------------------------------------------------------------")
-    --dump(Server)
-    --print(Server.name)
-    --print("---------------------------------------------------------------")
-
-  	if Server ~= nil and Server.name ~= nil then
-  	  setStatus("Server: "..Server.name)
-  	end
+	if MPCoreNetwork.Server ~= nil and MPCoreNetwork.Server.name ~= nil then
+	  setStatus("Server: "..MPCoreNetwork.Server.name)
+	end
   end
 end
 

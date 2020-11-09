@@ -52,11 +52,30 @@ local function applyLivePowertrain(data)
 	--dump(decodedData)
 	local devices = powertrain.getDevices()
 	for k, v in pairs(decodedData) do -- For each device
-		if k == "gearbox" then
+		if k == "gearbox" or k == "differential_F" or k == "differential_R" or k == "wheelaxleFL" or k == "wheelaxleFR" or k == "wheelaxleRL" or k == "wheelaxleRR" then
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
-				if key == "gearIndex" then
-					devices["gearbox"].setGearIndex(devices["gearbox"], value)
+				print(devices[k].type)
+				if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
+					print(k .. " -> " .. value)
+					devices[k].setGearIndex(devices[k], value)
+				end
+				if key == "mode" then
+					print(k .. " -> " .. value)
+					devices[k].setMode(devices[k], value)
+				end
+			end
+		end
+
+		if k == "transfercase_F" or k == "transfercase_R" or k == "rangebox" then
+			--print("applied "..k.." - "..tostring(v))
+			for key,value in pairs(v) do
+				print(devices[k].type)
+				if key == "mode" then
+					print(k.." ("..key..")  -> "..value)
+					if devices[k].mode ~= value then
+						powertrain.toggleDeviceMode(k)
+					end
 				end
 			end
 		end
@@ -64,52 +83,21 @@ local function applyLivePowertrain(data)
 end
 
 local function onInit()
-	local setModeNil = false
-	for k, device in pairs(powertrain.getDevices()) do
-		if device.setMode == nil and (k == "mainEngine" or k == "gearbox") then
-			setModeNil = true
-			print("FOUND A NIL")
-			print(device)
-			print(k)
-		end
+	local devices = powertrain.getDevices() -- Get all devices
+	for k,v in pairs(devices) do
+		--print(k .. " = " .. tostring(v))
 	end
-
-	if not setModeNil then
-		print("Not Nil Now")
-	else
-		print(" Still Nil Reload?")
-		--onInit()
-	end
-
-	--[[for _, device in pairs(powertrain.getDevices()) do
-
-		local setMode = device.setMode
-
-		device.setMode = function(device, mode, ...)
-			--print("Powertrain update: ID = "..obj:getID()..", name = "..device.name..", mode = "..mode)
-
-			sendPowertrain(device.name, mode)
-
-			return setMode(device, mode, ...)
-		end
-	end]]
-
-	print("Hooked powertrain device mode updates")
 end
 
 local function equals(t1, t2)
-  for k,v in pairs(t1["gearbox"]) do
+  for k,_ in pairs(t1) do
 		--print(tostring(t1["gearbox"][k]).." ~= "..tostring(t2["gearbox"][k]))
-		if t1["gearbox"][k] ~= t2["gearbox"][k] then
-			return false
+		for key,_ in pairs(t1[k]) do
+			if t1[k][key] ~= t2[k][key] then
+				return false
+			end
 		end
 	end
-	--[[for k,v in pairs(t1["mainEngine"]) do
-		--print(tostring(t1["mainEngine"][k]).." ~= "..tostring(t2["mainEngine"][k]))
-		if t1["mainEngine"][k] ~= t2["mainEngine"][k] then
-			return false
-		end
-	end]]
 	return true
 end
 
@@ -121,6 +109,9 @@ local lastPowertrain = {
 	gearbox = {
 		type = "",
 		gearIndex = "",
+		mode = ""
+	},
+	transfercase_F = {
 		mode = ""
 	}
 }
@@ -137,28 +128,88 @@ local function updateGFX(dt)
 			type = "",
 			gearIndex = "",
 			mode = ""
+		},
+		transfercase_F = {
+			mode = ""
 		}
 	}
 
-	if --[[devices["mainEngine"] ~= nil and]] devices["gearbox"] ~= nil then
-		currentPowertrain = {
-			--[[mainEngine = {
-				isBroken = devices["mainEngine"].isBroken,
-				isStalled = devices["mainEngine"].isStalled
-			},]]
-			gearbox = {
-				type = devices["gearbox"].type,
-				gearIndex = devices["gearbox"].gearIndex,
-				mode = devices["gearbox"].mode
-			}
+	if devices["gearbox"] ~= nil then
+		currentPowertrain.gearbox = {
+			type = devices["gearbox"].type,
+			gearIndex = devices["gearbox"].gearIndex,
+			mode = devices["gearbox"].mode
+		}
+	end
+
+	if devices["transfercase_F"] ~= nil then
+		currentPowertrain.transfercase_F = {
+			type = devices["transfercase_F"].type,
+			mode = devices["transfercase_F"].mode
+		}
+	end
+
+	if devices["transfercase_R"] ~= nil then
+		currentPowertrain.transfercase_R = {
+			type = devices["transfercase_R"].type,
+			mode = devices["transfercase_R"].mode
+		}
+	end
+
+	if devices["differential_F"] ~= nil then
+		currentPowertrain.differential_F = {
+			type = devices["differential_F"].type,
+			mode = devices["differential_F"].mode
+		}
+	end
+
+	if devices["differential_R"] ~= nil then
+		currentPowertrain.differential_R = {
+			type = devices["differential_R"].type,
+			mode = devices["differential_R"].mode
+		}
+	end
+
+	if devices["rangebox"] ~= nil then
+		currentPowertrain.rangebox = {
+			type = devices["rangebox"].type,
+			mode = devices["rangebox"].mode
+		}
+	end
+
+	if devices["wheelaxleFL"] ~= nil then
+		currentPowertrain.wheelaxleFL = {
+			type = devices["wheelaxleFL"].type,
+			mode = devices["wheelaxleFL"].mode
+		}
+	end
+
+	if devices["wheelaxleFR"] ~= nil then
+		currentPowertrain.wheelaxleFR = {
+			type = devices["wheelaxleFR"].type,
+			mode = devices["wheelaxleFR"].mode
+		}
+	end
+
+	if devices["wheelaxleRL"] ~= nil then
+		currentPowertrain.wheelaxleRL = {
+			type = devices["wheelaxleRL"].type,
+			mode = devices["wheelaxleRL"].mode
+		}
+	end
+
+	if devices["wheelaxleRR"] ~= nil then
+		currentPowertrain.wheelaxleRR = {
+			type = devices["wheelaxleRR"].type,
+			mode = devices["wheelaxleRR"].mode
 		}
 	end
 
 	--print(equals(lastPowertrain, currentPowertrain))
 	if not equals(lastPowertrain, currentPowertrain) then
-		--dump(lastPowertrain)
-		--dump(currentPowertrain)
-		--print("Sending Powertrain Edits")
+		dump(lastPowertrain)
+		dump(currentPowertrain)
+		print("Sending Powertrain Edits")
 		obj:queueGameEngineLua("powertrainGE.sendLivePowertrain(\'"..jsonEncode(currentPowertrain).."\', \'"..obj:getID().."\')")
 		lastPowertrain = currentPowertrain
 	end

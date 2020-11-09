@@ -72,8 +72,8 @@ end
 
 local function getServers()
 	print("Getting the servers list")
-	TCPLauncherSocket:send('Z\n')
-	TCPLauncherSocket:send('B\n')
+	TCPLauncherSocket:send('Z')
+	TCPLauncherSocket:send('B')
 end
 
 
@@ -102,10 +102,10 @@ local function connectToServer(ip, port)
 	local ipString
 	if ip and port then -- Direct connect
 		ipString = ip..':'..port
-		TCPLauncherSocket:send('C'..ipString..'\n')
+		TCPLauncherSocket:send('C'..ipString..'')
 	else -- Server list connect
 		ipString = currentServer.ip..':'..currentServer.port
-		TCPLauncherSocket:send('C'..ipString..'\n')
+		TCPLauncherSocket:send('C'..ipString..'')
     end
 	print("Connecting to server "..ipString)
 	status = "LoadingResources"
@@ -128,7 +128,7 @@ local function HandleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if params == "ldone" and status == "LoadingResources" then
-		TCPLauncherSocket:send('Mrequest\n')
+		TCPLauncherSocket:send('Mrequest')
 		status = "LoadingMap"
 	end
 	if code == "p" then
@@ -168,9 +168,9 @@ local function onUpdate(dt)
 		--================================ SECONDS TIMER ================================
 		secondsTimer = secondsTimer + dt -- Time in seconds
 		if secondsTimer > 1 then
-			TCPLauncherSocket:send('A\n') -- Launcher heartbeat
-			if status == "LoadingResources" then TCPLauncherSocket:send('Ul\n') -- Ask the launcher for a loading screen update
-			else TCPLauncherSocket:send('Up\n') end -- Server heartbeat
+			TCPLauncherSocket:send('A') -- Launcher heartbeat
+			if status == "LoadingResources" then TCPLauncherSocket:send('Ul') -- Ask the launcher for a loading screen update
+			else TCPLauncherSocket:send('Up') end -- Server heartbeat
 			secondsTimer = 0
 		end
 		-- If secondsTImer is more than 2 seconds and the game tick time is greater
@@ -203,7 +203,7 @@ end
 
 local function resetSession(goBack)
 	print("Reset Session Called!")
-	TCPLauncherSocket:send('QS\n') -- Tell the launcher that we quit server / session
+	TCPLauncherSocket:send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
@@ -218,14 +218,14 @@ end
 
 local function quitMP()
 	print("Reset Session Called!")
-	TCPLauncherSocket:send('QG\n') -- Quit game
+	TCPLauncherSocket:send('QG') -- Quit game
 end
 
 
 
 local function modLoaded(modname)
 	if modname ~= "beammp" then -- We don't want to check beammp mod
-		TCPLauncherSocket:send('R'..modname..'\n')
+		TCPLauncherSocket:send('R'..modname..'')
 	end
 end
 

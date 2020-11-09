@@ -43,7 +43,7 @@ end
 
 
 local function sendData(data)
-	local r = TCPSocket:send(data..'\n')
+	local r = TCPSocket:send(data..'')
 	if settings.getValue("showDebugOutput") == true then
 		print('[MPGameNetwork] Sending Data ('..r..'): '..data)
 	end
@@ -86,7 +86,7 @@ local function handleEvents(p)  --- E:<NAME>:data
 end
 
 function TriggerServerEvent(n, d)
-	TCPSocket:send('E:'..n..':'..d..'\n')
+	TCPSocket:send('E:'..n..':'..d)
 end
 
 function TriggerClientEvent(code, data)

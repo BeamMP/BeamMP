@@ -26,7 +26,7 @@ local function sendAllPowertrain()
 			tableToSend[name] = mode -- Add device to the table
 		end
   end
-	obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
+	--obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
 end
 
 
@@ -43,6 +43,14 @@ local function applyPowertrain(data)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
 		--print("applied "..k.." - "..v)
+		powertrain.setDeviceMode(k, v) -- Apply it
+	end
+end
+
+local function applyLivePowertrain(data)
+	local decodedData = jsonDecode(data) -- Decode data
+	for k, v in pairs(decodedData) do -- For each device
+		print("applied "..k.." - "..v)
 		powertrain.setDeviceMode(k, v) -- Apply it
 	end
 end
@@ -64,12 +72,65 @@ local function onInit()
 	print("Hooked powertrain device mode updates")
 end
 
+local function equals(t1, t2)
+  for k,v in pairs(t1["gearbox"]) do
+		--print(tostring(t1["gearbox"][k]).." ~= "..tostring(t2["gearbox"][k]))
+		if t1["gearbox"][k] ~= t2["gearbox"][k] then
+			return false
+		end
+	end
+	for k,v in pairs(t1["mainEngine"]) do
+		--print(tostring(t1["mainEngine"][k]).." ~= "..tostring(t2["mainEngine"][k]))
+		if t1["mainEngine"][k] ~= t2["mainEngine"][k] then
+			return false
+		end
+	end
+	return true
+end
+
+local lastPowertrain = {
+	mainEngine = {
+		isBroken = "",
+		isStalled = ""
+	},
+	gearbox = {
+		type = "",
+		gearIndex = "",
+		mode = ""
+	}
+}
+
+local function updateGFX(dt)
+	local devices = powertrain.getDevices() -- Get all devices
+
+	local currentPowertrain = {
+		mainEngine = {
+			isBroken = devices["mainEngine"].isBroken,
+			isStalled = devices["mainEngine"].isStalled
+		},
+		gearbox = {
+			type = devices["gearbox"].type,
+			gearIndex = devices["gearbox"].gearIndex,
+			mode = devices["gearbox"].mode
+		}
+	}
+
+	--print(equals(lastPowertrain, currentPowertrain))
+	if not equals(lastPowertrain, currentPowertrain) then
+		dump(lastPowertrain)
+		dump(currentPowertrain)
+		print("Sending Powertrain Edits")
+		obj:queueGameEngineLua("powertrainGE.sendLivePowertrain(\'"..jsonEncode(currentPowertrain).."\', \'"..obj:getID().."\')")
+		lastPowertrain = currentPowertrain
+	end
+end
+
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit
 M.sendPowertrain     = sendPowertrain
 M.sendAllPowertrain  = sendAllPowertrain
 M.applyPowertrain    = applyPowertrain
-
+M.updateGFX			= updateGFX
 
 
 return M

@@ -31,11 +31,28 @@ local function sendPowertrain(data, gameVehicleID)
 	end
 end
 
+local function sendLivePowertrain(data, gameVehicleID)
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			MPGameNetwork.send('Yl:'..serverVehicleID..":"..data) -- Send powertrain to server
+		end
+	end
+end
+
 local function applyPowertrain(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("powertrainVE.applyPowertrain(\'"..data.."\')")
+	end
+end
+
+local function applyLivePowertrain(data, serverVehicleID)
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local veh = be:getObjectByID(gameVehicleID)
+	if veh then
+		veh:queueLuaCommand("powertrainVE.applyLivePowertrain(\'"..data.."\')")
 	end
 end
 
@@ -49,12 +66,19 @@ local function handle(rawData)
 		local data = string.match(rawData,":(.*)")
 		applyPowertrain(data, serverVehicleID)
 	end
+	if code == "l" then
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		applyLivePowertrain(data, serverVehicleID)
+	end
 end
 
 
 M.tick                   = tick
 M.handle                 = handle
 M.sendPowertrain         = sendPowertrain
+M.sendLivePowertrain     = sendLivePowertrain
 M.applyPowertrain        = applyPowertrain
 
 

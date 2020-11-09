@@ -52,7 +52,13 @@ local function applyLivePowertrain(data)
 	--dump(decodedData)
 	local devices = powertrain.getDevices()
 	for k, v in pairs(decodedData) do -- For each device
-		if k == "gearbox" or k == "differential_F" or k == "differential_R" or k == "wheelaxleFL" or k == "wheelaxleFR" or k == "wheelaxleRL" or k == "wheelaxleRR" then
+		for key,value in pairs(v) do
+			if key == "mode" then
+				print(k .. " -> " .. value)
+				devices[k].setMode(devices[k], value)
+			end
+		end
+		if k == "gearbox" or k == "differential_F" or k == "differential_R" or k == "differential_R_1" or k == "differential_R_2" or k == "wheelaxleFL" or k == "wheelaxleFR" or k == "wheelaxleRL" or k == "wheelaxleRR" then
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
 				print(devices[k].type)
@@ -60,14 +66,10 @@ local function applyLivePowertrain(data)
 					print(k .. " -> " .. value)
 					devices[k].setGearIndex(devices[k], value)
 				end
-				if key == "mode" then
-					print(k .. " -> " .. value)
-					devices[k].setMode(devices[k], value)
-				end
 			end
 		end
 
-		if k == "transfercase_F" or k == "transfercase_R" or k == "rangebox" then
+		if string.match(k, "transfercase") or k == "rangebox" then
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
 				print(devices[k].type)
@@ -102,106 +104,28 @@ local function equals(t1, t2)
 end
 
 local lastPowertrain = {
-	--[[mainEngine = {
-		isBroken = "",
-		isStalled = ""
-	},]]
 	gearbox = {
 		type = "",
 		gearIndex = "",
 		mode = ""
 	},
-	transfercase_F = {
-		mode = ""
-	}
 }
 
 local function updateGFX(dt)
 	local devices = powertrain.getDevices() -- Get all devices
 
 	local currentPowertrain = {
-		--[[mainEngine = {
-			isBroken = "",
-			isStalled = ""
-		},]]
 		gearbox = {
 			type = "",
 			gearIndex = "",
 			mode = ""
 		},
-		transfercase_F = {
-			mode = ""
-		}
 	}
 
-	if devices["gearbox"] ~= nil then
-		currentPowertrain.gearbox = {
-			type = devices["gearbox"].type,
-			gearIndex = devices["gearbox"].gearIndex,
-			mode = devices["gearbox"].mode
-		}
-	end
-
-	if devices["transfercase_F"] ~= nil then
-		currentPowertrain.transfercase_F = {
-			type = devices["transfercase_F"].type,
-			mode = devices["transfercase_F"].mode
-		}
-	end
-
-	if devices["transfercase_R"] ~= nil then
-		currentPowertrain.transfercase_R = {
-			type = devices["transfercase_R"].type,
-			mode = devices["transfercase_R"].mode
-		}
-	end
-
-	if devices["differential_F"] ~= nil then
-		currentPowertrain.differential_F = {
-			type = devices["differential_F"].type,
-			mode = devices["differential_F"].mode
-		}
-	end
-
-	if devices["differential_R"] ~= nil then
-		currentPowertrain.differential_R = {
-			type = devices["differential_R"].type,
-			mode = devices["differential_R"].mode
-		}
-	end
-
-	if devices["rangebox"] ~= nil then
-		currentPowertrain.rangebox = {
-			type = devices["rangebox"].type,
-			mode = devices["rangebox"].mode
-		}
-	end
-
-	if devices["wheelaxleFL"] ~= nil then
-		currentPowertrain.wheelaxleFL = {
-			type = devices["wheelaxleFL"].type,
-			mode = devices["wheelaxleFL"].mode
-		}
-	end
-
-	if devices["wheelaxleFR"] ~= nil then
-		currentPowertrain.wheelaxleFR = {
-			type = devices["wheelaxleFR"].type,
-			mode = devices["wheelaxleFR"].mode
-		}
-	end
-
-	if devices["wheelaxleRL"] ~= nil then
-		currentPowertrain.wheelaxleRL = {
-			type = devices["wheelaxleRL"].type,
-			mode = devices["wheelaxleRL"].mode
-		}
-	end
-
-	if devices["wheelaxleRR"] ~= nil then
-		currentPowertrain.wheelaxleRR = {
-			type = devices["wheelaxleRR"].type,
-			mode = devices["wheelaxleRR"].mode
+	for k,v in pairs(devices) do
+		currentPowertrain[k] = {
+			type = v.type,
+			mode = v.mode
 		}
 	end
 

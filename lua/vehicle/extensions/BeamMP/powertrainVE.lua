@@ -51,6 +51,7 @@ local function applyLivePowertrain(data)
 	-- shifterMode = 2 : arcade
 	-- shifterMode = 3 : realistic (automatic)
 	--drivetrain.setShifterMode(2)
+	controller.mainController.setGearboxMode("realistic")
 	print("Applying Data")
 	local decodedData = jsonDecode(data) -- Decode data
 	--dump(decodedData)
@@ -63,18 +64,16 @@ local function applyLivePowertrain(data)
 			end
 		end
 		if k == "gearbox" then
-			print("Gearbox Data: "..tostring(k))
+			--print("Gearbox Data: "..tostring(k))
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
-				print(devices[k].type)
-				if devices[k].type == "dctGearbox" then
-					print(k .. " -> " .. value)
-					if key == "gearIndex1" then
-						devices[k].setGearIndex1(devices[k], value)
-					end
-					if key == "gearIndex2" then
-						devices[k].setGearIndex2(devices[k], value)
-					end
+				--print(devices[k].type)
+				if (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") and key == "gearIndex" then
+					print("Shifting to Gear "..value)
+					controller.mainController.shiftToGearIndex(tonumber(value))
+				elseif devices[k].type == "dctGearbox" and key == "gearIndex" then
+					print("Shifting to Gear "..value)
+					controller.mainController.shiftToGearIndex(tonumber(value))
 				else
 					if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
 						print(k .. " -> " .. value)
@@ -135,6 +134,17 @@ local lastPowertrain = {
 	},
 }
 
+local gearTranslationTable = {
+	["R"] = -1,
+	["N"] = 0,
+	["P"] = 1,
+	["D"] = 2,
+	["M"] = 6,
+	["1"] = 5,
+	["2"] = 4,
+	["S"] = 3,
+}
+
 local function updateGFX(dt)
 	local devices = powertrain.getDevices() -- Get all devices
 
@@ -148,12 +158,11 @@ local function updateGFX(dt)
 
 	for k,v in pairs(devices) do
 		if k == "gearbox" then
-			if v.type == "dctGearbox" then
+			if v.type == "automaticGearbox" or v.type == "dctGearbox" then
 				currentPowertrain[k] = {
 					type = v.type,
 					mode = v.mode,
-					gearIndex1 = v.gearIndex1,
-					gearIndex2 = v.gearIndex2
+					gearIndex = gearTranslationTable[electrics.values.gear]
 				}
 			else
 				currentPowertrain[k] = {

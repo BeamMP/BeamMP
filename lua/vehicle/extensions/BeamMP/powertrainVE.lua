@@ -131,9 +131,9 @@ local function updateGFX(dt)
 
 	--print(equals(lastPowertrain, currentPowertrain))
 	if not equals(lastPowertrain, currentPowertrain) then
-		dump(lastPowertrain)
-		dump(currentPowertrain)
-		print("Sending Powertrain Edits")
+		--dump(lastPowertrain)
+		--dump(currentPowertrain)
+		--print("Sending Powertrain Edits")
 		obj:queueGameEngineLua("powertrainGE.sendLivePowertrain(\'"..jsonEncode(currentPowertrain).."\', \'"..obj:getID().."\')")
 		lastPowertrain = currentPowertrain
 	end

@@ -71,7 +71,9 @@ local function sessionData(data)
 	end
 end
 
-
+-------------------------------------------------------------------------------
+-- Events System
+-------------------------------------------------------------------------------
 
 local function handleEvents(p)  --- E:<NAME>:data
 	local eventName = string.match(p,"(%w+)%:")
@@ -87,12 +89,15 @@ function TriggerServerEvent(n, d)
 	TCPSocket:send('E:'..n..':'..d)
 end
 
-
 function TriggerClientEvent(code, data)
 	handleEvents(code..':'..data)
 end
 
-
+function AddEventHandler(n, f)
+	print("Adding Event Handler: Name = "..tostring(n))
+	table.insert(eventTriggers, {name = n, func = f})
+	dump(eventTriggers)
+end
 
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,
@@ -118,7 +123,7 @@ local function onUpdate(dt)
 		while (true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
-			-- break it up into code + data	
+			-- break it up into code + data
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)

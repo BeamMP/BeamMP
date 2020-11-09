@@ -105,15 +105,29 @@ local function updateGFX(dt)
 
 	local currentPowertrain = {
 		mainEngine = {
-			isBroken = devices["mainEngine"].isBroken,
-			isStalled = devices["mainEngine"].isStalled
+			isBroken = "",
+			isStalled = ""
 		},
 		gearbox = {
-			type = devices["gearbox"].type,
-			gearIndex = devices["gearbox"].gearIndex,
-			mode = devices["gearbox"].mode
+			type = "",
+			gearIndex = "",
+			mode = ""
 		}
 	}
+
+	if devices["mainEngine"] ~= nil and devices["gearbox"] ~= nil then
+		currentPowertrain = {
+			mainEngine = {
+				isBroken = devices["mainEngine"].isBroken,
+				isStalled = devices["mainEngine"].isStalled
+			},
+			gearbox = {
+				type = devices["gearbox"].type,
+				gearIndex = devices["gearbox"].gearIndex,
+				mode = devices["gearbox"].mode
+			}
+		}
+	end
 
 	--print(equals(lastPowertrain, currentPowertrain))
 	if not equals(lastPowertrain, currentPowertrain) then

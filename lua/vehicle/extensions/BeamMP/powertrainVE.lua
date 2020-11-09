@@ -152,7 +152,7 @@ local function updateGFX(dt)
 				currentPowertrain[k] = {
 					type = v.type,
 					mode = v.mode,
-					gearIndex1 = v.gearIndex1
+					gearIndex1 = v.gearIndex1,
 					gearIndex2 = v.gearIndex2
 				}
 			else

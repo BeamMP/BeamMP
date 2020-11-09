@@ -147,10 +147,10 @@ end
 local function updateVehicle(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then print("gameVehicleID for "..serverID.." not found") return end
-	
+
 	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then print("Vehicle "..gameVehicleID.." not found") return end
-	
+
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
@@ -327,8 +327,9 @@ end
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 local function onServerVehicleResetted(serverVehicleID, data)
+	print("Reset Event Received for a player")
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if lastResetID ~= serverVehicleID then
+	--if lastResetID ~= serverVehicleID then
 		if gameVehicleID then
 			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 			if veh then
@@ -345,14 +346,14 @@ local function onServerVehicleResetted(serverVehicleID, data)
 		else
 			print("gameVehicleID for serverVehicleID "..serverVehicleID.." not found")
 		end
-	end
+	--end
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 
 
 
 local HandleNetwork = {
-	['s'] = function(rawData) 
+	['s'] = function(rawData)
 		local playerRole = string.match(rawData,"(%w+)%:") -- Get the player role
 		rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname = string.match(rawData,"^.-:")
@@ -363,19 +364,19 @@ local HandleNetwork = {
 		local data = string.match(rawData,":(.*)") -- Get the vehicle data
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
-	['r'] = function(rawData) 
+	['r'] = function(rawData)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		onServerVehicleResetted(serverVehicleID, data)
 	end,
-	['c'] = function(rawData) 
+	['c'] = function(rawData)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		updateVehicle(serverVehicleID, data)
 	end,
-	['d'] = function(rawData) 
+	['d'] = function(rawData)
 		onServerVehicleRemoved(rawData)
 	end
 }
@@ -427,7 +428,7 @@ end
 local function onUpdate(dt)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
-		
+
 		-- Vehicles syncing timer
 		syncTimer = syncTimer + dt
 		if syncTimer > 10 then

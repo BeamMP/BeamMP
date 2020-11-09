@@ -29,17 +29,15 @@ local function sendAllPowertrain()
 	obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
 end
 
-
-
 local function sendPowertrain(name, mode)
 	local tableToSend = {}  -- Create table with gameVehicleID
 	tableToSend[name] = mode -- Add device to the table
 	obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
 end
 
-
-
 local function applyPowertrain(data)
+	print("Initial data for powertrain received")
+	drivetrain.setShifterMode(2)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
 		print("applied "..k.." - "..tostring(v))
@@ -48,6 +46,12 @@ local function applyPowertrain(data)
 end
 
 local function applyLivePowertrain(data)
+	-- shifterMode = 0 : realistic (manual)
+	-- shifterMode = 1 : realistic (manual autoclutch)
+	-- shifterMode = 2 : arcade
+	-- shifterMode = 3 : realistic (automatic)
+	--drivetrain.setShifterMode(2)
+	print("Applying Data")
 	local decodedData = jsonDecode(data) -- Decode data
 	--dump(decodedData)
 	local devices = powertrain.getDevices()
@@ -58,13 +62,25 @@ local function applyLivePowertrain(data)
 				devices[k].setMode(devices[k], value)
 			end
 		end
-		if k == "gearbox" or k == "differential_F" or k == "differential_R" or k == "differential_R_1" or k == "differential_R_2" or k == "wheelaxleFL" or k == "wheelaxleFR" or k == "wheelaxleRL" or k == "wheelaxleRR" then
+		if k == "gearbox" then
+			print("Gearbox Data: "..tostring(k))
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
 				print(devices[k].type)
-				if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
+				if devices[k].type == "dctGearbox" then
 					print(k .. " -> " .. value)
-					devices[k].setGearIndex(devices[k], value)
+					if key == "gearIndex1" then
+						devices[k].setGearIndex1(devices[k], value)
+					end
+					if key == "gearIndex2" then
+						devices[k].setGearIndex2(devices[k], value)
+					end
+				else
+					if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
+						print(k .. " -> " .. value)
+						controller.mainController.shiftToGearIndex(value)
+						devices[k].setGearIndex(devices[k], value)
+					end
 				end
 			end
 		end
@@ -87,7 +103,15 @@ end
 local function onInit()
 	local devices = powertrain.getDevices() -- Get all devices
 	for k,v in pairs(devices) do
-		--print(k .. " = " .. tostring(v))
+		print(k .. " = " .. tostring(v))
+	end
+	print("========================================")
+	for k,v in pairs(devices) do
+		if k == "frontMotor" then
+			for i,j in pairs(v) do
+				print(i .. " = " .. tostring(j))
+			end
+		end
 	end
 end
 
@@ -123,10 +147,39 @@ local function updateGFX(dt)
 	}
 
 	for k,v in pairs(devices) do
-		currentPowertrain[k] = {
-			type = v.type,
-			mode = v.mode
-		}
+		if k == "gearbox" then
+			if v.type == "dctGearbox" then
+				currentPowertrain[k] = {
+					type = v.type,
+					mode = v.mode,
+					gearIndex1 = v.gearIndex1
+					gearIndex2 = v.gearIndex2
+				}
+			else
+				currentPowertrain[k] = {
+					type = v.type,
+					mode = v.mode,
+					gearIndex = v.gearIndex
+				}
+			end
+		elseif k == "frontMotor" then
+			currentPowertrain[k] = {
+				type = v.type,
+				mode = v.mode,
+				gearIndex = v.gearIndex
+			}
+		elseif k == "rearMotor" then
+			currentPowertrain[k] = {
+				type = v.type,
+				mode = v.mode,
+				gearIndex = v.gearIndex
+			}
+		else
+			currentPowertrain[k] = {
+				type = v.type,
+				mode = v.mode
+			}
+		end
 	end
 
 	--print(equals(lastPowertrain, currentPowertrain))

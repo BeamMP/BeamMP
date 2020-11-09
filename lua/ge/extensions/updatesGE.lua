@@ -44,12 +44,6 @@ local function onUpdate(dt)
 			mpConfig.electricsDelay = 0 -- Reset the delay
 			electricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
-
-		mpConfig.powertrainDelay = mpConfig.powertrainDelay + dt
-		if mpConfig.powertrainDelay > mpConfig.getPowertrainTickrate() then
-			mpConfig.powertrainDelay = 0 -- Reset the delay
-			powertrainGE.tick() -- Comment this line to disable position synchronization
-		end
 	end
 end
 

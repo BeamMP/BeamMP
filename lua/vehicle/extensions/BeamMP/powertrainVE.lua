@@ -26,7 +26,7 @@ local function sendAllPowertrain()
 			tableToSend[name] = mode -- Add device to the table
 		end
   end
-	--obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
+	obj:queueGameEngineLua("powertrainGE.sendPowertrain(\'"..jsonEncode(tableToSend).."\', \'"..obj:getID().."\')")
 end
 
 
@@ -54,7 +54,7 @@ local function applyLivePowertrain(data)
 	for k, v in pairs(decodedData) do -- For each device
 		for key,value in pairs(v) do
 			if key == "mode" then
-				print(k .. " -> " .. value)
+				--print(k .. " -> " .. value)
 				devices[k].setMode(devices[k], value)
 			end
 		end
@@ -72,7 +72,7 @@ local function applyLivePowertrain(data)
 		if string.match(k, "transfercase") or k == "rangebox" then
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
-				print(devices[k].type)
+				--print(devices[k].type)
 				if key == "mode" then
 					print(k.." ("..key..")  -> "..value)
 					if devices[k].mode ~= value then

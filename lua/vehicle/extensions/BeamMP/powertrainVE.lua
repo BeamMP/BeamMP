@@ -42,21 +42,46 @@ end
 local function applyPowertrain(data)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
-		--print("applied "..k.." - "..v)
+		print("applied "..k.." - "..tostring(v))
 		powertrain.setDeviceMode(k, v) -- Apply it
 	end
 end
 
 local function applyLivePowertrain(data)
 	local decodedData = jsonDecode(data) -- Decode data
+	--dump(decodedData)
+	local devices = powertrain.getDevices()
 	for k, v in pairs(decodedData) do -- For each device
-		print("applied "..k.." - "..v)
-		powertrain.setDeviceMode(k, v) -- Apply it
+		if k == "gearbox" then
+			--print("applied "..k.." - "..tostring(v))
+			for key,value in pairs(v) do
+				if key == "gearIndex" then
+					devices["gearbox"].setGearIndex(devices["gearbox"], value)
+				end
+			end
+		end
 	end
 end
 
 local function onInit()
-	for _, device in pairs(powertrain.getDevices()) do
+	local setModeNil = false
+	for k, device in pairs(powertrain.getDevices()) do
+		if device.setMode == nil and (k == "mainEngine" or k == "gearbox") then
+			setModeNil = true
+			print("FOUND A NIL")
+			print(device)
+			print(k)
+		end
+	end
+
+	if not setModeNil then
+		print("Not Nil Now")
+	else
+		print(" Still Nil Reload?")
+		--onInit()
+	end
+
+	--[[for _, device in pairs(powertrain.getDevices()) do
 
 		local setMode = device.setMode
 
@@ -67,7 +92,7 @@ local function onInit()
 
 			return setMode(device, mode, ...)
 		end
-	end
+	end]]
 
 	print("Hooked powertrain device mode updates")
 end
@@ -79,20 +104,20 @@ local function equals(t1, t2)
 			return false
 		end
 	end
-	for k,v in pairs(t1["mainEngine"]) do
+	--[[for k,v in pairs(t1["mainEngine"]) do
 		--print(tostring(t1["mainEngine"][k]).." ~= "..tostring(t2["mainEngine"][k]))
 		if t1["mainEngine"][k] ~= t2["mainEngine"][k] then
 			return false
 		end
-	end
+	end]]
 	return true
 end
 
 local lastPowertrain = {
-	mainEngine = {
+	--[[mainEngine = {
 		isBroken = "",
 		isStalled = ""
-	},
+	},]]
 	gearbox = {
 		type = "",
 		gearIndex = "",
@@ -104,10 +129,10 @@ local function updateGFX(dt)
 	local devices = powertrain.getDevices() -- Get all devices
 
 	local currentPowertrain = {
-		mainEngine = {
+		--[[mainEngine = {
 			isBroken = "",
 			isStalled = ""
-		},
+		},]]
 		gearbox = {
 			type = "",
 			gearIndex = "",
@@ -115,12 +140,12 @@ local function updateGFX(dt)
 		}
 	}
 
-	if devices["mainEngine"] ~= nil and devices["gearbox"] ~= nil then
+	if --[[devices["mainEngine"] ~= nil and]] devices["gearbox"] ~= nil then
 		currentPowertrain = {
-			mainEngine = {
+			--[[mainEngine = {
 				isBroken = devices["mainEngine"].isBroken,
 				isStalled = devices["mainEngine"].isStalled
-			},
+			},]]
 			gearbox = {
 				type = devices["gearbox"].type,
 				gearIndex = devices["gearbox"].gearIndex,
@@ -131,20 +156,21 @@ local function updateGFX(dt)
 
 	--print(equals(lastPowertrain, currentPowertrain))
 	if not equals(lastPowertrain, currentPowertrain) then
-		dump(lastPowertrain)
-		dump(currentPowertrain)
-		print("Sending Powertrain Edits")
+		--dump(lastPowertrain)
+		--dump(currentPowertrain)
+		--print("Sending Powertrain Edits")
 		obj:queueGameEngineLua("powertrainGE.sendLivePowertrain(\'"..jsonEncode(currentPowertrain).."\', \'"..obj:getID().."\')")
 		lastPowertrain = currentPowertrain
 	end
 end
 
-M.onInit             = onInit
-M.onExtensionLoaded  = onInit
-M.sendPowertrain     = sendPowertrain
-M.sendAllPowertrain  = sendAllPowertrain
-M.applyPowertrain    = applyPowertrain
-M.updateGFX			= updateGFX
+M.onInit              = onInit
+M.onExtensionLoaded   = onInit
+M.sendPowertrain      = sendPowertrain
+M.sendAllPowertrain   = sendAllPowertrain
+M.applyPowertrain     = applyPowertrain
+M.applyLivePowertrain = applyLivePowertrain
+M.updateGFX			      = updateGFX
 
 
 return M

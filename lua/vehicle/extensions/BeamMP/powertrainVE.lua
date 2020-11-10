@@ -14,6 +14,21 @@ local sendNow = false -- When set to true, it send the electrics value at next u
 local allowed  = true -- Allow or not the user to send electrics value at next update
 local getElectricsDelay = 0
 local latestData
+
+local expectedGear = 0
+local gearType = ""
+
+local gearTranslationTable = {
+	["R"] = -1,
+	["N"] = 0,
+	["P"] = 1,
+	["D"] = 2,
+	["M"] = 6,
+	["1"] = 5,
+	["2"] = 4,
+	["S"] = 3,
+}
+
 -- ============= VARIABLES =============
 
 local function sendAllPowertrain()
@@ -64,16 +79,20 @@ local function applyLivePowertrain(data)
 			end
 		end
 		if k == "gearbox" then
+			print(devices[k].type)
 			--print("Gearbox Data: "..tostring(k))
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
-				--print(devices[k].type)
-				if (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") and key == "gearIndex" then
+				if (devices[k].type == "manualGearbox" or devices[k].type == "sequentialGearbox") and key == "gearIndex" then
 					print("Shifting to Gear "..value)
 					controller.mainController.shiftToGearIndex(tonumber(value))
-				elseif devices[k].type == "dctGearbox" and key == "gearIndex" then
+					gearType = "manual"
+					expectedGear = value
+				elseif (devices[k].type == "dctGearbox" or devices[k].type == "automaticGearbox") and key == "gearIndex" then
 					print("Shifting to Gear "..value)
 					controller.mainController.shiftToGearIndex(tonumber(value))
+					gearType = "auto"
+					expectedGear = value
 				else
 					if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
 						print(k .. " -> " .. value)
@@ -134,18 +153,18 @@ local lastPowertrain = {
 	},
 }
 
-local gearTranslationTable = {
-	["R"] = -1,
-	["N"] = 0,
-	["P"] = 1,
-	["D"] = 2,
-	["M"] = 6,
-	["1"] = 5,
-	["2"] = 4,
-	["S"] = 3,
-}
-
 local function updateGFX(dt)
+	if gearType == "auto" then
+		if gearTranslationTable[string.sub(electrics.values.gear, 1, 1)] ~= tonumber(expectedGear) then
+			controller.mainController.shiftToGearIndex(tonumber(expectedGear))
+		end
+	else
+		if electrics.values.gear ~= tonumber(expectedGear) then
+			controller.mainController.shiftToGearIndex(tonumber(expectedGear))
+		end
+	end
+
+
 	local devices = powertrain.getDevices() -- Get all devices
 
 	local currentPowertrain = {
@@ -162,7 +181,7 @@ local function updateGFX(dt)
 				currentPowertrain[k] = {
 					type = v.type,
 					mode = v.mode,
-					gearIndex = gearTranslationTable[electrics.values.gear]
+					gearIndex = gearTranslationTable[string.sub(electrics.values.gear, 1, 1)]
 				}
 			else
 				currentPowertrain[k] = {

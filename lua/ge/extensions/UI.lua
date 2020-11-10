@@ -6,6 +6,7 @@
 local M = {}
 
 local players = {}
+local pings = {}
 
 print("UI Initialising...")
 
@@ -45,10 +46,12 @@ local function split(s, sep)
 end
 
 local function updatePlayersList(playersString)
-  --print(playersString)
-  local players = split(playersString, ",")
-  --print(dump(players))
-  be:executeJS('playerList(\''..jsonEncode(players)..'\');')
+	--print(playersString)
+	local players = split(playersString, ",")
+	--print(dump(players))
+	be:executeJS('playerList(\''..jsonEncode(players)..'\');')
+
+	be:executeJS('playerPings(\''..jsonEncode(pings)..'\');')
 end
 
 local function setPing(ping)
@@ -157,6 +160,14 @@ local function readyReset()
   deletenext = true
 end
 
+local function setVehPing(vehicleID, ping)
+	local nickmap = vehicleGE.getNicknameMap()
+
+	if not vehicleGE.isOwn(vehicleID) and nickmap[vehicleID] ~= nil then
+		pings[nickmap[vehicleID]] = ping
+	end
+end
+
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
 M.ready = ready
@@ -168,6 +179,7 @@ M.chatMessage = chatMessage
 M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
+M.setVehPing = setVehPing
 
 print("UI Loaded.")
 return M

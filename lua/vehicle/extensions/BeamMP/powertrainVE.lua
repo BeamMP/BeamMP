@@ -119,6 +119,8 @@ local function applyLivePowertrain(data)
 end
 
 local function onInit()
+	print("MPInit!")
+	electrics.values.MPGear = 0
 	local devices = powertrain.getDevices() -- Get all devices
 	for k,v in pairs(devices) do
 		print(k .. " = " .. tostring(v))
@@ -154,16 +156,29 @@ local lastPowertrain = {
 }
 
 local function updateGFX(dt)
-	if gearType == "auto" then
-		if gearTranslationTable[string.sub(electrics.values.gear, 1, 1)] ~= tonumber(expectedGear) then
-			controller.mainController.shiftToGearIndex(tonumber(expectedGear))
-		end
-	else
-		if electrics.values.gear ~= tonumber(expectedGear) then
-			controller.mainController.shiftToGearIndex(tonumber(expectedGear))
+	if v.mpVehicleType == 'remote' then
+		if gearType == "auto" then
+			if gearTranslationTable[string.sub(electrics.values.gear, 1, 1)] ~= tonumber(expectedGear) then
+				controller.mainController.shiftToGearIndex(tonumber(expectedGear))
+			end
+		else
+			if electrics.values.MPGear ~= tonumber(expectedGear) then
+				print("Looping gear!")
+				if powertrain.getDevices().gearbox.type == "manualGearbox" then
+					controller.mainController.shiftToGearIndex(tonumber(expectedGear))
+					electrics.values.MPGear = expectedGear
+				else
+					if electrics.values.MPGear < tonumber(expectedGear) then
+						controller.mainController.shiftToGearIndex(tonumber(electrics.values.MPGear)+1)
+						electrics.values.MPGear = electrics.values.MPGear + 1
+					else
+						controller.mainController.shiftToGearIndex(tonumber(electrics.values.MPGear)-1)
+						electrics.values.MPGear = electrics.values.MPGear - 1
+					end
+				end
+			end
 		end
 	end
-
 
 	local devices = powertrain.getDevices() -- Get all devices
 

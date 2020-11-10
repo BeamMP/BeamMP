@@ -16,7 +16,7 @@ print("nodesGE Initialising...")
 
 
 local function tick()
-	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -26,16 +26,16 @@ local function tick()
 end
 
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			GameNetwork.sendSplit('Xn:', serverVehicleID..":", data)
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			MPGameNetwork.sendSplit('Xn:', serverVehicleID..":", data)
 		end
 	end
 end
 
 local function applyNodes(data, serverVehicleID)
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		--local pos = veh:getPosition()
@@ -45,7 +45,7 @@ local function applyNodes(data, serverVehicleID)
 end
 
 local function applyRot(data, serverVehicleID)
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("nodesVE.applyRotation(\'"..data.."\')") -- Send nodes values

@@ -52,10 +52,14 @@ local function updatePlayersList(playersString)
 end
 
 local function setPing(ping)
-	if tonumber(ping) > -1 then
-		be:executeJS('setPing("'..ping..' ms")')
-	else
+	if tonumber(ping) == -1 then
 		--print("ping is -1")
+		guihooks.trigger("app:showConnectionIssues", false)
+	elseif tonumber(ping) == -2 then
+		guihooks.trigger("app:showConnectionIssues", true)
+	else
+		guihooks.trigger("setPing", ""..ping.." ms")
+		guihooks.trigger("app:showConnectionIssues", false)
 	end
 end
 
@@ -65,11 +69,13 @@ local function setNickName(name)
 end
 
 local function setStatus(status)
-	be:executeJS('setStatus("'..status..'")')
+	--be:executeJS('setStatus("'..status..'")')
+  guihooks.trigger("setStatus", status)
 end
 
 local function setPlayerCount(playerCount)
-	be:executeJS('setPlayerCount("'..playerCount..'")')
+	--be:executeJS('setPlayerCount("'..playerCount..'")')
+  guihooks.trigger("setPlayerCount", playerCount)
 end
 
 local function error(text)
@@ -103,7 +109,7 @@ end
 local function chatSend(msg)
   local c = 'C:'..mpConfig.getNickname()..": "..msg
   print(c)
-  GameNetwork.send(c)
+  MPGameNetwork.send(c)
 end
 
 local ready = true
@@ -129,14 +135,20 @@ local function ready(src)
   end
 
   if src == "MP-SESSION" or src == "FIRSTVEH" then
-	if ready then
-	  ready = false
-	  GameNetwork.connectToLauncher()
-	end
+  	if ready then
+  	  ready = false
+  	  MPGameNetwork.connectToLauncher()
+  	end
 
-	if CoreNetwork.Server ~= nil and CoreNetwork.Server.NAME ~= nil then
-	  setStatus("Server: "..CoreNetwork.Server.NAME)
-	end
+    local Server = MPCoreNetwork.getCurrentServer()
+    --print("---------------------------------------------------------------")
+    --dump(Server)
+    --print(Server.name)
+    --print("---------------------------------------------------------------")
+
+  	if Server ~= nil and Server.name ~= nil then
+  	  setStatus("Server: "..Server.name)
+  	end
   end
 end
 

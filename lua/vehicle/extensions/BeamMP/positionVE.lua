@@ -89,7 +89,6 @@ local remoteData = {
 }
 
 local debugDrawer = obj.debugDrawProxy
-local DEBUG = false
 
 local abs = math.abs
 local min = math.min
@@ -105,13 +104,11 @@ local function setPing(p)
 end
 
 local function updateGFX(dt)
+	
 	timer = timer + dt
-
 	lastDT = dt
 
-	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then
-		return
-	end
+	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
 	local vehPos = vec3(obj:getPosition())
@@ -127,7 +124,6 @@ local function updateGFX(dt)
 
 	-- Smoothed difference between local and remote timestamps
 	local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
-
 	if abs(timeOffset - remoteData.timeOffset) > 1 then
 		timeOffsetSmoother:set(remoteData.timeOffset)
 		timeOffset = remoteData.timeOffset
@@ -141,7 +137,6 @@ local function updateGFX(dt)
 
 	-- More prediction = slower smoothing
 	local smootherDT = dt / guardZero(abs(predictTime))
-
 	local remoteVel = remoteVelSmoother:get(remoteData.vel, smootherDT)
 	local remoteRvel = remoteRvelSmoother:get(remoteData.rvel, smootherDT)
 	local remoteAcc = remoteAccSmoother:get(remoteData.acc, smootherDT)
@@ -154,14 +149,14 @@ local function updateGFX(dt)
 	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
-	--DEBUG
-  if DEBUG then
-  	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
-  	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,255))
-  	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
-  	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,255))
+	--[[
+	-- Debug
+	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
+	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,255))
+	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
+	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,255))
 	debugDrawer:drawText(pos:toFloat3(), color(0,0,0,255), string.format("Prediction: %.0f ms", predictTime*1000))
-  end
+	--]]
 
 	-- Error correction
 	local posError = pos - vehPos
@@ -233,48 +228,48 @@ local function updateGFX(dt)
 end
 
 local function getVehicleRotation()
-	local tempTable = {}
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
 	local rot = obj:getRotation()
-	local rvel = {}
-	rvel.y = obj:getPitchAngularVelocity()
-	rvel.z = obj:getRollAngularVelocity()
-	rvel.x = obj:getYawAngularVelocity()
-	tempTable['pos'] = {}
-	tempTable['pos'].x = tonumber(pos.x)
-	tempTable['pos'].y = tonumber(pos.y)
-	tempTable['pos'].z = tonumber(pos.z)
-	tempTable['vel'] = {}
-	tempTable['vel'].x = tonumber(vel.x)
-	tempTable['vel'].y = tonumber(vel.y)
-	tempTable['vel'].z = tonumber(vel.z)
-	tempTable['ang'] = {}
-	tempTable['ang'].x = tonumber(rot.x)
-	tempTable['ang'].y = tonumber(rot.y)
-	tempTable['ang'].z = tonumber(rot.z)
-	tempTable['ang'].w = tonumber(rot.w)
-	tempTable['rvel'] = {}
-	tempTable['rvel'].x = tonumber(rvel.x)
-	tempTable['rvel'].y = tonumber(rvel.y)
-	tempTable['rvel'].z = tonumber(rvel.z)
-	tempTable['tim'] = timer
-	tempTable['ping'] = ownPing+lastDT
-	--print(dump(tempTable))
-	--print("tempTable ^ ")
+	local tempTable = {
+		pos = {
+			x = pos.x,
+			y = pos.y,
+			z = pos.z
+		},
+		vel = {
+			x = vel.x,
+			y = vel.y,
+			z = vel.z
+		},
+		rot = {
+			x = rot.x,
+			y = rot.y,
+			z = rot.z,
+			w = rot.w
+		},
+		rvel = {
+			x = obj:getPitchAngularVelocity(),
+			y = obj:getPitchAngularVelocity(),
+			z = obj:getRollAngularVelocity()
+		},
+		tim = timer,
+		ping = ownPing + lastDT
+	}
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
 
-local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
+local function setVehiclePosRot(data)
 
+	local pr   = jsonDecode(data)
+	local pos  = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
+	local vel  = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
+	local rot  = quat(pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w)
+	local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
+	local tim  = pr.tim
+	local ping = pr.ping
+	
 	local remoteDT = max(tim - remoteData.timer, 0.001)
-
-	-- If packets arrive in wrong order, print warning message
-	--if remoteDT < 0 then
-		--print("Wrong position packet order! Vehicle ID: "..obj:getID()..", Old Timestamp: "..remoteData.timer..", New Timestamp: "..tim)
-
-		--return
-	--end
 
 	-- Sanity checks for acceleration
 	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
@@ -285,6 +280,7 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 		remoteData.acc = vec3(0,0,0)
 		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
 	end
+	
 	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
 		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
 		remoteData.rvel = rvel
@@ -299,9 +295,6 @@ local function setVehiclePosRot(pos, vel, rot, rvel, tim, ping)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
-
-	--print("OwnPing = "..ownPing.." Ping = "..ping)
-
 end
 
 local function setDEBUG(x)

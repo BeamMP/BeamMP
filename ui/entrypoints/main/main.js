@@ -1180,7 +1180,7 @@ angular.module('beamng.stuff')
 
   bngApi.engineLua('extensions.hook("onUIInitialised")');
 
-$scope.$on('requestUIInitialised', () => {
+  $scope.$on('requestUIInitialised', () => {
     bngApi.engineLua('core_gamestate.onUIInitialised()');
   })
 
@@ -1532,10 +1532,10 @@ $scope.$on('requestUIInitialised', () => {
   vm.quit = function () {
     if (vm.mainmenu) {
       bngApi.engineScript('quit();'); //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
-      bngApi.engineLua("CoreNetwork.quitMP()");
+      bngApi.engineLua("MPCoreNetwork.quitMP()");
       bngApi.engineLua("TorqueScript.eval('quit();')");
     } else {
-      bngApi.engineLua("CoreNetwork.resetSession()");
+      bngApi.engineLua("MPCoreNetwork.resetSession()");
       bngApi.engineLua("returnToMainMenu()");
     }
   };
@@ -1657,7 +1657,23 @@ $scope.$on('requestUIInitialised', () => {
     $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
   });
 
+  vm.showConnectionIssues = true;
 
+  $scope.$on('app:showConnectionIssues', function (event, value, callback) {
+    vm.showConnectionIssues = value;
+    /*Utils.waitForCefAndAngular(() => {
+      if (callback !== undefined && typeof callback === 'function') {
+        callback(vm.showConnectionIssues);
+      }
+    });*/
+    /*console.log(value)
+    var showIssuesElement = document.getElementById('showConnectionIssues');
+    if (value) {
+      showIssuesElement.style.display = 'block'
+    } else {
+      showIssuesElement.style.display = 'none'
+    }*/
+  });
 
   vm.isWaiting = false;
 

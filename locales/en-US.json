@@ -825,9 +825,11 @@
     "ui.options.licenses": "Licenses",
     "ui.options.controls": "Controls",
 
+    "ui.options.multiplayer.syncConfigUpdates": "Apply Other Player Vehicle Part Updates.",
+    "ui.options.multiplayer.showSyncConfigUpdates": "Should the mod automaticlly apply other player vehicle part config changes.",
     "ui.options.multiplayer.nameTags": "Show player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Alternate nametag colors",
-	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",
+	  "ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",
     "ui.options.multiplayer.debugOutput": "Show debug messages in the console",
     "ui.options.multiplayer.launcherPort": "Launcher port:[br]Don't change unless you have to",
     "ui.options.multiplayer.launcherPortWarn": "Don't change unless you have to",
@@ -2871,9 +2873,9 @@
     "vehicle.turbocharger.overheating": "Turbo is overheating",
     "vehicle.main.instability": "Instability detected in '{{vehicle}}'. Simulation paused preemptively",
     "vehicle.core.spawnError":"This is often caused by broken mods or corrupt core files. Please check in Safe Mode [url=https://documentation.beamng.com/troubleshooting/safe_mode.html][Click here for Safe Mode instructions][/url]If persists, perform a Clean Installation [url=https://documentation.beamng.com/troubleshooting/clean_install.html][Click here Clean Install instructions][/url]",
-	
-	
-	
+
+
+
 	"ui.options.multiplayer.nameTagTitle": "Nametags",
 	"ui.options.multiplayer.others": "Others",
 

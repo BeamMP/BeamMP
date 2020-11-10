@@ -8,7 +8,7 @@
     <!-- checks if the ui is loaded in an external browser and sets up communication via websocket to the game if that's the case -->
     <script src="entrypoints/main/setupCommunication.js"></script>
 
-    <script src="modules/multiplayer/js/jquery.min.js"></script> <!-- HERE HERE HERE HERE HERE HERE HERE HERE HERE -->
+    <!--<script src="modules/multiplayer/js/jquery.min.js"></script> <!-- HERE HERE HERE HERE HERE HERE HERE HERE HERE -->
 
     <!-- 3rd party includes -->
     <script src="lib/ext/angular.min.js"></script>
@@ -61,8 +61,6 @@
     <script src="modules/debug/debug.js"></script>
     <script src="modules/credits/credits.js"></script>
 	  <script src="modules/multiplayer/multiplayer.js"></script> <!-- HERE HERE HERE HERE HERE HERE HERE HERE HERE -->
-    <script src="modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script> <!-- HERE HERE HERE HERE HERE HERE HERE HERE HERE -->
-    <!--<script src="modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script> <!-- HERE HERE HERE HERE HERE HERE HERE HERE HERE -->
     <script src="modules/startScreen/startScreen.js"></script>
     <script src="modules/vehicleconfig/vehicleconfig.js"></script>
     <script src="modules/loading/loading.js"></script>
@@ -131,6 +129,15 @@
     <script src="modules/imageviewer/imageviewer.js"></script>
   </div> -->
 
+    <!--  .............. connection failed overlay ..............  -->
+    <div ng-if="app.showConnectionIssues" id="showConnectionIssues" style="position:absolute; top:100px; right: 0; background:transparent; z-index:1000" class="md-padding">
+      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
+          <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;color: red;" layout="row" layout-align="center center">
+            Connection Error! Please Rejoin the server.
+          </div>
+      </span>
+    </div>
+
     <!--  .............. waiting screen overlay ..............  -->
     <div ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: 999;" layout="row" layout-align="center center">
       <ng-md-icon class="material-icons" style="font-size: 20rem; color: white; text-shadow: -1px 1px 8px #DB7B00, 1px -1px 8px #DB7B00; z-index:10;">
@@ -140,17 +147,17 @@
 
     <!-- .............. pause screen overlay ..............  -->
     <div ng-if="app.showPauseIcon" style="position:absolute; top:100px; right: 0; background:transparent; z-index:10" class="md-padding" ng-click="app.unpause()">
-    <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
-        <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
-          Press
-          <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
-          to resume
-        </div>
-        <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
-          pause_circle_outline
-        </span>
-    </span>
-  </div>
+      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
+          <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
+            Press
+            <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
+            to resume
+          </div>
+          <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
+            pause_circle_outline
+          </span>
+      </span>
+    </div>
 
     <game-indicators-layer></game-indicators-layer>
 

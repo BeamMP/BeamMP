@@ -13,7 +13,7 @@ local lastElectrics = ""
 local lastGear = ""
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	local ownMap = vehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -26,11 +26,11 @@ end
 
 
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			if data ~= lastElectrics then
-				GameNetwork.send('We:'..serverVehicleID..":"..data)--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
+				MPGameNetwork.send('We:'..serverVehicleID..":"..data)--Network.send(Network.buildPacket(0, 2131, serverVehicleID, data))
 				lastElectrics = data
 				--print("Electrics sent "..serverVehicleID)
 			end
@@ -41,11 +41,11 @@ end
 
 
 local function applyElectrics(data, serverVehicleID)
-	--print("gameVehicleID: "..vehicleGE.getGameVehicleID(serverVehicleID))
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	--print("gameVehicleID: "..MPVehicleGE.getGameVehicleID(serverVehicleID))
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not vehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn() then
 			veh:queueLuaCommand("electricsVE.applyElectrics(\'"..data.."\')")
 		end
 	end
@@ -54,11 +54,11 @@ end
 
 
 local function sendGear(data, gameVehicleID)
-	if GameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = vehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and vehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			if data ~= lastGear then
-				GameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
+				MPGameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
 				lastGear = data
 				--print("Gear sent "..serverVehicleID)
 			end
@@ -67,10 +67,10 @@ local function sendGear(data, gameVehicleID)
 end
 
 local function applyGear(data, serverVehicleID)
-	local gameVehicleID = vehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not vehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn() then
 			veh:queueLuaCommand("electricsVE.applyGear(\'"..data.."\')")
 		end
 	end

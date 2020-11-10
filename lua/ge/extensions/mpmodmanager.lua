@@ -18,7 +18,6 @@ local timer = 0
 
 local mods = {
   "beammp",
-  "BeamMP"
 }
 
 local serverMods = {}

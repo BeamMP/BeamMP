@@ -467,12 +467,12 @@ local function onUpdate(dt)
 					if localPos and settings.getValue("nameTagShowDistance") then
 						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
 						if distfloat > 10 then
-							dist = " "
+							dist = ""
 							if settings.getValue("uiUnitLength") == "imperial" then
 								distfloat = distfloat * 3.28084
-								dist = tostring(math.floor(distfloat)).." ft"
+								dist = " "..tostring(math.floor(distfloat)).." ft"
 							else
-								dist = tostring(math.floor(distfloat)).." m"
+								dist = " "..tostring(math.floor(distfloat)).." m"
 							end
 						end
 					end

@@ -1657,7 +1657,7 @@ angular.module('beamng.stuff')
     $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
   });
 
-  vm.showConnectionIssues = true;
+  vm.showConnectionIssues = false;
 
   $scope.$on('app:showConnectionIssues', function (event, value, callback) {
     vm.showConnectionIssues = value;

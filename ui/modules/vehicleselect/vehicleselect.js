@@ -432,6 +432,7 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   };
 
   vm.launchVehicle = function (model) {
+	bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
         vm.mode.selected(model, model.key, model.default_pc, model.default_color)
     }

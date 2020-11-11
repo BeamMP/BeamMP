@@ -211,7 +211,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local pos             = vec3(decodedData.pos)
 	local rot             = quat(decodedData.rot)
 
-	print("Received a vehicle from server "..playerServerID)
+	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
 	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
@@ -305,7 +305,7 @@ end
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldID, newID)
-	print("Vehicle switched from "..oldID.." to "..newID)
+	--print("Vehicle switched from "..oldID.." to "..newID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newID then -- If it's not null

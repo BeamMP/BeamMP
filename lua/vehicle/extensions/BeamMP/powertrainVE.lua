@@ -51,11 +51,11 @@ local function sendPowertrain(name, mode)
 end
 
 local function applyPowertrain(data)
-	print("Initial data for powertrain received")
+	--print("Initial data for powertrain received")
 	drivetrain.setShifterMode(2)
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
-		print("applied "..k.." - "..tostring(v))
+		--print("applied "..k.." - "..tostring(v))
 		powertrain.setDeviceMode(k, v) -- Apply it
 	end
 end

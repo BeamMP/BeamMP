@@ -104,7 +104,6 @@ local function setPing(p)
 end
 
 local function updateGFX(dt)
-	
 	timer = timer + dt
 	lastDT = dt
 
@@ -295,6 +294,9 @@ local function setVehiclePosRot(data)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
+
+	--print("OwnPing = "..ownPing.." Ping = "..ping)
+	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
 local function setDEBUG(x)

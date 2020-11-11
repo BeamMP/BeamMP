@@ -1,5 +1,6 @@
 var connected = false;
 var players = [];
+let pingList = [];
 var nickname = "";
 var app = angular.module('beamng.apps');
 app.directive('multiplayerplayerlist', ['UiUnits', function (UiUnits) {
@@ -56,7 +57,7 @@ function playerList(list) {
 		//for(var i = 0; i< joined.length;i++)
 			//addMessage(joined[i] + " joined the server");
 
-		if(joined.length>0 || left.length>0){ //update playerlist if someone joined or left
+		//if(joined.length>0 || left.length>0){ //update playerlist if someone joined or left //keep updating because pings are a thing now
 			clearPlayerList();
 			for (let i = 0; i < parsedList.length; i++) {
 				var row = playersList.insertRow(playersList.rows.length);
@@ -70,7 +71,8 @@ function playerList(list) {
 					var cell2 = row.insertCell(1);
 					cell2.style.width = '30px';
 					var btn = document.createElement("BUTTON");
-					btn.appendChild(document.createTextNode("TP"));
+					if (pingList[parsedList[i]] != null)
+						btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
 					btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
 					btn.setAttribute("class","tp-button");
 					cell2.appendChild(btn);
@@ -81,10 +83,20 @@ function playerList(list) {
 			if(document.getElementById("plist-container").style.display == "block")
 				document.getElementById("plist-show-button").style.height = playersList.offsetHeight+"px"; 
 
-		}
+		//}
 	}
 	players = parsedList; //store player list as an array for the next update
 }
+
+function playerPings(list) {
+	pingList = JSON.parse(list);
+	for(let i = 0; i < pingList.length; i++) {
+		pingList[i] = pingList[i]-16;
+		if (pingList[i] > 999) pingList[i] = 999;
+	}
+	//console.log(pingList);
+}
+
 
 function clearPlayerList() {
 	let playersList = document.getElementById("playerstable");

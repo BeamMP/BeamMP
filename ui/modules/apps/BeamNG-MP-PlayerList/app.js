@@ -90,7 +90,7 @@ function playerList(list) {
 
 function playerPings(list) {
 	pingList = JSON.parse(list);
-	console.log(pingList);
+	//console.log(pingList);
 }
 
 

@@ -11,15 +11,15 @@ local pings = {}
 print("UI Initialising...")
 
 local function updateLoading(data)
-  --print(data)
-  local code = string.sub(data, 1, 1)
-  local msg = string.sub(data, 2)
-
-  if code == "l" then
-    guihooks.trigger('LoadingInfo', {
-      message = msg
-    })
-  end
+	--print(data)
+	local code = string.sub(data, 1, 1)
+	local msg = string.sub(data, 2)
+	
+	if code == "l" then
+		guihooks.trigger('LoadingInfo', {
+		message = msg
+		})
+	end
 end
 
 local function typeof(var)
@@ -73,12 +73,12 @@ end
 
 local function setStatus(status)
 	--be:executeJS('setStatus("'..status..'")')
-  guihooks.trigger("setStatus", status)
+	guihooks.trigger("setStatus", status)
 end
 
 local function setPlayerCount(playerCount)
 	--be:executeJS('setPlayerCount("'..playerCount..'")')
-  guihooks.trigger("setPlayerCount", playerCount)
+	guihooks.trigger("setPlayerCount", playerCount)
 end
 
 local function error(text)
@@ -92,27 +92,26 @@ local function message(text)
 end
 
 local function showNotification(type, text)
-  if text == nil then
-    message(type)
-  else
-    if type == "error" then
-      error(text)
-    else
-      message(text)
-    end
-  end
+	if text == nil then
+		message(type)
+	else
+		if type == "error" then
+			error(text)
+		else
+			message(text)
+		end
+	end
 end
 
 local function chatMessage(rawMessage)
-  local message = string.sub(rawMessage, 2)
+	local message = string.sub(rawMessage, 2)
 	be:executeJS('addMessage("'..message..'")')
 	TriggerClientEvent("ChatMessageReceived", message)
 end
 
 local function chatSend(msg)
-  local c = 'C:'..mpConfig.getNickname()..": "..msg
-  print(c)
-  MPGameNetwork.send(c)
+	local c = 'C:'..mpConfig.getNickname()..": "..msg
+	MPGameNetwork.send(c)
 end
 
 local ready = true
@@ -161,10 +160,12 @@ local function readyReset()
 end
 
 local function setVehPing(vehicleID, ping)
-	local nickmap = vehicleGE.getNicknameMap()
+	--print("Vehicle "..vehicleID.." has ping "..ping)
+	local nickmap = MPVehicleGE.getNicknameMap()
 
-	if not vehicleGE.isOwn(vehicleID) and nickmap[vehicleID] ~= nil then
-		pings[nickmap[vehicleID]] = ping
+	if not MPVehicleGE.isOwn(vehicleID) and nickmap[tonumber(vehicleID)] ~= nil then
+		pings[nickmap[tonumber(vehicleID)]] = ping
+		--print("belongs to: "..nickmap[tonumber(vehicleID)])
 	end
 end
 

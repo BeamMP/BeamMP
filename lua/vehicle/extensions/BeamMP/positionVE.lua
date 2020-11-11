@@ -17,7 +17,7 @@ local function newVectorSmoothing(rate)
   return data
 end
 
-local function vectorSmoothing:get(sample, dt)
+function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
   st = st + dif * math.min(self.rate * dt, 1)
@@ -25,11 +25,11 @@ local function vectorSmoothing:get(sample, dt)
   return st
 end
 
-local function vectorSmoothing:set(sample)
+function vectorSmoothing:set(sample)
   self.state = sample
 end
 
-local function vectorSmoothing:reset()
+function vectorSmoothing:reset()
   self.state = vec3(0,0,0)
 end
 
@@ -176,7 +176,7 @@ local function updateGFX(dt)
 		else
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		end
-		
+
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
 
 		remoteVelSmoother:set(remoteData.vel)
@@ -198,7 +198,7 @@ local function updateGFX(dt)
 	local velError = vel - vehVel
 	local accError = accErrorSmoother:get((lastAcc or vehAcc) - vehAcc, dt)
 	--print("AccError: "..tostring(accError:length()/dt))
-	
+
 	local rvelError = rvel - vehRvel
 	local raccError = accErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
 	--print("RaccError: "..tostring(raccError:length()/dt))
@@ -209,11 +209,11 @@ local function updateGFX(dt)
 	local targetAccMul = 1-min(max(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError*dt),0),1)
 	--print("Force multiplier: "..targetAccMul)
 	targetAcc = targetAcc*targetAccMul
-	
+
 	local targetRaccMul = 1-min(max(targetRacc:dot(raccError)/(targetRacc:squaredLength()+maxRaccError*maxRaccError*dt),0),1)
 	--print("Rotation force multiplier: "..targetRaccMul)
 	targetRacc = targetRacc*targetRaccMul
-	
+
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if targetRacc:length() > minRotForce then
@@ -221,7 +221,7 @@ local function updateGFX(dt)
 	elseif targetAcc:length() > minPosForce then
 		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	end
-	
+
 	lastAcc = targetAcc
 	lastRacc = targetRacc
 end
@@ -267,7 +267,7 @@ local function setVehiclePosRot(data)
 	local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 	local tim  = pr.tim
 	local ping = pr.ping
-	
+
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
 	-- Sanity checks for acceleration
@@ -279,7 +279,7 @@ local function setVehiclePosRot(data)
 		remoteData.acc = vec3(0,0,0)
 		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
 	end
-	
+
 	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
 		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
 		remoteData.rvel = rvel

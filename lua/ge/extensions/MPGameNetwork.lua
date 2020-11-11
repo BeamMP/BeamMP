@@ -43,7 +43,7 @@ end
 
 
 local function sendData(s)
-	TCPSocket:send(string.len(s)..'>'..s)
+	local r = TCPSocket:send(string.len(s)..'>'..s)
 	if settings.getValue("showDebugOutput") == true then
 		print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 	end

@@ -67,7 +67,7 @@ local function applyLivePowertrain(data)
 	-- shifterMode = 3 : realistic (automatic)
 	--drivetrain.setShifterMode(2)
 	controller.mainController.setGearboxMode("realistic")
-	print("Applying Data")
+	--print("Applying Data")
 	local decodedData = jsonDecode(data) -- Decode data
 	--dump(decodedData)
 	local devices = powertrain.getDevices()
@@ -79,23 +79,23 @@ local function applyLivePowertrain(data)
 			end
 		end
 		if k == "gearbox" then
-			print(devices[k].type)
+			--print(devices[k].type)
 			--print("Gearbox Data: "..tostring(k))
 			--print("applied "..k.." - "..tostring(v))
 			for key,value in pairs(v) do
 				if (devices[k].type == "manualGearbox" or devices[k].type == "sequentialGearbox") and key == "gearIndex" then
-					print("Shifting to Gear "..value)
+					--print("Shifting to Gear "..value)
 					controller.mainController.shiftToGearIndex(tonumber(value))
 					gearType = "manual"
 					expectedGear = value
 				elseif (devices[k].type == "dctGearbox" or devices[k].type == "automaticGearbox") and key == "gearIndex" then
-					print("Shifting to Gear "..value)
+					--print("Shifting to Gear "..value)
 					controller.mainController.shiftToGearIndex(tonumber(value))
 					gearType = "auto"
 					expectedGear = value
 				else
 					if key == "gearIndex" and (devices[k].type == "manualGearbox" or devices[k].type == "automaticGearbox") then
-						print(k .. " -> " .. value)
+						--print(k .. " -> " .. value)
 						controller.mainController.shiftToGearIndex(value)
 						devices[k].setGearIndex(devices[k], value)
 					end
@@ -108,7 +108,7 @@ local function applyLivePowertrain(data)
 			for key,value in pairs(v) do
 				--print(devices[k].type)
 				if key == "mode" then
-					print(k.." ("..key..")  -> "..value)
+					--print(k.." ("..key..")  -> "..value)
 					if devices[k].mode ~= value then
 						powertrain.toggleDeviceMode(k)
 					end
@@ -151,7 +151,7 @@ local function updateGFX(dt)
 			end
 		else
 			if electrics.values.MPGear ~= tonumber(expectedGear) then
-				print("Looping gear!")
+				--print("Looping gear!")
 				if powertrain.getDevices().gearbox.type == "manualGearbox" then
 					controller.mainController.shiftToGearIndex(tonumber(expectedGear))
 					electrics.values.MPGear = expectedGear

@@ -69,9 +69,9 @@ local function setMods(modsString)
 end
 
 local function send(s)
-	TCPLauncherSocket:send(string.len(s)..'>'..s)
+	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
 	if settings.getValue("showDebugOutput") == true then
-		print('[MPCoreNetwork] Sending Data ('..r..'): '..data)
+		print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
 	end
 end
 

@@ -43,7 +43,7 @@ local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
-local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
+local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
 local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
@@ -249,7 +249,7 @@ local function getVehicleRotation()
 		},
 		rvel = {
 			x = obj:getPitchAngularVelocity(),
-			y = obj:getPitchAngularVelocity(),
+			y = obj:getYawAngularVelocity(),
 			z = obj:getRollAngularVelocity()
 		},
 		tim = timer,
@@ -275,7 +275,7 @@ local function setVehiclePosRot(data)
 		remoteData.acc = (vel - remoteData.vel)/remoteDT
 		remoteData.vel = vel
 	else
-		print("Acceleration too high! Vehicle ID: "..obj:getID())
+		--print("Acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.acc = vec3(0,0,0)
 		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
 	end
@@ -284,7 +284,7 @@ local function setVehiclePosRot(data)
 		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
 		remoteData.rvel = rvel
 	else
-		print("Angular acceleration too high! Vehicle ID: "..obj:getID())
+		--print("Angular acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.racc = vec3(0,0,0)
 		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
 	end
@@ -299,15 +299,10 @@ local function setVehiclePosRot(data)
 	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
-local function setDEBUG(x)
-  DEBUG = x
-end
-
 M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot = setVehiclePosRot
 M.setPing = setPing
-M.setDEBUG = setDEBUG
 
 
 return M

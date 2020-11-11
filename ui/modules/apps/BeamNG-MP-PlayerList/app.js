@@ -72,7 +72,7 @@ function playerList(list) {
 					cell2.style.width = '30px';
 					var btn = document.createElement("BUTTON");
 					if (pingList[parsedList[i]] != null)
-						btn.appendChild(document.createTextNode(pingList[parsedList[i]]-16));
+						btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
 					btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
 					btn.setAttribute("class","tp-button");
 					cell2.appendChild(btn);

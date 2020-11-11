@@ -63,10 +63,11 @@ local function setPing(ping)
 	else
 		guihooks.trigger("setPing", ""..ping.." ms")
 		guihooks.trigger("app:showConnectionIssues", false)
+		pings[mpConfig.getNickname()] = ping
 	end
 end
 
-local function setNickName(name)
+local function setNickname(name)
   --print("My Nickname: "..name)
 	be:executeJS('setNickname("'..name..'")')
 end
@@ -174,7 +175,7 @@ M.updatePlayersList = updatePlayersList
 M.ready = ready
 M.readyReset = readyReset
 M.setPing = setPing
-M.setNickName = setNickName
+M.setNickname = setNickname
 M.setStatus = setStatus
 M.chatMessage = chatMessage
 M.chatSend = chatSend

@@ -90,6 +90,10 @@ function playerList(list) {
 
 function playerPings(list) {
 	pingList = JSON.parse(list);
+	for(let i = 0; i < pingList.length; i++) {
+		pingList[i] = pingList[i]-16;
+		if (pingList[i] > 999) pingList[i] = 999;
+	}
 	//console.log(pingList);
 }
 

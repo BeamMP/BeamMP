@@ -200,7 +200,7 @@ local function updateGFX(dt)
 	--print("AccError: "..tostring(accError:length()/dt))
 
 	local rvelError = rvel - vehRvel
-	local raccError = accErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
+	local raccError = raccErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
 	--print("RaccError: "..tostring(raccError:length()/dt))
 
 	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)

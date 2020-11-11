@@ -58,7 +58,7 @@ local function setPing(ping)
 	if tonumber(ping) == -1 then
 		--print("ping is -1")
 		guihooks.trigger("app:showConnectionIssues", false)
-	elseif tonumber(ping) == -2 then
+	elseif tonumber(ping) == -2 and MPGameNetwork.connectionStatus() == 2 then
 		guihooks.trigger("app:showConnectionIssues", true)
 	else
 		guihooks.trigger("setPing", ""..ping.." ms")

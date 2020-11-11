@@ -119,18 +119,7 @@ local function applyLivePowertrain(data)
 end
 
 local function onInit()
-	local devices = powertrain.getDevices() -- Get all devices
-	for k,v in pairs(devices) do
-		print(k .. " = " .. tostring(v))
-	end
-	print("========================================")
-	for k,v in pairs(devices) do
-		if k == "frontMotor" then
-			for i,j in pairs(v) do
-				print(i .. " = " .. tostring(j))
-			end
-		end
-	end
+	
 end
 
 local function equals(t1, t2)

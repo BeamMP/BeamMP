@@ -55,10 +55,10 @@ local function updatePlayersList(playersString)
 end
 
 local function setPing(ping)
-	if tonumber(ping) == -1 then
+	if tonumber(ping) == -1 then -- not connected
 		--print("ping is -1")
-		guihooks.trigger("app:showConnectionIssues", false)
-	elseif tonumber(ping) == -2 and MPGameNetwork.connectionStatus() == 2 then
+		--guihooks.trigger("app:showConnectionIssues", false)
+	elseif tonumber(ping) == -2 then -- ping too high, display warning
 		guihooks.trigger("app:showConnectionIssues", true)
 	else
 		guihooks.trigger("setPing", ""..ping.." ms")
@@ -126,6 +126,7 @@ local function ready(src)
     deletenext = true
   end
   if src == "MP-SESSION" then
+	setPing("-2")
     if deletenext then
       print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
       core_vehicles.removeCurrent(); -- 0.20 Fix

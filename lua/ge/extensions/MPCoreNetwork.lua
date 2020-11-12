@@ -104,7 +104,6 @@ end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port)
-	UI.setPing("-2")
 	local ipString
 	if ip and port then -- Direct connect
 		ipString = ip..':'..port

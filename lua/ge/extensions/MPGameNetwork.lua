@@ -12,7 +12,7 @@ print("Loading MPGameNetwork")
 
 -- ============= VARIABLES =============
 local TCPSocket
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
+local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local sysTime = 0
 local eventTriggers = {}
 -- ============= VARIABLES =============

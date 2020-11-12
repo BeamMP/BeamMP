@@ -248,8 +248,8 @@ local function getVehicleRotation()
 			w = rot.w
 		},
 		rvel = {
-			x = obj:getPitchAngularVelocity(),
-			y = obj:getYawAngularVelocity(),
+			x = obj:getYawAngularVelocity(),
+			y = obj:getPitchAngularVelocity(),
 			z = obj:getRollAngularVelocity()
 		},
 		tim = timer,

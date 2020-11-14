@@ -13,16 +13,13 @@ local nodesDelay = 0
 local nodesTickrate = 1.0 -- in seconds
 
 local positionDelay = 0
-local positionTickrate = 0.02 --0.016
+local positionTickrate = 0.020 -- 0.016
 
 local inputsDelay = 0
 local inputsTickrate = 0.02 --0.05
 
 local electricsDelay = 0
 local electricsTickrate = 0.02
-
-local powertrainDelay = 0
-local powertrainTickrate = 0.02
 
 local function setNickname(x)
   print("Nickname Set To: "..x)
@@ -74,14 +71,6 @@ local function getElectricsTickrate()
   return electricsTickrate
 end
 
-local function setPowertrainTickrate(x)
-  powertrainTickrate = x
-end
-
-local function getPowertrainTickrate()
-  return powertrainTickrate
-end
-
 -- Variables
 M.ShowNameTags = ShowNameTags
 M.Nickname = Nickname
@@ -97,8 +86,6 @@ M.inputsDelay = inputsDelay
 M.inputsTickrate = inputsTickrate
 M.electricsDelay = electricsDelay
 M.electricsTickrate = electricsTickrate
-M.powertrainDelay = powertrainDelay
-M.powertrainTickrate = powertrainTickrate
 
 -- Functions
 M.setNickname = setNickname
@@ -111,8 +98,6 @@ M.setInputsTickrate = setInputsTickrate
 M.getInputsTickrate = getInputsTickrate
 M.setElectricsTickrate = setElectricsTickrate
 M.getElectricsTickrate = getElectricsTickrate
-M.setPowertrainTickrate = setPowertrainTickrate
-M.getPowertrainTickrate = getPowertrainTickrate
 
 print("mpConfig Loaded.")
 return M

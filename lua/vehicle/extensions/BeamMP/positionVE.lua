@@ -17,7 +17,7 @@ local function newVectorSmoothing(rate)
   return data
 end
 
-local function vectorSmoothing:get(sample, dt)
+function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
   st = st + dif * math.min(self.rate * dt, 1)
@@ -25,11 +25,11 @@ local function vectorSmoothing:get(sample, dt)
   return st
 end
 
-local function vectorSmoothing:set(sample)
+function vectorSmoothing:set(sample)
   self.state = sample
 end
 
-local function vectorSmoothing:reset()
+function vectorSmoothing:reset()
   self.state = vec3(0,0,0)
 end
 
@@ -43,7 +43,7 @@ local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
-local rotCorrectMul = 5        -- How much velocity to use for correcting angle error (rad/s per rad)
+local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
 local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
@@ -104,7 +104,6 @@ local function setPing(p)
 end
 
 local function updateGFX(dt)
-	
 	timer = timer + dt
 	lastDT = dt
 
@@ -145,7 +144,7 @@ local function updateGFX(dt)
 	-- Use received position, and smoothed velocity and acceleration to predict vehicle position
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
-	local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
+	local rotAdd = (remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime):rotated(vehRot)
 	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
@@ -177,7 +176,7 @@ local function updateGFX(dt)
 		else
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		end
-		
+
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
 
 		remoteVelSmoother:set(remoteData.vel)
@@ -199,9 +198,9 @@ local function updateGFX(dt)
 	local velError = vel - vehVel
 	local accError = accErrorSmoother:get((lastAcc or vehAcc) - vehAcc, dt)
 	--print("AccError: "..tostring(accError:length()/dt))
-	
+
 	local rvelError = rvel - vehRvel
-	local raccError = accErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
+	local raccError = raccErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
 	--print("RaccError: "..tostring(raccError:length()/dt))
 
 	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)
@@ -210,11 +209,11 @@ local function updateGFX(dt)
 	local targetAccMul = 1-min(max(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError*dt),0),1)
 	--print("Force multiplier: "..targetAccMul)
 	targetAcc = targetAcc*targetAccMul
-	
+
 	local targetRaccMul = 1-min(max(targetRacc:dot(raccError)/(targetRacc:squaredLength()+maxRaccError*maxRaccError*dt),0),1)
 	--print("Rotation force multiplier: "..targetRaccMul)
 	targetRacc = targetRacc*targetRaccMul
-	
+
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if targetRacc:length() > minRotForce then
@@ -222,7 +221,7 @@ local function updateGFX(dt)
 	elseif targetAcc:length() > minPosForce then
 		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	end
-	
+
 	lastAcc = targetAcc
 	lastRacc = targetRacc
 end
@@ -249,7 +248,7 @@ local function getVehicleRotation()
 			w = rot.w
 		},
 		rvel = {
-			x = obj:getPitchAngularVelocity(),
+			x = obj:getYawAngularVelocity(),
 			y = obj:getPitchAngularVelocity(),
 			z = obj:getRollAngularVelocity()
 		},
@@ -268,7 +267,7 @@ local function setVehiclePosRot(data)
 	local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
 	local tim  = pr.tim
 	local ping = pr.ping
-	
+
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
 	-- Sanity checks for acceleration
@@ -276,16 +275,16 @@ local function setVehiclePosRot(data)
 		remoteData.acc = (vel - remoteData.vel)/remoteDT
 		remoteData.vel = vel
 	else
-		print("Acceleration too high! Vehicle ID: "..obj:getID())
+		--print("Acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.acc = vec3(0,0,0)
 		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
 	end
-	
+
 	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
 		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
 		remoteData.rvel = rvel
 	else
-		print("Angular acceleration too high! Vehicle ID: "..obj:getID())
+		--print("Angular acceleration too high! Vehicle ID: "..obj:getID())
 		remoteData.racc = vec3(0,0,0)
 		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
 	end
@@ -295,17 +294,15 @@ local function setVehiclePosRot(data)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
-end
 
-local function setDEBUG(x)
-  DEBUG = x
+	--print("OwnPing = "..ownPing.." Ping = "..ping)
+	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
 M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot = setVehiclePosRot
 M.setPing = setPing
-M.setDEBUG = setDEBUG
 
 
 return M

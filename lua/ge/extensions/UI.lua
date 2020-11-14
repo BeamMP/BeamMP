@@ -6,19 +6,20 @@
 local M = {}
 
 local players = {}
+local pings = {}
 
 print("UI Initialising...")
 
 local function updateLoading(data)
-  --print(data)
-  local code = string.sub(data, 1, 1)
-  local msg = string.sub(data, 2)
-
-  if code == "l" then
-    guihooks.trigger('LoadingInfo', {
-      message = msg
-    })
-  end
+	--print(data)
+	local code = string.sub(data, 1, 1)
+	local msg = string.sub(data, 2)
+	
+	if code == "l" then
+		guihooks.trigger('LoadingInfo', {
+		message = msg
+		})
+	end
 end
 
 local function typeof(var)
@@ -45,37 +46,40 @@ local function split(s, sep)
 end
 
 local function updatePlayersList(playersString)
-  --print(playersString)
-  local players = split(playersString, ",")
-  --print(dump(players))
-  be:executeJS('playerList(\''..jsonEncode(players)..'\');')
+	--print(playersString)
+	local players = split(playersString, ",")
+	--print(dump(players))
+	be:executeJS('playerList(\''..jsonEncode(players)..'\');')
+
+	be:executeJS('playerPings(\''..jsonEncode(pings)..'\');')
 end
 
 local function setPing(ping)
-	if tonumber(ping) == -1 then
+	if tonumber(ping) == -1 then -- not connected
 		--print("ping is -1")
-		guihooks.trigger("app:showConnectionIssues", false)
-	elseif tonumber(ping) == -2 then
+		--guihooks.trigger("app:showConnectionIssues", false)
+	elseif tonumber(ping) == -2 then -- ping too high, display warning
 		guihooks.trigger("app:showConnectionIssues", true)
 	else
 		guihooks.trigger("setPing", ""..ping.." ms")
 		guihooks.trigger("app:showConnectionIssues", false)
+		pings[mpConfig.getNickname()] = ping
 	end
 end
 
-local function setNickName(name)
+local function setNickname(name)
   --print("My Nickname: "..name)
 	be:executeJS('setNickname("'..name..'")')
 end
 
 local function setStatus(status)
 	--be:executeJS('setStatus("'..status..'")')
-  guihooks.trigger("setStatus", status)
+	guihooks.trigger("setStatus", status)
 end
 
 local function setPlayerCount(playerCount)
 	--be:executeJS('setPlayerCount("'..playerCount..'")')
-  guihooks.trigger("setPlayerCount", playerCount)
+	guihooks.trigger("setPlayerCount", playerCount)
 end
 
 local function error(text)
@@ -89,27 +93,26 @@ local function message(text)
 end
 
 local function showNotification(type, text)
-  if text == nil then
-    message(type)
-  else
-    if type == "error" then
-      error(text)
-    else
-      message(text)
-    end
-  end
+	if text == nil then
+		message(type)
+	else
+		if type == "error" then
+			error(text)
+		else
+			message(text)
+		end
+	end
 end
 
 local function chatMessage(rawMessage)
-  local message = string.sub(rawMessage, 2)
+	local message = string.sub(rawMessage, 2)
 	be:executeJS('addMessage("'..message..'")')
 	TriggerClientEvent("ChatMessageReceived", message)
 end
 
 local function chatSend(msg)
-  local c = 'C:'..mpConfig.getNickname()..": "..msg
-  print(c)
-  MPGameNetwork.send(c)
+	local c = 'C:'..mpConfig.getNickname()..": "..msg
+	MPGameNetwork.send(c)
 end
 
 local ready = true
@@ -123,6 +126,7 @@ local function ready(src)
     deletenext = true
   end
   if src == "MP-SESSION" then
+	setPing("-2")
     if deletenext then
       print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
       core_vehicles.removeCurrent(); -- 0.20 Fix
@@ -157,17 +161,28 @@ local function readyReset()
   deletenext = true
 end
 
+local function setVehPing(vehicleID, ping)
+	--print("Vehicle "..vehicleID.." has ping "..ping)
+	local nickmap = MPVehicleGE.getNicknameMap()
+
+	if not MPVehicleGE.isOwn(vehicleID) and nickmap[tonumber(vehicleID)] ~= nil then
+		pings[nickmap[tonumber(vehicleID)]] = ping
+		--print("belongs to: "..nickmap[tonumber(vehicleID)])
+	end
+end
+
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
 M.ready = ready
 M.readyReset = readyReset
 M.setPing = setPing
-M.setNickName = setNickName
+M.setNickname = setNickname
 M.setStatus = setStatus
 M.chatMessage = chatMessage
 M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
+M.setVehPing = setVehPing
 
 print("UI Loaded.")
 return M

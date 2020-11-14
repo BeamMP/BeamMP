@@ -12,7 +12,7 @@ print("Loading MPGameNetwork")
 
 -- ============= VARIABLES =============
 local TCPSocket
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
+local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local sysTime = 0
 local eventTriggers = {}
 -- ============= VARIABLES =============
@@ -42,10 +42,10 @@ end
 
 
 
-local function sendData(data)
-	local r = TCPSocket:send(data..'')
+local function sendData(s)
+	local r = TCPSocket:send(string.len(s)..'>'..s)
 	if settings.getValue("showDebugOutput") == true then
-		print('[MPGameNetwork] Sending Data ('..r..'): '..data)
+		print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 	end
 end
 
@@ -66,12 +66,14 @@ local function sessionData(data)
 		UI.updatePlayersList(data)
 		UI.setPlayerCount(players)
 	elseif code == "n" then
-		UI.setNickName(data)
+		UI.setNickname(data)
 		mpConfig.setNickname(data)
 	end
 end
 
-
+-------------------------------------------------------------------------------
+-- Events System
+-------------------------------------------------------------------------------
 
 local function handleEvents(p)  --- E:<NAME>:data
 	local eventName = string.match(p,"(%w+)%:")
@@ -83,13 +85,19 @@ local function handleEvents(p)  --- E:<NAME>:data
 	end
 end
 
-
+function TriggerServerEvent(n, d)
+	sendData('E:'..n..':'..d)
+end
 
 function TriggerClientEvent(code, data)
 	handleEvents(code..':'..data)
 end
 
-
+function AddEventHandler(n, f)
+	print("Adding Event Handler: Name = "..tostring(n))
+	table.insert(eventTriggers, {name = n, func = f})
+	dump(eventTriggers)
+end
 
 local HandleNetwork = {
 	['V'] = function(params) inputsGE.handle(params) end,
@@ -115,7 +123,7 @@ local function onUpdate(dt)
 		while (true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
-			-- break it up into code + data	
+			-- break it up into code + data
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)

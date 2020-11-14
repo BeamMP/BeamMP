@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by jojos38 & Titch2000.
+-- All work by jojos38, Titch2000 & 20dka.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
@@ -18,7 +18,7 @@ print("MPVehicleGE Initialising...")
 
 
 -- ============= VARIABLES =============
-local lastResetID = ""
+local lastResetTime = {}
 local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
@@ -28,8 +28,10 @@ local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local onVehicleSpawnedAllowed = true
 local syncTimer = 0
+local localCounter = 0
 local vehiclesToSync = {}
 local activeVehicle = 0
+
 local roleToInfo = {
 	['USER'] = { backcolor = ColorI(0, 0, 0, 127), tag = "" },
 	['EA'] = { backcolor = ColorI(69, 0, 150, 127), tag = "[Early Access]" },
@@ -41,6 +43,7 @@ local roleToInfo = {
 	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = "[BeamNG Staff]" },
 	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = "[MP DEV]" }
 }
+
 -- ============= VARIABLES =============
 
 
@@ -70,6 +73,25 @@ end
 local function getOwnMap()
     return ownMap
 end
+
+local function getVehicleMap()
+    return vehiclesMap
+end
+
+local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
+	local nicknameSimple = {}
+	for k,v in pairs(nicknameMap) do
+		nicknameSimple[k] = v.nickname
+		--print("carID"..tostring(k).." is owned by "..nicknameSimple[k])
+	end
+	local thisNick =  mpConfig.getNickname()
+	--dump(nicknameMap)
+	--dump(nicknameSimple)
+	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
+
+    return nicknameSimple
+end
+
 --============== SOME FUNCTIONS ==============
 
 
@@ -147,10 +169,10 @@ end
 local function updateVehicle(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then print("gameVehicleID for "..serverID.." not found") return end
-	
+
 	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then print("Vehicle "..gameVehicleID.." not found") return end
-	
+
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
@@ -290,6 +312,7 @@ local function onVehicleSwitched(oldID, newID)
 			MPGameNetwork.send('Om:'..newID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
+	activeVehicle = newID
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 
@@ -327,15 +350,14 @@ end
 
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 local function onServerVehicleResetted(serverVehicleID, data)
+	--print("Reset Event Received for a player")
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if lastResetID ~= serverVehicleID then
+	if localCounter - (lastResetTime[serverVehicleID] or 0) > 0.2 then
 		if gameVehicleID then
 			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 			if veh then
-				lastResetID = serverVehicleID
 				local pr = jsonDecode(data) -- Decoded data
 				veh:reset()
-				print("Vehicle "..serverVehicleID.." resetted by server")
 				if pr then
 					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w) -- Apply position
 				else
@@ -346,13 +368,14 @@ local function onServerVehicleResetted(serverVehicleID, data)
 			print("gameVehicleID for serverVehicleID "..serverVehicleID.." not found")
 		end
 	end
+	lastResetTime[serverVehicleID] = localCounter
 end
 --======================= ON VEHICLE RESETTED (SERVER) =======================
 
 
 
 local HandleNetwork = {
-	['s'] = function(rawData) 
+	['s'] = function(rawData)
 		local playerRole = string.match(rawData,"(%w+)%:") -- Get the player role
 		rawData = rawData:gsub(playerRole..":", "")
 		local playerNickname = string.match(rawData,"^.-:")
@@ -363,19 +386,19 @@ local HandleNetwork = {
 		local data = string.match(rawData,":(.*)") -- Get the vehicle data
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
-	['r'] = function(rawData) 
+	['r'] = function(rawData)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		onServerVehicleResetted(serverVehicleID, data)
 	end,
-	['c'] = function(rawData) 
+	['c'] = function(rawData)
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		updateVehicle(serverVehicleID, data)
 	end,
-	['d'] = function(rawData) 
+	['d'] = function(rawData)
 		onServerVehicleRemoved(rawData)
 	end
 }
@@ -392,23 +415,12 @@ end
 
 local function removeRequest(gameVehicleID)
 	if isOwn(gameVehicleID) then
-		core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")
+		core_vehicles.removeCurrent(); commands.setFreeCamera() --extensions.hook("trackNewVeh")
 		print("Request to remove car id "..gameVehicleID.." DONE")
 	else
 		print("Request to remove car id "..gameVehicleID.." DENIED")
 	end
 end
-
-
-
-local function setCurrentVehicle(gameVehicleID)
-	if activeVehicle ~= gameVehicleID then
-		print("Current vehicle "..gameVehicleID)
-		activeVehicle = gameVehicleID
-	end
-end
-
-
 
 local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do
@@ -427,7 +439,7 @@ end
 local function onUpdate(dt)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
-		
+
 		-- Vehicles syncing timer
 		syncTimer = syncTimer + dt
 		if syncTimer > 10 then
@@ -435,7 +447,7 @@ local function onUpdate(dt)
 			syncTimer = 0
 		end
 
-		local localPos
+		local localPos = nil
 		if activeVehicle then
 			local veh = be:getObjectByID(tonumber(activeVehicle))
 			if veh then
@@ -447,31 +459,35 @@ local function onUpdate(dt)
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
 				local gameVehicleID = veh:getID()
-				if activeVehicle ~= gameVehicleID and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") then
+				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") then
 					local pos = veh:getPosition()
 					local dist = ""
 					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
+
 					if localPos and settings.getValue("nameTagShowDistance") then
 						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
 						if distfloat > 10 then
+							dist = ""
 							if settings.getValue("uiUnitLength") == "imperial" then
 								distfloat = distfloat * 3.28084
-								dist = tostring(math.floor(distfloat)).." ft"
+								dist = " "..tostring(math.floor(distfloat)).." ft"
 							else
-								dist = tostring(math.floor(distfloat)).." m"
+								dist = " "..tostring(math.floor(distfloat)).." m"
 							end
 						end
 					end
+
 					pos.z = pos.z + 2.0 -- So it appears above the vehicle, not inside
 					debugDrawer:drawTextAdvanced(
 						pos, -- Position in 3D
-						String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag.." "..dist.." "), -- Text
+						String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag..dist.." "), -- Text
 						ColorF(1, 1, 1, 1), true, false, -- Foreground Color / Background / Wtf
 						roleInfo.backcolor -- Background Color
 					)
 				end
 			end
 		end
+		localCounter = localCounter + dt
 	end
 end
 
@@ -485,6 +501,8 @@ M.onVehicleSwitched       = onVehicleSwitched
 M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
+M.getVehicleMap           = getVehicleMap
+M.getNicknameMap          = getNicknameMap
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed
@@ -499,5 +517,5 @@ M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
 
 
-
+print("MPVehicleGE Loaded.")
 return M

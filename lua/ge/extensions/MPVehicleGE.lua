@@ -49,6 +49,13 @@ local roleToInfo = {
 
 
 --============== SOME FUNCTIONS ==============
+-- GET A TABLE LENGTH
+function tableLength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
 	return invertedVehiclesMap[tostring(serverVehicleID)]
@@ -214,7 +221,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
 	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
-		ownMap[tostring(gameVehicleID)] = 1 -- Insert vehicle in own map
+		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
 		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 		onVehicleSpawnedAllowed = false
@@ -293,6 +300,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get the serverVehicleID
 			if serverVehicleID then
 				MPGameNetwork.send('Od:'..serverVehicleID)
+				ownMap[tostring(gameVehicleID)] = nil
 			end
 		else
 			onVehicleDestroyedAllowed = true
@@ -304,12 +312,16 @@ end
 
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
-local function onVehicleSwitched(oldID, newID)
+local escape = 0
+local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	--print("Vehicle switched from "..oldID.." to "..newID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
-		local newID = getServerVehicleID(newID) -- Get new serverVehicleID of the new vehicle the player is driving
-		if newID then -- If it's not null
-			MPGameNetwork.send('Om:'..newID)--Network.buildPacket(1, 2122, newID, ""))
+		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
+		if newServerVehicleID then -- If it's not null
+			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
+				be:enterNextVehicle(0, 1)
+			end
+			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
 	activeVehicle = newID
@@ -515,6 +527,7 @@ M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
+
 
 
 print("MPVehicleGE Loaded.")

@@ -20,7 +20,12 @@
     <md-checkbox ng-model="options.data.values.showSyncConfigUpdates" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
-
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  
+  
 
   <md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.others' | translate }}</md-subheader>
   <md-list-item md-no-ink>

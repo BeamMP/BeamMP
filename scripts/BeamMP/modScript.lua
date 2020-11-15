@@ -33,3 +33,5 @@ registerCoreModule("updatesGE")
 
 load("nodesGE")
 registerCoreModule("nodesGE")
+
+print("BeamMP v3.5 Started")

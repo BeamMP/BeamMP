@@ -1017,11 +1017,12 @@ angular.module('beamng.stuff')
     { translateid: 'ui.playmodes.campaigns',    icon: 'material_star',           disabled: false,            targetState: 'campaigns',                      },
     { translateid: 'ui.playmodes.scenarios',    icon: 'material_movie_creation', disabled: false,            targetState: 'scenarios',                      },
     { translateid: 'ui.playmodes.freeroam',     icon: 'material_terrain',        disabled: false,            targetState: 'levels',                         },
+    { translateid: 'ui.playmodes.multiplayer',  icon: 'people_outline',          disabled: false,            targetState: 'multiplayer',                    },
     { translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
     { translateid: 'ui.playmodes.bus',          icon: 'material_directions_bus', disabled: false,            targetState: 'busRoutes',                      },
     { translateid: 'ui.playmodes.lightRunner',  icon: 'general_light_runner',    disabled: false,            targetState: 'lightrunnerOverview'             },
-    { translateid: 'ui.playmodes.trackBuilder', icon: 'material_all_inclusive',  disabled: false,            targetState: '.',     levelName: "glow_city", },
-    { translateid: 'ui.playmodes.career',       icon: 'material_flag',           disabled: beamng.shipping , targetState: 'career',                         },
+    { translateid: 'ui.playmodes.trackBuilder', icon: 'material_all_inclusive',  disabled: false,            targetState: '.',     levelName: "glow_city",  },
+    { translateid: 'ui.playmodes.career',       icon: 'material_flag',           disabled: beamng.shipping,  targetState: 'career',                         },
   ],
 })
 

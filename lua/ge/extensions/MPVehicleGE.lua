@@ -202,18 +202,7 @@ local function onDisconnect()
 	nicknameMap = {}
 end
 
-local function onServerVehicleCoupled(serverVehicleID, state)
-	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if isOwn(gameVehicleID) ~= 1 then
-		local veh = be:getObjectByID(gameVehicleID)
-		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
-	end
-end
 
-local function sendBeamstate(state, gameVehicleID)
-	print("SENDING T")
-	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
-end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
@@ -323,14 +312,22 @@ end
 
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
-local escape = 0
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	--print("Vehicle switched from "..oldID.." to "..newID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
 			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
-				be:enterNextVehicle(0, 1)
+				local curVehicle = be:getPlayerVehicle(0)
+				local currGameVehicleID = curVehicle:getID()
+				local vehicles = getAllVehicles()
+				for index, vehicle in ipairs(vehicles) do
+					local gameVehicleID = vehicle and vehicle:getID()
+					if isOwn(gameVehicleID) and gameVehicleID ~= currGameVehicleID then
+						be:enterVehicle(0, vehicles[index])
+						break
+					end
+				end
 			end
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
@@ -423,12 +420,6 @@ local HandleNetwork = {
 	end,
 	['d'] = function(rawData)
 		onServerVehicleRemoved(rawData)
-	end,
-	['t'] = function(rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleCoupled(serverVehicleID, data)
 	end
 }
 
@@ -544,8 +535,6 @@ M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
-M.sendBeamstate           = sendBeamstate
-M.onServerVehicleCoupled  = onServerVehicleCoupled
 
 
 

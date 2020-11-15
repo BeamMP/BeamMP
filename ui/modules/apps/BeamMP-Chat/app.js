@@ -18,7 +18,7 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		//bngApi.engineLua('UI.ready("CHAT")');
 		countUpdateInterval = setInterval(updateCount, 20000);
 		document.getElementById("CHATMESSAGE").addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		document.getElementById("CHATMESSAGE").addEventListener("mouseout", function(){ chatShown = false; console.log("leave"); });
+		document.getElementById("CHATMESSAGE").addEventListener("mouseout", function(){ chatShown = false; });
 	};
 
 	$scope.reset = function() {

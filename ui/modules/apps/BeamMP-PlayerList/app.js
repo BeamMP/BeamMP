@@ -5,7 +5,7 @@ var nickname = "";
 var app = angular.module('beamng.apps');
 app.directive('multiplayerplayerlist', ['UiUnits', function (UiUnits) {
 	return {
-		templateUrl: 'modules/apps/BeamNG-MP-PlayerList/app.html',
+		templateUrl: 'modules/apps/BeamMP-PlayerList/app.html',
 		replace: true,
 		restrict: 'EA',
 		scope: true

@@ -1,7 +1,7 @@
 var app = angular.module('beamng.apps');
 app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 	return {
-		templateUrl: 'modules/apps/BeamNG-MP-Session/app.html',
+		templateUrl: 'modules/apps/BeamMP-Session/app.html',
 		replace: true,
 		restrict: 'EA',
 		scope: true

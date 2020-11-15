@@ -1,7 +1,7 @@
 var app = angular.module('beamng.apps');
 app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
 	return {
-		templateUrl: 'modules/apps/BeamNG-MP-Chat/app.html',
+		templateUrl: 'modules/apps/BeamMP-Chat/app.html',
 		replace: true,
 		restrict: 'EA',
 		scope: true
@@ -17,6 +17,8 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
 		//bngApi.engineLua('UI.ready("CHAT")');
 		countUpdateInterval = setInterval(updateCount, 20000);
+		document.getElementById("CHATMESSAGE").addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		document.getElementById("CHATMESSAGE").addEventListener("mouseout", function(){ chatShown = false; console.log("leave"); });
 	};
 
 	$scope.reset = function() {
@@ -96,8 +98,69 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		}
 	}
 }]);
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+
+// -------------------------------------------- CHAT FADING -------------------------------------------- //
+var chatShown = false;
+var chatShowTime = 3500; // 5000ms
+var chatFadeSteps = 1/30; // 60 steps
+var chatFadeSpeed = 1000 / (1/chatFadeSteps); // 1000ms
+async function fadeNode(node) {
+	// Set the node opacity to 1.0
+	node.style.opacity = 1.0;
+	// Once the node is shown, we wait before fading it
+	// We take care of checking that the chat is not shown while we are waiting before fading
+	for (var steps = chatShowTime/35; steps < chatShowTime; steps += chatShowTime/35) {
+		if (chatShown) return;
+		await sleep(chatShowTime/35);
+	}
+	// We fade the node
+	var nodeOpacity = 1.0;
+	while (nodeOpacity > 0.0) {
+		// If the user move the mouse hover the chat before
+		// this loop as ended then we break the loop
+		if (chatShown) return;
+		nodeOpacity = nodeOpacity - chatFadeSteps;
+		node.style.opacity = nodeOpacity;
+		await sleep(chatFadeSpeed);
+	}
+}
+
+async function showChat() {
+	// While the mouse is over the chat, we wait
+	while (chatShown) {
+		// Get the chat and the messages
+		var chatMessages = document.getElementById("CHAT").getElementsByTagName("li");
+		// Set all messages opacity to 1.0
+		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
+		await sleep(100);
+	}
+	// Once the mouse is not over the chat anymore, we wait before fading
+	// We take care of checking that the chat is not shown while we are waiting before fading
+	for (var steps = chatShowTime/35; steps < chatShowTime; steps += chatShowTime/35) {
+		if (chatShown) return;
+		await sleep(chatShowTime/35);
+	}
+	var chatOpacity = 1.0;
+	while (chatOpacity > 0.0) {
+		// If the user move the mouse hover the chat before
+		// this loop as ended then we break the loop
+		if (chatShown) break;
+		chatOpacity = chatOpacity - chatFadeSteps;
+		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = chatOpacity;
+		await sleep(chatFadeSpeed);
+	}
+}
+// -------------------------------------------- CHAT FADING -------------------------------------------- //
+
+
 
 function addMessage(msg) {
+
 	//getting current time and adding it to the message before displaying
 	var now = new Date();
     var hour    = now.getHours();
@@ -109,9 +172,12 @@ function addMessage(msg) {
 	var time = hour + ":" + minute + ":" + second;
 
 	msg = time + " - " + msg;
-
+	//setTimeout(function(){ alert("Hello"); }, 3000);
 	let node = document.createElement("li");
-	node.style.marginBottom = "4px";
+	node.style.paddingBottom = "4px";
+	node.style.backgroundColor = "rgba(0, 0, 0, 0.45)";
+	fadeNode(node);
+	
 	let textnode = document.createTextNode(msg);
 	let chat = document.getElementById("CHAT");
 	node.appendChild(textnode);

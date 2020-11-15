@@ -202,7 +202,18 @@ local function onDisconnect()
 	nicknameMap = {}
 end
 
+local function onServerVehicleCoupled(serverVehicleID, state)
+	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
+	if isOwn(gameVehicleID) ~= 1 then
+		local veh = be:getObjectByID(gameVehicleID)
+		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
+	end
+end
 
+local function sendBeamstate(state, gameVehicleID)
+	print("SENDING T")
+	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
+end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
@@ -412,6 +423,12 @@ local HandleNetwork = {
 	end,
 	['d'] = function(rawData)
 		onServerVehicleRemoved(rawData)
+	end,
+	['t'] = function(rawData)
+		local serverVehicleID = string.match(rawData,"^.-:")
+		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
+		local data = string.match(rawData,":(.*)")
+		onServerVehicleCoupled(serverVehicleID, data)
 	end
 }
 
@@ -527,6 +544,8 @@ M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
+M.sendBeamstate           = sendBeamstate
+M.onServerVehicleCoupled  = onServerVehicleCoupled
 
 
 

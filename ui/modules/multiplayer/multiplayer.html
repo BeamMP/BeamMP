@@ -33,21 +33,26 @@
     </md-toolbar>
 
     <div flex layout="row" style="overflow: auto;">
-        <md-content layout="column" id="left-menu">
-            <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.servers') !== -1)}" ui-sref="menu.multiplayer.servers" style="text-align:left;">
-                <md-icon class="material-icons">desktop_windows</md-icon>
-				{{:: 'ui.multiplayer.servers' | translate}}
-            </md-button>
+      <md-content layout="column" id="left-menu">
+        <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.servers') !== -1)}" ui-sref="menu.multiplayer.servers" style="text-align:left;">
+          <md-icon class="material-icons">desktop_windows</md-icon>
+		      {{:: 'ui.multiplayer.servers' | translate}}
+        </md-button>
 
-            <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
-                <md-icon class="material-icons">star</md-icon>
-				{{:: 'ui.multiplayer.favorites' | translate}}
-            </md-button>
+        <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
+          <md-icon class="material-icons">star</md-icon>
+				  {{:: 'ui.multiplayer.favorites' | translate}}
+        </md-button>
 
-            <md-button id="direct-connect-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
-                <md-icon class="material-icons">web</md-icon>
-				{{:: 'ui.multiplayer.direct_connect' | translate}}
-            </md-button>
+        <md-button id="direct-connect-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
+          <md-icon class="material-icons">web</md-icon>
+				  {{:: 'ui.multiplayer.direct_connect' | translate}}
+        </md-button>
+
+        <md-button id="direct-connect-btn" onclick="openForumLink()" ng-class="" style="text-align:left;">
+          <md-icon class="material-icons">web</md-icon>
+				  {{:: 'ui.multiplayer.forum' | translate}}
+        </md-button>
 
             <!--<md-button id="settings-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.settings') !== -1)}" ui-sref="menu.multiplayer.settings" style="text-align:left;">
                 <md-icon class="material-icons">more_horiz</md-icon>

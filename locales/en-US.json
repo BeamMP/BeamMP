@@ -809,6 +809,7 @@
     "ui.playmodes.campaigns": "Campaigns",
     "ui.playmodes.scenarios": "Scenarios",
     "ui.playmodes.freeroam": "Freeroam",
+    "ui.playmodes.multiplayer": "Multiplayer",
     "ui.playmodes.career": "Career",
     "ui.playmodes.quickrace" : "Time Trials",
     "ui.playmodes.bus" : "Bus Routes",
@@ -2887,6 +2888,7 @@
 	"ui.multiplayer.servers": "Servers",
 	"ui.multiplayer.favorites": "Favorites",
 	"ui.multiplayer.direct_connect": "Direct connect",
+	"ui.multiplayer.forum": "Forum",
 	"ui.multiplayer.refresh": "Refresh",
 	"ui.multiplayer.connect": "Connect",
 

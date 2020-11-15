@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("inputsGE Initialising...")
+print("MPInputsGE Initialising...")
 
 
 
@@ -15,7 +15,7 @@ local function tick() -- Update electrics values of all vehicles - The server ch
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
-			veh:queueLuaCommand("inputsVE.getInputs()") -- Send electrics values
+			veh:queueLuaCommand("MPInputsVE.getInputs()") -- Send electrics values
 		end
 	end
 end
@@ -23,7 +23,7 @@ end
 
 
 local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Vi:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2130, serverVehicleID, data))
@@ -31,22 +31,23 @@ local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
 	end
 end
 
+
+
 local function applyInputs(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("inputsVE.applyInputs(\'"..data.."\')")
+		veh:queueLuaCommand("MPInputsVE.applyInputs(\'"..data.."\')")
 	end
 end
 
+
+
 local function handle(rawData)
-	--print("inputsGE.handle: "..rawData)
 	rawData = string.sub(rawData,3)
 	local serverVehicleID = string.match(rawData,"^.-:")
 	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 	local data = string.match(rawData,":(.*)")
-	--print(serverVehicleID)
-	--print(data)
 	applyInputs(data, serverVehicleID)
 end
 
@@ -59,6 +60,4 @@ M.applyInputs = applyInputs
 
 
 
-
-print("inputsGE Loaded.")
 return M

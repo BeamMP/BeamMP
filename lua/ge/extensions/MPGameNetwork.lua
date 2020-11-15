@@ -52,7 +52,7 @@ end
 
 
 local function onPlayerConnect() -- Function called when a player connect to the server
-	updatesGE.onPlayerConnect()
+	MPUpdatesGE.onPlayerConnect()
 end
 
 
@@ -100,8 +100,8 @@ function AddEventHandler(n, f)
 end
 
 local HandleNetwork = {
-	['V'] = function(params) inputsGE.handle(params) end,
-	['W'] = function(params) electricsGE.handle(params) end,
+	['V'] = function(params) MPInputsGE.handle(params) end,
+	['W'] = function(params) MPElectricsGE.handle(params) end,
 	['X'] = function(params) nodesGE.handle(params) end,
 	['Y'] = function(params) powertrainGE.handle(params) end,
 	['Z'] = function(params) positionGE.handle(params) end,

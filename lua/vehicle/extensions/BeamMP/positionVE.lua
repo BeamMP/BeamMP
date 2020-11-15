@@ -7,33 +7,13 @@
 
 local M = {}
 
--- Smoothing for vectors, original temporalSmoothingNonLinear created by BeamNG
-local vectorSmoothing = {}
-vectorSmoothing.__index = vectorSmoothing
 
-local function newVectorSmoothing(rate)
-  local data = {rate = rate or 10, state = vec3(0,0,0)}
-  setmetatable(data, vectorSmoothing)
-  return data
-end
-
-function vectorSmoothing:get(sample, dt)
-  local st = self.state
-  local dif = sample - st
-  st = st + dif * math.min(self.rate * dt, 1)
-  self.state = st
-  return st
-end
-
-function vectorSmoothing:set(sample)
-  self.state = sample
-end
-
-function vectorSmoothing:reset()
-  self.state = vec3(0,0,0)
-end
 
 -- ============= VARIABLES =============
+local abs = math.abs
+local min = math.min
+local max = math.max
+
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
@@ -89,12 +69,39 @@ local remoteData = {
 }
 
 local debugDrawer = obj.debugDrawProxy
-
-local abs = math.abs
-local min = math.min
-local max = math.max
-
 -- ============= VARIABLES =============
+
+
+
+-- =============================== SOME FUNCTIONS ===============================
+-- Smoothing for vectors, original temporalSmoothingNonLinear created by BeamNG
+local vectorSmoothing = {}
+vectorSmoothing.__index = vectorSmoothing
+
+local function newVectorSmoothing(rate)
+  local data = {rate = rate or 10, state = vec3(0,0,0)}
+  setmetatable(data, vectorSmoothing)
+  return data
+end
+
+function vectorSmoothing:get(sample, dt)
+  local st = self.state
+  local dif = sample - st
+  st = st + dif * math.min(self.rate * dt, 1)
+  self.state = st
+  return st
+end
+
+function vectorSmoothing:set(sample)
+  self.state = sample
+end
+
+function vectorSmoothing:reset()
+  self.state = vec3(0,0,0)
+end
+-- =============================== SOME FUNCTIONS ===============================
+
+
 
 local function setPing(p)
 	-- some ping packets seem to go missing on local servers
@@ -102,6 +109,8 @@ local function setPing(p)
 		ownPing = p
 	end
 end
+
+
 
 local function updateGFX(dt)
 	timer = timer + dt
@@ -226,6 +235,8 @@ local function updateGFX(dt)
 	lastRacc = targetRacc
 end
 
+
+
 local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
@@ -257,6 +268,8 @@ local function getVehicleRotation()
 	}
 	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
 end
+
+
 
 local function setVehiclePosRot(data)
 
@@ -298,6 +311,8 @@ local function setVehiclePosRot(data)
 	--print("OwnPing = "..ownPing.." Ping = "..ping)
 	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
+
+
 
 M.updateGFX = updateGFX
 M.getVehicleRotation = getVehicleRotation

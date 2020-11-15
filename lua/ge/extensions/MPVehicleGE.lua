@@ -77,28 +77,26 @@ local function isOwn(gameVehicleID)
     return ownMap[tostring(gameVehicleID)] ~= nil
 end
 
+-- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
     return ownMap
 end
 
+-- RETURN THE MAP OF ALL VEHICLES IDS
 local function getVehicleMap()
     return vehiclesMap
 end
 
+-- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
 	for k,v in pairs(nicknameMap) do
 		nicknameSimple[k] = v.nickname
-		--print("carID"..tostring(k).." is owned by "..nicknameSimple[k])
 	end
 	local thisNick =  mpConfig.getNickname()
-	--dump(nicknameMap)
-	--dump(nicknameSimple)
 	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
-
     return nicknameSimple
 end
-
 --============== SOME FUNCTIONS ==============
 
 
@@ -173,6 +171,8 @@ local function sendCustomVehicleData(gameVehicleID)
 end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
+
+
 local function updateVehicle(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then print("gameVehicleID for "..serverID.." not found") return end
@@ -194,8 +194,10 @@ local function updateVehicle(serverID, data)
 	end
 end
 
+
+
 local function onDisconnect()
-	-- Clear ownMap and vehiclesMap
+	-- Clear all maps
 	ownMap = {}
 	vehiclesMap = {}
 	invertedVehiclesMap = {}

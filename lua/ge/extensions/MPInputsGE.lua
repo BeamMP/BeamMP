@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by jojos38 & Titch2000.
+-- All work by Titch2000 and jojos38.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 

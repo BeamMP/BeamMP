@@ -9,11 +9,43 @@ local M = {}
 
 
 
--- ============= VARIABLES =============
 local abs = math.abs
 local min = math.min
 local max = math.max
 
+
+
+-- =============================== SOME FUNCTIONS ===============================
+-- Smoothing for vectors, original temporalSmoothingNonLinear created by BeamNG
+local vectorSmoothing = {}
+vectorSmoothing.__index = vectorSmoothing
+
+local function newVectorSmoothing(rate)
+  local data = {rate = rate or 10, state = vec3(0,0,0)}
+  setmetatable(data, vectorSmoothing)
+  return data
+end
+
+function vectorSmoothing:get(sample, dt)
+  local st = self.state
+  local dif = sample - st
+  st = st + dif * math.min(self.rate * dt, 1)
+  self.state = st
+  return st
+end
+
+function vectorSmoothing:set(sample)
+  self.state = sample
+end
+
+function vectorSmoothing:reset()
+  self.state = vec3(0,0,0)
+end
+-- =============================== SOME FUNCTIONS ===============================
+
+
+
+-- ============= VARIABLES =============
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
@@ -70,36 +102,6 @@ local remoteData = {
 
 local debugDrawer = obj.debugDrawProxy
 -- ============= VARIABLES =============
-
-
-
--- =============================== SOME FUNCTIONS ===============================
--- Smoothing for vectors, original temporalSmoothingNonLinear created by BeamNG
-local vectorSmoothing = {}
-vectorSmoothing.__index = vectorSmoothing
-
-local function newVectorSmoothing(rate)
-  local data = {rate = rate or 10, state = vec3(0,0,0)}
-  setmetatable(data, vectorSmoothing)
-  return data
-end
-
-function vectorSmoothing:get(sample, dt)
-  local st = self.state
-  local dif = sample - st
-  st = st + dif * math.min(self.rate * dt, 1)
-  self.state = st
-  return st
-end
-
-function vectorSmoothing:set(sample)
-  self.state = sample
-end
-
-function vectorSmoothing:reset()
-  self.state = vec3(0,0,0)
-end
--- =============================== SOME FUNCTIONS ===============================
 
 
 

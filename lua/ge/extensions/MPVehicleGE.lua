@@ -1,7 +1,9 @@
 --====================================================================================
--- All work by jojos38, Titch2000 & 20dka.
+-- All work by Titch2000, jojos38 and 20dka.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
+
+
 
 -- HOW DOES IT WORK :
 -- When player connect to server for the first time, it send all his spawned vehicles to the server
@@ -93,7 +95,7 @@ local function getNicknameMap() -- Returns a ["localID"] = "username" table of a
 	for k,v in pairs(nicknameMap) do
 		nicknameSimple[k] = v.nickname
 	end
-	local thisNick =  mpConfig.getNickname()
+	local thisNick =  MPConfig.getNickname()
 	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
     return nicknameSimple
 end
@@ -130,7 +132,7 @@ local function sendVehicle(gameVehicleID)
 		local pos          = veh:getPosition()
 		local rot          = veh:getRotation()
 
-		vehicleTable.pid = mpConfig.getPlayerServerID() -- Player Server ID
+		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = tostring(gameVehicleID) -- Game Vehicle ID
 		vehicleTable.jbm = veh:getJBeamFilename() -- JBeam
 		vehicleTable.vcf = vehicleData.config -- Vehicle Config
@@ -158,7 +160,7 @@ local function sendCustomVehicleData(gameVehicleID)
 	local p0           = veh.colorPalette0
 	local p1           = veh.colorPalette1
 
-	vehicleTable.pid = mpConfig.getPlayerServerID()
+	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
 	vehicleTable.col = {c.x, c.y, c.z, c.w}
@@ -221,7 +223,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local rot             = quat(decodedData.rot)
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
-	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
+	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
 		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
@@ -443,6 +445,8 @@ local function removeRequest(gameVehicleID)
 		print("Request to remove car id "..gameVehicleID.." DENIED")
 	end
 end
+
+
 
 local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do

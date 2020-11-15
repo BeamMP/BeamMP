@@ -1,3 +1,8 @@
+--====================================================================================
+-- All work by Titch2000 and jojos38.
+-- You have no permission to edit, redistribute or upload. Contact us for more info!
+--====================================================================================
+
 load("UI")
 registerCoreModule("UI")
 
@@ -7,8 +12,8 @@ registerCoreModule("MPModManager")
 load("MPCoreNetwork")
 registerCoreModule("MPCoreNetwork")
 
-load("mpConfig")
-registerCoreModule("mpConfig")
+load("MPConfig")
+registerCoreModule("MPConfig")
 
 load("MPGameNetwork")
 registerCoreModule("MPGameNetwork")
@@ -16,11 +21,11 @@ registerCoreModule("MPGameNetwork")
 load("MPVehicleGE")
 registerCoreModule("MPVehicleGE")
 
-load("inputsGE")
-registerCoreModule("inputsGE")
+load("MPInputsGE")
+registerCoreModule("MPInputsGE")
 
-load("electricsGE")
-registerCoreModule("electricsGE")
+load("MPElectricsGE")
+registerCoreModule("MPElectricsGE")
 
 load("positionGE")
 registerCoreModule("positionGE")
@@ -28,10 +33,8 @@ registerCoreModule("positionGE")
 load("powertrainGE")
 registerCoreModule("powertrainGE")
 
-load("updatesGE")
-registerCoreModule("updatesGE")
+load("MPUpdatesGE")
+registerCoreModule("MPUpdatesGE")
 
 load("nodesGE")
 registerCoreModule("nodesGE")
-
-print("BeamMP v3.5 Started")

@@ -67,7 +67,7 @@ local function sessionData(data)
 		UI.setPlayerCount(players)
 	elseif code == "n" then
 		UI.setNickname(data)
-		mpConfig.setNickname(data)
+		MPConfig.setNickname(data)
 	end
 end
 
@@ -106,7 +106,7 @@ local HandleNetwork = {
 	['Y'] = function(params) powertrainGE.handle(params) end,
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) MPVehicleGE.handle(params) end,
-	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
+	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
 	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
 	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
 	['S'] = function(params) sessionData(params) end, -- Update Session Data

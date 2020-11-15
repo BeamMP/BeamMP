@@ -1,26 +1,29 @@
 --====================================================================================
--- All work by Titch2000.
+-- All work by Titch2000 and jojos38.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
+
+
 local M = {}
+print("UI Initialising...")
+
+
 
 local players = {}
 local pings = {}
 
-print("UI Initialising...")
+
 
 local function updateLoading(data)
-	--print(data)
 	local code = string.sub(data, 1, 1)
 	local msg = string.sub(data, 2)
-	
 	if code == "l" then
-		guihooks.trigger('LoadingInfo', {
-		message = msg
-		})
+		guihooks.trigger('LoadingInfo', {message = msg})
 	end
 end
+
+
 
 local function typeof(var)
     local _type = type(var);
@@ -35,6 +38,8 @@ local function typeof(var)
     end
 end
 
+
+
 local function split(s, sep)
     local fields = {}
 
@@ -45,6 +50,8 @@ local function split(s, sep)
     return fields
 end
 
+
+
 local function updatePlayersList(playersString)
 	--print(playersString)
 	local players = split(playersString, ",")
@@ -53,6 +60,8 @@ local function updatePlayersList(playersString)
 
 	be:executeJS('playerPings(\''..jsonEncode(pings)..'\');')
 end
+
+
 
 local function setPing(ping)
 	if tonumber(ping) == -1 then -- not connected
@@ -63,34 +72,46 @@ local function setPing(ping)
 	else
 		guihooks.trigger("setPing", ""..ping.." ms")
 		guihooks.trigger("app:showConnectionIssues", false)
-		pings[mpConfig.getNickname()] = ping
+		pings[MPConfig.getNickname()] = ping
 	end
 end
+
+
 
 local function setNickname(name)
   --print("My Nickname: "..name)
 	be:executeJS('setNickname("'..name..'")')
 end
 
+
+
 local function setStatus(status)
 	--be:executeJS('setStatus("'..status..'")')
 	guihooks.trigger("setStatus", status)
 end
+
+
 
 local function setPlayerCount(playerCount)
 	--be:executeJS('setPlayerCount("'..playerCount..'")')
 	guihooks.trigger("setPlayerCount", playerCount)
 end
 
+
+
 local function error(text)
 	print("UI Error > "..text)
 	ui_message(''..text, 10, 0, 0)
 end
 
+
+
 local function message(text)
 	print("[Message] > "..text)
 	ui_message(''..text, 10, 0, 0)
 end
+
+
 
 local function showNotification(type, text)
 	if text == nil then
@@ -104,19 +125,27 @@ local function showNotification(type, text)
 	end
 end
 
+
+
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
 	be:executeJS('addMessage("'..message..'")')
 	TriggerClientEvent("ChatMessageReceived", message)
 end
 
+
+
 local function chatSend(msg)
-	local c = 'C:'..mpConfig.getNickname()..": "..msg
+	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
 end
 
+
+
 local ready = true
 local deletenext = true
+
+
 
 local function ready(src)
   print("UI / Game Has now loaded ("..src..")")
@@ -156,10 +185,14 @@ local function ready(src)
   end
 end
 
+
+
 local function readyReset()
   ready = true
   deletenext = true
 end
+
+
 
 local function setVehPing(vehicleID, ping)
 	--print("Vehicle "..vehicleID.." has ping "..ping)
@@ -170,6 +203,8 @@ local function setVehPing(vehicleID, ping)
 		--print("belongs to: "..nickmap[tonumber(vehicleID)])
 	end
 end
+
+
 
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
@@ -184,5 +219,6 @@ M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
 
-print("UI Loaded.")
+
+
 return M

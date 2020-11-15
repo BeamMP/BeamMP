@@ -17,8 +17,12 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
 		//bngApi.engineLua('UI.ready("CHAT")');
 		countUpdateInterval = setInterval(updateCount, 20000);
-		document.getElementById("CHATMESSAGE").addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		document.getElementById("CHATMESSAGE").addEventListener("mouseout", function(){ chatShown = false; });
+		var chatMessage = document.getElementById("CHATMESSAGE");
+		chatMessage.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chatMessage.addEventListener("mouseout", function(){ chatShown = false; });
+		var chat = document.getElementById("CHAT");
+		chat.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chat.addEventListener("mouseout", function(){ chatShown = false; });
 	};
 
 	$scope.reset = function() {

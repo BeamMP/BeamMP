@@ -84,9 +84,13 @@
 		padding-left: 0px;
 		overflow-y: scroll;
 		overflow-wrap: break-word;
-		overflow: hidden;
+		<!-- overflow: hidden; -->
 		<!--background-color:rgba(0, 0, 0, 0.45);-->
 	  }
+	  ::-webkit-scrollbar {
+    width: 0px;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
+}
 	  #CHAT {<!--background-color:rgba(0, 0, 0, 0.45);-->}
 	</style>
 

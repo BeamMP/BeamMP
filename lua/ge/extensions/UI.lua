@@ -129,6 +129,7 @@ end
 
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
+	print("Message received: "..message) -- DO NOT REMOVE 
 	be:executeJS('addMessage("'..message..'")')
 	TriggerClientEvent("ChatMessageReceived", message)
 end

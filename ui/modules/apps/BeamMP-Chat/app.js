@@ -187,7 +187,7 @@ function addMessage(msg) {
 	node.appendChild(textnode);
 	chat.appendChild(node);
 
-	if (chat.children.length > 50) {
+	if (chat.children.length > 70) {
 		chat.removeChild(chat.children[0]);
 	}
 

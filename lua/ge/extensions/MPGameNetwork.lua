@@ -52,7 +52,7 @@ end
 
 
 local function onPlayerConnect() -- Function called when a player connect to the server
-	updatesGE.onPlayerConnect()
+	MPUpdatesGE.onPlayerConnect()
 end
 
 
@@ -67,7 +67,7 @@ local function sessionData(data)
 		UI.setPlayerCount(players)
 	elseif code == "n" then
 		UI.setNickname(data)
-		mpConfig.setNickname(data)
+		MPConfig.setNickname(data)
 	end
 end
 
@@ -100,13 +100,13 @@ function AddEventHandler(n, f)
 end
 
 local HandleNetwork = {
-	['V'] = function(params) inputsGE.handle(params) end,
-	['W'] = function(params) electricsGE.handle(params) end,
+	['V'] = function(params) MPInputsGE.handle(params) end,
+	['W'] = function(params) MPElectricsGE.handle(params) end,
 	['X'] = function(params) nodesGE.handle(params) end,
 	['Y'] = function(params) powertrainGE.handle(params) end,
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) MPVehicleGE.handle(params) end,
-	['P'] = function(params) mpConfig.setPlayerServerID(params) end,
+	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
 	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
 	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
 	['S'] = function(params) sessionData(params) end, -- Update Session Data

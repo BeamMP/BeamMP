@@ -1,7 +1,9 @@
 --====================================================================================
--- All work by jojos38, Titch2000 & 20dka.
+-- All work by Titch2000, jojos38 and 20dka.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
+
+
 
 -- HOW DOES IT WORK :
 -- When player connect to server for the first time, it send all his spawned vehicles to the server
@@ -77,28 +79,26 @@ local function isOwn(gameVehicleID)
     return ownMap[tostring(gameVehicleID)] ~= nil
 end
 
+-- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
     return ownMap
 end
 
+-- RETURN THE MAP OF ALL VEHICLES IDS
 local function getVehicleMap()
     return vehiclesMap
 end
 
+-- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
 	for k,v in pairs(nicknameMap) do
 		nicknameSimple[k] = v.nickname
-		--print("carID"..tostring(k).." is owned by "..nicknameSimple[k])
 	end
-	local thisNick =  mpConfig.getNickname()
-	--dump(nicknameMap)
-	--dump(nicknameSimple)
+	local thisNick =  MPConfig.getNickname()
 	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
-
     return nicknameSimple
 end
-
 --============== SOME FUNCTIONS ==============
 
 
@@ -132,7 +132,7 @@ local function sendVehicle(gameVehicleID)
 		local pos          = veh:getPosition()
 		local rot          = veh:getRotation()
 
-		vehicleTable.pid = mpConfig.getPlayerServerID() -- Player Server ID
+		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = tostring(gameVehicleID) -- Game Vehicle ID
 		vehicleTable.jbm = veh:getJBeamFilename() -- JBeam
 		vehicleTable.vcf = vehicleData.config -- Vehicle Config
@@ -160,7 +160,7 @@ local function sendCustomVehicleData(gameVehicleID)
 	local p0           = veh.colorPalette0
 	local p1           = veh.colorPalette1
 
-	vehicleTable.pid = mpConfig.getPlayerServerID()
+	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
 	vehicleTable.col = {c.x, c.y, c.z, c.w}
@@ -172,6 +172,8 @@ local function sendCustomVehicleData(gameVehicleID)
 	print("Vehicle custom data "..gameVehicleID.." was sent")
 end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
+
+
 
 local function updateVehicle(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
@@ -194,26 +196,17 @@ local function updateVehicle(serverID, data)
 	end
 end
 
+
+
 local function onDisconnect()
-	-- Clear ownMap and vehiclesMap
+	-- Clear all maps
 	ownMap = {}
 	vehiclesMap = {}
 	invertedVehiclesMap = {}
 	nicknameMap = {}
 end
 
-local function onServerVehicleCoupled(serverVehicleID, state)
-	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if isOwn(gameVehicleID) ~= 1 then
-		local veh = be:getObjectByID(gameVehicleID)
-		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
-	end
-end
 
-local function sendBeamstate(state, gameVehicleID)
-	print("SENDING T")
-	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
-end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
@@ -230,7 +223,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local rot             = quat(decodedData.rot)
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
-	if mpConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
+	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
 		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
@@ -323,14 +316,22 @@ end
 
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
-local escape = 0
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	--print("Vehicle switched from "..oldID.." to "..newID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
 			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
-				be:enterNextVehicle(0, 1)
+				local curVehicle = be:getPlayerVehicle(0)
+				local currGameVehicleID = curVehicle:getID()
+				local vehicles = getAllVehicles()
+				for index, vehicle in ipairs(vehicles) do
+					local gameVehicleID = vehicle and vehicle:getID()
+					if isOwn(gameVehicleID) and gameVehicleID ~= currGameVehicleID then
+						be:enterVehicle(0, vehicles[index])
+						break
+					end
+				end
 			end
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
@@ -423,12 +424,6 @@ local HandleNetwork = {
 	end,
 	['d'] = function(rawData)
 		onServerVehicleRemoved(rawData)
-	end,
-	['t'] = function(rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleCoupled(serverVehicleID, data)
 	end
 }
 
@@ -450,6 +445,8 @@ local function removeRequest(gameVehicleID)
 		print("Request to remove car id "..gameVehicleID.." DENIED")
 	end
 end
+
+
 
 local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do
@@ -544,8 +541,6 @@ M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
-M.sendBeamstate           = sendBeamstate
-M.onServerVehicleCoupled  = onServerVehicleCoupled
 
 
 

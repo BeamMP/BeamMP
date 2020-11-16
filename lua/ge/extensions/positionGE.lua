@@ -22,11 +22,11 @@ end
 
 
 
-local function distance( x1, y1, z1, x2, y2, z2 )
+local function distance(x1, y1, z1, x2, y2, z2)
 	local dx = x1 - x2
 	local dy = y1 - y2
 	local dz = z1 - z2
-	return math.sqrt ( dx*dx + dy*dy + dz*dz)
+	return math.sqrt(dx*dx + dy*dy + dz*dz)
 end
 
 
@@ -35,7 +35,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2134, serverVehicleID, data))
+			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end
@@ -73,14 +73,12 @@ local function setPing(ping)
 	end
 end
 
-
-
---TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
---without resetting the vehicle
+-- TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua
+-- without resetting the vehicle
 local function setPosition(gameVehicleID, x, y, z)
 	local veh = be:getObjectByID(gameVehicleID)
 	veh:setPosition(Point3F(x, y, z))
-	veh:queueLuaCommand("electricsVE.applyLatestElectrics()") -- Redefine electrics values
+	veh:queueLuaCommand("MPElectricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
 
 

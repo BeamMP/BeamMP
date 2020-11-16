@@ -10,13 +10,9 @@ local wantedCouplerState = false
 local toggled = false
 
 local function updateGFX(dt)
-  if wantedCouplerState ~= toggled then
+  if toggled ~= wantedCouplerState then
     print("Toggling couplers")
-    if toggled then
-        toggled = false
-    else
-        toggled = true
-    end
+    toggled = wantedCouplerState
     beamstate.toggleCouplers()
   end
 end

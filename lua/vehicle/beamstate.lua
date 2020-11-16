@@ -258,9 +258,13 @@ local function toggleCouplers()
   if autoCouplingActive then
     obj:stopLatching()
     disableAutoCoupling()
-    obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..tostring(autoCouplingActive).."\', \'"..obj:getID().."\')")
+    if v.mpVehicleType == "local" then
+      obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'"..obj:getID().."\')")
+    end
   else
-    obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..tostring(autoCouplingActive).."\', \'"..obj:getID().."\')")
+    if v.mpVehicleType == "local" then
+      obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'"..obj:getID().."\')")
+    end
     if isCouplerAttached() then
       detachCouplers()
     else

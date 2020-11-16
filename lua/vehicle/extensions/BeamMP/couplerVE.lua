@@ -10,23 +10,14 @@ local wantedCouplerState = false
 local toggled = false
 
 local function updateGFX(dt)
-  --[[local couplerState = beamstate.isCouplerAttached()
---print(couplerState)
-  if couplerState ~= lastCouplerState then
-    obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..tostring(couplerState).."\', \'"..obj:getID().."\')")
-  end
-
-  if couplerState ~= wantedCouplerState and not toggled then
+  if wantedCouplerState ~= toggled then
+    print("Toggling couplers")
+    if toggled then
+        toggled = false
+    else
+        toggled = true
+    end
     beamstate.toggleCouplers()
-    toggled = true
-  end
-
-  if couplerState == wantedCouplerState and toggled then
-    toggled = false
-  end]]
-
-  if wantedCouplerState ~= beamstate.autoCouplingActive then
-    breamstate.toggleCouplers()
   end
 end
 

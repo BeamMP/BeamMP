@@ -332,16 +332,24 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
 			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
-				local curVehicle = be:getPlayerVehicle(0)
-				local currGameVehicleID = curVehicle:getID()
 				local vehicles = getAllVehicles()
+				local vLen = #vehicles
+				local currIndex = vLen
+				-- First get the index of our current vehicle
 				for index, vehicle in ipairs(vehicles) do
-					local gameVehicleID = vehicle and vehicle:getID()
-					if isOwn(gameVehicleID) and gameVehicleID ~= currGameVehicleID then
-						be:enterVehicle(0, vehicles[index])
-						break
-					end
+					if newGameVehicleID == vehicles[index]:getId() then currIndex = index end
 				end
+				-- We start from the current index and we do currIndex  % vehiclesLen + 1
+				-- While the vehicle of currIndex is not one of our vehicle. Using this way
+				-- We will have to loop trough all vehicles eventually, until coming back
+				-- on our own vehicle. We add a if statement to check if we have done a full loop
+				-- to avoid blocking the whole game in the event something goes wrong in ownMap
+				local index = currIndex
+				repeat
+					index = index % vLen + 1
+					if index == currIndex then break end
+				until MPVehicleGE.isOwn(vehicles[index]:getId())
+				be:enterVehicle(0, vehicles[index])
 			end
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end

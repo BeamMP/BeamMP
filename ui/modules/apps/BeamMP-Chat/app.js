@@ -18,10 +18,10 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		//bngApi.engineLua('UI.ready("CHAT")');
 		countUpdateInterval = setInterval(updateCount, 20000);
 		var chatMessage = document.getElementById("CHATMESSAGE");
-		chatMessage.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chatMessage.addEventListener("mouseover", function(){ showChat(); });
 		chatMessage.addEventListener("mouseout", function(){ chatShown = false; });
 		var chat = document.getElementById("CHAT");
-		chat.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chat.addEventListener("mouseover", function(){ showChat(); });
 		chat.addEventListener("mouseout", function(){ chatShown = false; });
 	};
 
@@ -135,6 +135,8 @@ async function fadeNode(node) {
 }
 
 async function showChat() {
+	if (chatShown) return;
+	chatShown = true;
 	// While the mouse is over the chat, we wait
 	while (chatShown) {
 		// Get the chat and the messages

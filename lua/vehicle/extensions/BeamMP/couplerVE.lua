@@ -30,7 +30,12 @@ local function toggleCouplerState(state)
   end
 end
 
+local function onReset()
+    toggled = false
+    wantedCouplerState = false
+end
 
+M.onReset            = onReset
 M.toggleCouplerState = toggleCouplerState
 M.updateGFX			     = updateGFX
 

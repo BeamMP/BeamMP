@@ -5,34 +5,15 @@
 
 
 local M = {}
-local lastCouplerState = false
-local wantedCouplerState = false
-local toggled = false
-
-local function updateGFX(dt)
-  if toggled ~= wantedCouplerState then
-    print("Toggling couplers")
-    toggled = wantedCouplerState
-    beamstate.toggleCouplers()
-  end
-end
 
 local function toggleCouplerState(state)
-  print("RECEIVED A COUPLER STATE!!! "..state)
-  if state == "true" then
-    wantedCouplerState = true
-  else
-    wantedCouplerState = false
-  end
+    if state == "true" then
+        beamstate.activateAutoCoupling()
+    else
+        beamstate.disableAutoCoupling()
+    end
 end
 
-local function onReset()
-    toggled = false
-    wantedCouplerState = false
-end
-
-M.onReset            = onReset
 M.toggleCouplerState = toggleCouplerState
-M.updateGFX			     = updateGFX
 
 return M

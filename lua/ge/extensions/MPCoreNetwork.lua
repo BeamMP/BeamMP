@@ -16,7 +16,6 @@ local currentServer -- Store the server we are on
 local Servers = {} -- Store all the servers
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local secondsTimer = 0
-local serverTimeoutTimer = 0
 local MapLoadingTimeout = 0
 local status = ""
 local launcherVersion = ""
@@ -159,6 +158,7 @@ local HandleNetwork = {
 
 
 local function onUpdate(dt)
+	--print(secondsTimer)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
@@ -176,12 +176,13 @@ local function onUpdate(dt)
 			send('A') -- Launcher heartbeat
 			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
 			else send('Up') end -- Server heartbeat
-			secondsTimer = 0
+			--secondsTimer = 0 -- this might break resource loading
 		end
-		-- If secondsTImer is more than 2 seconds and the game tick time is greater
+		-- If secondsTimer is more than 5 seconds and the game tick time is greater
 		-- than 20000 then our game is running very slow and or has timed out / crashed.
-		if secondsTimer > 2 and dt > 20000 then
+		if secondsTimer > 5 then -- and dt > 20000
 			print("Timed out")
+			UI.setPing("-2")
 			disconnectLauncher()
 			connectToLauncher()
 		end

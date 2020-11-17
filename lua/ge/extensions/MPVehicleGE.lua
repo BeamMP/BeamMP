@@ -346,7 +346,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
-	activeVehicle = newID
+	activeVehicle = newGameVehicleID
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 

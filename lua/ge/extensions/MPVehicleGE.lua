@@ -542,8 +542,8 @@ end
 
 
 
-M.setCurrentVehicle		    = setCurrentVehicle
-M.removeRequest			      = removeRequest
+M.setCurrentVehicle		  = setCurrentVehicle
+M.removeRequest			  = removeRequest
 M.onUpdate                = onUpdate
 M.handle                  = handle
 M.onVehicleSwitched       = onVehicleSwitched

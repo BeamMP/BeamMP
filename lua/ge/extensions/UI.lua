@@ -160,10 +160,10 @@ local function ready(src)
     if deletenext then
       print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
       core_vehicles.removeCurrent(); -- 0.20 Fix
+      commands.setFreeCamera()		 -- Fix camera
       deletenext = false
     end
 
-    commands.setFreeCamera() -- Fix camera
 
     deletenext = false
   end

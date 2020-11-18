@@ -25,6 +25,7 @@ local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
+local distanceMap = {}
 local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
@@ -89,6 +90,11 @@ local function getVehicleMap()
     return vehiclesMap
 end
 
+-- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
+local function getDistanceMap()
+    return distanceMap
+end
+
 -- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
@@ -96,7 +102,7 @@ local function getNicknameMap() -- Returns a ["localID"] = "username" table of a
 		nicknameSimple[k] = v.nickname
 	end
 	local thisNick =  MPConfig.getNickname()
-	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
+	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
     return nicknameSimple
 end
 --============== SOME FUNCTIONS ==============
@@ -508,6 +514,7 @@ local function onUpdate(dt)
 
 					if localPos and settings.getValue("nameTagShowDistance") then
 						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
+						distanceMap[gameVehicleID] = distfloat
 						if distfloat > 10 then
 							dist = ""
 							if settings.getValue("uiUnitLength") == "imperial" then
@@ -543,6 +550,7 @@ M.onVehicleSwitched       = onVehicleSwitched
 M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
+M.getDistanceMap          = getDistanceMap
 M.getVehicleMap           = getVehicleMap
 M.getNicknameMap          = getNicknameMap
 M.getGameVehicleID        = getGameVehicleID

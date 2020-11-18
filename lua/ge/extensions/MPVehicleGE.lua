@@ -105,6 +105,11 @@ local function getNicknameMap() -- Returns a ["localID"] = "username" table of a
 	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
     return nicknameSimple
 end
+
+-- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
+local function hideNicknames(hide)
+	nicknamesAllowed = not hide
+end
 --============== SOME FUNCTIONS ==============
 
 
@@ -507,7 +512,7 @@ local function onUpdate(dt)
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
 				local gameVehicleID = veh:getID()
-				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") then
+				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") and nicknamesAllowed then
 					local pos = veh:getPosition()
 					local dist = ""
 					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
@@ -553,6 +558,7 @@ M.getOwnMap               = getOwnMap
 M.getDistanceMap          = getDistanceMap
 M.getVehicleMap           = getVehicleMap
 M.getNicknameMap          = getNicknameMap
+M.hideNicknames           = hideNicknames
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed

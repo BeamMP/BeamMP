@@ -837,11 +837,11 @@
 
     "ui.options.gameplay": "Gameplay",
     "ui.options.other": "Other",
-	"ui.options.multiplayer": "Multiplayer",
+	  "ui.options.multiplayer": "Multiplayer",
     "ui.options.licenses": "Licenses",
     "ui.options.controls": "Controls",
 
-	"ui.options.multiplayer.syncConfigUpdates": "Apply Other Player Vehicle Part Updates.",
+	  "ui.options.multiplayer.syncConfigUpdates": "Apply Other Player Vehicle Part Updates.",
     "ui.options.multiplayer.showSyncConfigUpdates": "Should the mod automaticlly apply other player vehicle part config changes.",
     "ui.options.multiplayer.nameTags": "Show player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Alternate nametag colors",
@@ -852,7 +852,8 @@
     "ui.options.multiplayer.launcherPort.tooltip": "Set this to the custom port that the launcher was set to use.",
     "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",
     "ui.options.multiplayer.clearLauncherCache.tooltip": "Enabling this will clear the currently download mod cache of the launcher. Doing this will result in you having to download all mods for each server you join again.",
-	"ui.options.multiplayer.skipOtherPlayersVehicles": "Disable switching to other players vehicles",
+	  "ui.options.multiplayer.skipOtherPlayersVehicles": "Disable switching to other players vehicles",
+    "ui.multiplayer.clear": "Clear Launcher Cache",
     "ui.multiplayer.clear": "Clear Launcher Cache",
 
     "ui.options.userInterface": "User Interface",
@@ -3475,5 +3476,6 @@
 	"ui.multiplayer.location": "Location",
 	"ui.multiplayer.description": "Title",
 	"ui.multiplayer.map": "Map",
+	"ui.multiplayer.forum": "FORUM",
 	"ui.multiplayer.players": "Players"
 }

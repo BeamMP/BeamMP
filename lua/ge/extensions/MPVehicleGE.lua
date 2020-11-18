@@ -26,6 +26,7 @@ local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
 local distanceMap = {}
+local nicknamesAllowed = true
 local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true

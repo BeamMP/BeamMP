@@ -137,7 +137,7 @@ angular.module('beamng.stuff')
 	vm.slider_maxModSize = 500; //should be almost a terabyte
 
 	bngApiScope = bngApi;
-	localStorage.clear('servers'); //clear serverlist so we dont show cached ones if the launcher broke
+	localStorage.removeItem('servers'); //clear serverlist so we dont show cached ones if the launcher broke
 	bngApi.engineLua('MPCoreNetwork.getServers()');
 	vm.exit = function ($event) {
 		if ($event)

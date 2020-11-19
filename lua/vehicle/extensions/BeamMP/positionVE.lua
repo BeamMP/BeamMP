@@ -155,7 +155,7 @@ local function updateGFX(dt)
 	-- Use received position, and smoothed velocity and acceleration to predict vehicle position
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
-	local rotAdd = (remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime):rotated(vehRot)
+	local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
 	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
 	local rvel = remoteRvel + remoteRacc*predictTime
 

@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by Jojos38 & Titch2000.
+-- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistrobute or upload. Contact us for more info!
 --====================================================================================
 
@@ -14,7 +14,6 @@ local lastElectrics = {}
 local lastGear = -1
 local latestData
 local electricsChanged = false
-local checkNow = false
 -- ============= VARIABLES =============
 
 
@@ -86,33 +85,6 @@ local disallowedKeys = {
 
 
 
-local function onUpdate(dt) --ONUPDATE OPEN
-	if checkNow then -- Defined by MPUpdatesGE
-		local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
-		local electricsChanged = false
-		local e = electrics.values
-		for k,v in pairs(e) do -- For each electric value
-			if not disallowedKeys[k] then -- If it's not a disallowed key
-				if lastElectrics[k] ~= v then -- If the value changed
-					electricsChanged = true -- Send electrics
-					lastElectrics[k] = v -- Define the new value
-					electricsToSend[k] = v
-				end
-			end
-		end	
-		if electricsChanged then
-			obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', \'"..obj:getID().."\')")
-		end	
-		if e.gear ~= lastGear then
-			obj:queueGameEngineLua("MPElectricsGE.sendGear(\'"..e.gear.."\', \'"..obj:getID().."\')")
-			lastGear = e.gear
-		end
-		checkNow = false
-	end
-end --ONUPDATE CLOSE
-
-
-
 local function applyGear(data)
 	if not (data) then return end
 	if data == "R" then
@@ -131,7 +103,26 @@ end
 
 
 local function check()
-	checkNow = true
+	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
+	local electricsChanged = false
+	local e = electrics.values
+	if not e or not e.gear then return end
+	for k,v in pairs(e) do -- For each electric value
+		if not disallowedKeys[k] then -- If it's not a disallowed key
+			if lastElectrics[k] ~= v then -- If the value changed
+				electricsChanged = true -- Send electrics
+				lastElectrics[k] = v -- Define the new value
+				electricsToSend[k] = v
+			end
+		end
+	end	
+	if electricsChanged then
+		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', \'"..obj:getID().."\')")
+	end	
+	if e.gear ~= lastGear then
+		obj:queueGameEngineLua("MPElectricsGE.sendGear(\'"..e.gear.."\', \'"..obj:getID().."\')")
+		lastGear = e.gear
+	end
 end
 
 
@@ -185,7 +176,6 @@ M.check				   = check
 M.applyGear			   = applyGear
 M.applyElectrics	   = applyElectrics
 M.applyLatestElectrics = applyLatestElectrics
-M.updateGFX	    	   = onUpdate
 
 
 

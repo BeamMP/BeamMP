@@ -25,6 +25,8 @@ local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
+local distanceMap = {}
+local nicknamesAllowed = true
 local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
@@ -89,6 +91,11 @@ local function getVehicleMap()
     return vehiclesMap
 end
 
+-- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
+local function getDistanceMap()
+    return distanceMap
+end
+
 -- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
@@ -96,8 +103,13 @@ local function getNicknameMap() -- Returns a ["localID"] = "username" table of a
 		nicknameSimple[k] = v.nickname
 	end
 	local thisNick =  MPConfig.getNickname()
-	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
+	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
     return nicknameSimple
+end
+
+-- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
+local function hideNicknames(hide)
+	nicknamesAllowed = not hide
 end
 --============== SOME FUNCTIONS ==============
 
@@ -206,17 +218,25 @@ local function onDisconnect()
 	nicknameMap = {}
 end
 
+
+
 local function onServerVehicleCoupled(serverVehicleID, state)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if isOwn(gameVehicleID) ~= 1 then
 		local veh = be:getObjectByID(gameVehicleID)
-		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
+		if veh then
+			veh:queueLuaCommand("MPCouplerVE.toggleCouplerState('"..state.."')")
+		end
 	end
 end
+
+
 
 local function sendBeamstate(state, gameVehicleID)
 	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
 end
+
+
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
@@ -332,29 +352,21 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
 			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
+				local curVehicle = be:getPlayerVehicle(0)
+				local currGameVehicleID = curVehicle:getID()
 				local vehicles = getAllVehicles()
-				local vLen = #vehicles
-				local currIndex = vLen
-				-- First get the index of our current vehicle
 				for index, vehicle in ipairs(vehicles) do
-					if newGameVehicleID == vehicles[index]:getId() then currIndex = index end
+					local gameVehicleID = vehicle and vehicle:getID()
+					if isOwn(gameVehicleID) and gameVehicleID ~= currGameVehicleID then
+						be:enterVehicle(0, vehicles[index])
+						break
+					end
 				end
-				-- We start from the current index and we do currIndex  % vehiclesLen + 1
-				-- While the vehicle of currIndex is not one of our vehicle. Using this way
-				-- We will have to loop trough all vehicles eventually, until coming back
-				-- on our own vehicle. We add a if statement to check if we have done a full loop
-				-- to avoid blocking the whole game in the event something goes wrong in ownMap
-				local index = currIndex
-				repeat
-					index = index % vLen + 1
-					if index == currIndex then break end
-				until MPVehicleGE.isOwn(vehicles[index]:getId())
-				be:enterVehicle(0, vehicles[index])
 			end
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
-	activeVehicle = newID
+	activeVehicle = newGameVehicleID
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 
@@ -509,13 +521,14 @@ local function onUpdate(dt)
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
 				local gameVehicleID = veh:getID()
-				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") then
+				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") and nicknamesAllowed then
 					local pos = veh:getPosition()
 					local dist = ""
 					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 
 					if localPos and settings.getValue("nameTagShowDistance") then
 						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
+						distanceMap[gameVehicleID] = distfloat
 						if distfloat > 10 then
 							dist = ""
 							if settings.getValue("uiUnitLength") == "imperial" then
@@ -543,16 +556,18 @@ end
 
 
 
-M.setCurrentVehicle		    = setCurrentVehicle
-M.removeRequest			      = removeRequest
+M.setCurrentVehicle		  = setCurrentVehicle
+M.removeRequest			  = removeRequest
 M.onUpdate                = onUpdate
 M.handle                  = handle
 M.onVehicleSwitched       = onVehicleSwitched
 M.onDisconnect            = onDisconnect
 M.isOwn                   = isOwn
 M.getOwnMap               = getOwnMap
+M.getDistanceMap          = getDistanceMap
 M.getVehicleMap           = getVehicleMap
 M.getNicknameMap          = getNicknameMap
+M.hideNicknames           = hideNicknames
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID
 M.onVehicleDestroyed      = onVehicleDestroyed

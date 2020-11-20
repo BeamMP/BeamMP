@@ -177,7 +177,7 @@ local function onUpdate(dt)
 			send('A') -- Launcher heartbeat
 			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
 			else send('Up') end -- Server heartbeat
-			--secondsTimer = 0 -- this might break resource loading
+			secondsTimer = 0 -- this might break resource loading
 		end
 		-- If secondsTimer is more than 5 seconds and the game tick time is greater
 		-- than 20000 then our game is running very slow and or has timed out / crashed.

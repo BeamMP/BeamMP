@@ -165,7 +165,7 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, pitchDiff, rollDiff, yawDiff)
 end
 
-v.mpVehicleType = "local"
+v.mpVehicleType = "L"
 local function setVehicleType(x)
   v.mpVehicleType = x
 end

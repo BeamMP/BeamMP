@@ -18,19 +18,19 @@ local lastInputs = {}
 local function getInputs()
 	-- Get inputs values
 	local inputsTable = {
-		input.state.steering.val,
-		input.state.throttle.val,
-		input.state.brake.val,
-		input.state.parkingbrake.val,
-		input.state.clutch.val
+		s = electrics.values.steering_input,
+		t = electrics.values.throttle,
+		b = electrics.values.brake,
+		p = electrics.values.parkingbrake,
+		c = electrics.values.clutch
 	}
 
 	-- If inputs didn't change then return
-	if inputsTable[1] == lastInputs[1]
-	and inputsTable[2] == lastInputs[2]
-	and inputsTable[3] == lastInputs[3]
-	and inputsTable[4] == lastInputs[4]
-	and inputsTable[5] == lastInputs[5]
+	if inputsTable.s == lastInputs.s
+	and inputsTable.t == lastInputs.t
+	and inputsTable.b == lastInputs.b
+	and inputsTable.p == lastInputs.p
+	and inputsTable.c == lastInputs.c
 	then return end
 
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
@@ -42,11 +42,13 @@ end
 
 local function applyInputs(data)
 	local decodedData = jsonDecode(data) -- Decode received data
-	input.event("steering", decodedData[1], 1)
-	input.event("throttle", decodedData[2], 1)
-	input.event("brake", decodedData[3], 1)
-	input.event("parkingbrake", decodedData[4], 1)
-	input.event("clutch", decodedData[5], 1)
+	if decodedData.s and decodedData.t and decodedData.b and decodedData.p and decodedData.c then
+		input.event("steering", decodedData.s, 1)
+		input.event("throttle", decodedData.t, 1)
+		input.event("brake", decodedData.b, 1)
+		input.event("parkingbrake", decodedData.p, 1)
+		input.event("clutch", decodedData.c, 1)
+	end
 end
 
 

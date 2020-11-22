@@ -22,6 +22,12 @@ local inputsTickrate = 1/10 -- 10 times / second
 local electricsDelay = 0
 local electricsTickrate = 1/16 -- 16 times / second
 
+local gearDelay = 0
+local gearTickrate = 1/2
+
+local powertrainDelay = 0
+local powertrainTickrate = 1/10
+
 
 
 local function onPlayerConnect()
@@ -30,7 +36,7 @@ local function onPlayerConnect()
 	--nodesGE.tick()
 	positionGE.tick()
 	MPInputsGE.tick()
-	powertrainGE.tick()
+	MPPowertrainGE.tick()
 end
 
 
@@ -59,6 +65,18 @@ local function onUpdate(dt)
 		if electricsDelay > electricsTickrate then
 			electricsDelay = 0 -- Reset the delay
 			MPElectricsGE.tick() -- Comment this line to disable electrics synchronization
+		end
+		
+		gearDelay = gearDelay + dt
+		if gearDelay > gearTickrate then
+			gearDelay = 0 -- Reset the delay
+			MPElectricsGE.tickGears()
+		end
+		
+		powertrainDelay = powertrainDelay + dt
+		if powertrainDelay > powertrainTickrate then
+			powertrainDelay = 0 -- Reset the delay
+			MPPowertrainGE.tick() -- Comment this line to disable electrics synchronization
 		end
 	end
 end

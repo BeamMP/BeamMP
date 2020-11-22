@@ -27,6 +27,17 @@ end
 
 
 
+local function tickGears() -- Update electrics values of all vehicles
+	for i = 0, be:getObjectCount() do -- For each vehicle
+		local veh = be:getObject(0) --  Get vehicle
+		if veh and not MPVehicleGE.isOwn(veh:getId()) then -- For loop always return one empty vehicle ?
+			veh:queueLuaCommand("MPElectricsVE.checkGears()") -- Check if any value changed
+		end
+	end
+end
+
+
+
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
@@ -99,6 +110,7 @@ end
 
 
 M.tick 			 = tick
+M.tickGears		 = tickGears
 M.handle     	 = handle
 M.sendGear		 = sendGear
 M.applyGear	 	 = applyGear

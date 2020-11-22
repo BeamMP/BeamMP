@@ -219,7 +219,7 @@ local function updateGFX(dt) -- dt in seconds
       M.wheelFFBForceCoefCurrent = 0 -- free up the wheel while AI is driving
     end
 
-    if v.mpVehicleType == "remote" then
+    if v.mpVehicleType == "R" then
       M.wheelFFBForceCoefCurrent = 0 -- don't apply wheel forces if vehicle is remote
     end
   end

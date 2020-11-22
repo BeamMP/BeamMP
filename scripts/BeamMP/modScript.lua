@@ -30,8 +30,8 @@ registerCoreModule("MPElectricsGE")
 load("positionGE")
 registerCoreModule("positionGE")
 
-load("powertrainGE")
-registerCoreModule("powertrainGE")
+load("MPPowertrainGE")
+registerCoreModule("MPPowertrainGE")
 
 load("MPUpdatesGE")
 registerCoreModule("MPUpdatesGE")

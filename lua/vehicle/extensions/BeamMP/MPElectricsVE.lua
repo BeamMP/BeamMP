@@ -35,7 +35,7 @@ local translationTable = {
 
 
 local function applyGear(data)
-	if not electrics.values.gearIndex then return ends
+	if not electrics.values.gearIndex then return end
 	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
 	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor")).type
 	if gearboxType == "manualGearbox" then

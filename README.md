@@ -1,4 +1,4 @@
-# BeamNG-MP
+# BeamMP
 A LUA implementation at attempting to bring local network multiplayer to BeamNG.drive
 
 # Contents
@@ -111,17 +111,17 @@ Update: Actually is for this: https://github.com/BeamNG/BeamNGpy Still was helpf
 
 ### “I have the mod installed, but I can’t connect to any servers…”
 
-At this stage you should have the bridge and BeamNG-MP UI up and running but cannot connect to a server. If you don’t have one of these, please follow the video posted above (in 'Installation') carefully.
+At this stage you should have the bridge and BeamMP UI up and running but cannot connect to a server. If you don’t have one of these, please follow the video posted above (in 'Installation') carefully.
 
 There could be several reasons why this is happening, so we’ll cover some basic problems
 
--	First, make sure you have entered the correct IP into bridge, copy and paste the IP from the official BeamNG-MP discord – do NOT alter the port information
+-	First, make sure you have entered the correct IP into bridge, copy and paste the IP from the official BeamMP discord – do NOT alter the port information
 
--	Make sure bridge is running and has been started. Then whilst in the same map as the server is running, press CTRL+L (to refresh the UI) and then click connect using the in-game BeamNG-MP UI.
+-	Make sure bridge is running and has been started. Then whilst in the same map as the server is running, press CTRL+L (to refresh the UI) and then click connect using the in-game BeamMP UI.
 
--	Ensure that you have not put an IP or port in the BeamNG-MP in-game UI. You only need to enter your nickname here
+-	Ensure that you have not put an IP or port in the BeamMP in-game UI. You only need to enter your nickname here
 
--	Make sure there is no hidden space after the IP in the bridge, this will cause this error. Also check that the server isn’t down by checking the BeamNG-MP discord
+-	Make sure there is no hidden space after the IP in the bridge, this will cause this error. Also check that the server isn’t down by checking the BeamMP discord
 
 -	Javascript errors that pop up in the bridge app can be fixed by restarting bridge. Currently a new version of the bridge is being developed and should combat these errors. These errors may be frequent upon server disconnect/game close, so if in doubt, restart bridge.
 
@@ -150,7 +150,7 @@ There could be several reasons why this is happening, so we’ll cover some basi
 # “I cannot find a fix for my issue" or "My issue still persists”
 
 
--	Please head on over to our official discord (BeamNG-MP) and start a new support ticket, in ‘Support area’ with a brief description of the error. A member of staff will help you with your problem. 😊
+-	Please head on over to our official discord (BeamMP) and start a new support ticket, in ‘Support area’ with a brief description of the error. A member of staff will help you with your problem. 😊
 
 https://discord.gg/4VWgTJ2
 

@@ -87,9 +87,14 @@ local function onClientPreStartMission(mission)
   file = path .. 'mainLevel'
   if not FS:fileExists(file..'.lua') then return end
   extensions.loadAtRoot(file,"")
+  core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
   if mainLevel and mainLevel.onClientPreStartMission then
     mainLevel.onClientPreStartMission(mission)
   end
+end
+
+local function onClientPostStartMission()
+  core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
 end
 
 local function onClientStartMission(mission)
@@ -150,6 +155,7 @@ end
 M.startMultiplayer           = startMultiplayer
 M.startMultiplayerByName     = startMultiplayerByName
 M.onClientPreStartMission    = onClientPreStartMission
+M.onClientPostStartMission   = onClientPostStartMission
 M.onClientStartMission       = onClientStartMission
 M.onClientEndMission         = onClientEndMission
 M.onVehicleSwitched          = onVehicleSwitched

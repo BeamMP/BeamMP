@@ -2,103 +2,79 @@
 	ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}"
 	ng-init="init()">
 	<style>
-	  input[type=number] {
-		width: 58px;
-	  }
-	  .title {
-		margin-top: 0px;
-		margin-bottom: 0px;
-		font-size: 1em;
-		font-weight: bold;
-		color: #BBBBBB;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-	  }
-	  .b-important {
-		font-weight: bold;
-	  }
-	  .b-important:hover {
-		background-color: #C8FFC8;
-	  }
-	  .b-important:active {
-		background-color: #A8FFA8;
-	  }
-	  .nomargin-input{
-		margin-bottom: 0;
-		width: 130px;
-	  }
-	  .nobotmargin{
-		margin-top: 8px;
-		margin-bottom: 0;
-	  }
-	  .empty-span {
-		min-width: 30px;
-		display: inline-block;
-	  }
-	  .error {
-		color: red;
-		margin-top: 5px;
-		margin-bottom:5px;
-	  }
-	  #MainChatBoxWindow {
-		display: flex;
-		flex-direction: column;
-		height:100%;
-		width:100%;
-	  }
-	  #CHATMESSAGE {
-		width:100%;
-		height:auto;
-	    background-color: black;
-		background-color:rgba(0, 0, 0, 0.25);
-		border: 2px solid rgba(175, 175, 175, 0.45);
-		color:white;
-		transition: 0.20s;
-	  }
-	  #CHATMESSAGE::placeholder {
-		color: #DDDDDD;
-	  }
-	  #CHATMESSAGE:hover {
-		background-color:rgba(0, 0, 0, 0.5);
-	  }
-	  #send-button {
-		background-color:black;
-		color: #DDDDDD;
-		border: 2px solid rgba(175, 175, 175, 0.45);
-		transition: 0.20s;
-		background-color:rgba(0, 0, 0, 0.45);
-		height:100%;
-	  }
-	  #send-button:hover {
-		background-color:rgba(0, 0, 0, 0.65);
-		color: #FFFFFF;
-	  }
-	  .chatbox {
-		display: flex;
-		min-height:40px;
-	  }
-	  ul#CHAT {
-		margin-top: auto;
-		margin-bottom: 0px;
-		list-style: none;
-		padding-left: 0px;
-		overflow-y: scroll;
-		overflow-wrap: break-word;
-		<!-- overflow: hidden; -->
-		<!--background-color:rgba(0, 0, 0, 0.45);-->
-	  }
-	  ::-webkit-scrollbar {
-    width: 0px;  /* Remove scrollbar space */
-    background: transparent;  /* Optional: just make scrollbar invisible */
-}
-	  #CHAT {<!--background-color:rgba(0, 0, 0, 0.45);-->}
+		.error {
+			color: red;
+		}
+		#chat-window {
+			display: flex;
+			flex-direction: column;
+			height:100%;
+			width:100%;
+			font-size:1.15em;
+			font-family: sans-serif, Arial, Helvetica;
+		}
+		#chat-input {
+			width:100%;
+			height:auto;
+			background-color: black;
+			background-color:rgba(0, 0, 0, 0.25);
+			border: 2px solid rgba(175, 175, 175, 0.45);
+			color:white;
+			transition: 0.20s;
+		}
+		#chat-input::placeholder {
+			color: #DDDDDD;
+		}
+		#chat-input:hover {
+			background-color:rgba(0, 0, 0, 0.5);
+		}
+		.buttons {
+			background-color:black;
+			color: #DDDDDD;
+			border: 2px solid rgba(175, 175, 175, 0.45);
+			transition: 0.20s;
+			background-color:rgba(0, 0, 0, 0.45);
+			height:100%;
+		}
+		.buttons:hover {
+			background-color:rgba(0, 0, 0, 0.65);
+			color: #FFFFFF;
+		}
+		#chatbox {
+			display: flex;
+			min-height:40px;
+			width:250px;
+			transition: 0.20s;
+			transition-delay:400ms;
+		}
+		#chatbox:hover {
+			width:100%;
+			transition: none; /* No animation */
+		}
+		ul#chat-list {
+			list-style: none;
+			padding-left: 0px;
+			overflow-y: scroll;
+			overflow-wrap: break-word;
+		}
+		#chat-list {
+			display:flex;
+			flex-direction: column;
+			margin-top:auto;
+			margin-bottom:0px;
+		}
+		::-webkit-scrollbar {
+			width: 0px;  /* Remove scrollbar space */
+			background: transparent;  /* Optional: just make scrollbar invisible */
+		}
 	</style>
-
-	<div id="MainChatBoxWindow">
-	  <ul id="CHAT"></ul>
-	  <form class="chatbox">
-		<input id="CHATMESSAGE" type="text" ng-click="select()" placeholder="Chat here">
-		<button id="send-button" ng-click="chatSend()">Send</button>
-	  </form>
+	<div id="chat-window">
+		<ul id="chat-list"></ul>
+		<form id="chatbox">
+			<button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
+			<input id="chat-input" type="text" ng-click="select()" placeholder="Chat here"></input>
+			<button id="swap-button" class="buttons" ng-click="chatSwapVertical()">&uarr;</button>
+			<button id="swap-button" class="buttons" ng-click="chatSwapHorizontal()">&lt;</button>
+		</form>
 	</div>
 </div>

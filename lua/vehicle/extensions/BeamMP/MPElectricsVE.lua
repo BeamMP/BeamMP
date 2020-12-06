@@ -74,7 +74,6 @@ local function applyGear(data)
 	-- We use the same thing as automatic for all the first gears, and we use
 	-- the same type of shifting as sequential for M gears.
 	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" then
-		print("dctGearbox cvtGearbox")
 		local state = string.sub(data, 1, 1)
 		if state == 'M' then
 			if localGearMode ~= 'M' then

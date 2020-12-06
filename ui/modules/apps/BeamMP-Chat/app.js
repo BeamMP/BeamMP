@@ -1,4 +1,6 @@
 var app = angular.module('beamng.apps');
+
+
 app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
 	return {
 		templateUrl: 'modules/apps/BeamMP-Chat/app.html',
@@ -6,28 +8,21 @@ app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
 		restrict: 'EA',
 		scope: true
 	}
-}]);
-app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
-	$scope.warnVis = false;
-	$scope.timer = null;
-	let count = 0;
-	let countUpdateInterval = null;
-	let spamLocked = false;
+}]); 
 
+
+app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
-		//bngApi.engineLua('UI.ready("CHAT")');
-		countUpdateInterval = setInterval(updateCount, 20000);
-		var chatMessage = document.getElementById("CHATMESSAGE");
-		chatMessage.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		chatMessage.addEventListener("mouseout", function(){ chatShown = false; });
-		var chat = document.getElementById("CHAT");
-		chat.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		chat.addEventListener("mouseout", function(){ chatShown = false; });
+		// Set listeners
+		var chatinput = document.getElementById("chat-input");
+		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chatinput.addEventListener("mouseout", function(){ chatShown = false; });
+		var chatlist = document.getElementById("chat-list");
+		chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+		chatlist.addEventListener("mouseout", function(){ chatShown = false; });
 	};
 
 	$scope.reset = function() {
-		connected = false;
-		players = [];
 		$scope.init();
 	};
 
@@ -35,80 +30,59 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
 
-	$scope.chatClear = function() {
-		chatClear();
-	};
-
-	$scope.$on('useCustomChatWindow', function (setting) {
-		if (setting == true) {
-			var chatWindow = document.getElementById("MainChatBoxWindow");
-			chatWindow.style.display = "none";
-		}
-	})
-
-	$scope.chatSend = function() {
-		if (count > 12 || spamLocked) {
-			spamLimit();
+	$scope.chatSwapHorizontal = function() {
+		const chatbox = document.getElementById("chatbox");
+		if (chatbox.style.flexDirection != "row-reverse") {
+			chatbox.style.flexDirection = "row-reverse";
+			chatbox.style.marginLeft = "auto";
 		}
 		else {
-			let cm = document.getElementById("CHATMESSAGE");
-			if (cm.value) {
-				if (cm.value.length > 150) {
-					msgTooLong();
-				}
-				else {
-					bngApi.engineLua('UI.chatSend("'+ String(cm.value) + '")');
-					cm.value = '';
-					count++;
-				}
+			chatbox.style.flexDirection = "row";
+			chatbox.style.marginLeft = "0px";
+		}
+	}
+
+	$scope.chatSwapVertical = function() {
+		const chatwindow = document.getElementById("chat-window");
+		const chatlist = document.getElementById("chat-list");
+		if (chatwindow.style.flexDirection != "column-reverse") {
+			chatwindow.style.flexDirection = "column-reverse";
+			chatlist.style.flexDirection = "column-reverse";
+			chatlist.style.marginTop = "0px";
+			chatlist.style.marginBottom = "auto";
+		}
+		else {
+			chatwindow.style.flexDirection = "column";
+			chatlist.style.flexDirection = "column";
+			chatlist.style.marginTop = "auto";
+			chatlist.style.marginBottom = "0px";
+		}
+	}
+
+	$scope.$on('chatMessage', function (event, message) {
+		addMessage(message);
+	});
+
+	$scope.chatSend = function() {
+		let chatinput = document.getElementById("chat-input");
+		const text = chatinput.value
+		if (text) {
+			if (text > 150) addMessage("Your message should not be longer than 150 characters!");
+			else {
+				bngApi.engineLua("UI.chatSend(\""+ text.replace(/"/g, '\'') + "\")");
+				chatinput.value = '';
 			}
 		}
 	};
-
-	function updateCount() {
-		count = 0;
-	}
-
-	function msgTooLong() {
-		addMessage("Your message should not be longer than 150 characters!");
-	}
-
-	function spamLimit() {
-		if (!spamLocked) {
-			spamLock();
-		}
-		addMessage("Spam warning: your chat has been locked for 20 seconds");
-	}
-
-	function spamLock() {
-		spamLocked = true;
-		clearInterval(countUpdateInterval);
-		countUpdateInterval = null;
-		count = 0;
-		setTimeout(spamUnlock, 20000);
-	}
-
-	function spamUnlock() {
-		countUpdateInterval = setInterval(updateCount, 20000)
-		spamLocked = false;
-	}
-
-	function addWarning() {
-		if (!$scope.warnVis) {
-			$scope.warnVis = true;
-			$scope.timer = setTimeout(function() {
-				$scope.warnVis = false;
-			}, 10000)
-		}
-	}
 }]);
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 
 // -------------------------------------------- CHAT FADING -------------------------------------------- //
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 var chatShown = false;
 var chatShowTime = 3500; // 5000ms
 var chatFadeSteps = 1/30; // 60 steps
@@ -138,7 +112,7 @@ async function showChat() {
 	// While the mouse is over the chat, we wait
 	while (chatShown) {
 		// Get the chat and the messages
-		var chatMessages = document.getElementById("CHAT").getElementsByTagName("li");
+		var chatMessages = document.getElementById("chat-list").getElementsByTagName("li");
 		// Set all messages opacity to 1.0
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
 		await sleep(100);
@@ -162,45 +136,33 @@ async function showChat() {
 // -------------------------------------------- CHAT FADING -------------------------------------------- //
 
 
-
 function addMessage(msg) {
-
 	//getting current time and adding it to the message before displaying
 	var now = new Date();
     var hour    = now.getHours();
     var minute  = now.getMinutes();
     var second  = now.getSeconds();
-    if(hour.toString().length == 1) hour = '0'+hour;
-    if(minute.toString().length == 1) minute = '0'+minute;
-    if(second.toString().length == 1) second = '0'+second;
+    if(hour < 10) hour = '0'+hour;
+    if(minute < 10) minute = '0'+minute;
+    if(second < 10) second = '0'+second;
 	var time = hour + ":" + minute + ":" + second;
+	msg = time + " " + msg;
 
-	msg = time + " - " + msg;
-	//setTimeout(function(){ alert("Hello"); }, 3000);
+	// Create the message node and add it
 	let node = document.createElement("li");
-	node.style.paddingBottom = "4px";
+	node.style.padding = "3px 0px 3px 0px";
 	node.style.backgroundColor = "rgba(0, 0, 0, 0.45)";
 	fadeNode(node);
-	
-	let textnode = document.createTextNode(msg);
-	let chat = document.getElementById("CHAT");
-	node.appendChild(textnode);
-	chat.appendChild(node);
+	let textNode = document.createTextNode(msg);
+	let chatlist = document.getElementById("chat-list");
+	node.appendChild(textNode);
+	chatlist.appendChild(node);
 
-	if (chat.children.length > 70) {
-		chat.removeChild(chat.children[0]);
-	}
+	// Delete oldest chat message if too long
+	if (chatlist.children.length > 70) chatlist.removeChild(chatlist.children[0]);
 
-	chat.scrollTop = chat.scrollHeight;
-}
-
-function chatClear() {
-	let chat = document.getElementById("CHAT");
-	chat.innerHTML = '';
-	//console.log(chat.children.length);
-}
-
-function greeting(server) {
-	addMessage("You are now connected to " + stripCustomFormatting(sanitizeString(server)));
-	addMessage("Welcome to our chat!");
+	// Scroll the chat depending of it's direction
+	const chatwindow = document.getElementById("chat-window");
+	if (chatwindow.style.flexDirection != "column-reverse") chatlist.scrollTop = chatlist.scrollHeight;
+	else chatlist.scrollTop = 0;
 }

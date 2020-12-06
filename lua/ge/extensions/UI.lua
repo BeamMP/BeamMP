@@ -130,7 +130,8 @@ end
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
 	print("Message received: "..message) -- DO NOT REMOVE 
-	be:executeJS('addMessage("'..message..'")')
+	--be:executeJS('addMessage("'..message..'")')
+	guihooks.trigger("chatMessage", message)
 	TriggerClientEvent("ChatMessageReceived", message)
 end
 

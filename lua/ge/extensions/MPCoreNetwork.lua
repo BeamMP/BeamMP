@@ -122,7 +122,8 @@ local function LoadLevel(map)
 	MapLoadingTimeout = 0
 	mapLoaded = false
 	status = "LoadingMapNow"
-	freeroam_freeroam.startFreeroam(map)
+	--freeroam_freeroam.startFreeroam(map)
+	multiplayer_multiplayer.startMultiplayer(map)
 end
 
 

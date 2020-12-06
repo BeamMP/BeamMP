@@ -3,6 +3,9 @@
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
+load("multiplayer/multiplayer")
+registerCoreModule("multiplayer/multiplayer")
+
 load("UI")
 registerCoreModule("UI")
 

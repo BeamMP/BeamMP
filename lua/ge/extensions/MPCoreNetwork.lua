@@ -236,7 +236,10 @@ local function modLoaded(modname)
 	end
 end
 
-
+local function login(d)
+	print('Attempting login')
+	send('N:'..d..'')
+end
 
 local function onInit()
 	connectToLauncher()
@@ -256,6 +259,7 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
+M.login = login
 M.onInit = onInit
 
 

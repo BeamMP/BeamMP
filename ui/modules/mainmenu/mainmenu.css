@@ -121,6 +121,10 @@
   color: white;
 }
 
+.backBtn {
+  z-index: 1000;
+}
+
 .contentNavMainmenu .backBtn:focus {
   background-color: rgba(180, 37, 37, 0.83);
 }
@@ -412,4 +416,3 @@
   left: 10%;
 
 }
-

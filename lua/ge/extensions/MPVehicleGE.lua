@@ -97,7 +97,7 @@ local function getDistanceMap()
 end
 
 -- RETURN THE MAP OF ALL NICKNAMES
-local function getNicknameMap() -- Returns a ["localID"] = "username" table of all vehicles, including own ones
+local function getNicknameMap() -- Returns a [localID] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
 	for k,v in pairs(nicknameMap) do
 		nicknameSimple[k] = v.nickname
@@ -369,7 +369,7 @@ local function onVehicleResetted(gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if serverVehicleID and isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle -- If it's not null
-			print("Vehicle "..gameVehicleID.." resetted by client")
+			--print("Vehicle "..gameVehicleID.." resetted by client")
 			local veh = be:getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
 			local rot = veh:getRotation()
@@ -488,7 +488,59 @@ local function syncVehicles()
 	vehiclesToSync = {}
 end
 
+local function teleportVehToPlayer(targetName)
+	print("tp vehicle to: "..targetName)
+	if activeVehicle then
+		local veh = be:getObjectByID(tonumber(activeVehicle))
+		if veh then
+			for i,n in pairs(nicknameMap) do
+				if n.nickname == targetName then
+					print("teleporting to ",i)
 
+					local targetVeh = be:getObjectByID(i)
+					local targetVehPos = targetVeh:getPosition()
+					local targetVehRot = targetVeh:getRotation() -- vehicles forward are inverted
+
+					targetVehPos.x = targetVehPos.x + 2.5
+					targetVehPos.y = targetVehPos.y + 2.5
+
+					--local up = vec3(0, 0, 1)
+					--local yDir = vec3(0, 1, 0)
+					--local rot = quatFromDir(yDir:rotated(quatFromDir(-vec3(targetVeh:getDirectionVector()), up)), up)
+					--veh:setPositionRotation(targetVehPos.x, targetVehPos.y, targetVehPos.z, rot.x, rot.y, rot.z, rot.w) -- this reset the vehicle :()
+
+					veh:setPosition(targetVehPos)
+					--veh:autoplace(false)
+					print("donesies")
+					return
+				end
+			end
+		else
+			print("no veh, teleporting camera instead")
+			teleportCameraToPlayer(targetName)
+		end
+	else
+		print("no active vehicle, teleporting camera instead")
+		teleportCameraToPlayer(targetName)
+	end
+end
+
+local function teleportCameraToPlayer(targetName)
+	print("tp camera to: "..targetName)
+	local nickmap = getNicknameMap()
+	for i,n in pairs(nickmap) do
+		if n == targetName then
+			print("found vehicle ",i, "active ",activeVehicle)
+			local targetVeh = be:getObjectByID(i)
+
+			if i ~= tonumber(activeVehicle) and targetVeh then
+				print("entering vehicle ",i)
+				be:enterVehicle(0,targetVeh)
+				return
+			end
+		end
+	end
+end
 
 local function onUpdate(dt)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
@@ -513,32 +565,53 @@ local function onUpdate(dt)
 			local veh = be:getObject(i) --  Get vehicle
 			if veh then -- For loop always return one empty vehicle ?
 				local gameVehicleID = veh:getID()
-				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] and settings.getValue("showNameTags") and nicknamesAllowed then
+				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] then
 					local pos = veh:getPosition()
-					local dist = ""
-					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
+					local nametagAlpha = 1
+					local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
 
-					if localPos and settings.getValue("nameTagShowDistance") then
+					if localPos then
 						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
+						nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 						distanceMap[gameVehicleID] = distfloat
-						if distfloat > 10 then
-							dist = ""
-							if settings.getValue("uiUnitLength") == "imperial" then
-								distfloat = distfloat * 3.28084
-								dist = " "..tostring(math.floor(distfloat)).." ft"
-							else
-								dist = " "..tostring(math.floor(distfloat)).." m"
-							end
-						end
 					end
 
-					pos.z = pos.z + 2.0 -- So it appears above the vehicle, not inside
-					debugDrawer:drawTextAdvanced(
-						pos, -- Position in 3D
-						String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag..dist.." "), -- Text
-						ColorF(1, 1, 1, 1), true, false, -- Foreground Color / Background / Wtf
-						roleInfo.backcolor -- Background Color
-					)
+					if settings.getValue("showNameTags") and nicknamesAllowed then
+						local dist = ""
+						local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
+						local backColor = roleInfo.backcolor
+
+						if distanceMap[gameVehicleID] > 10 then
+							if settings.getValue("uiUnitLength") == "imperial" then
+								dist = " "..tostring(math.floor(distanceMap[gameVehicleID]*3.28084)).." ft"
+							else
+								dist = " "..tostring(math.floor(distanceMap[gameVehicleID])).." m"
+							end
+						end
+
+						if not settings.getValue("nameTagShowDistance") then dist = "" end
+
+						if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
+							if settings.getValue("nameTagFadeInvert") then
+								nametagAlpha = 1 - nametagAlpha
+							else
+								dist = ""
+							end
+						end
+
+						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
+						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
+
+						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
+						debugDrawer:drawTextAdvanced(
+							pos, -- Location
+							String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag..dist.." "), -- Text
+							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
+							backColor -- Background Color
+						)
+
+						--"██▓▓▒▒░░"
+					end
 				end
 			end
 		end
@@ -575,6 +648,8 @@ M.onServerVehicleResetted = onServerVehicleResetted
 M.sendBeamstate           = sendBeamstate
 M.onServerVehicleCoupled  = onServerVehicleCoupled
 
+M.teleportVehToPlayer     = teleportVehToPlayer
+M.teleportCameraToPlayer  = teleportCameraToPlayer
 
 print("MPVehicleGE Loaded.")
 return M

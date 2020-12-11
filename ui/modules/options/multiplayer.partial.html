@@ -1,5 +1,21 @@
 <md-content>
 
+  <md-subheader class="md-no-sticky">General</md-subheader>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.syncConfigUpdates' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.showSyncConfigUpdates" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+
+
+
+
   <md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</md-subheader>
 
   <md-list-item md-no-ink>
@@ -16,16 +32,32 @@
   </md-list-item>
 
   <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.multiplayer.syncConfigUpdates' | translate }}</p>
-    <md-checkbox ng-model="options.data.values.showSyncConfigUpdates" ng-change="options.applyState()"></md-checkbox>
+    <p>Fade nametags in/out</p>
+    <md-checkbox ng-model="options.data.values.nameTagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
-  <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
-    <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
+
+  <md-list-item ng-if="options.data.values.nameTagFadeEnabled" layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">How far nametags will start fading in/stop fading out</md-tooltip>
+  <p flex="30">Fade distance</p>
+  <md-slider flex
+    ng-model="options.data.values.nameTagFadeDistance" min="0" max="150" step="1" aria-label="_"
+    ng-change="options.applyState()">
+  </md-slider>
+  <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
+  <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
   </md-list-item>
-  
-  
+
+  <md-list-item ng-if="options.data.values.nameTagFadeEnabled" md-no-ink>
+    <p>Invert nametag fade direction</p>
+	<span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
+	<span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
+    <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+
+
+
 
   <md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.others' | translate }}</md-subheader>
   <md-list-item md-no-ink>
@@ -44,7 +76,7 @@
     <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">4444 (Default)</span>
   </md-list-item>
 
-  <md-list-item md-no-ink>
+  <!--<md-list-item md-no-ink>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.clearLauncherCache.tooltip' | translate }}</md-tooltip>
     <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>
   </md-list-item>
@@ -53,6 +85,6 @@
      <md-button md-no-ink class="md-raised md-warn" flex ng-click="options.clearLauncherCache()">
        <md-icon class="material-icons">check</md-icon> {{ ::'ui.multiplayer.clear' | translate }}
      </md-button>
-   </md-list-item>
+   </md-list-item>-->
 
 </md-content>

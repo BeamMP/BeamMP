@@ -27,6 +27,22 @@ angular.module('beamng.stuff')
 		}
 	});
 
+	vm.login = function() {
+		var u = document.getElementById('loginUsername').value;
+		var p = document.getElementById('loginPassword').value;
+		document.getElementById('loginUsername').value = '';
+		document.getElementById('loginPassword').value = '';
+		var d = {
+			username: u,
+			password: p
+		}
+		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
+	}
+
+	vm.guestLogin = function() {
+
+	}
+
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
 		console.log("ok");

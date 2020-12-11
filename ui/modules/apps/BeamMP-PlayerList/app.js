@@ -2,6 +2,7 @@ var connected = false;
 var players = [];
 let pingList = [];
 var nickname = "";
+var bngApiScope;
 var app = angular.module('beamng.apps');
 app.directive('multiplayerplayerlist', ['UiUnits', function (UiUnits) {
 	return {
@@ -14,6 +15,7 @@ app.directive('multiplayerplayerlist', ['UiUnits', function (UiUnits) {
 app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.warnVis = false;
 	$scope.timer = null;
+	bngApiScope =  bngApi;
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-PlayerList")');
 	};
@@ -108,12 +110,12 @@ function clearPlayerList() {
 
 function teleportToPlayer(targetPlayerName) {
 	console.log("teleportEvent: " + targetPlayerName);
-	//addMessage("Teleporting to " + targetPlayerName);
-	//actually teleport the car lol
+	//bngApiScope.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
 }
 
 function showPlayerInfo(targetPlayerName) {
 	console.log("showPlayerInfoEvent: " + targetPlayerName);
+	bngApiScope.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
 
 

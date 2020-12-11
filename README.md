@@ -152,6 +152,6 @@ There could be several reasons why this is happening, so we’ll cover some basi
 
 -	Please head on over to our official discord (BeamMP) and start a new support ticket, in ‘Support area’ with a brief description of the error. A member of staff will help you with your problem. 😊
 
-https://discord.gg/4VWgTJ2
+https://discord.gg/BeamMP
 
 #### Please keep in mind that this is a heavy work-in-progress, everything is subject to change and thus will be updated frequently -keep an eye on the official discord for any new releases, and check you have the latest version before you make a support ticket. Many thanks!

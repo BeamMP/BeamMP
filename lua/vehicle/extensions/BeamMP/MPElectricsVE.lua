@@ -197,11 +197,7 @@ local lastRightSignal = 0
 local lastHazards = 0
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
-	if (decodedData) then -- If received data is correct
-		for k,v in pairs(decodedData) do
-			electrics.values[k] = v
-		end
-	
+	if (decodedData) then -- If received data is correct	
 		if not decodedData.signal_left_input then decodedData.signal_left_input = lastLeftSignal end
 		if not decodedData.signal_right_input then decodedData.signal_right_input = lastRightSignal end
 		if not decodedData.hazard_enabled then decodedData.hazard_enabled = lastHazards end
@@ -235,6 +231,11 @@ local function applyElectrics(data)
 		if decodedData.fog then
 			electrics.set_fog_lights(decodedData.fog)
 		end
+		
+		for k,v in pairs(decodedData) do
+			electrics.values[k] = v
+		end
+		
 		latestData = data
 	end
 end

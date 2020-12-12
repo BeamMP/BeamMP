@@ -96,14 +96,69 @@ local function applyGear(data)
 	latestGearData = data
 end
 
-local allowedKeys = {
-	["signal_left_input"] = 1,
-	["signal_right_input"] = 1,
-	["hazard_enabled"] = 1,
-	["lights_state"] = 1,
-	["lightbar"] = 1,
-	["horn"] = 1,
-	["fog"] = 1
+local disallowedKeys = {
+	["wheelThermals"] = 1,
+	["airflowspeed"] = 1,
+	["airspeed"] = 1,
+	["altitude"] = 1,
+	["avgWheelAV"] = 1,
+	["clutch_input"] = 1,
+	["driveshaft"] = 1,
+	["driveshaft_F"] = 1,
+	["engineLoad"] = 1,
+	["exhaustFlow"] = 1,
+	["fuel"] = 1,
+	["fuelVolume"] = 1,
+	["oiltemp"] = 1,
+	["rpm"] = 1,
+	["rpmTacho"] = 1,
+	["rpmspin"] = 1,
+	["virtualAirspeed"] = 1,
+	["watertemp"] = 1,
+	["wheelspeed"] = 1,
+	["turnsignal"] = 1,
+	["hazard"] = 1,
+	["signal_R"] = 1,
+	["signal_L"] = 1,
+	["radiatorFanSpin"] = 1,
+	["turboBoost"] = 1,
+	["turboSpin"] = 1,
+	["turboRPM"] = 1,
+	["turboRpmRatio"] = 1,
+	["engineThrottle"] = 1,
+	["throttle"] = 1,
+	["brake_input"] = 1,
+	["brake"] = 1,
+	["brakelights"] = 1,
+	["clutch"] = 1,
+	["clutchRatio"] = 1,
+	["steering"] = 1,
+	["steering_input"] = 1,
+	["throttle_input"] = 1,
+	["abs"] = 1,
+	["lights"] = 1,
+	["wheelaxleFR"] = 1,
+	["wheelaxleFL"] = 1,
+	["wheelaxleRR"] = 1,
+	["wheelaxleRL"] = 1,
+	["axle_FR"] = 1,
+	["axle_FL"] = 1,
+	["axle_RR"] = 1,
+	["axle_RL"] = 1,
+	["throttleFactorRear"] = 1,
+	["throttleFactorFront"] = 1,
+	["esc"] = 1,
+	["tcs"] = 1,
+	["escActive"] = 1,
+	["absActive"] = 1,
+	["disp_N"] = 1,
+	["regenThrottle"] = 1,
+	["disp_1"] = 1,
+	["tcsActive"] = 1,
+	["clutchRatio1"] = 1,
+	["lockupClutchRatio"] = 1,
+	["throttleOverride"] = 1,
+	["cruiseControlTarget"] = 1
 }
 
 local function checkGears()
@@ -118,7 +173,7 @@ local function check()
 	local e = electrics.values
 	if not e or not e.gear then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
-		if allowedKeys[k] then -- If it's not a disallowed key
+		if not disallowedKeys[k] then -- If it's not a disallowed key
 			if lastElectrics[k] ~= v then -- If the value changed
 				electricsChanged = true -- Send electrics
 				lastElectrics[k] = v -- Define the new value
@@ -143,6 +198,10 @@ local lastHazards = 0
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
 	if (decodedData) then -- If received data is correct
+		for k,v in pairs(decodedData) do
+			electrics.values[k] = v
+		end
+	
 		if not decodedData.signal_left_input then decodedData.signal_left_input = lastLeftSignal end
 		if not decodedData.signal_right_input then decodedData.signal_right_input = lastRightSignal end
 		if not decodedData.hazard_enabled then decodedData.hazard_enabled = lastHazards end

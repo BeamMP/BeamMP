@@ -100,6 +100,13 @@
     <script src="modules/busRoute/busRoute.js"></script>
     <script src="modules/iconView/icons.js"></script>
 
+    <!-- UIv3 Imports -->
+
+    <!-- <script src="modules/options2/graphicsbasic/graphicsbasic.js"></script> -->
+    <script src="modules/freeplay/freeplay.js"></script>
+    <script src="modules/freeplay-spawn/freeplay-spawn.js"></script>
+    <!-- <script src="modules/modmanager2/modmanager2.js"></script> -->
+
     <!-- Mod Wizard -->
     <!-- <script src="modules/modwizard/modwizard.js"></script>
     <script src="modules/modwizard/skinWizard/skinwizard.js"></script>
@@ -147,17 +154,17 @@
 
     <!-- .............. pause screen overlay ..............  -->
     <div ng-if="app.showPauseIcon" style="position:absolute; top:100px; right: 0; background:transparent; z-index:10" class="md-padding" ng-click="app.unpause()">
-      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
-          <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
-            Press
-            <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
-            to resume
-          </div>
-          <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
-            pause_circle_outline
-          </span>
-      </span>
-    </div>
+    <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
+        <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
+          {{::'ui.inputActions.general.press' | translate}}
+          <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
+          {{::'ui.inputActions.general.pause.toResume' | translate}}
+        </div>
+        <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
+          pause_circle_outline
+        </span>
+    </span>
+  </div>
 
     <game-indicators-layer></game-indicators-layer>
 

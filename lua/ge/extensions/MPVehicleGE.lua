@@ -151,7 +151,7 @@ local function sendVehicle(gameVehicleID)
 		local p0           = veh.colorPalette0
 		local p1           = veh.colorPalette1
 		local pos          = veh:getPosition()
-		local rot          = veh:getRotation()
+		local rot          = quat(veh:getRotation())
 
 		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = tostring(gameVehicleID) -- Game Vehicle ID
@@ -243,6 +243,10 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
+	if not decodedData then --JSON decode failed
+		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."!")
+		return
+	end
 	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
 	local vehicleName     = decodedData.jbm -- Vehicle name
@@ -251,7 +255,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local cP0             = decodedData.cpz -- Vehicle colorPalette0
 	local cP1             = decodedData.cpo -- Vehicle colorPalette1
 	local pos             = vec3(decodedData.pos)
-	local rot             = quat(decodedData.rot)
+	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
@@ -381,7 +385,7 @@ local function onVehicleResetted(gameVehicleID)
 			--print("Vehicle "..gameVehicleID.." resetted by client")
 			local veh = be:getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
-			local rot = veh:getRotation()
+			local rot = quat(veh:getRotation())
 			local tempTable = {
 				pos = {
 					x = pos.x,
@@ -508,7 +512,7 @@ local function teleportVehToPlayer(targetName)
 
 					local targetVeh = be:getObjectByID(i)
 					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = targetVeh:getRotation() -- vehicles forward are inverted
+					local targetVehRot = quat(targetVeh:getRotation()) -- vehicles forward are inverted
 
 					targetVehPos.x = targetVehPos.x + 2.5
 					targetVehPos.y = targetVehPos.y + 2.5

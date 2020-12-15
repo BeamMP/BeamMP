@@ -30,8 +30,8 @@ angular.module('beamng.stuff')
 	vm.switchToLogin = function() {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-    	x[i].innerText='';    // Change the content
-    }
+			x[i].innerText='';    // Change the content
+		}
 		document.getElementById('GuestContainer').style.display = 'none'
 		document.getElementById('LoginContainer').style.display = 'block'
 	}
@@ -51,8 +51,8 @@ angular.module('beamng.stuff')
 	vm.switchToGuest = function() {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-    	x[i].innerText='';    // Change the content
-    }
+			x[i].innerText='';    // Change the content
+		}
 		document.getElementById('LoginContainer').style.display = 'none'
 		document.getElementById('GuestContainer').style.display = 'block'
 	}
@@ -69,8 +69,8 @@ angular.module('beamng.stuff')
 	$scope.$on('LoginContainerController', function (event, data) {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-    	x[i].innerText='';    // Change the content
-    }
+			x[i].innerText='';    // Change the content
+		}
 		if (data.hide) {
 			document.getElementById('MultiplayerLoginBody').style.display = 'none'
 		} else {
@@ -81,8 +81,8 @@ angular.module('beamng.stuff')
 	$scope.$on('LoginError', function (event, data) {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-    	x[i].innerText=data.message;    // Change the content
-    }
+			x[i].innerText=data.message;    // Change the content
+		}
 	});
 
 	vm.modelChanged = function($event) {
@@ -193,6 +193,7 @@ angular.module('beamng.stuff')
 	vm.check_isNotFull = false;
 	vm.check_modSlider = false;
 	vm.slider_maxModSize = 500; //should be almost a terabyte
+	vm.select_map = "Any"
 
 	bngApiScope = bngApi;
 	localStorage.removeItem('servers'); //clear serverlist so we dont show cached ones if the launcher broke
@@ -218,6 +219,10 @@ angular.module('beamng.stuff')
 		if (!row) return;
 		row.classList.remove("highlight");
 		row.selected = false;
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
 	}
 
 	vm.connect = function() {
@@ -269,66 +274,7 @@ angular.module('beamng.stuff')
 		}
 	}
 
-	function setColor(row) {
-		if (row.rowIndex % 2 == 0) { // If odd gray / If even lightgray
-			row.style.backgroundColor = "white";
-		} else {
-			row.style.backgroundColor = "#f2f2f2";
-		}
-	}
 
-	vm.sortTable = function(n, data, number) {
-		var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-		table = document.getElementById("servers-table");
-		switching = true;
-		// Set the sorting direction to ascending:
-		dir = "asc";
-		// Make a loop that will continue until no switching has been done:
-		while (switching) {
-			// Start by saying: no switching is done:
-			switching = false;
-			rows = table.rows;
-			// Loop through all table rows (except the first, which contains table headers):
-			for (i = 1; i < (rows.length - 1); i++) {
-				// Start by saying there should be no switching:
-				shouldSwitch = false;
-				// Get the two elements you want to compare, one from current row and one from the next:
-				x = rows[i].servData[data];
-				y = rows[i + 1].servData[data];
-				if (x.toLowerCase) {
-					x = x.toLowerCase()
-					y = y.toLowerCase()
-				}
-				// Check if the two rows should switch place, based on the direction, asc or desc:
-				if (dir == "asc") {
-					if (x > y) {
-						// If so, mark as a switch and break the loop:
-						shouldSwitch = true;
-						break;
-					}
-				} else if (dir == "desc") {
-					if (x < y) {
-						// If so, mark as a switch and break the loop:
-						shouldSwitch = true;
-						break;
-					}
-				}
-			}
-			if (shouldSwitch) {
-				// If a switch has been marked, make the switch and mark that a switch has been done:
-				rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-				switching = true;
-				// Each time a switch is done, increase this count by 1:
-				switchcount ++;
-			} else {
-				// If no switching has been done AND the direction is "asc", set the direction to "desc" and run the while loop again.
-				if (switchcount == 0 && dir == "asc") {
-					dir = "desc";
-					switching = true;
-				}
-			}
-		}
-	}
 
 	$scope.$on('SteamInfo', function (event, data) {
 		$scope.$apply(function () {
@@ -377,7 +323,9 @@ angular.module('beamng.stuff')
 	function displayServers() {
 		var table = document.getElementById("serversTableBody");
 		table.innerHTML = "";
+		var mapNames = new Array(); //["Any"];
 
+		console.log(vm.select_map)
 		var servers = JSON.parse(localStorage.getItem('servers'))
 		for (var i = 0; i < servers.length; i++) {
 			var filtered = servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
@@ -387,6 +335,10 @@ angular.module('beamng.stuff')
 			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
 
 			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
+			
+			if(filtered && !mapNames.includes(SmoothMapName(servers[i].map))) mapNames.push(SmoothMapName(servers[i].map));
+			if(filtered && vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) filtered = false;
+
 
 			if(filtered){
 				var bgcolor = 'rgba(0,0,0,0)!important';
@@ -410,21 +362,29 @@ angular.module('beamng.stuff')
 			}
 		}
 
+		console.log(mapNames);
+		
+		mapNames.sort();
+		mapNames.unshift("Any");
+		
+		vm.availableMaps = mapNames;
+
+
 		///////////////////////////////////////////////////////////////////////////
 		// This adds the on click handler for the dynamically created element.
 		var table = document.getElementById("serversTableBody");
-    var rows = table.getElementsByTagName("tr");
-    for (i = 0; i < rows.length; i++) {
-      var currentRow = table.rows[i];
-      var createClickHandler =
-      function(row) {
-        return function() {
-					//console.log(row.getAttribute('data-id'))
-					vm.selectRow(row, row.getAttribute('data-id'))
-        };
-      };
-      currentRow.onclick = createClickHandler(currentRow);
-    }
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			var currentRow = table.rows[i];
+			var createClickHandler =
+			function(row) {
+				return function() {
+							//console.log(row.getAttribute('data-id'))
+							vm.selectRow(row, row.getAttribute('data-id'))
+				};
+			};
+			currentRow.onclick = createClickHandler(currentRow);
+		}
 	};
 
 	vm.displayServers = displayServers;
@@ -508,6 +468,10 @@ angular.module('beamng.stuff')
 		if (!row) return;
 		row.classList.remove("highlight");
 		row.selected = false;
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
 	}
 
 	function select(row, table) {
@@ -571,58 +535,6 @@ angular.module('beamng.stuff')
 		}
 	}
 
-	vm.sortTable = function(n, data, number) {
-		var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-		table = document.getElementById("servers-table");
-		switching = true;
-		// Set the sorting direction to ascending:
-		dir = "asc";
-		// Make a loop that will continue until no switching has been done:
-		while (switching) {
-			// Start by saying: no switching is done:
-			switching = false;
-			rows = table.rows;
-			// Loop through all table rows (except the first, which contains table headers):
-			for (i = 1; i < (rows.length - 1); i++) {
-				// Start by saying there should be no switching:
-				shouldSwitch = false;
-				// Get the two elements you want to compare, one from current row and one from the next:
-				x = rows[i].servData[data];
-				y = rows[i + 1].servData[data];
-				if (x.toLowerCase) {
-					x = x.toLowerCase()
-					y = y.toLowerCase()
-				}
-				// Check if the two rows should switch place, based on the direction, asc or desc:
-				if (dir == "asc") {
-					if (x > y) {
-						// If so, mark as a switch and break the loop:
-						shouldSwitch = true;
-						break;
-					}
-				} else if (dir == "desc") {
-					if (x < y) {
-						// If so, mark as a switch and break the loop:
-						shouldSwitch = true;
-						break;
-					}
-				}
-			}
-			if (shouldSwitch) {
-				// If a switch has been marked, make the switch and mark that a switch has been done:
-				rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-				switching = true;
-				// Each time a switch is done, increase this count by 1:
-				switchcount ++;
-			} else {
-				// If no switching has been done AND the direction is "asc", set the direction to "desc" and run the while loop again.
-				if (switchcount == 0 && dir == "asc") {
-					dir = "desc";
-					switching = true;
-				}
-			}
-		}
-	}
 
 	$scope.$on('SteamInfo', function (event, data) {
 		$scope.$apply(function () {
@@ -675,6 +587,8 @@ angular.module('beamng.stuff')
 		var allServers = JSON.parse(localStorage.getItem('servers'))
 		for(var i in allServers)
 			allServers[i].id = i;
+
+		getFavs()
 
 		var favjson = JSON.parse(localStorage.getItem('favorites'))
 		if (favjson == null) return;
@@ -776,9 +690,7 @@ angular.module('beamng.stuff')
 					<md-button id="serverconnect-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect()" style="margin-left: 10px;">Connect</md-button>
 					<md-button id="removeFav-button"     class="button md-button md-default-theme" ng-class="" ng-click="removeFav()"           style="margin-left: 10px;">Remove Favorite</md-button>
 				</div>
-				<div class="row">
-					<h4></h4>
-
+				<div class="row" style="padding-left: 10px;">
 					<p>${listPlayers(d.playerslist)}</p>
 				</div>
 	    </td>`;
@@ -1017,12 +929,18 @@ function modCount(s) {
 	return s.split(";").length-1;
 }
 function modList(s) {
-	var re = new RegExp("Resources/Client/", 'g');
-	s = s.replace(re, '');
-	var re = new RegExp(".zip", 'g');
-	s = s.replace(re, '');
-	var re = new RegExp(";", 'g');
-	s = s.replace(re, ', ');
+	var modarray = s.split(';');
+	//console.log(modarray);
+	s = "";
+	
+	for (var i=0; i<modarray.length-1; i++){
+		var modName = modarray[i].split('/').pop();
+		modName = modName.replace(".zip","");
+		s += modName;
+		//if (i<modarray.length-2) 
+			s += ", ";
+	}
+	//console.log(s);
 	s = s.substring(0, s.length -2);
 	return s
 }
@@ -1050,75 +968,6 @@ function listPlayers(s) {
 
 
 
-/*window.onload = function() {
-	if (window.jQuery) {
-		// jQuery is loaded
-		//alert("Yeah!");
-		//console.log("DT Setup?")
-		var table = $('#serversTable').DataTable({
-			responsive: true,
-			"columns": [
-				{
-					"className": 'details-control',
-					"orderable": true,
-					"data": null,
-					"defaultContent": ''
-				},
-				{ "data": "location" },
-				{ "data": "description" },
-				{ "data": "map" },
-				{ "data": "players" },
-				{ "data": "pps" }
-			],
-			"order": [[1, 'asc']]
-		});
-
-		// Event listener for opening and closing details
-		$(document).on('click', '#serversTableBody > tr', function(e) {
-			$("#ServerInfoRow").remove();
-			var row = table.row(e);
-			if ( row.child.isShown() ) { // This row is already open - close it
-				row.child.hide();
-				e.removeClass('shown');
-			} else { // Open this row
-				var id = $(e.currentTarget).attr("data-id")
-				if (id !== undefined) {
-					var server;
-					if(id.split(',')[0]>-1) {
-						id = id.split(',')[0];
-						server = JSON.parse(localStorage.getItem('servers'))[id];
-					} else {
-						id = id.split(',')[1];
-						server = JSON.parse(localStorage.getItem('favorites'))[id];
-					}
-
-					$(showDetailsScope(server)).insertAfter($(e.currentTarget)).show();
-					(e.currentTarget).classList.add('shown');
-				}
-			}
-		});
-
-		// Event listener for adding selected server to favs
-		$(document).on('click', '#addFav-button', function(e) {
-			addFav();
-		});
-		$(document).on('click', '#removeFav-button', function(e) {
-			removeFav();
-		});
-
-
-		// Event listener for connecting to a selected server
-		$(document).on('click', '#serverconnect-button', function(e) {
-			connectScope();
-		});
-	} else {
-		//alert("jQuery is not loaded");
-	}
-}*/
-
-//$(document).on('click', '#serversTableBody > tr', function(e) {
-	//selectRowScope(e.originalEvent)
-//});
 
 
 var serverStyleArray = [
@@ -1174,6 +1023,7 @@ function removeFav() {
 	console.log(highlightedServer);
 
 	localStorage.setItem('favorites', JSON.stringify(favArray))
+	saveFavs();
 	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
@@ -1202,9 +1052,9 @@ function addFav(fname, fip, fport) {
 		serverToAdd.time = 0            ,
 		serverToAdd.version = "-1"      ,
 		serverToAdd.id = -1
-																			}
-														else
-										{
+	}
+	else
+	{
 		serverToAdd = highlightedServer;
 		serverToAdd.players  = 0;
 		serverToAdd.maxplayers  = 0;
@@ -1214,6 +1064,7 @@ function addFav(fname, fip, fport) {
 	}
 
 
+	getFavs();
 
 	var favjson = JSON.parse(localStorage.getItem('favorites'));
 	var favArray = new Array();
@@ -1228,7 +1079,6 @@ function addFav(fname, fip, fport) {
 	if(favArray.filter(s=>s.ip == serverToAdd.ip).filter(s=>s.port == serverToAdd.port).length==0)
 		favArray.push(serverToAdd);
 
-	//favArray = [...new Set(favArray)];
 
 	favArray.sort((a, b) => (a.official > b.official) ? -1 : 1)
 
@@ -1236,6 +1086,7 @@ function addFav(fname, fip, fport) {
 	console.log(favArray);
 
 	localStorage.setItem('favorites', JSON.stringify(favArray))
+	saveFavs();
 	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
@@ -1249,9 +1100,11 @@ function findPlayer(pname, join=false){
 				var names = server.playerslist.split(';').filter(function (item) { return item.toLowerCase().includes(pname); });
 				console.log("found player '" +names[0]+ "'\n on server ID:" +id+ "\n Title: " +stripCustomFormatting(server.sname));
 				if(join){
-					bngApiScope.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.sname}")`);
+					bngApiScope.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${stripCustomFormatting(server.sname)}")`);
 					if (document.getElementById('LoadingServer') !== null) document.getElementById('LoadingServer').style.display = 'block';
 					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
+				}else{
+					//bngApiScope.selectRow(id)
 				}
 				return id;
 			}
@@ -1259,4 +1112,17 @@ function findPlayer(pname, join=false){
 	}
 	console.log("player "+ pname+" not found.");
 	return -1;
+}
+
+function getFavs(){
+	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
+		console.log(data)
+		if (data == null) return;
+		localStorage.setItem("favorites", data)
+		//for (var key in data) { var val = data[key] }
+	});
+}
+
+function saveFavs(){
+	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);	
 }

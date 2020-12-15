@@ -90,6 +90,10 @@ table#serversTable {
 }
 
 
+.dropdown {
+    min-width: 150px;
+}
+
 .button {
   color: white;
   text-align: center;

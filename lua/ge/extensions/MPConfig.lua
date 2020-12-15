@@ -71,6 +71,35 @@ local function getElectricsTickrate()
   return electricsTickrate
 end
 
+
+local function getFavorites()
+  if not FS:directoryExists("BeamMP") then
+    return nil
+  end
+
+  local favs = nil
+  local favsfile = '/BeamMP/favorites.json'
+  if FS:fileExists(favsfile) then
+    favs = jsonReadFile(favsfile)
+  else
+	print("favs file doesnt exist")
+  end
+  return favs
+end
+
+
+local function setFavorites(favstr)
+  if not FS:directoryExists("BeamMP") then
+    FS:directoryCreate("BeamMP")
+  end
+
+  local favs = json.decode(favstr)
+  local favsfile = '/BeamMP/favorites.json'
+  jsonWriteFile(favsfile, favs)
+end
+
+
+
 -- Variables
 M.ShowNameTags = ShowNameTags
 M.Nickname = Nickname
@@ -98,6 +127,9 @@ M.setInputsTickrate = setInputsTickrate
 M.getInputsTickrate = getInputsTickrate
 M.setElectricsTickrate = setElectricsTickrate
 M.getElectricsTickrate = getElectricsTickrate
+
+M.getFavorites = getFavorites
+M.setFavorites = setFavorites
 
 print("mpConfig Loaded.")
 return M

@@ -25,6 +25,8 @@ local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
+local nicknamePrefixMap = {}
+local nicknameSuffixMap = {}
 local distanceMap = {}
 local nicknamesAllowed = true
 local latestVeh
@@ -105,6 +107,13 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 	local thisNick =  MPConfig.getNickname()
 	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
     return nicknameSimple
+end
+
+local function setPlayerNickPrefix(name, prefix)
+	nicknamePrefixMap[name] = prefix
+end
+local function setPlayerNickSuffix(name, suffix)
+	nicknameSuffixMap[name] = suffix
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
@@ -602,10 +611,13 @@ local function onUpdate(dt)
 						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
+						local prefix = nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or " "
+						local suffix = nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] and nicknameSuffixMap[nicknameMap[gameVehicleID].nickname].." " or ""
+
 						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
 						debugDrawer:drawTextAdvanced(
 							pos, -- Location
-							String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag..dist.." "), -- Text
+							String(prefix..tostring(nicknameMap[gameVehicleID].nickname).." "..suffix..roleInfo.tag..dist.." "), -- Text
 							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
 							backColor -- Background Color
 						)
@@ -632,6 +644,8 @@ M.getOwnMap               = getOwnMap
 M.getDistanceMap          = getDistanceMap
 M.getVehicleMap           = getVehicleMap
 M.getNicknameMap          = getNicknameMap
+M.setPlayerNickPrefix     = setPlayerNickPrefix
+M.setPlayerNickSuffix     = setPlayerNickSuffix
 M.hideNicknames           = hideNicknames
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID

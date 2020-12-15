@@ -242,7 +242,7 @@ end
 local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
-	local rot = obj:getRotation()
+	local rot = quat(obj:getRotation())
 	local tempTable = {
 		pos = {
 			x = pos.x,

@@ -17,7 +17,15 @@ local sysTime = 0
 local eventTriggers = {}
 -- ============= VARIABLES =============
 
-
+-- ============= INIT =============
+--Preston (Cobalt) Preload the UI profile for multiplayer
+local layouts = jsonReadFile("settings/uiapps-layouts.json")
+if not layouts.multiplayer or table[1] == nil then
+	layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
+	jsonWriteFile("settings/uiapps-layouts.json",layouts)
+	log("A","Print","multiplayer UI layout added")
+end
+-- ============= INIT =============
 
 local function connectToLauncher()
 	print("Connecting to the Launcher for Session Data")

@@ -126,7 +126,7 @@ local function updateGFX(dt)
 	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	local vehRot = quat(obj:getRotation())
-	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity())
+	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
 
 	lastVehVel = vehVel
@@ -155,7 +155,7 @@ local function updateGFX(dt)
 	-- Use received position, and smoothed velocity and acceleration to predict vehicle position
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
-	local rotAdd = (remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime):rotated(vehRot)
+	local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
 	local rot = remoteData.rot * quatFromEuler(rotAdd.x, rotAdd.y, rotAdd.z)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
@@ -171,7 +171,7 @@ local function updateGFX(dt)
 	-- Error correction
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
-	rotError = vec3(rotError.y, rotError.z, rotError.x)
+	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
 	
 	if posError:length() > maxPosError or rotError:length() > maxRotError then
 		tpTimer = tpTimer + dt
@@ -244,6 +244,7 @@ local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
 	local rot = quat(obj:getRotation())
+	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
 	local tempTable = {
 		pos = {
 			x = pos.x,
@@ -262,9 +263,9 @@ local function getVehicleRotation()
 			w = rot.w
 		},
 		rvel = {
-			x = obj:getPitchAngularVelocity(),
-			y = obj:getRollAngularVelocity(),
-			z = obj:getYawAngularVelocity()
+			x = rvel.x,
+			y = rvel.y,
+			z = rvel.z
 		},
 		tim = timer,
 		ping = ownPing + lastDT

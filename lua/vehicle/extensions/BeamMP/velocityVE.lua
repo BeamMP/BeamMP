@@ -139,8 +139,7 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	end
 
 	local vel = vec3(x, y, z)
-	local toWorldAxisQuat = quat(obj:getRotation())
-	local av = vec3(pitchAV, rollAV, yawAV):rotated(toWorldAxisQuat)
+	local av = vec3(pitchAV, rollAV, yawAV)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	for nid, connected in pairs(isConnectedNode) do
 		local nodeWeight = obj:getNodeMass(nid)
@@ -157,12 +156,11 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	local vel = vec3(x, y, z)
 	local vvel = vec3(obj:getVelocity())
 	local velDiff = vel - vvel
-
-	local pitchDiff = pitchAV - obj:getPitchAngularVelocity()
-	local rollDiff = rollAV - obj:getRollAngularVelocity()
-	local yawDiff = yawAV - obj:getYawAngularVelocity()
-
-	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, pitchDiff, rollDiff, yawDiff)
+	local rvel = vec3(pitchAV, rollAV, yawAV)
+	local vrvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(quat(obj:getRotation()))
+	local rvelDiff = rvel - vrvel
+	
+	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z)
 end
 
 v.mpVehicleType = "L"

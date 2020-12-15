@@ -100,7 +100,7 @@
     <md-tooltip md-direction="right">{{:: 'ui.options.traffic.amount.tooltip' | translate }}</md-tooltip>
     <p>{{:: 'ui.options.traffic.amount' | translate }}</p>
     <md-slider flex
-      ng-model="options.data.values.trafficAmount" min="0" max="10" step="1" aria-label="_"
+      ng-model="options.data.values.trafficAmount" min="0" max="12" step="1" aria-label="_"
       ng-change="options.applyState()">
     </md-slider>
     <span ng-if="options.data.values.trafficAmount > 0" style="margin-left:10px">

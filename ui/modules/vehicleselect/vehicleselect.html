@@ -9,29 +9,17 @@
       <div style="margin: 8px">Vehicles</div>
       <div flex layout="row" layout-align="center center" layout-wrap>
 
-    <!--<md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()">
-      <md-icon class="material-icons"  style="color:black;font:bold;">sd_storage</md-icon>
-      {{ ::'ui.options.gameplay.defaultToCurrentVehicle' | translate }}
-    </md-button>
-    <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()">
-      <md-icon class="material-icons"  style="color:black;font:bold;">folder_open</md-icon>
-      {{ ::'ui.options.gameplay.loadDefaultVehicle' | translate }}
-    </md-button>-->
-    <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()">
-      <md-icon class="material-icons"  style="color:black;font:bold;">content_copy</md-icon>
-      {{ ::'ui.options.gameplay.cloneCurrentVehicle' | translate }}
-    </md-button>
-    <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()">
-      <md-icon class="material-icons"  style="color:black;font:bold;">delete</md-icon>
-      {{ ::'ui.options.gameplay.removeCurrentVehicle' | translate }}
-    </md-button>
-    <!--<md-button class="" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeAllExceptCurrentVehicle()">
-      Remove others
-    </md-button>-->
-
+        <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()">
+          <md-icon class="material-icons"  style="color:black;font:bold;">content_copy</md-icon>
+          {{ ::'ui.options.gameplay.cloneCurrentVehicle' | translate }}
+        </md-button>
+        <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()">
+          <md-icon class="material-icons"  style="color:black;font:bold;">delete</md-icon>
+          {{ ::'ui.options.gameplay.removeCurrentVehicle' | translate }}
+        </md-button>
       </div>
 
-      <md-checkbox layout="row" layout-align="center center" md-no-ink ng-model="vehicles.showFiltersBar">Show Filters</md-checkbox>
+      <md-checkbox layout="row" layout-align="center center" md-no-ink ng-model="vehicles.showFiltersBar">{{"ui.options.gameplay.showFilters" | translate}}</md-checkbox>
     </div>
   </md-toolbar>
 
@@ -71,11 +59,11 @@
       <input ng-model="vehicles.query" ng-model-options="{debounce: 400}" ng-change="vehicles.applyFilters()">
     </md-input-container>
 
-    <md-checkbox layout-align="center center" md-no-ink ng-model="vehicles.showConfigurations" ng-change="vehicles.switchList()">Show Configurations</md-checkbox>
+    <md-checkbox layout-align="center center" md-no-ink ng-model="vehicles.showConfigurations" ng-change="vehicles.switchList()">{{"ui.options.gameplay.showConfigurations" | translate}}</md-checkbox>
 
     <bng-accordion multiple style="overflow-y: auto">
       <bng-accordion-pane ng-repeat="key in vehicles.filterKeyList" ng-if="vehicles.showData(key);">
-        <bng-pane-header class="md-padding">{{ :: key}}</bng-pane-header>
+        <bng-pane-header class="md-padding">{{ :: key | translate}}</bng-pane-header>
 
         <bng-pane-body style="margin-left:10px" ng-if=":: !vehicles.isRange(key);">
           <md-checkbox md-no-ink ng-repeat="(option, _) in ::vehicles.data.filters[key] track by $index" ng-model="vehicles.data.filters[key][option]" ng-change="vehicles.applyFilters()">{{ :: option }}</md-checkbox>

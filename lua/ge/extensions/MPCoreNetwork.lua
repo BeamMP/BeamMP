@@ -147,11 +147,17 @@ local function HandleLogin(params)
 	print('LOGIN HANDLER')
 	--dump(params)
 	local r = jsonDecode(params)
-	--dump(r)
+	dump(r)
 	if (r.success == true or r.Auth == 1) then
 		print('WE ARE LOGGED IN!!')
 		-- hide the login screen
 		guihooks.trigger('LoginContainerController', {message = "success", hide = true})
+	else
+		local m = ''
+		if (r.message) then
+			m = r.message
+		end		
+		guihooks.trigger('LoginError', {message = m})
 	end
 end
 

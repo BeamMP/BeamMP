@@ -278,6 +278,10 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 	color: white;
 }
 
+.text-red {
+	color: red;
+}
+
 #MultiplayerLoginBody {
 	position: absolute;
   width: 100%;

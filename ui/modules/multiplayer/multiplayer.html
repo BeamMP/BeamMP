@@ -14,6 +14,7 @@
         </div>
         <div class="col-2">
           <h2 class="text-white">Login with your BeamMP account.</h2>
+          <h2 class="text-red LOGINERRORFIELD"></h2>
           <input type="text" id="loginUsername" placeholder="Username / Email"/>
       		<input type="password" id="loginPassword" placeholder="Password"/>
       		<md-button id="" class="button" ng-click="multiplayer.login()">Login</md-button>
@@ -26,6 +27,7 @@
         </div>
         <div class="col-2">
           <h2 class="text-white">Please enter a Username to play with.</h2>
+          <h2 class="text-red LOGINERRORFIELD"></h2>
           <input type="text" id="guestUsername" placeholder="Username"/>
       		<md-button id="" class="button" ng-click="multiplayer.guestLogin()">Play</md-button>
           <md-button id="" class="button" ng-click="multiplayer.switchToLogin()">Login</md-button>

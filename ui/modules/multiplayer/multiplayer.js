@@ -28,6 +28,10 @@ angular.module('beamng.stuff')
 	});
 
 	vm.switchToLogin = function() {
+		var x = document.getElementsByClassName('LOGINERRORFIELD')
+		for(var i = 0; i < x.length; i++){
+    	x[i].innerText='';    // Change the content
+    }
 		document.getElementById('GuestContainer').style.display = 'none'
 		document.getElementById('LoginContainer').style.display = 'block'
 	}
@@ -45,6 +49,10 @@ angular.module('beamng.stuff')
 	}
 
 	vm.switchToGuest = function() {
+		var x = document.getElementsByClassName('LOGINERRORFIELD')
+		for(var i = 0; i < x.length; i++){
+    	x[i].innerText='';    // Change the content
+    }
 		document.getElementById('LoginContainer').style.display = 'none'
 		document.getElementById('GuestContainer').style.display = 'block'
 	}
@@ -59,12 +67,22 @@ angular.module('beamng.stuff')
 	}
 
 	$scope.$on('LoginContainerController', function (event, data) {
+		var x = document.getElementsByClassName('LOGINERRORFIELD')
+		for(var i = 0; i < x.length; i++){
+    	x[i].innerText='';    // Change the content
+    }
 		if (data.hide) {
 			document.getElementById('MultiplayerLoginBody').style.display = 'none'
 		} else {
 			document.getElementById('MultiplayerLoginBody').style.display = 'block'
 		}
+	});
 
+	$scope.$on('LoginError', function (event, data) {
+		var x = document.getElementsByClassName('LOGINERRORFIELD')
+		for(var i = 0; i < x.length; i++){
+    	x[i].innerText=data.message;    // Change the content
+    }
 	});
 
 	vm.modelChanged = function($event) {

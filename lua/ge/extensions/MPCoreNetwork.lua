@@ -78,6 +78,7 @@ local function getServers()
 	print("Getting the servers list")
 	send('Z')
 	send('B')
+	send('Nc')
 end
 
 
@@ -142,6 +143,17 @@ local function HandleU(params)
 	end
 end
 
+local function HandleLogin(params)
+	print('LOGIN HANDLER')
+	--dump(params)
+	local r = jsonDecode(params)
+	--dump(r)
+	if (r.success == true or r.Auth == 1) then
+		print('WE ARE LOGGED IN!!')
+		-- hide the login screen
+		guihooks.trigger('LoginContainerController', {message = "success", hide = true})
+	end
+end
 
 
 local HandleNetwork = {
@@ -238,11 +250,6 @@ end
 local function login(d)
 	print('Attempting login')
 	send('N:'..d..'')
-end
-
-local HandleLogin(params)
-	print('LOGIN HANDLER')
-	dump(params)
 end
 
 local function onInit()

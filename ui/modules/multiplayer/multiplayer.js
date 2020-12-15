@@ -58,6 +58,15 @@ angular.module('beamng.stuff')
 		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
 	}
 
+	$scope.$on('LoginContainerController', function (event, data) {
+		if (data.hide) {
+			document.getElementById('MultiplayerLoginBody').style.display = 'none'
+		} else {
+			document.getElementById('MultiplayerLoginBody').style.display = 'block'
+		}
+
+	});
+
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
 		console.log("ok");

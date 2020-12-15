@@ -10,7 +10,7 @@ app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
 		//console.log(`CALLING READY: UI.ready("MP-SESSION")`)
-		bngApi.engineLua('UI.ready("MP-SESSION")');
+		//bngApi.engineLua('UI.ready("MP-SESSION")');
 	};
 
 	$scope.mpquit = function() {

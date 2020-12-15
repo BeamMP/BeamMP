@@ -27,6 +27,11 @@ angular.module('beamng.stuff')
 		}
 	});
 
+	vm.switchToLogin = function() {
+		document.getElementById('GuestContainer').style.display = 'none'
+		document.getElementById('LoginContainer').style.display = 'block'
+	}
+
 	vm.login = function() {
 		var u = document.getElementById('loginUsername').value;
 		var p = document.getElementById('loginPassword').value;
@@ -39,8 +44,18 @@ angular.module('beamng.stuff')
 		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
 	}
 
-	vm.guestLogin = function() {
+	vm.switchToGuest = function() {
+		document.getElementById('LoginContainer').style.display = 'none'
+		document.getElementById('GuestContainer').style.display = 'block'
+	}
 
+	vm.guestLogin = function() {
+		var u = document.getElementById('guestUsername').value;
+		document.getElementById('guestUsername').value = '';
+		var d = {
+			guest: u
+		}
+		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
 	}
 
 	vm.modelChanged = function($event) {

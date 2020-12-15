@@ -286,7 +286,7 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   z-index: 3;
 }
 
-#LoginContainer {
+.GuestLoginContainer {
 	width: 500px;
   height: 500px;
   left: calc(50vw - 500px);

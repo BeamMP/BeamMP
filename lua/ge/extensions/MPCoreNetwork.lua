@@ -149,6 +149,7 @@ local HandleNetwork = {
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
 	['U'] = function(params) HandleU(params) end, -- UI
 	['M'] = function(params) LoadLevel(params) end,
+	['N'] = function(params) HandleLogin(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end,
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
@@ -206,8 +207,6 @@ local function onUpdate(dt)
 	end
 end
 
-
-
 local function resetSession(goBack)
 	print("Reset Session Called!")
 	send('QS') -- Tell the launcher that we quit server / session
@@ -241,11 +240,17 @@ local function login(d)
 	send('N:'..d..'')
 end
 
+local HandleLogin(params)
+	print('LOGIN HANDLER')
+	dump(params)
+end
+
 local function onInit()
 	connectToLauncher()
 	reloadUI()
 	core_gamestate.requestExitLoadingScreen('MP')
 	returnToMainMenu()
+	send('Nc')
 end
 
 

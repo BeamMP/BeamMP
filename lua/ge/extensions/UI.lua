@@ -129,7 +129,7 @@ end
 
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
-	print("Message received: "..message) -- DO NOT REMOVE 
+	print("Message received: "..message) -- DO NOT REMOVE
 	--be:executeJS('addMessage("'..message..'")')
 	guihooks.trigger("chatMessage", message)
 	TriggerClientEvent("ChatMessageReceived", message)
@@ -176,10 +176,10 @@ local function ready(src)
   	end
 
     local Server = MPCoreNetwork.getCurrentServer()
-    --print("---------------------------------------------------------------")
+    print("---------------------------------------------------------------")
     --dump(Server)
-    --print(Server.name)
-    --print("---------------------------------------------------------------")
+    print(Server.name)
+    print("---------------------------------------------------------------")
 
   	if Server ~= nil and Server.name ~= nil then
   	  setStatus("Server: "..Server.name)

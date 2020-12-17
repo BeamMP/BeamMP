@@ -67,6 +67,11 @@
 		      {{:: 'ui.multiplayer.servers' | translate}}
         </md-button>
 
+        <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.recent') !== -1)}" ui-sref="menu.multiplayer.recent" style="text-align:left;">
+          <md-icon class="material-icons">alarm</md-icon>
+				  {{:: 'ui.multiplayer.recent' | translate}}
+        </md-button>
+
         <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
           <md-icon class="material-icons">star</md-icon>
 				  {{:: 'ui.multiplayer.favorites' | translate}}

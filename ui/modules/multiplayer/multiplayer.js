@@ -335,7 +335,7 @@ angular.module('beamng.stuff')
 			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
 
 			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
-			
+
 			if(filtered && !mapNames.includes(SmoothMapName(servers[i].map))) mapNames.push(SmoothMapName(servers[i].map));
 			if(filtered && vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) filtered = false;
 
@@ -363,10 +363,255 @@ angular.module('beamng.stuff')
 		}
 
 		console.log(mapNames);
-		
+
 		mapNames.sort();
 		mapNames.unshift("Any");
-		
+
+		vm.availableMaps = mapNames;
+
+
+		///////////////////////////////////////////////////////////////////////////
+		// This adds the on click handler for the dynamically created element.
+		var table = document.getElementById("serversTableBody");
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			var currentRow = table.rows[i];
+			var createClickHandler =
+			function(row) {
+				return function() {
+							//console.log(row.getAttribute('data-id'))
+							vm.selectRow(row, row.getAttribute('data-id'))
+				};
+			};
+			currentRow.onclick = createClickHandler(currentRow);
+		}
+	};
+
+	vm.displayServers = displayServers;
+
+	function formatServerDetailsRow ( d ) {
+    // `d` is the original data object for the row
+		console.log(d)
+    return `
+			<td colspan="5">
+				<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
+					<div class="row">
+					<div class="col">
+						<table class="description-table">
+							<tr><td>Owner:</td><td>${d.owner}</td></tr>
+							<tr><td>Map:</td><td>${SmoothMapName(d.map)}</td></tr>
+							<tr><td>Players:</td><td>${d.players}/${d.maxplayers}</td></tr>
+							<tr><td valign="top">Description:</td><td>${formatDescriptionName(d.sdesc)}</td></tr>
+						</table>
+					</div>
+					<div class="col">
+						<ul class="serverItemDetails">
+							<li>PPS: ${d.pps}</li>
+							<li>Mods: ${modCount(d.modlist)}</li>
+							<li>Mod Names: ${modList(d.modlist)}</li>
+							<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
+						</ul>
+					</div>
+				</div>
+				<div class="row" style="padding-left: 10px;">
+					<md-button id="serverconnect-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect()" style="margin-left: 10px;">Connect</md-button>
+					<md-button id="addFav-button"        class="button md-button md-default-theme" ng-class="" ng-click="addFav()"            style="margin-left: 10px;">Add Favorite</md-button>
+				</div>
+				<div class="row">
+					<h4></h4>
+
+					<p>${listPlayers(d.playerslist)}</p>
+				</div>
+	    </td>`;
+	};
+
+	serversScope = receiveServers;
+	//selectRowScope = selectRow;
+	displayServerScope = displayServers;
+	showDetailsScope = formatServerDetailsRow;
+}])
+.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+	var vm = this;
+
+	vm.check_isEmpty = false;
+	vm.check_isNotEmpty = false;
+	vm.check_isNotFull = false;
+	vm.check_modSlider = false;
+	vm.slider_maxModSize = 500; //should be almost a terabyte
+	vm.select_map = "Any"
+
+	bngApiScope = bngApi;
+	//localStorage.removeItem('servers'); //clear serverlist so we dont show cached ones if the launcher broke
+	bngApi.engineLua('MPCoreNetwork.getServers()');
+	vm.exit = function ($event) {
+		if ($event)
+		logger.debug('[MultiplayerRecentController] exiting by keypress event %o', $event);
+		$state.go('menu.mainmenu');
+	};
+
+	var timeOut = $timeout(function() {
+		if (vm.loadingPage === true) {
+			vm.loadTimeout = true;
+		}
+	}, 10000);
+
+	$scope.$on('$destroy', function () {
+		$timeout.cancel(timeOut);
+		logger.debug('[MultiplayerRecentController] destroyed.');
+	});
+
+	function deselect(row) {
+		if (!row) return;
+		row.classList.remove("highlight");
+		row.selected = false;
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
+	}
+
+	vm.connect = function() {
+		logger.debug("Attempting to call connect to server.")
+		document.getElementById('LoadingServer').style.display = 'block'
+		bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	}
+
+	function select(row, table) {
+		var oldInfoRow = document.getElementById('ServerInfoRow')
+		if (oldInfoRow != null) {
+			oldInfoRow.remove();
+		}
+		var table = document.getElementById("serversTable");
+		deselect(table.selectedRow);
+		row.classList.add("highlight");
+		row.selected = true;
+		table.selectedRow = row;
+		//console.log(row)
+		var id = row.getAttribute("data-id")
+		if (id !== null) {
+			var servers = JSON.parse(localStorage.getItem('servers'))
+			var server = servers[id];
+			highlightedServer = servers[id];
+			//$(showDetailsScope(server)).insertAfter($(e.currentTarget)).show();
+			var serverInfoRow = showDetailsScope(server);
+			var serverInfoRow = document.createElement("tr");
+			serverInfoRow.innerHTML = showDetailsScope(server);
+			serverInfoRow.setAttribute("id", "ServerInfoRow");
+			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
+
+			var connectToServerButton = document.getElementById('serverconnect-button');
+      var createClickHandler = function() {
+        return function() {
+					vm.connect()
+        };
+      };
+      connectToServerButton.onclick = createClickHandler();
+
+			var addServer2FavButton = document.getElementById('addFav-button');
+      var createClickHandler2 = function() {
+        return function() {
+					addFav()
+        };
+      };
+      addServer2FavButton.onclick = createClickHandler2();
+
+			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
+		}
+	}
+
+
+
+	$scope.$on('SteamInfo', function (event, data) {
+		$scope.$apply(function () {
+			$scope.steamData = data;
+		});
+	});
+
+	$scope.$on('addServer', function (event, data) {
+		var table = document.getElementById("servers-table");
+		var row = table.insertRow(table.rows.length);
+		row.insertCell(0).innerHTML = data.location;
+		row.insertCell(1).innerHTML = data.description;
+		row.insertCell(2).innerHTML = data.map;
+		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
+		row.insertCell(4).innerHTML = data.pps;
+		row.servData = data;
+		row.onclick = selectRow;
+	});
+
+	vm.selectRow = function(row) {
+		console.log("[2] ROW CLICKED, DATA: ")
+		var table = document.getElementById("servers-table");
+		select(row, table);
+	};
+
+	function receiveServers(data) {
+		console.log(data)
+		var serverArray = new Array();
+
+		for (var i = 0; i < data.length; i++) {
+			var v = data[i][Object.keys(data[i])[0]]
+			if(v.cversion == launcherVersion){
+				v.strippedName = stripCustomFormatting(v.sname);
+				serverArray.push(v);
+			}
+		}
+
+		//serverArray.sort((a, b) => a.strippedName.localeCompare(b.strippedName)) //dont sort servers by name because people didnt like it :C
+		serverArray.sort((a, b) => (b.official - a.official))
+
+		localStorage.setItem('servers', JSON.stringify(serverArray))
+
+		displayServers()
+	};
+
+	function displayServers() {
+		var table = document.getElementById("serversTableBody");
+		table.innerHTML = "";
+		var mapNames = new Array(); //["Any"];
+
+		console.log(vm.select_map)
+		var servers = JSON.parse(localStorage.getItem('servers'))
+		for (var i = 0; i < servers.length; i++) {
+			var filtered = servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
+
+			if(filtered && vm.check_isEmpty && servers[i].players>0) filtered = false;
+			if(filtered && vm.check_isNotEmpty && servers[i].players==0) filtered = false;
+			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
+
+			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
+
+			if(filtered && !mapNames.includes(SmoothMapName(servers[i].map))) mapNames.push(SmoothMapName(servers[i].map));
+			if(filtered && vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) filtered = false;
+
+
+			if(filtered){
+				var bgcolor = 'rgba(0,0,0,0)!important';
+				if (servers[i].official) bgcolor = 'rgba(255,106,0,0.25)!important';
+
+				var html = `
+				<tr data-id="${i}">
+					<td style="background-color:${bgcolor};">${servers[i].location}</td>
+					<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
+					<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
+					<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
+					<td style="background-color:${bgcolor};">${servers[i].pps}</td>
+				</tr>
+				`;
+
+				//document.getElementById('TEMPNODE').innerHTML = html;
+
+				//console.log("APPENDING NOW?")
+				//$('#serversTableBody').append(html);
+				document.getElementById('serversTableBody').innerHTML += html
+			}
+		}
+
+		console.log(mapNames);
+
+		mapNames.sort();
+		mapNames.unshift("Any");
+
 		vm.availableMaps = mapNames;
 
 
@@ -932,12 +1177,12 @@ function modList(s) {
 	var modarray = s.split(';');
 	//console.log(modarray);
 	s = "";
-	
+
 	for (var i=0; i<modarray.length-1; i++){
 		var modName = modarray[i].split('/').pop();
 		modName = modName.replace(".zip","");
 		s += modName;
-		//if (i<modarray.length-2) 
+		//if (i<modarray.length-2)
 			s += ", ";
 	}
 	//console.log(s);
@@ -1124,5 +1369,5 @@ function getFavs(){
 }
 
 function saveFavs(){
-	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);	
+	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);
 }

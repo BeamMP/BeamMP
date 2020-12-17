@@ -12,41 +12,6 @@
 	<div layout="row" layout-padding="">
 			<input type="text" id="search" name="search" placeholder="Search" oninput="displayRecentServers()"/>
 			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
-			<md-button id="addserver-button" class="button" ng-class="" style="margin-left:15px" ng-click="multiplayer.showCustomServer()">{{:: 'ui.multiplayer.addCustomServer' | translate}}</md-button>
-
-			<md-checkbox ng-model="multiplayermenu.check_isEmpty" ng-change="multiplayermenu.displayServers();">
-			<md-tooltip md-direction="right">
-			Only show empty servers
-			</md-tooltip md-no-ink>
-			Empty only
-			</md-checkbox>
-
-			<md-checkbox ng-model="multiplayermenu.check_isNotEmpty" ng-change="multiplayermenu.displayServers();">
-			<md-tooltip md-direction="right">
-			Only show not empty servers
-			</md-tooltip md-no-ink>
-			Not empty
-			</md-checkbox>
-
-			<md-checkbox ng-model="multiplayermenu.check_isNotFull" ng-change="multiplayermenu.displayServers();">
-			<md-tooltip md-direction="right">
-			Only show not full servers
-			</md-tooltip md-no-ink>
-			Not full
-			</md-checkbox>
-
-			<md-checkbox ng-model="multiplayermenu.check_modSlider" ng-change="multiplayermenu.displayServers();">
-			<md-tooltip md-direction="right">
-			Enable mod size limiter
-			</md-tooltip md-no-ink>
-			Mod size slider
-			</md-checkbox>
-
-			<md-slider flex ng-if="multiplayermenu.check_modSlider"
-				ng-model="multiplayermenu.slider_maxModSize" min="0" max="5000" step="50" aria-label="_"
-				ng-change="multiplayermenu.displayServers();">
-			</md-slider>
-			<span ng-if="multiplayermenu.check_modSlider" style="margin-left:15px">{{ multiplayermenu.slider_maxModSize }} MB</span>
 
 		<md-divider></md-divider>
 	</div>

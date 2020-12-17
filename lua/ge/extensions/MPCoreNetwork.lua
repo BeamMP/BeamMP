@@ -134,6 +134,7 @@ local function HandleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if params == "ldone" and status == "LoadingResources" then
+		be:executeJS('addRecent("'..jsonEncode(currentServer)..'")')
 		send('Mrequest')
 		status = "LoadingMap"
 	end

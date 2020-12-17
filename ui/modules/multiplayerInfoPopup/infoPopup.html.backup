@@ -1,0 +1,97 @@
+<div style="background-color: rgba(0, 0, 0, 0.5); display: flex;">
+  <div class="md-padding" style="display:flex; max-height: 1000px; min-width: 500px; width: 70%; max-width: 80%; margin: 2.5% auto; background-color: rgba(255, 255, 255, 0.85); color: rgb(62, 62, 62); overflow-y: scroll">
+    <style>
+      md-radio-button .md-container {
+        display:none;
+      }
+
+      .onlineDialogue .md-button {
+        color: rgba(0, 0, 0, 0.87);
+        background-color: white;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+      }
+
+      .onlineDialogue .md-button:hover {
+        background-color:rgba(83, 79, 76, 0.8);
+        color:white;
+      }
+      
+      .onlineDialogue .md-button.affirmative:hover {
+        background-color:rgba(255, 102, 0, 0.555);
+        color:white;
+      }
+
+      .onlineDialogue .md-button.md-raised:not([disabled]) {
+        background-color:rgba(83, 79, 76, 1.0);
+        color:white;
+      }
+
+      .onlineDialogue .md-button.affirmative.md-raised:not([disabled]) {
+        background-color:rgb(255,102,0);
+        color:white;
+      }
+
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      md-radio-button .md-label {
+        margin-left:0;
+      }
+
+      .onlineDialogue .md-button[disabled], .onlineDialogue .md-button[disabled]:hover {
+        background-color: rgba(98, 94, 91, 0.4) !important;
+        color: rgba(200, 200, 200, 0.75) !important;
+      }
+    </style>
+   
+    <div style="position: relative; top: 50%; transform: translateY(-50%);">
+    <div>
+      <h3>{{ 'ui.mainmenu.onlineFeatures.featureTitle' | translate }}</h3>
+      <h3>FRICKKKK</h3>
+    </div>
+    <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
+    <h4>{{ 'ui.options.onlineFeatures' | translate }}</h4>
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;" bng-translate="ui.mainmenu.onlineFeatures.featureDescription"></div><br />
+    <div style="display: flex;">
+      <span style="flex: 1 1;"></span>
+    <md-radio-group ng-model="online" class="onlineDialogue">
+      <md-radio-button value="enable" class="md-button affirmative" ng-class="{'md-raised': online === 'enable'}" aria-label="OK" ng-click="onlineChanged()">
+        Yes
+      </md-radio-button>
+      <md-radio-button value="disable" class="md-button" ng-class="{'md-raised': online === 'disable'}" aria-label="NoThanks" ng-click="onlineChanged()">
+        No, thanks
+      </md-radio-button>
+    </md-radio-group>
+    </div>
+    <div>
+      <h3>{{ 'ui.options.telemetry' | translate }}</h3>
+    </div>
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;" bng-translate="ui.mainmenu.telemetry.featureDescription"></div>
+    <div style="opacity: 0.75;" bng-translate="ui.mainmenu.telemetryOnlineHint" ng-if="online == 'disable'"></div>
+    <div style="display: flex">
+      <span style="flex: 1 1;"></span>
+      <md-radio-group ng-model="telemetry" class="onlineDialogue">
+        <md-radio-button value="enable" class="md-button affirmative" ng-class="{'md-raised': telemetry === 'enable'}" aria-label="OK" ng-disabled="online == 'disable'">
+          Yes
+        </md-radio-button>
+        <md-radio-button value="disable" class="md-button" ng-class="{'md-raised': telemetry === 'disable'}" aria-label="NoThanks" ng-disabled="online == 'disable'">
+          No, thanks
+        </md-radio-button>
+      </md-radio-group>
+    </div>
+      <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
+      <div style="margin-top: 0.5em; margin-bottom: 0.5em;" bng-translate="ui.mainmenu.privacyPolicyHint"></div>
+      <div style="margin-bottom: 1em;margin-top: 1em; display: flex">
+        <span style="flex: 1 1;"></span>
+        <md-button ng-if="(online != 'disable' && online != 'enable') || (online == 'enable' && (telemetry != 'disable' && telemetry != 'enable'))" ng-disabled="true" class="md-raised md-primary">
+            Please choose the options above
+        </md-button>
+        <md-button ng-click="storeAnswer()" ng-if="online == 'disable' || (online == 'enable' && (telemetry == 'enable' || telemetry == 'disable'))" class="md-raised md-primary">
+          {{ 'ui.common.continue' | translate}}
+      </md-button>
+
+      </div>
+    </div>
+  </div>
+</div>

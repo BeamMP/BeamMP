@@ -335,6 +335,12 @@ angular.module('beamng.stuff')
     console.log('Settings: ', Settings.values);
     $state.go('menu.onlineFeatures');
   }
+  //if (Settings.values. === 'ask' || Settings.values.telemetry === 'ask') {
+  $state.go('menu.multiplayerInfoPopup');
+  console.log("lol ok")
+  //$state.go('menu.onlineFeatures');
+    //console.log('Settings: ', Settings.values);
+  //}
 
   $scope.values = Settings.values;
   $scope.options = Settings.options;
@@ -408,6 +414,7 @@ angular.module('beamng.stuff')
   });
 
   bngApi.engineLua('core_hardwareinfo.requestInfo()');
+  //$state.go('menu.BeamMP-splash');
 }]);
 
 function openForumLink(){

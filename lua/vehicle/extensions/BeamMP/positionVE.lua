@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by jojos38 & Titch2000 & stefan750.
+-- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
@@ -29,7 +29,7 @@ end
 function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
-  st = st + dif * min(self.rate * dt, 1)
+  st = st + dif * math.min(self.rate * dt, 1)
   self.state = st
   return st
 end
@@ -57,7 +57,7 @@ local maxAccError = 3          -- If difference between target and actual accele
 -- Rotation
 local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
-local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
+local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
 local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
 local maxRotError = 2          -- Max allowed rotation error (rad)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
@@ -126,7 +126,7 @@ local function updateGFX(dt)
 	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	local vehRot = quat(obj:getRotation())
-	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
+	local vehRvel = vec3(obj:getYawAngularVelocity(), obj:getPitchAngularVelocity(), obj:getRollAngularVelocity())
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
 
 	lastVehVel = vehVel
@@ -156,7 +156,7 @@ local function updateGFX(dt)
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
 	local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
-	local rot = remoteData.rot * quatFromEuler(rotAdd.x, rotAdd.y, rotAdd.z)
+	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
 	--[[
@@ -171,8 +171,7 @@ local function updateGFX(dt)
 	-- Error correction
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
-	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
-	
+
 	if posError:length() > maxPosError or rotError:length() > maxRotError then
 		tpTimer = tpTimer + dt
 		posError = posError:normalized()*maxPosError
@@ -189,7 +188,7 @@ local function updateGFX(dt)
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
 		end
 
-		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
+		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
 
 		remoteVelSmoother:set(remoteData.vel)
 		remoteRvelSmoother:set(remoteData.rvel)
@@ -229,7 +228,7 @@ local function updateGFX(dt)
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if targetRacc:length() > minRotForce then
-		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.x, targetRacc.y, targetRacc.z)
+		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.y, targetRacc.z, targetRacc.x)
 	elseif targetAcc:length() > minPosForce then
 		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	end
@@ -244,7 +243,6 @@ local function getVehicleRotation()
 	local pos = obj:getPosition()
 	local vel = obj:getVelocity()
 	local rot = quat(obj:getRotation())
-	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
 	local tempTable = {
 		pos = {
 			x = pos.x,
@@ -263,9 +261,9 @@ local function getVehicleRotation()
 			w = rot.w
 		},
 		rvel = {
-			x = rvel.x,
-			y = rvel.y,
-			z = rvel.z
+			x = obj:getYawAngularVelocity(),
+			y = obj:getPitchAngularVelocity(),
+			z = obj:getRollAngularVelocity()
 		},
 		tim = timer,
 		ping = ownPing + lastDT

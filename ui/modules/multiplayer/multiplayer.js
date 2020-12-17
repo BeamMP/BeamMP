@@ -568,52 +568,71 @@ angular.module('beamng.stuff')
 	function displayServers() {
 		var table = document.getElementById("serversTableBody");
 		table.innerHTML = "";
-		var mapNames = new Array(); //["Any"];
 
-		console.log(vm.select_map)
-		var servers = JSON.parse(localStorage.getItem('servers'))
-		for (var i = 0; i < servers.length; i++) {
-			var filtered = servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
+		var allServers = JSON.parse(localStorage.getItem('servers'))
+		for(var i in allServers)
+			allServers[i].id = i;
 
-			if(filtered && vm.check_isEmpty && servers[i].players>0) filtered = false;
-			if(filtered && vm.check_isNotEmpty && servers[i].players==0) filtered = false;
-			if(filtered && vm.check_isNotFull && servers[i].players==servers[i].maxplayers) filtered = false;
+		var recentjson = JSON.parse(localStorage.getItem('recent'))
+		//if (recentjson == null) return;
 
-			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < servers[i].modstotalsize) filtered = false;
-
-			if(filtered && !mapNames.includes(SmoothMapName(servers[i].map))) mapNames.push(SmoothMapName(servers[i].map));
-			if(filtered && vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) filtered = false;
+		var servers = new Array();
 
 
-			if(filtered){
-				var bgcolor = 'rgba(0,0,0,0)!important';
-				if (servers[i].official) bgcolor = 'rgba(255,106,0,0.25)!important';
+		for(var i in recentjson){
+			recentjson[i].sname      = "❓ " + recentjson[i].name;
+			recentjson[i].location   = "?";
+			recentjson[i].map        = "Unknown";
+			recentjson[i].players    = "?";
+			recentjson[i].maxplayers = "?";
+			recentjson[i].pps        = "?";
 
-				var html = `
-				<tr data-id="${i}">
-					<td style="background-color:${bgcolor};">${servers[i].location}</td>
-					<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
-					<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
-					<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
-					<td style="background-color:${bgcolor};">${servers[i].pps}</td>
-				</tr>
-				`;
-
-				//document.getElementById('TEMPNODE').innerHTML = html;
-
-				//console.log("APPENDING NOW?")
-				//$('#serversTableBody').append(html);
-				document.getElementById('serversTableBody').innerHTML += html
+			var foundServers = allServers.filter(s=>s.ip == recentjson[i].ip).filter(s=>s.port == recentjson[i].port)
+			if (foundServers.length>0) {
+				foundServers[0].recid = i;
+				servers.push(foundServers[0]);
+			} else {
+				recentjson[i].id = -1;
+				recentjson[i].recid = i;
+				servers.push(recentjson[i]);
 			}
 		}
 
-		console.log(mapNames);
+		console.log(servers);
 
-		mapNames.sort();
-		mapNames.unshift("Any");
+		if (servers.length == 0) {
+			var bgcolor = 'rgba(0,0,0,0)!important';
+			var html = `
+			<tr>
+			<td style="background-color:${bgcolor};"></td>
+			<td style="background-color:${bgcolor};"><center>No recent servers found. Join a server for something to show up here!</center></td>
+			<td style="background-color:${bgcolor};"></td>
+			<td style="background-color:${bgcolor};"></td>
+			<td style="background-color:${bgcolor};"></td>
+			</tr>
+			`;
+			document.getElementById('serversTableBody').innerHTML += html
+		}
 
-		vm.availableMaps = mapNames;
+		for (var i = 0; i < servers.length; i++) {
+			var bgcolor = 'rgba(0,0,0,0)!important';
+			if (servers[i].official) bgcolor = 'rgba(255,106,0,0.25)!important';
 
+			//console.log(servers[i].id);
+			//console.log(servers[i].recid);
+
+			var html = `
+			<tr data-id="${servers[i].id},${servers[i].recid}" ng-onclick(selectRow(e)>
+			<td style="background-color:${bgcolor};">${servers[i].location}</td>
+			<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
+			<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
+			<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
+			<td style="background-color:${bgcolor};">${servers[i].pps}</td>
+			</tr>
+			`;
+			//$('#serversTableBody').append(html);
+			document.getElementById('serversTableBody').innerHTML += html
+		}
 
 		///////////////////////////////////////////////////////////////////////////
 		// This adds the on click handler for the dynamically created element.
@@ -622,12 +641,11 @@ angular.module('beamng.stuff')
 		for (i = 0; i < rows.length; i++) {
 			var currentRow = table.rows[i];
 			var createClickHandler =
-			function(row) {
-				return function() {
-							//console.log(row.getAttribute('data-id'))
-							vm.selectRow(row, row.getAttribute('data-id'))
+				function(row) {
+					return function() {
+						vm.selectRow(row, row.getAttribute('data-id'))
+					};
 				};
-			};
 			currentRow.onclick = createClickHandler(currentRow);
 		}
 	};
@@ -741,7 +759,7 @@ angular.module('beamng.stuff')
 				id = id.split(',')[1];
 				console.log(id);
 				server = JSON.parse(localStorage.getItem('favorites'))[id];
-				//server.strippedName = server.strippedName.replace('UNKNOWN ', '');
+				//server.strippedName = server.strippedName.replace('Unknown ', '');
 			}
 
 			highlightedServer = server;
@@ -888,18 +906,17 @@ angular.module('beamng.stuff')
 		///////////////////////////////////////////////////////////////////////////
 		// This adds the on click handler for the dynamically created element.
 		var table = document.getElementById("serversTableBody");
-    var rows = table.getElementsByTagName("tr");
-    for (i = 0; i < rows.length; i++) {
-      var currentRow = table.rows[i];
-      var createClickHandler =
-      function(row) {
-        return function() {
-					//console.log(row.getAttribute('data-id'))
-					vm.selectRow(row, row.getAttribute('data-id'))
-        };
-      };
-      currentRow.onclick = createClickHandler(currentRow);
-    }
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			var currentRow = table.rows[i];
+			var createClickHandler =
+				function(row) {
+					return function() {
+						vm.selectRow(row, row.getAttribute('data-id'))
+					};
+				};
+			currentRow.onclick = createClickHandler(currentRow);
+		}
 	};
 
 	vm.displayServers = displayServers;
@@ -1363,11 +1380,21 @@ function getFavs(){
 	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
 		console.log(data)
 		if (data == null) return;
-		localStorage.setItem("favorites", data)
-		//for (var key in data) { var val = data[key] }
+		localStorage.setItem("favorites", data);
 	});
 }
 
 function saveFavs(){
 	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);
 }
+
+function addRecent(recentstr){
+	var json = JSON.parse(recentstr);
+	console.log(json);
+	var recents = JSON.parse(localStorage.getItem("recent"));
+	if (recents == null) recents = new Array();
+	recents.unshift(json);
+	recents = recents.slice(0, 10); //keep the last 10 entries
+	localStorage.setItem("recent", recents);
+}
+

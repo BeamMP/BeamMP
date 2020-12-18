@@ -19,20 +19,20 @@ angular.module('beamng.stuff')
       ],
 
       checkboxGroup2: [
-        { name: 'ui.options.graphics.GraphicAntialiasType',   key: 'GraphicAntialiasType'   },
-        { name: 'ui.options.graphics.GraphicMeshQuality',     key: 'GraphicMeshQuality'     },
-        { name: 'ui.options.graphics.GraphicTextureQuality',  key: 'GraphicTextureQuality'  },
-        { name: 'ui.options.graphics.GraphicLightingQuality', key: 'GraphicLightingQuality' },
-        { name: 'ui.options.graphics.GraphicShaderQuality',   key: 'GraphicShaderQuality'   },
-        { name: 'ui.options.graphics.GraphicPostfxQuality',   key: 'GraphicPostfxQuality'   },
-        { name: 'ui.options.graphics.GraphicAnisotropic',     key: 'GraphicAnisotropic'     }
+        { name: 'ui.options.graphics.GraphicAntialiasType',   tooltip: 'ui.options.graphics.GraphicAntialiasTypeTooltip',   key: 'GraphicAntialiasType'   },
+        { name: 'ui.options.graphics.GraphicMeshQuality',     tooltip: 'ui.options.graphics.GraphicMeshQualityTooltip',     key: 'GraphicMeshQuality'     },
+        { name: 'ui.options.graphics.GraphicTextureQuality',  tooltip: 'ui.options.graphics.GraphicTextureQualityTooltip',  key: 'GraphicTextureQuality'  },
+        { name: 'ui.options.graphics.GraphicLightingQuality', tooltip: 'ui.options.graphics.GraphicLightingQualityTooltip', key: 'GraphicLightingQuality' },
+        { name: 'ui.options.graphics.GraphicShaderQuality',   tooltip: 'ui.options.graphics.GraphicShaderQualityTooltip',   key: 'GraphicShaderQuality'   },
+        { name: 'ui.options.graphics.GraphicPostfxQuality',   tooltip: 'ui.options.graphics.GraphicPostfxQualityTooltip',   key: 'GraphicPostfxQuality'   },
+        { name: 'ui.options.graphics.GraphicAnisotropic',     tooltip: 'ui.options.graphics.GraphicAnisotropicTooltip',     key: 'GraphicAnisotropic'     }
       ],
 
       dynReflectionSliders: [
-        { name: 'Texture Size',     key: 'GraphicDynReflectionTexsize',        min: 0,  max: 3,    step: 1   },
-        { name: 'Update Rate',      key: 'GraphicDynReflectionFacesPerupdate', min: 1,  max: 6,    step: 1   },
-        { name: 'Detail',           key: 'GraphicDynReflectionDetail',         min: 0,  max: 1,    step: 0.1 },
-        { name: 'Distance',         key: 'GraphicDynReflectionDistance',       min: 50, max: 1000, step: 50, unitsTxt: 'm' }
+        { name: 'Texture Size', tooltip: 'GraphicDynReflectionTexsizeTooltip',        key: 'GraphicDynReflectionTexsize',        min: 0,  max: 3,    step: 1   },
+        { name: 'Update Rate',  tooltip: 'GraphicDynReflectionFacesPerupdateTooltip', key: 'GraphicDynReflectionFacesPerupdate', min: 1,  max: 6,    step: 1   },
+        { name: 'Detail',       tooltip: 'GraphicDynReflectionDetailTooltip',         key: 'GraphicDynReflectionDetail',         min: 0,  max: 1,    step: 0.1 },
+        { name: 'Distance',     tooltip: 'GraphicDynReflectionDistanceTooltip',       key: 'GraphicDynReflectionDistance',       min: 50, max: 1000, step: 50, unitsTxt: 'm' }
       ]
     },
 
@@ -103,6 +103,13 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       vm.data = data;
       vm.checkUiUnitsSystem();
     });
+  });
+
+  $scope.$watch('options.data.values.GraphicDynReflectionTexsize', function(value) {
+    if (value == 0) { $scope.GraphicDynReflectionTexsizeText = "128"; }
+    if (value == 1) { $scope.GraphicDynReflectionTexsizeText = "256"; }
+    if (value == 2) { $scope.GraphicDynReflectionTexsizeText = "512"; }
+    if (value == 3) { $scope.GraphicDynReflectionTexsizeText = "1024"; }
   });
 
   bngApi.engineLua('settings.requestState()');
@@ -251,8 +258,139 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     bngApi.engineScript('Canvas.pushDialog(PostFXManager);');
   };
 
+  vm.resetPostFX = function() {
+    bngApi.engineScript('exec("core/scripts/client/postFx/presets/default.postfxpreset.cs"); PostFXManager.settingsApplyFromPreset();');
+  };
+
+
+
 }])
 
+.directive('tripleScreenCanvas', ['logger','Utils', '$timeout', function (logger, Utils, $timeout) {
+  return {
+    template: `
+      <canvas style="border: 1px gray solid;width:100%"></canvas>
+    `,
+    replace: true,
+    restrict: 'AEC',
+    link: function (scope, element, attrs) {
+      var canvas = element[0];
+      var ctx = canvas.getContext('2d');
+
+      var scale = (canvas.clientWidth / canvas.clientHeight);
+      canvas.setAttribute('width', canvas.width * scale);
+      canvas.setAttribute('height', canvas.height * scale);
+
+      var hfov = 0;
+      var aspectRatio = 1;
+
+      //var screenSize = 32; // inch
+      //var bezelSizes = 2;
+
+      function degToRad(deg) {
+        return deg * (Math.PI / 180)
+      }
+
+      function drawText(x, y, rot, yOffset, text, color) {
+        var rotInRad = degToRad(rot)
+        ctx.save()
+        ctx.translate(x, y);
+        ctx.rotate(rotInRad);
+        ctx.font = "20px monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = color;
+        ctx.fillText(text, 0, -yOffset);
+        ctx.restore();
+      }
+
+      function drawArrow(x, y, x2, y2, color) {
+        ctx.beginPath();
+        ctx.moveTo(x, y)
+        ctx.lineTo(x2, y2)
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+
+      function drawArrowRot(x, y, len, rot, color) {
+        var rotInRad = degToRad(rot)
+        drawArrow(x, y, x + Math.cos(rotInRad) * len, y + Math.sin(rotInRad) * len, color)
+      }
+
+      function drawBoxRot(x, y, w, h, rot, fillStyle, strokeStyle) {
+        var rotInRad = degToRad(rot)
+        ctx.save()
+        ctx.translate(x, y);
+        ctx.rotate(rotInRad);
+
+        ctx.beginPath();
+        ctx.rect(- w * 0.5, - h * 0.5, w, h);
+        if(fillStyle) {
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+        }
+        if(strokeStyle) {
+          ctx.strokeStyle = strokeStyle;
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function redraw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+
+        var a = hfov / 3;
+
+        var color = 'black';
+
+        var screenDepth = 6;
+
+
+        // middle screen
+        var x = canvas.width * 0.5
+        var y = canvas.height * 0.4
+        drawBoxRot(x, y, 120, screenDepth, 0, '#ff6b00')
+        drawArrowRot(x, y, 100, 90, color)
+        drawText(x, y, 0, screenDepth, 'screen 2', color)
+        drawBoxRot(x, 50, 120, 120 / aspectRatio, 0, null, '#ff6b00')
+
+        // left screen
+        var x1 = x - 60 - Math.cos(degToRad(-a)) * 60
+        var y1 = y - Math.sin(degToRad(-a)) * 60
+        drawBoxRot(x1, y1, 120, screenDepth, -a, '#ff6b00')
+        drawArrowRot(x1, y1, 100, -a + 90, color)
+        drawText(x1, y1, -a, screenDepth, 'screen 1', color)
+
+        drawBoxRot(x1, 50, 120, 120 / aspectRatio, 0, null, '#ff6b00')
+
+        //drawArrow(x1, y1, x1, canvas.height * 0.7, color)
+
+        // right screen
+        var x2 = x + 60 + Math.cos(degToRad(a)) * 60
+        var y2 = y + Math.sin(degToRad(a)) * 60
+        drawBoxRot(x2, y2, 120, screenDepth, a, '#ff6b00')
+        drawArrowRot(x2, y2, 100, a + 90, color)
+        drawText(x2, y2, a, screenDepth, 'screen 3', color)
+        drawBoxRot(x2, 50, 120, 120 / aspectRatio, 0, null, '#ff6b00')
+
+
+
+        ctx.restore();
+      }
+
+      scope.$watch('$parent.options.data.values', function(values) {
+        //console.log('FOV changed: ', values.GraphicTripleMonitorFov)
+        //console.log('screen res: ', values.GraphicDisplayResolutions)
+        var aspectRatioStr = values.GraphicDisplayResolutions.split(' ')
+        aspectRatio = parseInt(aspectRatioStr[0]) / parseInt(aspectRatioStr[1])
+        //console.log('screen aspectRatio: ', aspectRatio)
+        hfov = values.GraphicTripleMonitorFov
+        redraw();
+      });
+    }
+  }
+}])
 
 /**
  * @ngdoc controller
@@ -268,7 +406,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
        vm.cameraBindings[i] = ControlsUtils.findBindingForAction("camera_"+i);
    }
 
-  vm.focusedCamId = 0;
+  vm.focusedCamName;
   vm.lastSlotId = 0;
   vm.defaultId = null;
 
@@ -276,7 +414,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     $scope.$apply(
       function() {
         vm.cameraConfig = data.cameraConfig;
-        vm.focusedCamId = data.focusedCamId-1;
+        vm.focusedCamName = data.focusedCamName;
         vm.defaultId = null;
         for (i in vm.cameraConfig) {
             if (vm.defaultId == null && !vm.cameraConfig[i].hidden && vm.cameraConfig[i].enabled) vm.defaultId = i;
@@ -287,7 +425,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
   });
 
   vm.changeOrder     = function(camId, offset) { bngApi.engineLua(`core_camera.changeOrder      (${camId+1}, ${offset})`); }
-  vm.setCameraById           = function(camId) { bngApi.engineLua(`core_camera.setById          (${camId+1})`           ); }
+  vm.setCameraByName = function(camName) { bngApi.engineLua(`core_camera.setByName(0, '${camName}')`); }
   vm.toggleEnabledCameraById = function(camId) {console.log(camId); bngApi.engineLua(`core_camera.toggleEnabledById(${camId+1})`           ); }
   vm.resetConfiguration      = function     () { bngApi.engineLua(`core_camera.resetConfiguration()`                    ); }
 
@@ -911,12 +1049,29 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       <md-divider></md-divider>
 
       <md-list-item layout ng-if="data.details.action == 'steering'">
-        <span flex="30">Angle</span>
-        <md-tooltip md-direction="">How much your steering wheel can turn, from lock to lock. If possible, use the same angle that is displayed by the drivers configuration (and as high as possible). Set to zero to disable</md-tooltip>
+        <span flex="30">Steering Lock Angle</span>
+        <md-tooltip md-direction="">How much your steering wheel can turn, from lock to lock. Advice: use the same number displayed in the drivers configuration panel, which should be set to the maximum your steering wheel supports.</md-tooltip>
         <md-slider ng-model="data.details.angle" ng-change="inputResponseCurveRender()" flex min="0" max="6000" step="10" aria-label="_"></md-slider>
         <md-input-container class="bng-controls-aux-input" >
           <input aria-label="_" type="number" min="0" max="6000" step="10" ng-model="data.details.angle" ng-change="inputResponseCurveRender()">
         </md-input-container>
+      </md-list-item>
+      <md-list-item layout style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType != '0' && data.details.angle <= 0">
+        <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
+        <p>{{:: 'ui.controls.lockType.warningMissingAngle' | translate}}</p>
+      </md-list-item>
+      <md-list-item layout style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType == '0' && data.details.angle > 0">
+        <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
+        <p>{{:: 'ui.controls.lockType.warningAdvice' | translate}}</p>
+      </md-list-item>
+      <md-list-item layout>
+        <span flex="35">{{:: "ui.controls.lockType" | translate }}</span>
+        <md-select flex ng-model="data.details.lockType" aria-label="_" class="bng-select-fullwidth">
+          <md-option value="0" md-no-ink>{{:: "ui.controls.lockTypes.0" | translate }}</md-option>
+          <md-option value="1" md-no-ink>{{:: "ui.controls.lockTypes.1" | translate }}</md-option>
+          <md-option value="2" md-no-ink>{{:: "ui.controls.lockTypes.2" | translate }}</md-option>
+        </md-select>
+        <md-tooltip md-direction="">How BeamNG.drive will attempt to match your steering wheel to the vehicle you're driving. Any 1:1 lock type is recommended over 1:N</md-tooltip>
       </md-list-item>
 
       <div style="width:310px; height: 150px; position:relative; border: solid grey 2px; margin-left: 20px;">

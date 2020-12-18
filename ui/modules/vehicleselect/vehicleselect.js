@@ -201,9 +201,7 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          //var func = "replaceVehicle";
-          //if (spawnNew) func = "spawnNewVehicle";
-		  var func = "spawnNewVehicle"
+          var func = "spawnNewVehicle"; //dont touch dis - deer
 
           var luaArgs = {};
 
@@ -250,7 +248,7 @@ angular.module('beamng.stuff')
   vm.selectConfig = function (configname, launch) {
     vm.selectedConfig = vm.configs[configname];
     vm.detailsKeys = Object.keys(vm.selectedConfig.aggregates);
-    console.warn(vm.selectedConfig);
+    // console.warn(vm.selectedConfig);
 
     for (var i = 0; i < vm.detailsKeys.length; i += 1) {
       var dtKeyName = vm.detailsKeys[i];
@@ -300,8 +298,8 @@ angular.module('beamng.stuff')
   vm.showData = (title, performance) => (vm.selectedConfig[title] !== undefined ? Vehicles.showData(title, true, performance) : false);
 
   vm.launchConfig = function (spawnNew) {
-	if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-	vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, true);
+    if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, true);  //dont touch dis - deer
   };
 
   // because of bug in non compete iirc
@@ -313,6 +311,11 @@ angular.module('beamng.stuff')
     vm.model          = response.model;
     vm.hasConfigs     = Object.keys(response.configs).length > 1;
     vm.configs        = response.configs;
+
+    for (var key in vm.configs) {
+      var config = vm.configs[key]
+      config.orderKey = ((config.Value || '') + "").padStart(16, '0') + '|' + (config.Configuration || '');
+    }
 
     // Filter out powerglow configs
     if (vm.mode.name !== "lightRunner") {
@@ -624,10 +627,10 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
 
   };
   vm.removeCurrentVehicle = function() {
-	//bngApi.engineLua("MPVehicleGE.removeRequest('\"..obj:getID()..\"'\)");
+    //bngApi.engineLua("MPVehicleGE.removeRequest('\"..obj:getID()..\"'\)");
 
-	if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-	else bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")');
+    if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+    else bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")');
 
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
@@ -646,7 +649,7 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     $rootScope.$broadcast('MenuHide');
   };
   vm.saveDefault = function() {
-    bngApi.activeObjectLua('partmgmt.savedefault();');
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };

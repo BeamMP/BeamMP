@@ -30,6 +30,8 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	});
 
 	$scope.$on('setStatus', function (event, status) {
+		console.log('Setting Status to: ')
+		console.log(sanitizeString(status))
     //document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status)); // REMOVE COLORS FROM SERVER NAME
 		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
 	});

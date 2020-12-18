@@ -45,6 +45,9 @@
   -webkit-animation: zoomIn 0.25s forwards ease-out;
 }
 
+.mainmenu .tile:hover a {
+  -webkit-animation: zoomIn 0.25s forwards ease-out;
+}
 
 @-webkit-keyframes zoomIn {
   100% { -webkit-transform: scale(1.1); }

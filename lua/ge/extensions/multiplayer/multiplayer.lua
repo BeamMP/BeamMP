@@ -95,6 +95,7 @@ end
 
 local function onClientPostStartMission()
   core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
+  UI.ready("MP-SESSION")
 end
 
 local function onClientStartMission(mission)

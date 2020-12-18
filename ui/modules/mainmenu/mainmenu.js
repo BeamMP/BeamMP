@@ -122,11 +122,11 @@ angular.module('beamng.stuff')
         bngApi.engineLua('settings.getValue("uiUpscaling")', (val) => {
           logger.mainMenu.log(`moduleDestroyed: ${moduleDestroyed}`);
           logger.mainMenu.log(`val: ${val}`);
-          if (Number(val) === 0 && !moduleDestroyed) {
-            oldScalingValue = val;
-            if (scaling) bngApi.engineLua('TorqueScript.setVar("$CEF_UI::maxSizeHeight", "1080")');
-            logger.mainMenu.log('set uiUpscaling to: "1080"');
-          }
+          // if (Number(val) === 0 && !moduleDestroyed) {
+            // oldScalingValue = val;
+            // if (scaling) bngApi.engineLua('TorqueScript.setVar("$CEF_UI::maxSizeHeight", "1080")');
+            // logger.mainMenu.log('set uiUpscaling to: "1080"');
+          // }
         });
 
         bngApi.engineLua('sailingTheHighSeas', (val) => {
@@ -331,7 +331,8 @@ angular.module('beamng.stuff')
     $scope.options = data.options;
   })
 
-  if (Settings.values.onlineFeatures === 'ask') {
+  if (Settings.values.onlineFeatures === 'ask' || Settings.values.telemetry === 'ask') {
+    console.log('Settings: ', Settings.values);
     $state.go('menu.onlineFeatures');
   }
 
@@ -359,10 +360,10 @@ angular.module('beamng.stuff')
 
   $scope.quit = () => $scope.$emit('quit');
 
-  //$scope.garage = function () {
-    //var luaCmd = `loadGameModeModules(` + bngApi.serializeToLua(["ui_garage"]) + `)`;
-    //bngApi.engineLua(luaCmd);
-  //};
+  $scope.garage = function () {
+    var luaCmd = `loadGameModeModules(` + bngApi.serializeToLua(["ui_garage"]) + `)`;
+    bngApi.engineLua(luaCmd);
+  };
 
   bngApi.engineLua('core_online.requestState()');
 
@@ -411,4 +412,8 @@ angular.module('beamng.stuff')
 
 function openForumLink(){
 	bngApiScope.engineLua(`openWebBrowser("http://forum.beammp.com")`);
+}
+
+function openExternalLink(url){
+	bngApiScope.engineLua(`openWebBrowser("`+url+`")`);
 }

@@ -1,0 +1,40 @@
+<!-- DataTables CSS --
+<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+<!-- DataTables Responsive CSS -->
+<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
+
+<!-- DataTables JavaScript -->
+<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
+<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
+
+<md-content>
+	<div layout="row" layout-padding="">
+			<input type="text" id="search" name="search" placeholder="Search" oninput="displayRecentServers()"/>
+			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
+
+		<md-divider></md-divider>
+	</div>
+
+	<table id="serversTable">
+		<thead>
+			<tr id="header">
+				<th>{{:: 'ui.multiplayer.location' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.description' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.map' | translate}}</th>
+				<th>{{:: 'ui.multiplayer.players' | translate}}</th>
+				<th>PPS</th>
+			</tr>
+		</thead>
+		<tbody id="serversTableBody">
+		</tbody>
+	</table>
+
+	<div id="footer">
+		<span id="TEMPAREA" style="display:none;"></span>
+  </div>
+</md-content>
+
+<script>
+
+</script>

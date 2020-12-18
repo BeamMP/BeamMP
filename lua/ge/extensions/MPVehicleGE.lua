@@ -25,6 +25,8 @@ local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
 local nicknameMap = {}
+local nicknamePrefixMap = {}
+local nicknameSuffixMap = {}
 local distanceMap = {}
 local nicknamesAllowed = true
 local latestVeh
@@ -107,6 +109,13 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
     return nicknameSimple
 end
 
+local function setPlayerNickPrefix(name, prefix)
+	nicknamePrefixMap[name] = prefix
+end
+local function setPlayerNickSuffix(name, suffix)
+	nicknameSuffixMap[name] = suffix
+end
+
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
 local function hideNicknames(hide)
 	nicknamesAllowed = not hide
@@ -142,7 +151,7 @@ local function sendVehicle(gameVehicleID)
 		local p0           = veh.colorPalette0
 		local p1           = veh.colorPalette1
 		local pos          = veh:getPosition()
-		local rot          = veh:getRotation()
+		local rot          = quat(veh:getRotation())
 
 		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = tostring(gameVehicleID) -- Game Vehicle ID
@@ -234,6 +243,10 @@ end
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	local decodedData     = jsonDecode(data)
+	if not decodedData then --JSON decode failed
+		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."!")
+		return
+	end
 	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
 	local vehicleName     = decodedData.jbm -- Vehicle name
@@ -242,7 +255,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local cP0             = decodedData.cpz -- Vehicle colorPalette0
 	local cP1             = decodedData.cpo -- Vehicle colorPalette1
 	local pos             = vec3(decodedData.pos)
-	local rot             = quat(decodedData.rot)
+	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
@@ -372,7 +385,7 @@ local function onVehicleResetted(gameVehicleID)
 			--print("Vehicle "..gameVehicleID.." resetted by client")
 			local veh = be:getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
-			local rot = veh:getRotation()
+			local rot = quat(veh:getRotation())
 			local tempTable = {
 				pos = {
 					x = pos.x,
@@ -499,7 +512,7 @@ local function teleportVehToPlayer(targetName)
 
 					local targetVeh = be:getObjectByID(i)
 					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = targetVeh:getRotation() -- vehicles forward are inverted
+					local targetVehRot = quat(targetVeh:getRotation()) -- vehicles forward are inverted
 
 					targetVehPos.x = targetVehPos.x + 2.5
 					targetVehPos.y = targetVehPos.y + 2.5
@@ -602,10 +615,13 @@ local function onUpdate(dt)
 						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
+						local prefix = nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or " "
+						local suffix = nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] and nicknameSuffixMap[nicknameMap[gameVehicleID].nickname].." " or ""
+
 						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
 						debugDrawer:drawTextAdvanced(
 							pos, -- Location
-							String(" "..tostring(nicknameMap[gameVehicleID].nickname).." "..roleInfo.tag..dist.." "), -- Text
+							String(prefix..tostring(nicknameMap[gameVehicleID].nickname).." "..suffix..roleInfo.tag..dist.." "), -- Text
 							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
 							backColor -- Background Color
 						)
@@ -632,6 +648,8 @@ M.getOwnMap               = getOwnMap
 M.getDistanceMap          = getDistanceMap
 M.getVehicleMap           = getVehicleMap
 M.getNicknameMap          = getNicknameMap
+M.setPlayerNickPrefix     = setPlayerNickPrefix
+M.setPlayerNickSuffix     = setPlayerNickSuffix
 M.hideNicknames           = hideNicknames
 M.getGameVehicleID        = getGameVehicleID
 M.getServerVehicleID      = getServerVehicleID

@@ -6,7 +6,7 @@ angular.module('beamng.gamepadNav', []);
 angular.module('beamng.controls', []);
 angular.module('beamng.ui2Ports', []);
 
-angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars'])
+angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
 
 .factory('customTranslationsLoader', ['$rootScope', '$timeout', '$q', function ($rootScope, $timeout, $q) {
   var data = {};
@@ -237,11 +237,17 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	    controller: 'MultiplayerServersController as multiplayermenu'
 	  })
 
-  	.state('menu.multiplayer.favorites', {
-  	  url: '/mpfavorites',
-  	  templateUrl: 'modules/multiplayer/favorites.partial.html',
-  	  controller: 'MultiplayerFavoritesController as multiplayermenu'
-  	})
+	  .state('menu.multiplayer.recent', {
+	    url: '/mpservers',
+	    templateUrl: 'modules/multiplayer/recent.partial.html',
+	    controller: 'MultiplayerRecentController as multiplayermenu'
+	  })
+
+  	  .state('menu.multiplayer.favorites', {
+  	    url: '/mpfavorites',
+  	    templateUrl: 'modules/multiplayer/favorites.partial.html',
+  	    controller: 'MultiplayerFavoritesController as multiplayermenu'
+  	  })
 
 	  .state('menu.multiplayer.direct', {
 	    url: '/mpdirect',
@@ -552,6 +558,9 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 
   .state('scenario-start', {
     url: '/scenariocontrol/start',
+    params: {
+      data: {}
+    },
     templateUrl: 'modules/scenariocontrol/start.html',
     controller: 'ScenarioStartController as scenarioStart'
   })
@@ -560,7 +569,8 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     url: '/scenariocontrol/end',
     params: {
         stats: {},
-        rewards: {}
+        rewards: {},
+        portrait: {}
     },
     templateUrl: 'modules/scenariocontrol/end.html',
     controller: 'ScenarioEndController'
@@ -811,7 +821,57 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
       controller: 'VehicleDetailsController as vehicle'
     })
 
-  ;
+    //-------------------------------------------------------------- UI3 states ---- test space ----------------------------------***************************
+    .state('menu.menu2view', {
+      url: '/menu2',
+      templateUrl: `modules/mainmenu2/menu2view.html`,
+      controller: 'MainMenu2Controller',
+    })
+
+    .state('menu.menu2view.mainMenu2', {
+      url: '/mainmenu2',
+      templateUrl: `modules/mainmenu2/mainmenu2.html`,
+      controller: '',
+    })
+
+    .state('menu.menu2view.quickPlayMenu', {
+      url: '/quickplay',
+      templateUrl: 'modules/quickplaymenu/quickplaymenu.html',
+      controller: '' //TODO
+    })
+
+    .state('menu.menu2view.freePlay', {
+      url: '/freeplay',
+      templateUrl: 'modules/freeplay/freeplay.html',
+      controller: 'FreePlayController as fpctrl'
+    })
+
+    .state('menu.menu2view.freePlaySpawn', {
+      url: '/freeplay/:level',
+      templateUrl: 'modules/freeplay-spawn/freeplay-spawn.html',
+      controller: 'FreePlaySpawnController as fpsctrl'
+    })
+
+    .state('menu.menu2view.modManager2', {
+      url: '/modmanager',
+      templateUrl: 'modules/modmanager2/modmanager2.html',
+      controller: '' //TODO
+    })
+
+    .state('menu.menu2view.options2', {
+      url: '/options',
+      templateUrl: 'modules/options2/options2.html',
+      controller: '' //TODO
+    })
+
+    .state('menu.menu2view.graphicsBasic', {
+      url: '/options/graphicsbasic',
+      templateUrl: 'modules/options2/graphicsbasic/graphicsbasic.html',
+      controller: 'OptionsGraphicsController' //TODO
+    })
+
+    //-------------------------------------------------------------- UI3 states ---- test space ----------------------------------***************************
+    ;
 
   if(beamng.shipping) {
     $stateProvider
@@ -819,17 +879,17 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     ;
   }
 
-  if(!beamng.shipping) {
-    // only add the template module in dev builds
-    $stateProvider
-
-    .state('menu.career', {
-      url: '/career',
-      templateUrl: 'modules/careerselect/careerselect.html',
-      controller: 'CareerSelectController as careerSelect'
-    })
-
-    ;
+  for (var key in AppDefaults.playModes) {
+    if (AppDefaults.playModes[key].targetState == "career") {
+      if (!AppDefaults.playModes[key].disabled) {
+        $stateProvider.state('menu.career', {
+          url: '/career',
+          templateUrl: 'modules/careerselect/careerselect.html',
+          controller: 'CareerSelectController as careerSelect'
+        });
+      }
+      break;
+    }
   }
 
   // default entry that is loaded on startup:
@@ -873,7 +933,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     'contrastLightColors': undefined    // could also specify this if default was 'dark'
   });
 
-// todo: fix this to use settings instead
+  // todo: fix this to use settings instead
   var uiTheme = JSON.parse(localStorage.getItem('angularThemeConfig')) || AppDefaults.uiTheme;
 
   $mdThemingProvider.theme('default')
@@ -994,7 +1054,40 @@ function ($animate, $http, logger, $rootScope, $templateCache, $window, $transla
 
   // settings storage end
 
-}]);
+}])
+
+//------------Trying filter for date translation --------- put on separate file!!!
+
+.filter('formattedDate', function(dateFilter, $translate) {
+
+  var format = null, translated = false;
+
+  function returnFilter(inputDate) {
+    if(format){
+      return dateFilter(inputDate, format);
+    }else{
+      return '-';
+    }
+  }
+
+  function formattedDateFilter(inputDate){
+    if( format === null ) {
+      if( !translated ){
+        translated = true;
+        $translate('general.time_format').then(function (result) {
+          format = result;
+        },function (translationId) {
+          format = translationId;
+        });
+      }
+
+    }
+    else return returnFilter(inputDate);
+  }
+
+  formattedDateFilter.$stateful = true;
+  return formattedDateFilter;
+});
 
 
 angular.module('beamng.stuff')
@@ -1140,7 +1233,9 @@ angular.module('beamng.stuff')
       }
 
       if (useGamepadNavigation) {
-        $rootScope.$evalAsync(actions[action][actions[action].length - 1].func);
+        console.log(actions[action]);
+        // console.log(actions[action][0]);
+        $rootScope.$evalAsync(actions[action][0].func);
       }
     });
 
@@ -1273,7 +1368,7 @@ angular.module('beamng.stuff')
       { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
       { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
       { translateid: 'ui.dashboard.environment',   icon: 'cloud_queue',            state: 'menu.environment'   },
-      //{ translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("toggleTrackBuilder()") },
+      //{ translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()") },
       //{ translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
@@ -1293,8 +1388,18 @@ angular.module('beamng.stuff')
       { translateid: 'ui.dashboard.debug',         icon: 'bug_report',             state: 'menu.debug',      advanced: true },
       { translateid: 'ui.dashboard.performance',   icon: 'equalizer',              state: '.', action: () => bngApi.engineLua("togglePerformanceGraph()"), advanced: true },
       { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
-    ]
+    ],
 
+    career: [
+      { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
+      { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
+      { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
+      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
+      { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},
+      { translateid: 'ui.dashboard.performance',   icon: 'equalizer',              state: '.', action: () => bngApi.engineLua("togglePerformanceGraph()"), advanced: true },
+      { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
+    ]
   };
 
   if(!beamng.shipping) {
@@ -1401,6 +1506,7 @@ angular.module('beamng.stuff')
   vm.sections = { // defines in which state after which icons should be a divider
     freeroam: ['.', 'menu.help', 'menu.vehicleconfig.parts', 'menu.environment', 'performance', 'photomode', 'menu.options.graphics'],
     scenario: ['.', 'menu.help', 'performance', 'photomode'],
+    career:   ['.', 'menu.drive'],
   };
 
   vm.stickyState = null;
@@ -1427,7 +1533,9 @@ angular.module('beamng.stuff')
     // logger.log(data);
     logger.AppCtrl.log(`got game state: ${data.state}`, data);
 
-    vm.gameState = data.menuItems;
+    $scope.$evalAsync(() => {
+        vm.gameState = data.menuItems;
+    });
   });
 
   $scope.$on('ShowApps', function (event, data) {

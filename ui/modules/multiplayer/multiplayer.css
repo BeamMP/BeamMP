@@ -90,6 +90,10 @@ table#serversTable {
 }
 
 
+.dropdown {
+    min-width: 150px;
+}
+
 .button {
   color: white;
   text-align: center;
@@ -278,6 +282,10 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 	color: white;
 }
 
+.text-red {
+	color: red;
+}
+
 #MultiplayerLoginBody {
 	position: absolute;
   width: 100%;
@@ -286,7 +294,7 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   z-index: 3;
 }
 
-#LoginContainer {
+.GuestLoginContainer {
 	width: 500px;
   height: 500px;
   left: calc(50vw - 500px);

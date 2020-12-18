@@ -96,8 +96,9 @@ angular.module('beamng.stuff')
       var d = $q.defer();
 
       bngApi.engineLua('extensions.core_vehicle_partmgmt.getConfigList()', (configs) => {
-        var list = configs.map((elem) => elem.slice(0, -3));
-        d.resolve(list);
+        //var list = configs.map((elem) => elem.slice(0, -3));
+
+        d.resolve(configs);
       });
 
       return d.promise;
@@ -160,12 +161,16 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     for (var key in vm.d.data) {
       processPart(vm.d.data[key], function(obj) {
         flattenedParts.push(obj);
-      })
+      });
     }
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`);
   };
 
   $scope.$on('VehicleFocusChanged', function(event, data) {
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
+  })
+
+  $scope.$on('VehicleJbeamIoChanged', function(event, data) {
     bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()');
   })
 
@@ -645,16 +650,19 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   $scope.$on('VehicleChangeColor', fetchDefinedColors);
 }])
 
-.controller('Vehicleconfig_save', ["$scope", "VehicleConfig", "bngApi", function ($scope, VehicleConfig, bngApi) {
+.controller('Vehicleconfig_save', ["$scope", "$mdDialog", "VehicleConfig", "bngApi", function ($scope, $mdDialog, VehicleConfig, bngApi) {
   var vm = this;
   vm.saveThumbnail = true;
+
+  vm.openConfigFolderInExplorer = function(){
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.openConfigFolderInExplorer()');
+  }
 
   vm.save = function (configName) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`);
 
     if (vm.saveThumbnail == true) {
       $scope.$emit('hide_ui', true);
-
       // This function starts a chain to hide the UI, set up the camera and take a screenshot.
       // See lua/ge/extensions/core/vehicles/partmgmt.lua
       setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100);
@@ -687,6 +695,47 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.loadLocal("${config}.pc")`);
     $event.stopPropagation();
   };
+
+  vm.remove = function ($event, config) {
+
+    loadedConfig = config;
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.removeLocal("${config}")`);
+    getConfigList();
+    $event.stopPropagation();
+
+
+    // showConfirm()
+    // // Confirmation dialog when deleting configuration
+    // var confirm;
+    // function showConfirm() {
+    //   confirm = $mdDialog.confirm({
+    //     title: "Are you sure?",
+    //     content: "This will permanently remove the configuration. You will not be able to recover it.",
+    //     ok: "Delete permanently",
+    //     cancel: "Cancel"
+    //   });
+    //   $mdDialog
+    //     .show(confirm).then(
+    //       function() { removeConfig() },
+    //       function() { }
+    //   );
+    // }
+
+    // function removeConfig () {
+    //   loadedConfig = config;
+    //   bngApi.engineLua(`extensions.core_vehicle_partmgmt.removeLocal("${config}")`);
+    //   getConfigList();
+    //   $event.stopPropagation();
+    // }
+  };
+
+  vm.configExists = function(name) {
+    for(var i = 0; i<vm.configList.length; i++) {
+      if(vm.configList[i].name === name)
+        return true;
+    }
+    return false;
+  }
 
   function getConfigList () {
     VehicleConfig.loadConfigList().then((list) => {

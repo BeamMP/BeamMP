@@ -78,6 +78,7 @@ local function getServers()
 	print("Getting the servers list")
 	send('Z')
 	send('B')
+	send('Nc')
 end
 
 
@@ -133,6 +134,7 @@ local function HandleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if params == "ldone" and status == "LoadingResources" then
+		be:executeJS('addRecent("'..jsonEncode(currentServer)..'")')
 		send('Mrequest')
 		status = "LoadingMap"
 	end
@@ -142,6 +144,23 @@ local function HandleU(params)
 	end
 end
 
+local function HandleLogin(params)
+	print('LOGIN HANDLER')
+	--dump(params)
+	local r = jsonDecode(params)
+	dump(r)
+	if (r.success == true or r.Auth == 1) then
+		print('WE ARE LOGGED IN!!')
+		-- hide the login screen
+		guihooks.trigger('LoginContainerController', {message = "success", hide = true})
+	else
+		local m = ''
+		if (r.message) then
+			m = r.message
+		end		
+		guihooks.trigger('LoginError', {message = m})
+	end
+end
 
 
 local HandleNetwork = {
@@ -149,6 +168,7 @@ local HandleNetwork = {
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
 	['U'] = function(params) HandleU(params) end, -- UI
 	['M'] = function(params) LoadLevel(params) end,
+	['N'] = function(params) HandleLogin(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end,
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
@@ -206,8 +226,6 @@ local function onUpdate(dt)
 	end
 end
 
-
-
 local function resetSession(goBack)
 	print("Reset Session Called!")
 	send('QS') -- Tell the launcher that we quit server / session
@@ -246,6 +264,7 @@ local function onInit()
 	reloadUI()
 	core_gamestate.requestExitLoadingScreen('MP')
 	returnToMainMenu()
+	send('Nc')
 end
 
 

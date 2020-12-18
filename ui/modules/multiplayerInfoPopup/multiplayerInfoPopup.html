@@ -1,0 +1,74 @@
+<div class="md-padding">
+<div class="container" style = "position: absolute; padding: 2.5%">
+<!--<div style="background-color: rgba(0, 0, 0, 0.5); display: flex; min-width: 500px;">!-->
+<div style="display:block max-height: 1000px; height:100%; min-width: 500px; width: 70%; max-width: 80%; margin: auto; background-color: rgba(224, 224, 224); color: rgb(62, 62, 62);">
+	<style>
+		md-radio-button .md-container {
+			display:none;
+		}
+
+		.onlineDialogue .md-button {
+		color: rgba(0, 0, 0, 0.87);
+		background-color: white;
+		box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+		}
+
+	
+		.onlineDialogue .md-button:hover {
+		background-color:rgba(83, 79, 76, 0.8);
+		color:white;
+		}
+
+		.onlineDialogue .md-button.affirmative:hover {
+		background-color:rgba(255, 102, 0, 0.555);
+		color:white;
+		}
+		
+		.onlineDialogue .md-button.md-raised:not([disabled]) {
+		background-color:rgba(83, 79, 76, 1.0);
+		color:white;
+		}
+		
+		.onlineDialogue .md-button.affirmative.md-raised:not([disabled]) {
+		background-color:rgb(255,102,0);
+		color:white;
+		}
+		
+		::-webkit-scrollbar {
+		width: 12px;
+		}
+		
+		md-radio-button .md-label {
+		margin-left:0;
+		}
+
+		.onlineDialogue .md-button[disabled], .onlineDialogue .md-button[disabled]:hover {
+		background-color: rgba(98, 94, 91, 0.4) !important;
+		color: rgba(200, 200, 200, 0.75) !important;
+		}
+	</style>
+	<div style = "height:7%; background-color: rgb(62, 62, 62); color: rgb(255,255,255);">
+		<div style="position:relative; top:10px; left:10px">
+			<img src="modules/multiplayer/beammp.png" alt="BeamMP" style="height:50px; width:126px; position:absolute;">
+		</div>
+		<center style="font-size:50px">News</center>
+	</div>
+
+	<div style="height:86%; display:flex; overflow-y:scroll">
+		<div style="margin:0.5%">
+			stuff goes here
+		</div>
+	</div>
+	<!--<md-divider style="border-color: rgb(62, 62, 62);"></md-divider>!-->
+
+	<div style="height:7%; display:flex; background-color:rgb(200, 200, 200);">
+		<div style="margin:auto">
+			Don't show again<md-checkbox ng-change="setDontShowAgain()" class="md-primary">Don't show again</md-checkbox>
+			<md-button ng-click="toMainMenu()" class="md-raised md-primary">Continue</md-button>
+		</div>
+	</div>
+</div>
+<!--</div>!-->
+</div>
+</div>
+<script src="multiplayerInfoPopup.js"></script>

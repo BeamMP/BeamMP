@@ -100,6 +100,7 @@ end
 
 local function getPartCondition(partName, partTypeData)
   local canProvideCondition = false
+  local omitSpawn = false
   local partCondition = {integrityValue = 1, integrityState = {brokenBreakGroups = {}, nonApplyableIntegrityValue = nonApplyableIntegrityValues[partName]}, visualValue = 1, visualState = {}}
 
   if partTypeData then
@@ -121,11 +122,14 @@ local function getPartCondition(partName, partTypeData)
     end
 
     canProvideCondition = true
+    if brokenBreakGroupCount == breakGroupCount and breakGroupCount > 1 then
+      omitSpawn = true
+    end
   end
 
-  partCondition.integrityValue = partCondition.integrityValue - (nonApplyableIntegrityValues[partName] or 0)
+  partCondition.integrityValue = max(partCondition.integrityValue - (nonApplyableIntegrityValues[partName] or 0), 0)
 
-  return partCondition, canProvideCondition
+  return partCondition, omitSpawn, canProvideCondition
 end
 
 local function luaBreakBeam(id)
@@ -185,8 +189,7 @@ M.debugDraw = nop
 local function debugDraw(focusPos)
   -- highlight all coupling nodes
   for _, coupler in pairs(couplerCache) do
-    local ccol = getContrastColor(stringHash(coupler.couplerTag or coupler.tag))
-    obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, color(ccol.r, ccol.g, ccol.b, 150))
+    obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
   end
 end
 
@@ -258,13 +261,10 @@ local function toggleCouplers()
   if autoCouplingActive then
     obj:stopLatching()
     disableAutoCoupling()
-    if v.mpVehicleType == "L" then
-      obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'"..obj:getID().."\')")
-    end
+    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
   else
-    if v.mpVehicleType == "L" then
-      obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'"..obj:getID().."\')")
-    end
+	
+    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
     if isCouplerAttached() then
       detachCouplers()
     else
@@ -1220,8 +1220,19 @@ local function load(filename)
   obj:commitLoad()
 end
 
-local function getVehicleState()
-  return obj:getID(), partCondition.getConditions(), v.config.itemId
+local function getVehicleState(...)
+  -- fake delay, to be used only during development, to emulate possible framerate issues in slower computers and prevent abuse this API
+  log("W", "", "getVehicleState delay")
+  local timer, fakeDelay = HighPerfTimer(), 1
+  while fakeDelay > 0 do
+    fakeDelay = fakeDelay - timer:stopAndReset()/1000
+  end
+
+  local pos = vec3(obj:getPosition())
+  local front = vec3(obj:getDirectionVector())
+  local up = vec3(obj:getDirectionVectorUp())
+  local vehicleState = {objId=obj:getID(), partsCondition=partCondition.getConditions(), itemId=v.config.itemId, pos=pos, front=front, up=up}
+  return vehicleState, ...
 end
 
 local function getPartDamageData()
@@ -1278,7 +1289,6 @@ M.toggleCouplers = toggleCouplers
 M.attachCouplers = attachCouplers
 M.detachCouplers = detachCouplers
 M.couplerExists = couplerExists
-M.autoCouplingActive = autoCouplingActive
 
 -- for the UI
 M.requestSkeletonState = sendUISkeletonState

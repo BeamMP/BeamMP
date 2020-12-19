@@ -12,7 +12,7 @@ print("MPModManager initialising...")
 
 local timer = 0
 local serverMods = {}
-local mods = {"beammp"}
+local mods = {"multiplayerbeammp", "beammp"}
 
 
 
@@ -51,7 +51,7 @@ end
 local function cleanUpSessionMods()
 	for k,v in pairs(serverMods) do
 		core_modmanager.deactivateMod(string.lower(v))
-		core_modmanager.deleteMod(string.lower(v))
+		--core_modmanager.deleteMod(string.lower(v))
 	end
 	Lua:requestReload() -- reload Lua to make sure we don't have any leftover GE files
 end
@@ -75,6 +75,7 @@ local function onUpdate(dt)
 					if IsModAllowed(modname) then
 						print("Inactive Mod but Should be Active: "..modname)
 						core_modmanager.activateMod(string.lower(modname))--'/mods/'..string.lower(v)..'.zip')
+						MPCoreNetwork.modLoaded(modname)
 					end
 				end
 			end
@@ -96,9 +97,20 @@ end
 
 
 local function setServerMods(mods)
-  --print("Server Mods Set:")
+  print("Server Mods Set:")
   dump(mods)
   serverMods = mods
+	for k,v in pairs(serverMods) do
+		serverMods[k] = 'multiplayer'..v
+	end
+
+	print("Converted Server Mods Set:")
+	dump(serverMods)
+
+	--for modname,mdata in pairs(core_modmanager.getModList())
+		--if not mdata.active then
+		--end
+	--end
 end
 
 

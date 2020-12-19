@@ -69,7 +69,7 @@ local function onUpdate(dt)
 					if not IsModAllowed(modname) then -- This mod is not allowed to be running
 						print("This mod should not be running: "..modname)
 						core_modmanager.deactivateMod(modname)
-						core_modmanager.deleteMod(modname)
+						--core_modmanager.deleteMod(modname)
 					end
 				else -- The mod is not active but lets check if it should be
 					if IsModAllowed(modname) then

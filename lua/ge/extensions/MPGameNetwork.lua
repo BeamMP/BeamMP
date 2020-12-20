@@ -20,7 +20,8 @@ local eventTriggers = {}
 -- ============= INIT =============
 --Preston (Cobalt) Preload the UI profile for multiplayer
 local layouts = jsonReadFile("settings/uiapps-layouts.json")
-if not layouts.multiplayer or table[1] == nil then
+--if not layouts.multiplayer or table[1] == nil then
+if not layouts.multiplayer and MPCoreNetwork.isMPSession() then
 	layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
 	jsonWriteFile("settings/uiapps-layouts.json",layouts)
 	log("A","Print","multiplayer UI layout added")

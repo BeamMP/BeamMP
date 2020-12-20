@@ -61,7 +61,7 @@ end
 
 
 local function onUpdate(dt)
-  if timer >= 8 then -- Checking mods every 8 seconds
+  if timer >= 8 and MPCoreNetwork.isGoingMPSession() then -- Checking mods every 8 seconds
     timer = 0
     --print("Checking Mods...")
     try {

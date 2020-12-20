@@ -83,19 +83,23 @@ local function startMultiplayerByName(levelName)
 end
 
 local function onClientPreStartMission(mission)
-  local path, file, ext = path.splitWithoutExt(mission)
-  file = path .. 'mainLevel'
-  if not FS:fileExists(file..'.lua') then return end
-  extensions.loadAtRoot(file,"")
-  core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
-  if mainLevel and mainLevel.onClientPreStartMission then
-    mainLevel.onClientPreStartMission(mission)
+  if MPCoreNetwork.isMPSession() then
+    local path, file, ext = path.splitWithoutExt(mission)
+    file = path .. 'mainLevel'
+    if not FS:fileExists(file..'.lua') then return end
+    extensions.loadAtRoot(file,"")
+    core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
+    if mainLevel and mainLevel.onClientPreStartMission then
+      mainLevel.onClientPreStartMission(mission)
+    end
   end
 end
 
 local function onClientPostStartMission()
-  core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
-  UI.ready("MP-SESSION")
+  if MPCoreNetwork.isMPSession() then
+    core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
+    UI.ready("MP-SESSION")
+  end
 end
 
 local function onClientStartMission(mission)

@@ -179,7 +179,12 @@ local function ready(src)
 	    local Server = MPCoreNetwork.getCurrentServer()
 	    print("---------------------------------------------------------------")
 	    --dump(Server)
-	    print(Server.name)
+			if Server ~= nil then
+				local name = Server.name
+	    	print(name)
+			else
+				print('Server.name == nil')
+			end
 	    print("---------------------------------------------------------------")
 
 	  	if Server ~= nil and Server.name ~= nil then

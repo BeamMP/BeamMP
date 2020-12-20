@@ -1223,7 +1223,6 @@ end
 
 local function getVehicleState(...)
   -- fake delay, to be used only during development, to emulate possible framerate issues in slower computers and prevent abuse this API
-  return obj:getID(), partCondition.getConditions(), v.config.itemId	  -- fake delay, to be used only during development, to emulate possible framerate issues in slower computers and prevent abuse this API
   log("W", "", "getVehicleState delay")
   local timer, fakeDelay = HighPerfTimer(), 1
   while fakeDelay > 0 do

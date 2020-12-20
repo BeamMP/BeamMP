@@ -304,9 +304,9 @@ local function updateZIPEntry(filename)
       d.orgZipFilename = d.orgZipFilename..'.zip'
       d.unpackedPath = filename
 
-      oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
-      lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
-      vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
+      local oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
+      local lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
+      local vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
       if #oldLvlFiles > 0 or #lvlFiles > 0 then d.modType = 'terrain' end
       if #vehFiles > 0 then d.modType = 'vehicle' end
       -- not sure if it's actually usefull do to the folowing as it happen only when mod is new

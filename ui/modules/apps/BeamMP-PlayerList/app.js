@@ -57,25 +57,24 @@ function playerList(list) {
 			nameCell.textContent = parsedList[i];
 			nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
 
-			if(parsedList[i].trim() != nickname.trim()) {
+			//if(parsedList[i].trim() != nickname.trim()) {
 				// Insert a cell containing the player ping
 				var pingCell = row.insertCell(1);
-				pingCell.style.width = "50px";
-				pingCell.style.height= "25px";
-				pingCell.style.border = "none";
+				pingCell.setAttribute("class", "tp-button");
 				
 				// Insert the button inside the cell
 				var btn = document.createElement("BUTTON");
-				if (pingList[parsedList[i]]) btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
+				var pingText = pingList[parsedList[i]] || "?";
+				btn.appendChild(document.createTextNode(pingText));
 				btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
 				btn.setAttribute("class", "tp-button buttons");
 				pingCell.appendChild(btn);
-			} else{
-				nameCell.colSpan = 2;
-			}
+			//} else{
+			//	nameCell.colSpan = 2;
+			//}
 		}
 		if(document.getElementById("plist-container").style.display == "block")
-			document.getElementById("show-button").style.height = playersList.offsetHeight+"px"; 
+			document.getElementById("show-button").style.height = playersList.offsetHeight + 4 + "px"; 
 	}
 	players = parsedList; //store player list as an array for the next update
 }
@@ -104,7 +103,6 @@ function showPlayerInfo(targetPlayerName) {
 	console.log("showPlayerInfoEvent: " + targetPlayerName);
 	bngApiScope.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
-
 
 function setNickname(n) {
 	nickname = n

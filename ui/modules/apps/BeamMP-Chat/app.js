@@ -1,4 +1,4 @@
-var app = angular.module('beamng.apps');
+  var app = angular.module('beamng.apps');
 
 
 app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
@@ -110,9 +110,14 @@ async function fadeNode(node) {
 
 async function showChat() {
 	// While the mouse is over the chat, we wait
+	var chatMessages = []
 	while (chatShown) {
 		// Get the chat and the messages
-		var chatMessages = document.getElementById("chat-list").getElementsByTagName("li");
+		var tempMessages = document.getElementById("chat-list").getElementsByTagName("li");
+		for (i = 0; i < tempMessages.length; i++) {
+			chatMessages[i] = tempMessages[i];
+		}
+		console.log(chatMessages);
 		// Set all messages opacity to 1.0
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
 		await sleep(100);

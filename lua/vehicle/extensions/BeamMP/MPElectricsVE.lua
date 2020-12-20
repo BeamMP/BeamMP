@@ -237,7 +237,7 @@ local function applyElectrics(data)
 		
 		-- Gear syncing
 		if decodedData.gear then
-			latestgeardata = decodedData.gear
+			latestGearData = decodedData.gear
 		end
 		
 		-- Anything else

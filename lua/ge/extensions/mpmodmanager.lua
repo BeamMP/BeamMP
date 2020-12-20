@@ -64,36 +64,27 @@ local function onUpdate(dt)
   if timer >= 8 and MPCoreNetwork.isGoingMPSession() then -- Checking mods every 8 seconds
     timer = 0
     --print("Checking Mods...")
-    try {
-		function()
-			for modname,mdata in pairs(core_modmanager.getModList()) do
-				if mdata.active then
-					if not IsModAllowed(modname) then -- This mod is not allowed to be running
-						print("This mod should not be running: "..modname)
-						core_modmanager.deactivateMod(modname)
-            if string.match(string.lower(modname), 'multiplayer') then
-        		  core_modmanager.deleteMod(string.lower(modname))
-            end
-					end
-				else -- The mod is not active but lets check if it should be
-					if IsModAllowed(modname) then
-						print("Inactive Mod but Should be Active: "..modname)
-						core_modmanager.activateMod(string.lower(modname))--'/mods/'..string.lower(v)..'.zip')
-						MPCoreNetwork.modLoaded(modname)
-					end
-				end
+    if not core_modmanager.getModList then
+		print("Mod managed was not loaded, reloading Lua")
+		Lua:requestReload()
+	end
+	for modname,mdata in pairs(core_modmanager.getModList()) do
+		if mdata.active then
+			if not IsModAllowed(modname) then -- This mod is not allowed to be running
+				print("This mod should not be running: "..modname)
+				core_modmanager.deactivateMod(modname)
+	if string.match(string.lower(modname), 'multiplayer') then
+		  core_modmanager.deleteMod(string.lower(modname))
+	end
 			end
-		end,
-		catch {
-			function(error)
-				print('caught error: ' .. error)
-				if string.match(error, "(a nil value)") and string.match(error, "getModList") then
-					print("Time to reload lua as our custom mod manager was not loaded.")
-					Lua:requestReload()
-				end
+		else -- The mod is not active but lets check if it should be
+			if IsModAllowed(modname) then
+				print("Inactive Mod but Should be Active: "..modname)
+				core_modmanager.activateMod(string.lower(modname))--'/mods/'..string.lower(v)..'.zip')
+				MPCoreNetwork.modLoaded(modname)
 			end
-		}
-    }
+		end
+	end
   end
   timer = timer + dt
 end

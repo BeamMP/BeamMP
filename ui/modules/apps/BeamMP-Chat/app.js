@@ -20,6 +20,9 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		var chatlist = document.getElementById("chat-list");
 		chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
 		chatlist.addEventListener("mouseout", function(){ chatShown = false; });
+		// Set chat direction
+		setChatDirection(localStorage.getItem('chatHorizontal'));
+		setChatDirection(localStorage.getItem('chatVertical'));
 	};
 
 	$scope.reset = function() {
@@ -30,33 +33,51 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
 
-	$scope.chatSwapHorizontal = function() {
+	function setChatDirection(direction) {
+		console.log("Moving chat to the " + direction);
 		const chatbox = document.getElementById("chatbox");
-		if (chatbox.style.flexDirection != "row-reverse") {
-			chatbox.style.flexDirection = "row-reverse";
-			chatbox.style.marginLeft = "auto";
-		}
-		else {
+		const chatwindow = document.getElementById("chat-window");
+		const chatlist = document.getElementById("chat-list");
+		if (direction == "left") {
 			chatbox.style.flexDirection = "row";
 			chatbox.style.marginLeft = "0px";
+			localStorage.setItem('chatHorizontal', "left");
 		}
+		else if (direction == "right") {
+			chatbox.style.flexDirection = "row-reverse";
+			chatbox.style.marginLeft = "auto";
+			localStorage.setItem('chatHorizontal', "right");
+		}
+		else if (direction == "top") {
+			chatwindow.style.flexDirection = "column-reverse";
+			chatlist.style.flexDirection = "column-reverse";
+			chatlist.style.marginTop = "0px";
+			chatlist.style.marginBottom = "auto";
+			localStorage.setItem('chatVertical', "top");
+		}
+		else if (direction == "bottom") {
+			chatwindow.style.flexDirection = "column";
+			chatlist.style.flexDirection = "column";
+			chatlist.style.marginTop = "auto";
+			chatlist.style.marginBottom = "0px";
+			localStorage.setItem('chatVertical', "bottom");
+		}
+	}
+
+	$scope.chatSwapHorizontal = function() {
+		const chatbox = document.getElementById("chatbox");
+		const chatHorizontal = localStorage.getItem('chatHorizontal');
+		console.log(chatHorizontal);
+		if (chatHorizontal != "right") setChatDirection("right");
+		else setChatDirection("left");
 	}
 
 	$scope.chatSwapVertical = function() {
 		const chatwindow = document.getElementById("chat-window");
 		const chatlist = document.getElementById("chat-list");
-		if (chatwindow.style.flexDirection != "column-reverse") {
-			chatwindow.style.flexDirection = "column-reverse";
-			chatlist.style.flexDirection = "column-reverse";
-			chatlist.style.marginTop = "0px";
-			chatlist.style.marginBottom = "auto";
-		}
-		else {
-			chatwindow.style.flexDirection = "column";
-			chatlist.style.flexDirection = "column";
-			chatlist.style.marginTop = "auto";
-			chatlist.style.marginBottom = "0px";
-		}
+		const chatVertical = localStorage.getItem('chatVertical');
+		if (chatVertical != "top") setChatDirection("top");
+		else setChatDirection("bottom");
 	}
 
 	$scope.$on('chatMessage', function (event, message) {
@@ -113,11 +134,11 @@ async function showChat() {
 	var chatMessages = []
 	while (chatShown) {
 		// Get the chat and the messages
+		// Copy the variables so it's a pointer
 		var tempMessages = document.getElementById("chat-list").getElementsByTagName("li");
 		for (i = 0; i < tempMessages.length; i++) {
 			chatMessages[i] = tempMessages[i];
 		}
-		console.log(chatMessages);
 		// Set all messages opacity to 1.0
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
 		await sleep(100);

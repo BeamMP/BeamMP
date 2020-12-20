@@ -3913,8 +3913,8 @@
 
 	"ui.options.multiplayer.syncConfigUpdates": "Apply other player vehicle part updates",
     "ui.options.multiplayer.showSyncConfigUpdates": "Should the mod automaticlly apply other player vehicle part config changes",
-    "ui.options.multiplayer.nameTags": "Show player nametags",
-    "ui.options.multiplayer.nameTagAlternate": "Alternate nametag colors",
+    "ui.options.multiplayer.nameTags": "Hide player nametags",
+    "ui.options.multiplayer.nameTagAlternate": "Use alternate nametag colors",
 	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",
     "ui.options.multiplayer.debugOutput": "Show debug messages in the console",
     "ui.options.multiplayer.launcherPort": "Launcher port:[br]Don't change unless you have to",

@@ -39,8 +39,9 @@ angular.module('beamng.stuff')
       $state.go('menu.mainmenu');
     };
 
-    $scope.setDontShowAgain = function(state) {
-      console.log(state);
+    $scope.setDontShowAgain = function(stateObj) {
+      console.log(stateObj);
+      vm.doNotShowUntilNextUpdate = !vm.doNotShowUntilNextUpdate
     };
   }]);
 })();

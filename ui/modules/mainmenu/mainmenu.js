@@ -1,5 +1,4 @@
 var alreadyShown = false
-
 angular.module('beamng.stuff')
 
 .directive('versionInfo', [function () {
@@ -341,9 +340,11 @@ angular.module('beamng.stuff')
   }
 
   console.log('Settings: ', Settings.values.showNewFeatures, Settings.values.doNotShowUntilNextUpdate);
-  if ((Settings.values.showNewFeatures != '40' || Settings.values.doNotShowUntilNextUpdate == null || Settings.values.doNotShowUntilNextUpdate == false) || alreadyShown == true) {
-    alreadyShown = true
-    $state.go('menu.newFeatures');
+  if ((Settings.values.showNewFeatures != '40' || Settings.values.doNotShowUntilNextUpdate == null || Settings.values.doNotShowUntilNextUpdate == false)) {
+    if (!alreadyShown) {
+      alreadyShown = true
+      $state.go('menu.newFeatures');
+    }
   }
 
   $scope.values = Settings.values;

@@ -277,6 +277,7 @@ angular.module('beamng.stuff')
     return [ 'menu.mainmenu'
       , 'menu.quickraceOverview'
       , 'menu.onlineFeatures'
+      , 'menu.newFeatures'
       , 'menu.skinwizard'
       , 'menu.vehiclewizard'
       , 'menu.terrainwizard'
@@ -334,6 +335,11 @@ angular.module('beamng.stuff')
   if (Settings.values.onlineFeatures === 'ask' || Settings.values.telemetry === 'ask') {
     console.log('Settings: ', Settings.values);
     $state.go('menu.onlineFeatures');
+  }
+
+  if (Settings.values.showNewFeatures != '4.0' || Settings.values.doNotShowUntilNextUpdate == false) {
+    console.log('Settings: ', Settings.values);
+    $state.go('menu.newFeatures');
   }
 
   $scope.values = Settings.values;

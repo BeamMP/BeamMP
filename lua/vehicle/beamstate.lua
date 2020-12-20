@@ -189,6 +189,8 @@ M.debugDraw = nop
 local function debugDraw(focusPos)
   -- highlight all coupling nodes
   for _, coupler in pairs(couplerCache) do
+    --local ccol = getContrastColor(stringHash(coupler.couplerTag or coupler.tag))
+    --obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, color(ccol.r, ccol.g, ccol.b, 150))
     obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
   end
 end
@@ -263,7 +265,6 @@ local function toggleCouplers()
     disableAutoCoupling()
     if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
   else
-	
     if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
     if isCouplerAttached() then
       detachCouplers()
@@ -1222,6 +1223,7 @@ end
 
 local function getVehicleState(...)
   -- fake delay, to be used only during development, to emulate possible framerate issues in slower computers and prevent abuse this API
+  return obj:getID(), partCondition.getConditions(), v.config.itemId	  -- fake delay, to be used only during development, to emulate possible framerate issues in slower computers and prevent abuse this API
   log("W", "", "getVehicleState delay")
   local timer, fakeDelay = HighPerfTimer(), 1
   while fakeDelay > 0 do

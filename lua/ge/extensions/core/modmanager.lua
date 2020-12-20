@@ -745,7 +745,7 @@ local function activateMod(modname)
     log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
     log('E', 'initDB.modScript', dumps(ret))
   end
-  
+
   loadCoreExtensions()
 end
 
@@ -1202,7 +1202,7 @@ end
 local function getModList()
   return mods
 end
-M.getModList = getModList			   
+M.getModList = getModList
 -- ///////////////////////////////////////////////////////////////////
 
 -- public interface

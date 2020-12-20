@@ -206,7 +206,7 @@ local function updateVehicle(serverID, data)
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
-	if vehicleName == veh:getJBeamFilename() and settings.getValue("showSyncConfigUpdates") then
+	if vehicleName == veh:getJBeamFilename() and not settings.getValue("showSyncConfigUpdates") then
 		latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		print("Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))

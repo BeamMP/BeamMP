@@ -271,6 +271,7 @@ end
 local function onInit()
 	connectToLauncher()
 	reloadUI()
+	if not core_modmanager.getModList then Lua:requestReload() end
 	core_gamestate.requestExitLoadingScreen('MP')
 	returnToMainMenu()
 	send('Nc')

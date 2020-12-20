@@ -16,23 +16,6 @@ local mods = {"multiplayerbeammp", "beammp"}
 
 
 
--- TRY CATCH FROM: https://gist.github.com/cwarden/1207556/a3c7caa194cad0c22871ac650159b40a88ecd702
-function catch(what)
-   return what[1]
-end
-
-
-
-function try(what)
-	local status, result = pcall(what[1])
-	if not status then
-		what[2](result)
-	end
-	return result
-end
-
-
-
 local function IsModAllowed(n)
 	for k,v in pairs(mods) do
 		if string.lower(v) == string.lower(n) then
@@ -101,11 +84,6 @@ local function setServerMods(mods)
 
 	print("Converted Server Mods Set:")
 	dump(serverMods)
-
-	--for modname,mdata in pairs(core_modmanager.getModList())
-		--if not mdata.active then
-		--end
-	--end
 end
 
 

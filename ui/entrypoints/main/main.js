@@ -100,6 +100,12 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
       controller: 'OnlineFeaturesController',
     })
 
+    .state('menu.newFeatures', {
+      url: '/newFeatures',
+      templateUrl: `modules/newFeatures/newFeatures.html`,
+      controller: 'NewFeaturesController',
+    })
+
     .state('menu.playmodes', {
       url: '/playmodes',
       templateUrl: 'modules/playmodes/playmodes.html',

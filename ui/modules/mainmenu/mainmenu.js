@@ -1,3 +1,5 @@
+var alreadyShown = false
+
 angular.module('beamng.stuff')
 
 .directive('versionInfo', [function () {
@@ -277,6 +279,7 @@ angular.module('beamng.stuff')
     return [ 'menu.mainmenu'
       , 'menu.quickraceOverview'
       , 'menu.onlineFeatures'
+      , 'menu.newFeatures'
       , 'menu.skinwizard'
       , 'menu.vehiclewizard'
       , 'menu.terrainwizard'
@@ -325,6 +328,7 @@ angular.module('beamng.stuff')
   gamepadNav.enableGamepadNav(false);
   gamepadNav.enableSpatialNav(true);
 
+
   // just in case
   $scope.$on('SettingsChanged', (ev, data) => {
     $scope.values = data.values;
@@ -334,6 +338,12 @@ angular.module('beamng.stuff')
   if (Settings.values.onlineFeatures === 'ask' || Settings.values.telemetry === 'ask') {
     console.log('Settings: ', Settings.values);
     $state.go('menu.onlineFeatures');
+  }
+
+  console.log('Settings: ', Settings.values.showNewFeatures, Settings.values.doNotShowUntilNextUpdate);
+  if ((Settings.values.showNewFeatures != '40' || Settings.values.doNotShowUntilNextUpdate == null || Settings.values.doNotShowUntilNextUpdate == false) || alreadyShown == true) {
+    alreadyShown = true
+    $state.go('menu.newFeatures');
   }
 
   $scope.values = Settings.values;

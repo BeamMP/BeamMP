@@ -37,55 +37,45 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 }]);
 
 function playerList(list) {
-	let playersList = document.getElementById("playerstable");
+	let playersList = document.getElementById("players-table");
 	let parsedList = JSON.parse(list);
-
-	//console.log("Setting Elements for player list")
-
 	if(players != null){
 		//get differences between playernames and send them as messages
+		var left = players.filter((item) => { return !parsedList.includes(item) });
+		var joined = parsedList.filter((item) => { return !players.includes(item) });	
+		
+		// Clear the player list
+		clearPlayerList();
+		
+		// And fill it with the updated players
+		for (let i = 0; i < parsedList.length; i++) {
+			// Insert a row at the end of the players list
+			var row = playersList.insertRow(playersList.rows.length);
+			
+			// Insert a cell containing the player name
+			var nameCell = row.insertCell(0);
+			nameCell.textContent = parsedList[i];
+			nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
 
-		var left = players.filter((item)=>{
-			return !parsedList.includes(item)
-		});
-
-		let joined = parsedList.filter((item)=>{
-			return !players.includes(item)
-		});
-
-		//for(var i = 0; i< left.length;i++)
-			//if(left[i].length>0) addMessage(left[i] + " left the server"); //the game would send an empty left message when joining a server
-
-		//for(var i = 0; i< joined.length;i++)
-			//addMessage(joined[i] + " joined the server");
-
-		//if(joined.length>0 || left.length>0){ //update playerlist if someone joined or left //keep updating because pings are a thing now
-			clearPlayerList();
-			for (let i = 0; i < parsedList.length; i++) {
-				var row = playersList.insertRow(playersList.rows.length);
-				var cell1 = row.insertCell(0);
-				cell1.textContent = parsedList[i];
-				cell1.className = "playerlistName";
-				cell1.setAttribute("onclick","showPlayerInfo('"+parsedList[i]+"')");
-
-				//adding button
-				if(parsedList[i].trim() != nickname.trim()){
-					var cell2 = row.insertCell(1);
-					cell2.style.width = '30px';
-					var btn = document.createElement("BUTTON");
-					if (pingList[parsedList[i]] != null)
-						btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
-					btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
-					btn.setAttribute("class","tp-button");
-					cell2.appendChild(btn);
-				}else{
-					cell1.colSpan = 2;
-				}
+			if(parsedList[i].trim() != nickname.trim()) {
+				// Insert a cell containing the player ping
+				var pingCell = row.insertCell(1);
+				pingCell.style.width = "50px";
+				pingCell.style.height= "25px";
+				pingCell.style.border = "none";
+				
+				// Insert the button inside the cell
+				var btn = document.createElement("BUTTON");
+				if (pingList[parsedList[i]]) btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
+				btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
+				btn.setAttribute("class", "tp-button buttons");
+				pingCell.appendChild(btn);
+			} else{
+				nameCell.colSpan = 2;
 			}
-			if(document.getElementById("plist-container").style.display == "block")
-				document.getElementById("plist-show-button").style.height = playersList.offsetHeight+"px"; 
-
-		//}
+		}
+		if(document.getElementById("plist-container").style.display == "block")
+			document.getElementById("show-button").style.height = playersList.offsetHeight+"px"; 
 	}
 	players = parsedList; //store player list as an array for the next update
 }
@@ -96,16 +86,13 @@ function playerPings(list) {
 		pingList[i] = pingList[i]-16;
 		if (pingList[i] > 999) pingList[i] = 999;
 	}
-	//console.log(pingList);
 }
 
 
 function clearPlayerList() {
-	let playersList = document.getElementById("playerstable");
+	let playersList = document.getElementById("players-table");
 	var rowCount = playersList.rows.length - 1;
-	for(rowCount; rowCount > 0; rowCount--) {
-		playersList.deleteRow(1);
-	}
+	for(rowCount; rowCount > 0; rowCount--) playersList.deleteRow(1);
 }
 
 function teleportToPlayer(targetPlayerName) {
@@ -130,10 +117,7 @@ function setOfflineInPlayerList() {
 
 function toggleList() {
 	var listcont = document.getElementById("plist-container");
-	var btn = document.getElementById("plist-show-button");
-	console.log("Playerlist window state: " + listcont.style.display);
-	if(listcont.style.display != "block") { listcont.style.display = "block"; btn.innerHTML = '>'; }
-	else { listcont.style.display = "none"; btn.innerHTML = 'P l a y e r s'; btn.style.height = "160px"; }
-
-	console.log("Playerlist window state: " + listcont.style.display);
+	var btn = document.getElementById("show-button");
+	if(listcont.style.display != "block") { listcont.style.display = "block"; btn.innerHTML = "&gt;"; }
+	else { listcont.style.display = "none"; btn.innerHTML = "&lt;"; btn.style.height = "80px"; }
 }

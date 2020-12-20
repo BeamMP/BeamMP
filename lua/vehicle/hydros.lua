@@ -27,6 +27,7 @@ local vehicleFFBForceCoef = 1.2
 local responseCurve = 0
 local responseCorrected = false
 local FFBsmooth = newExponentialSmoothing(M.wheelFFBSmoothing)
+-- local FFBsmooth = newDoubleExponentialSmoothing(M.wheelFFBSmoothing)
 local FFBHydros = {}
 local FFBRest = {}
 local FFBRestCount = 0
@@ -313,7 +314,7 @@ local function onFFBConfigChanged(newFFBConfig)
     FFBHydrosExist = true
     FFBsmooth:set(0)
     curForceLimitSmoother:set(0)
-    --log("D", "hydros.init", "Response to FFB config request: "..dumps(newFFBConfig))
+    log("D", "hydros.init", "Response to FFB config request: "..dumps(newFFBConfig))
 
     local ffbConfig = newFFBConfig.steering
 

@@ -3,43 +3,65 @@
 		.popout-list {
 			display: none;
 			margin-right: 25px;
-			background-color: rgba(0, 0, 0, 0.5);
+			background-color: rgba(0, 0, 0, 0.45);
 			width:100%;
 			resize:both;
+			border: 2px solid rgba(175, 175, 175, 0.45);
 		}
-		.plist-show-button {
-			color: white;
+		#show-button {
 			font-weight: bold;
-			border: 0px;
 			width: 25px;
-			height: 160px;
+			height: 80px;
 			position: absolute;
 			right: 0;
-			background-color: rgba(0, 0, 0, 0.5)
+			border: 2px solid rgba(175, 175, 175, 0.45);
 		}
 		.tp-button {
-			color: white;
-			border: 0px;
-			width: 40px;
-			height: 24px;
-			//position: absolute;
-			//right: 0;
-			background-color: rgba(0, 0, 0, 0.5)
+			width: 100%;
+			min-height: 100%;
 		}
-		.multiplayerPlayerList {
+		#players-table {
 			color: white;
-			box-sizing: border-box;
-			padding:2px;
-			background-color: rgba(0, 0, 0, 0)
+			border: none;
+			border-collapse: collapse;
+			border-spacing: 2px;
+			margin: 0px;
+			width: 100%;
+		}
+		#players-table td {
+			
+		}
+		#players-table th {
+			border-bottom: 2px solid rgba(175, 175, 175, 0.45);
+		}
+		.buttons {
+			background-color:black;
+			color: #DDDDDD;
+			transition: 0.20s;
+			background-color: rgba(0, 0, 0, 0.45);
+			height:100%;
+			border: none;
+			margin: 0px;
+		}
+		.buttons:hover {
+			background-color: rgba(0, 0, 0, 0.65);
+			color: #FFFFFF;
 		}
 	</style>
 	<div style="display:flex; resize:both;">
 		<div class="popout-list" id="plist-container">
-			<table id="playerstable" border="1" style="border-collapse: collapse; width:100%;">
-				<tr><th colspan="2">Players</th></tr>
-				<tr><td>No players.. something is wrong</td><td width="30px"><button class="tp-button" onclick="teleportToPlayer('meow')">TP</button></td></tr>
+			<table id="players-table">
+				<tr>
+					<th colspan="2">Players</th>
+				</tr>
+				<tr>
+					<td>No players.. something is wrong</td>
+					<td width="30px">
+						<button class="buttons tp-button" onclick="teleportToPlayer('meow')">TP</button>
+					</td>
+				</tr>
 			</table>
 		</div>
-		<button class="plist-show-button" id="plist-show-button" onclick="toggleList()">P l a y e r s</button>
+		<button class="buttons" id="show-button" onclick="toggleList()">&lt;</button>
 	</div>
 </div>

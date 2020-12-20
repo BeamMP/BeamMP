@@ -193,7 +193,7 @@ local function onUpdate(dt)
 
 		--================================ SECONDS TIMER ================================
 		secondsTimer = secondsTimer + dt -- Time in seconds
-		if secondsTimer > 1 then
+		if secondsTimer > 0.5 then
 			send('A') -- Launcher heartbeat
 			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
 			else send('Up') end -- Server heartbeat

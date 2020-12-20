@@ -37,12 +37,16 @@
 			background-color:rgba(0, 0, 0, 0.65);
 			color: #FFFFFF;
 		}
+		.swap-buttons {
+			min-width:23px;
+			text-align: center;
+		}
 		#chatbox {
 			display: flex;
 			min-height:40px;
 			width:250px;
 			transition: 0.20s;
-			transition-delay:400ms;
+			transition-delay:700ms;
 		}
 		#chatbox:hover {
 			width:100%;
@@ -70,8 +74,8 @@
 		<form id="chatbox">
 			<button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
 			<input id="chat-input" type="text" ng-click="select()" placeholder=" Chat here"></input>
-			<button id="swap-button" class="buttons" ng-click="chatSwapVertical()">&uarr;</button>
-			<button id="swap-button" class="buttons" ng-click="chatSwapHorizontal()">&lt;</button>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
 		</form>
 	</div>
 </div>

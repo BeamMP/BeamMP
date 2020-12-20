@@ -51,7 +51,9 @@ end
 local function cleanUpSessionMods()
 	for k,v in pairs(serverMods) do
 		core_modmanager.deactivateMod(string.lower(v))
-		--core_modmanager.deleteMod(string.lower(v))
+    if string.match(string.lower(v), 'multiplayer') then
+		  core_modmanager.deleteMod(string.lower(v))
+    end
 	end
 	Lua:requestReload() -- reload Lua to make sure we don't have any leftover GE files
 end
@@ -69,7 +71,9 @@ local function onUpdate(dt)
 					if not IsModAllowed(modname) then -- This mod is not allowed to be running
 						print("This mod should not be running: "..modname)
 						core_modmanager.deactivateMod(modname)
-						--core_modmanager.deleteMod(modname)
+            if string.match(string.lower(modname), 'multiplayer') then
+        		  core_modmanager.deleteMod(string.lower(modname))
+            end
 					end
 				else -- The mod is not active but lets check if it should be
 					if IsModAllowed(modname) then

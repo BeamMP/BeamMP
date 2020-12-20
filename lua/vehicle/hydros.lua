@@ -220,9 +220,11 @@ local function updateGFX(dt) -- dt in seconds
       M.wheelFFBForceCoefCurrent = 0 -- free up the wheel while AI is driving
     end
 
+	-- ///////////////////////////////////////// BEAMMP /////////////////////////////////////////
     if v.mpVehicleType == "R" then
       M.wheelFFBForceCoefCurrent = 0 -- don't apply wheel forces if vehicle is remote
     end
+	-- ///////////////////////////////////////// BEAMMP /////////////////////////////////////////
   end
 
   -- update electrics steering

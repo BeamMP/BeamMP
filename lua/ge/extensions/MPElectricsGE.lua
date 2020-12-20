@@ -27,9 +27,9 @@ end
 
 
 
-local function tickGears() -- Update electrics values of all vehicles
+local function tickGears() -- Update gears of all vehicles
 	for i = 0, be:getObjectCount() do -- For each vehicle
-		local veh = be:getObject(0) --  Get vehicle
+		local veh = be:getObject(i) --  Get vehicle
 		if veh and not MPVehicleGE.isOwn(veh:getId()) then -- For loop always return one empty vehicle ?
 			veh:queueLuaCommand("MPElectricsVE.checkGears()") -- Check if any value changed
 		end
@@ -51,7 +51,6 @@ end
 
 
 local function applyElectrics(data, serverVehicleID)
-	--print("gameVehicleID: "..MPVehicleGE.getGameVehicleID(serverVehicleID))
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
@@ -63,27 +62,12 @@ end
 
 
 
-local function sendGear(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
-		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			if data ~= lastGear then
-				MPGameNetwork.send('Wg:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2135, serverVehicleID, data))
-				lastGear = data
-				--print("Gear sent "..serverVehicleID)
-			end
-		end
-	end
-end
-
-
-
 local function applyGear(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		if not MPVehicleGE.isOwn() then
-			veh:queueLuaCommand("MPElectricsVE.applyGear(\'"..data.."\')")
+			veh:queueLuaCommand("MPElectricsVE.setGear(\'"..data.."\')")
 		end
 	end
 end
@@ -112,7 +96,6 @@ end
 M.tick 			 = tick
 M.tickGears		 = tickGears
 M.handle     	 = handle
-M.sendGear		 = sendGear
 M.applyGear	 	 = applyGear
 M.sendElectrics  = sendElectrics
 M.applyElectrics = applyElectrics

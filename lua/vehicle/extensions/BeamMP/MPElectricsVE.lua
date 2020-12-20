@@ -11,12 +11,11 @@ local M = {}
 
 -- ============= VARIABLES =============
 local lastElectrics = {}
-local lastGear = -1
 local latestData
 local electricsChanged = false
-local localGearIndex = 0
 local latestGearData
 local localGearMode
+local localCurrentGear = 0
 -- ============= VARIABLES =============
 
 
@@ -35,13 +34,15 @@ local translationTable = {
 
 
 local function applyGear(data)
-	if not electrics.values.gearIndex then return end
+	latestGearData = data
+	if not electrics.values.gearIndex or localCurrentGear == data then return end
 	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
 	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor")).type
 	if gearboxType == "manualGearbox" then
 		local index = tonumber(data)
 		if electrics.values.gearIndex ~= index then
 			controller.mainController.shiftToGearIndex(index) -- Simply switch to the gear index
+			localCurrentGear = data
 		end
 	-- Sequential gearbox doesn't work with shiftToGearIndex, for some reason reverse is
 	-- -2 and not -1 so we need to do a loop to down shift. The loop is because the game
@@ -50,8 +51,10 @@ local function applyGear(data)
 		local index = tonumber(data)
 		if electrics.values.gearIndex < index then
 			controller.mainController.shiftUp()
+			localCurrentGear = tostring(localCurrentGear + 1)
 		elseif electrics.values.gearIndex > index then
 			controller.mainController.shiftDown()
+			localCurrentGear = tostring(localCurrentGear - 1)
 		end
 
 	-- Nothing special
@@ -70,6 +73,7 @@ local function applyGear(data)
 			end
 		end
 		localGearMode = state
+		localCurrentGear = data
 
 	-- We use the same thing as automatic for all the first gears, and we use
 	-- the same type of shifting as sequential for M gears.
@@ -91,9 +95,12 @@ local function applyGear(data)
 			controller.mainController.shiftToGearIndex(index)
 			localGearMode = state
 		end
+		localCurrentGear = data
 	end
+end
 
-	latestGearData = data
+local function setGear(gear)
+	latestGearData = gear
 end
 
 local disallowedKeys = {
@@ -171,7 +178,7 @@ local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
 	local e = electrics.values
-	if not e or not e.gear then return end -- Error avoidance in console
+	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
 		if not disallowedKeys[k] then -- If it's not a disallowed key
 			if lastElectrics[k] ~= v then -- If the value changed
@@ -183,10 +190,6 @@ local function check()
 	end	
 	if electricsChanged then
 		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', \'"..obj:getID().."\')")
-	end	
-	if e.gear ~= lastGear then
-		obj:queueGameEngineLua("MPElectricsGE.sendGear(\'"..e.gear.."\', \'"..obj:getID().."\')")
-		lastGear = e.gear
 	end
 end
 
@@ -232,6 +235,12 @@ local function applyElectrics(data)
 			electrics.set_fog_lights(decodedData.fog)
 		end
 		
+		-- Gear syncing
+		if decodedData.gear then
+			latestgeardata = decodedData.gear
+		end
+		
+		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v
 		end
@@ -245,7 +254,7 @@ end
 local function onReset()
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
-		localGearIndex = 0
+		localCurrentGear = 0
 	end
 end
 
@@ -271,6 +280,7 @@ M.onExtensionLoaded    = onExtensionLoaded
 M.onReset			   = onReset
 M.check				   = check
 M.checkGears		   = checkGears
+M.setGear			   = setGear
 M.applyGear			   = applyGear
 M.applyElectrics	   = applyElectrics
 M.applyLatestElectrics = applyLatestElectrics

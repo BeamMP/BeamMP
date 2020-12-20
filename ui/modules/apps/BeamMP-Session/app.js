@@ -1,4 +1,5 @@
 var app = angular.module('beamng.apps');
+
 app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 	return {
 		templateUrl: 'modules/apps/BeamMP-Session/app.html',
@@ -7,9 +8,9 @@ app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 		scope: true
 	}
 }]);
+
 app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
-		//console.log(`CALLING READY: UI.ready("MP-SESSION")`)
 		bngApi.engineLua('UI.ready("MP-SESSION")');
 	};
 
@@ -32,7 +33,6 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.$on('setStatus', function (event, status) {
 		console.log('Setting Status to: ')
 		console.log(sanitizeString(status))
-    //document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status)); // REMOVE COLORS FROM SERVER NAME
 		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
 	});
 
@@ -42,11 +42,9 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 }]);
 
 function sanitizeString(str) {  // VERY basic sanitization.
-    //console.log(str)
-		str = str.replace(/<script.*?<\/script>/g, '');
-		str = str.replace(/<button.*?<\/button>/g, '');
-		str = str.replace(/<iframe.*?<\/iframe>/g, '');
-		str = str.replace(/<a.*?<\/a>/g, '');
-    //console.log(str)
+	str = str.replace(/<script.*?<\/script>/g, '');
+	str = str.replace(/<button.*?<\/button>/g, '');
+	str = str.replace(/<iframe.*?<\/iframe>/g, '');
+	str = str.replace(/<a.*?<\/a>/g, '');
     return str
 }

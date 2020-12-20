@@ -20,6 +20,8 @@ local MapLoadingTimeout = 0
 local status = ""
 local launcherVersion = ""
 local mapLoaded = false
+local isMpSession = false
+local isGoingMpSession = false
 --[[
 Z -> The client ask to the launcher his version
 B -> The client ask for the servers list to the launcher
@@ -51,6 +53,7 @@ local function disconnectLauncher()
 		launcherConnectionStatus = 0
 		serverTimeoutTimer = 0 -- Reset timeout delay
 		secondsTimer = 0
+		isGoingMpSession = false
 	end
 end
 
@@ -64,6 +67,7 @@ local function setMods(modsString)
 			table.insert(mods, modFileName)
 		end
 	end
+	isGoingMpSession = true
 	MPModManager.setServerMods(mods)
 end
 
@@ -125,6 +129,7 @@ local function LoadLevel(map)
 	status = "LoadingMapNow"
 	--freeroam_freeroam.startFreeroam(map)
 	multiplayer_multiplayer.startMultiplayer(map)
+	isMpSession = true
 end
 
 
@@ -157,7 +162,7 @@ local function HandleLogin(params)
 		local m = ''
 		if (r.message) then
 			m = r.message
-		end		
+		end
 		guihooks.trigger('LoginError', {message = m})
 	end
 end
@@ -227,6 +232,8 @@ local function onUpdate(dt)
 end
 
 local function resetSession(goBack)
+	isMpSession = false
+	isGoingMpSession = false
 	print("Reset Session Called!")
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
@@ -242,6 +249,8 @@ end
 
 
 local function quitMP()
+	isMpSession = false
+	isGoingMpSession = false
 	print("Reset Session Called!")
 	send('QG') -- Quit game
 end
@@ -267,7 +276,13 @@ local function onInit()
 	send('Nc')
 end
 
+local function isMPSession()
+	return isMpSession
+end
 
+local function isGoingMPSession()
+	return isGoingMpSession
+end
 
 M.onUpdate = onUpdate
 M.getServers = getServers
@@ -280,6 +295,8 @@ M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
 M.login = login
 M.onInit = onInit
+M.isMPSession = isMPSession
+M.isGoingMPSession = isGoingMPSession
 
 
 

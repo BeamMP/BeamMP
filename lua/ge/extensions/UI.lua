@@ -150,15 +150,15 @@ local deletenext = true
 
 
 local function ready(src)
-  print("UI / Game Has now loaded ("..src..")")
+  print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
 
-  if src == "FIRSTVEH" then
+  if src == "FIRSTVEH" and MPCoreNetwork.isMPSession() then
     deletenext = true
   end
   if src == "MP-SESSION" then
 		setPing("-2")
-    if deletenext then
+    if deletenext and MPCoreNetwork.isMPSession() then
       print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
       core_vehicles.removeCurrent(); -- 0.20 Fix
       commands.setFreeCamera()		 -- Fix camera
@@ -170,20 +170,27 @@ local function ready(src)
   end
 
   if src == "MP-SESSION" or src == "FIRSTVEH" then
-  	if ready then
+  	if ready and MPCoreNetwork.isMPSession() then
   	  ready = false
   	  MPGameNetwork.connectToLauncher()
   	end
 
-    local Server = MPCoreNetwork.getCurrentServer()
-    print("---------------------------------------------------------------")
-    --dump(Server)
-    print(Server.name)
-    print("---------------------------------------------------------------")
+		if MPCoreNetwork.isMPSession() then
+	    local Server = MPCoreNetwork.getCurrentServer()
+	    print("---------------------------------------------------------------")
+	    --dump(Server)
+			if Server ~= nil then
+				local name = Server.name
+	    	print(name)
+			else
+				print('Server.name == nil')
+			end
+	    print("---------------------------------------------------------------")
 
-  	if Server ~= nil and Server.name ~= nil then
-  	  setStatus("Server: "..Server.name)
-  	end
+	  	if Server ~= nil and Server.name ~= nil then
+	  	  setStatus("Server: "..Server.name)
+	  	end
+		end
   end
 end
 
@@ -206,7 +213,10 @@ local function setVehPing(vehicleID, ping)
 	end
 end
 
-
+local function GSUpdate(state)
+	print('NEW GS SSTATE!!!!!!')
+	dump(state)
+end
 
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
@@ -220,7 +230,7 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
-
+M.onGameStateUpdate = GSUpdate
 
 
 return M

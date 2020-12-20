@@ -1165,6 +1165,7 @@
     "ui.options.gameplay.multiseat": "Use multiseat for this session",
     "ui.options.gameplay.switchHint": "Use the [action=switch_next_vehicle_multiseat]'Switch to next vehicle (multiseat)' binding to switch vehicles",
     "ui.options.gameplay.multiseatTags": "Display multiseat player tags",
+    "ui.options.gameplay.enableSmartRecovery": "Enable the smart recovery system",
     "ui.options.gameplay.controlOnBlur": "Allow controller input and force feedback when window focus is lost",
     "ui.options.gameplay.enginesPreheated": "Start vehicle engines preheated",
     "ui.options.gameplay.enginesPreheated.tooltip": "If disabled, the engine thermal simulation starts at the environmental temperature.",
@@ -3901,7 +3902,7 @@
     "ui.campaign.localPlayers": "local players",
     "ui.campaign.requiresOneController": "Requires one controller per player",
 
-    "December": "Decemberrrr",
+    "December": "December",
     "general.time_format": "dd MM yyyy",
 
     "ui.loadingScreen.tips": "TIPS",

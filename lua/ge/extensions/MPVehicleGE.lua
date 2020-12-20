@@ -592,7 +592,7 @@ local function onUpdate(dt)
 						distanceMap[gameVehicleID] = distfloat
 					end
 
-					if settings.getValue("showNameTags") and nicknamesAllowed then
+					if not settings.getValue("showNameTags") and nicknamesAllowed then
 						local dist = ""
 						local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 						local backColor = roleInfo.backcolor

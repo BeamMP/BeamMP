@@ -340,7 +340,7 @@ angular.module('beamng.stuff')
     $state.go('menu.onlineFeatures');
   }
 
-  console.log('Settings: ', Settings.values.showNewFeatures, Settings.values.doNotShowUntilNextUpdate);
+  console.log('Settings: ', Settings.values.showNewFeatures, Settings.values.doNotShowUntilNextUpdate, alreadyShown);
   if ((Settings.values.showNewFeatures != '40' || Settings.values.doNotShowUntilNextUpdate == null || Settings.values.doNotShowUntilNextUpdate == false) || alreadyShown == true) {
     alreadyShown = true
     $state.go('menu.newFeatures');

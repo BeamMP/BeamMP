@@ -83,14 +83,10 @@
 
 			<div style="height:48px; display:flex; background-color:rgb(62, 62, 62); color: white; border-radius: 0px 0px 10px 10px;">
 				<div style="margin:auto; display: -webkit-inline-box;">
-					<!--<div style="display: -webkit-inline-box; margin-top: -10px;">
-						Don't show again
-						<md-checkbox ng-change="setDontShowAgain()" class="md-primary" style="margin-top: -10px;">Don't show again</md-checkbox>
-					</div>-->
-					<md-checkbox flex ng-model="newFeatures" name="doNotShowUntilNextUpdate">
+					<md-checkbox flex ng-model="newFeatures" name="doNotShowUntilNextUpdate" ng-change="setDontShowAgain()">
 						Don't show again
 			      <md-tooltip md-direction="right">
-			        Automatically applies changes when moving the sliders
+			        Do not show this window until the next update.
 			      </md-tooltip md-no-ink>
 			    </md-checkbox>
 					<md-button ng-click="toMainMenu()" class="md-raised md-primary" md-no-ink>Continue</md-button>

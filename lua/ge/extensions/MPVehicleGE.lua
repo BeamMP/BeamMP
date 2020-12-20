@@ -258,6 +258,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
+	print("It is for "..playerNickname)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
@@ -443,6 +444,8 @@ local HandleNetwork = {
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1) -- Get the serverVehicleID
 		local data = string.match(rawData,":(.*)") -- Get the vehicle data
+		--dump(rawData)
+		--print(playerRole, playerNickname, serverVehicleID)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
 	['r'] = function(rawData)

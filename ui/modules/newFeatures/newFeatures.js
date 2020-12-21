@@ -15,7 +15,6 @@ angular.module('beamng.stuff')
   * Basic controller for the new features scene
   **/
   .controller('NewFeaturesController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
-    console.log("aaaaaaaaaaaaaaa IM HERE")
     // The lua setting need to be functional before we redirect, otherwise we'll land here again.
     // for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
     var vm = this;
@@ -26,22 +25,23 @@ angular.module('beamng.stuff')
     $scope.toMainMenu = function() {
       $scope.hide = false
 
-      if ($scope.doNotShowUntilNextUpdate == true) {
-        $scope.doNotShowUntilNextUpdate = 'disable';
+      if (vm.doNotShowUntilNextUpdate == true) {
+        vm.doNotShowUntilNextUpdate = true;
       }
 
 
       var newState = {
-        showNewFeatures: '4.0',
-        doNotShowUntilNextUpdate: $scope.doNotShowUntilNextUpdate
+        showNewFeatures: '40',
+        doNotShowUntilNextUpdate: vm.doNotShowUntilNextUpdate
       };
 
       bngApi.engineLua(`settings.setState(${bngApi.serializeToLua(newState)})`);
       $state.go('menu.mainmenu');
     };
 
-    $scope.setDontShowAgain = function(state) {
-      console.log(state);
+    $scope.setDontShowAgain = function(stateObj) {
+      console.log(stateObj);
+      vm.doNotShowUntilNextUpdate = !vm.doNotShowUntilNextUpdate
     };
   }]);
 })();

@@ -206,7 +206,7 @@ local function updateVehicle(serverID, data)
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
-	if vehicleName == veh:getJBeamFilename() and settings.getValue("showSyncConfigUpdates") then
+	if vehicleName == veh:getJBeamFilename() and not settings.getValue("showSyncConfigUpdates") then
 		latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		print("Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
@@ -258,6 +258,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
+	print("It is for "..playerNickname)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
 		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
@@ -443,6 +444,8 @@ local HandleNetwork = {
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1) -- Get the serverVehicleID
 		local data = string.match(rawData,":(.*)") -- Get the vehicle data
+		--dump(rawData)
+		--print(playerRole, playerNickname, serverVehicleID)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
 	['r'] = function(rawData)
@@ -589,7 +592,7 @@ local function onUpdate(dt)
 						distanceMap[gameVehicleID] = distfloat
 					end
 
-					if settings.getValue("showNameTags") and nicknamesAllowed then
+					if not settings.getValue("showNameTags") and nicknamesAllowed then
 						local dist = ""
 						local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 						local backColor = roleInfo.backcolor

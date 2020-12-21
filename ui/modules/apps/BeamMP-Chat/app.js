@@ -34,19 +34,26 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	};
 
 	function setChatDirection(direction) {
-		console.log("Moving chat to the " + direction);
 		const chatbox = document.getElementById("chatbox");
 		const chatwindow = document.getElementById("chat-window");
 		const chatlist = document.getElementById("chat-list");
 		if (direction == "left") {
 			chatbox.style.flexDirection = "row";
 			chatbox.style.marginLeft = "0px";
+			chatwindow.style.alignItems = "flex-start";
 			localStorage.setItem('chatHorizontal', "left");
 		}
 		else if (direction == "right") {
 			chatbox.style.flexDirection = "row-reverse";
 			chatbox.style.marginLeft = "auto";
+			chatwindow.style.alignItems = "flex-start";
 			localStorage.setItem('chatHorizontal', "right");
+		}
+		else if (direction == "middle") {
+			chatbox.style.flexDirection = "row";
+			chatbox.style.marginLeft = "0px";
+			chatwindow.style.alignItems = "center";
+			localStorage.setItem('chatHorizontal', "middle");
 		}
 		else if (direction == "top") {
 			chatwindow.style.flexDirection = "column-reverse";
@@ -65,16 +72,13 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 	}
 
 	$scope.chatSwapHorizontal = function() {
-		const chatbox = document.getElementById("chatbox");
-		const chatHorizontal = localStorage.getItem('chatHorizontal');
-		console.log(chatHorizontal);
-		if (chatHorizontal != "right") setChatDirection("right");
+		const chatHorizontal = localStorage.getItem('chatHorizontal') || "middle";
+		if (chatHorizontal == "left") setChatDirection("middle");
+		else if (chatHorizontal == "middle") setChatDirection("right");
 		else setChatDirection("left");
 	}
 
 	$scope.chatSwapVertical = function() {
-		const chatwindow = document.getElementById("chat-window");
-		const chatlist = document.getElementById("chat-list");
 		const chatVertical = localStorage.getItem('chatVertical');
 		if (chatVertical != "top") setChatDirection("top");
 		else setChatDirection("bottom");

@@ -14,7 +14,6 @@
 		#chat-input {
 			width:100%;
 			height:auto;
-			background-color: black;
 			background-color:rgba(0, 0, 0, 0.25);
 			border: 2px solid rgba(175, 175, 175, 0.45);
 			color:white;
@@ -45,12 +44,12 @@
 			display: flex;
 			min-height:40px;
 			width:250px;
-			transition: 0.20s;
+			transition: 0.13s;
 			transition-delay:700ms;
 		}
 		#chatbox:hover {
 			width:100%;
-			transition: none; /* No animation */
+			transition-delay:0ms;
 		}
 		ul#chat-list {
 			list-style: none;
@@ -63,6 +62,7 @@
 			flex-direction: column;
 			margin-top:auto;
 			margin-bottom:0px;
+			width:100%;
 		}
 		::-webkit-scrollbar {
 			width: 0px;  /* Remove scrollbar space */

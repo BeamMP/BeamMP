@@ -112,7 +112,7 @@ function playerList(list) {
 			pingCell.appendChild(btn);
 		}
 		if(document.getElementById("plist-container").style.display == "block")
-			document.getElementById("show-button").style.height = playersList.offsetHeight + "px";
+			document.getElementById("show-button").style.height = playersList.offsetHeight + "px"; 
 	}
 	players = parsedList; //store player list as an array for the next update
 }
@@ -155,6 +155,15 @@ function showList() {
 	var shownText = "&gt;";
 	var hiddenText = "&lt;";
 	if (localStorage.getItem('plHorizontal') == "right") { shownText = "&lt;"; hiddenText = "&gt;"; }
+	var plContainer = document.getElementById("plist-container");
+	var btn = document.getElementById("show-button");
+	plContainer.style.display = "block";
+	btn.innerHTML = shownText;
+}
+
+function hideList() {
+	var hiddenText = "&lt;";
+	if (localStorage.getItem('plHorizontal') == "right") { hiddenText = "&gt;"; }
 	var plContainer = document.getElementById("plist-container");
 	var btn = document.getElementById("show-button");
 	plContainer.style.display = "block";

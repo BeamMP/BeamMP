@@ -314,8 +314,17 @@ end
 
 
 
+local function onClientEndMission(mission)
+	if isMPSession() then
+		resetSession(1)
+	end
+end
+
+
+
 M.login = login
 M.onClientStartMission = onClientStartMission
+M.onClientEndMission = onClientEndMission
 M.onUpdate = onUpdate
 M.getServers = getServers
 M.getCurrentServer = getCurrentServer

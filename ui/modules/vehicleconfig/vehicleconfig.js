@@ -282,12 +282,13 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
       })
     }
   };
-
-
+  
+  // --------------------------------------- BEAMMP --------------------------------------- //
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
     bngApi.engineLua("MPVehicleGE.sendCustomVehicleData(be:getPlayerVehicle(0):getID())");
   }
+  // --------------------------------------- BEAMMP --------------------------------------- //
 
   function calcTreesync (config) {
     if (init) {

@@ -80,7 +80,6 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 function playerList(list) {
 	let playersList = document.getElementById("players-table");
 	let parsedList = JSON.parse(list);
-	parsedList = ["this_nickname_is_way_too_long_and_it_goes", "test2", "jojos38", "test3", "test4", "test5", "test6", "test7"];
 	if(players != null){
 		//get differences between playernames and send them as messages
 		var left = players.filter((item) => { return !parsedList.includes(item) });

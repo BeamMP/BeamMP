@@ -40,6 +40,7 @@ local function applyGear(data)
 	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor")).type
 	if gearboxType == "manualGearbox" then
 		local index = tonumber(data)
+		if not index then return end
 		if electrics.values.gearIndex ~= index then
 			controller.mainController.shiftToGearIndex(index) -- Simply switch to the gear index
 			localCurrentGear = data
@@ -49,6 +50,7 @@ local function applyGear(data)
 	-- does not allow skipping gears when using shiftToGearIndex on sequential gearboxes
 	elseif gearboxType == "sequentialGearbox" then
 		local index = tonumber(data)
+		if not index then return end
 		if electrics.values.gearIndex < index then
 			controller.mainController.shiftUp()
 			localCurrentGear = tostring(localCurrentGear + 1)

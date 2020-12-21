@@ -1384,6 +1384,23 @@ $scope.$on('requestUIInitialised', () => {
       { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
     ],
 
+	// -------------------------------------------------------------------- BEAMMP --------------------------------------------------------------------//
+	multiplayer: [
+      { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
+      { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
+      { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
+      { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
+      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
+      { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
+      { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},
+      { translateid: 'ui.dashboard.debug',         icon: 'bug_report',             state: 'menu.debug',      advanced: true },
+      { translateid: 'ui.dashboard.performance',   icon: 'equalizer',              state: '.', action: () => bngApi.engineLua("togglePerformanceGraph()"), advanced: true },
+      { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
+	],
+	// -------------------------------------------------------------------- BEAMMP --------------------------------------------------------------------//
+
+
     scenario: [
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
       { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },

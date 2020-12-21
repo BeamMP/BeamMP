@@ -146,7 +146,6 @@ local function handleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if params == "ldone" and status == "LoadingResources" then
-		be:executeJS('addRecent("'..jsonEncode(currentServer)..'")')
 		send('Mrequest')
 		status = "LoadingMap"
 	end
@@ -320,6 +319,9 @@ local function onClientEndMission(mission)
 	end
 end
 
+local function addRecent()
+	guihooks.trigger('addRecent', jsonEncode(currentServer))
+end
 
 
 M.login = login
@@ -337,7 +339,7 @@ M.modLoaded = modLoaded
 M.onInit = onInit
 M.isMPSession = isMPSession
 M.isGoingMPSession = isGoingMPSession
-
+M.addRecent = addRecent
 
 
 return M

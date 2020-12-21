@@ -85,6 +85,11 @@ angular.module('beamng.stuff')
 		}
 	});
 
+	$scope.$on('addRecent', function (event, data) {
+		console.log("recent received from lua");
+		addRecent(data);
+	});
+
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
 		console.log("ok");
@@ -103,12 +108,18 @@ angular.module('beamng.stuff')
 		logger.debug("Attempting to refresh server list.")
 		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
+	
+	vm.clearRecents = function() {
+		localStorage.removeItem("recent");
+		vm.refreshList();
+	}
 
 	vm.directConnect = function() {
 		console.log('Clicked')
 		var ip = document.getElementById('directip').value;
 		var port = document.getElementById('directport').value;
 		document.getElementById('LoadingServer').style.display = 'block';
+		//addRecent({name:ip, ip:ip, port:port});
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
@@ -301,7 +312,6 @@ angular.module('beamng.stuff')
 	};
 
 	function receiveServers(data) {
-		console.log(data)
 		var serverArray = new Array();
 
 		for (var i = 0; i < data.length; i++) {
@@ -546,7 +556,6 @@ angular.module('beamng.stuff')
 	};
 
 	function receiveServers(data) {
-		console.log(data)
 		var serverArray = new Array();
 
 		for (var i = 0; i < data.length; i++) {
@@ -1364,6 +1373,7 @@ function findPlayer(pname, join=false){
 				if(join){
 					bngApiScope.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${stripCustomFormatting(server.sname)}")`);
 					if (document.getElementById('LoadingServer') !== null) document.getElementById('LoadingServer').style.display = 'block';
+					//addRecent({name:server.sname, ip:server.ip, port:server.port})
 					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
 				}else{
 					//bngApiScope.selectRow(id)
@@ -1380,7 +1390,7 @@ function getFavs(){
 	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
 		console.log(data)
 		if (data == null) return;
-		localStorage.setItem("favorites", data);
+		localStorage.setItem("favorites", JSON.stringify(data));
 	});
 }
 
@@ -1388,13 +1398,21 @@ function saveFavs(){
 	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);
 }
 
-function addRecent(recentstr){
+function addRecent(recentstr){ // has to have name, ip, port
 	var json = JSON.parse(recentstr);
 	console.log(json);
 	var recents = JSON.parse(localStorage.getItem("recent"));
 	if (recents == null) recents = new Array();
-	recents.unshift(json);
-	recents = recents.slice(0, 10); //keep the last 10 entries
-	localStorage.setItem("recent", recents);
+
+	var arr = Array(1).fill(json);
+
+	console.log(recents);
+
+	for(var i=0; i < Math.min(recents.length, 9); i++)
+		if(arr.filter(s=>s.ip == recents[i].ip).filter(s=>s.port == recents[i].port).length==0)
+			arr.push(recents[i]);
+
+	//recents = recents.slice(0, 10); //keep the last 10 entries
+	localStorage.setItem("recent", JSON.stringify(arr));
 }
 

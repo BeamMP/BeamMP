@@ -191,6 +191,7 @@ local function sendCustomVehicleData(gameVehicleID)
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 	print("Vehicle custom data "..gameVehicleID.." was sent")
+	vehiclesToSync[gameVehicleID] = nil
 end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
@@ -206,7 +207,7 @@ local function updateVehicle(serverID, data)
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
-	if vehicleName == veh:getJBeamFilename() and settings.getValue("showSyncConfigUpdates") then
+	if vehicleName == veh:getJBeamFilename() and not settings.getValue("disableSyncConfigUpdates") then
 		latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		print("Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
@@ -354,7 +355,7 @@ end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	--print("Vehicle switched from "..oldID.." to "..newID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreNetwork.isMPSession() then -- If TCP connected
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
 			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
@@ -482,7 +483,7 @@ end
 
 
 local function removeRequest(gameVehicleID)
-	if isOwn(gameVehicleID) then
+	if isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
 		core_vehicles.removeCurrent(); commands.setFreeCamera() --extensions.hook("trackNewVeh")
 		print("Request to remove car id "..gameVehicleID.." DONE")
 	else
@@ -494,7 +495,7 @@ end
 
 local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do
-		local veh = be:getObject(k) --  Get vehicle
+		local veh = be:getObjectByID(k) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?
 			local gameVehicleID = veh:getID()
 			print("Autosyncing vehicle "..gameVehicleID)

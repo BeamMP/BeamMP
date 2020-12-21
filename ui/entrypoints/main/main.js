@@ -100,12 +100,6 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
       controller: 'OnlineFeaturesController',
     })
 
-    .state('menu.newFeatures', {
-      url: '/newFeatures',
-      templateUrl: `modules/newFeatures/newFeatures.html`,
-      controller: 'NewFeaturesController',
-    })
-
     .state('menu.playmodes', {
       url: '/playmodes',
       templateUrl: 'modules/playmodes/playmodes.html',
@@ -230,7 +224,8 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
       templateUrl: 'modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle'
     })
-
+	
+	// -------------------------------------- BEAMMP -------------------------------------- //
 	.state('menu.multiplayer', {
 	  url: '/multiplayer',
 	  templateUrl: 'modules/multiplayer/multiplayer.html',
@@ -260,7 +255,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	    templateUrl: 'modules/multiplayer/direct.partial.html',
 	    controller: 'MultiplayerDirectController as multiplayermenu'
 	  })
-
+	// -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.options', {
       url: '/options',
@@ -310,12 +305,14 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         templateUrl: 'modules/options/other.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
-
-      .state('menu.options.multiplayer', {
+	  
+	  // -------------------------------------- BEAMMP -------------------------------------- //
+	  .state('menu.options.multiplayer', {
         url: '/multiplayer',
         templateUrl: 'modules/options/multiplayer.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
+	  // -------------------------------------- BEAMMP -------------------------------------- //
 
       .state('menu.options.licenses', {
         url: '/licenses',
@@ -1116,12 +1113,14 @@ angular.module('beamng.stuff')
     { translateid: 'ui.playmodes.campaigns',    icon: 'material_star',           disabled: false,            targetState: 'campaigns',                      },
     { translateid: 'ui.playmodes.scenarios',    icon: 'material_movie_creation', disabled: false,            targetState: 'scenarios',                      },
     { translateid: 'ui.playmodes.freeroam',     icon: 'material_terrain',        disabled: false,            targetState: 'levels',                         },
-    { translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                    },
-    { translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
+    // ------------------------------------ BEAMMP ------------------------------------ //
+	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                    },
+	// ------------------------------------ BEAMMP ------------------------------------ //
+	{ translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
     { translateid: 'ui.playmodes.bus',          icon: 'material_directions_bus', disabled: false,            targetState: 'busRoutes',                      },
     { translateid: 'ui.playmodes.lightRunner',  icon: 'general_light_runner',    disabled: false,            targetState: 'lightrunnerOverview'             },
-    { translateid: 'ui.playmodes.trackBuilder', icon: 'material_all_inclusive',  disabled: false,            targetState: '.',     levelName: "glow_city",  },
-    { translateid: 'ui.playmodes.career',       icon: 'material_flag',           disabled: beamng.shipping,  targetState: 'career',                         },
+    { translateid: 'ui.playmodes.trackBuilder', icon: 'material_all_inclusive',  disabled: false,            targetState: '.',     levelName: "glow_city", },
+    { translateid: 'ui.playmodes.career',       icon: 'material_flag',           disabled: beamng.shipping , targetState: 'career',                         },
   ],
 })
 
@@ -1213,6 +1212,7 @@ angular.module('beamng.stuff')
     SpatialNavigation.currentViewActions.toggleMenues = {cmd: () => $rootScope.$broadcast('MenuToggle'), name: 'Toggle Menues', navigation: true};
 
     $rootScope.$on('MenuItemNavigation', function (event, action, val) {
+
       logger.gamepadNav.log('Got action: ' + action);
       logger.gamepadNav.log('Enabled Librarys', useCrossfire, useGamepadNavigation, useSpatialNav);
 
@@ -1282,7 +1282,7 @@ angular.module('beamng.stuff')
 
   bngApi.engineLua('extensions.hook("onUIInitialised")');
 
-  $scope.$on('requestUIInitialised', () => {
+$scope.$on('requestUIInitialised', () => {
     bngApi.engineLua('core_gamestate.onUIInitialised()');
   })
 
@@ -1368,14 +1368,14 @@ angular.module('beamng.stuff')
   vm.menuEntries = {
     freeroam: [
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
-      //{ translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
+      { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
       { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
-      //{ translateid: 'ui.dashboard.mods',          icon: 'shop',                   state: 'menu.mods.local',   },
+      { translateid: 'ui.dashboard.mods',          icon: 'shop',                   state: 'menu.mods.local',   },
       { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
       { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
       { translateid: 'ui.dashboard.environment',   icon: 'cloud_queue',            state: 'menu.environment'   },
-      //{ translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()") },
-      //{ translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      { translateid: 'ui.dashboard.trackBuilder',  icon: 'all_inclusive',          state: '.', action: () => bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()") },
+      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
       { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},
@@ -1384,9 +1384,26 @@ angular.module('beamng.stuff')
       { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
     ],
 
+	// -------------------------------------------------------------------- BEAMMP --------------------------------------------------------------------//
+	multiplayer: [
+      { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
+      { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'          },
+      { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
+      { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
+      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
+      { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
+      { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},
+      { translateid: 'ui.dashboard.debug',         icon: 'bug_report',             state: 'menu.debug',      advanced: true },
+      { translateid: 'ui.dashboard.performance',   icon: 'equalizer',              state: '.', action: () => bngApi.engineLua("togglePerformanceGraph()"), advanced: true },
+      { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
+	],
+	// -------------------------------------------------------------------- BEAMMP --------------------------------------------------------------------//
+
+
     scenario: [
       { translateid: 'ui.dashboard.play',          icon: 'play_arrow', state: '.', action: () => $timeout(() => $scope.$emit('MenuToggle'))},
-      //{ translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
+      { translateid: 'ui.dashboard.drive',         icon: 'layers',                 state: 'menu.playmodes'     },
       { translateid: 'ui.dashboard.help',          icon: 'help',                   state: 'menu.help'},
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'},
@@ -1647,10 +1664,8 @@ angular.module('beamng.stuff')
   vm.quit = function () {
     if (vm.mainmenu) {
       bngApi.engineScript('quit();'); //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
-      bngApi.engineLua("MPCoreNetwork.quitMP()");
       bngApi.engineLua("TorqueScript.eval('quit();')");
     } else {
-      bngApi.engineLua("MPCoreNetwork.resetSession()");
       bngApi.engineLua("returnToMainMenu()");
     }
   };
@@ -1772,23 +1787,7 @@ angular.module('beamng.stuff')
     $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
   });
 
-  vm.showConnectionIssues = false;
 
-  $scope.$on('app:showConnectionIssues', function (event, value, callback) {
-    vm.showConnectionIssues = value;
-    /*Utils.waitForCefAndAngular(() => {
-      if (callback !== undefined && typeof callback === 'function') {
-        callback(vm.showConnectionIssues);
-      }
-    });*/
-    /*console.log(value)
-    var showIssuesElement = document.getElementById('showConnectionIssues');
-    if (value) {
-      showIssuesElement.style.display = 'block'
-    } else {
-      showIssuesElement.style.display = 'none'
-    }*/
-  });
 
   vm.isWaiting = false;
 
@@ -1959,3 +1958,9 @@ angular.module('beamng.stuff')
   })();
 
 }]);
+
+//Trying a date filter-------------------------------------------------------
+
+
+
+

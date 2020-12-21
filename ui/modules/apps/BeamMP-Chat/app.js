@@ -1,4 +1,4 @@
-var app = angular.module('beamng.apps');
+  var app = angular.module('beamng.apps');
 
 
 app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
@@ -20,6 +20,9 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		var chatlist = document.getElementById("chat-list");
 		chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
 		chatlist.addEventListener("mouseout", function(){ chatShown = false; });
+		// Set chat direction
+		setChatDirection(localStorage.getItem('chatHorizontal'));
+		setChatDirection(localStorage.getItem('chatVertical'));
 	};
 
 	$scope.reset = function() {
@@ -30,33 +33,55 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
 
-	$scope.chatSwapHorizontal = function() {
+	function setChatDirection(direction) {
 		const chatbox = document.getElementById("chatbox");
-		if (chatbox.style.flexDirection != "row-reverse") {
-			chatbox.style.flexDirection = "row-reverse";
-			chatbox.style.marginLeft = "auto";
-		}
-		else {
-			chatbox.style.flexDirection = "row";
-			chatbox.style.marginLeft = "0px";
-		}
-	}
-
-	$scope.chatSwapVertical = function() {
 		const chatwindow = document.getElementById("chat-window");
 		const chatlist = document.getElementById("chat-list");
-		if (chatwindow.style.flexDirection != "column-reverse") {
+		if (direction == "left") {
+			chatbox.style.flexDirection = "row";
+			chatbox.style.marginLeft = "0px";
+			chatwindow.style.alignItems = "flex-start";
+			localStorage.setItem('chatHorizontal', "left");
+		}
+		else if (direction == "right") {
+			chatbox.style.flexDirection = "row-reverse";
+			chatbox.style.marginLeft = "auto";
+			chatwindow.style.alignItems = "flex-start";
+			localStorage.setItem('chatHorizontal', "right");
+		}
+		else if (direction == "middle") {
+			chatbox.style.flexDirection = "row";
+			chatbox.style.marginLeft = "0px";
+			chatwindow.style.alignItems = "center";
+			localStorage.setItem('chatHorizontal', "middle");
+		}
+		else if (direction == "top") {
 			chatwindow.style.flexDirection = "column-reverse";
 			chatlist.style.flexDirection = "column-reverse";
 			chatlist.style.marginTop = "0px";
 			chatlist.style.marginBottom = "auto";
+			localStorage.setItem('chatVertical', "top");
 		}
-		else {
+		else if (direction == "bottom") {
 			chatwindow.style.flexDirection = "column";
 			chatlist.style.flexDirection = "column";
 			chatlist.style.marginTop = "auto";
 			chatlist.style.marginBottom = "0px";
+			localStorage.setItem('chatVertical', "bottom");
 		}
+	}
+
+	$scope.chatSwapHorizontal = function() {
+		const chatHorizontal = localStorage.getItem('chatHorizontal') || "middle";
+		if (chatHorizontal == "left") setChatDirection("middle");
+		else if (chatHorizontal == "middle") setChatDirection("right");
+		else setChatDirection("left");
+	}
+
+	$scope.chatSwapVertical = function() {
+		const chatVertical = localStorage.getItem('chatVertical');
+		if (chatVertical != "top") setChatDirection("top");
+		else setChatDirection("bottom");
 	}
 
 	$scope.$on('chatMessage', function (event, message) {
@@ -110,9 +135,14 @@ async function fadeNode(node) {
 
 async function showChat() {
 	// While the mouse is over the chat, we wait
+	var chatMessages = []
 	while (chatShown) {
 		// Get the chat and the messages
-		var chatMessages = document.getElementById("chat-list").getElementsByTagName("li");
+		// Copy the variables so it's a pointer
+		var tempMessages = document.getElementById("chat-list").getElementsByTagName("li");
+		for (i = 0; i < tempMessages.length; i++) {
+			chatMessages[i] = tempMessages[i];
+		}
 		// Set all messages opacity to 1.0
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
 		await sleep(100);

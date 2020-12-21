@@ -3911,8 +3911,7 @@
     "ui.playmodes.multiplayer": "Multiplayer",
 	"ui.options.multiplayer": "Multiplayer",
 
-	"ui.options.multiplayer.syncConfigUpdates": "Apply other player vehicle part updates",
-    "ui.options.multiplayer.showSyncConfigUpdates": "Should the mod automaticlly apply other player vehicle part config changes",
+    "ui.options.multiplayer.disableSyncConfigUpdates": "Disable other players vehicle part config changes (Warning: you won't see custom configs!)",
     "ui.options.multiplayer.nameTags": "Hide player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Use alternate nametag colors",
 	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",

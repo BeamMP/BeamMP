@@ -88,7 +88,7 @@ local function onClientPreStartMission(mission)
     file = path .. 'mainLevel'
     if not FS:fileExists(file..'.lua') then return end
     extensions.loadAtRoot(file,"")
-    core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
+    core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
     if mainLevel and mainLevel.onClientPreStartMission then
       mainLevel.onClientPreStartMission(mission)
     end
@@ -97,18 +97,14 @@ end
 
 local function onClientPostStartMission()
   if MPCoreNetwork.isMPSession() then
-    core_gamestate.setGameState('freeroam', 'multiplayer', 'freeroam') -- This is added to set the UI elements
+    core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
     UI.ready("MP-SESSION")
   end
 end
 
 local function onClientStartMission(mission)
-  local path, file, ext = path.splitWithoutExt(mission)
-  file = path .. 'mainLevel'
-
   if M.state.multiplayerActive then
     extensions.hook('onMultiplayerLoaded', mission)
-
     local ExplorationCheckpoints = scenetree.findObject("ExplorationCheckpointsActionMap")
     if ExplorationCheckpoints then
       ExplorationCheckpoints:push()

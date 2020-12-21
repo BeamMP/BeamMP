@@ -19,6 +19,7 @@ local secondsTimer = 0
 local MapLoadingTimeout = 0
 local status = ""
 local launcherVersion = ""
+local currentMap = ""
 local mapLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
@@ -71,12 +72,16 @@ local function setMods(modsString)
 	MPModManager.setServerMods(mods)
 end
 
+
+
 local function send(s)
 	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
 	if settings.getValue("showDebugOutput") == true then
 		print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
 	end
 end
+
+
 
 local function getServers()
 	print("Getting the servers list")
@@ -108,6 +113,8 @@ end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port)
+	-- Prevent the user from connecting to a server when already connected to one
+	if getMissionFilename() ~= "" then Lua:requestReload() end
 	local ipString
 	if ip and port then -- Direct connect
 		ipString = ip..':'..port
@@ -122,19 +129,19 @@ end
 
 
 
-local function LoadLevel(map)
+local function loadLevel(map)
 	-- Map loading has a 5 seconds timeout in case it doesn't work
 	MapLoadingTimeout = 0
 	mapLoaded = false
 	status = "LoadingMapNow"
-	--freeroam_freeroam.startFreeroam(map)
+	currentMap = map
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
 end
 
 
 
-local function HandleU(params)
+local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
@@ -149,30 +156,27 @@ local function HandleU(params)
 	end
 end
 
+
+
 local function HandleLogin(params)
-	print('LOGIN HANDLER')
-	--dump(params)
+	print('Logging in')
 	local r = jsonDecode(params)
-	dump(r)
 	if (r.success == true or r.Auth == 1) then
-		print('WE ARE LOGGED IN!!')
-		-- hide the login screen
+		print('Logged successfully')
 		guihooks.trigger('LoginContainerController', {message = "success", hide = true})
 	else
-		local m = ''
-		if (r.message) then
-			m = r.message
-		end
+		local m = r.message or ''
 		guihooks.trigger('LoginError', {message = m})
 	end
 end
 
 
+
 local HandleNetwork = {
 	['A'] = function(params) secondsTimer = 0; end, -- Connection Alive Checking
 	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
-	['U'] = function(params) HandleU(params) end, -- UI
-	['M'] = function(params) LoadLevel(params) end,
+	['U'] = function(params) handleU(params) end, -- UI
+	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) HandleLogin(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end,
 	['L'] = function(params) setMods(params) end,
@@ -204,8 +208,7 @@ local function onUpdate(dt)
 			else send('Up') end -- Server heartbeat
 			secondsTimer = 0 -- this might break resource loading
 		end
-		-- If secondsTimer is more than 5 seconds and the game tick time is greater
-		-- than 20000 then our game is running very slow and or has timed out / crashed.
+		-- If secondsTimer is more than 5 seconds has timed out / crashed.
 		if secondsTimer > 5 then -- and dt > 20000
 			print("Timed out")
 			UI.setPing("-2")
@@ -230,6 +233,8 @@ local function onUpdate(dt)
 		end
 	end
 end
+
+
 
 local function resetSession(goBack)
 	isMpSession = false
@@ -263,27 +268,63 @@ local function modLoaded(modname)
 	end
 end
 
-local function login(d)
-	print('Attempting login')
-	send('N:'..d..'')
-end
+
 
 local function onInit()
+	-- First we connected to the launcher
 	connectToLauncher()
+	-- Then we check that the game has loaded our mod manager, if not we reload lua
+	if not core_modmanager.getModList then Lua:requestReload() end
+	-- We reload the UI to load our custom UI
 	reloadUI()
-	core_gamestate.requestExitLoadingScreen('MP')
-	returnToMainMenu()
+	-- We reset "serverConnection" because for some reasons singleplayer doesn't work without this
+	local endCallback = function () if type(callback) == 'function' then callback() end end
+	serverConnection.disconnect(endCallback)
+	-- ???
 	send('Nc')
 end
+
+
 
 local function isMPSession()
 	return isMpSession
 end
 
+
+
 local function isGoingMPSession()
 	return isGoingMpSession
 end
 
+
+
+local function login(d)
+	print('Attempting login')
+	send('N:'..d..'')
+end
+
+
+
+local function onClientStartMission(mission)
+	if status == "Playing" and getMissionFilename() ~= currentMap then
+		print("The user has loaded another mission!")
+		Lua:requestReload()
+	end
+end
+
+
+
+local function onClientEndMission(mission)
+	if isMPSession() then
+		resetSession(1)
+	end
+end
+
+
+
+M.login = login
+M.onClientStartMission = onClientStartMission
+M.onClientEndMission = onClientEndMission
 M.onUpdate = onUpdate
 M.getServers = getServers
 M.getCurrentServer = getCurrentServer
@@ -293,7 +334,6 @@ M.quitMP = quitMP
 M.connectToServer = connectToServer
 M.connectionStatus = launcherConnectionStatus
 M.modLoaded = modLoaded
-M.login = login
 M.onInit = onInit
 M.isMPSession = isMPSession
 M.isGoingMPSession = isGoingMPSession

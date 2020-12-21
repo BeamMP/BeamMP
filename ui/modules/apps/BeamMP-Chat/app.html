@@ -1,4 +1,4 @@
-<div  ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
+<div ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
 	<style>
 		.error {
 			color: red;
@@ -14,7 +14,6 @@
 		#chat-input {
 			width:100%;
 			height:auto;
-			background-color: black;
 			background-color:rgba(0, 0, 0, 0.25);
 			border: 2px solid rgba(175, 175, 175, 0.45);
 			color:white;
@@ -27,7 +26,6 @@
 			background-color:rgba(0, 0, 0, 0.5);
 		}
 		.buttons {
-			background-color:black;
 			color: #DDDDDD;
 			border: 2px solid rgba(175, 175, 175, 0.45);
 			transition: 0.20s;
@@ -38,16 +36,20 @@
 			background-color:rgba(0, 0, 0, 0.65);
 			color: #FFFFFF;
 		}
+		.swap-buttons {
+			min-width:23px;
+			text-align: center;
+		}
 		#chatbox {
 			display: flex;
 			min-height:40px;
 			width:250px;
-			transition: 0.20s;
-			transition-delay:400ms;
+			transition: 0.13s;
+			transition-delay:700ms;
 		}
 		#chatbox:hover {
 			width:100%;
-			transition: none; /* No animation */
+			transition-delay:0ms;
 		}
 		ul#chat-list {
 			list-style: none;
@@ -60,6 +62,7 @@
 			flex-direction: column;
 			margin-top:auto;
 			margin-bottom:0px;
+			width:100%;
 		}
 		::-webkit-scrollbar {
 			width: 0px;  /* Remove scrollbar space */
@@ -71,8 +74,8 @@
 		<form id="chatbox">
 			<button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
 			<input id="chat-input" type="text" ng-click="select()" placeholder=" Chat here"></input>
-			<button id="swap-button" class="buttons" ng-click="chatSwapVertical()">&uarr;</button>
-			<button id="swap-button" class="buttons" ng-click="chatSwapHorizontal()">&lt;</button>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
 		</form>
 	</div>
 </div>

@@ -19,11 +19,10 @@ local secondsTimer = 0
 local MapLoadingTimeout = 0
 local status = ""
 local launcherVersion = ""
+local currentMap = ""
 local mapLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
-local currentMap = ""
-local mapCheckingDelay = 0
 --[[
 Z -> The client ask to the launcher his version
 B -> The client ask for the servers list to the launcher

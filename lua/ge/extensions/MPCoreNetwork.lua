@@ -270,6 +270,20 @@ end
 
 
 local function onInit()
+	--Preston (Cobalt) Preload the UI profile for multiplayer
+	local layouts = jsonReadFile("settings/uiapps-layouts.json")
+	--if not layouts.multiplayer or table[1] == nil then
+	if not layouts then
+		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
+		jsonWriteFile("settings/uiapps-layouts.json", layouts)
+		log("A","Print","default UI layout added")
+	end
+	if not layouts.multiplayer then
+		layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
+		jsonWriteFile("settings/uiapps-layouts.json", layouts)
+		log("A","Print","multiplayer UI layout added")
+	end
+
 	-- First we connected to the launcher
 	connectToLauncher()
 	-- Then we check that the game has loaded our mod manager, if not we reload lua
@@ -324,6 +338,7 @@ local function addRecent()
 end
 
 
+M.onInit = onInit
 M.login = login
 M.onClientStartMission = onClientStartMission
 M.onClientEndMission = onClientEndMission

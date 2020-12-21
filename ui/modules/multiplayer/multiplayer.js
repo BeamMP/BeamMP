@@ -59,6 +59,7 @@ angular.module('beamng.stuff')
 
 	vm.guestLogin = function() {
 		var u = document.getElementById('guestUsername').value;
+		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "");
 		document.getElementById('guestUsername').value = '';
 		var d = {
 			guest: u

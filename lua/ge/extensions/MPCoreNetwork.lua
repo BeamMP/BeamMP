@@ -22,6 +22,8 @@ local launcherVersion = ""
 local mapLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
+local currentMap = ""
+local mapCheckingDelay = 0
 --[[
 Z -> The client ask to the launcher his version
 B -> The client ask for the servers list to the launcher
@@ -108,6 +110,7 @@ end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port)
+	if getMissionFilename() ~= "" then Lua:requestReload() end
 	local ipString
 	if ip and port then -- Direct connect
 		ipString = ip..':'..port
@@ -127,7 +130,7 @@ local function LoadLevel(map)
 	MapLoadingTimeout = 0
 	mapLoaded = false
 	status = "LoadingMapNow"
-	--freeroam_freeroam.startFreeroam(map)
+	currentMap = map
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
 end
@@ -228,6 +231,15 @@ local function onUpdate(dt)
 				MapLoadingTimeout = MapLoadingTimeout + dt
 			end
 		end
+		if mapCheckingDelay > 5 then
+			if status == "Playing" and getMissionFilename() ~= currentMap then
+				print("The user has loaded another mission!")
+				Lua:requestReload()
+			end
+			mapCheckingDelay = 0
+		else
+			mapCheckingDelay = mapCheckingDelay + dt
+		end
 	end
 end
 
@@ -270,10 +282,12 @@ end
 
 local function onInit()
 	connectToLauncher()
+	if not core_modmanager.getModList then Lua:requestReload() end	
 	reloadUI()
-	if not core_modmanager.getModList then Lua:requestReload() end
-	core_gamestate.requestExitLoadingScreen('MP')
-	returnToMainMenu()
+	local endCallback = function ()
+		if type(callback) == 'function' then callback() end
+	end
+	serverConnection.disconnect(endCallback)
 	send('Nc')
 end
 

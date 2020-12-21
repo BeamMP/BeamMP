@@ -214,7 +214,7 @@ local function setVehPing(vehicleID, ping)
 end
 
 local function GSUpdate(state)
-	print('NEW GS SSTATE!!!!!!')
+	print('NEW GS STATE')
 	dump(state)
 end
 

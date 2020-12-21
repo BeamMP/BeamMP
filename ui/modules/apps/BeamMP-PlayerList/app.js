@@ -38,7 +38,7 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 		players = [];
 		connected = false;
 	};
-	
+
 	function setPLDirection(direction) {
 		const mainContainer = document.getElementById("main-container");
 		const plistContainer = document.getElementById("plist-container");
@@ -80,19 +80,20 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 function playerList(list) {
 	let playersList = document.getElementById("players-table");
 	let parsedList = JSON.parse(list);
+	
 	if(players != null){
 		//get differences between playernames and send them as messages
 		var left = players.filter((item) => { return !parsedList.includes(item) });
-		var joined = parsedList.filter((item) => { return !players.includes(item) });	
-		
+		var joined = parsedList.filter((item) => { return !players.includes(item) });
+
 		// Clear the player list
 		clearPlayerList();
-		
+
 		// And fill it with the updated players
 		for (let i = 0; i < parsedList.length; i++) {
 			// Insert a row at the end of the players list
 			var row = playersList.insertRow(playersList.rows.length);
-			
+
 			// Insert a cell containing the player name
 			var nameCell = row.insertCell(0);
 			nameCell.textContent = parsedList[i];
@@ -101,7 +102,7 @@ function playerList(list) {
 			// Insert a cell containing the player ping
 			var pingCell = row.insertCell(1);
 			pingCell.setAttribute("class", "tp-button");
-			
+
 			// Insert the button inside the cell
 			var btn = document.createElement("BUTTON");
 			var pingText = pingList[parsedList[i]] || "?";
@@ -154,6 +155,15 @@ function showList() {
 	var shownText = "&gt;";
 	var hiddenText = "&lt;";
 	if (localStorage.getItem('plHorizontal') == "right") { shownText = "&lt;"; hiddenText = "&gt;"; }
+	var plContainer = document.getElementById("plist-container");
+	var btn = document.getElementById("show-button");
+	plContainer.style.display = "block";
+	btn.innerHTML = shownText;
+}
+
+function hideList() {
+	var hiddenText = "&lt;";
+	if (localStorage.getItem('plHorizontal') == "right") { hiddenText = "&gt;"; }
 	var plContainer = document.getElementById("plist-container");
 	var btn = document.getElementById("show-button");
 	plContainer.style.display = "block";

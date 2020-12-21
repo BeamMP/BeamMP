@@ -298,6 +298,13 @@ end
 
 
 
+local function login(d)
+	print('Attempting login')
+	send('N:'..d..'')
+end
+
+
+
 local function onClientStartMission(mission)
 	if status == "Playing" and getMissionFilename() ~= currentMap then
 		print("The user has loaded another mission!")
@@ -307,6 +314,7 @@ end
 
 
 
+M.login = login
 M.onClientStartMission = onClientStartMission
 M.onUpdate = onUpdate
 M.getServers = getServers

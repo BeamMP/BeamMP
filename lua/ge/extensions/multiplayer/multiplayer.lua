@@ -103,12 +103,8 @@ local function onClientPostStartMission()
 end
 
 local function onClientStartMission(mission)
-  local path, file, ext = path.splitWithoutExt(mission)
-  file = path .. 'mainLevel'
-
   if M.state.multiplayerActive then
     extensions.hook('onMultiplayerLoaded', mission)
-
     local ExplorationCheckpoints = scenetree.findObject("ExplorationCheckpointsActionMap")
     if ExplorationCheckpoints then
       ExplorationCheckpoints:push()

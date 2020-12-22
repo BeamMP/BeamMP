@@ -69,7 +69,6 @@ local function setMods(modsString)
 		end
 	end
 	isGoingMpSession = true
-	MPModManager.backupLoadedMods() -- Backup the current loaded mods
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
 end
 
@@ -324,6 +323,7 @@ local function onClientStartMission(mission)
 		Lua:requestReload()
 	end
 	if isMPSession() then
+		MPModManager.backupLoadedMods() -- Backup the current loaded mods
 		MPModManager.checkAllMods() -- Checking all the mods
 	end
 	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating

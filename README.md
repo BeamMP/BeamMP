@@ -15,7 +15,7 @@ The BeamMP mod has been made as simple as it gets. Just head over to our website
 
 # Servers
 Server is open source as well as the launcher.
-Please check out our wiki for how to setup your own server.
+Please check out wiki.beammp.com for how to setup your own server.
 
 # How does this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.

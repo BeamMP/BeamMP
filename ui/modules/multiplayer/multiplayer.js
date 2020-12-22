@@ -59,7 +59,7 @@ angular.module('beamng.stuff')
 
 	vm.guestLogin = function() {
 		var u = document.getElementById('guestUsername').value;
-		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "");
+		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
 		document.getElementById('guestUsername').value = '';
 		var d = {
 			guest: u
@@ -499,10 +499,19 @@ angular.module('beamng.stuff')
 		//console.log(row)
 		var id = row.getAttribute("data-id")
 		if (id !== null) {
-			var servers = JSON.parse(localStorage.getItem('servers'))
-			var server = servers[id];
-			highlightedServer = servers[id];
-			//$(showDetailsScope(server)).insertAfter($(e.currentTarget)).show();
+			var server = null;
+			if(id.split(',')[0]>-1) {
+				id = id.split(',')[0];
+				server = JSON.parse(localStorage.getItem('servers'))[id];
+			} else {
+				id = id.split(',')[1];
+				console.log(id);
+				server = JSON.parse(localStorage.getItem('recent'))[id];
+				//server.strippedName = server.strippedName.replace('Unknown ', '');
+			}
+
+			highlightedServer = server;
+
 			var serverInfoRow = showDetailsScope(server);
 			var serverInfoRow = document.createElement("tr");
 			serverInfoRow.innerHTML = showDetailsScope(server);
@@ -517,13 +526,13 @@ angular.module('beamng.stuff')
 			};
 			connectToServerButton.onclick = createClickHandler();
 
-			var addServer2FavButton = document.getElementById('addFav-button');
+			var remServer2FavButton = document.getElementById('addFav-button');
 			var createClickHandler2 = function() {
 				return function() {
-					addFav()
+					removeFav()
 				};
 			};
-			addServer2FavButton.onclick = createClickHandler2();
+			remServer2FavButton.onclick = createClickHandler2();
 
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
@@ -589,7 +598,7 @@ angular.module('beamng.stuff')
 
 		for(var i in recentjson){
 			recentjson[i].sname      = "❓ " + recentjson[i].name;
-			recentjson[i].location   = "?";
+			recentjson[i].location   = "N/A";
 			recentjson[i].map        = "Unknown";
 			recentjson[i].players    = "?";
 			recentjson[i].maxplayers = "?";
@@ -631,7 +640,7 @@ angular.module('beamng.stuff')
 
 			var html = `
 			<tr data-id="${servers[i].id},${servers[i].recid}" ng-onclick(selectRow(e)>
-			<td style="background-color:${bgcolor};">${servers[i].location}</td>
+			<td style="background-color:${bgcolor};">${servers[i].location || "N/A"}</td>
 			<td style="background-color:${bgcolor};">${formatServerName(servers[i].sname)}</td>
 			<td style="background-color:${bgcolor};">${SmoothMapName(servers[i].map)}</td>
 			<td style="background-color:${bgcolor};">${servers[i].players}/${servers[i].maxplayers}</td>
@@ -669,17 +678,17 @@ angular.module('beamng.stuff')
 					<div class="row">
 					<div class="col">
 						<table class="description-table">
-							<tr><td>Owner:</td><td>${d.owner}</td></tr>
-							<tr><td>Map:</td><td>${SmoothMapName(d.map)}</td></tr>
-							<tr><td>Players:</td><td>${d.players}/${d.maxplayers}</td></tr>
-							<tr><td valign="top">Description:</td><td>${formatDescriptionName(d.sdesc)}</td></tr>
+							<tr><td>Owner:</td><td>${d.owner|| ""}</td></tr>
+							<tr><td>Map:</td><td>${SmoothMapName(d.map || "")}</td></tr>
+							<tr><td>Players:</td><td>${d.players|| ""}/${d.maxplayers|| ""}</td></tr>
+							<tr><td valign="top">Description:</td><td>${formatDescriptionName(d.sdesc|| "")}</td></tr>
 						</table>
 					</div>
 					<div class="col">
 						<ul class="serverItemDetails">
-							<li>PPS: ${d.pps}</li>
-							<li>Mods: ${modCount(d.modlist)}</li>
-							<li>Mod Names: ${modList(d.modlist)}</li>
+							<li>PPS: ${d.pps|| ""}</li>
+							<li>Mods: ${modCount(d.modlist|| "")}</li>
+							<li>Mod Names: ${modList(d.modlist|| "")}</li>
 							<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
 						</ul>
 					</div>
@@ -691,7 +700,7 @@ angular.module('beamng.stuff')
 				<div class="row">
 					<h4></h4>
 
-					<p>${listPlayers(d.playerslist)}</p>
+					<p>${listPlayers(d.playerslist|| "")}</p>
 				</div>
 	    </td>`;
 	};
@@ -768,6 +777,8 @@ angular.module('beamng.stuff')
 				server = JSON.parse(localStorage.getItem('favorites'))[id];
 				//server.strippedName = server.strippedName.replace('Unknown ', '');
 			}
+			
+			server.ip = server.ip.trim();
 
 			highlightedServer = server;
 
@@ -1402,6 +1413,24 @@ function addRecent(recentstr){ // has to have name, ip, port
 	console.log(json);
 	var recents = JSON.parse(localStorage.getItem("recent"));
 	if (recents == null) recents = new Array();
+
+	json.sname = json.name;
+
+	json.location = "N/A"    ,
+	json.map = "Unknown"     ,
+	json.modlist = ""        ,
+	json.modstotal = "N/A"   ,
+	json.modstotalsize = 0   ,
+	json.official = 0        ,
+	json.owner = ""          ,
+	json.players = "N"       ,
+	json.maxplayers = "A"    ,
+	json.playerslist = ""    ,
+	json.pps = "N/A"         ,
+	json.private = false     ,
+	json.time = 0            ,
+	json.version = "-1"      ,
+	json.id = -1
 
 	var arr = Array(1).fill(json);
 

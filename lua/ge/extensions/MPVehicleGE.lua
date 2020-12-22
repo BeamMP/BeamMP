@@ -570,11 +570,12 @@ local function onUpdate(dt)
 			syncTimer = 0
 		end
 
-		local localPos = nil
-		if activeVehicle then
+
+		local localPos = vec3(getCameraPosition())
+		if not commands.isFreeCamera() and activeVehicle then
 			local veh = be:getObjectByID(tonumber(activeVehicle))
 			if veh then
-				localPos = veh:getPosition()
+				localPos = vec3(veh:getPosition())
 			end
 		end
 
@@ -587,13 +588,11 @@ local function onUpdate(dt)
 					local nametagAlpha = 1
 					local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
 
-					if localPos then
-						local distfloat = math.sqrt(math.pow(localPos.x-pos.x, 2) + math.pow(localPos.y-pos.y, 2) + math.pow(localPos.z-pos.z, 2))
-						nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-						distanceMap[gameVehicleID] = distfloat
-					end
+					local distfloat = (localPos or vec3() - pos):length()
+					nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
+					distanceMap[gameVehicleID] = distfloat
 
-					if not settings.getValue("showNameTags") and nicknamesAllowed then
+					if not settings.getValue("hideNameTags") and nicknamesAllowed then
 						local dist = ""
 						local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 						local backColor = roleInfo.backcolor

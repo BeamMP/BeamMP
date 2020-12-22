@@ -66,14 +66,14 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.plSwapHorizontal = function() {
 		const plHorizontal = localStorage.getItem('plHorizontal');
 		console.log(plHorizontal);
-		if (plHorizontal != "right") setPLDirection("right");
-		else setPLDirection("left");
+		if (plHorizontal != "left") setPLDirection("left");
+		else setPLDirection("right");
 	}
 
 	$scope.plSwapVertical = function() {
 		const plVertical = localStorage.getItem('plVertical');
-		if (plVertical != "top") setPLDirection("top");
-		else setPLDirection("bottom");
+		if (plVertical != "bottom") setPLDirection("bottom");
+		else setPLDirection("top");
 	}
 }]);
 

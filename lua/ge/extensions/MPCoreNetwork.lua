@@ -69,7 +69,7 @@ local function setMods(modsString)
 		end
 	end
 	isGoingMpSession = true
-	MPModManager.setServerMods(mods)
+	MPModManager.setServerMods(mods) -- Setting the mods from the server
 end
 
 
@@ -272,7 +272,6 @@ end
 local function onInit()
 	--Preston (Cobalt) Preload the UI profile for multiplayer
 	local layouts = jsonReadFile("settings/uiapps-layouts.json")
-	--if not layouts.multiplayer or table[1] == nil then
 	if not layouts then
 		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
 		jsonWriteFile("settings/uiapps-layouts.json", layouts)
@@ -323,6 +322,11 @@ local function onClientStartMission(mission)
 		print("The user has loaded another mission!")
 		Lua:requestReload()
 	end
+	if isMPSession() then
+		MPModManager.backupLoadedMods() -- Backup the current loaded mods
+		MPModManager.checkAllMods() -- Checking all the mods
+	end
+	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
 end
 
 

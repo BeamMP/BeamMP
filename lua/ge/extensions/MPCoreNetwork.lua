@@ -333,9 +333,12 @@ local function onClientEndMission(mission)
 	end
 end
 
+
+
 local function addRecent()
 	guihooks.trigger('addRecent', jsonEncode(currentServer))
 end
+
 
 
 M.onInit = onInit

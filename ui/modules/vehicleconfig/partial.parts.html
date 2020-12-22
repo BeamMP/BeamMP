@@ -161,7 +161,7 @@
         {{ :: 'ui.common.reset' | translate}}
       </md-button>
 	  
-	  <md-button ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-success">
+	  <md-button ng-hide="!vehConf_parts.isMPSession" ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-success">
         {{ :: 'ui.common.sync' | translate}}
       </md-button>
     </div>

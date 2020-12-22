@@ -583,11 +583,11 @@ local function onUpdate(dt)
 		end
 
 
-		local localPos = vec3(getCameraPosition())
+		local cameraPos = vec3(getCameraPosition())
 		if not commands.isFreeCamera() and activeVehicle then
 			local veh = be:getObjectByID(tonumber(activeVehicle))
 			if veh then
-				localPos = vec3(veh:getPosition())
+				cameraPos = vec3(veh:getPosition())
 			end
 		end
 
@@ -600,7 +600,7 @@ local function onUpdate(dt)
 					local nametagAlpha = 1
 					local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
 
-					local distfloat = (localPos or vec3() - pos):length()
+					local distfloat = (cameraPos or vec3()):distance(pos)
 					nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 					distanceMap[gameVehicleID] = distfloat
 

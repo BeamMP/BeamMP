@@ -148,7 +148,7 @@ angular.module('beamng.stuff')
 		document.getElementById('customFavName').value = '';
 		document.getElementById('customFavIP').value = '';
 		document.getElementById('customFavPort').value = '';
-		refreshList();
+		vm.refreshList();
 	};
 
 	vm.stateName = $state.current.name;
@@ -243,7 +243,7 @@ angular.module('beamng.stuff')
 		bngApi.engineLua('MPCoreNetwork.connectToServer()');
 	}
 
-	function select(row, table) {
+	function select(row) {
 		var oldInfoRow = document.getElementById('ServerInfoRow')
 		if (oldInfoRow != null) {
 			oldInfoRow.remove();
@@ -267,20 +267,20 @@ angular.module('beamng.stuff')
 			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 
 			var connectToServerButton = document.getElementById('serverconnect-button');
-      var createClickHandler = function() {
-        return function() {
+			var createClickHandler = function() {
+				return function() {
 					vm.connect()
-        };
-      };
-      connectToServerButton.onclick = createClickHandler();
+				};
+			};
+			connectToServerButton.onclick = createClickHandler();
 
 			var addServer2FavButton = document.getElementById('addFav-button');
-      var createClickHandler2 = function() {
-        return function() {
+			var createClickHandler2 = function() {
+				return function() {
 					addFav()
-        };
-      };
-      addServer2FavButton.onclick = createClickHandler2();
+				};
+			};
+			addServer2FavButton.onclick = createClickHandler2();
 
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
@@ -308,8 +308,7 @@ angular.module('beamng.stuff')
 
 	vm.selectRow = function(row) {
 		console.log("[2] ROW CLICKED, DATA: ")
-		var table = document.getElementById("servers-table");
-		select(row, table);
+		select(row);
 	};
 
 	function receiveServers(data) {
@@ -437,7 +436,7 @@ angular.module('beamng.stuff')
 	};
 
 	serversScope = receiveServers;
-	//selectRowScope = selectRow;
+	selectRowScope = select;
 	displayServerScope = displayServers;
 	showDetailsScope = formatServerDetailsRow;
 }])
@@ -487,7 +486,7 @@ angular.module('beamng.stuff')
 		bngApi.engineLua('MPCoreNetwork.connectToServer()');
 	}
 
-	function select(row, table) {
+	function select(row) {
 		var oldInfoRow = document.getElementById('ServerInfoRow')
 		if (oldInfoRow != null) {
 			oldInfoRow.remove();
@@ -511,20 +510,20 @@ angular.module('beamng.stuff')
 			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 
 			var connectToServerButton = document.getElementById('serverconnect-button');
-      var createClickHandler = function() {
-        return function() {
+			var createClickHandler = function() {
+				return function() {
 					vm.connect()
-        };
-      };
-      connectToServerButton.onclick = createClickHandler();
+				};
+			};
+			connectToServerButton.onclick = createClickHandler();
 
 			var addServer2FavButton = document.getElementById('addFav-button');
-      var createClickHandler2 = function() {
-        return function() {
+			var createClickHandler2 = function() {
+				return function() {
 					addFav()
-        };
-      };
-      addServer2FavButton.onclick = createClickHandler2();
+				};
+			};
+			addServer2FavButton.onclick = createClickHandler2();
 
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
@@ -552,8 +551,7 @@ angular.module('beamng.stuff')
 
 	vm.selectRow = function(row) {
 		console.log("[2] ROW CLICKED, DATA: ")
-		var table = document.getElementById("servers-table");
-		select(row, table);
+		select(row);
 	};
 
 	function receiveServers(data) {
@@ -747,7 +745,7 @@ angular.module('beamng.stuff')
 		}
 	}
 
-	function select(row, table) {
+	function select(row) {
 		var oldInfoRow = document.getElementById('ServerInfoRow')
 		if (oldInfoRow != null) {
 			oldInfoRow.remove();
@@ -757,9 +755,8 @@ angular.module('beamng.stuff')
 		row.classList.add("highlight");
 		row.selected = true;
 		table.selectedRow = row;
-		console.log(row)
+		//console.log(row)
 		var id = row.getAttribute("data-id")
-		console.log(id);
 		if (id !== null) {
 			var server = null;
 			if(id.split(',')[0]>-1) {
@@ -781,20 +778,20 @@ angular.module('beamng.stuff')
 			row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 
 			var connectToServerButton = document.getElementById('serverconnect-button');
-      var createClickHandler = function() {
-        return function() {
+			var createClickHandler = function() {
+				return function() {
 					vm.connect()
-        };
-      };
-      connectToServerButton.onclick = createClickHandler();
+				};
+			};
+			connectToServerButton.onclick = createClickHandler();
 
 			var remServer2FavButton = document.getElementById('removeFav-button');
-      var createClickHandler2 = function() {
-        return function() {
+			var createClickHandler2 = function() {
+				return function() {
 					removeFav()
-        };
-      };
-      remServer2FavButton.onclick = createClickHandler2();
+				};
+			};
+			remServer2FavButton.onclick = createClickHandler2();
 
 			bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 		}
@@ -830,8 +827,7 @@ angular.module('beamng.stuff')
 	//function selectRow(event) {
 	vm.selectRow = function(row) {
 		console.log("[1] ROW CLICKED, DATA: ")
-		var table = document.getElementById("servers-table");
-		select(row, table);
+		select(row);
 	};
 
 	function receiveServers(data) {
@@ -1377,7 +1373,9 @@ function findPlayer(pname, join=false){
 					//addRecent({name:server.sname, ip:server.ip, port:server.port})
 					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
 				}else{
-					//bngApiScope.selectRow(id)
+					var table = document.getElementById("serversTable");
+					var row = table.rows[id];
+					selectRowScope(row);
 				}
 				return id;
 			}

@@ -14,8 +14,8 @@ A LUA implementation at attempting to bring local network multiplayer to BeamNG.
 The BeamMP mod has been made as simple as it gets. Just head over to our website https://beammp.com and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. Done :)
 
 # Servers
-The server source is closed however you are able to run your own. This is currently available to server boosters and donators only until it reaches a version 1 status at which point it will be made public and free to all!
-Please check out our wiki for how to setup your own server.
+Server is open source as well as the launcher.
+Please check out wiki.beammp.com for how to setup your own server.
 
 # How does this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.

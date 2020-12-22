@@ -37,7 +37,7 @@ local function applyGear(data)
 	latestGearData = data
 	if not electrics.values.gearIndex or localCurrentGear == data then return end
 	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
-	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor")).type
+	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or "none").type
 	if gearboxType == "manualGearbox" then
 		local index = tonumber(data)
 		if not index then return end

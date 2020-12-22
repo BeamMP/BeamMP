@@ -266,6 +266,18 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 		onVehicleSpawnedAllowed = false
+		
+		local allowed = false
+		local vehiclesList = extensions.core_vehicles.getModelNames()
+		for index, value in ipairs(vehiclesList) do
+			if vehicleName == value then allowed = true end
+		end
+		if not allowed then
+			print("This received vehicle "..vehicleName.." is not currently installed on the game, cancelling the spawn")
+			UI.showNotification("info", "Player "..playerNickname.." spawned an illegal vehicle ("..vehicleName.."), it was skipped")
+			return
+		end
+		
 		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
 		local spawnedVehID = spawnedVeh:getID()
 		print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)

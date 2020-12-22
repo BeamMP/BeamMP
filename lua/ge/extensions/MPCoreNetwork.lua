@@ -68,7 +68,6 @@ local function setMods(modsString)
 			table.insert(mods, modFileName)
 		end
 	end
-	print("ok")
 	isGoingMpSession = true
 	MPModManager.backupLoadedMods() -- Backup the current loaded mods
 	MPModManager.setServerMods(mods) -- Setting the mods from the server

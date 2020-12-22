@@ -1391,7 +1391,7 @@ $scope.$on('requestUIInitialised', () => {
       { translateid: 'ui.dashboard.vehicles',      icon: 'directions_car',         state: 'menu.vehicles'      },
       { translateid: 'ui.dashboard.vehicleconfig', icon: 'settings_applications',  state: 'menu.vehicleconfig.parts' },
       { translateid: 'ui.dashboard.environment',   icon: 'cloud_queue',            state: 'menu.environment'   },
-	  { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
+      { translateid: 'ui.dashboard.replay',        icon: 'local_movies',           state: 'menu.replay'        },
       { translateid: 'ui.dashboard.photomode',     icon: 'photo_camera',           state: 'photomode'          },
       { translateid: 'ui.dashboard.appedit',       icon: 'web',                    state: 'appedit'            },
       { translateid: 'ui.dashboard.options',       icon: 'tune',                   state: 'menu.options.graphics'},

@@ -160,9 +160,10 @@ end
 local function HandleLogin(params)
 	print('Logging in')
 	local r = jsonDecode(params)
+	--dump(r)
 	if (r.success == true or r.Auth == 1) then
 		print('Logged successfully')
-		guihooks.trigger('LoginContainerController', {message = "success", hide = true})
+		guihooks.trigger('LoginContainerController', {message = r.message, hide = true})
 	else
 		local m = r.message or ''
 		guihooks.trigger('LoginError', {message = m})
@@ -283,7 +284,7 @@ local function onInit()
 		log("A","Print","multiplayer UI layout added")
 	end
 
-	-- First we connected to the launcher
+	-- First we connect to the launcher
 	connectToLauncher()
 	-- Then we check that the game has loaded our mod manager, if not we reload lua
 	if not core_modmanager.getModList then Lua:requestReload() end
@@ -313,6 +314,12 @@ end
 local function login(d)
 	print('Attempting login')
 	send('N:'..d..'')
+end
+
+
+local function logout()
+	print('Attempting logout')
+	--send('YES:'..d..'')
 end
 
 
@@ -347,6 +354,7 @@ end
 
 M.onInit = onInit
 M.login = login
+M.logout = logout
 M.onClientStartMission = onClientStartMission
 M.onClientEndMission = onClientEndMission
 M.onUpdate = onUpdate

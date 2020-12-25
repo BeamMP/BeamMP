@@ -322,10 +322,6 @@ local function onClientStartMission(mission)
 		print("The user has loaded another mission!")
 		Lua:requestReload()
 	end
-	if isMPSession() then
-		MPModManager.backupLoadedMods() -- Backup the current loaded mods
-		MPModManager.checkAllMods() -- Checking all the mods
-	end
 	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
 end
 

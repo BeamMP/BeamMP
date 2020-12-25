@@ -61,7 +61,9 @@ end
 
 
 local function cleanUpSessionMods()
-	backupAllowed = false -- Disable mods backup so it doesn't overwrite the file
+	-- At this point isMPSession is false so we disable mods backup so that
+	-- the call doesn't backup when it shouldn't
+	backupAllowed = false
 	for k,v in pairs(serverMods) do
 		core_modmanager.deactivateMod(string.lower(v))
 		if string.match(string.lower(v), 'multiplayer') then
@@ -74,25 +76,13 @@ end
 
 
 
---[[local function onUpdate(dt)
-	if timer >= 5 and MPCoreNetwork.isGoingMPSession() then -- Checking mods every 2 seconds
-		timer = 0
-		--checkAllMods()
-	end
-	timer = timer + dt
-end--]]
-
-
-
-local function setServerMods(mods)
+local function setServerMods(receivedMods)
 	print("Server Mods Set:")
 	dump(mods)
-	serverMods = mods
+	serverMods = receivedMods
 	for k,v in pairs(serverMods) do
 		serverMods[k] = 'multiplayer'..v
 	end
-	print("Converted Server Mods Set:")
-	dump(serverMods)
 end
 
 
@@ -109,7 +99,7 @@ local function backupLoadedMods()
 	local modsDB = jsonReadFile("mods/db.json")
 	if modsDB then
 		os.remove("settings/db-backup.json")
-		jsonWriteFile("settings/db-backup.json", modsDB)
+		jsonWriteFile("settings/db-backup.json", modsDB, true)
 		print("Backed up db.json file")
 	else
 		print("No db.json file found")
@@ -117,36 +107,15 @@ local function backupLoadedMods()
 end
 
 
-local function onModChanged(mod)
-	if type(mod) ~= "table" then return end
-	if MPCoreNetwork.isGoingMPSession() or MPCoreNetwork.isMPSession() then
-		checkMod(mod)
-	else
-		if backupAllowed then backupLoadedMods() end
-	end
-end
 
-
-
--- Called from beammp\lua\ge\extensions\core
-local function onModActivated(mod)
-	onModChanged(mod)
-end
-
-
-
--- Called from beammp\lua\ge\extensions\core
-local function onModDeactivated(mod)
-	onModChanged(mod)
-end
-
-
-
-local function onModManagerReady()
-	-- Restore the current mods before joining the server
+local function restoreLoadedMods()
+	-- Backup the current mods before joining the server
 	local modsDBBackup = jsonReadFile("settings/db-backup.json")
 	if modsDBBackup then
-		jsonWriteFile("mods/db.json", modsDBBackup)
+		os.remove("mods/db.json")
+		jsonWriteFile("mods/db.json", modsDBBackup, true)
+		-- This commented code activate all the mods one by one instead of asking for a reboot
+		-- HOWEVER -> This causes HUGE lags when a lots of mods are being activated
 		--[[print("Restored db.json backup")
 		for modname, mod in pairs(modsDBBackup.mods) do
 			if mod.active then
@@ -155,6 +124,7 @@ local function onModManagerReady()
 				core_modmanager.deactivateMod(string.lower(modname))
 			end
 		end--]]
+		print("Restored db.json backup")
 	else
 		print("No db.json backup found")
 	end
@@ -162,15 +132,75 @@ end
 
 
 
+-- Called from beammp\lua\ge\extensions\core
+local function onModStateChanged(mod)
+	-- The function makes two calls, one with a table and one with the mod name
+	-- We only want the table not the mod name call
+	if type(mod) ~= "table" then return end
+	if MPCoreNetwork.isGoingMPSession() or MPCoreNetwork.isMPSession() then
+		checkMod(mod)
+	end
+end
+
+
+
+local function onModManagerReady()
+	if not MPCoreNetwork.isMPSession() then
+		restoreLoadedMods()
+	end
+end
+
+
+
+local function onExit() -- Called when the user exits the game
+	restoreLoadedMods() -- Restore the mods when we quit the game
+	-- Don't add isMPSession checking because onClientEndMission is called before!
+end
+
+
+
+local function onClientStartMission(mission)
+	if MPCoreNetwork.isMPSession() then
+		backupLoadedMods() -- Backup the current loaded mods
+		checkAllMods() -- Checking all the mods
+	end
+	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
+end
+
+
+
+local function onClientEndMission(mission)
+	-- We restore the db.json before lua reloads because on reload the db.json get backup up
+	-- if we were connected to a server this would cause a backup of the db.json with all mods disabled
+	-- By doing this, lua activate itself the mods after the reload so we don't even need
+	-- to enable the mods ourself.
+	restoreLoadedMods()
+end
+
+
+
+-- This function is used because when onModeStateChanged is called, the db.json file
+-- is not updated yet and we therefor need to use a different function that checks for
+-- specific changes of this file.
+local function modsDatabaseChanged()
+	if backupAllowed and (not MPCoreNetwork.isGoingMPSession() or not MPCoreNetwork.isMPSession()) then
+		backupLoadedMods()
+	end
+end
+
+
+
+M.onClientEndMission = onClientEndMission
+M.onClientStartMission = onClientStartMission
+M.modsDatabaseChanged = modsDatabaseChanged
+M.onModStateChanged = onModStateChanged
 M.onModManagerReady = onModManagerReady
 M.backupLoadedMods = backupLoadedMods
-M.checkAllMods = checkAllMods
-M.onModActivated = onModActivated
-M.onModDeactivated = onModDeactivated
---M.onUpdate = onUpdate
 M.cleanUpSessionMods = cleanUpSessionMods
 M.showServerMods = showServerMods
 M.setServerMods = setServerMods
+M.checkAllMods = checkAllMods
+M.onExit = onExit
 
 
 

@@ -131,6 +131,7 @@ end
 
 local function loadLevel(map)
 	-- Map loading has a 5 seconds timeout in case it doesn't work
+	MPModManager.backupLoadedMods() -- Backup the current loaded mods before loading the map
 	MapLoadingTimeout = 0
 	mapLoaded = false
 	status = "LoadingMapNow"
@@ -286,7 +287,9 @@ local function onInit()
 	-- First we connected to the launcher
 	connectToLauncher()
 	-- Then we check that the game has loaded our mod manager, if not we reload lua
-	if not core_modmanager.getModList then Lua:requestReload() end
+	if not core_modmanager.getModList then
+		Lua:requestReload()
+	end
 	-- We reload the UI to load our custom UI
 	reloadUI()
 	-- We reset "serverConnection" because for some reasons singleplayer doesn't work without this

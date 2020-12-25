@@ -114,16 +114,8 @@ local function restoreLoadedMods()
 	if modsDBBackup then
 		os.remove("mods/db.json")
 		jsonWriteFile("mods/db.json", modsDBBackup, true)
-		-- This commented code activate all the mods one by one instead of asking for a reboot
-		-- HOWEVER -> This causes HUGE lags when a lots of mods are being activated
-		--[[print("Restored db.json backup")
-		for modname, mod in pairs(modsDBBackup.mods) do
-			if mod.active then
-				core_modmanager.activateMod(string.lower(modname))
-			else
-				core_modmanager.deactivateMod(string.lower(modname))
-			end
-		end--]]
+		-- And delete the backup file because we don't need it anymore
+		os.remove("settings/db-backup.json")
 		print("Restored db.json backup")
 	else
 		print("No db.json backup found")
@@ -144,16 +136,18 @@ end
 
 
 
-local function onModManagerReady()
-	if not MPCoreNetwork.isMPSession() then
-		restoreLoadedMods()
-	end
+local function onInit()
+	-- When the game inits we restore the db.json which deletes it and then back it up.
+	-- If the game was closed correctly, there should be no db-backup.json file which mean
+	-- that restoreLoadedMods won't do anything. Therefor not restoring a wrong backup
+	restoreLoadedMods()
+	backupLoadedMods()
 end
 
 
 
 local function onExit() -- Called when the user exits the game
-	restoreLoadedMods() -- Restore the mods when we quit the game
+	restoreLoadedMods() -- Restore the mods and delete db-backup.json when we quit the game
 	-- Don't add isMPSession checking because onClientEndMission is called before!
 end
 
@@ -161,7 +155,6 @@ end
 
 local function onClientStartMission(mission)
 	if MPCoreNetwork.isMPSession() then
-		backupLoadedMods() -- Backup the current loaded mods
 		checkAllMods() -- Checking all the mods
 	end
 	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
@@ -179,28 +172,17 @@ end
 
 
 
--- This function is used because when onModeStateChanged is called, the db.json file
--- is not updated yet and we therefor need to use a different function that checks for
--- specific changes of this file.
-local function modsDatabaseChanged()
-	if backupAllowed and (not MPCoreNetwork.isGoingMPSession() or not MPCoreNetwork.isMPSession()) then
-		backupLoadedMods()
-	end
-end
-
-
-
 M.onClientEndMission = onClientEndMission
 M.onClientStartMission = onClientStartMission
 M.modsDatabaseChanged = modsDatabaseChanged
 M.onModStateChanged = onModStateChanged
-M.onModManagerReady = onModManagerReady
 M.backupLoadedMods = backupLoadedMods
 M.cleanUpSessionMods = cleanUpSessionMods
 M.showServerMods = showServerMods
 M.setServerMods = setServerMods
 M.checkAllMods = checkAllMods
 M.onExit = onExit
+M.onInit = onInit
 
 
 

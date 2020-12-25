@@ -172,6 +172,15 @@ end
 
 
 
+local function modsDatabaseChanged()
+	if not MPCoreNetwork.isMPSession() then
+		backupLoadedMods()
+	end
+end
+
+
+
+M.modsDatabaseChanged = modsDatabaseChanged
 M.onClientEndMission = onClientEndMission
 M.onClientStartMission = onClientStartMission
 M.modsDatabaseChanged = modsDatabaseChanged

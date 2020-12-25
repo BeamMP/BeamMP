@@ -85,7 +85,7 @@ local function stateChanged()
   -- and save it to disc (if not in safe mode)
   if not isSafeMode() then
     jsonWriteFile(persistencyfile, { header = dbHeader, mods = mods}, true)
-	--MPModManager.modsDatabaseChanged() -- ///////////////////////////////////////////////////////////// BEAMMP
+	MPModManager.modsDatabaseChanged() -- ///////////////////////////////////////////////////////////// BEAMMP
   end
 end
 

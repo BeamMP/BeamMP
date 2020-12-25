@@ -319,7 +319,7 @@ end
 
 local function logout()
 	print('Attempting logout')
-	--send('YES:'..d..'')
+	send('N:LO')
 end
 
 

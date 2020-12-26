@@ -8,6 +8,7 @@ local isConnectedNode = {}
 local parentNode = nil
 local beamsChanged = false
 local physicsFPS = 0
+local cogRel = vec3(0,0,0)
 
 -- Recursively find nodes connected to parent node
 local function findConnectedNodesRecursive(parentID)
@@ -81,18 +82,21 @@ local function onInit()
 		end
 		
 		findConnectedNodes()
-		
-		M.onReset = findConnectedNodes
 	else
 		print("Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
 	        isConnectedNode[n.cid] = true
 	    end
-		
-		M.onReset = nop
 	end
 
 	print("velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..parentNode)
+end
+
+local function onReset()
+	-- Need to do this here because calcCenterOfGravityRel() returns garbage in onInit()...
+	cogRel = vec3(obj:calcCenterOfGravityRel(false)):rotated(quat(obj:getRotation()):inversed())
+	
+	if parentNode then findConnectedNodes() end
 end
 
 -- Add velocity to vehicle in m/s
@@ -123,28 +127,25 @@ local function setVelocity(x, y, z)
 	addVelocity(velDiff.x, velDiff.y, velDiff.z)
 end
 
--- pos yaw makes it go to the right
--- pos roll makes it roll from left to right
--- pos pitch makes the nose go up
 
 -- Add angular velocity to vehicle in rad/s
--- How it works: Calculate node tangential velocity relative to car center point at the desired angular velocity
+-- How it works: Calculate node tangential velocity relative to car center of gravity at the desired angular velocity
 --               and apply enough force to reach the calculated speed in 1 physics tick.
--- NOTE: - will rotate around vehicle position, not center of gravity (calculated COG moves with detached parts)
---         so can cause slight linear movement in some cases
---       - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
+-- NOTE: - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	if beamsChanged then
 		findConnectedNodes()
 	end
-
+	
+	local cog = cogRel:rotated(quat(obj:getRotation()))
+	
+	local rvel = vec3(pitchAV, rollAV, yawAV)
 	local vel = vec3(x, y, z)
-	local av = vec3(pitchAV, rollAV, yawAV)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	for nid, connected in pairs(isConnectedNode) do
 		local nodeWeight = obj:getNodeMass(nid)
-		local nodePos = vec3(obj:getNodePosition(nid))
-		local targetAcc = vel + nodePos:cross(av)
+		local nodePos = vec3(obj:getNodePosition(nid)) - cog
+		local targetAcc = vel + nodePos:cross(rvel)
 		local forceVec = targetAcc*nodeWeight*physicsFPS -- calculate force for desired acceleration
 
 		obj:applyForceVector(nid, forceVec:toFloat3())
@@ -153,12 +154,15 @@ end
 
 -- Instantly set vehicle angular velocity in rad/s
 local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
-	local vel = vec3(x, y, z)
-	local vvel = vec3(obj:getVelocity())
-	local velDiff = vel - vvel
+	local cog = cogRel:rotated(quat(obj:getRotation()))
+	
 	local rvel = vec3(pitchAV, rollAV, yawAV)
 	local vrvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(quat(obj:getRotation()))
 	local rvelDiff = rvel - vrvel
+	
+	local vel = vec3(x, y, z)
+	local vvel = vec3(obj:getVelocity()) + cog:cross(vrvel)
+	local velDiff = vel - vvel
 	
 	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z)
 end
@@ -171,7 +175,7 @@ end
 -- public interface
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit
-M.onReset            = nop
+M.onReset            = onReset
 M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity

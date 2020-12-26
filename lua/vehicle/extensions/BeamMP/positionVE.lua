@@ -49,7 +49,7 @@ end
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
-local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
+local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
 local maxAcc = 500             -- Maximum acceleration (m/s^2)
 local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
@@ -88,6 +88,8 @@ local lastRacc = nil
 
 local tpTimer = 0
 
+local cogRel = vec3(0,0,0)
+
 local remoteData = {
 	pos = nil,
 	vel = vec3(0,0,0),
@@ -113,6 +115,11 @@ local function setPing(p)
 end
 
 
+local function onReset()
+	-- Need to do this here because calcCenterOfGravityRel() returns garbage in onInit()...
+	cogRel = vec3(obj:calcCenterOfGravityRel(false)):rotated(quat(obj:getRotation()):inversed())
+end
+
 
 local function updateGFX(dt)
 	timer = timer + dt
@@ -121,13 +128,15 @@ local function updateGFX(dt)
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
-	local vehPos = vec3(obj:getPosition())
-	local vehVel = vec3(obj:getVelocity())
-	local vehAcc = vehVel-(lastVehVel or vehVel)
-
+	local cog = cogRel:rotated(quat(obj:getRotation()))
+	
 	local vehRot = quat(obj:getRotation())
 	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
+	
+	local vehPos = vec3(obj:getPosition()) + cog
+	local vehVel = vec3(obj:getVelocity()) + cog:cross(vehRvel)
+	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	lastVehVel = vehVel
 	lastVehRvel = vehRvel
@@ -182,11 +191,14 @@ local function updateGFX(dt)
 
 	-- If position error is larger than limit, teleport the vehicle
 	if tpTimer > abs(predictTime)*2 then
+		-- Subtract COG offset because setPosition works relative to refNode
+		local tpPos = pos - cog
+		
 		if rotError:length() > maxRotError then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
-			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
+			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
 		else
-			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
+			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
 		end
 
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
@@ -241,32 +253,18 @@ end
 
 
 local function getVehicleRotation()
-	local pos = obj:getPosition()
-	local vel = obj:getVelocity()
+	local cog = cogRel:rotated(quat(obj:getRotation()))
+	
 	local rot = quat(obj:getRotation())
 	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
+	local pos = vec3(obj:getPosition()) + cog
+	local vel = vec3(obj:getVelocity()) + cog:cross(rvel)
+	
 	local tempTable = {
-		pos = {
-			x = pos.x,
-			y = pos.y,
-			z = pos.z
-		},
-		vel = {
-			x = vel.x,
-			y = vel.y,
-			z = vel.z
-		},
-		rot = {
-			x = rot.x,
-			y = rot.y,
-			z = rot.z,
-			w = rot.w
-		},
-		rvel = {
-			x = rvel.x,
-			y = rvel.y,
-			z = rvel.z
-		},
+		pos = {pos.x, pos.y, pos.z},
+		vel = {vel.x, vel.y, vel.z},
+		rot = {rot.x, rot.y, rot.z, rot.w},
+		rvel = {rvel.x, rvel.y, rvel.z},
 		tim = timer,
 		ping = ownPing + lastDT
 	}
@@ -278,10 +276,10 @@ end
 local function setVehiclePosRot(data)
 
 	local pr   = jsonDecode(data)
-	local pos  = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
-	local vel  = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
-	local rot  = quat(pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w)
-	local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
+	local pos  = vec3(pr.pos)
+	local vel  = vec3(pr.vel)
+	local rot  = quat(pr.rot)
+	local rvel = vec3(pr.rvel)
 	local tim  = pr.tim
 	local ping = pr.ping
 
@@ -318,10 +316,11 @@ end
 
 
 
-M.updateGFX = updateGFX
+M.onReset            = onReset
+M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
-M.setVehiclePosRot = setVehiclePosRot
-M.setPing = setPing
+M.setVehiclePosRot   = setVehiclePosRot
+M.setPing            = setPing
 
 
 return M

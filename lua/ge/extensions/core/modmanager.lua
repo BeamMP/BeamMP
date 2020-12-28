@@ -85,6 +85,7 @@ local function stateChanged()
   -- and save it to disc (if not in safe mode)
   if not isSafeMode() then
     jsonWriteFile(persistencyfile, { header = dbHeader, mods = mods}, true)
+	MPModManager.modsDatabaseChanged() -- ///////////////////////////////////////////////////////////// BEAMMP
   end
 end
 
@@ -719,7 +720,7 @@ local function deactivateMod(modname)
   _G.onFileChanged(mountedFilesChange) --main.lua
   stateChanged()
   
-  MPModManager.onModDeactivated(modname)
+  MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
 end
 
 local function getModNameFromID(modID)
@@ -767,7 +768,7 @@ local function activateMod(modname)
 
   stateChanged()
   
-  MPModManager.onModActivated(modname)
+  MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
 end
 
 local function activateModId(modID)

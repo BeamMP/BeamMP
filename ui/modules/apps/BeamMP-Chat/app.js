@@ -92,7 +92,7 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		let chatinput = document.getElementById("chat-input");
 		const text = chatinput.value
 		if (text) {
-			if (text > 150) addMessage("Your message should not be longer than 150 characters!");
+			if (text.length > 150) addMessage("Your message should not be longer than 150 characters!");
 			else {
 				bngApi.engineLua("UI.chatSend(\""+ text.replace(/"/g, '\'') + "\")");
 				chatinput.value = '';

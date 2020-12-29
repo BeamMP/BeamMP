@@ -59,6 +59,7 @@ angular.module('beamng.stuff')
 	}
 
 	vm.logout = function() {
+		document.getElementById('MultiplayerLoginBody').style.display = 'block';
 		vm.switchToLogin();
 		bngApi.engineLua(`MPCoreNetwork.logout()`);
 	}

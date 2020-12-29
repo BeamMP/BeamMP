@@ -28,30 +28,46 @@ angular.module('beamng.stuff')
 	});
 
 	vm.switchToLogin = function() {
+		document.getElementById('loginHeader').textContent = 'Login with your BeamMP account.';
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-			x[i].innerText='';    // Change the content
+			x[i].textContent='';    // Change the content
 		}
 		document.getElementById('GuestContainer').style.display = 'none'
 		document.getElementById('LoginContainer').style.display = 'block'
 	}
 
 	vm.login = function() {
-		var u = document.getElementById('loginUsername').value;
-		var p = document.getElementById('loginPassword').value;
+		var u = document.getElementById('loginUsername').value.trim();
+		var p = document.getElementById('loginPassword').value.trim();
+		
+		if (u == "" || p == ""){
+			document.getElementById('loginHeader').textContent = 'Missing credentials';
+			return;
+		}
+		
 		document.getElementById('loginUsername').value = '';
 		document.getElementById('loginPassword').value = '';
 		var d = {
 			username: u,
 			password: p
 		}
+
+		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
+
 		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
+	}
+
+	vm.logout = function() {
+		document.getElementById('MultiplayerLoginBody').style.display = 'block';
+		vm.switchToLogin();
+		bngApi.engineLua(`MPCoreNetwork.logout()`);
 	}
 
 	vm.switchToGuest = function() {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-			x[i].innerText='';    // Change the content
+			x[i].textContent='';    // Change the content
 		}
 		document.getElementById('LoginContainer').style.display = 'none'
 		document.getElementById('GuestContainer').style.display = 'block'
@@ -70,10 +86,18 @@ angular.module('beamng.stuff')
 	$scope.$on('LoginContainerController', function (event, data) {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-			x[i].innerText='';    // Change the content
+			x[i].textContent='';    // Change the content
 		}
-		if (data.hide) {
+		if (data.hide) { //login successful
 			document.getElementById('MultiplayerLoginBody').style.display = 'none'
+			
+			if (data.message !== undefined) {
+				console.log(data.message);
+				localStorage.setItem('welcomeMessage',data.message.replace('Authentication Successful. ',''));
+				document.getElementById('topRightStatus').textContent = data.message;
+			} else {
+				document.getElementById('topRightStatus').textContent = localStorage.getItem('welcomeMessage')||"";
+			}
 		} else {
 			document.getElementById('MultiplayerLoginBody').style.display = 'block'
 		}
@@ -82,7 +106,7 @@ angular.module('beamng.stuff')
 	$scope.$on('LoginError', function (event, data) {
 		var x = document.getElementsByClassName('LOGINERRORFIELD')
 		for(var i = 0; i < x.length; i++){
-			x[i].innerText=data.message;    // Change the content
+			x[i].textContent=data.message;    // Change the content
 		}
 	});
 
@@ -1444,3 +1468,10 @@ function addRecent(recentstr){ // has to have name, ip, port
 	localStorage.setItem("recent", JSON.stringify(arr));
 }
 
+function openExternalLink(url){
+	bngApiScope.engineLua(`openWebBrowser("`+url+`")`);
+}
+
+function openForumLink(){
+	openExternalLink("http://forum.beammp.com");
+}

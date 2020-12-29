@@ -40,14 +40,14 @@ local activeVehicle = 0
 
 local roleToInfo = {
 	['USER'] = { backcolor = ColorI(0, 0, 0, 127), tag = "" },
-	['EA'] = { backcolor = ColorI(69, 0, 150, 127), tag = "[Early Access]" },
-	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = "[YouTuber]" },
-	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = "[Events Team]" },
-	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = "[Support]" },
-	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = "[Moderator]" },
-	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = "[Admin]" },
-	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = "[BeamNG Staff]" },
-	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = "[MP DEV]" }
+	['EA'] = { backcolor = ColorI(69, 0, 150, 127), tag = " [Early Access]" },
+	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]" },
+	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]" },
+	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Support]" },
+	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]" },
+	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]" },
+	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]" },
+	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]" }
 }
 
 -- ============= VARIABLES =============
@@ -610,11 +610,24 @@ local function onUpdate(dt)
 						local backColor = roleInfo.backcolor
 
 						if distanceMap[gameVehicleID] > 10 then
+							local d
 							if settings.getValue("uiUnitLength") == "imperial" then
-								dist = " "..tostring(math.floor(distanceMap[gameVehicleID]*3.28084)).." ft"
+								local ft = distanceMap[gameVehicleID]*3.28084
+								if ft > 5280 then
+									local mi = math.floor( (ft / 5280 * 100) + 0.5) / 100
+									d = tostring(mi).." mi"
+								else
+									d = tostring(math.floor(ft)).." ft"
+								end
 							else
-								dist = " "..tostring(math.floor(distanceMap[gameVehicleID])).." m"
+								if distanceMap[gameVehicleID] > 1000 then
+									local km = math.floor((distanceMap[gameVehicleID] / 10) + 0.5) / 100
+									d = tostring(km).." km"
+								else
+									d = tostring(math.floor(distanceMap[gameVehicleID])).." m"
+								end
 							end
+							dist = " "..d
 						end
 
 						if not settings.getValue("nameTagShowDistance") then dist = "" end
@@ -630,13 +643,13 @@ local function onUpdate(dt)
 						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
-						local prefix = nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or " "
+						local prefix = nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] and nicknamePrefixMap[nicknameMap[gameVehicleID].nickname].." " or ""
 						local suffix = nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] and nicknameSuffixMap[nicknameMap[gameVehicleID].nickname].." " or ""
 
 						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
 						debugDrawer:drawTextAdvanced(
 							pos, -- Location
-							String(prefix..tostring(nicknameMap[gameVehicleID].nickname).." "..suffix..roleInfo.tag..dist.." "), -- Text
+							String(" "..prefix..tostring(nicknameMap[gameVehicleID].nickname)..suffix..roleInfo.tag..dist.." "), -- Text
 							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
 							backColor -- Background Color
 						)

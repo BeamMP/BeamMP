@@ -346,8 +346,12 @@ angular.module('beamng.stuff')
 			}
 		}
 
-		//serverArray.sort((a, b) => a.strippedName.localeCompare(b.strippedName)) //dont sort servers by name because people didnt like it :C
-		serverArray.sort((a, b) => (b.official - a.official))
+		serverArray.sort(function(a, b) {
+			if (a.official && b.official) return a.strippedName.localeCompare(b.strippedName)
+			else if (a.official) return -1;
+			else if (b.official) return 1;
+			return 0;
+		});
 
 		localStorage.setItem('servers', JSON.stringify(serverArray))
 

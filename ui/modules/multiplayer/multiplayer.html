@@ -10,28 +10,29 @@
 <div id="MultiplayerLoginBody" style="">
     <div id="LoginContainer" class="GuestLoginContainer">
         <div class="col-2">
-          <img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
+			<img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
         </div>
-        <div class="col-2">
-          <h2 class="text-white">Login with your BeamMP account.</h2>
-          <h2 class="text-red LOGINERRORFIELD"></h2>
-          <input type="text" id="loginUsername" placeholder="Username / Email"/>
-      		<input type="password" id="loginPassword" placeholder="Password"/>
-      		<md-button id="" class="button" ng-click="multiplayer.login()">Login</md-button>
-          <md-button id="" class="button" ng-click="multiplayer.switchToGuest()">Play as Guest</md-button>
-        </div>
+        <form class="col-2">
+			<h2 class="text-white" id="loginHeader">Login with your BeamMP account.</h2>
+			<h2 class="text-red LOGINERRORFIELD"></h2>
+			<input (keyup.enter)="multiplayer.login()" type="text" id="loginUsername" placeholder="Username / Email"/>
+			<input (keyup.enter)="multiplayer.login()" type="password" id="loginPassword" placeholder="Password"/>
+			<md-button id="" class="button" ng-click="multiplayer.login()">Login</md-button>
+			<md-button id="" class="button" ng-click="multiplayer.switchToGuest()">Play as Guest</md-button>
+			<md-button id="" class="button" onclick="openExternalLink('https://forum.beammp.com/register')">Register</md-button>
+        </form>
     </div>
     <div id="GuestContainer" class="GuestLoginContainer" style="display: none;">
         <div class="col-2">
           <img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
         </div>
-        <div class="col-2">
+        <form class="col-2">
           <h2 class="text-white">Please enter a Username to play with.</h2>
           <h2 class="text-red LOGINERRORFIELD"></h2>
           <input type="text" id="guestUsername" placeholder="Username"/>
       		<md-button id="" class="button" ng-click="multiplayer.guestLogin()">Play</md-button>
           <md-button id="" class="button" ng-click="multiplayer.switchToLogin()">Login</md-button>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -55,8 +56,8 @@
     <md-toolbar class="md-primary" id="top-bar">
         <md-list-item layout="row" class="">
             <h1 class="md-toolbar-tools" style="width:auto;">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
-            <!--<p id="launcher-status" style="text-align:right; margin-right:10px;">Launcher Disconnected</p>-->
-			      <!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
+            <p id="topRightStatus" style="text-align:right; margin-right:10px;"></p>
+			<!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
         </md-list-item>
     </md-toolbar>
 
@@ -87,21 +88,22 @@
 				  {{:: 'ui.multiplayer.forum' | translate}}
         </md-button>
 
-            <!--<md-button id="settings-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.settings') !== -1)}" ui-sref="menu.multiplayer.settings" style="text-align:left;">
-                <md-icon class="material-icons">more_horiz</md-icon>
-                Settings
-            </md-button>-->
 
-			<md-divider></md-divider>
+	    <md-divider></md-divider>
+	    
+	    <div flex="" style="max-height: none;"></div>
+	    
+        <md-button id="direct-connect-btn" ng-click="multiplayer.logout()" class="md-raised md-accent" style="text-align:left;">
+          <md-icon class="material-icons">exit_to_app</md-icon>
+				  Logout
+        </md-button>
+      </md-content>
 
-            <div flex="" style="max-height: none;"></div>
-        </md-content>
+      <div flex style="position: relative;">
+        <md-content ui-view class="container" style="background: transparent; overflow: auto;"></md-content>
+      </div>
 
-        <div flex style="position: relative;">
-            <md-content ui-view class="container" style="background: transparent; overflow: auto;"></md-content>
-        </div>
-
-        <div ui-view="edit" layout="column"></div>
+      <div ui-view="edit" layout="column"></div>
     </div>
 </md-content>
 

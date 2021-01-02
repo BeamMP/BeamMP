@@ -17,23 +17,14 @@ local sysTime = 0
 local eventTriggers = {}
 -- ============= VARIABLES =============
 
--- ============= INIT =============
---Preston (Cobalt) Preload the UI profile for multiplayer
-local layouts = jsonReadFile("settings/uiapps-layouts.json")
---if not layouts.multiplayer or table[1] == nil then
-if not layouts.multiplayer and MPCoreNetwork.isMPSession() then
-	layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
-	jsonWriteFile("settings/uiapps-layouts.json",layouts)
-	log("A","Print","multiplayer UI layout added")
-end
--- ============= INIT =============
+
 
 local function connectToLauncher()
-	print("Connecting to the Launcher for Session Data")
+	print("Connecting to the Launcher for mp session")
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
-		TCPSocket:setoption("keepalive",true)
+		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1

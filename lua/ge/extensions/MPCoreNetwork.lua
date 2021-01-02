@@ -68,7 +68,7 @@ local function onLauncherConnectionFailed()
 	local modsList = core_modmanager.getModList()
 	local beammpMod = modsList["beammp"] or modsList["multiplayerbeammp"]
 	if (beammpMod) then
-		if beammpMod.active then
+		if beammpMod.active and not beammpMod.unpackedPath then
 			core_modmanager.deleteMod(beammpMod.modname)
 			Lua:requestReload()
 		end

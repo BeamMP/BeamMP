@@ -11,6 +11,7 @@ print("Loading MPCoreNetwork")
 
 
 -- ============= VARIABLES =============
+local version = "0.21"
 local TCPLauncherSocket -- Launcher socket
 local currentServer -- Store the server we are on
 local Servers = {} -- Store all the servers
@@ -23,6 +24,9 @@ local currentMap = ""
 local mapLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
+local launcherTimeout = 0
+local connectionFailed = false
+local packetReceivedYet = false
 --[[
 Z -> The client ask to the launcher his version
 B -> The client ask for the servers list to the launcher
@@ -52,10 +56,29 @@ local function disconnectLauncher()
 		print("Disconnecting from launcher")
 		TCPLauncherSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
-		serverTimeoutTimer = 0 -- Reset timeout delay
 		secondsTimer = 0
 		isGoingMpSession = false
 	end
+end
+
+
+
+local function onLauncherConnectionFailed()
+	disconnectLauncher()
+	local modsList = core_modmanager.getModList()
+	local beammpMod = modsList["beammp"] or modsList["multiplayerbeammp"]
+	if (beammpMod) then
+		if beammpMod.active then
+			core_modmanager.deleteMod(beammpMod.modname)
+			Lua:requestReload()
+		end
+	end
+end
+
+
+
+local function onModManagerReady()
+	if connectionFailed then onLauncherConnectionFailed() end
 end
 
 
@@ -194,7 +217,15 @@ local function onUpdate(dt)
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
 			local received, status, partial = TCPLauncherSocket:receive() -- Receive data
-			if received == nil or received == "" then break end
+			
+			-- Checking connection
+			if launcherTimeout > 0.1 then onLauncherConnectionFailed() connectionFailed = true end
+			if received == nil or received == "" then
+				if not packetReceivedYet then launcherTimeout = launcherTimeout + dt end
+				break
+			end
+			packetReceivedYet = true
+			
 			-- break it up into code + data
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
@@ -285,10 +316,10 @@ local function onInit()
 		log("A","Print","multiplayer UI layout added")
 	end
 
-	-- First we connect to the launcher
-	connectToLauncher()
 	-- Then we check that the game has loaded our mod manager, if not we reload lua
 	if not core_modmanager.getModList then Lua:requestReload() end
+	-- First we connect to the launcher
+	connectToLauncher()
 	-- We reload the UI to load our custom UI
 	reloadUI()
 	-- We reset "serverConnection" because for some reasons singleplayer doesn't work without this
@@ -349,6 +380,7 @@ end
 
 
 
+M.onModManagerReady = onModManagerReady
 M.onInit = onInit
 M.login = login
 M.logout = logout

@@ -114,15 +114,11 @@ end
 
 
 
-local function showNotification(type, text)
-	if text == nil then
-		message(type)
+local function showNotification(text, type)
+	if type and type == "error" then
+		error(text)
 	else
-		if type == "error" then
-			error(text)
-		else
-			message(text)
-		end
+		message(text)
 	end
 end
 

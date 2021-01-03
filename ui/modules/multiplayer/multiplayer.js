@@ -361,7 +361,7 @@ angular.module('beamng.stuff')
 	function displayServers() {
 		var table = document.getElementById("serversTableBody");
 		table.innerHTML = "";
-		var mapNames = new Array(); //["Any"];
+		var mapNames = new Array();
 
 		console.log(vm.select_map)
 		var servers = JSON.parse(localStorage.getItem('servers'))
@@ -1413,7 +1413,7 @@ function findPlayer(pname, join=false){
 					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
 				}else{
 					var table = document.getElementById("serversTable");
-					var row = table.rows[id];
+					var row = table.rows[id+1];
 					selectRowScope(row);
 				}
 				return id;

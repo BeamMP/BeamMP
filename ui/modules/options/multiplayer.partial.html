@@ -4,7 +4,7 @@
 
   <md-list-item md-no-ink>
     <p>Queue player updates</p>    
-	<md-tooltip md-direction="right">If enabled, you will only spawn vehicles once slowed down, as to not affect gameplay</md-tooltip>
+    <md-tooltip md-direction="right">If enabled, you will only spawn vehicles once slowed down, as to not affect gameplay</md-tooltip>
     <md-checkbox ng-model="options.data.values.queueSpawnEdit" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
@@ -13,7 +13,11 @@
     <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
-
+  <md-list-item md-no-ink>
+    <p>Enable optimisations</p>
+    <md-tooltip md-direction="right">If enabled, other vehicles will run limited calculations</md-tooltip>
+    <md-checkbox ng-model="options.data.values.luaOptimisations" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
 
 
 

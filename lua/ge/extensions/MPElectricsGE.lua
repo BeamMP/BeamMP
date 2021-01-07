@@ -28,9 +28,9 @@ end
 
 
 local function tickGears() -- Update gears of all vehicles
-	for i = 0, be:getObjectCount() do -- For each vehicle
+	for i = 0, be:getObjectCount() - 1 do -- For each vehicle
 		local veh = be:getObject(i) --  Get vehicle
-		if veh and not MPVehicleGE.isOwn(veh:getId()) then -- For loop always return one empty vehicle ?
+		if veh and not MPVehicleGE.isOwn(veh:getId()) then
 			veh:queueLuaCommand("MPElectricsVE.checkGears()") -- Check if any value changed
 		end
 	end

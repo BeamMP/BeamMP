@@ -128,9 +128,9 @@ end
 local function deleteAllVehicles()
 	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 	commands.setFreeCamera()
-	for i = 0, be:getObjectCount() do -- For each vehicle
+	for i = 0, be:getObjectCount() - 1 do -- For each vehicle
 		local veh = be:getObject(0) --  Get vehicle
-		if veh then -- For loop always return one empty vehicle ?
+		if veh then
 			onVehicleDestroyedAllowed = false
 			veh:delete()
 		end
@@ -574,7 +574,6 @@ end
 local function onUpdate(dt)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
-
 		-- Vehicles syncing timer
 		syncTimer = syncTimer + dt
 		if syncTimer > 10 then

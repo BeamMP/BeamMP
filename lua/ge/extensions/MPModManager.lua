@@ -186,6 +186,7 @@ M.onClientStartMission = onClientStartMission
 M.modsDatabaseChanged = modsDatabaseChanged
 M.onModStateChanged = onModStateChanged
 M.backupLoadedMods = backupLoadedMods
+M.restoreLoadedMods = restoreLoadedMods
 M.cleanUpSessionMods = cleanUpSessionMods
 M.showServerMods = showServerMods
 M.setServerMods = setServerMods

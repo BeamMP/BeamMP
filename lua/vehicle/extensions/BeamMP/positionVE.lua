@@ -88,8 +88,6 @@ local lastRacc = nil
 
 local tpTimer = 0
 
-local cogRel = vec3(0,0,0)
-
 local remoteData = {
 	pos = nil,
 	vel = vec3(0,0,0),
@@ -115,11 +113,6 @@ local function setPing(p)
 end
 
 
-local function onReset()
-	-- Need to do this here because calcCenterOfGravityRel() returns garbage in onInit()...
-	cogRel = vec3(obj:calcCenterOfGravityRel(false)):rotated(quat(obj:getRotation()):inversed())
-end
-
 
 local function updateGFX(dt)
 	timer = timer + dt
@@ -128,12 +121,11 @@ local function updateGFX(dt)
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
-	local cog = cogRel:rotated(quat(obj:getRotation()))
-	
-	local vehRot = quat(obj:getRotation())
+	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
 	
+	local cog = velocityVE.cogRel:rotated(vehRot)
 	local vehPos = vec3(obj:getPosition()) + cog
 	local vehVel = vec3(obj:getVelocity()) + cog:cross(vehRvel)
 	local vehAcc = vehVel-(lastVehVel or vehVel)
@@ -170,10 +162,12 @@ local function updateGFX(dt)
 
 	--[[
 	-- Debug
-	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
-	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,255))
-	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
-	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,255))
+	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,200))
+	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,200))
+	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,200))
+	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,200))
+	debugDrawer:drawSphere(0.3, vehPos:toFloat3(), color(255,0,0,200))
+	debugDrawer:drawLine(vehPos:toFloat3(), (vehPos + vec3(0,-5,0):rotated(vehRot)):toFloat3(), color(255,0,0,200))
 	debugDrawer:drawText(pos:toFloat3(), color(0,0,0,255), string.format("Prediction: %.0f ms", predictTime*1000))
 	--]]
 
@@ -190,15 +184,19 @@ local function updateGFX(dt)
 	end
 
 	-- If position error is larger than limit, teleport the vehicle
-	if tpTimer > abs(predictTime)*2 then
+	if tpTimer > (0.5+abs(predictTime)*2) then
 		-- Subtract COG offset because setPosition works relative to refNode
-		local tpPos = pos - cog
+		local tpPos = pos - velocityVE.cogRel:rotated(rot)
+		-- Offset teleport rotation for vehicles with different JBeam orientations
+		local tpRot = rot*vehRot/quat(obj:getRotation())
 		
 		if rotError:length() > maxRotError then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
-			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
+			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
+			--print("Teleport Angle "..obj:getID())
 		else
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
+			--print("Teleport "..obj:getID())
 		end
 
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
@@ -253,10 +251,11 @@ end
 
 
 local function getVehicleRotation()
-	local cog = cogRel:rotated(quat(obj:getRotation()))
 	
-	local rot = quat(obj:getRotation())
+	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
+	
+	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
 	local vel = vec3(obj:getVelocity()) + cog:cross(rvel)
 	
@@ -316,7 +315,6 @@ end
 
 
 
-M.onReset            = onReset
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot

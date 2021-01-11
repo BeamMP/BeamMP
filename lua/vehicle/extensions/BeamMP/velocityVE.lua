@@ -8,7 +8,26 @@ local isConnectedNode = {}
 local parentNode = nil
 local beamsChanged = false
 local physicsFPS = 0
-local cogRel = vec3(0,0,0)
+M.cogRel = vec3(0,0,0)
+
+-- Calculate center of gravity from connected nodes
+local function calcCOG()
+	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	
+	local totalMass = 0
+	local cog = vec3(0,0,0)
+	for nid, connected in pairs(isConnectedNode) do
+		local nodeWeight = obj:getNodeMass(nid)
+		local nodePos = vec3(obj:getNodePosition(nid))
+		
+		cog = cog + nodePos*nodeWeight
+		
+		totalMass = totalMass + nodeWeight
+	end
+	cog = cog/totalMass
+	
+	M.cogRel = vec3(cog:rotated(rot:inversed()))
+end
 
 -- Recursively find nodes connected to parent node
 local function findConnectedNodesRecursive(parentID)
@@ -33,9 +52,12 @@ local function findConnectedNodesRecursive(parentID)
 	end
 end
 
+-- Trigger finding of connected nodes
 local function findConnectedNodes()
 	isConnectedNode = {}
 	findConnectedNodesRecursive(parentNode)
+	
+	calcCOG()
 	
 	beamsChanged = false
 end
@@ -62,6 +84,17 @@ local function onInit()
 	-- Choose ref node with connected beams as parent node
 	local refNodes = v.data.refNodes[0]
 	
+	local refPos = vec3(v.data.nodes[refNodes.ref].pos)
+	local backPos = vec3(v.data.nodes[refNodes.back].pos) - refPos
+	local upPos = vec3(v.data.nodes[refNodes.up].pos) - refPos
+	local leftPos = vec3(v.data.nodes[refNodes.left].pos) - refPos
+	
+	local cosAng = leftPos:cosAngle(backPos:cross(upPos))
+	
+	if cosAng < 0 then
+		print("Misaligned refNodes detected in vehicle"..obj:getId().."! This might cause wrong rotations or instability.")
+	end
+	
 	if connectedBeams[refNodes.ref] then
 		parentNode = refNodes.ref
 	elseif connectedBeams[refNodes.back] then
@@ -76,7 +109,10 @@ local function onInit()
 		-- TODO: find less hacky way to get beamBroke events
 		local beamBroke = powertrain.beamBroke
 		powertrain.beamBroke = function(id, ...)
-			beamsChanged = true
+			local beamType = v.data.beams[id].beamType
+			if beamType ~= 3 and beamType ~= 4 and beamType ~= 7 then
+				beamsChanged = true
+			end
 
 			return beamBroke(id, ...)
 		end
@@ -87,15 +123,13 @@ local function onInit()
 	    for _, n in pairs(v.data.nodes) do
 	        isConnectedNode[n.cid] = true
 	    end
+		calcCOG()
 	end
 
 	print("velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..parentNode)
 end
 
 local function onReset()
-	-- Need to do this here because calcCenterOfGravityRel() returns garbage in onInit()...
-	cogRel = vec3(obj:calcCenterOfGravityRel(false)):rotated(quat(obj:getRotation()):inversed())
-	
 	if parentNode then findConnectedNodes() end
 end
 
@@ -137,7 +171,8 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 		findConnectedNodes()
 	end
 	
-	local cog = cogRel:rotated(quat(obj:getRotation()))
+	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	local cog = M.cogRel:rotated(rot)
 	
 	local rvel = vec3(pitchAV, rollAV, yawAV)
 	local vel = vec3(x, y, z)
@@ -154,10 +189,11 @@ end
 
 -- Instantly set vehicle angular velocity in rad/s
 local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
-	local cog = cogRel:rotated(quat(obj:getRotation()))
+	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	local cog = M.cogRel:rotated(rot)
 	
 	local rvel = vec3(pitchAV, rollAV, yawAV)
-	local vrvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(quat(obj:getRotation()))
+	local vrvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
 	local rvelDiff = rvel - vrvel
 	
 	local vel = vec3(x, y, z)

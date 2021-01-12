@@ -117,11 +117,11 @@ local function getNicknameFromID(id)
 	return nickIDMap[id]
 end
 
-local function setPlayerNickPrefix(name, prefix)
-	nicknamePrefixMap[name] = prefix
+local function setPlayerNickPrefix(name, tagSource, prefix)
+	nicknamePrefixMap[name][tagSource] = prefix
 end
-local function setPlayerNickSuffix(name, suffix)
-	nicknameSuffixMap[name] = suffix
+local function setPlayerNickSuffix(name, tagSource, suffix)
+	nicknameSuffixMap[name][tagSource] = suffix
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
@@ -740,8 +740,13 @@ local function onUpdate(dt)
 						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
-						local prefix = nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] and nicknamePrefixMap[nicknameMap[gameVehicleID].nickname].." " or ""
-						local suffix = nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] and nicknameSuffixMap[nicknameMap[gameVehicleID].nickname].." " or ""
+						local prefix = ""
+						for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+							do prefix = prefix..tag.." " end
+						
+						local suffix = ""
+						for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+							do suffix = suffix..tag.." " end
 
 						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
 						debugDrawer:drawTextAdvanced(

@@ -3911,7 +3911,8 @@
     "ui.playmodes.multiplayer": "Multiplayer",
 	"ui.options.multiplayer": "Multiplayer",
 
-    "ui.options.multiplayer.disableSyncConfigUpdates": "Disable other players vehicle part config changes (Warning: you won't see custom configs!)",
+    "ui.options.multiplayer.autoSyncVehicles": "Enable auto part sync",
+    "ui.options.multiplayer.autoSyncVehicles.tooltip": "If enabled, your vehicle parts will automatically be synced to other players after a few seconds",
     "ui.options.multiplayer.nameTags": "Hide player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Use alternate nametag colors",
 	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",

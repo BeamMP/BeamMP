@@ -9,6 +9,12 @@
   </md-list-item>
 
   <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.autoSyncVehicles' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.autoSyncVehicles.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.autoSyncVehicles" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
     <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>

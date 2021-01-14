@@ -684,7 +684,7 @@ local function onUpdate(dt)
 		-- Vehicles syncing timer
 		syncTimer = syncTimer + dt
 		if syncTimer > 10 then
-			syncVehicles()
+			if settings.getValue("autoSyncVehicles") then syncVehicles() end
 			syncTimer = 0
 		end
 

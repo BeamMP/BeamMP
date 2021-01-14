@@ -3913,6 +3913,10 @@
 
     "ui.options.multiplayer.autoSyncVehicles": "Enable auto part sync",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "If enabled, your vehicle parts will automatically be synced to other players after a few seconds",
+    "ui.options.multiplayer.queueSpawnEdit": "Queue player updates",
+    "ui.options.multiplayer.queueSpawnEdit.tooltip": "If enabled, you will only spawn vehicles once slowed down, as to not affect gameplay",
+    "ui.options.multiplayer.luaOptimisations": "Enable optimisations",
+    "ui.options.multiplayer.luaOptimisations.tooltip": "If enabled, other vehicles will run limited calculations",
     "ui.options.multiplayer.nameTags": "Hide player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Use alternate nametag colors",
 	"ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",

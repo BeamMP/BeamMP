@@ -233,18 +233,22 @@ local function updateVehicle(serverID, data)
 
 	if settings.getValue("queueSpawnEdit") then
 
-		vehicleEditQueue[serverID] = data	
+		vehicleEditQueue[serverID] = data
 		print('edit received and queued')
 
 		local id = string.match(serverID,"^(.*)-")
 
 		local playerNickname = nickIDMap[id] or "unknown"
+
+		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
+
 		UI.showNotification('edit received and queued for '..playerNickname)
 
 	else
 
 		applyVehEdit(serverID, data)
 
+		UI.updateQueue({}, {}, false)
 	end
 end
 
@@ -353,6 +357,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			if not vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = {} end
 			table.insert(vehicleSpawnQueue[serverVehicleID], eventdata)
 			print('queue enabled adding spawn for '..playerNickname)
+			
+			UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 
 			UI.showNotification('spawn received and queued for '..playerNickname)
 
@@ -361,6 +367,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			print('queue disabled, spawning now')
 
 			applyVehSpawn(eventdata)
+			UI.updateQueue({}, {}, false)
 
 		end
 	end
@@ -642,27 +649,31 @@ local function teleportCameraToPlayer(targetName)
 end
 
 local function applyQueuedEvents()
-	if not vehicleEditQueue then return end
+	if not vehicleSpawnQueue then return end
 
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 	for vehicleID, spawns in pairs(vehicleSpawnQueue) do
-		dump(vehicleID)
+		--dump(vehicleID)
 		for k, spawn in pairs(spawns) do
 			print("spawn")
 			applyVehSpawn(spawn)
 		end
 		vehicleSpawnQueue[vehicleID] = nil
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
 	end
 
+	if not vehicleEditQueue then return end
+
 	for vehicleID, edit in pairs(vehicleEditQueue) do
-		dump(vehicleID)
+		--dump(vehicleID)
 		--for k, event in pairs(edits) do
 			print("edit")
 			applyVehEdit(vehicleID, edit)
 			--table.remove(edits, k)
 		--end
 		vehicleEditQueue[vehicleID] = nil
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix

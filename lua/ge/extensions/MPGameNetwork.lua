@@ -75,9 +75,9 @@ end
 -- Events System
 -------------------------------------------------------------------------------
 
-local function handleEvents(p)  --- E:<NAME>:data
-	local eventName = string.match(p,"(%w+)%:")
-	local data = p:gsub(eventName..":", "")
+local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
+	local eventName = string.match(p,"%:(%w+)%:")
+	local data = p:gsub(":"..eventName..":", "")
 	for i=1,#eventTriggers do
 		if eventTriggers[i].name == eventName then
 			eventTriggers[i].func(data)
@@ -89,8 +89,8 @@ function TriggerServerEvent(n, d)
 	sendData('E:'..n..':'..d)
 end
 
-function TriggerClientEvent(code, data)
-	handleEvents(code..':'..data)
+function TriggerClientEvent(n, d)
+	handleEvents(':'..n..':'..d)
 end
 
 function AddEventHandler(n, f)

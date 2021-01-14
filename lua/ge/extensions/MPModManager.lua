@@ -42,10 +42,30 @@ local function checkMod(mod)
 		if string.match(string.lower(modname), 'multiplayer') then
 			core_modmanager.deleteMod(modname)
 		end
-	elseif modAllowed and not mod.active then
-		print("Inactive Mod but Should be Active: "..modname)
-		core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-		MPCoreNetwork.modLoaded(modname)
+	elseif modAllowed then
+		if mod.active then -- this mod just got enabled for MP, run modscript
+			local dir, basefilename, ext = path.splitWithoutExt(mod.fullpath)
+
+			local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
+			print(mod.filename)
+			print("Loaded mod " .. basefilename)
+			
+			
+			local f = io.open(modscriptpath, "r")
+			if f == nil or not io.close(f) then return end
+			
+			local status, ret = pcall(dofile, modscriptpath)
+			if not status then
+				log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
+				log('E', 'initDB.modScript', dumps(ret))
+			end
+
+			loadCoreExtensions()
+		else
+			print("Inactive Mod but Should be Active: "..modname)
+			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
+			MPCoreNetwork.modLoaded(modname)
+		end
 	end
 end
 

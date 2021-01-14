@@ -60,6 +60,7 @@ function updateCorePhysicsStepEnabled()
   obj:setPhysicsStepEnabled(controller.isPhysicsStepUsed() or powertrain.isPhysicsStepUsed() or wheels.isPhysicsStepUsed() or motionSim.isPhysicsStepUsed() or thrusters.isPhysicsStepUsed() or hydros.isPhysicsStepUsed() or beamstate.isPhysicsStepUsed())
 end
 
+--- BEAMMP START ---
 local doFunkyBusiness = false
 local lazydtSim = 0
 local lazyPhysCount = 0
@@ -106,7 +107,7 @@ end
 function onGraphicsStep(dtSim)
   --debugPoll()
   
-  doFunkyBusiness = settings.getValue('luaOptimisations')
+  doFunkyBusiness = settings.getValue('luaOptimisations')          --- BEAMMP END ---
 
   lastDt = dtSim
   sensors.updateGFX(dtSim) -- must be before input and ai

@@ -240,7 +240,7 @@ local function update(dtSim)
   local hydros = M.hydros
   local hcount = hydroCount
 
-  physicsDt = dtSim
+  physicsDt = dtSim --- BEAMMP ---
 
   if FFBHydrosExist then
     local statewp = 0

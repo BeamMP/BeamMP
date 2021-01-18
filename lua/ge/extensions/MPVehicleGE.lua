@@ -231,7 +231,7 @@ end
 
 local function updateVehicle(serverID, data)
 
-	if settings.getValue("queueSpawnEdit") then
+	if settings.getValue("enableSpawnQueue") then
 
 		vehicleEditQueue[serverID] = data
 		print('edit received and queued')
@@ -352,7 +352,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		eventdata.serverVehicleID = serverVehicleID
 		eventdata.data = data
 
-		if settings.getValue("queueSpawnEdit") then
+		if settings.getValue("enableSpawnQueue") then
 
 			if not vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = {} end
 			table.insert(vehicleSpawnQueue[serverVehicleID], eventdata)
@@ -687,7 +687,7 @@ local function onUpdate(dt)
 		if currveh then
 			local vel = vec3()
 			vel:set(currveh:getVelocity())
-			if math.abs(vel:length() or 0) < 0.5 then applyQueuedEvents() end
+			if not isOwn(currveh:getID()) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
 			if not commands.isFreeCamera() then cameraPos = vec3(currveh:getPosition()) end
 		else applyQueuedEvents() end
 
@@ -807,7 +807,7 @@ M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
 M.sendBeamstate           = sendBeamstate
 M.onServerVehicleCoupled  = onServerVehicleCoupled
-
+M.applyQueuedEvents       = applyQueuedEvents
 M.teleportVehToPlayer     = teleportVehToPlayer
 M.teleportCameraToPlayer  = teleportCameraToPlayer
 

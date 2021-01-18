@@ -3,9 +3,15 @@
   <md-subheader class="md-no-sticky">General</md-subheader>
 
   <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
-    <md-checkbox ng-model="options.data.values.queueSpawnEdit" ng-change="options.applyState()"></md-checkbox>
+    <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
   <md-list-item md-no-ink>

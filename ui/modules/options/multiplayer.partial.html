@@ -25,6 +25,12 @@
     <md-checkbox ng-model="options.data.values.luaOptimisations" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+  <md-list-item md-no-ink>
+    <p>Fade out vehicles as they get closer</p>
+    <md-tooltip md-direction="right">Good when paired with disabled collisions</md-tooltip>
+    <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
 
 
   <md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</md-subheader>

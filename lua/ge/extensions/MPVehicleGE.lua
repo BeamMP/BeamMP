@@ -699,76 +699,77 @@ local function onUpdate(dt)
 			syncTimer = 0
 		end
 
-		for i = 0, be:getObjectCount() do -- For each vehicle
+		for i = 0, be:getObjectCount()-1 do -- For each vehicle
 			local veh = be:getObject(i) --  Get vehicle
-			if veh then -- For loop always return one empty vehicle ?
-				local gameVehicleID = veh:getID()
-				if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] then
-					local pos = veh:getPosition()
-					local nametagAlpha = 1
-					local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
+			local gameVehicleID = veh:getID()
+			if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] then
+				local pos = veh:getPosition()
+				local nametagAlpha = 1
+				local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
 
-					local distfloat = (cameraPos or vec3()):distance(pos)
-					nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-					distanceMap[gameVehicleID] = distfloat
+				local distfloat = (cameraPos or vec3()):distance(pos)
+				nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
+				distanceMap[gameVehicleID] = distfloat
 
-					if not settings.getValue("hideNameTags") and nicknamesAllowed then
-						local dist = ""
-						local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
-						local backColor = roleInfo.backcolor
+				if not settings.getValue("hideNameTags") and nicknamesAllowed then
+					local dist = ""
+					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
+					local backColor = roleInfo.backcolor
 
-						if distanceMap[gameVehicleID] > 10 then
-							local d
-							if settings.getValue("uiUnitLength") == "imperial" then
-								local ft = distanceMap[gameVehicleID]*3.28084
-								if ft > 5280 then
-									local mi = math.floor( (ft / 5280 * 100) + 0.5) / 100
-									d = tostring(mi).." mi"
-								else
-									d = tostring(math.floor(ft)).." ft"
-								end
+					if distanceMap[gameVehicleID] > 10 then
+						local d
+						if settings.getValue("uiUnitLength") == "imperial" then
+							local ft = distanceMap[gameVehicleID]*3.28084
+							if ft > 5280 then
+								local mi = math.floor( (ft / 5280 * 100) + 0.5) / 100
+								d = tostring(mi).." mi"
 							else
-								if distanceMap[gameVehicleID] > 1000 then
-									local km = math.floor((distanceMap[gameVehicleID] / 10) + 0.5) / 100
-									d = tostring(km).." km"
-								else
-									d = tostring(math.floor(distanceMap[gameVehicleID])).." m"
-								end
+								d = tostring(math.floor(ft)).." ft"
 							end
-							dist = " "..d
-						end
-
-						if not settings.getValue("nameTagShowDistance") then dist = "" end
-
-						if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
-							if settings.getValue("nameTagFadeInvert") then
-								nametagAlpha = 1 - nametagAlpha
+						else
+							if distanceMap[gameVehicleID] > 1000 then
+								local km = math.floor((distanceMap[gameVehicleID] / 10) + 0.5) / 100
+								d = tostring(km).." km"
 							else
-								dist = ""
+								d = tostring(math.floor(distanceMap[gameVehicleID])).." m"
 							end
 						end
-
-						if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
-						backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-
-						local prefix = ""
-						for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {}) 
-							do prefix = prefix..tag.." " end
-						
-						local suffix = ""
-						for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {}) 
-							do suffix = suffix..tag.." " end
-
-						pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
-						debugDrawer:drawTextAdvanced(
-							pos, -- Location
-							String(" "..prefix..tostring(nicknameMap[gameVehicleID].nickname)..suffix..roleInfo.tag..dist.." "), -- Text
-							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
-							backColor -- Background Color
-						)
-
-						--"██▓▓▒▒░░"
+						dist = " "..d
 					end
+
+					if not settings.getValue("nameTagShowDistance") then dist = "" end
+
+					if settings.getValue("fadeVehicles") then
+						if currveh:getID() == gameVehicleID then veh:setMeshAlpha(1, "", false)
+						else veh:setMeshAlpha(1-nametagAlpha, "", false) end
+					end
+
+					if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
+						if settings.getValue("nameTagFadeInvert") then
+							nametagAlpha = 1 - nametagAlpha
+						else
+							dist = ""
+						end
+					end
+
+					if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
+					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
+
+					local prefix = ""
+					for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+						do prefix = prefix..tag.." " end
+					
+					local suffix = ""
+					for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+						do suffix = suffix..tag.." " end
+
+					pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
+					debugDrawer:drawTextAdvanced(
+						pos, -- Location
+						String(" "..prefix..tostring(nicknameMap[gameVehicleID].nickname)..suffix..roleInfo.tag..dist.." "), -- Text
+						ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
+						backColor -- Background Color
+					)
 				end
 			end
 		end

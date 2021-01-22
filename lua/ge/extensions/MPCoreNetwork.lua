@@ -65,6 +65,7 @@ end
 
 local function onLauncherConnectionFailed()
 	disconnectLauncher()
+	MPModManager.restoreLoadedMods() -- Attempt to restore the mods before deleting BeamMP
 	local modsList = core_modmanager.getModList()
 	local beammpMod = modsList["beammp"] or modsList["multiplayerbeammp"]
 	if (beammpMod) then

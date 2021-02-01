@@ -304,7 +304,6 @@ angular.module('beamng.stuff')
 }])
 
 
-
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	RECENT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,6 +542,9 @@ function(logger, $scope, $state, $timeout, bngApi) {
 	});
 }]);
 
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	FUNCTIONS
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
 function setClientVersion(v) {
 	launcherVersion = v;
 };
@@ -985,6 +987,40 @@ function addFav(fname, fip, fport) {
 	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
+function findPlayer(pname, join=false){
+	pname = pname.toLowerCase();
+	var servers = JSON.parse(localStorage.getItem('servers'))
+	for (var id = 0; id < servers.length; id++) {
+		var server = servers[id];
+		if (server.playerslist !== undefined){
+			if (server.playerslist.toLowerCase().includes(pname)){
+				var names = server.playerslist.split(';').filter(function (item) { return item.toLowerCase().includes(pname); });
+				console.log("found player '" +names[0]+ "'\n on server ID:" +id+ "\n Title: " +stripCustomFormatting(server.sname));
+				if(join){
+					bngApiScope.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${stripCustomFormatting(server.sname)}")`);
+					if (document.getElementById('LoadingServer') !== null) document.getElementById('LoadingServer').style.display = 'block';
+					//addRecent({name:server.sname, ip:server.ip, port:server.port})
+					bngApiScope.engineLua('MPCoreNetwork.connectToServer()');
+				}else{
+					var table = document.getElementById("serversTable");
+					var row = table.rows[id+1];
+					selectRowScope(row);
+				}
+				return id;
+			}
+		}
+	}
+	console.log("player "+ pname+" not found.");
+	return -1;
+}
+
+function getFavs(){
+	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
+		console.log(data)
+		if (data == null) return;
+		localStorage.setItem("favorites", JSON.stringify(data));
+	});
+  
 function createTableRow(table, i, type, fav, bngApi, serversList) {
 	var server = serversList ? serversList[i] : servers[i];
 	var bgcolor = 'rgba(0,0,0,0)!important';

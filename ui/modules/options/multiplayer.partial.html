@@ -3,8 +3,21 @@
   <md-subheader class="md-no-sticky">General</md-subheader>
 
   <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.multiplayer.disableSyncConfigUpdates' | translate }}</p>
-    <md-checkbox ng-model="options.data.values.disableSyncConfigUpdates" ng-change="options.applyState()"></md-checkbox>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.autoSyncVehicles' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.autoSyncVehicles.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.autoSyncVehicles" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
   <md-list-item md-no-ink>
@@ -12,7 +25,17 @@
     <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.luaOptimisations' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.luaOptimisations.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.luaOptimisations" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
 
+  <md-list-item md-no-ink>
+    <p>Fade out vehicles as they get closer</p>
+    <md-tooltip md-direction="right">Good when paired with disabled collisions</md-tooltip>
+    <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
 
 
 

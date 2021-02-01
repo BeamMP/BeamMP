@@ -63,6 +63,10 @@ local function updatePlayersList(playersString)
 end
 
 
+local function updateQueue(spawns, edits, s)
+	local UIqueue = {spawnCount = tableLength(spawns), editCount = tableLength(edits), show = s}
+	guihooks.trigger("setQueue", UIqueue)
+end
 
 local function setPing(ping)
 	if tonumber(ping) == -1 then -- not connected
@@ -114,15 +118,11 @@ end
 
 
 
-local function showNotification(type, text)
-	if text == nil then
-		message(type)
+local function showNotification(text, type)
+	if type and type == "error" then
+		error(text)
 	else
-		if type == "error" then
-			error(text)
-		else
-			message(text)
-		end
+		message(text)
 	end
 end
 
@@ -232,6 +232,7 @@ M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
 M.onGameStateUpdate = GSUpdate
+M.updateQueue = updateQueue
 
 
 return M

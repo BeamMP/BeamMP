@@ -216,15 +216,9 @@ local function updateGFX(dt) -- dt in seconds
 
     curWheelFFBSmoothing = M.wheelFFBSmoothing
 
-    if ai.isDriving() then
+    if ai.isDriving() or v.mpVehicleType == "R" then -- ///////////////////////////////////////// BEAMMP /////////////////////////////////////////
       M.wheelFFBForceCoefCurrent = 0 -- free up the wheel while AI is driving
     end
-
-	-- ///////////////////////////////////////// BEAMMP /////////////////////////////////////////
-    if v.mpVehicleType == "R" then
-      M.wheelFFBForceCoefCurrent = 0 -- don't apply wheel forces if vehicle is remote
-    end
-	-- ///////////////////////////////////////// BEAMMP /////////////////////////////////////////
   end
 
   -- update electrics steering
@@ -239,6 +233,8 @@ local function update(dtSim)
   -- note: state is scaled to the ratio as the last step
   local hydros = M.hydros
   local hcount = hydroCount
+
+  physicsDt = dtSim --- BEAMMP ---
 
   if FFBHydrosExist then
     local statewp = 0

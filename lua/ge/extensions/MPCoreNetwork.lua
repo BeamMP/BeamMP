@@ -199,7 +199,7 @@ end
 
 local HandleNetwork = {
 	['A'] = function(params) secondsTimer = 0; end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; be:executeJS('receiveServers('..params..')'); end,
+	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived',  params); end,
 	['U'] = function(params) handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) HandleLogin(params) end, -- Login system

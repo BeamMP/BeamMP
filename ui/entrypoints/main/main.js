@@ -226,6 +226,12 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     })
 	
 	// -------------------------------------- BEAMMP -------------------------------------- //
+	.state('menu.multiplayertos', {
+	  url: '/multiplayertos',
+	  templateUrl: 'modules/multiplayertos/tos.html',
+	  controller: 'MultiplayerTOSController as multiplayertos'
+	})
+	
 	.state('menu.multiplayer', {
 	  url: '/multiplayer',
 	  templateUrl: 'modules/multiplayer/multiplayer.html',
@@ -1114,7 +1120,7 @@ angular.module('beamng.stuff')
     { translateid: 'ui.playmodes.scenarios',    icon: 'material_movie_creation', disabled: false,            targetState: 'scenarios',                      },
     { translateid: 'ui.playmodes.freeroam',     icon: 'material_terrain',        disabled: false,            targetState: 'levels',                         },
     // ------------------------------------ BEAMMP ------------------------------------ //
-	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                    },
+	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayertos',                 },
 	// ------------------------------------ BEAMMP ------------------------------------ //
 	{ translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
     { translateid: 'ui.playmodes.bus',          icon: 'material_directions_bus', disabled: false,            targetState: 'busRoutes',                      },

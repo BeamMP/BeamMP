@@ -3959,5 +3959,11 @@
 	"ui.multiplayer.modSlider": "Mod size limiter",
 	"ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
 
+	"ui.multiplayertos.title": "Rules and terms of services",
+	"ui.multiplayertos.tos": "Terms of services",
+	"ui.multiplayertos.rules": "Rules",
+    "ui.multiplayertos.tos.description": "Full terms of services can be found [url=https://forum.beammp.com/topic/94/terms-of-use-v1-0]here[/url] (https://forum.beammp.com/topic/94/terms-of-use-v1-0). In order to play BeamMP you will have to read and accept the terms of services.",
+	"ui.multiplayertos.info": "For more information, be sure to check our [url=https://beammp.com/]official website[/url] (https://beammp.com/). You can also find more information on our official discord BeamMP (https://discord.gg/beammp)",
+	"ui.multiplayertos.rules.description": "Our rules can be found on [url=https://forum.beammp.com/topic/29/rules-please-read]this link[/url] (https://forum.beammp.com/topic/29/rules-please-read). In order to play BeamMP you will have to accept all the game only rules.",
     "ui.common.sync": "Sync"
 }

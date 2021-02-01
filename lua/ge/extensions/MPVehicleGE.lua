@@ -213,8 +213,6 @@ local function applyVehEdit(serverID, data)
 	local veh = be:getObjectByID(tonumber(gameVehicleID)) -- Get the vehicle
 	if not veh then log('W','beammp.applyEdit',"Vehicle "..gameVehicleID.." not found") return end
 
-	print(data)
-
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
@@ -230,24 +228,15 @@ local function applyVehEdit(serverID, data)
 end
 
 local function updateVehicle(serverID, data)
-
 	if settings.getValue("enableSpawnQueue") then
-
 		vehicleEditQueue[serverID] = data
 		print('edit received and queued')
-
 		local id = string.match(serverID,"^(.*)-")
-
 		local playerNickname = nickIDMap[id] or "unknown"
-
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
-
 		UI.showNotification('edit received and queued for '..playerNickname)
-
 	else
-
 		applyVehEdit(serverID, data)
-
 		UI.updateQueue({}, {}, false)
 	end
 end
@@ -296,29 +285,29 @@ local function applyVehSpawn(event)
 	print("Received a vehicle from server with serverVehicleID "..event.serverVehicleID)
 	print("It is for "..event.playerNickname)
 
-
-		onVehicleSpawnedAllowed = false
-		
-		local allowed = false
-		local vehiclesList = extensions.core_vehicles.getModelNames()
-		for index, value in ipairs(vehiclesList) do
-			if vehicleName == value then allowed = true end
-		end
-		if not allowed then
-			print("This received vehicle "..vehicleName.." is not currently installed on the game, cancelling the spawn")
-			UI.showNotification("info", "Player "..event.playerNickname.." spawned an illegal vehicle ("..vehicleName.."), it was skipped")
-			return
-		end
-		
-		local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
-		local spawnedVehID = spawnedVeh:getID()
-		print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
-		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
-		nicknameMap[spawnedVehID] = {
-			nickname = event.playerNickname,
-			role = event.playerRole
-		}
-		core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
+	onVehicleSpawnedAllowed = false
+	
+	local allowed = false
+	local vehiclesList = extensions.core_vehicles.getModelNames()
+	for index, value in ipairs(vehiclesList) do
+		if vehicleName == value then allowed = true end
+	end
+	if not allowed then
+		print("This received vehicle "..vehicleName.." is not currently installed on the game, cancelling the spawn")
+		UI.showNotification("info", "Player "..event.playerNickname.." spawned an illegal vehicle ("..vehicleName.."), it was skipped")
+		return
+	end
+	
+	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
+	spawnedVeh.mpVehicleType = "R";
+	local spawnedVehID = spawnedVeh:getID()
+	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
+	insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
+	nicknameMap[spawnedVehID] = {
+		nickname = event.playerNickname,
+		role = event.playerRole
+	}
+	core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
 end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================

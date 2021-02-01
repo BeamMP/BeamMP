@@ -204,9 +204,6 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 end
 
 v.mpVehicleType = "L"
-local function setVehicleType(x)
-  v.mpVehicleType = x
-end
 
 -- public interface
 M.onInit             = onInit
@@ -216,6 +213,5 @@ M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity
 M.setAngularVelocity = setAngularVelocity
-M.setVehicleType     = setVehicleType
 
 return M

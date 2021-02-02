@@ -15,7 +15,7 @@
         background-color:rgba(83, 79, 76, 0.8);
         color:white;
       }
-      
+
       .onlineDialogue .md-button.affirmative:hover {
         background-color:rgba(255, 102, 0, 0.555);
         color:white;
@@ -50,7 +50,11 @@
     </div>
     <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
     <h2>{{ 'ui.multiplayertos.tos' | translate }}</h2>
-    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;" bng-translate="ui.multiplayertos.tos.description"></div><br />
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	  <span bng-translate="ui.multiplayertos.tos.description1"></span>
+	  <a href="http-external://forum.beammp.com/topic/94/terms-of-use-v1-0" onclick="openExternalLink('https://forum.beammp.com/topic/94/terms-of-use-v1-0')">here</a>.
+	  <span bng-translate="ui.multiplayertos.tos.description2"></span>
+	</div>
     <div style="display: flex;">
       <span style="flex: 1 1;"></span>
     <md-radio-group ng-model="tos" class="onlineDialogue">
@@ -65,7 +69,11 @@
     <div>
       <h2>{{ 'ui.multiplayertos.rules' | translate }}</h2>
     </div>
-    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;" bng-translate="ui.multiplayertos.rules.description"></div>
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	  <span bng-translate="ui.multiplayertos.rules.description1"></span>
+	  <a href="http-external://forum.beammp.com/topic/29/rules-please-read" onclick="openExternalLink('https://forum.beammp.com/topic/29/rules-please-read')">here</a>.
+	  <span bng-translate="ui.multiplayertos.rules.description2"></span>
+	</div>
     <div style="display: flex">
       <span style="flex: 1 1;"></span>
       <md-radio-group ng-model="rules" class="onlineDialogue">
@@ -78,7 +86,12 @@
       </md-radio-group>
     </div>
       <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
-      <div style="margin-top: 0.5em; margin-bottom: 0.5em;" bng-translate="ui.multiplayertos.info"></div>
+	  <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	    <span bng-translate="ui.multiplayertos.info1"></span>
+	    <a href="http-external://www.beammp.com" onclick="openExternalLink('https://www.beammp.com')">official website</a>.
+	    <span bng-translate="ui.multiplayertos.info2"></span>
+	    <a href="http-external://www.discord.gg/beammp" onclick="openExternalLink('https://www.discord.gg/beammp')">official discord</a>.
+	  </div>
       <div style="margin-bottom: 1em;margin-top: 1em; display: flex">
         <span style="flex: 1 1;"></span>
         <md-button ng-if="(tos != 'disable' && tos != 'enable') || (tos == 'enable' && (rules != 'disable' && rules != 'enable'))" ng-disabled="true" class="md-raised md-primary">

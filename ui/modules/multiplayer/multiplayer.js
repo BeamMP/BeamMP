@@ -279,7 +279,7 @@ angular.module('beamng.stuff')
 			else if(vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) shown = false;
 			
 			// If the server passed the filter 
-			if(shown) createTableRow(serversTable, i, 0, false, bngApi);
+			if(shown) createTableRow(serversTable, i, 0, bngApi);
 		}
 		mapNames.sort(); // Sort the maps by name
 		mapNames.unshift("Any"); // Set Any to the beginning
@@ -408,7 +408,7 @@ angular.module('beamng.stuff')
 			document.getElementById('serversTableBody').innerHTML += html
 		}
 
-		for (var i = 0; i < recentServers.length; i++) createTableRow(table, i, 1, false, bngApi, recentServers);
+		for (var i = 0; i < recentServers.length; i++) createTableRow(table, i, 1, bngApi, recentServers);
 	};
 }])
 
@@ -506,7 +506,7 @@ angular.module('beamng.stuff')
 			if(filtered && vm.check_isNotEmpty && favoriteServers[i].players==0) filtered = false;
 			if(filtered && vm.check_isNotFull && favoriteServers[i].players==favoriteServers[i].maxplayers) filtered = false;
 			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < favoriteServers[i].modstotalsize) filtered = false;
-			if(filtered) createTableRow(table, i, 1, true, bngApi, favoriteServers);
+			if(filtered) createTableRow(table, i, 2, bngApi, favoriteServers);
 		}
 	};
 
@@ -991,10 +991,8 @@ function addFav(fname, fip, fport) {
 	bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
-function createTableRow(table, i, type, fav, bngApi, serversList) {
+function createTableRow(table, i, type, bngApi, serversList) {
 	var server = serversList ? serversList[i] : servers[i];
-	var bgcolor = 'rgba(0,0,0,0)!important';
-	if (server.official) bgcolor = 'rgba(255,106,0,0.25)!important';
 	// Create the row and set it's attributes
 	let newRow = table.insertRow(table.length);
 	var bgcolor = server.official ? 'rgba(255,106,0,0.25)!important' : 'rgba(0,0,0,0)!important';
@@ -1006,9 +1004,19 @@ function createTableRow(table, i, type, fav, bngApi, serversList) {
 		<td style="background-color:${bgcolor};">${server.pps}</td>
 	`;
 	newRow.innerHTML = tempHTML;
-	if (type == 0) newRow.setAttribute('data-id', i);
-	else newRow.setAttribute('data-id', server.id + "," + server.recid);
-	newRow.onclick = function() { select(this, type, fav, bngApi) };
+	switch (type) {
+		default:
+		case 0:
+			newRow.setAttribute('data-id', i);
+			break;
+		case 1:
+			newRow.setAttribute('data-id', server.id + "," + server.recid);
+			break;
+		case 2:
+			newRow.setAttribute('data-id', server.id + "," + server.favid);
+			break;
+	}
+	newRow.onclick = function() { select(this, type, bngApi) };
 }
 
 // Used to connect to the backend with ids
@@ -1021,9 +1029,9 @@ function connect(bngApi) {
 }
 
 // Used to select a row (when it's clicked)
-// Type 0 is normal servers
-// Type 1 is saved servers (recent, favorite...)
-function select(row, type, fav, bngApi) {
+// Type 0 is normal servers (public serverlist)
+// Type >0 is saved servers (recent:1, favorites:2)
+function select(row, type, bngApi) {
 	var table = document.getElementById("serversTable");
 	// Deselect the old row
 	deselect(table.selectedRow);
@@ -1037,18 +1045,18 @@ function select(row, type, fav, bngApi) {
 	var id = row.getAttribute("data-id")
 
 	if (id) {
-		
 		var server;
 		if (type == 0) var server = servers[id]; // Get the server of the selected row
 		else {
 			id = id.split(',');
-			if(id[0] > -1) {
+			if(id[0] > -1) { //get live server
 				id = id[0];
 				server = servers[id];
 			}
-			else {
+			else { //get cached server
 				id = id[1];
-				server = JSON.parse(localStorage.getItem('recent'))[id];
+				if (type==1) server = JSON.parse(localStorage.getItem('recent'))[id];
+				else if (type==2) server = JSON.parse(localStorage.getItem('favorites'))[id];
 			}
 		}	
 		
@@ -1056,7 +1064,7 @@ function select(row, type, fav, bngApi) {
 
 		// Create and insert the server info tr
 		var serverInfoRow = document.createElement("tr");
-		serverInfoRow.innerHTML = getServerInfoHTML(server, fav);
+		serverInfoRow.innerHTML = getServerInfoHTML(server, (type==2));
 		serverInfoRow.setAttribute("id", "ServerInfoRow");	
 		row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 		
@@ -1067,7 +1075,7 @@ function select(row, type, fav, bngApi) {
 		};
 		connectToServerButton.onclick = createClickHandler();
 		
-		if (!fav) {
+		if (type != 2) {
 			// Add the favorite button
 			var addServer2FavButton = document.getElementById('addFav-button');
 			var createClickHandler2 = function() {

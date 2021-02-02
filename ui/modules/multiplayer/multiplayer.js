@@ -211,6 +211,7 @@ angular.module('beamng.stuff')
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerController] destroyed.');
+		bngApi.engineLua('if not MPCoreNetwork.isGoingMpSession() then MPCoreNetwork.resetSession(true) end');
 	});
 }])
 

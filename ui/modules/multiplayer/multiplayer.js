@@ -1020,7 +1020,8 @@ function getFavs(){
 		if (data == null) return;
 		localStorage.setItem("favorites", JSON.stringify(data));
 	});
-  
+}
+ 
 function createTableRow(table, i, type, fav, bngApi, serversList) {
 	var server = serversList ? serversList[i] : servers[i];
 	var bgcolor = 'rgba(0,0,0,0)!important';

@@ -767,7 +767,7 @@ function addRecent(recentstr){ // has to have name, ip, port
 
 	console.log(recents);
 
-	for(var i=0; i < Math.min(recents.length, 9); i++)
+	for(var i=0; i < Math.min(recents.length, 10); i++)
 		if(arr.filter(s=>s.ip == recents[i].ip).filter(s=>s.port == recents[i].port).length==0)
 			arr.push(recents[i]);
 

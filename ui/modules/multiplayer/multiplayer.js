@@ -438,7 +438,7 @@ angular.module('beamng.stuff')
 	$scope.$on('onServersReceived', function (event, data) {
 		console.log("Servers received");
 		servers = receiveServers(JSON.parse(data));
-		vm.displayServers(servers);
+		vm.getFavs(true);
 	});
 
 	vm.connect = function() {
@@ -476,12 +476,20 @@ angular.module('beamng.stuff')
 		row.onclick = selectRow;
 	});
 
+	vm.getFavs = function(callDisplay) {
+		bngApi.engineLua(`MPConfig.getFavorites()`, (data) => {
+			if (data == null) return;
+			localStorage.setItem("favorites", JSON.stringify(data));
+			if (callDisplay) vm.displayServers();
+		});
+	};
+
 	vm.displayServers = function() {
 		var table = document.getElementById("serversTableBody");
 		table.innerHTML = "";
 		for(var i in servers) servers[i].id = i;
 
-		getFavs()
+		//getFavs(false);
 
 		var favjson = JSON.parse(localStorage.getItem('favorites'))
 
@@ -732,6 +740,7 @@ function getFavs(){
 	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
 		if (data == null) return;
 		localStorage.setItem("favorites", JSON.stringify(data));
+		
 	});
 }
 
@@ -947,7 +956,7 @@ function select(row, type, bngApi) {
 		}
 
 		highlightedServer = server; // Set it as the selected server
-		console.log(server);
+
 		// Create and insert the server info tr
 		var serverInfoRow = document.createElement("tr");
 		serverInfoRow.innerHTML = getServerInfoHTML(server, (type==2));

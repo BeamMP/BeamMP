@@ -13,8 +13,10 @@ angular.module('beamng.stuff')
   if (localStorage.getItem("tosAccepted") == "true") {
 	  $state.go('menu.multiplayer');
   }
-  
+
   $scope.validate = function () {
+	bngApi.engineLua(`MPConfig.acceptTos()`);
+
 	localStorage.setItem("tosAccepted", "true");
     $state.go('menu.multiplayer');
   };

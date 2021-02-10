@@ -238,8 +238,12 @@ local function updateVehicle(serverID, data)
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 		UI.showNotification('edit received and queued for '..playerNickname)
 	else
+		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+
 		applyVehEdit(serverID, data)
 		UI.updateQueue({}, {}, false)
+
+		if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	end
 end
 
@@ -356,9 +360,12 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 			print('queue disabled, spawning now')
 
+			local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+
 			applyVehSpawn(eventdata)
 			UI.updateQueue({}, {}, false)
 
+			if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 		end
 	end
 end

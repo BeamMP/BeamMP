@@ -5,12 +5,12 @@
 	<div style="background:#2C2F33; padding-left:15px;">
 		<br />
 		<div layout="row">
-			<input type="text" id="directip" name="ip" placeholder="Server IP" value="127.0.0.1"/>
+			<input type="text" id="directip" name="ip" placeholder="Server IP" value="127.0.0.1" tabindex="1"/>
 			<md-button class="button" ng-class="" ng-click="multiplayer.pasteClipboardToDirectIP()">Paste from Clipboard</md-button>
 		</div>
-		<input type="text" id="directport" name="port" placeholder="Server Port" value="30814"/>
+		<input type="text" id="directport" name="port" placeholder="Server Port" value="30814" tabindex="2"/>
 		<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
-		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()">Connect</md-button>
+		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()" tabindex="3">Connect</md-button>
 		<md-divider></md-divider>
 	</div>
 	<div id="footer"></div>

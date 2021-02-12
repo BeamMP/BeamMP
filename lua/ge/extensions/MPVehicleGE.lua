@@ -117,11 +117,13 @@ local function getNicknameFromID(id)
 	return nickIDMap[id]
 end
 
-local function setPlayerNickPrefix(name, tagSource, prefix)
-	nicknamePrefixMap[name][tagSource] = prefix
+local function setPlayerNickPrefix(name, tagSource, text)
+	if text == nil then text = tagSource; tagSource = "default" end
+	nicknamePrefixMap[name] = { [tagSource] = text }
 end
-local function setPlayerNickSuffix(name, tagSource, suffix)
-	nicknameSuffixMap[name][tagSource] = suffix
+local function setPlayerNickSuffix(name, tagSource, text)
+	if text == nil then text = tagSource; tagSource = "default" end
+	nicknameSuffixMap[name] = { [tagSource] = text }
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
@@ -217,7 +219,7 @@ local function applyVehEdit(serverID, data)
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
 	if vehicleName == veh:getJBeamFilename() then
-		latestVeh = be:getPlayerVehicle(0) -- Camera fix
+		--latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
 		tableMerge(playerVehicle.config, vehicleConfig)
@@ -236,8 +238,12 @@ local function updateVehicle(serverID, data)
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 		UI.showNotification('edit received and queued for '..playerNickname)
 	else
+		--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+
 		applyVehEdit(serverID, data)
 		UI.updateQueue({}, {}, false)
+
+		--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	end
 end
 
@@ -298,8 +304,7 @@ local function applyVehSpawn(event)
 		return
 	end
 	
-	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
-	spawnedVeh.mpVehicleType = "R";
+	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)
 	local spawnedVehID = spawnedVeh:getID()
 	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
 	insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
@@ -355,9 +360,12 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 			print('queue disabled, spawning now')
 
+			--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+
 			applyVehSpawn(eventdata)
 			UI.updateQueue({}, {}, false)
 
+			--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 		end
 	end
 end
@@ -384,10 +392,6 @@ local function onVehicleSpawned(gameVehicleID)
 		print("Vehicle "..gameVehicleID.." was edited")
 		syncTimer = 0
 		vehiclesToSync[gameVehicleID] = 1.
-		if latestVeh then
-			be:enterVehicle(0, latestVeh)
-			latestVeh = nil
-		end -- Camera fix
 	end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -401,6 +405,7 @@ local function onServerVehicleRemoved(serverVehicleID)
 
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
+		if nicknameMap[gameVehicleID] then nicknameMap[gameVehicleID] = nil end
 		print("Vehicle destroyed by server "..serverVehicleID)
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
@@ -421,6 +426,7 @@ end
 
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
+	if nicknameMap[gameVehicleID] then nicknameMap[gameVehicleID] = nil end
 	print("Vehicle destroyed by user "..gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
@@ -584,29 +590,23 @@ local function syncVehicles()
 end
 
 local function teleportVehToPlayer(targetName)
-	print("tp vehicle to: "..targetName)
+	--print("tp vehicle to: "..targetName)
 	if activeVehicle then
 		local veh = be:getObjectByID(tonumber(activeVehicle))
 		if veh then
 			for i,n in pairs(nicknameMap) do
 				if n.nickname == targetName then
-					print("teleporting to ",i)
+					--print("teleporting to "..tostring(i))
 
 					local targetVeh = be:getObjectByID(i)
 					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = quat(targetVeh:getRotation()) -- vehicles forward are inverted
+					local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
 
-					targetVehPos.x = targetVehPos.x + 2.5
-					targetVehPos.y = targetVehPos.y + 2.5
+					local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
 
-					--local up = vec3(0, 0, 1)
-					--local yDir = vec3(0, 1, 0)
-					--local rot = quatFromDir(yDir:rotated(quatFromDir(-vec3(targetVeh:getDirectionVector()), up)), up)
-					--veh:setPositionRotation(targetVehPos.x, targetVehPos.y, targetVehPos.z, rot.x, rot.y, rot.z, rot.w) -- this reset the vehicle :()
+					spawn.safeTeleport(veh, vec3Pos, targetVehRot, false)
 
-					veh:setPosition(targetVehPos)
-					--veh:autoplace(false)
-					print("donesies")
+					--print("donesies")
 					return
 				end
 			end
@@ -640,7 +640,7 @@ end
 local function applyQueuedEvents()
 	if not vehicleSpawnQueue then return end
 
-	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 	for vehicleID, spawns in pairs(vehicleSpawnQueue) do
 		--dump(vehicleID)
@@ -665,7 +665,7 @@ local function applyQueuedEvents()
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
 	end
 
-	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+	--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 end
 
 local function onUpdate(dt)

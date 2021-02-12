@@ -992,6 +992,19 @@ function ($animate, $http, logger, $rootScope, $templateCache, $window, $transla
       AppLayout[key] = data[key];
   });
 
+	// -------------------------------------- BEAMMP -------------------------------------- //
+
+	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
+		if (data != null) {
+			if (!localStorage.getItem("tosAccepted")) {
+				localStorage.setItem("tosAccepted", data.tos);
+			}
+		}
+	});
+
+	// -------------------------------------- BEAMMP -------------------------------------- //
+
+
   // ..... Define all objects attached directly to the window object here
 
   /**

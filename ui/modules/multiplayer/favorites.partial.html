@@ -10,7 +10,7 @@
 
 <md-content>
 	<div layout="row" layout-padding="">
-			<input type="text" id="search" name="search" placeholder="Search" oninput="displayServers()"/>
+			<input type="text" id="search" name="search" placeholder="Search" ng-model="multiplayermenu.SEARCHHHH" ng-change="multiplayermenu.displayServers()"/>
 			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
 			<md-button id="addserver-button" class="button" ng-class="" ng-click="multiplayer.showCustomServer()">{{:: 'ui.multiplayer.addCustomServer' | translate}}</md-button>
 

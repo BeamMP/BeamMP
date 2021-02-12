@@ -590,29 +590,23 @@ local function syncVehicles()
 end
 
 local function teleportVehToPlayer(targetName)
-	print("tp vehicle to: "..targetName)
+	--print("tp vehicle to: "..targetName)
 	if activeVehicle then
 		local veh = be:getObjectByID(tonumber(activeVehicle))
 		if veh then
 			for i,n in pairs(nicknameMap) do
 				if n.nickname == targetName then
-					print("teleporting to ",i)
+					--print("teleporting to "..tostring(i))
 
 					local targetVeh = be:getObjectByID(i)
 					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = quat(targetVeh:getRotation()) -- vehicles forward are inverted
+					local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
 
-					targetVehPos.x = targetVehPos.x + 2.5
-					targetVehPos.y = targetVehPos.y + 2.5
+					local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
 
-					--local up = vec3(0, 0, 1)
-					--local yDir = vec3(0, 1, 0)
-					--local rot = quatFromDir(yDir:rotated(quatFromDir(-vec3(targetVeh:getDirectionVector()), up)), up)
-					--veh:setPositionRotation(targetVehPos.x, targetVehPos.y, targetVehPos.z, rot.x, rot.y, rot.z, rot.w) -- this reset the vehicle :()
+					spawn.safeTeleport(veh, vec3Pos, targetVehRot, false)
 
-					veh:setPosition(targetVehPos)
-					--veh:autoplace(false)
-					print("donesies")
+					--print("donesies")
 					return
 				end
 			end

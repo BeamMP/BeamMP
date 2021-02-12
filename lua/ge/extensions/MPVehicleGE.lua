@@ -219,7 +219,7 @@ local function applyVehEdit(serverID, data)
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
 	if vehicleName == veh:getJBeamFilename() then
-		latestVeh = be:getPlayerVehicle(0) -- Camera fix
+		--latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
 		tableMerge(playerVehicle.config, vehicleConfig)
@@ -238,12 +238,12 @@ local function updateVehicle(serverID, data)
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 		UI.showNotification('edit received and queued for '..playerNickname)
 	else
-		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+		--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 		applyVehEdit(serverID, data)
 		UI.updateQueue({}, {}, false)
 
-		if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+		--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	end
 end
 
@@ -304,7 +304,7 @@ local function applyVehSpawn(event)
 		return
 	end
 	
-	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
+	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)
 	local spawnedVehID = spawnedVeh:getID()
 	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
 	insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
@@ -360,12 +360,12 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 			print('queue disabled, spawning now')
 
-			local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+			--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 			applyVehSpawn(eventdata)
 			UI.updateQueue({}, {}, false)
 
-			if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+			--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 		end
 	end
 end
@@ -392,10 +392,6 @@ local function onVehicleSpawned(gameVehicleID)
 		print("Vehicle "..gameVehicleID.." was edited")
 		syncTimer = 0
 		vehiclesToSync[gameVehicleID] = 1.
-		if latestVeh then
-			be:enterVehicle(0, latestVeh)
-			latestVeh = nil
-		end -- Camera fix
 	end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -409,6 +405,7 @@ local function onServerVehicleRemoved(serverVehicleID)
 
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
+		if nicknameMap[gameVehicleID] then nicknameMap[gameVehicleID] = nil end
 		print("Vehicle destroyed by server "..serverVehicleID)
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
@@ -429,6 +426,7 @@ end
 
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
+	if nicknameMap[gameVehicleID] then nicknameMap[gameVehicleID] = nil end
 	print("Vehicle destroyed by user "..gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
@@ -648,7 +646,7 @@ end
 local function applyQueuedEvents()
 	if not vehicleSpawnQueue then return end
 
-	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 	for vehicleID, spawns in pairs(vehicleSpawnQueue) do
 		--dump(vehicleID)
@@ -673,7 +671,7 @@ local function applyQueuedEvents()
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
 	end
 
-	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+	--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 end
 
 local function onUpdate(dt)

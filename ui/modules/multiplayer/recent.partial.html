@@ -10,7 +10,7 @@
 
 <md-content>
 	<div layout="row" layout-padding="">
-			<input type="text" id="search" name="search" placeholder="Search" oninput="displayRecentServers()"/>
+			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
 			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
 			<md-button id="clear-button" class="button" ng-class="" ng-click="multiplayer.clearRecents()">Clear recents</md-button>
 

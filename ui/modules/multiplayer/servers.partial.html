@@ -10,24 +10,24 @@
 
 <md-content>
 	<div layout="row" layout-padding="">
-			<input type="text" id="search" name="search" placeholder="Search" oninput="displayServers()"/>
+			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
 			<md-button id="refresh-button" class="button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
 
-			<md-checkbox ng-model="multiplayermenu.check_isEmpty" ng-change="multiplayermenu.displayServers();">
+			<md-checkbox ng-model="multiplayermenu.checkIsEmpty" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.emptyOnlyTooltip' | translate}}
 				</md-tooltip md-no-ink>
 				{{:: 'ui.multiplayer.emptyOnly' | translate}}
 			</md-checkbox>
 
-			<md-checkbox ng-model="multiplayermenu.check_isNotEmpty" ng-change="multiplayermenu.displayServers();">
+			<md-checkbox ng-model="multiplayermenu.checkIsNotEmpty" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.notEmptyTooltip' | translate}}
 				</md-tooltip md-no-ink>
 				{{:: 'ui.multiplayer.notEmpty' | translate}}
 			</md-checkbox>
 
-			<md-checkbox ng-model="multiplayermenu.check_isNotFull" ng-change="multiplayermenu.displayServers();">
+			<md-checkbox ng-model="multiplayermenu.checkIsNotFull" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.notFullTooltip' | translate}}
 				</md-tooltip md-no-ink>
@@ -35,7 +35,7 @@
 			</md-checkbox>
 
 
-			<md-select ng-model="multiplayermenu.select_map" placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.displayServers();" style="height: 40px; background: unset;">
+			<md-select ng-model="multiplayermenu.selectMap" placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();" style="height: 40px; background: unset;">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.mapFilterTooltip' | translate}}
 				</md-tooltip md-no-ink>
@@ -46,18 +46,18 @@
 			</md-select>
 
 
-			<md-checkbox ng-model="multiplayermenu.check_modSlider" ng-change="multiplayermenu.displayServers();">
+			<md-checkbox ng-model="multiplayermenu.checkModSlider" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.modSliderTooltip' | translate}}
 				</md-tooltip md-no-ink>
 				{{:: 'ui.multiplayer.modSlider' | translate}}
 			</md-checkbox>
 
-			<md-slider flex ng-if="multiplayermenu.check_modSlider"
-				ng-model="multiplayermenu.slider_maxModSize" min="0" max="5000" step="50" aria-label="_"
-				ng-change="multiplayermenu.displayServers();">
+			<md-slider flex ng-if="multiplayermenu.checkModSlider"
+				ng-model="multiplayermenu.sliderMaxModSize" min="0" max="5000" step="50" aria-label="_"
+				ng-change="multiplayermenu.repopulate();">
 			</md-slider>
-			<span ng-if="multiplayermenu.check_modSlider" style="margin: 0px 15px; padding-top: 13px; color: white;">{{ multiplayermenu.slider_maxModSize }} MB</span>
+			<span ng-if="multiplayermenu.checkModSlider" style="margin: 0px 15px; padding-top: 13px; color: white;">{{ multiplayermenu.sliderMaxModSize }} MB</span>
 
 		<md-divider></md-divider>
 	</div>
@@ -65,11 +65,11 @@
 	<table id="serversTable">
 		<thead>
 			<tr id="header">
-				<th>{{:: 'ui.multiplayer.location' | translate}}</th>
-				<th>{{:: 'ui.multiplayer.description' | translate}}</th>
-				<th>{{:: 'ui.multiplayer.map' | translate}}</th>
-				<th>{{:: 'ui.multiplayer.players' | translate}}</th>
-				<th>PPS</th>
+				<th sort-type="location" onclick="sortTable(0)">{{:: 'ui.multiplayer.location' | translate}}</th>
+				<th sort-type="sname" onclick="sortTable(1)">{{:: 'ui.multiplayer.description' | translate}}</th>
+				<th sort-type="map" onclick="sortTable(2)">{{:: 'ui.multiplayer.map' | translate}}</th>
+				<th sort-type="players" sort-number="true" onclick="sortTable(3)">{{:: 'ui.multiplayer.players' | translate}}</th>
+				<th sort-type="pps" sort-number="true" onclick="sortTable(4)">PPS</th>
 			</tr>
 		</thead>
 		<tbody id="serversTableBody">

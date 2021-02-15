@@ -148,18 +148,21 @@ angular.module('beamng.stuff')
 	};
 
 	vm.addCustomServer = function() {
-		var valid = (document.getElementById('customFavIP').value.length > 0) && (document.getElementById('customFavPort').value.length > 0) && !isNaN(document.getElementById('customFavPort').value)
-
+		var ip = document.getElementById('customFavIP');
+		var port = document.getElementById('customFavPort');
+		var name = document.getElementById('customFavName');
+		var valid = (ip.value.length > 0) && (port.value.length > 0) && !isNaN(port.value)
 		if (!valid) return;
-
-		addFav(document.getElementById('customFavName').value,
-					document.getElementById('customFavIP').value,
-					document.getElementById('customFavPort').value);
-
+		var server = {
+			cversion: launcherVersion, ip: ip, location: "--", map: "", maxplayers: "0", players: "0",
+			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
+			custom: true
+		};
+		addFav(server);
 		document.getElementById('addCustomFav').style.display = 'none';
-		document.getElementById('customFavName').value = '';
-		document.getElementById('customFavIP').value = '';
-		document.getElementById('customFavPort').value = '';
+		name.value = '';
+		ip.value = '';
+		port.value = '';
 		vm.refreshList();
 	};
 
@@ -267,18 +270,6 @@ angular.module('beamng.stuff')
 			bngApi
 		);
 	};
-
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
 }])
 
 
@@ -342,19 +333,6 @@ angular.module('beamng.stuff')
 		document.getElementById('LoadingServer').style.display = 'block'
 		bngApi.engineLua('MPCoreNetwork.connectToServer()');
 	}
-
-	// Add a server inside the table
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
 }])
 
 
@@ -427,18 +405,6 @@ angular.module('beamng.stuff')
 		if (row.rowIndex % 2 == 0) row.style.backgroundColor = "white";
 		else row.style.backgroundColor = "#f2f2f2";
 	}
-
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
 
 	function setClientVersion(v) {
 		launcherVersion = v;
@@ -752,6 +718,7 @@ function stripCustomFormatting(name){
 async function getFavorites() {
 	return new Promise(function(resolve, reject) {
 		bngApiScope.engineLua("MPConfig.getFavorites()", (data) => {
+			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
 			resolve(data || []);
 		});
 	});
@@ -764,8 +731,6 @@ function addFav(server) {
 }
 
 function removeFav(server) {
-	// delete favorites[server.ip][server.port];
-	// if (favorites[server.ip].length == 0) delete favorites[server.ip];
 	for (let i = 0; i < favorites.length; i++) {
 		let tmpServer = favorites[i];
 		if (tmpServer.ip == server.ip && tmpServer.port == server.port) {
@@ -789,7 +754,7 @@ function getRecents() {
 
 function addRecent(server) { // has to have name, ip, port
 	recents.push(server);
-	// recents = recents.slice(0, 10); //keep the last 10 entries
+	recents = recents.slice(-1 * 10); //keep the last 10 entries
 	localStorage.setItem("recents", JSON.stringify(recents));
 }
 
@@ -804,9 +769,8 @@ function openForumLink(){
 function getServerInfoHTML(d) {
 		// `d` is the original data object for the row
 		var favButton;
-		if (d.favorite) favButton = `<md-button id="removeFav-button"     class="button md-button md-default-theme" ng-class="" ng-click="removeFav()"           style="margin-left: 10px;">Remove Favorite</md-button>`;
-		else favButton = `<md-button id="addFav-button"        class="button md-button md-default-theme" ng-class="" ng-click="addFav(this)"            style="margin-left: 10px;">Add Favorite</md-button>`;
-		
+		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
+		else favButton = `<md-button id="addFav-button" class="button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
 		return `
 				<td colspan="5">
 					<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
@@ -841,6 +805,9 @@ function getServerInfoHTML(d) {
 
 function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent) {
 	let newRow = table.insertRow(table.length);
+	newRow.server = server;
+	newRow.server.favorite = isFavorite;
+	newRow.server.recent = isRecent;
 	newRow.innerHTML = `
 		<td style="background-color:${bgcolor};">${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(server.sname)}</td>
@@ -848,9 +815,6 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent) {
 		<td style="background-color:${bgcolor};">${server.players}/${server.maxplayers}</td>
 		<td style="background-color:${bgcolor};">${server.pps}</td>
 	`;
-	newRow.server = server;
-	newRow.server.favorite = isFavorite;
-	newRow.server.recent = isRecent;
 	newRow.onclick = function() { select(this, bngApi); };
 }
 
@@ -906,13 +870,13 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 			let stillOk = true;
 			for (let i = 0; i < servers.length; i++) {
 				var tmpServer2 = servers[i];
-				if (tmpServer1.ip == tmpServer2.ip && tmpServer1.port == tmpServer2.port) { console.log("Server found, break"); stillOk = true; break; }
+				if (tmpServer1.ip == tmpServer2.ip && tmpServer1.port == tmpServer2.port) { stillOk = true; break; }
 				else stillOk = false;
 			}
 			if (!stillOk) {
 				var tmpServer3 = Object.create(tmpServer1);
 				tmpServer3.sname += " [OFFLINE]";
-				createRow(newTbody, tmpServer3, 'rgba(0, 0, 0, 0.35)!important', bngApi, isFavorite, isRecent);
+				createRow(newTbody, tmpServer3, 'rgba(0, 0, 0, 0.35)!important', bngApi, type == 1, type == 2);
 			}
 		}
 		

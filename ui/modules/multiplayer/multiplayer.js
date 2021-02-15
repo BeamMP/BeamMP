@@ -134,7 +134,6 @@ angular.module('beamng.stuff')
 		var ip = document.getElementById('directip').value;
 		var port = document.getElementById('directport').value;
 		document.getElementById('LoadingServer').style.display = 'block';
-		//addRecent({name:ip, ip:ip, port:port});
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
@@ -154,9 +153,9 @@ angular.module('beamng.stuff')
 		var valid = (ip.value.length > 0) && (port.value.length > 0) && !isNaN(port.value)
 		if (!valid) return;
 		var server = {
-			cversion: launcherVersion, ip: ip, location: "--", map: "", maxplayers: "0", players: "0",
+			cversion: launcherVersion, ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
 			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
-			custom: true
+			custom: true, port: port.value
 		};
 		addFav(server);
 		document.getElementById('addCustomFav').style.display = 'none';
@@ -874,9 +873,11 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 				else stillOk = false;
 			}
 			if (!stillOk) {
-				var tmpServer3 = Object.create(tmpServer1);
-				tmpServer3.sname += " [OFFLINE]";
-				createRow(newTbody, tmpServer3, 'rgba(0, 0, 0, 0.35)!important', bngApi, type == 1, type == 2);
+				var tmpServer3 = Object.assign({}, tmpServer1);
+				var bgcolor = "";
+				if (!tmpServer3.custom) { tmpServer3.sname += " [OFFLINE]"; bgcolor = "rgba(0, 0, 0, 0.35)!important"; }
+				else { tmpServer3.sname += " [CUSTOM]"; bgcolor = "rgba(255, 215, 0, 0.35)!important" }
+				createRow(newTbody, tmpServer3, bgcolor, bngApi, type == 1, type == 2);
 			}
 		}
 		

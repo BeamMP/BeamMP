@@ -122,11 +122,10 @@ end
 
 
 
-local function setCurrentServer(id, ip, port, modsString, name)
+local function setCurrentServer(ip, port, modsString, name)
 	currentServer = {
 		ip		   = ip,
 		port	   = port,
-		id		   = id,
 		modsstring = modsString,
 		name	   = name
 	}
@@ -362,7 +361,6 @@ local function onClientStartMission(mission)
 		print("The user has loaded another mission!")
 		Lua:requestReload()
 	end
-	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
 end
 
 
@@ -371,12 +369,6 @@ local function onClientEndMission(mission)
 	if isMPSession() then
 		resetSession(1)
 	end
-end
-
-
-
-local function addRecent()
-	guihooks.trigger('addRecent', jsonEncode(currentServer))
 end
 
 
@@ -399,7 +391,7 @@ M.modLoaded = modLoaded
 M.onInit = onInit
 M.isMPSession = isMPSession
 M.isGoingMPSession = isGoingMPSession
-M.addRecent = addRecent
+
 
 
 return M

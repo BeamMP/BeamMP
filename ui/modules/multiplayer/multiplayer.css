@@ -44,22 +44,22 @@ table#serversTable {
 	border-right: 1px solid #2C2F33;
 }
 
-#servers-table th {
-	background-color: #2C2F33;
+#serversTable th {
+	background-color: rgba(0, 0, 0, 0);
 	color: white;
 	transition: 0.15s;
 }
 
-#servers-table th:hover {
-	background-color: #3C3F43;
+#serversTable th:hover {
+	background-color: rgba(0, 0, 0, 0.25);
 }
 
 #servers-table td {
 	padding-left: 10px;
 }
 
-#servers-table tr {
-	height:40px;
+#serversTable tr {
+	height:25px;
 	transition:0.3s;
 }
 
@@ -73,8 +73,8 @@ table#serversTable {
 	background-color: #696969;
 }
 
-#servers-table tr:hover {
-	background-color:#555555;
+#serversTable tr:hover {
+	background-color: rgba(0, 0, 0, 0.25);
 }
 
 .description-table {

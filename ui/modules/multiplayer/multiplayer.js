@@ -97,7 +97,7 @@ angular.module('beamng.stuff')
 				document.getElementById('topRightStatus').textContent = localStorage.getItem('welcomeMessage')||"";
 			}
 		} else {
-			document.getElementById('MultiplayerLoginBody').style.display = 'block'
+			document.getElementById('MultiplayerLoginBody').style.display = 'block';
 		}
 	});
 
@@ -349,7 +349,6 @@ angular.module('beamng.stuff')
 	vm.sliderMaxModSize = 500; //should be almost a terabyte
 	vm.selectMap = "Any";
 	vm.searchText = "";
-
 	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	vm.exit = function ($event) {
@@ -456,6 +455,7 @@ function toTitleCase(str) {
 }
 
 function SmoothMapName(map) {
+	if (!map) return;
 	map = map.replace("/info.json","")
 	map = map.split('/').pop().replace(/\s*/g,'')
 	map = map.replace(/_/g," ")
@@ -517,7 +517,6 @@ var descStyleMap = {
     '^m': 'text-decoration:line-through',
     '^n': 'text-decoration:underline',
     '^o': 'font-style:italic',
-    '^p': 'display:block'
 };
 
 function applyDescCode(string, codes) {
@@ -723,10 +722,11 @@ async function getFavorites() {
 	});
 }
 
-function addFav(server) {
+function addFav(server, isUpdate) {
+	server.addTime = Date.now();
 	favorites.push(server);
 	saveFav();
-	bngApiScope.engineLua('MPCoreNetwork.getServers()');
+	if (!isUpdate) bngApiScope.engineLua('MPCoreNetwork.getServers()');
 }
 
 function removeFav(server) {
@@ -751,10 +751,11 @@ function getRecents() {
 	});
 }
 
-function addRecent(server) { // has to have name, ip, port
+function addRecent(server, isUpdate) { // has to have name, ip, port
+	server.addTime = Date.now();
 	recents.push(server);
 	recents = recents.slice(-1 * 10); //keep the last 10 entries
-	localStorage.setItem("recents", JSON.stringify(recents));
+	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
 function openExternalLink(url){
@@ -802,14 +803,14 @@ function getServerInfoHTML(d) {
 			</td>`;
 };
 
-function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent) {
+function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) {
 	let newRow = table.insertRow(table.length);
 	newRow.server = server;
 	newRow.server.favorite = isFavorite;
 	newRow.server.recent = isRecent;
 	newRow.innerHTML = `
 		<td style="background-color:${bgcolor};">${server.location}</td>
-		<td style="background-color:${bgcolor};">${formatServerName(server.sname)}</td>
+		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor};">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor};">${server.players}/${server.maxplayers}</td>
 		<td style="background-color:${bgcolor};">${server.pps}</td>
@@ -847,18 +848,20 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 		if(!mapNames.includes(smoothMapName)) mapNames.push(smoothMapName);
 
 		// Favorite
-		for (let tmpServer of favorites) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isFavorite = true;
+		for (let tmpServer of favorites) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isFavorite = tmpServer.addTime;
 		if (type == 1 && !isFavorite) shown = false; // If it's favorite tab, we only show favorites
 
 		// Recents
-		for (let tmpServer of recents) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isRecent = true;
+		for (let tmpServer of recents) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isRecent = tmpServer.addTime;
 		if (type == 2 && !isRecent) shown = false; // Everything happens underneath for recents
 
 		// If the server passed the filter
 		if(shown) {
 			// Set the color relative to either favorite, official or normal
 			var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.official ? 'rgba(255,106,0,0.25)!important' : 'rgba(0,0,0,0)!important';
-			createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent);
+			createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
+			if (isFavorite) addFav(server, true);
+			if (isRecent) addRecent(server, true);
 		}
 	}
 	
@@ -873,19 +876,18 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 				else stillOk = false;
 			}
 			if (!stillOk) {
-				var tmpServer3 = Object.assign({}, tmpServer1);
 				var bgcolor = "";
-				if (!tmpServer3.custom) { tmpServer3.sname += " [OFFLINE]"; bgcolor = "rgba(0, 0, 0, 0.35)!important"; }
-				else { tmpServer3.sname += " [CUSTOM]"; bgcolor = "rgba(255, 215, 0, 0.35)!important" }
-				createRow(newTbody, tmpServer3, bgcolor, bngApi, type == 1, type == 2);
+				var name = tmpServer1.sname;
+				if (!tmpServer1.custom) { name += " [OFFLINE]"; bgcolor = "rgba(0, 0, 0, 0.35)!important"; }
+				else { name += " [CUSTOM]"; bgcolor = "rgba(255, 215, 0, 0.35)!important" }
+				createRow(newTbody, tmpServer1, bgcolor, bngApi, type == 1, type == 2, name);
 			}
 		}
-		
 	}
-	
 	tableTbody.parentNode.replaceChild(newTbody, tableTbody);
 	mapNames.sort(); // Sort the maps by name
 	mapNames.unshift("Any"); // Set Any to the beginning
+	if (type == 2) sortTable("recent", true, -1);
 	return mapNames; // Set the list of available maps
 }
 
@@ -918,7 +920,8 @@ function select(row, bngApi) {
 	// Create and insert the server info tr
 	var serverInfoRow = document.createElement("tr");
 	serverInfoRow.innerHTML = getServerInfoHTML(server);
-	serverInfoRow.setAttribute("id", "ServerInfoRow");	
+	serverInfoRow.setAttribute("id", "ServerInfoRow");
+	serverInfoRow.server = row.server;
 	row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 
 	// Add the connect button
@@ -970,21 +973,15 @@ function deselect(row) {
 	if (oldInfoRow) oldInfoRow.remove();
 }
 
-var tmp = 1;
-function sortTable(col) {
+var reverse = -1;
+function sortTable(sortType, isNumber, dir) {
+	if (dir) reverse = dir;
 	var table = document.getElementById("serversTable");
     var tb = table.tBodies[0], tr = Array.prototype.slice.call(tb.rows, 0);
 	var headers = document.querySelectorAll("#serversTable > thead > tr > th")
-	var sortType = headers[col].getAttribute("sort-type");
-    reverse = -((+tmp) || -1);
-    tr = tr.sort(function (a, b) { // sort rows
-		if (headers[col].getAttribute("sort-number")) {
-			return reverse * (a.server[sortType].localeCompare(b.server[sortType], undefined, {'numeric': true}));
-		} else {
-			return reverse * (a.server[sortType].localeCompare(b.server[sortType]));
-		}
-        
+	tr = tr.sort(function (a, b) { // sort rows
+		return reverse * (a.server[sortType].toString().localeCompare(b.server[sortType].toString(), undefined, {'numeric': isNumber}));
     });
     for(var i = 0; i < tr.length; ++i) tb.appendChild(tr[i]); // append each row in order
-	tmp = !tmp;
+	reverse = -((+reverse) || -1);
 }

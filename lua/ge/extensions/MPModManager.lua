@@ -84,14 +84,16 @@ local function cleanUpSessionMods()
 	-- At this point isMPSession is false so we disable mods backup so that
 	-- the call doesn't backup when it shouldn't
 	backupAllowed = false
+	local hadMods = false
 	for k,v in pairs(serverMods) do
+		hadMods = true
 		core_modmanager.deactivateMod(string.lower(v))
 		if string.match(string.lower(v), 'multiplayer') then
 			core_modmanager.deleteMod(string.lower(v))
 		end
 	end
 	backupAllowed = true
-	Lua:requestReload() -- reload Lua to make sure we don't have any leftover GE files
+	if hadMods then Lua:requestReload() end-- reload Lua to make sure we don't have any leftover GE files
 end
 
 

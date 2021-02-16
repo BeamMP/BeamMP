@@ -1,5 +1,3 @@
--- FIXME
--- This should be removed?
 
 local M = {}
 print("mpConfig Initialising...")
@@ -99,6 +97,42 @@ local function setFavorites(favstr)
 end
 
 
+local function getConfig()
+  if not FS:directoryExists("BeamMP") then
+    return nil
+  end
+
+  local file = '/BeamMP/config.json'
+  if FS:fileExists(file) then
+    return jsonReadFile(file)
+  else
+	print("config file doesnt exist")
+	return nil
+  end
+end
+
+local function setConfig(settingName, settingVal)
+	local config = getConfig()
+	if not config then config = {} end
+
+	config[settingName] = settingVal
+
+	local favsfile = '/BeamMP/config.json'
+	jsonWriteFile(favsfile, config)
+end
+
+
+local function acceptTos()
+	local config = getConfig()
+	if not config then config = {} end
+
+	config.tos = true
+
+	local favsfile = '/BeamMP/config.json'
+	jsonWriteFile(favsfile, config)
+end
+
+
 
 -- Variables
 M.ShowNameTags = ShowNameTags
@@ -130,6 +164,10 @@ M.getElectricsTickrate = getElectricsTickrate
 
 M.getFavorites = getFavorites
 M.setFavorites = setFavorites
+
+M.getConfig = getConfig
+M.setConfig = setConfig
+M.acceptTos = acceptTos
 
 print("mpConfig Loaded.")
 return M

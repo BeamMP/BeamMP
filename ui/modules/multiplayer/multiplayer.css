@@ -1,94 +1,39 @@
 #top-bar {
 	background:#404040b8;
 }
+
 #left-menu {
 	color:white;
 	background-color:#404040b8;
 }
-#bottom-bar {
-	color:white;
-	background-color:#404040b8;
-}
+
 #back {
 	width:100%;
 	height: 100%;
-	/*background: #353535;*/
 }
-
-#footer {
-	position:fixed;
-	bottom:0;
-	background-color:#404040b8;
-	height:0px;
-	width:100%;
-}
-
-/*input {
-	margin-right:15px;
-}*/
 
 table#serversTable {
     width: 100%;
-		color: white;
-}
-
-#servers-table {
-	width:100%;
-	border-collapse: collapse;
-	color:white;
-	height:200px;
-}
-
-#servers-table, th, td {
-	/*border-left: 1px solid #2C2F33;*/
-	border-right: 1px solid #2C2F33;
+	color: white;
 }
 
 #serversTable th {
 	background-color: rgba(0, 0, 0, 0);
 	color: white;
-	transition: 0.15s;
+	transition: 0.2s;
 }
 
 #serversTable th:hover {
 	background-color: rgba(0, 0, 0, 0.25);
 }
 
-#servers-table td {
-	padding-left: 10px;
-}
-
-#serversTable tr {
-	height:25px;
-	transition:0.3s;
-}
-
-/* Even table rows */
-#servers-table tr:nth-child(even) {
-	background-color: #808080;
-}
-
-/* Odd table rows */
-#servers-table tr:nth-child(odd) {
-	background-color: #696969;
-}
-
 #serversTable tr:hover {
 	background-color: rgba(0, 0, 0, 0.25);
-}
-
-.description-table {
-	border-spacing: 22px 2px;
-}
-
-.description-table td{
-	border-right: 0px;
 }
 
 .highlight {
 	background-color: #99AAB5 !important;
 }
-
 
 .dropdown {
     min-width: 150px;
@@ -99,17 +44,15 @@ table#serversTable {
   text-align: center;
   text-decoration: none;
   font-size: 15px;
-  transition-duration: 0.4s;
+  transition-duration: 0.2s;
   cursor: pointer;
 }
 
 .button {
 	background-color: rgb(212, 100, 26);
 	color: white;
-	/*border: 2px solid #555555;*/
 	margin:0px;
 	margin-bottom:20px;
-	
 	margin-left: 15px;
 }
 

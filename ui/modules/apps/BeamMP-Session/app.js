@@ -1,4 +1,5 @@
 var app = angular.module('beamng.apps');
+
 app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 	return {
 		templateUrl: 'modules/apps/BeamMP-Session/app.html',
@@ -7,14 +8,18 @@ app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
 		scope: true
 	}
 }]);
+
 app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	$scope.init = function() {
-		//console.log(`CALLING READY: UI.ready("MP-SESSION")`)
-		//bngApi.engineLua('UI.ready("MP-SESSION")');
+		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
 	};
 
 	$scope.mpquit = function() {
 		bngApi.engineLua('MPCoreNetwork.resetSession(1)');
+	};
+
+	$scope.applyQueue = function() {
+		bngApi.engineLua('MPVehicleGE.applyQueuedEvents()');
 	};
 
 	$scope.reset = function() {
@@ -26,25 +31,36 @@ app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
 	};
 
 	$scope.$on('setPing', function (event, ping) {
-    document.getElementById("Session-Ping").innerHTML = ping;
+		document.getElementById("Session-Ping").innerHTML = ping;
+	});
+
+	$scope.$on('setQueue', function (event, queue) {
+		if (queue.show) document.getElementById("queue-block").style.display = "";
+		else { document.getElementById("queue-block").style.display = "none"; return;}
+		
+		var queueCount = queue.editCount + queue.spawnCount;
+		var queueElem = document.getElementById("Session-Queue")
+		queueElem.innerHTML = `${queue.spawnCount}|${queue.editCount}`;
+		queueElem.title = `Edits: ${queue.editCount}\nSpawns: ${queue.spawnCount}`; // titles dont work in game :C
+
 	});
 
 	$scope.$on('setStatus', function (event, status) {
-    //document.getElementById("Session-Status").innerHTML = stripCustomFormatting(sanitizeString(status)); // REMOVE COLORS FROM SERVER NAME
+		console.log('Setting status to: ' + sanitizeString(status))
+		if (status == "") document.getElementById("server-name-block").style.display = "none";
+		else document.getElementById("server-name-block").style.display = "";
 		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
 	});
 
 	$scope.$on('setPlayerCount', function (event, count) {
-    document.getElementById("Session-PlayerCount").innerHTML = count;
+		document.getElementById("Session-PlayerCount").innerHTML = count;
 	});
 }]);
 
 function sanitizeString(str) {  // VERY basic sanitization.
-    //console.log(str)
-		str = str.replace(/<script.*?<\/script>/g, '');
-		str = str.replace(/<button.*?<\/button>/g, '');
-		str = str.replace(/<iframe.*?<\/iframe>/g, '');
-		str = str.replace(/<a.*?<\/a>/g, '');
-    //console.log(str)
+	str = str.replace(/<script.*?<\/script>/g, '');
+	str = str.replace(/<button.*?<\/button>/g, '');
+	str = str.replace(/<iframe.*?<\/iframe>/g, '');
+	str = str.replace(/<a.*?<\/a>/g, '');
     return str
 }

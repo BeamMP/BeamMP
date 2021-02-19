@@ -46,7 +46,6 @@ local function applyPos(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("velocityVE.setVehicleType('R')")
 		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
 end
@@ -65,7 +64,7 @@ end
 
 local function setPing(ping)
 	local p = ping/1000
-	for i = 0, be:getObjectCount()-1 do
+	for i = 0, be:getObjectCount() - 1 do
 		local veh = be:getObject(i)
 		if veh then
 			veh:queueLuaCommand("positionVE.setPing("..p..")")

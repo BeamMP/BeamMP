@@ -85,6 +85,7 @@ local function stateChanged()
   -- and save it to disc (if not in safe mode)
   if not isSafeMode() then
     jsonWriteFile(persistencyfile, { header = dbHeader, mods = mods}, true)
+	MPModManager.modsDatabaseChanged() -- ///////////////////////////////////////////////////////////// BEAMMP
   end
 end
 
@@ -304,9 +305,9 @@ local function updateZIPEntry(filename)
       d.orgZipFilename = d.orgZipFilename..'.zip'
       d.unpackedPath = filename
 
-      oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
-      lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
-      vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
+      local oldLvlFiles = FS:findFiles( "/"..filename..'levels/', "*.mis", 1, true, false )
+      local lvlFiles = FS:findFiles( "/"..filename..'levels/', "*.level.json", 3, true, false )
+      local vehFiles = FS:findFiles( "/"..filename..'vehicles/', "*", 0, true, true )
       if #oldLvlFiles > 0 or #lvlFiles > 0 then d.modType = 'terrain' end
       if #vehFiles > 0 then d.modType = 'vehicle' end
       -- not sure if it's actually usefull do to the folowing as it happen only when mod is new
@@ -501,7 +502,6 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
   for k,filename in pairs(fileList) do
     filename = string.lower(filename)
     -- ensure the window is refreshing
-    Engine.Platform.repaintCanvas()
 
     -- mount only zip files and unpacked zip folders
     if string.endswith(filename, '.zip') or FS:directoryExists(filename) then
@@ -518,6 +518,7 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
         job.yield()
       end
     end
+    --Engine.Platform.repaintCanvas() -- This repaint must happen *after* the first yield (rather than before); Otherwise imgui is not properly initialized, which can lead to crashes somewhere else. For instance, it made career imgui UI crash on the first frame after ctrl+L)
   end
 
   if( #mountList > 0) then
@@ -539,7 +540,7 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
     newMountedFiles[k] = {filename = v, type = "added" }
   end
   log("D","initDB", "Notification : took ".. tostring(tim:stopAndReset()) .. "ms to reorganise ".. tostring(#newMountedFiles) .. " files")
-  onFileChanged(newMountedFiles)
+  _G.onFileChanged(newMountedFiles) --main.lua
   log("D","initDB", "Notification : took ".. tostring(tim:stopAndReset()) .. "ms to callback")
 
   --dump(mods)
@@ -689,6 +690,10 @@ local function testZips()
 end
 --]]
 
+local function _cleanPathFromHash(p)
+  return p:gsub("\\","")
+end
+
 local function deactivateMod(modname)
   if not mods[modname] then
     log('I', 'deactivateMod', 'mod not existing ' .. tostring(modname))
@@ -698,9 +703,24 @@ local function deactivateMod(modname)
   if FS:isMounted(filename) then
     FS:unmount(filename)
   end
+
+  local mountedFilesChange = {}
+  local mountPoint = ""
+  if mods[modname].mountPoint then
+    mountPoint = mods[modname].mountPoint
+  end
+  if mods[modname].modData and mods[modname].modData.hashes then
+    for i,e in ipairs(mods[modname].modData.hashes) do
+      mountedFilesChange[i] = {filename = "/"..mountPoint.._cleanPathFromHash(e[1]), type = "deleted" } --e[2] is hash
+    end
+  end
+
   mods[modname].active = false
   extensions.hook('onModDeactivated', deepcopy(mods[modname]))
+  _G.onFileChanged(mountedFilesChange) --main.lua
   stateChanged()
+  
+  MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
 end
 
 local function getModNameFromID(modID)
@@ -730,23 +750,25 @@ local function activateMod(modname)
   if not FS:isMounted(mods[modname].fullpath) then
     mountEntry(mods[modname].fullpath, mods[modname].mountPoint)
   end
+
+  local mountedFilesChange = {}
+  local mountPoint = ""
+  if mods[modname].mountPoint then
+    mountPoint = mods[modname].mountPoint
+  end
+  if mods[modname].modData and mods[modname].modData.hashes then
+    for i,e in ipairs(mods[modname].modData.hashes) do
+      mountedFilesChange[i] = {filename = "/"..mountPoint.._cleanPathFromHash(e[1]), type = "added" } --e[2] is hash
+    end
+  end
+
   mods[modname].active = true
   extensions.hook('onModActivated', deepcopy(mods[modname]))
+  _G.onFileChanged(mountedFilesChange) --main.lua
+
   stateChanged()
-
-  local dir, basefilename, ext = path.splitWithoutExt(mods[modname].fullpath)
-
-  local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
-  print(mods[modname].filename)
-  print("Loaded mod " .. basefilename)
-
-  local status, ret = pcall(dofile, modscriptpath)
-  if not status then
-    log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
-    log('E', 'initDB.modScript', dumps(ret))
-  end
   
-  loadCoreExtensions()
+  MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
 end
 
 local function activateModId(modID)
@@ -960,7 +982,7 @@ local function workOffChangedMod(filename, type)
     if mod and mod.active ~= false then
       log('D', 'onFileChanged', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
-	  MPCoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////
+	  MPCoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
     end
     FS:triggerFilesChanged(files) -- alert c++ of changed files
     stateChanged()
@@ -1198,11 +1220,12 @@ local function updateZipMod(oldFileName,newFileName)
   end
 end
 
+
 -- ///////////////////////////////////////////////////////////////////
 local function getModList()
   return mods
 end
-M.getModList = getModList			   
+M.getModList = getModList
 -- ///////////////////////////////////////////////////////////////////
 
 -- public interface

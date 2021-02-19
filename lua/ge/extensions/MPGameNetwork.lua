@@ -17,22 +17,14 @@ local sysTime = 0
 local eventTriggers = {}
 -- ============= VARIABLES =============
 
--- ============= INIT =============
---Preston (Cobalt) Preload the UI profile for multiplayer
-local layouts = jsonReadFile("settings/uiapps-layouts.json")
-if not layouts.multiplayer or table[1] == nil then
-	layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
-	jsonWriteFile("settings/uiapps-layouts.json",layouts)
-	log("A","Print","multiplayer UI layout added")
-end
--- ============= INIT =============
+
 
 local function connectToLauncher()
-	print("Connecting to the Launcher for Session Data")
+	print("Connecting to the Launcher for mp session")
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
-		TCPSocket:setoption("keepalive",true)
+		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
@@ -83,9 +75,9 @@ end
 -- Events System
 -------------------------------------------------------------------------------
 
-local function handleEvents(p)  --- E:<NAME>:data
-	local eventName = string.match(p,"(%w+)%:")
-	local data = p:gsub(eventName..":", "")
+local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
+	local eventName = string.match(p,"%:(%w+)%:")
+	local data = p:gsub(":"..eventName..":", "")
 	for i=1,#eventTriggers do
 		if eventTriggers[i].name == eventName then
 			eventTriggers[i].func(data)
@@ -97,8 +89,8 @@ function TriggerServerEvent(n, d)
 	sendData('E:'..n..':'..d)
 end
 
-function TriggerClientEvent(code, data)
-	handleEvents(code..':'..data)
+function TriggerClientEvent(n, d)
+	handleEvents(':'..n..':'..d)
 end
 
 function AddEventHandler(n, f)
@@ -115,8 +107,8 @@ local HandleNetwork = {
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) MPVehicleGE.handle(params) end,
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
-	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player Joined
-	['L'] = function(params) UI.showNotification(params) end, -- A player Joined
+	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player joined
+	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
 	['T'] = function(params) MPCoreNetwork.resetSession('true') end, -- Event For another Resource

@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by jojos38 & Titch2000.
+-- All work by jojos38 & Titch2000 & stefan750.
 -- You have no permission to edit, redistribute or upload. Contact us for more info!
 --====================================================================================
 
@@ -29,7 +29,7 @@ end
 function vectorSmoothing:get(sample, dt)
   local st = self.state
   local dif = sample - st
-  st = st + dif * math.min(self.rate * dt, 1)
+  st = st + dif * min(self.rate * dt, 1)
   self.state = st
   return st
 end
@@ -49,7 +49,7 @@ end
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
-local minPosForce = 0.1        -- If force is smaller than this, ignore to save performance
+local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
 local maxAcc = 500             -- Maximum acceleration (m/s^2)
 local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
@@ -57,7 +57,7 @@ local maxAccError = 3          -- If difference between target and actual accele
 -- Rotation
 local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
-local minRotForce = 0.05       -- If force is smaller than this, ignore to save performance
+local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
 local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
 local maxRotError = 2          -- Max allowed rotation error (rad)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
@@ -121,13 +121,14 @@ local function updateGFX(dt)
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
-	local vehPos = vec3(obj:getPosition())
-	local vehVel = vec3(obj:getVelocity())
-	local vehAcc = vehVel-(lastVehVel or vehVel)
-
-	local vehRot = quat(obj:getRotation())
-	local vehRvel = vec3(obj:getYawAngularVelocity(), obj:getPitchAngularVelocity(), obj:getRollAngularVelocity())
+	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
+	
+	local cog = velocityVE.cogRel:rotated(vehRot)
+	local vehPos = vec3(obj:getPosition()) + cog
+	local vehVel = vec3(obj:getVelocity()) + cog:cross(vehRvel)
+	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	lastVehVel = vehVel
 	lastVehRvel = vehRvel
@@ -156,22 +157,25 @@ local function updateGFX(dt)
 	local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
 	local vel = remoteVel + remoteAcc*predictTime
 	local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
-	local rot = remoteData.rot * quatFromEuler(rotAdd.y, rotAdd.z, rotAdd.x)
+	local rot = remoteData.rot * quatFromEuler(rotAdd.x, rotAdd.y, rotAdd.z)
 	local rvel = remoteRvel + remoteRacc*predictTime
 
 	--[[
 	-- Debug
-	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,255))
-	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,255))
-	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,255))
-	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,255))
+	debugDrawer:drawSphere(0.3, remoteData.pos:toFloat3(), color(0,0,255,200))
+	debugDrawer:drawLine(remoteData.pos:toFloat3(), (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)):toFloat3(), color(0,0,255,200))
+	debugDrawer:drawSphere(0.3, pos:toFloat3(), color(0,255,0,200))
+	debugDrawer:drawLine(pos:toFloat3(), (pos + vec3(0,-5,0):rotated(rot)):toFloat3(), color(0,255,0,200))
+	debugDrawer:drawSphere(0.3, vehPos:toFloat3(), color(255,0,0,200))
+	debugDrawer:drawLine(vehPos:toFloat3(), (vehPos + vec3(0,-5,0):rotated(vehRot)):toFloat3(), color(255,0,0,200))
 	debugDrawer:drawText(pos:toFloat3(), color(0,0,0,255), string.format("Prediction: %.0f ms", predictTime*1000))
 	--]]
 
 	-- Error correction
 	local posError = pos - vehPos
 	local rotError = (rot / vehRot):toEulerYXZ()
-
+	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
+	
 	if posError:length() > maxPosError or rotError:length() > maxRotError then
 		tpTimer = tpTimer + dt
 		posError = posError:normalized()*maxPosError
@@ -180,15 +184,22 @@ local function updateGFX(dt)
 	end
 
 	-- If position error is larger than limit, teleport the vehicle
-	if tpTimer > abs(predictTime)*2 then
+	if tpTimer > (0.5+abs(predictTime)*2) then
+		-- Subtract COG offset because setPosition works relative to refNode
+		local tpPos = pos - velocityVE.cogRel:rotated(rot)
+		-- Offset teleport rotation for vehicles with different JBeam orientations
+		local tpRot = rot*vehRot/quat(obj:getRotation())
+		
 		if rotError:length() > maxRotError then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
-			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..","..rot.x..","..rot.y..","..rot.z..","..rot.w..")")
+			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
+			--print("Teleport Angle "..obj:getID())
 		else
-			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..pos.x..","..pos.y..","..pos.z..")")
+			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
+			--print("Teleport "..obj:getID())
 		end
 
-		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.y, rvel.z, rvel.x)
+		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
 
 		remoteVelSmoother:set(remoteData.vel)
 		remoteRvelSmoother:set(remoteData.rvel)
@@ -228,7 +239,7 @@ local function updateGFX(dt)
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if targetRacc:length() > minRotForce then
-		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.y, targetRacc.z, targetRacc.x)
+		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.x, targetRacc.y, targetRacc.z)
 	elseif targetAcc:length() > minPosForce then
 		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
 	end
@@ -240,31 +251,19 @@ end
 
 
 local function getVehicleRotation()
-	local pos = obj:getPosition()
-	local vel = obj:getVelocity()
-	local rot = quat(obj:getRotation())
+	
+	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
+	
+	local cog = velocityVE.cogRel:rotated(rot)
+	local pos = vec3(obj:getPosition()) + cog
+	local vel = vec3(obj:getVelocity()) + cog:cross(rvel)
+	
 	local tempTable = {
-		pos = {
-			x = pos.x,
-			y = pos.y,
-			z = pos.z
-		},
-		vel = {
-			x = vel.x,
-			y = vel.y,
-			z = vel.z
-		},
-		rot = {
-			x = rot.x,
-			y = rot.y,
-			z = rot.z,
-			w = rot.w
-		},
-		rvel = {
-			x = obj:getYawAngularVelocity(),
-			y = obj:getPitchAngularVelocity(),
-			z = obj:getRollAngularVelocity()
-		},
+		pos = {pos.x, pos.y, pos.z},
+		vel = {vel.x, vel.y, vel.z},
+		rot = {rot.x, rot.y, rot.z, rot.w},
+		rvel = {rvel.x, rvel.y, rvel.z},
 		tim = timer,
 		ping = ownPing + lastDT
 	}
@@ -276,10 +275,10 @@ end
 local function setVehiclePosRot(data)
 
 	local pr   = jsonDecode(data)
-	local pos  = vec3(pr.pos.x, pr.pos.y, pr.pos.z)
-	local vel  = vec3(pr.vel.x, pr.vel.y, pr.vel.z)
-	local rot  = quat(pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w)
-	local rvel = vec3(pr.rvel.x, pr.rvel.y, pr.rvel.z)
+	local pos  = vec3(pr.pos)
+	local vel  = vec3(pr.vel)
+	local rot  = quat(pr.rot)
+	local rvel = vec3(pr.rvel)
 	local tim  = pr.tim
 	local ping = pr.ping
 
@@ -316,10 +315,10 @@ end
 
 
 
-M.updateGFX = updateGFX
+M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
-M.setVehiclePosRot = setVehiclePosRot
-M.setPing = setPing
+M.setVehiclePosRot   = setVehiclePosRot
+M.setPing            = setPing
 
 
 return M

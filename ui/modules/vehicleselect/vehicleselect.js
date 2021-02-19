@@ -201,7 +201,8 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = "spawnNewVehicle"; //dont touch dis - deer
+          var func = "replaceVehicle";
+          if (spawnNew) func = "spawnNewVehicle";
 
           var luaArgs = {};
 
@@ -244,6 +245,16 @@ angular.module('beamng.stuff')
   var vm = this;
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default'];
   // logger.log($stateParams);
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
+  vm.isMPSession = false;
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+    $scope.$evalAsync(() => { vm.isMPSession = str; vm.isNotMPSession = !str; });
+  });
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
 
   vm.selectConfig = function (configname, launch) {
     vm.selectedConfig = vm.configs[configname];
@@ -299,7 +310,7 @@ angular.module('beamng.stuff')
 
   vm.launchConfig = function (spawnNew) {
     if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, true);  //dont touch dis - deer
+    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew || vm.isMPSession);  //dont touch dis - deer
   };
 
   // because of bug in non compete iirc
@@ -375,6 +386,17 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default'];
   vm.shownData;
 
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
+  vm.isMPSession = false;
+  vm.isNotMPSession = false;
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+    $scope.$evalAsync(() => { vm.isMPSession = str; vm.isNotMPSession = !str; });
+  });
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
+
   Vehicles.populate().then(() => {
     vm.data = angular.copy(InstalledContent.vehicles);
     if (vm.mode.name !== "lightRunner") {
@@ -437,11 +459,14 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   vm.launchVehicle = function (model) {
 	bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-        vm.mode.selected(model, model.key, model.default_pc, model.default_color)
+		console.log("case 1")
+        vm.mode.selected(model, model.key, model.default_pc, model.default_color, vm.isMPSession)
     }
     else if (vm.showConfigurations && model.model_key !== undefined) {
+      console.log("case 2")
       vm.mode.selected(model, model.model_key, model.key);
     } else {
+      console.log("case 3")
       vm.mode.selected(model, model.key);
     }
   };

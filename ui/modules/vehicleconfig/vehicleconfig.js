@@ -181,6 +181,15 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     $scope.$evalAsync(() => { vm.licensePlate = str; });
   });
 
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
+  vm.isMPSession = false;
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+    $scope.$evalAsync(() => { vm.isMPSession = str; });
+  });
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
   vm.updateLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText("${vm.licensePlate}")`);
   };
@@ -282,12 +291,14 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
       })
     }
   };
-
+  
+  // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
     bngApi.engineLua("MPVehicleGE.sendCustomVehicleData(be:getPlayerVehicle(0):getID())");
   }
+  // --------------------------------------- BEAMMP --------------------------------------- //
 
   function calcTreesync (config) {
     if (init) {
@@ -547,6 +558,17 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   vm.openRuntime = {};
   vm.d = {};
   vm.liveVariablesUpdate = false;
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
+
+  vm.isMPSession = false;
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+    $scope.$evalAsync(() => { vm.isMPSession = str; });
+  });
+
+  // --------------------------------------- BEAMMP --------------------------------------- //
+
 
   var autoUpdateVariables = RateLimiter.debounce(() => {
     logger.vehicleconfig.debug(`Writing vehicle configuration (live update)`);

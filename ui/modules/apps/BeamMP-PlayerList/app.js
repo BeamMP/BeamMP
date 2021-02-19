@@ -18,6 +18,10 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 	bngApiScope =  bngApi;
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-PlayerList")');
+		// Set players list direction
+		setPLDirection(localStorage.getItem('plHorizontal'));
+		setPLDirection(localStorage.getItem('plVertical'));
+		if (localStorage.getItem('plShown') == 1) showList();
 	};
 
 	$scope.reset = function() {
@@ -34,58 +38,81 @@ app.controller("PlayerList", ['$scope', 'bngApi', function ($scope, bngApi) {
 		players = [];
 		connected = false;
 	};
+
+	function setPLDirection(direction) {
+		const mainContainer = document.getElementById("main-container");
+		const plistContainer = document.getElementById("plist-container");
+		const showButton = document.getElementById("show-button");
+		if (direction == "left") {
+			mainContainer.style.flexDirection = "row-reverse";
+			localStorage.setItem('plHorizontal', "left");
+		}
+		else if (direction == "right") {
+			mainContainer.style.flexDirection = "row";
+			localStorage.setItem('plHorizontal', "right");
+		}
+		else if (direction == "top") {
+			plistContainer.style.marginTop = "0";
+			showButton.style.marginTop = "0";
+			localStorage.setItem('plVertical', "top");
+		}
+		else if (direction == "bottom") {
+			plistContainer.style.marginTop = "auto";
+			showButton.style.marginTop = "auto";
+			localStorage.setItem('plVertical', "bottom");
+		}
+	}
+
+	$scope.plSwapHorizontal = function() {
+		const plHorizontal = localStorage.getItem('plHorizontal');
+		console.log(plHorizontal);
+		if (plHorizontal != "left") setPLDirection("left");
+		else setPLDirection("right");
+	}
+
+	$scope.plSwapVertical = function() {
+		const plVertical = localStorage.getItem('plVertical');
+		if (plVertical != "bottom") setPLDirection("bottom");
+		else setPLDirection("top");
+	}
 }]);
 
 function playerList(list) {
-	let playersList = document.getElementById("playerstable");
+	let playersList = document.getElementById("players-table");
 	let parsedList = JSON.parse(list);
-
-	//console.log("Setting Elements for player list")
-
+	
 	if(players != null){
 		//get differences between playernames and send them as messages
+		var left = players.filter((item) => { return !parsedList.includes(item) });
+		var joined = parsedList.filter((item) => { return !players.includes(item) });
 
-		var left = players.filter((item)=>{
-			return !parsedList.includes(item)
-		});
+		// Clear the player list
+		clearPlayerList();
 
-		let joined = parsedList.filter((item)=>{
-			return !players.includes(item)
-		});
+		// And fill it with the updated players
+		for (let i = 0; i < parsedList.length; i++) {
+			// Insert a row at the end of the players list
+			var row = playersList.insertRow(playersList.rows.length);
 
-		//for(var i = 0; i< left.length;i++)
-			//if(left[i].length>0) addMessage(left[i] + " left the server"); //the game would send an empty left message when joining a server
+			// Insert a cell containing the player name
+			var nameCell = row.insertCell(0);
+			nameCell.textContent = parsedList[i];
+			nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
 
-		//for(var i = 0; i< joined.length;i++)
-			//addMessage(joined[i] + " joined the server");
+			// Insert a cell containing the player ping
+			var pingCell = row.insertCell(1);
+			pingCell.setAttribute("class", "tp-button");
 
-		//if(joined.length>0 || left.length>0){ //update playerlist if someone joined or left //keep updating because pings are a thing now
-			clearPlayerList();
-			for (let i = 0; i < parsedList.length; i++) {
-				var row = playersList.insertRow(playersList.rows.length);
-				var cell1 = row.insertCell(0);
-				cell1.textContent = parsedList[i];
-				cell1.className = "playerlistName";
-				cell1.setAttribute("onclick","showPlayerInfo('"+parsedList[i]+"')");
-
-				//adding button
-				if(parsedList[i].trim() != nickname.trim()){
-					var cell2 = row.insertCell(1);
-					cell2.style.width = '30px';
-					var btn = document.createElement("BUTTON");
-					if (pingList[parsedList[i]] != null)
-						btn.appendChild(document.createTextNode(pingList[parsedList[i]]));
-					btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
-					btn.setAttribute("class","tp-button");
-					cell2.appendChild(btn);
-				}else{
-					cell1.colSpan = 2;
-				}
-			}
-			if(document.getElementById("plist-container").style.display == "block")
-				document.getElementById("plist-show-button").style.height = playersList.offsetHeight+"px"; 
-
-		//}
+			// Insert the button inside the cell
+			var btn = document.createElement("BUTTON");
+			var pingText = pingList[parsedList[i]] || "?";
+			btn.appendChild(document.createTextNode(pingText));
+			btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
+			btn.setAttribute("class", "tp-button buttons");
+			pingCell.appendChild(btn);
+		}
+		if(document.getElementById("plist-container").style.display == "block")
+			document.getElementById("show-button").style.height = playersList.offsetHeight + "px"; 
 	}
 	players = parsedList; //store player list as an array for the next update
 }
@@ -96,16 +123,13 @@ function playerPings(list) {
 		pingList[i] = pingList[i]-16;
 		if (pingList[i] > 999) pingList[i] = 999;
 	}
-	//console.log(pingList);
 }
 
 
 function clearPlayerList() {
-	let playersList = document.getElementById("playerstable");
+	let playersList = document.getElementById("players-table");
 	var rowCount = playersList.rows.length - 1;
-	for(rowCount; rowCount > 0; rowCount--) {
-		playersList.deleteRow(1);
-	}
+	for(rowCount; rowCount > 0; rowCount--) playersList.deleteRow(1);
 }
 
 function teleportToPlayer(targetPlayerName) {
@@ -118,7 +142,6 @@ function showPlayerInfo(targetPlayerName) {
 	bngApiScope.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
 
-
 function setNickname(n) {
 	nickname = n
 }
@@ -128,12 +151,42 @@ function setOfflineInPlayerList() {
 	if(playersList != null) playersList.textContent = "OFFLINE"; //added this cause it was throwing console errors
 }
 
-function toggleList() {
-	var listcont = document.getElementById("plist-container");
-	var btn = document.getElementById("plist-show-button");
-	console.log("Playerlist window state: " + listcont.style.display);
-	if(listcont.style.display != "block") { listcont.style.display = "block"; btn.innerHTML = '>'; }
-	else { listcont.style.display = "none"; btn.innerHTML = 'P l a y e r s'; btn.style.height = "160px"; }
+function showList() {
+	var shownText = "&gt;";
+	var hiddenText = "&lt;";
+	if (localStorage.getItem('plHorizontal') == "right") { shownText = "&lt;"; hiddenText = "&gt;"; }
+	var plContainer = document.getElementById("plist-container");
+	var btn = document.getElementById("show-button");
+	plContainer.style.display = "block";
+	btn.innerHTML = shownText;
+}
 
-	console.log("Playerlist window state: " + listcont.style.display);
+function hideList() {
+	var hiddenText = "&lt;";
+	if (localStorage.getItem('plHorizontal') == "right") { hiddenText = "&gt;"; }
+	var plContainer = document.getElementById("plist-container");
+	var btn = document.getElementById("show-button");
+	plContainer.style.display = "block";
+	btn.innerHTML = shownText;
+}
+
+function hideList() {
+	var hiddenText = "&lt;";
+	if (localStorage.getItem('plHorizontal') == "right") { hiddenText = "&gt;"; }
+	var plContainer = document.getElementById("plist-container");
+	var btn = document.getElementById("show-button");
+	plContainer.style.display = "none";
+	btn.innerHTML = hiddenText;
+	btn.style.height = "75px";
+}
+
+function toggleList() {
+	if(localStorage.getItem('plShown') != 1) {
+		showList();
+		localStorage.setItem('plShown', 1);
+	}
+	else {
+		hideList();
+		localStorage.setItem('plShown', 0);
+	}
 }

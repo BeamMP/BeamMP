@@ -19,6 +19,7 @@ local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
 	local msg = string.sub(data, 2)
 	if code == "l" then
+		if msg == "Loading..." then MPCoreNetwork.addRecent() end
 		guihooks.trigger('LoadingInfo', {message = msg})
 	end
 end
@@ -62,6 +63,10 @@ local function updatePlayersList(playersString)
 end
 
 
+local function updateQueue(spawns, edits, s)
+	local UIqueue = {spawnCount = tableLength(spawns), editCount = tableLength(edits), show = s}
+	guihooks.trigger("setQueue", UIqueue)
+end
 
 local function setPing(ping)
 	if tonumber(ping) == -1 then -- not connected
@@ -113,15 +118,11 @@ end
 
 
 
-local function showNotification(type, text)
-	if text == nil then
-		message(type)
+local function showNotification(text, type)
+	if type and type == "error" then
+		error(text)
 	else
-		if type == "error" then
-			error(text)
-		else
-			message(text)
-		end
+		message(text)
 	end
 end
 
@@ -129,7 +130,7 @@ end
 
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
-	print("Message received: "..message) -- DO NOT REMOVE 
+	print("Message received: "..message) -- DO NOT REMOVE
 	--be:executeJS('addMessage("'..message..'")')
 	guihooks.trigger("chatMessage", message)
 	TriggerClientEvent("ChatMessageReceived", message)
@@ -150,15 +151,15 @@ local deletenext = true
 
 
 local function ready(src)
-  print("UI / Game Has now loaded ("..src..")")
+  print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
   -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
 
-  if src == "FIRSTVEH" then
+  if src == "FIRSTVEH" and MPCoreNetwork.isMPSession() then
     deletenext = true
   end
   if src == "MP-SESSION" then
-	setPing("-2")
-    if deletenext then
+		setPing("-2")
+    if deletenext and MPCoreNetwork.isMPSession() then
       print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
       core_vehicles.removeCurrent(); -- 0.20 Fix
       commands.setFreeCamera()		 -- Fix camera
@@ -170,20 +171,27 @@ local function ready(src)
   end
 
   if src == "MP-SESSION" or src == "FIRSTVEH" then
-  	if ready then
+  	if ready and MPCoreNetwork.isMPSession() then
   	  ready = false
   	  MPGameNetwork.connectToLauncher()
   	end
 
-    local Server = MPCoreNetwork.getCurrentServer()
-    --print("---------------------------------------------------------------")
-    --dump(Server)
-    --print(Server.name)
-    --print("---------------------------------------------------------------")
+		if MPCoreNetwork.isMPSession() then
+	    local Server = MPCoreNetwork.getCurrentServer()
+	    print("---------------------------------------------------------------")
+	    --dump(Server)
+			if Server ~= nil then
+				local name = Server.name
+	    	print(name)
+			else
+				print('Server.name == nil')
+			end
+	    print("---------------------------------------------------------------")
 
-  	if Server ~= nil and Server.name ~= nil then
-  	  setStatus("Server: "..Server.name)
-  	end
+	  	if Server ~= nil and Server.name ~= nil then
+	  	  setStatus("Server: "..Server.name)
+	  	end
+		end
   end
 end
 
@@ -206,7 +214,10 @@ local function setVehPing(vehicleID, ping)
 	end
 end
 
-
+local function GSUpdate(state)
+	print('NEW GS STATE')
+	dump(state)
+end
 
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
@@ -220,7 +231,8 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
-
+M.onGameStateUpdate = GSUpdate
+M.updateQueue = updateQueue
 
 
 return M

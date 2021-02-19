@@ -1,0 +1,97 @@
+<div class="md-padding">
+	<div class="container" style = "position: absolute; padding: 2.5%">
+		<div style="display:block max-height: 1000px; height:100%; min-width: 500px; width: 70%; max-width: 80%; margin: auto; background-color: rgba(224, 224, 224, 0); color: rgb(62, 62, 62); border-radius: 10px 10px 10px 10px;">
+			<style>
+				md-radio-button .md-container {
+					display:none;
+				}
+
+				.onlineDialogue .md-button {
+				color: rgba(0, 0, 0, 0.87);
+				background-color: white;
+				box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+				}
+
+
+				.onlineDialogue .md-button:hover {
+				background-color:rgba(83, 79, 76, 0.8);
+				color:white;
+				}
+
+				.onlineDialogue .md-button.affirmative:hover {
+				background-color:rgba(255, 102, 0, 0.555);
+				color:white;
+				}
+
+				.onlineDialogue .md-button.md-raised:not([disabled]) {
+				background-color:rgba(83, 79, 76, 1.0);
+				color:white;
+				}
+
+				.onlineDialogue .md-button.affirmative.md-raised:not([disabled]) {
+				background-color:rgb(255,102,0);
+				color:white;
+				}
+
+				::-webkit-scrollbar {
+				width: 12px;
+				}
+
+				md-radio-button .md-label {
+				margin-left:0;
+				}
+
+				.onlineDialogue .md-button[disabled], .onlineDialogue .md-button[disabled]:hover {
+				background-color: rgba(98, 94, 91, 0.4) !important;
+				color: rgba(200, 200, 200, 0.75) !important;
+				}
+			</style>
+			<div style = "height:7%; background-color: rgb(62, 62, 62); color: white; border-radius: 10px 10px 0px 0px;">
+				<div style="position:relative; top:10px; left:10px">
+					<img src="modules/multiplayer/beammp.png" alt="BeamMP" style="height:50px; width:126px; position:absolute;">
+				</div>
+				<center style="font-size:50px">News</center>
+			</div>
+
+			<div style="height:86%; display:flex; overflow-y:scroll; background: #696969a1; color: white;">
+				<div style="margin: 0px 30px; width: 100%;">
+					<h1><b>BeamMP v4.0 Released!!!</b></h1>
+					<hr/>
+					<p style="white-space: pre-line;">
+						Woohoo, we made it this far. Now with the acheviement of us reaching <b>400+</b> concurrent players here is BeamMP version 4.0!
+						So what has changed? Well here goes:
+						<ul>
+							<li>New ModSync system is now inplace. This has been a near rewrite of the server, launcher and client mod. However you should now be able to enjoy faster downloads.</li>
+							<li>New features screen that will be updated with each of our updates and changes as we go!</li>
+							<li>Slightly revised position sync system.</li>
+							<li>We now no longer require you to have discord!!!</li>
+							<li>The mod is now much more closely aligned with Singleplayer which hopefully will provide you with a more streamlined experience.</li>
+							<li>UI elements will be automatically added when in a Multiplayer session just incase you do not have them already.</li>
+							<li>The UI system is now broken up into its own profile which means you can now have a multiplayer app layout and a singleplayer app layout!</li>
+							<li>BeamMP now operates out of your normal user profile directory which means your controls, UI app preferences and other settings will be automatically synced with BeamMP.</li>
+							<li>We had the exterminators in. Its was time consuming but most of those pesky <b><i>bugs</i></b> are gone now ready for the cold winter nights.</li>
+						</ul>
+
+						So we think that sums up this update. Hopefully you are as excited about this update as we are!
+						<center>
+							<img src="modules/newFeatures/noice.gif" alt="" width="300px" style="margin-top: 30px">
+						</center>
+					</p>
+				</div>
+			</div>
+			<!--<md-divider style="border-color: rgb(62, 62, 62);"></md-divider>!-->
+
+			<div style="height:48px; display:flex; background-color:rgb(62, 62, 62); color: white; border-radius: 0px 0px 10px 10px;">
+				<div style="margin:auto; display: -webkit-inline-box;">
+					<md-checkbox flex ng-model="newFeatures" name="doNotShowUntilNextUpdate" ng-change="setDontShowAgain()">
+						Don't show again
+			      <md-tooltip md-direction="right">
+			        Do not show this window until the next update.
+			      </md-tooltip md-no-ink>
+			    </md-checkbox>
+					<md-button ng-click="toMainMenu()" class="md-raised md-primary" md-no-ink>Continue</md-button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

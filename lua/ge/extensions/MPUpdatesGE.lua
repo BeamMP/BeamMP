@@ -23,7 +23,7 @@ local electricsDelay = 0
 local electricsTickrate = 1/16 -- 16 times / second
 
 local gearDelay = 0
-local gearTickrate = 1/2
+local gearTickrate = 1/4
 
 local powertrainDelay = 0
 local powertrainTickrate = 1/10

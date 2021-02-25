@@ -242,27 +242,17 @@ local function applyElectrics(data)
 			latestGearData = decodedData.gear
 		end
 
+		-- Transbrake syncing
 		if decodedData.transbrake ~= nil then
-			if decodedData.transbrake == true then
-				if electrics.values.transbrake == 0 then
-					controller.getController("transbrake").setTransbrake(true)
-				end
-			else
-				if electrics.values.transbrake == 1 then
-					controller.getController("transbrake").setTransbrake(false)
-				end
+			if electrics.values.transbrake ~= decodedData.transbrake then
+				controller.getController("transbrake").setLineLock(decodedData.transbrake)
 			end
 		end
 
-		if decodedData.linelock ~= nil then
-			if decodedData.linelock == 1 then
-				if electrics.values.linelock == 0 then
-					controller.getController("lineLock").setLineLock(1)
-				end
-			else
-				if electrics.values.linelock == 1 then
-					controller.getController("lineLock").setLineLock(0)
-				end
+		-- LineLock syncing
+		if decodedData.lineLock ~= nil then
+			if electrics.values.lineLock ~= decodedData.linelock then
+				controller.getController("lineLock").setLineLock(decodedData.linelock)
 			end
 		end
 

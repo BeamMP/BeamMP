@@ -189,7 +189,7 @@ local function check()
 				electricsToSend[k] = v
 			end
 		end
-	end	
+	end
 	if electricsChanged then
 		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', \'"..obj:getID().."\')")
 	end
@@ -202,11 +202,11 @@ local lastRightSignal = 0
 local lastHazards = 0
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
-	if (decodedData) then -- If received data is correct	
+	if (decodedData) then -- If received data is correct
 		if not decodedData.signal_left_input then decodedData.signal_left_input = lastLeftSignal end
 		if not decodedData.signal_right_input then decodedData.signal_right_input = lastRightSignal end
 		if not decodedData.hazard_enabled then decodedData.hazard_enabled = lastHazards end
-		
+
 		lastLeftSignal = decodedData.signal_left_input
 		lastRightSignal = decodedData.signal_right_input
 		lastHazards = decodedData.hazard_enabled
@@ -227,7 +227,7 @@ local function applyElectrics(data)
 			electrics.setLightsState(decodedData.lights_state) -- Apply lights values
 		end
 		if decodedData.lightbar then
-			electrics.set_lightbar_signal(decodedData.lightbar) -- Apply lightbar values		
+			electrics.set_lightbar_signal(decodedData.lightbar) -- Apply lightbar values
 		end
 		if decodedData.horn then
 			if decodedData.horn > 0.99 then electrics.horn(true)
@@ -236,17 +236,31 @@ local function applyElectrics(data)
 		if decodedData.fog then
 			electrics.set_fog_lights(decodedData.fog)
 		end
-		
+
 		-- Gear syncing
 		if decodedData.gear then
 			latestGearData = decodedData.gear
 		end
-		
+
+		-- Transbrake syncing
+		if decodedData.transbrake ~= nil then
+			if electrics.values.transbrake ~= decodedData.transbrake then
+				controller.getController("transbrake").setLineLock(decodedData.transbrake)
+			end
+		end
+
+		-- LineLock syncing
+		if decodedData.lineLock ~= nil then
+			if electrics.values.lineLock ~= decodedData.linelock then
+				controller.getController("lineLock").setLineLock(decodedData.linelock)
+			end
+		end
+
 		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v
 		end
-		
+
 		latestData = data
 	end
 end

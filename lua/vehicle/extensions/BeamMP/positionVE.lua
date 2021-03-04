@@ -51,7 +51,6 @@ local posCorrectMul = 5        -- How much velocity to use for correcting positi
 local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
 local maxAcc = 500             -- Maximum acceleration (m/s^2)
-local maxPosError = 3          -- Max allowed continuous position error (m)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
@@ -59,8 +58,18 @@ local rotCorrectMul = 7        -- How much velocity to use for correcting angle 
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
 local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
-local maxRotError = 2          -- Max allowed rotation error (rad)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
+
+-- Teleport
+local tpDelayAdd = 1           -- Additional teleport delay (s)
+local tpDistAdd = 1            -- Additional teleport distance (m)
+local tpDistMul1 = 0.1         -- Multiplier for delayed teleport distance based on velocity (m per m/s)
+local tpDistMul2 = 0.5         -- Multiplier for instant teleport distance based on velocity (m per m/s)
+local tpRotAdd = 0.5           -- Additional teleport rotation (rad)
+local tpRotMul1 = 0.2          -- Multiplier for delayed teleport rotation based on rotation velocity (rad per rad/s)
+local tpRotMul2 = 0.5          -- Multiplier for instant teleport rotation based on rotation velocity (rad per rad/s)
+local tpVelSmoother = newTemporalSmoothingNonLinear(2,50)  -- Smoother for filtering low velocities during collisions
+local tpRvelSmoother = newTemporalSmoothingNonLinear(2,50) -- Smoother for filtering low rotation velocities during collisions
 
 -- Prediction
 local maxPredict = 0.3         -- Maximum prediction limit (s)
@@ -110,6 +119,29 @@ local function setPing(p)
 	if p < 0.99 or p > 1.01 then
 		ownPing = p
 	end
+end
+
+
+
+local function onReset()
+	-- Reset smoothers and state variables
+	tpVelSmoother:reset()
+	tpRvelSmoother:reset()
+	remoteVelSmoother:reset()
+	remoteRvelSmoother:reset()
+	remoteAccSmoother:reset()
+	remoteRaccSmoother:reset()
+	accErrorSmoother:reset()
+	raccErrorSmoother:reset()
+	
+	lastVehVel = nil
+	lastVehRvel = nil
+
+	lastAcc = nil
+	lastRacc = nil
+	
+	remoteData.acc = vec3(0,0,0)
+	remoteData.racc = vec3(0,0,0)
 end
 
 
@@ -176,21 +208,35 @@ local function updateGFX(dt)
 	local rotError = (rot / vehRot):toEulerYXZ()
 	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
 	
-	if posError:length() > maxPosError or rotError:length() > maxRotError then
+	-- Calculate teleport thresholds
+	local maxVel = tpVelSmoother:get(max(vel:length(), vehVel:length()), dt)
+	local tpDist1 = tpDistAdd + maxVel*tpDistMul1
+	local tpDist2 = tpDistAdd + maxVel*tpDistMul2
+	-- Debug
+	--debugDrawer:drawSphere(tpDist1, vehPos:toFloat3(), color(0,0,255,50))
+	--debugDrawer:drawSphere(tpDist2, vehPos:toFloat3(), color(255,0,0,50))
+	
+	local maxRvel = tpRvelSmoother:get(max(rvel:length(), vehRvel:length()), dt)
+	local tpRot1 = tpRotAdd + maxRvel*tpRotMul1
+	local tpRot2 = tpRotAdd + maxRvel*tpRotMul2
+	
+	local posErrorLen = posError:length()
+	local rotErrorLen = rotError:length()
+	
+	if posErrorLen > tpDist1 or rotErrorLen > tpRot1 then
 		tpTimer = tpTimer + dt
-		posError = posError:normalized()*maxPosError
 	else
 		tpTimer = 0
 	end
 
-	-- If position error is larger than limit, teleport the vehicle
-	if tpTimer > (0.5+abs(predictTime)*2) then
+	-- If instant teleport distance or teleport timer exceeded, teleport
+	if tpTimer > (tpDelayAdd + abs(predictTime)) or posErrorLen > tpDist2 or rotErrorLen > tpRot2 then
 		-- Subtract COG offset because setPosition works relative to refNode
 		local tpPos = pos - velocityVE.cogRel:rotated(rot)
 		-- Offset teleport rotation for vehicles with different JBeam orientations
 		local tpRot = rot*vehRot/quat(obj:getRotation())
 		
-		if rotError:length() > maxRotError then
+		if rotErrorLen > tpRot1 or rotErrorLen > tpRot2 then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
 			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
 			--print("Teleport Angle "..obj:getID())
@@ -315,6 +361,7 @@ end
 
 
 
+M.onReset            = onReset
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot

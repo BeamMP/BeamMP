@@ -59,12 +59,6 @@ local roleToInfo = {
 
 
 --============== SOME FUNCTIONS ==============
--- GET A TABLE LENGTH
-function tableLength(T)
-  local count = 0
-  for _ in pairs(T) do count = count + 1 end
-  return count
-end
 
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
@@ -117,13 +111,13 @@ local function getNicknameFromID(id)
 	return nickIDMap[id]
 end
 
-local function setPlayerNickPrefix(name, tagSource, text)
+local function setPlayerNickPrefix(targetName, tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
-	nicknamePrefixMap[name] = { [tagSource] = text }
+	nicknamePrefixMap[targetName] = { [tagSource] = text }
 end
-local function setPlayerNickSuffix(name, tagSource, text)
+local function setPlayerNickSuffix(targetName, tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
-	nicknameSuffixMap[name] = { [tagSource] = text }
+	nicknameSuffixMap[targetName] = { [tagSource] = text }
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
@@ -131,22 +125,6 @@ local function hideNicknames(hide)
 	nicknamesAllowed = not hide
 end
 --============== SOME FUNCTIONS ==============
-
-
-
---============================ DELETE ALL VEHICLES ==============================
-local function deleteAllVehicles()
-	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
-	commands.setFreeCamera()
-	for i = 0, be:getObjectCount() - 1 do -- For each vehicle
-		local veh = be:getObject(0) --  Get vehicle
-		if veh then
-			onVehicleDestroyedAllowed = false
-			veh:delete()
-		end
-	end
-end
---============================ DELETE ALL VEHICLES ==============================
 
 
 
@@ -450,7 +428,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	if MPCoreNetwork.isMPSession() then -- If TCP connected
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
-			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
+			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableSize(ownMap) > 0 then
 				be:enterNextVehicle(0, 1) extensions.hook('trackNewVeh')
 			end
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
@@ -768,37 +746,47 @@ end
 
 
 
-M.setCurrentVehicle		  = setCurrentVehicle
-M.removeRequest			  = removeRequest
+--DEBUG
+M.bleat = queryRoadNodeToPosition
+
+
+-- EVENTS
 M.onUpdate                = onUpdate
-M.handle                  = handle
+M.onPreRender             = onPreRender
 M.onVehicleSwitched       = onVehicleSwitched
 M.onDisconnect            = onDisconnect
-M.isOwn                   = isOwn
-M.getOwnMap               = getOwnMap
-M.getDistanceMap          = getDistanceMap
-M.getVehicleMap           = getVehicleMap
-M.getNicknameMap          = getNicknameMap
-M.setPlayerNickPrefix     = setPlayerNickPrefix
-M.setPlayerNickSuffix     = setPlayerNickSuffix
-M.hideNicknames           = hideNicknames
-M.getGameVehicleID        = getGameVehicleID
-M.getServerVehicleID      = getServerVehicleID
+M.handle                  = handle
 M.onVehicleDestroyed      = onVehicleDestroyed
 M.onVehicleSpawned        = onVehicleSpawned
-M.deleteAllVehicles       = deleteAllVehicles
-M.sendVehicle             = sendVehicle
-M.sendVehicleData         = sendVehicleData
-M.sendCustomVehicleData   = sendCustomVehicleData
 M.onServerVehicleSpawned  = onServerVehicleSpawned
 M.onServerVehicleRemoved  = onServerVehicleRemoved
 M.onVehicleResetted       = onVehicleResetted
 M.onServerVehicleResetted = onServerVehicleResetted
-M.sendBeamstate           = sendBeamstate
 M.onServerVehicleCoupled  = onServerVehicleCoupled
-M.applyQueuedEvents       = applyQueuedEvents
-M.teleportVehToPlayer     = teleportVehToPlayer
-M.teleportCameraToPlayer  = teleportCameraToPlayer
+
+
+-- FUNCTIONS
+M.isOwn                   = isOwn                    -- takes: vehID  returns: bool
+M.getOwnMap               = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
+M.getDistanceMap          = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
+M.getVehicleMap           = getVehicleMap            -- takes: -
+M.getNicknameMap          = getNicknameMap           -- takes: -
+M.hideNicknames           = hideNicknames            -- takes: bool   returns: -
+M.setPlayerNickPrefix     = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
+M.setPlayerNickSuffix     = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
+M.getGameVehicleID        = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
+M.getServerVehicleID      = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
+M.removeRequest			  = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
+M.sendBeamstate           = sendBeamstate            -- takes: 
+M.applyQueuedEvents       = applyQueuedEvents        -- takes: -
+M.teleportVehToPlayer     = teleportVehToPlayer      -- takes: string targetName
+M.teleportCameraToPlayer  = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
+M.focusCameraOnPlayer     = focusCameraOnPlayer      -- takes: string targetName
+M.groundmarkerToPlayer    = groundmarkerToPlayer     -- takes: string targetName
+M.groundmarkerFollowPlayer= groundmarkerFollowPlayer -- takes: string targetName
+--M.sendVehicle             = sendVehicle            --these shouldnt be public?
+--M.sendVehicleData         = sendVehicleData        --these shouldnt be public?
+--M.sendCustomVehicleData   = sendCustomVehicleData  --these shouldnt be public?
 
 print("MPVehicleGE Loaded.")
 return M

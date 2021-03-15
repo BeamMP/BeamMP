@@ -10,8 +10,9 @@ print("UI Initialising...")
 
 
 
-local players = {}
-local pings = {}
+local players = {} -- { 'apple', 'banana', 'meow' }
+local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
+local readyCalled = false
 
 
 
@@ -24,23 +25,6 @@ local function updateLoading(data)
 	end
 end
 
-
-
-local function typeof(var)
-    local _type = type(var);
-    if(_type ~= "table" and _type ~= "userdata") then
-        return _type;
-    end
-    local _meta = getmetatable(var);
-    if(_meta ~= nil and _meta._NAME ~= nil) then
-        return _meta._NAME;
-    else
-        return _type;
-    end
-end
-
-
-
 local function split(s, sep)
     local fields = {}
 
@@ -50,8 +34,6 @@ local function split(s, sep)
 
     return fields
 end
-
-
 
 local function updatePlayersList(playersString)
 	--print(playersString)
@@ -104,26 +86,13 @@ end
 
 
 
-local function error(text)
-	print("UI Error > "..text)
-	ui_message(''..text, 10, 0, 0)
-end
-
-
-
-local function message(text)
-	print("[Message] > "..text)
-	ui_message(''..text, 10, 0, 0)
-end
-
-
-
 local function showNotification(text, type)
 	if type and type == "error" then
-		error(text)
+		print("UI Error > "..text)
 	else
-		message(text)
+		print("[Message] > "..text)
 	end
+	ui_message(''..text, 10, 0, 0)
 end
 
 
@@ -145,61 +114,56 @@ end
 
 
 
-local ready = true
-local deletenext = true
+
+
 
 
 
 local function ready(src)
-  print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
-  -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
-
-  if src == "FIRSTVEH" and MPCoreNetwork.isMPSession() then
-    deletenext = true
-  end
-  if src == "MP-SESSION" then
-		setPing("-2")
-    if deletenext and MPCoreNetwork.isMPSession() then
-      print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
-      core_vehicles.removeCurrent(); -- 0.20 Fix
-      commands.setFreeCamera()		 -- Fix camera
-      deletenext = false
-    end
+	print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
+	-- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
 
 
-    deletenext = false
-  end
+	if MPCoreNetwork.isMPSession() then
 
-  if src == "MP-SESSION" or src == "FIRSTVEH" then
-  	if ready and MPCoreNetwork.isMPSession() then
-  	  ready = false
-  	  MPGameNetwork.connectToLauncher()
-  	end
+		if src == "MP-SESSION" then
+			setPing("-2")
 
-		if MPCoreNetwork.isMPSession() then
-	    local Server = MPCoreNetwork.getCurrentServer()
-	    print("---------------------------------------------------------------")
-	    --dump(Server)
-			if Server ~= nil then
+			local Server = MPCoreNetwork.getCurrentServer()
+			print("---------------------------------------------------------------")
+			--dump(Server)
+			if Server then
 				local name = Server.name
-	    	print(name)
+				if name then
+					print('Server name: '..name)
+					setStatus("Server: "..name)
+				else
+					print('Server.name = nil')
+				end
 			else
-				print('Server.name == nil')
+				print('Server = nil')
 			end
-	    print("---------------------------------------------------------------")
-
-	  	if Server ~= nil and Server.name ~= nil then
-	  	  setStatus("Server: "..Server.name)
-	  	end
+			print("---------------------------------------------------------------")
 		end
-  end
+
+		if src == "MP-GAMESTATE" then
+
+			if not readyCalled then
+				readyCalled = true
+				print("[BeamMP] First Session Vehicle Removed")
+				core_vehicles.removeCurrent(); -- 0.20 Fix
+				commands.setFreeCamera()		 -- Fix camera
+
+				MPGameNetwork.connectToLauncher()
+			end
+		end
+	end
 end
 
 
 
 local function readyReset()
-  ready = true
-  deletenext = true
+  readyCalled = false
 end
 
 
@@ -215,7 +179,7 @@ local function setVehPing(vehicleID, ping)
 end
 
 local function GSUpdate(state)
-	print('NEW GS STATE')
+	print('New GameState received')
 	dump(state)
 end
 

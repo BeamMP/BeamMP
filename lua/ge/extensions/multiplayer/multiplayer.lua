@@ -98,7 +98,7 @@ end
 local function onClientPostStartMission()
   if MPCoreNetwork.isMPSession() then
     core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
-    UI.ready("MP-SESSION")
+    UI.ready("MP-GAMESTATE")
   end
 end
 

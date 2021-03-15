@@ -6,6 +6,9 @@
 load("multiplayer/multiplayer")
 registerCoreModule("multiplayer/multiplayer")
 
+load("MPUtils")
+registerCoreModule("MPUtils")
+
 load("UI")
 registerCoreModule("UI")
 

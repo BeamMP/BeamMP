@@ -96,7 +96,6 @@ end
 function AddEventHandler(n, f)
 	print("Adding Event Handler: Name = "..tostring(n))
 	table.insert(eventTriggers, {name = n, func = f})
-	dump(eventTriggers)
 end
 
 local HandleNetwork = {

@@ -217,7 +217,7 @@ local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
-			local received, status, partial = TCPLauncherSocket:receive() -- Receive data
+			local received, stat, partial = TCPLauncherSocket:receive() -- Receive data
 			
 			-- Checking connection
 			if launcherTimeout > 0.1 then onLauncherConnectionFailed() connectionFailed = true end

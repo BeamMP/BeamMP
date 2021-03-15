@@ -37,7 +37,6 @@ local onVehicleSpawnedAllowed = true
 local syncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
-local activeVehicle = 0
 
 local vehicleSpawnQueue = {}
 local vehicleEditQueue = {}
@@ -434,7 +433,6 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
-	activeVehicle = newGameVehicleID
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 
@@ -567,46 +565,128 @@ local function syncVehicles()
 	vehiclesToSync = {}
 end
 
-local function teleportVehToPlayer(targetName)
-	--print("tp vehicle to: "..targetName)
-	if activeVehicle then
-		local veh = be:getObjectByID(tonumber(activeVehicle))
-		if veh then
-			for i,n in pairs(nicknameMap) do
-				if n.nickname == targetName then
-					--print("teleporting to "..tostring(i))
 
-					local targetVeh = be:getObjectByID(i)
-					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
 
-					local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
+local lastQuery = -1 --get player pos on first run
+local groundmarkerRoads = {}
+local gmTargetPlayer = nil
 
-					spawn.safeTeleport(veh, vec3Pos, targetVehRot, false)
+local function queryRoadNodeToPosition(position, owner)
+	if not owner then owner = "target" end
+	--log('I',logTag, 'queryRoadNodeToPosition called...')
+	local pos = vec3(position)
+	local first, second, distance = map.findClosestRoad(pos)
+	if not first and not second then return false end
+	local state = M.state
+	--log('D', logTag, 'queryRoadNodeToPosition '..owner..': '..first..','..second..','..distance)
+	groundmarkerRoads[owner] = {position=position}
+	if first ~= 'nil' and second ~= 'nil' then
+		groundmarkerRoads[owner].first = first
+		groundmarkerRoads[owner].next = second
 
-					--print("donesies")
-					return
-				end
-			end
-		else
-			print("no veh, teleporting camera instead")
-			teleportCameraToPlayer(targetName)
+		local mapData = map.getMap()
+		local node1 = mapData.nodes[first]
+		local node2 = mapData.nodes[second]
+		if node1 and node2 then
+			-- find which node is closest to the owner
+			local sqrDist1 = (pos - node1.pos):squaredLength()
+			local sqrDist2 = (pos - node2.pos):squaredLength()
+
+			if sqrDist1 < sqrDist2 then groundmarkerRoads[owner].best = first
+			else groundmarkerRoads[owner].best = second end
 		end
-	else
-		print("no active vehicle, teleporting camera instead")
-		teleportCameraToPlayer(targetName)
+	end
+	return true
+end
+
+
+local function groundmarkerToPlayer(targetName)
+	for i,n in pairs(nicknameMap) do
+		if n.nickname == targetName then
+			local targetVeh = be:getObjectByID(i)
+			local targetVehPos = targetVeh:getPosition()
+			local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
+
+			queryRoadNodeToPosition(vec3Pos, "targetVeh")
+			return
+		end
 	end
 end
 
-local function teleportCameraToPlayer(targetName)
+local function groundmarkerFollowPlayer(targetName, dontfollow)
+	if dontfollow then --static
+		groundmarkerToPlayer(targetName)
+	else
+		if targetName then gmTargetPlayer = targetName
+		else
+			gmTargetPlayer = nil
+			groundmarkerRoads["targetVeh"] = nil
+		end
+	end
+end
+
+local function onPreRender(dt)
+	local vehicle = be:getPlayerVehicle(0)
+	if not vehicle then return end
+
+	lastQuery = lastQuery - dt
+	if lastQuery <= 0 then
+		lastQuery = 0.2
+		local vehiclePos = vehicle:getPosition()
+		queryRoadNodeToPosition(vehiclePos, 'player')
+		if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
+	end
+
+	local playerRoadData = groundmarkerRoads['player']
+	if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
+		for target,data in pairs(groundmarkerRoads) do
+			if target ~= 'player' then
+				if data.best then
+					core_groundMarkers.setFocus(data.best)
+				end
+			end
+		end
+	end
+end
+
+
+
+
+
+local function teleportVehToPlayer(targetName)
+	local activeVehicle = be:getPlayerVehicle(0)
+
+	if activeVehicle then
+		for i,n in pairs(nicknameMap) do
+			if n.nickname == targetName then
+				--print("teleporting to "..tostring(i))
+				local targetVeh = be:getObjectByID(i)
+				local targetVehPos = targetVeh:getPosition()
+				local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
+
+				local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
+
+				spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
+				return
+			end
+		end
+	else
+		print("no active vehicle, teleporting camera instead")
+		focusCameraOnPlayer(targetName)
+	end
+end
+
+local function focusCameraOnPlayer(targetName)
+	local activeVehicle = be:getPlayerVehicle(0)
+	local activeVehicleID = activeVehicle and activeVehicle:getID() or nil
 	print("tp camera to: "..targetName)
 	local nickmap = getNicknameMap()
 	for i,n in pairs(nickmap) do
 		if n == targetName then
-			print("found vehicle ",i, "active ",activeVehicle)
+			print("found vehicle ",i, "active ", activeVehicleID)
 			local targetVeh = be:getObjectByID(i)
 
-			if i ~= tonumber(activeVehicle) and targetVeh then
+			if i ~= activeVehicleID and targetVeh then
 				print("entering vehicle ",i)
 				be:enterVehicle(0,targetVeh)
 				return

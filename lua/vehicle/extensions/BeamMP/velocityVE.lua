@@ -203,12 +203,6 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z)
 end
 
-v.mpVehicleType = "L"
-local function setVehicleType(x)
-  v.mpVehicleType = x
-end
-
-M.setVehicleType     = setVehicleType
 -- public interface
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit

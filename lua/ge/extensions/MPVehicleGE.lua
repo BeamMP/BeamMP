@@ -290,6 +290,7 @@ local function applyVehSpawn(event)
 		role = event.playerRole
 	}
 	core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
+	spawnedVeh:queueLuaCommand("hydros.onFFBConfigChanged(nil)")
 end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================

@@ -47,7 +47,7 @@ local function applyPos(data, serverVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
 		if veh.mpVehicleType == nil then
-			veh:queueLuaCommand("velocityVE.setVehicleType('R')")
+			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
 		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")

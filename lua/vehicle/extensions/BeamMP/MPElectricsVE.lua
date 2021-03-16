@@ -256,6 +256,17 @@ local function applyElectrics(data)
 			end
 		end
 
+		-- Ignition syncing
+		if decodedData.ignition ~= nil then
+			if electrics.values.ignition ~= decodedData.ignition then
+				if decodedData.ignition == true then
+					controller.mainController.setStarter(true)
+				else
+					controller.mainController.setEngineIgnition(false)
+				end
+			end
+		end
+
 		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v

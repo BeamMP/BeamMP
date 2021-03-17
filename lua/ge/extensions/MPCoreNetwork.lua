@@ -123,11 +123,11 @@ local function getCurrentServer()
     return currentServer
 end
 
-local function setCurrentServer(id, ip, port, modsString, name)
+local function setCurrentServer(ip, port, modsString, name)
+
 	currentServer = {
 		ip		   = ip,
 		port	   = port,
-		id		   = id,
 		modsstring = modsString,
 		name	   = name
 	}
@@ -344,6 +344,7 @@ local function onClientStartMission(mission)
 		Lua:requestReload()
 	end
 	-- Checking all the mods again because BeamNG.drive has a bug with mods not deactivating
+
 end
 
 local function onClientEndMission(mission)
@@ -353,12 +354,12 @@ local function onClientEndMission(mission)
 end
 -- ============= EVENTS =============
 
+
 M.onInit               = onInit
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
-
 M.login                = login
 M.logout               = logout
 M.quitMP               = quitMP

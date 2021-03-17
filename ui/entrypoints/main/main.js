@@ -245,7 +245,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	  })
 
 	  .state('menu.multiplayer.recent', {
-	    url: '/mpservers',
+	    url: '/mprecent',
 	    templateUrl: 'modules/multiplayer/recent.partial.html',
 	    controller: 'MultiplayerRecentController as multiplayermenu'
 	  })

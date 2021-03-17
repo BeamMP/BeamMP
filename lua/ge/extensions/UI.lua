@@ -100,7 +100,6 @@ local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
 	local msg = string.sub(data, 2)
 	if code == "l" then
-		if msg == "Loading..." then MPCoreNetwork.addRecent() end
 		guihooks.trigger('LoadingInfo', {message = msg})
 	end
 end

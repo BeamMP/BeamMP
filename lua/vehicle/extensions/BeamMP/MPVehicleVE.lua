@@ -1,3 +1,8 @@
+--====================================================================================
+-- All work by 20dka.
+-- You have no permission to edit, redistrobute or upload. Contact BeamMP for more info!
+--====================================================================================
+
 local M = {}
 
 local callOnPhysUpdate = {}

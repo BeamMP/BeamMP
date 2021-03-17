@@ -1,6 +1,6 @@
 --====================================================================================
 -- All work by Titch2000, jojos38 and 20dka.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
@@ -869,5 +869,5 @@ M.groundmarkerFollowPlayer= groundmarkerFollowPlayer -- takes: string targetName
 --M.sendVehicleData         = sendVehicleData        --these shouldnt be public?
 --M.sendCustomVehicleData   = sendCustomVehicleData  --these shouldnt be public?
 
-print("MPVehicleGE Loaded.")
+print("MPVehicleGE loaded")
 return M

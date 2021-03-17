@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("nodesGE Initialising...")
+print("Loading nodesGE...")
 
 
 

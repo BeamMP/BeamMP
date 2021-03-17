@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("positionGE Initialising...")
+print("Loading positionGE...")
 
 
 

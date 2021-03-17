@@ -1,15 +1,14 @@
+--====================================================================================
+-- All work by 20dka.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+
+
 local M = {}
 
 
--- GET A TABLE LENGTH
-local function tableLength(T)
-  local count = 0
-  for _ in pairs(T) do count = count + 1 end
-  return count
-end
 
-
-M.tableLength = tableLength
-
+M.tableLength = tableSize
 
 return M

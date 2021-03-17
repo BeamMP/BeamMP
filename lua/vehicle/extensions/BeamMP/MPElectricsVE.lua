@@ -1,6 +1,6 @@
 --====================================================================================
--- All work by Jojos38 & Titch2000.
--- You have no permission to edit, redistrobute or upload. Contact us for more info!
+-- All work by Jojos38, Titch2000, 20dka.
+-- You have no permission to edit, redistrobute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 

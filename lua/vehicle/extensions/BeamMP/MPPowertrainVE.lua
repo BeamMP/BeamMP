@@ -2,8 +2,8 @@
 -- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Powertrain sync related functions
+--====================================================================================
 
 local M = {}
 

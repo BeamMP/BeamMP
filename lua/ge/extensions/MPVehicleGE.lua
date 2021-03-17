@@ -818,43 +818,43 @@ end
 
 
 --DEBUG
-M.bleat = queryRoadNodeToPosition
+M.queryRoadNodeToPosition = queryRoadNodeToPosition
 
 
 -- EVENTS
-M.onUpdate                = onUpdate
-M.onPreRender             = onPreRender
-M.onVehicleSwitched       = onVehicleSwitched
-M.onDisconnect            = onDisconnect
-M.handle                  = handle
-M.onVehicleDestroyed      = onVehicleDestroyed
-M.onVehicleSpawned        = onVehicleSpawned
-M.onServerVehicleSpawned  = onServerVehicleSpawned
-M.onServerVehicleRemoved  = onServerVehicleRemoved
-M.onVehicleResetted       = onVehicleResetted
-M.onServerVehicleResetted = onServerVehicleResetted
-M.onServerVehicleCoupled  = onServerVehicleCoupled
+M.onUpdate                 = onUpdate
+M.onPreRender              = onPreRender
+M.onVehicleSwitched        = onVehicleSwitched
+M.onDisconnect             = onDisconnect
+M.handle                   = handle
+M.onVehicleDestroyed       = onVehicleDestroyed
+M.onVehicleSpawned         = onVehicleSpawned
+M.onServerVehicleSpawned   = onServerVehicleSpawned
+M.onServerVehicleRemoved   = onServerVehicleRemoved
+M.onVehicleResetted        = onVehicleResetted
+M.onServerVehicleResetted  = onServerVehicleResetted
+M.onServerVehicleCoupled   = onServerVehicleCoupled
 
 
 -- FUNCTIONS
-M.isOwn                   = isOwn                    -- takes: vehID  returns: bool
-M.getOwnMap               = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
-M.getDistanceMap          = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
-M.getVehicleMap           = getVehicleMap            -- takes: -
-M.getNicknameMap          = getNicknameMap           -- takes: -
-M.hideNicknames           = hideNicknames            -- takes: bool   returns: -
-M.setPlayerNickPrefix     = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
-M.setPlayerNickSuffix     = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
-M.getGameVehicleID        = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
-M.getServerVehicleID      = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
-M.removeRequest			  = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
-M.sendBeamstate           = sendBeamstate            -- takes: 
-M.applyQueuedEvents       = applyQueuedEvents        -- takes: -
-M.teleportVehToPlayer     = teleportVehToPlayer      -- takes: string targetName
-M.teleportCameraToPlayer  = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
-M.focusCameraOnPlayer     = focusCameraOnPlayer      -- takes: string targetName
-M.groundmarkerToPlayer    = groundmarkerToPlayer     -- takes: string targetName
-M.groundmarkerFollowPlayer= groundmarkerFollowPlayer -- takes: string targetName
+M.isOwn                    = isOwn                    -- takes: vehID  returns: bool
+M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
+M.getDistanceMap           = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
+M.getVehicleMap            = getVehicleMap            -- takes: -
+M.getNicknameMap           = getNicknameMap           -- takes: -
+M.hideNicknames            = hideNicknames            -- takes: bool   returns: -
+M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
+M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
+M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
+M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
+M.removeRequest            = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
+M.sendBeamstate            = sendBeamstate            -- takes: 
+M.applyQueuedEvents        = applyQueuedEvents        -- takes: -
+M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
+M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
+M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName
+M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
+M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
 --M.sendVehicle             = sendVehicle            --these shouldnt be public?
 --M.sendVehicleData         = sendVehicleData        --these shouldnt be public?
 --M.sendCustomVehicleData   = sendCustomVehicleData  --these shouldnt be public?

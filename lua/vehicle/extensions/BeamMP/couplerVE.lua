@@ -2,7 +2,8 @@
 -- All work by Anonymous.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
+-- Coupler (trailer) sync related functions
+--====================================================================================
 
 local M = {}
 

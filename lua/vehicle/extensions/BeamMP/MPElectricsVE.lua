@@ -2,8 +2,8 @@
 -- All work by Jojos38, Titch2000, 20dka.
 -- You have no permission to edit, redistrobute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Electrics (and features derived from it) sync related functions
+--====================================================================================
 
 local M = {}
 

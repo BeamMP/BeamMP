@@ -2,6 +2,8 @@
 -- All work by stefan750, Titch2000, Anonymous.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
+-- Setting lateral and angular velocity of vehicles
+--====================================================================================
 
 local M = {}
 

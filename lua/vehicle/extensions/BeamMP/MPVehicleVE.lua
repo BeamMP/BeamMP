@@ -2,6 +2,8 @@
 -- All work by 20dka.
 -- You have no permission to edit, redistrobute or upload. Contact BeamMP for more info!
 --====================================================================================
+-- Main VE lua file for BeamMP
+--====================================================================================
 
 local M = {}
 

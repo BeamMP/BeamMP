@@ -2,8 +2,8 @@
 -- All work by jojos38 & Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Node sync related test functions
+--====================================================================================
 
 local M = {}
 
@@ -22,10 +22,7 @@ local function distance( x1, y1, z1, x2, y2, z2 )
 	return math.sqrt ( dx*dx + dy*dy + dz*dz)
 end
 
-local function Round(num, n)
-  local mult = 10^(n or 0)
-  return math.floor(num * mult + 0.5) / mult
-end
+
 
 local function getNodes()
 
@@ -193,14 +190,13 @@ end
 
 
 
-function round(num, numDecimalPlaces)
+local function round(num, numDecimalPlaces)
   local mult = 10^(numDecimalPlaces or 0)
   return math.floor(num * mult + 0.5) / mult
 end
 
 
 
-M.round      = round
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes

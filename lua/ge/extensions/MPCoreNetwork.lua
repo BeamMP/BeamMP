@@ -17,7 +17,6 @@ local currentServer -- Store the server we are on
 local Servers = {} -- Store all the servers
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
 local secondsTimer = 0
-local MapLoadingTimeout = 0
 local status = ""
 local launcherVersion = ""
 local currentMap = ""
@@ -158,6 +157,11 @@ local function loadLevel(map)
 	MapLoadingTimeout = 0
 	mapLoaded = false
 	status = "LoadingMapNow"
+	if not core_levels.expandMissionFileName(map) then
+		UI.updateLoading("lMap "..map.." not found")
+		MPCoreNetwork.resetSession(false)
+		return
+	end
 	currentMap = map
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
@@ -246,22 +250,6 @@ local function onUpdate(dt)
 			UI.setPing("-2")
 			disconnectLauncher()
 			connectToLauncher()
-		end
-		--================================ MAP LOADING TIMER ================================
-		if status == "LoadingMapNow" then
-			if MapLoadingTimeout > 5 then
-				if not mapLoaded then -- If map is not loaded yet
-					if not scenetree.MissionGroup then -- If not found then
-						print("Failed to load the map, did the mod get loaded?")
-						Lua:requestReload()
-					else
-						status = "Playing"
-						mapLoaded = true
-					end
-				end
-			else
-				MapLoadingTimeout = MapLoadingTimeout + dt
-			end
 		end
 	end
 end
@@ -360,6 +348,8 @@ local function onClientStartMission(mission)
 	if status == "Playing" and getMissionFilename() ~= currentMap then
 		print("The user has loaded another mission!")
 		Lua:requestReload()
+	elseif getMissionFilename() == currentMap then
+		status = "Playing"
 	end
 end
 

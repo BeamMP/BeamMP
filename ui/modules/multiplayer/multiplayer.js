@@ -716,6 +716,7 @@ function stripCustomFormatting(name){
 async function getFavorites() {
 	return new Promise(function(resolve, reject) {
 		bngApiScope.engineLua("MPConfig.getFavorites()", (data) => {
+			if (!data) { resolve([]); return; }
 			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
 			resolve(data || []);
 		});

@@ -35,12 +35,12 @@
 			</md-checkbox>
 
 
-			<md-select ng-model="multiplayermenu.selectMap" placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();" style="height: 40px; background: unset;">
+			<md-select id="map-select" ng-model="multiplayermenu.selectMap" placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.mapFilterTooltip' | translate}}
-				</md-tooltip md-no-ink>
+				</md-tooltip>
 
-				<md-option md-no-ink ng-repeat="map in multiplayermenu.availableMaps" ng-value="multiplayermenu.availableMaps[$index]" style="height: 40px;">
+				<md-option ng-repeat="map in multiplayermenu.availableMaps" ng-value="multiplayermenu.availableMaps[$index]" style="height: 40px;">
 					{{ map }}
 				</md-option>
 			</md-select>

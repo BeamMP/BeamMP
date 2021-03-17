@@ -11,11 +11,10 @@ print("Loading MPCoreNetwork...")
 
 
 -- ============= VARIABLES =============
-local version = "0.21"
 local TCPLauncherSocket -- Launcher socket
 local currentServer -- Store the server we are on
 local Servers = {} -- Store all the servers
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting | 2 connected
+local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local secondsTimer = 0
 local MapLoadingTimeout = 0
 local status = ""
@@ -28,15 +27,17 @@ local launcherTimeout = 0
 local connectionFailed = false
 local packetReceivedYet = false
 --[[
-Z -> The client ask to the launcher his version
-B -> The client ask for the servers list to the launcher
-QG -> The client tell the launcher that he is leaving
-C -> The client ask for the mods to the server
+Z  -> The client asks the launcher its version
+B  -> The client asks the launcher for the servers list
+QG -> The client tells the launcher that it's is leaving
+C  -> The client asks for the server's mods
 --]]
 -- ============= VARIABLES =============
 
 
 
+
+-- ============= LAUNCHER RELATED =============
 local function connectToLauncher()
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		print("Connecting to launcher")
@@ -49,8 +50,6 @@ local function connectToLauncher()
 	end
 end
 
-
-
 local function disconnectLauncher()
 	if launcherConnectionStatus > 0 then -- If player was connected
 		print("Disconnecting from launcher")
@@ -60,8 +59,6 @@ local function disconnectLauncher()
 		isGoingMpSession = false
 	end
 end
-
-
 
 local function onLauncherConnectionFailed()
 	disconnectLauncher()
@@ -76,13 +73,39 @@ local function onLauncherConnectionFailed()
 	end
 end
 
-
-
-local function onModManagerReady()
-	if connectionFailed then onLauncherConnectionFailed() end
+local function send(s)
+	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
+	if settings.getValue("showDebugOutput") == true then
+		print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
+	end
 end
 
+local function login(d)
+	print('Attempting login')
+	send('N:'..d..'')
+end
 
+local function logout()
+	print('Attempting logout')
+	send('N:LO')
+end
+-- ============= LAUNCHER RELATED =============
+
+
+
+
+
+
+
+
+
+-- ============= SERVER RELATED =============
+local function getServers()
+	print("Getting the servers list")
+	send('Z')
+	send('B')
+	send('Nc')
+end
 
 local function setMods(modsString)
 	local mods = {}
@@ -96,31 +119,9 @@ local function setMods(modsString)
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
 end
 
-
-
-local function send(s)
-	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
-	if settings.getValue("showDebugOutput") == true then
-		print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
-	end
-end
-
-
-
-local function getServers()
-	print("Getting the servers list")
-	send('Z')
-	send('B')
-	send('Nc')
-end
-
-
-
 local function getCurrentServer()
     return currentServer
 end
-
-
 
 local function setCurrentServer(id, ip, port, modsString, name)
 	currentServer = {
@@ -132,8 +133,6 @@ local function setCurrentServer(id, ip, port, modsString, name)
 	}
 	setMods(modString)
 end
-
-
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port)
@@ -151,8 +150,6 @@ local function connectToServer(ip, port)
 	status = "LoadingResources"
 end
 
-
-
 local function loadLevel(map)
 	-- Map loading has a 5 seconds timeout in case it doesn't work
 	MPModManager.backupLoadedMods() -- Backup the current loaded mods before loading the map
@@ -163,9 +160,11 @@ local function loadLevel(map)
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
 end
+-- ============= SERVER RELATED =============
 
 
 
+-- ============= OTHERS =============
 local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
@@ -180,12 +179,9 @@ local function handleU(params)
 	end
 end
 
-
-
 local function HandleLogin(params)
 	print('Logging in')
 	local r = jsonDecode(params)
-	--dump(r)
 	if (r.success == true or r.Auth == 1) then
 		print('Logged successfully')
 		guihooks.trigger('LoginContainerController', {message = r.message, hide = true})
@@ -196,20 +192,90 @@ local function HandleLogin(params)
 end
 
 
+local function modLoaded(modname)
+	if modname ~= "beammp" then -- We don't want to check beammp mod
+		send('R'..modname..'')
+	end
+end
 
+local function resetSession(goBack)
+	isMpSession = false
+	isGoingMpSession = false
+	print("Reset Session Called!")
+	send('QS') -- Tell the launcher that we quit server / session
+	disconnectLauncher()
+	MPGameNetwork.disconnectLauncher()
+	MPVehicleGE.onDisconnect()
+	connectToLauncher()
+	UI.readyReset()
+	status = "" -- Reset status
+	if goBack then returnToMainMenu() end
+	MPModManager.cleanUpSessionMods()
+end
+
+local function isMPSession()
+	return isMpSession
+end
+
+local function isGoingMPSession()
+	return isGoingMpSession
+end
+
+local function quitMP(reason)
+	isMpSession = false
+	isGoingMpSession = false
+	print("Quit MP Called!")
+	print("reason: "..tostring(reason))
+	send('QG') -- Quit game
+end
+
+local function addRecent()
+	guihooks.trigger('addRecent', jsonEncode(currentServer))
+end
+-- ============= OTHERS =============
+
+
+
+-- ============= EVENTS =============
 local HandleNetwork = {
-	['A'] = function(params) secondsTimer = 0; end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived',  params); end,
+	['A'] = function(params) secondsTimer = 0 end, -- Connection Alive Checking
+	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params) end, -- Serverlist received
 	['U'] = function(params) handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) HandleLogin(params) end, -- Login system
-	['V'] = function(params) MPVehicleGE.handle(params) end,
+	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
-	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')'); end, -- Tell the UI what the launcher version is.
-	-- [''] = function(params)  end, --
+	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
 }
 
+
+local function onInit()
+	--Preston (Cobalt) Preload the UI profile for multiplayer
+	local layouts = jsonReadFile("settings/uiapps-layouts.json")
+	if not layouts then
+		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
+		jsonWriteFile("settings/uiapps-layouts.json", layouts)
+		log("A","Print","default UI layout added")
+	end
+	if not layouts.multiplayer then
+		layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
+		jsonWriteFile("settings/uiapps-layouts.json", layouts)
+		log("A","Print","multiplayer UI layout added")
+	end
+
+	-- Then we check that the game has loaded our mod manager, if not we reload lua
+	if not core_modmanager.getModList then Lua:requestReload() end
+	-- First we connect to the launcher
+	connectToLauncher()
+	-- We reload the UI to load our custom layout
+	reloadUI()
+	-- We reset "serverConnection" because for some reasons singleplayer doesn't work without this
+	local endCallback = function () if type(callback) == 'function' then callback() end end
+	serverConnection.disconnect(endCallback)
+	-- ???
+	send('Nc')
+end
 
 
 local function onUpdate(dt)
@@ -218,15 +284,15 @@ local function onUpdate(dt)
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
 			local received, stat, partial = TCPLauncherSocket:receive() -- Receive data
-			
+
 			-- Checking connection
 			if launcherTimeout > 0.1 then onLauncherConnectionFailed() connectionFailed = true end
-			if received == nil or received == "" then
+			if not received or received == "" then
 				if not packetReceivedYet then launcherTimeout = launcherTimeout + dt end
 				break
 			end
 			packetReceivedYet = true
-			
+
 			-- break it up into code + data
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
@@ -268,138 +334,44 @@ local function onUpdate(dt)
 end
 
 
-
-local function resetSession(goBack)
-	isMpSession = false
-	isGoingMpSession = false
-	print("Reset Session Called!")
-	send('QS') -- Tell the launcher that we quit server / session
-	disconnectLauncher()
-	MPGameNetwork.disconnectLauncher()
-	MPVehicleGE.onDisconnect()
-	connectToLauncher()
-	UI.readyReset()
-	status = "" -- Reset status
-	if goBack then returnToMainMenu() end
-	MPModManager.cleanUpSessionMods()
+local function onModManagerReady()
+	if connectionFailed then onLauncherConnectionFailed() end
 end
-
-
-
-local function quitMP()
-	isMpSession = false
-	isGoingMpSession = false
-	print("Reset Session Called!")
-	send('QG') -- Quit game
-end
-
-
-
-local function modLoaded(modname)
-	if modname ~= "beammp" then -- We don't want to check beammp mod
-		send('R'..modname..'')
-	end
-end
-
-
-
-local function onInit()
-	--Preston (Cobalt) Preload the UI profile for multiplayer
-	local layouts = jsonReadFile("settings/uiapps-layouts.json")
-	if not layouts then
-		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
-		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("A","Print","default UI layout added")
-	end
-	if not layouts.multiplayer then
-		layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
-		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("A","Print","multiplayer UI layout added")
-	end
-
-	-- Then we check that the game has loaded our mod manager, if not we reload lua
-	if not core_modmanager.getModList then Lua:requestReload() end
-	-- First we connect to the launcher
-	connectToLauncher()
-	-- We reload the UI to load our custom UI
-	reloadUI()
-	-- We reset "serverConnection" because for some reasons singleplayer doesn't work without this
-	local endCallback = function () if type(callback) == 'function' then callback() end end
-	serverConnection.disconnect(endCallback)
-	-- ???
-	send('Nc')
-end
-
-
-
-local function isMPSession()
-	return isMpSession
-end
-
-
-
-local function isGoingMPSession()
-	return isGoingMpSession
-end
-
-
-
-local function login(d)
-	print('Attempting login')
-	send('N:'..d..'')
-end
-
-
-local function logout()
-	print('Attempting logout')
-	send('N:LO')
-end
-
-
 
 local function onClientStartMission(mission)
 	if status == "Playing" and getMissionFilename() ~= currentMap then
 		print("The user has loaded another mission!")
 		Lua:requestReload()
 	end
-	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
+	-- Checking all the mods again because BeamNG.drive has a bug with mods not deactivating
 end
-
-
 
 local function onClientEndMission(mission)
 	if isMPSession() then
 		resetSession(1)
 	end
 end
+-- ============= EVENTS =============
 
-
-
-local function addRecent()
-	guihooks.trigger('addRecent', jsonEncode(currentServer))
-end
-
-
-
-M.onModManagerReady = onModManagerReady
-M.onInit = onInit
-M.login = login
-M.logout = logout
+M.onInit               = onInit
+M.onUpdate             = onUpdate
+M.onModManagerReady    = onModManagerReady
+M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
-M.onClientEndMission = onClientEndMission
-M.onUpdate = onUpdate
-M.getServers = getServers
-M.getCurrentServer = getCurrentServer
-M.setCurrentServer = setCurrentServer
-M.resetSession = resetSession
-M.quitMP = quitMP
-M.connectToServer = connectToServer
-M.connectionStatus = launcherConnectionStatus
-M.modLoaded = modLoaded
-M.onInit = onInit
-M.isMPSession = isMPSession
-M.isGoingMPSession = isGoingMPSession
-M.addRecent = addRecent
+
+M.login                = login
+M.logout               = logout
+M.quitMP               = quitMP
+M.addRecent            = addRecent
+M.modLoaded            = modLoaded
+M.getServers           = getServers
+M.isMPSession          = isMPSession
+M.resetSession         = resetSession
+M.connectToServer      = connectToServer
+M.getCurrentServer     = getCurrentServer
+M.setCurrentServer     = setCurrentServer
+M.isGoingMPSession     = isGoingMPSession
+M.connectionStatus     = launcherConnectionStatus
 
 print("MPCoreNetwork loaded")
 

@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("MPUpdatesGE Initialising...")
+print("Loading MPUpdatesGE...")
 
 
 
@@ -88,4 +88,5 @@ M.onUpdate        = onUpdate
 
 
 
+print("MPUpdatesGE loaded")
 return M

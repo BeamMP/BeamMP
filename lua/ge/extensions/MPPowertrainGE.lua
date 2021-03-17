@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("MPPowertrainGE Initialising...")
+print("Loading MPPowertrainGE...")
 
 
 
@@ -64,5 +64,5 @@ M.sendLivePowertrain     = sendLivePowertrain
 
 
 
-print("MPPowertrainGE Loaded.")
+print("MPPowertrainGE loaded")
 return M

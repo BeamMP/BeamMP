@@ -70,7 +70,7 @@ end
 
 
 
-M.tick   	   = tick
+M.tick   	 = tick
 M.handle     = handle
 M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
@@ -78,5 +78,5 @@ M.applyRot   = applyRot
 
 
 
-print("nodesGE Loaded.")
+print("nodesGE loaded")
 return M

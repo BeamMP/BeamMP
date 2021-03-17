@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("MPElectricsGE Initialising...")
+print("Loading MPElectricsGE...")
 
 
 
@@ -101,5 +101,5 @@ M.sendElectrics  = sendElectrics
 M.applyElectrics = applyElectrics
 
 
-
+print("MPElectricsGE loaded")
 return M

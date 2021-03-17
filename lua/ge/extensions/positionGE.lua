@@ -95,4 +95,5 @@ M.setPing           = setPing
 
 
 
+print("positionGE loaded")
 return M

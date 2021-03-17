@@ -147,5 +147,5 @@ M.connectionStatus = connectionStatus
 M.CallEvent = handleEvents
 
 
-
+print("MPGameNetwork loaded")
 return M

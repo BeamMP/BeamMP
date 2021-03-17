@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("Loading MPCoreNetwork")
+print("Loading MPCoreNetwork...")
 
 
 
@@ -401,5 +401,6 @@ M.isMPSession = isMPSession
 M.isGoingMPSession = isGoingMPSession
 M.addRecent = addRecent
 
+print("MPCoreNetwork loaded")
 
 return M

@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("MPModManager initialising...")
+print("Loading MPModManager...")
 
 
 
@@ -218,4 +218,5 @@ M.onInit = onInit
 
 
 
+print("MPModManager loaded")
 return M

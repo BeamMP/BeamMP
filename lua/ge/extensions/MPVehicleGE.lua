@@ -5,18 +5,8 @@
 
 
 
--- HOW DOES IT WORK :
--- When player connect to server for the first time, it send all his spawned vehicles to the server
--- The server add all vehicles create ID for them and then send them back to the client with client ID
--- If the received vehicle is the one that have been spawned by the client (check using client ID) then
-	-- It sync the client in-game vehicle ID with the server ID
--- Else
-	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one
-
-
-
 local M = {}
-print("MPVehicleGE Initialising...")
+print("Loading MPVehicleGE...")
 
 
 -- ============= VARIABLES =============
@@ -496,7 +486,7 @@ end
 
 
 local HandleNetwork = {
-	['s'] = function(rawData)
+	['s'] = function(rawData) -- spawn
 		print(rawData)
 		local playerRole = string.match(rawData,"(%w+)%:") -- Get the player role
 		rawData = rawData:gsub(playerRole..":", "")
@@ -510,22 +500,22 @@ local HandleNetwork = {
 		--print(playerRole, playerNickname, serverVehicleID)
 		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 	end,
-	['r'] = function(rawData)
+	['r'] = function(rawData) -- reset
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		onServerVehicleResetted(serverVehicleID, data)
 	end,
-	['c'] = function(rawData)
+	['c'] = function(rawData) -- config sync
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")
 		updateVehicle(serverVehicleID, data)
 	end,
-	['d'] = function(rawData)
+	['d'] = function(rawData) -- remove
 		onServerVehicleRemoved(rawData)
 	end,
-	['t'] = function(rawData)
+	['t'] = function(rawData) -- coupler
 		local serverVehicleID = string.match(rawData,"^.-:")
 		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
 		local data = string.match(rawData,":(.*)")

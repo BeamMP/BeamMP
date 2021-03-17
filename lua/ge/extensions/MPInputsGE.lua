@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("MPInputsGE Initialising...")
+print("Loading MPInputsGE...")
 
 
 
@@ -59,5 +59,5 @@ M.sendInputs  = sendInputs
 M.applyInputs = applyInputs
 
 
-
+print("MPInputsGE loaded")
 return M

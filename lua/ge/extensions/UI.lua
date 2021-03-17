@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("UI Initialising...")
+print("Loading UI...")
 
 
 
@@ -279,4 +279,5 @@ M.onGameStateUpdate = GSUpdate
 M.updateQueue = updateQueue
 
 
+print("UI loaded")
 return M

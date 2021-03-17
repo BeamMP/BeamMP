@@ -228,10 +228,6 @@ local function quitMP(reason)
 	print("reason: "..tostring(reason))
 	send('QG') -- Quit game
 end
-
-local function addRecent()
-	guihooks.trigger('addRecent', jsonEncode(currentServer))
-end
 -- ============= OTHERS =============
 
 
@@ -343,8 +339,6 @@ local function onClientStartMission(mission)
 		print("The user has loaded another mission!")
 		Lua:requestReload()
 	end
-	-- Checking all the mods again because BeamNG.drive has a bug with mods not deactivating
-
 end
 
 local function onClientEndMission(mission)
@@ -363,7 +357,6 @@ M.onClientStartMission = onClientStartMission
 M.login                = login
 M.logout               = logout
 M.quitMP               = quitMP
-M.addRecent            = addRecent
 M.modLoaded            = modLoaded
 M.getServers           = getServers
 M.isMPSession          = isMPSession

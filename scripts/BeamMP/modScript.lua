@@ -6,9 +6,6 @@
 load("multiplayer/multiplayer")
 registerCoreModule("multiplayer/multiplayer")
 
-load("MPUtils")
-registerCoreModule("MPUtils")
-
 load("UI")
 registerCoreModule("UI")
 
@@ -44,3 +41,7 @@ registerCoreModule("MPUpdatesGE")
 
 load("nodesGE")
 registerCoreModule("nodesGE")
+
+-- load this file last so it can reference the others
+load("MPHelpers")
+registerCoreModule("MPHelpers")

@@ -33,7 +33,7 @@ local function getInputs()
 	and inputsTable.c == lastInputs.c
 	then return end
 
-	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', "..obj:getID()..")") -- Send it to GE lua
 
 	lastInputs = inputsTable
 end

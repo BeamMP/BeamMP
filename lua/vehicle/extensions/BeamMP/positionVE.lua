@@ -267,7 +267,7 @@ local function getVehicleRotation()
 		tim = timer,
 		ping = ownPing + lastDT
 	}
-	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
+	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', "..obj:getID()..")") -- Send it
 end
 
 

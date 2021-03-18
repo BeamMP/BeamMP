@@ -97,7 +97,7 @@ local function getNodes()
     save.beams[beam.cid + 1] = d
   end]]
 
-	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
 

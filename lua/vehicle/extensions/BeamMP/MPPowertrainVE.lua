@@ -48,7 +48,7 @@ local function check()
 		end
 	end
 	if next(devicesToSend) then
-		obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', \'"..obj:getID().."\')")
+		obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', "..obj:getID()..")")
 		-- print("Devices "..jsonEncode(devicesToSend).." sent")
 	end
 end

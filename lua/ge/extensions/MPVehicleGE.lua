@@ -51,23 +51,32 @@ local roleToInfo = {
 
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
-	return invertedVehiclesMap[tostring(serverVehicleID)]
+	if type(serverVehicleID) == "string" then
+	print("getGameVehicleID received string ID, please use numbers")
+	serverVehicleID = tonumber(serverVehicleID)
+	return invertedVehiclesMap[serverVehicleID]
 end
 
 -- GAME VEHICLE ID ----> SERVER VEHICLE ID
 local function getServerVehicleID(gameVehicleID)
-	return vehiclesMap[tostring(gameVehicleID)]
+	if type(gameVehicleID) == "string" then
+	print("getServerVehicleID received string ID, please use numbers")
+	gameVehicleID = tonumber(gameVehicleID)
+	return vehiclesMap[gameVehicleID]
 end
 
 -- INSERT A VEHICLE SPAWNED TO THE MAP
 local function insertVehicleMap(gameVehicleID, serverVehicleID)
-	vehiclesMap[tostring(gameVehicleID)] = tostring(serverVehicleID)
-	invertedVehiclesMap[tostring(serverVehicleID)] = tostring(gameVehicleID)
+	vehiclesMap[gameVehicleID] = serverVehicleID
+	invertedVehiclesMap[serverVehicleID] = gameVehicleID
 end
 
 -- CHECK IF A USER OWNS A VEHICLE
 local function isOwn(gameVehicleID)
-    return ownMap[tostring(gameVehicleID)] ~= nil
+	if type(gameVehicleID) == "string" then
+	print("isOwn received string ID, please use numbers")
+	gameVehicleID = tonumber(gameVehicleID)
+    return ownMap[gameVehicleID] ~= nil
 end
 
 -- RETURN THE MAP OF OWNED VEHICLES
@@ -92,7 +101,7 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 		nicknameSimple[k] = v.nickname
 	end
 	local thisNick =  MPConfig.getNickname()
-	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
+	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
     return nicknameSimple
 end
 
@@ -179,7 +188,7 @@ local function applyVehEdit(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then log('W','beammp.applyEdit',"gameVehicleID for "..serverID.." not found") return end
 
-	local veh = be:getObjectByID(tonumber(gameVehicleID)) -- Get the vehicle
+	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then log('W','beammp.applyEdit',"Vehicle "..gameVehicleID.." not found") return end
 
 	local decodedData     = jsonDecode(data) -- Decode the data
@@ -188,9 +197,9 @@ local function applyVehEdit(serverID, data)
 	if vehicleName == veh:getJBeamFilename() then
 		--latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
-		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
 		tableMerge(playerVehicle.config, vehicleConfig)
 		veh:respawn(serialize(playerVehicle.config))
+		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 	else
 		log('W','beammp.applyEdit',"The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
 	end
@@ -259,7 +268,7 @@ local function applyVehSpawn(event)
 	print("It is for "..event.playerNickname)
 
 	onVehicleSpawnedAllowed = false
-	
+
 	local allowed = false
 	local vehiclesList = extensions.core_vehicles.getModelNames()
 	for index, value in ipairs(vehiclesList) do
@@ -292,8 +301,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		return
 	end
 
-	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
-	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
+	local playerServerID   = decodedData.pid -- Server ID of the player that sent the vehicle
+	local gameVehicleIDstr = decodedData.vid -- gameVehicleID of the player that sent the vehicle
+	local gameVehicleID    = tonumber(gameVehicleIDstr) -- gameVehicleID of the player that sent the vehicle
 
 	local id = string.match(serverVehicleID,"^(.*)-")
 
@@ -303,9 +313,14 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
 	print("It is for "..playerNickname)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
-		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
-		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
-		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
+		if gameVehicleID then
+			insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
+			ownMap[gameVehicleID] = true -- Insert vehicle in own map
+			print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleIDstr.." with ServerID: "..serverVehicleID)
+		else
+			print("bad data received, aborting")
+			return;
+		end
 	else
 
 		local eventdata = {}
@@ -401,7 +416,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get the serverVehicleID
 			if serverVehicleID then
 				MPGameNetwork.send('Od:'..serverVehicleID)
-				ownMap[tostring(gameVehicleID)] = nil
+				ownMap[gameVehicleID] = nil
 			end
 		else
 			onVehicleDestroyedAllowed = true

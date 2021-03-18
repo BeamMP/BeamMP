@@ -848,16 +848,15 @@ M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetNam
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.removeRequest            = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
-M.sendBeamstate            = sendBeamstate            -- takes: 
-M.applyQueuedEvents        = applyQueuedEvents        -- takes: -
+M.sendBeamstate            = sendBeamstate            -- 
+M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
 M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
 M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName
 M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
 M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
---M.sendVehicle             = sendVehicle            --these shouldnt be public?
---M.sendVehicleData         = sendVehicleData        --these shouldnt be public?
---M.sendCustomVehicleData   = sendCustomVehicleData  --these shouldnt be public?
+M.sendCustomVehicleData    = sendCustomVehicleData    -- UI sync button
+--M.sendVehicle            = sendVehicle              -- this shouldnt be public?
 
 print("MPVehicleGE loaded")
 return M

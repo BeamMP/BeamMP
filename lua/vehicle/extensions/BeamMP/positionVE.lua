@@ -310,7 +310,7 @@ local function setVehiclePosRot(data)
 	remoteData.recTime = timer
 
 	--print("OwnPing = "..ownPing.." Ping = "..ping)
-	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
+	obj:queueGameEngineLua("UI.setVehPing("..obj:getID()..", \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
 

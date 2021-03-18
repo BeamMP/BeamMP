@@ -54,7 +54,7 @@ local function applyElectrics(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not MPVehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn(gameVehicleID) then
 			veh:queueLuaCommand("MPElectricsVE.applyElectrics(\'"..data.."\')")
 		end
 	end
@@ -66,7 +66,7 @@ local function applyGear(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not MPVehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn(gameVehicleID) then
 			veh:queueLuaCommand("MPElectricsVE.setGear(\'"..data.."\')")
 		end
 	end

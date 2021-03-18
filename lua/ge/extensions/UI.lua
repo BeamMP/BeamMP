@@ -200,22 +200,18 @@ end
 
 local function ready(src)
 	print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
-	-- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
-
 
 	if MPCoreNetwork.isMPSession() then
 
 		if src == "MP-SESSION" then
 			setPing("-2")
-
 			local Server = MPCoreNetwork.getCurrentServer()
 			print("---------------------------------------------------------------")
 			--dump(Server)
 			if Server then
-				local name = Server.name
-				if name then
-					print('Server name: '..name)
-					setStatus("Server: "..name)
+				if Server.name then
+					print('Server name: '..Server.name)
+					setStatus("Server: "..Server.name)
 				else
 					print('Server.name = nil')
 				end

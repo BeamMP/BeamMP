@@ -51,17 +51,15 @@ local roleToInfo = {
 
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
-	if type(serverVehicleID) == "string" then
-	print("getGameVehicleID received string ID, please use numbers")
-	serverVehicleID = tonumber(serverVehicleID)
 	return invertedVehiclesMap[serverVehicleID]
 end
 
 -- GAME VEHICLE ID ----> SERVER VEHICLE ID
 local function getServerVehicleID(gameVehicleID)
 	if type(gameVehicleID) == "string" then
-	print("getServerVehicleID received string ID, please use numbers")
-	gameVehicleID = tonumber(gameVehicleID)
+		print("getServerVehicleID received string ID, please use numbers")
+		gameVehicleID = tonumber(gameVehicleID)
+	end
 	return vehiclesMap[gameVehicleID]
 end
 
@@ -74,8 +72,9 @@ end
 -- CHECK IF A USER OWNS A VEHICLE
 local function isOwn(gameVehicleID)
 	if type(gameVehicleID) == "string" then
-	print("isOwn received string ID, please use numbers")
-	gameVehicleID = tonumber(gameVehicleID)
+		print("isOwn received string ID, please use numbers")
+		gameVehicleID = tonumber(gameVehicleID)
+	end
     return ownMap[gameVehicleID] ~= nil
 end
 

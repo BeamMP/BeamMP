@@ -7,9 +7,36 @@
 
 local M = {}
 
+local function colorMatch(old, new) -- we assume the new color object has more data
+	for k,v in ipairs(new) do
+		for kk, vv in ipairs(v) do
+			--dump(k, v, kk, vv)
+			if not old[k] or not old[k][kk] or tostring(old[k][kk]):sub(1,7) ~= tostring(vv):sub(1,7) then
+				--print(tostring(old[k][kk]))
+				--print(tostring(vv))
+				return false
+			end
+		end
+	end
+	return true
+end
+
+local function tableDiff(old, new)
+	local diff, o, n = {},{},{}
+	for k,v in pairs(old) do if new[k] ~= v then diff[k] = v; o[k] = v end end
+	for k,v in pairs(new) do if old[k] ~= v then diff[k] = v; n[k] = v end end
+
+	return diff, o, n
+end
+
 
 --generic
-M.tableLength = tableSize
+M.tableLength  = tableSize
+
+--local
+M.colorMatch   = colorMatch
+M.tableDiff    = tableDiff
+
 
 local function onExtensionLoaded()
 

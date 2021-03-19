@@ -196,9 +196,30 @@ local function applyVehEdit(serverID, data)
 	if vehicleName == veh:getJBeamFilename() then
 		--latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
-		tableMerge(playerVehicle.config, vehicleConfig)
-		veh:respawn(serialize(playerVehicle.config))
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
+
+		local partsDiff = MPHelpers.tableDiff(playerVehicle.config.parts, vehicleConfig.parts)
+		local tuningDiff = MPHelpers.tableDiff(playerVehicle.config.vars, vehicleConfig.vars)
+
+		local configChanged = tableSize(partsDiff) > 0 or tableSize(tuningDiff) > 0
+		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.colors, vehicleConfig.colors)
+
+		if configChanged or colorChanged then
+			tableMerge(playerVehicle.config, vehicleConfig)
+
+			dump(configChanged)
+			dump(partsDiff)
+			dump(tuningDiff)
+
+			if configChanged then
+				veh:respawn(serialize(playerVehicle.config))
+			else
+				print("only color changed")
+				extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID)
+			end
+		else
+			print("received edit matches local copy, ignoring")
+		end
 	else
 		log('W','beammp.applyEdit',"The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
 	end

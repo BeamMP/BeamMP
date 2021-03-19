@@ -299,7 +299,7 @@ local function applyVehSpawn(event)
 		UI.showNotification("info", "Player "..event.playerNickname.." spawned an illegal vehicle ("..vehicleName.."), it was skipped")
 		return
 	end
-	
+
 	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)
 	local spawnedVehID = spawnedVeh:getID()
 	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
@@ -760,9 +760,13 @@ local function onUpdate(dt)
 		if currveh then
 			local vel = vec3()
 			vel:set(currveh:getVelocity())
-			if not isOwn(currveh:getID()) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
+			if (not isOwn(currveh:getID()) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
 			if not commands.isFreeCamera() then cameraPos = vec3(currveh:getPosition()) end
 		else applyQueuedEvents() end
+
+		if not be:getPlayerVehicle(0) and not commands.isFreeCamera() then
+			commands.setFreeCamera()         -- Fix camera
+		end
 
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		-- Vehicles syncing timer

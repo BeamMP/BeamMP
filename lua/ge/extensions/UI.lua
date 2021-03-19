@@ -221,14 +221,13 @@ local function ready(src)
 			print("---------------------------------------------------------------")
 		end
 
-		if src == "MP-GAMESTATE" then
-
+		if src == "MP-GAMESTATE" then -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
 			if not readyCalled then
 				readyCalled = true
 				print("[BeamMP] First Session Vehicle Removed")
-				core_vehicles.removeCurrent(); -- 0.20 Fix
-				commands.setFreeCamera()		 -- Fix camera
-
+				--core_vehicles.removeCurrent(); -- 0.20 Fix
+				--commands.setFreeCamera()         -- Fix camera
+				--if core_camera then core_camera.setVehicleCameraByIndexOffset(0, 1) extensions.hook('trackCamMode') end
 				MPGameNetwork.connectToLauncher()
 			end
 		end
@@ -255,7 +254,11 @@ end
 
 local function GSUpdate(state)
 	print('New GameState received')
-	dump(state)
+	if tableSize(state) == 0 then
+		print("GameState empty, are we in the menu?")
+	else
+		dump(state)
+	end
 end
 
 M.updateLoading = updateLoading

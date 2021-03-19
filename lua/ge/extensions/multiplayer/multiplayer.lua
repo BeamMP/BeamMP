@@ -19,6 +19,7 @@ local function startMultiplayerHelper (level, startPointName)
 
   inputActionFilter.clear(0)
 
+  spawn.preventPlayerSpawning = true -- no default pickup pog
   core_levels.startLevel(levelPath)
   core_gamestate.requestExitLoadingScreen(logTag .. '.startMultiplayerHelper')
 end

@@ -669,9 +669,9 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     $rootScope.$broadcast('MenuHide');
   };
   vm.loadDefault = function() {
-    bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.spawnDefaultRequest('\"..obj:getID()..\"')\")");
+    //bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.spawnDefaultRequest('\"..obj:getID()..\"')\")");
 
-    bngApi.engineLua('extensions.hook("trackNewVeh")');
+    bngApi.engineLua('MPVehicleGE.spawnDefaultRequest()');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };

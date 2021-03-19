@@ -14,6 +14,7 @@ local lastResetTime = {}
 local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
+local jbeamMap = {}
 local nicknameMap = {}
 local nickIDMap = {}
 local nicknamePrefixMap = {}
@@ -220,6 +221,18 @@ local function applyVehEdit(serverID, data)
 		end
 	else
 		log('W','beammp.applyEdit',"The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
+
+
+		local c            = veh.color
+		local p0           = veh.colorPalette0
+		local p1           = veh.colorPalette1
+		local pos          = veh:getPosition()
+		local rot          = quat(veh:getRotation())
+
+
+		print("Updating vehicle from server "..vehicleName.." with id "..serverID)
+		spawn.setVehicleObject(veh, vehicleName, serialize(vehicleConfig), pos, rot, c, p0, p1, true)
+
 	end
 end
 
@@ -285,7 +298,7 @@ local function applyVehSpawn(event)
 	print("Received a vehicle from server with serverVehicleID "..event.serverVehicleID)
 	print("It is for "..event.playerNickname)
 
-	onVehicleSpawnedAllowed = false
+	onVehicleSpawnedAllowed = false -- this flag is used to indicate whether the next spawn is remote or not
 
 	local allowed = false
 	local vehiclesList = extensions.core_vehicles.getModelNames()
@@ -298,14 +311,27 @@ local function applyVehSpawn(event)
 		return
 	end
 
-	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)
-	local spawnedVehID = spawnedVeh:getID()
-	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
-	insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
-	nicknameMap[spawnedVehID] = {
-		nickname = event.playerNickname,
-		role = event.playerRole
-	}
+
+	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
+
+	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
+
+	if spawnedVeh then
+		print("Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
+		spawn.setVehicleObject(spawnedVeh, vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), true)
+	else
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)
+		spawnedVehID = spawnedVeh:getID()
+		print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
+		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
+		nicknameMap[spawnedVehID] = {
+			nickname = event.playerNickname,
+			role = event.playerRole
+		}
+	end
+
+	jbeamMap[spawnedVehID] = vehicleName
+
 	core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
 	spawnedVeh:queueLuaCommand("hydros.onFFBConfigChanged(nil)")
 end
@@ -376,24 +402,55 @@ end
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
+
+	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+
 	local veh = be:getObjectByID(gameVehicleID)
-	if isOwn(gameVehicleID) ~= 1 and getServerVehicleID(gameVehicleID) == nil then -- If it's not an edit
-		print("Vehicle Spawned "..gameVehicleID)
-		local veh = be:getObjectByID(gameVehicleID)
+
+
+	print("SPAWN")
+	dump(veh.mpVehicleType)
+	dump(isOwn(gameVehicleID) ~= 1)
+	dump(getServerVehicleID(gameVehicleID) == nil)
+	dump(jbeamMap[gameVehicleID])
+
+
+	if not jbeamMap[gameVehicleID] then -- If it's not an edit
+		print("New Vehicle Spawned "..gameVehicleID)
+
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
-		if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
-			if onVehicleSpawnedAllowed then
-				sendVehicle(gameVehicleID) -- Send it to the server
-			else
-				onVehicleSpawnedAllowed = true
-			end
+
+
+		if onVehicleSpawnedAllowed then -- if false then we spawned it (from server)
+			sendVehicle(gameVehicleID) -- Send it to the server
 		end
+
+		onVehicleSpawnedAllowed = true
+			
+
 	else
-		print("Vehicle "..gameVehicleID.." was edited")
-		syncTimer = 0
-		vehiclesToSync[gameVehicleID] = 1.
+
+		if jbeamMap[gameVehicleID] ~= veh:getJBeamFilename() then
+			print("Vehicle Updated")
+			
+			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
+			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
+
+			if onVehicleSpawnedAllowed then -- if false then we spawned it (from server)
+				sendVehicle(gameVehicleID) -- Send it to the server
+			end
+	
+			onVehicleSpawnedAllowed = true
+			
+		else
+			print("Vehicle "..gameVehicleID.." was edited")
+			syncTimer = 0
+			vehiclesToSync[gameVehicleID] = 1.
+		end
 	end
+	
+	jbeamMap[gameVehicleID] = veh:getJBeamFilename()
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 
@@ -584,27 +641,33 @@ local function saveDefaultRequest(gameVehicleID)
 		print("Request to save car id "..gameVehicleID.." DENIED")
 	end
 end
+local function forceUpdateVehicle(gameVehicleID)
+	
+	jbeamMap[gameVehicleID] = '-'
+	
+end
 
-local function spawnDefaultRequest(gameVehicleID)
+local function spawnDefaultRequest()
+	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh") end
+
+
 	local currentVehicle = be:getPlayerVehicle(0)
-	if FS:fileExists('settings/default.pc') then
-		local data = jsonReadFile('settings/default.pc')
-		if currentVehicle ~= nil and isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
-			commands.setFreeCamera()
-			core_vehicles.removeCurrent()
-			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
+	local defaultConfig = jsonReadFile('settings/default.pc')
+
+	if currentVehicle then
+		local gameVehicleID = currentVehicle:getID()
+		jbeamMap[gameVehicleID] = '-'
+		if isOwn(gameVehicleID) then
+			core_vehicles.replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		else
-			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
+			core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		end
 	else
-		if currentVehicle ~= nil and isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
-			commands.setFreeCamera()
-			core_vehicles.removeCurrent()
-			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
-		else
-			core_vehicles.spawnNewVehicle(core_vehicles.defaultVehicleModel)
-		end
+
+		core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+
 	end
+	extensions.hook("trackNewVeh")
 end
 
 local function syncVehicles()
@@ -917,6 +980,7 @@ M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: 
 M.removeRequest            = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
 M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
+M.forceUpdateVehicle       = forceUpdateVehicle      -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
 M.sendBeamstate            = sendBeamstate            -- 
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName

@@ -23,6 +23,10 @@ end
 
 local function tableDiff(old, new)
 	local diff, o, n = {},{},{}
+	
+	if not old then return new, {}, new end
+	if not new then return old, old, {} end
+	
 	for k,v in pairs(old) do if new[k] ~= v then diff[k] = v; o[k] = v end end
 	for k,v in pairs(new) do if old[k] ~= v then diff[k] = v; n[k] = v end end
 

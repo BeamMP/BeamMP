@@ -10,6 +10,15 @@
 	  <div ng-if="!vehicles.isMPSession && !vehicles.isNotMPSession" flex layout="row" layout-align="center center" layout-wrap> </div>
       <div ng-if="vehicles.isMPSession" flex layout="row" layout-align="center center" layout-wrap>
 
+        <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()">
+          <md-icon class="material-icons"  style="color:black;;">sd_storage</md-icon>
+          {{ ::'ui.options.gameplay.defaultToCurrentVehicle' | translate }}
+        </md-button>
+        <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()">
+          <md-icon class="material-icons"  style="color:black;;">folder_open</md-icon>
+          {{ ::'ui.options.gameplay.loadDefaultVehicle' | translate }}
+        </md-button>
+
         <md-button class="md-raised" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()">
           <md-icon class="material-icons"  style="color:black;font:bold;">content_copy</md-icon>
           {{ ::'ui.options.gameplay.cloneCurrentVehicle' | translate }}

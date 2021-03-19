@@ -577,7 +577,37 @@ local function removeRequest(gameVehicleID)
 	end
 end
 
+local function saveDefaultRequest(gameVehicleID)
+	if isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
+		extensions.core_vehicle_partmgmt.savedefault()
+		print("Request to save car id "..gameVehicleID.." DONE")
+	else
+		guihooks.trigger('Message', {ttl = 5, msg = "Cant't set another player's vehicle as default", icon = 'error'})
+		print("Request to save car id "..gameVehicleID.." DENIED")
+	end
+end
 
+local function spawnDefaultRequest(gameVehicleID)
+	local currentVehicle = be:getPlayerVehicle(0)
+	if FS:fileExists('settings/default.pc') then
+		local data = jsonReadFile('settings/default.pc')
+		if currentVehicle ~= nil and isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
+			commands.setFreeCamera()
+			core_vehicles.removeCurrent()
+			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
+		else
+			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
+		end
+	else
+		if currentVehicle ~= nil and isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
+			commands.setFreeCamera()
+			core_vehicles.removeCurrent()
+			core_vehicles.spawnNewVehicle(data.model, {config = 'settings/default.pc', licenseText = data.licenseName})
+		else
+			core_vehicles.spawnNewVehicle(core_vehicles.defaultVehicleModel)
+		end
+	end
+end
 
 local function syncVehicles()
 	for k,v in pairs(vehiclesToSync) do
@@ -887,6 +917,8 @@ M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetNam
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.removeRequest            = removeRequest            -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
+M.saveDefaultRequest       = saveDefaultRequest       -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
+M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: vehID  NOTE: always removes current veh, only uses the param for permission checking
 M.sendBeamstate            = sendBeamstate            -- 
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName

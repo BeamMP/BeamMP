@@ -669,12 +669,15 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     $rootScope.$broadcast('MenuHide');
   };
   vm.loadDefault = function() {
-    bngApi.engineLua('core_vehicles.spawnDefault(); extensions.hook("trackNewVeh")');
+    bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.spawnDefaultRequest('\"..obj:getID()..\"')\")");
+
+    bngApi.engineLua('extensions.hook("trackNewVeh")');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };
   vm.saveDefault = function() {
-    bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();');
+    bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.saveDefaultRequest('\"..obj:getID()..\"')\")");
+    //bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };

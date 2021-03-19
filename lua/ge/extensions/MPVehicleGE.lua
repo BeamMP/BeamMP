@@ -20,7 +20,6 @@ local nicknamePrefixMap = {}
 local nicknameSuffixMap = {}
 local distanceMap = {}
 local nicknamesAllowed = true
-local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local onVehicleSpawnedAllowed = true
@@ -194,7 +193,6 @@ local function applyVehEdit(serverID, data)
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
 	if vehicleName == veh:getJBeamFilename() then
-		--latestVeh = be:getPlayerVehicle(0) -- Camera fix
 		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
 		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 

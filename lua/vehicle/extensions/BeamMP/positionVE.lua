@@ -1,9 +1,9 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000 & stefan750.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- 
+--====================================================================================
 
 local M = {}
 
@@ -267,7 +267,7 @@ local function getVehicleRotation()
 		tim = timer,
 		ping = ownPing + lastDT
 	}
-	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
+	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', "..obj:getID()..")") -- Send it
 end
 
 
@@ -310,7 +310,7 @@ local function setVehiclePosRot(data)
 	remoteData.recTime = timer
 
 	--print("OwnPing = "..ownPing.." Ping = "..ping)
-	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
+	obj:queueGameEngineLua("UI.setVehPing("..obj:getID()..", \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
 

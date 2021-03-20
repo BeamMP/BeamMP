@@ -682,6 +682,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
   vm.save = function (configName) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`);
+    //bngApi.engineLua(`MPVehicleGE.saveConfigRequest("${configName}.pc")`);
 
     if (vm.saveThumbnail == true) {
       $scope.$emit('hide_ui', true);

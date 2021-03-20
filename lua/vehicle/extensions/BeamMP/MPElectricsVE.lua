@@ -1,9 +1,9 @@
 --====================================================================================
--- All work by Jojos38 & Titch2000.
--- You have no permission to edit, redistrobute or upload. Contact us for more info!
+-- All work by Jojos38, Titch2000, 20dka.
+-- You have no permission to edit, redistrobute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Electrics (and features derived from it) sync related functions
+--====================================================================================
 
 local M = {}
 
@@ -191,7 +191,7 @@ local function check()
 		end
 	end
 	if electricsChanged then
-		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', \'"..obj:getID().."\')")
+		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', "..obj:getID()..")")
 	end
 end
 
@@ -253,6 +253,17 @@ local function applyElectrics(data)
 		if decodedData.lineLock ~= nil then
 			if electrics.values.lineLock ~= decodedData.linelock then
 				controller.getController("lineLock").setLineLock(decodedData.linelock)
+			end
+		end
+
+		-- Ignition syncing
+		if decodedData.ignition ~= nil then
+			if electrics.values.ignition ~= decodedData.ignition then
+				if decodedData.ignition == true then
+					controller.mainController.setStarter(true)
+				else
+					controller.mainController.setEngineIgnition(false)
+				end
 			end
 		end
 

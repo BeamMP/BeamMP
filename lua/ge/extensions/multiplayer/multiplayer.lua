@@ -19,6 +19,7 @@ local function startMultiplayerHelper (level, startPointName)
 
   inputActionFilter.clear(0)
 
+  spawn.preventPlayerSpawning = true -- no default pickup pog
   core_levels.startLevel(levelPath)
   core_gamestate.requestExitLoadingScreen(logTag .. '.startMultiplayerHelper')
 end
@@ -98,7 +99,7 @@ end
 local function onClientPostStartMission()
   if MPCoreNetwork.isMPSession() then
     core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
-    UI.ready("MP-SESSION")
+    UI.ready("MP-GAMESTATE")
   end
 end
 

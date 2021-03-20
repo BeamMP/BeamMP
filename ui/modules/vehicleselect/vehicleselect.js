@@ -14,8 +14,8 @@ angular.module('beamng.stuff')
   var configs = {
     default: {
       hide: {},
-      selected: (carObj, model, config, color, spawnNew) => {
-        Vehicles.addToGame(model, config, color, spawnNew);
+      selected: (carObj, model, config, color, spawnNew, mp) => {
+        Vehicles.addToGame(model, config, color, spawnNew, mp);
         $state.go('menu');
         $rootScope.$broadcast('MenuHide');
       },
@@ -190,9 +190,10 @@ angular.module('beamng.stuff')
        * @param {string} config <TODO>
        * @param {string} color <TODO>
        * @param {boolean} spawnNew Whether to spawn a new vehicle into game instead of replacing the current
+       * @param {boolean} mp are we in a beammp session
       **/
-      addToGame: function (model, config, color, spawnNew) {
-        logger.log('got', model, config, color, spawnNew);
+      addToGame: function (model, config, color, spawnNew, mp) {
+        logger.log('got', model, config, color, spawnNew, mp);
 
         var fallback = $timeout(() => {
           // if the car isn't spawned by now it will probably not spawn at all, so remove the waiting sign
@@ -201,8 +202,9 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = "replaceVehicle";
-          if (spawnNew) func = "spawnNewVehicle";
+          var func = "core_vehicles.replaceVehicle";
+          if (spawnNew) func = "core_vehicles.spawnNewVehicle";
+          if (mp) func = "MPVehicleGE.spawnRequest";
 
           var luaArgs = {};
 
@@ -222,7 +224,11 @@ angular.module('beamng.stuff')
             model = model.key;
           }
 
-          bngApi.engineLua('core_vehicles.' + func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {
+		  if (spawnNew) {
+			luaArgs.spawnNew = true;
+		  }
+
+          bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {
             $rootScope.$broadcast('app:waiting', false);
             // car was spawned clear fallback
             $timeout.cancel(fallback);
@@ -309,8 +315,17 @@ angular.module('beamng.stuff')
   vm.showData = (title, performance) => (vm.selectedConfig[title] !== undefined ? Vehicles.showData(title, true, performance) : false);
 
   vm.launchConfig = function (spawnNew) {
-    if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew || vm.isMPSession);  //dont touch dis - deer
+    //if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+    console.log(vm.selectedConfig);
+    console.log(vm.model);
+    console.log(spawnNew);
+    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew, vm.isMPSession);  //dont touch dis - deer
+	//if (vm.isMPSession) {
+	//	if (spawnNew) bngApi.engineLua(`MPVehicleGE.spawnRequest("`+vm.model.key+`", "`+vm.selectedConfig.key+`", "`+vm.selectedColor+`", true)`);
+	//	else          bngApi.engineLua(`MPVehicleGE.spawnRequest("`+vm.model.key+`", "`+vm.selectedConfig.key+`", "`+vm.selectedColor+`", false)`);
+	//} else {
+	//	vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew);
+	//}
   };
 
   // because of bug in non compete iirc
@@ -457,18 +472,29 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   };
 
   vm.launchVehicle = function (model) {
-	bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+	console.log(model);
+	//bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-		console.log("case 1")
-        vm.mode.selected(model, model.key, model.default_pc, model.default_color, vm.isMPSession)
+      console.log("case 1")
+      //if (vm.isMPSession) bngApi.engineLua('MPVehicleGE.spawnRequest("'+model.key+'", "'+model.default_pc+'", "'+model.default_color+'")');
+      //else 
+		  vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
     }
     else if (vm.showConfigurations && model.model_key !== undefined) {
       console.log("case 2")
-      vm.mode.selected(model, model.model_key, model.key);
+      //if (vm.isMPSession) bngApi.engineLua('MPVehicleGE.spawnRequest("'+model.model_key+'", "'+model.key+'")');
+      //else 
+		  vm.mode.selected(model, model.model_key, model.key, null, false, vm.isMPSession)
     } else {
       console.log("case 3")
-      vm.mode.selected(model, model.key);
+	  //if (vm.isMPSession) bngApi.engineLua('MPVehicleGE.spawnRequest("'+model.key+'")');
+      //else 
+		  vm.mode.selected(model, model.key, null, null, false, vm.isMPSession)
     }
+
+	$state.go('menu');
+    $rootScope.$broadcast('MenuHide');
+
   };
 
   vm.showData = (key) => Vehicles.showData(key, false);
@@ -654,8 +680,9 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   vm.removeCurrentVehicle = function() {
     //bngApi.engineLua("MPVehicleGE.removeRequest('\"..obj:getID()..\"'\)");
 
-    if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-    else bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")');
+    //if (false) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
+    //else 
+		bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")');
 
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
@@ -669,12 +696,15 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     $rootScope.$broadcast('MenuHide');
   };
   vm.loadDefault = function() {
-    bngApi.engineLua('core_vehicles.spawnDefault(); extensions.hook("trackNewVeh")');
+    //bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.spawnDefaultRequest('\"..obj:getID()..\"')\")");
+
+    bngApi.engineLua('MPVehicleGE.spawnDefaultRequest()');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };
   vm.saveDefault = function() {
-    bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();');
+    bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.saveDefaultRequest('\"..obj:getID()..\"')\")");
+    //bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();');
     $state.go('menu');
     $rootScope.$broadcast('MenuHide');
   };

@@ -1,6 +1,6 @@
 --====================================================================================
--- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- All work by Titch2000, jojos38 & 20dka.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
@@ -96,7 +96,6 @@ end
 function AddEventHandler(n, f)
 	print("Adding Event Handler: Name = "..tostring(n))
 	table.insert(eventTriggers, {name = n, func = f})
-	dump(eventTriggers)
 end
 
 local HandleNetwork = {
@@ -148,5 +147,5 @@ M.connectionStatus = connectionStatus
 M.CallEvent = handleEvents
 
 
-
+print("MPGameNetwork loaded")
 return M

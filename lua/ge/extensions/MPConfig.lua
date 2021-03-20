@@ -1,6 +1,12 @@
+--====================================================================================
+-- All work by Titch2000.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+
 
 local M = {}
-print("mpConfig Initialising...")
+print("Loading mpConfig...")
 
 -- MP VARIABLES
 local Nickname = ""
@@ -134,40 +140,34 @@ end
 
 
 
--- Variables
-M.ShowNameTags = ShowNameTags
-M.Nickname = Nickname
-M.PlayerServerID = PlayerServerID
-M.getPlayerServerID = getPlayerServerID
-M.setPlayerServerID = setPlayerServerID
-M.State = State
-M.nodesDelay = nodesDelay
-M.nodesTickrate = nodesTickrate
-M.positionDelay = positionDelay
-M.positionTickrate = positionTickrate
-M.inputsDelay = inputsDelay
-M.inputsTickrate = inputsTickrate
-M.electricsDelay = electricsDelay
-M.electricsTickrate = electricsTickrate
+-- Deprecated
+
+--M.setNodesTickrate = setNodesTickrate
+--M.getNodesTickrate = getNodesTickrate
+--M.setInputsTickrate = setInputsTickrate
+--M.getInputsTickrate = getInputsTickrate
+--M.setPositionTickrate = setPositionTickrate
+--M.getPositionTickrate = getPositionTickrate
+--M.setElectricsTickrate = setElectricsTickrate
+--M.getElectricsTickrate = getElectricsTickrate
+--M.nodesDelay = nodesDelay
+--M.inputsDelay = inputsDelay
+--M.positionDelay = positionDelay
+--M.electricsDelay = electricsDelay
 
 -- Functions
-M.setNickname = setNickname
+M.getPlayerServerID = getPlayerServerID
+M.setPlayerServerID = setPlayerServerID
+
 M.getNickname = getNickname
-M.setNodesTickrate = setNodesTickrate
-M.getNodesTickrate = getNodesTickrate
-M.setPositionTickrate = setPositionTickrate
-M.getPositionTickrate = getPositionTickrate
-M.setInputsTickrate = setInputsTickrate
-M.getInputsTickrate = getInputsTickrate
-M.setElectricsTickrate = setElectricsTickrate
-M.getElectricsTickrate = getElectricsTickrate
+M.setNickname = setNickname
 
 M.getFavorites = getFavorites
 M.setFavorites = setFavorites
-
 M.getConfig = getConfig
 M.setConfig = setConfig
+
 M.acceptTos = acceptTos
 
-print("mpConfig Loaded.")
+print("mpConfig loaded")
 return M

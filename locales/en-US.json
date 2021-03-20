@@ -3917,6 +3917,8 @@
     "ui.options.multiplayer.queueSpawnEdit.tooltip": "If enabled, remote vehicle spawns and edits will be put in a queue, instead of applying instantly",
     "ui.options.multiplayer.queueAuto": "Automatic queue system",
     "ui.options.multiplayer.queueAuto.tooltip": "If enabled, you will only spawn queued vehicles once you come to a stop",
+    "ui.options.multiplayer.queueAutoSkipRemote": "Don't queue if spectating others",
+    "ui.options.multiplayer.queueAutoSkipRemote.tooltip": "If enabled and spectating other players, you will spawn queued vehicles right away",
     "ui.options.multiplayer.luaOptimisations": "Enable optimisations",
     "ui.options.multiplayer.luaOptimisations.tooltip": "If enabled, other vehicles will run limited calculations",
     "ui.options.multiplayer.nameTags": "Hide player nametags",

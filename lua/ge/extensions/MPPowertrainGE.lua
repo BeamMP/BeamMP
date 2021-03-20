@@ -1,12 +1,12 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("MPPowertrainGE Initialising...")
+print("Loading MPPowertrainGE...")
 
 
 
@@ -64,5 +64,5 @@ M.sendLivePowertrain     = sendLivePowertrain
 
 
 
-print("MPPowertrainGE Loaded.")
+print("MPPowertrainGE loaded")
 return M

@@ -41,3 +41,7 @@ registerCoreModule("MPUpdatesGE")
 
 load("nodesGE")
 registerCoreModule("nodesGE")
+
+-- load this file last so it can reference the others
+load("MPHelpers")
+registerCoreModule("MPHelpers")

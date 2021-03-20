@@ -1,9 +1,9 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Input (pedals & steering) sync related functions
+--====================================================================================
 
 local M = {}
 
@@ -33,7 +33,7 @@ local function getInputs()
 	and inputsTable.c == lastInputs.c
 	then return end
 
-	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', \'"..obj:getID().."\')") -- Send it to GE lua
+	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', "..obj:getID()..")") -- Send it to GE lua
 
 	lastInputs = inputsTable
 end

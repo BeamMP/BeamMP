@@ -96,7 +96,7 @@ local function onInit()
 	local cosAng = leftPos:cosAngle(backPos:cross(upPos))
 	
 	if cosAng < 0 then
-		print("Misaligned refNodes detected in vehicle"..obj:getId().."! This might cause wrong rotations or instability.")
+		print("Misaligned refNodes detected in vehicle "..obj:getId().."! This might cause wrong rotations or instability.")
 	end
 	
 	if connectedBeams[refNodes.ref] then

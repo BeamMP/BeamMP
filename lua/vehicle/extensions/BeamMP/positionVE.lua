@@ -2,7 +2,7 @@
 -- All work by jojos38 & Titch2000 & stefan750.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
--- 
+-- Get and set the position of multiplayer vehicles while keeping collisions active
 --====================================================================================
 
 local M = {}
@@ -65,7 +65,7 @@ local tpDelayAdd = 1           -- Additional teleport delay (s)
 local tpDistAdd = 1            -- Additional teleport distance (m)
 local tpDistMul1 = 0.1         -- Multiplier for delayed teleport distance based on velocity (m per m/s)
 local tpDistMul2 = 0.5         -- Multiplier for instant teleport distance based on velocity (m per m/s)
-local tpRotAdd = 0.5           -- Additional teleport rotation (rad)
+local tpRotAdd = 0.3           -- Additional teleport rotation (rad)
 local tpRotMul1 = 0.2          -- Multiplier for delayed teleport rotation based on rotation velocity (rad per rad/s)
 local tpRotMul2 = 0.5          -- Multiplier for instant teleport rotation based on rotation velocity (rad per rad/s)
 local tpVelSmoother = newTemporalSmoothingNonLinear(2,50)  -- Smoother for filtering low velocities during collisions
@@ -76,6 +76,8 @@ local maxPredict = 0.3         -- Maximum prediction limit (s)
 local packetTimeout = 0.1      -- Stop prediction if no packet received within this time (s)
 
 -- Smoothing
+local localVelSmoother = newVectorSmoothing(50)             -- Smoother for local velocity
+local localRvelSmoother = newVectorSmoothing(50)            -- Smoother for local angular velocity
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
 local remoteAccSmoother = newVectorSmoothing(1)             -- Smoother for acceleration calculated from received data
@@ -108,6 +110,11 @@ local remoteData = {
 	timeOffset = 0,
 	recTime = 0
 }
+
+local smoothVel = vec3(0,0,0)
+local smoothRvel = vec3(0,0,0)
+
+local physHandlerAdded = false
 
 local debugDrawer = obj.debugDrawProxy
 -- ============= VARIABLES =============
@@ -145,21 +152,35 @@ local function onReset()
 end
 
 
+local function update(dtSim)
+	-- Smooth vehicle velocity to prevent vibrating
+	smoothVel = localVelSmoother:get(vec3(obj:getVelocity()), dtSim)
+	smoothRvel = localRvelSmoother:get(vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()), dtSim)
+end
+
+
 
 local function updateGFX(dt)
 	timer = timer + dt
 	lastDT = dt
 
+	-- Add physics update handler
+	if not physHandlerAdded and MPVehicleVE then
+        MPVehicleVE.AddPhysUpdateHandler('positionVE', M.update) --register to get phys updates
+        physHandlerAdded = true
+    end
+
+	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
-	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
+	local vehRvel = smoothRvel:rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
 	
 	local cog = velocityVE.cogRel:rotated(vehRot)
 	local vehPos = vec3(obj:getPosition()) + cog
-	local vehVel = vec3(obj:getVelocity()) + cog:cross(vehRvel)
+	local vehVel = smoothVel + cog:cross(vehRvel)
 	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	lastVehVel = vehVel
@@ -212,7 +233,8 @@ local function updateGFX(dt)
 	local maxVel = tpVelSmoother:get(max(vel:length(), vehVel:length()), dt)
 	local tpDist1 = tpDistAdd + maxVel*tpDistMul1
 	local tpDist2 = tpDistAdd + maxVel*tpDistMul2
-	-- Debug
+	
+	-- Debug for teleport distances
 	--debugDrawer:drawSphere(tpDist1, vehPos:toFloat3(), color(0,0,255,50))
 	--debugDrawer:drawSphere(tpDist2, vehPos:toFloat3(), color(255,0,0,50))
 	
@@ -234,12 +256,12 @@ local function updateGFX(dt)
 		-- Subtract COG offset because setPosition works relative to refNode
 		local tpPos = pos - velocityVE.cogRel:rotated(rot)
 		-- Offset teleport rotation for vehicles with different JBeam orientations
-		local tpRot = rot*vehRot/quat(obj:getRotation())
+		local tpRot = quat(obj:getRotation())/vehRot*rot
 		
 		if rotErrorLen > tpRot1 or rotErrorLen > tpRot2 then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
 			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
-			--print("Teleport Angle "..obj:getID())
+			--print("Teleport Rotation "..obj:getID())
 		else
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
 			--print("Teleport "..obj:getID())
@@ -299,11 +321,11 @@ end
 local function getVehicleRotation()
 	
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
-	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
+	local rvel = smoothRvel:rotated(rot)
 	
 	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
-	local vel = vec3(obj:getVelocity()) + cog:cross(rvel)
+	local vel = smoothVel + cog:cross(rvel)
 	
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
@@ -362,6 +384,7 @@ end
 
 
 M.onReset            = onReset
+M.update             = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot

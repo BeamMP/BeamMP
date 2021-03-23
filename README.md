@@ -12,7 +12,6 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
  - [Installation](#installation)
  - [Servers](#servers)
  - [How does it work?](#how-does-it-work)
- - [Ports](#ports)
  - [Roadmap](#roadmap)
  - [Troubleshooting](#troubleshooting)
 
@@ -44,9 +43,6 @@ The Launcher is a separate program which start the game and connects to the Lua 
 For more information on how the launcher and server operate, you can read the source code (C++) in their respective repositories: 
 - [Launcher](https://github.com/BeamMP/BeamMP-Launcher)
 - [Server](https://github.com/BeamMP/BeamMP-Server)
-
-## Ports
- -  `TCP` & `UDP`: `30814`
 
 # Roadmap
 You can see and keep track of development, planned features, etc. on our [Trello](https://trello.com/b/Kw75j3zZ/beamngdrive-multiplayer)!

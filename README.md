@@ -1,21 +1,32 @@
 # BeamMP
-A LUA implementation at attempting to bring local network multiplayer to BeamNG.drive
+A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)
 
 # Contents
- - Installation
- - How does this work?
- - Network Codes
- - Progression tracking.
- - Troubleshooting - connecting to and playing on servers
- - Discord link
+ - [Installation](#installation)
+ - [Servers](#servers)
+ - [How does this work?](#how-does-this-work)
+ - [New Network Codes](#new-network-codes)
+ - [Network Codes (deprecated)](#network-codes)
+ - [Ports](#ports)
+ - [Progression tracking.](#progression-tracking)
+ - [Helpful links](#helpful-links)
+ - [Helper Snippets](#helper-snippets)
+ - [Troubleshooting](#troubleshooting)
+   - ["I have the mod installed, but I can’t connect to any servers…"](#i-have-the-mod-installed-but-i-cant-connect-to-any-servers)
+   - ["I am connected to the server, but I am experiencing problems..."](#i-am-connected-to-the-server-but-i-am-experiencing-problems)
+   - ["I cannot find a fix for my issue" or "My issue still persists”](#i-cannot-find-a-fix-for-my-issue-or-my-issue-still-persists)
+ - [Discord Server](https://discord.gg/BeamMP)<sub>🔗</sub>
 
 
 # Installation
-The BeamMP mod has been made as simple as it gets. Just head over to our website https://beammp.com and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. Done :)
+The BeamMP mod has been made as simple as it gets. Just head over to our website [beammp.com](https://beammp.com) and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. Done :)
+
+If you need help, see the [troubleshooting](#troubleshooting) section or join the official [Discord](https://discord.gg/BeamMP)!
 
 # Servers
-Server is open source as well as the launcher.
-Please check out wiki.beammp.com for how to setup your own server.
+The Server is usable free of charge, and the source code is available on [GitHub](https://github.com/BeamMP/BeamMP-Server).
+
+Please check out [wiki.beammp.com](https://Wiki.beammp.com) for a guide on how to setup your own server.
 
 # How does this work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.
@@ -109,7 +120,7 @@ Update: Actually is for this: https://github.com/BeamNG/BeamNGpy Still was helpf
 
 # Troubleshooting
 
-### “I have the mod installed, but I can’t connect to any servers…”
+### "I have the mod installed, but I can’t connect to any servers…"
 
 At this stage you should have the bridge and BeamMP UI up and running but cannot connect to a server. If you don’t have one of these, please follow the video posted above (in 'Installation') carefully.
 

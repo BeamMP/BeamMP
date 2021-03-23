@@ -4,9 +4,7 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)
 # Contents
  - [Installation](#installation)
  - [Servers](#servers)
- - [How does this work?](#how-does-this-work)
- - [New Network Codes](#new-network-codes)
- - [Network Codes (deprecated)](#network-codes)
+ - [How does it work?](#how-does-it-work)
  - [Ports](#ports)
  - [Progression tracking.](#progression-tracking)
  - [Helpful links](#helpful-links)
@@ -40,47 +38,9 @@ Now the new client will be setting up the world its current vehicles and so on.
 
 once the new client is setup, all players will unpause and rely on web sockets to maintain an updated gameplay. mean while the host will periodically update the running configuration.
 
-# New Network Codes
-  Format: Capital Letter Followed by option (Lowercase) then data or whatever else
-
-  Server / Setup
-
-  Game / Session
-  - O
-    - d = Vehicle Destroyed, Format: Od:<ServerVehicleID>
-    - s = Vehicle Spawned, Format: Os:0:<vehicleData>, 0 for the fact that it needs a serverVehicleID still.
-    - m = Vehicle Moved / Switched, Format: Om:<ServerVehicleID>  -- UNUSED NOW
-    - r = Vehicle Resetted, Format: Or:<ServerVehicleID>
-
-# Network Codes
-  XXXX - All codes are 4 characters and can be translated to a different control
-
-  Server / Setup
-  - HOLA = Welcome / Connection Successful
-  - PING = Ping request
-  - USER = Username Setting
-  - MAPC = Map Checking
-  - MAPS = Map Setting
-  - CHAT = Chat Message
-  - KICK = You have been Kicked
-  - PLST = Sending Player List to client
-  - SMSG = Screen Based Message
-
-  Game / Session
-  - U-VR (2121) = Vehicle Destroyed (deleted) Update (Your telling this)
-  - U-VC (2020) = Vehicle Config Update / Confirm / Created
-  - U-VL (2134) = Vehicle Position Update (Coords)
-  - U-VP (2133) = Vehicle Powertrain Update
-  - U-VN (2132) = Vehicle Notes Update
-  - U-VE (2131) = Vehicle Electrics Update
-  - U-VI (2130) = Vehicle Inputs Update
-  - U-VV = Vehicle Velocity Update
-
 # Ports
  - TCP = 30813
  - UDP = 30814
- - WS  = 30815
-
 
 # Progression tracking
 you can see and keep track of progression here:

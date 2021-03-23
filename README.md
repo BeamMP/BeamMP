@@ -19,16 +19,19 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)
 
 
 # Installation
-The BeamMP mod has been made as simple as it gets. Just head over to our website [beammp.com](https://beammp.com) and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. Done :)
+The BeamMP mod has been made as simple as it gets. Just head over to [our website (BeamMP.com)](https://beammp.com) and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. 
 
-If you need help, see the [troubleshooting](#troubleshooting) section or join the official [Discord](https://discord.gg/BeamMP)!
+Now you can play by clicking "Play" and then "Multiplayer", logging in with either a guest account or a [BeamMP Forum](https://forum.beammp.com) account.
+Then just select a server to play on! That's it! :)
+
+If you need help at any point, see the [troubleshooting](#troubleshooting) section or join the official [Discord](https://discord.gg/BeamMP) and ask our dedicated support team!
 
 # Servers
 The Server is usable free of charge, and the source code is available on [GitHub](https://github.com/BeamMP/BeamMP-Server).
 
 Please check out [wiki.beammp.com](https://Wiki.beammp.com) for a guide on how to setup your own server.
 
-# How does this work?
+# How does it work?
 So at present the idea sits as: Player sets them self as host, by setting a port and clicking host. This creates a running configuration of the world, current vehicles so on. This config is the first file that will be sent to any clients that try to join.
 
 Joining clients will check that they can match that configuration file. if they can then they tell the server Okay, I'm going to join. This pauses the host and any joined clients. The new client will then setup their world to match the running config which will have been updated now to be the same as the state that the host has been paused at. The new client will also be in a paused state.

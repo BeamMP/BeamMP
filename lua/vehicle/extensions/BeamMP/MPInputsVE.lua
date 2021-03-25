@@ -44,7 +44,7 @@ local function updateGFX(dt)
 			--end
 
 			steering = (steeringSlope * timeSinceLastApply) + steering
-			print(steeringSlope)
+			--print(steeringSlope)
 
 			steeringSlope = setSteeringSlope * (math.abs(steering - currentApply.s)/math.abs(steeringStart - currentApply.s))
 
@@ -137,14 +137,9 @@ local function applyInputs(data)
 			p = decodedData.p,
 			c = decodedData.c
 		}
-		for key,value in pairs(currentApply) do print(tostring(key) .. ": " .. tostring(value)) end
 
 		--update variables
-		print(appliedBefore)
-		print(timeSinceLastApply)
-		print(applyTime)
 		if appliedBefore == true then
-			print("AYE")
 
 			if timeSinceLastApply > 0 then
 				applyTime = timeSinceLastApply

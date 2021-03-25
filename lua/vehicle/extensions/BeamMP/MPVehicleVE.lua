@@ -41,6 +41,9 @@ local function updateGFX(dtReal)
 		print("Adding phys update handler hook")
 		origPhysUpdateFunc = motionSim.update
 		motionSim.update = update
+		
+		motionSim.isPhysicsStepUsed = function() return true end
+		updateCorePhysicsStepEnabled()
 	end
 
 	if v.mpVehicleType == 'R' and hydros.enableFFB then -- disable ffb if it got enabled by a reset

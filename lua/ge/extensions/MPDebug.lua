@@ -10,7 +10,7 @@ print("Loading MPDebug...")
 
 
 
-local function putcarspawnyes(targetPos)
+local function tpPlayerToPos(targetPos)
 	local activeVehicle = be:getPlayerVehicle(0)
 
 	if activeVehicle then
@@ -143,7 +143,7 @@ local function drawSpawnTeleport()
 		im.NextColumn()
 
 		if im.Button("Teleport##"..tostring(listIndex)) then
-			putcarspawnyes(point.pos)
+			tpPlayerToPos(point.pos)
 		end
 		im.NextColumn()
 	end
@@ -236,6 +236,13 @@ local function hideUI()
 	gui.hideWindow("MPnetworkPerf")
 end
 
+function MP_Console(show)
+	if show and show == 1 then
+		showUI()
+	elseif show == 0 then
+		hideUI()
+	end
+end
 
 local function onUpdate()
 	drawPlayerList()
@@ -256,10 +263,8 @@ end
 
 M.onExtensionLoaded		= onExtensionLoaded
 M.onUpdate				= onUpdate
-M.showUI				= showUI
-M.hideUI				= hideUI
-
-
+--M.showUI				= showUI
+--M.hideUI				= hideUI
 
 
 M.packetSent = packetSent

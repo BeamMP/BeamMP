@@ -22,7 +22,7 @@ angular.module('beamng.stuff')
 			document.getElementById('servers-btn').click();
 		}
 	});
-	
+
 	this.receiveServers = receiveServers;
 
 	vm.switchToLogin = function() {
@@ -38,12 +38,12 @@ angular.module('beamng.stuff')
 	vm.login = function() {
 		var u = document.getElementById('loginUsername').value.trim();
 		var p = document.getElementById('loginPassword').value.trim();
-		
+
 		if (u == "" || p == ""){
 			document.getElementById('loginHeader').textContent = 'Missing credentials';
 			return;
 		}
-		
+
 		document.getElementById('loginUsername').value = '';
 		document.getElementById('loginPassword').value = '';
 		var d = {
@@ -88,7 +88,7 @@ angular.module('beamng.stuff')
 		}
 		if (data.hide) { //login successful
 			document.getElementById('MultiplayerLoginBody').style.display = 'none'
-			
+
 			if (data.message !== undefined) {
 				console.log(data.message);
 				localStorage.setItem('welcomeMessage',data.message.replace('Authentication Successful. ',''));
@@ -123,7 +123,7 @@ angular.module('beamng.stuff')
 		logger.debug("Attempting to refresh server list.")
 		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
-	
+
 	vm.clearRecents = function() {
 		localStorage.removeItem("recents");
 		vm.refreshList();
@@ -246,14 +246,14 @@ angular.module('beamng.stuff')
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerServersController] destroyed.');
 	});
-	
+
 	$scope.$on('onServersReceived', async function (event, data) {
 		servers = receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
-	
+
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -278,7 +278,7 @@ angular.module('beamng.stuff')
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
-	
+
 	vm.searchText = "";
 
 	bngApi.engineLua('MPCoreNetwork.getServers()');
@@ -356,7 +356,7 @@ angular.module('beamng.stuff')
 		logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
-	
+
 	// Called when getServers() answered
 	$scope.$on('onServersReceived', async function (event, data) {
 		servers = receiveServers(JSON.parse(data));
@@ -364,7 +364,7 @@ angular.module('beamng.stuff')
 		recents = await getRecents();
 		vm.repopulate();
 	});
-	
+
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -833,15 +833,15 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 
 		// Filter by search
 		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) shown = false;
-		
+
 		// Filter by empty or full
 		else if(checkIsEmpty && server.players > 0) shown = false;
 		else if(checkIsNotEmpty && server.players == 0) shown = false;
 		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
-		
+
 		// Filter by mod size
 		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;
-	
+
 		// Filter by map
 		else if((selectMap != "Any" && selectMap != smoothMapName)) shown = false;
 
@@ -865,7 +865,7 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 			if (isRecent) addRecent(server, true);
 		}
 	}
-	
+
 	// Here we check if some favorited / recents servers are offline or not
 	if (type == 1 || type == 2) {
 		var toCheck = type == 1 ? favorites : recents
@@ -913,7 +913,7 @@ function select(row, bngApi) {
 	row.classList.add("highlight");
 	row.selected = true;
 	table.selectedRow = row;
-	
+
 	// Add the highlight menu
 	var server = row.server;
 	highlightedServer = server; // Set it as the selected server
@@ -928,7 +928,7 @@ function select(row, bngApi) {
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
 	connectToServerButton.onclick = function() { connect(bngApi) };
-	
+
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');
 		removeFavButton.onclick = function() { removeFav(server); }
@@ -946,8 +946,9 @@ function select(row, bngApi) {
 function receiveServers(data) {
 	var serversArray = new Array();
 	// Parse the data to a nice looking Array
+	//console.log(data)
 	for (var i = 0; i < data.length; i++) {
-		var v = data[i][Object.keys(data[i])[0]]
+		var v = data[i]
 		if(v.cversion == launcherVersion){
 			v.strippedName = stripCustomFormatting(v.sname);
 			serversArray.push(v);
@@ -959,7 +960,7 @@ function receiveServers(data) {
 		else if (a.official) return -1;
 		else if (b.official) return 1;
 		return 0;
-	});	
+	});
 	return serversArray;
 };
 

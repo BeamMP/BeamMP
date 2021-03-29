@@ -47,6 +47,7 @@ local function sendData(s)
 	if settings.getValue("showDebugOutput") == true then
 		print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 	end
+	MPDebug.packetSent(r)
 end
 
 
@@ -126,6 +127,8 @@ local function onUpdate(dt)
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)
+
+			MPDebug.packetReceived(string.len(received))
 		end
 	end
 end

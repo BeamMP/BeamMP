@@ -34,6 +34,7 @@ local filterOld = ""
 local filterCur = ""
 local originFilterImC = im.ArrayChar(256, "")
 local invalidOriginFilter = false
+local paused = false
 local winTitle = beamng_appname..".consoleNG - "..beamng_versiond .." - ".. beamng_buildtype .." - ".. beamng_arch .."##consoleNG"
 local consoleInputField = ffi.new("char[4096]", "")
 local inputCallbackC = nil
@@ -46,7 +47,7 @@ local loopHistory = im.BoolPtr(false)
 local sandboxCmd = im.BoolPtr(true)
 local focusOnShow = im.BoolPtr(true)
 local enableVehicleControls = true
-local historyFilename = cachepath .. 'ConsoleEntryHistory.json'
+local historyFilename = '/temp/ConsoleEntryHistory.json'
 local history = nil
 local historyPos = -1
 local comboCtxTxt = "GE - Lua\0GE - TorqueScript\0CEF/UI - JS\0\0"
@@ -191,6 +192,13 @@ local function toggle()
   end
 end
 
+local function clearConsole()
+  logs = {}
+  logFiltered = {}
+  logsHead = 1
+  logsTail = 1
+end
+
 local function checkPattern(pat)
   local status,err = pcall(function() string.match("", pat) end )
   if not status then filterErr = string.match(tostring(err), "%[.*%]:%d*: ?(.*)") end
@@ -242,9 +250,17 @@ local function menuToolbar(uiScale)
       end
     end
 
-    -- im.TextUnformatted(string.format("upd=%.3fms add=%.3fms", rollAvgCalc(rollAvgUpdate), rollAvgCalc(rollAvgAdd)) )
+    if paused then
+      im.TextUnformatted("Paused")
+    end
 
     local fsize = 24--*uiScale--im.CalcTextSize("test").y
+    if gui.uiIconImageButton(gui.icons.delete, {x=fsize, y=fsize}, iconButtonFgColor.Value, nil, iconButtonBgColor.Value) then
+      clearConsole()
+    end
+    im.tooltip("Clear console")
+    -- im.TextUnformatted(string.format("upd=%.3fms add=%.3fms", rollAvgCalc(rollAvgUpdate), rollAvgCalc(rollAvgAdd)) )
+
     im.SetCursorPosX(im.GetCursorPosX() + im.GetContentRegionAvailWidth() - fsize)
     if gui.uiIconImageButton(fullscreen and gui.icons.fullscreen_exit or gui.icons.fullscreen, {x=fsize, y=fsize}, iconButtonFgColor.Value, nil, iconButtonBgColor.Value) then
       if fullscreen then
@@ -325,7 +341,7 @@ local function runFilter(newEntry)
   end
 end
 
-local function inputCallback(ctx, data)
+local function inputCallback(data)
   --log('D', 'console', '>>> inputCallback 1 - ' .. dumps(data) .. ' / ' .. tostring(#history))
   if data.EventFlag == im.InputTextFlags_CallbackHistory then
     local prevHistoryPos = historyPos
@@ -412,13 +428,20 @@ local function onConsoleLog(timer, lvl, origin, line)
   local slashed = split(line,"\n")
   -- print("slash "..dumps(slashed))
   if #slashed == 0 then slashed[1]="" end --fix for empty print
-  local newEntry = {t,lvl,origin,slashed[1]}
-  logs[logsTail] = newEntry
+  if tostring(slashed[1]):len() > 4096 then
+    logs[logsTail] = {t,lvl,origin,tostring(slashed[1]):sub(1,4096)} --trim so we save memory and don't stress other part of code
+  else
+    logs[logsTail] = {t,lvl,origin,slashed[1]}
+  end
   logsTail = logsTail + 1
   if #slashed > 1 then
     for i=2,#slashed do
       -- logs[logsTail] = slashed[i]
-      logs[logsTail] = {t,lvl,origin,slashed[i]} --old T3D in-game console duplicate like that. lot simpler
+      if tostring(slashed[i]):len() > 4096 then
+        logs[logsTail] = {t,lvl,origin,tostring(slashed[i]):sub(1,4096)} --trim so we save memory and don't stress other part of code
+      else
+        logs[logsTail] = {t,lvl,origin,slashed[i]} --old T3D in-game console duplicate like that. lot simpler
+      end
       logsTail = logsTail + 1
     end
   end
@@ -462,16 +485,22 @@ local function onUpdate(dtReal, dtSim, dtRaw)
   previouslyShown = true
   -- local tim = hptimer()
 
-  local flog = Engine.getFrameLog()
-  if flog and #flog then
-    for _,l in ipairs(flog) do
-      onConsoleLog(l[1],l[2],l[3],l[4])
+  if im.IsKeyReleased(112) then --scroll lock
+    paused = not paused
+  end
+
+  if not paused then
+    local flog = Engine.getFrameLog()
+    if flog and #flog then
+      for _,l in ipairs(flog) do
+        onConsoleLog(l[1],l[2],l[3],l[4])
+      end
     end
   end
 
   local uiScale = 1
-  if editor and editor.preferences and editor.preferences.ui and editor.preferences.ui.scale then
-    uiScale = editor.preferences.ui.scale
+  if editor and editor.getPreference and editor.getPreference("ui.scale") then
+    uiScale = editor.getPreference("ui.scale")
   else
     uiScale = ui_imgui.GetIO().FontGlobalScale
   end
@@ -489,35 +518,38 @@ local function onUpdate(dtReal, dtSim, dtRaw)
   if( im.Begin(winTitle, windowOpen, im.WindowFlags_MenuBar + (fullscreen and (im.WindowFlags_NoResize+im.WindowFlags_NoMove+im.WindowFlags_NoCollapse+im.WindowFlags_NoDocking+im.WindowFlags_NoTitleBar) or 0) ) ) then
     menuToolbar(uiScale)
 
-    im.BeginHorizontal3(42)
-
     local imgsize = (im.CalcTextSize("yes_texture.dds").y + im.GetStyle().FramePadding.y * 2) / uiScale
 
     if gui.uiIconImageButton(gui.icons.error, {x=imgsize, y=imgsize}, levelFilter.E and iconColors.E.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
       levelFilter.E = not levelFilter.E
     end
     im.tooltip("Error")
+    im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.warning, {x=imgsize, y=imgsize}, levelFilter.W and iconColors.W.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
       levelFilter.W = not levelFilter.W
     end
     im.tooltip("Warning")
---games group_add
+    im.SameLine()
+
     if gui.uiIconImageButton(gui.icons.info, {x=imgsize, y=imgsize}, levelFilter.I and iconColors.I.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
       levelFilter.I = not levelFilter.I
     end
     im.tooltip("Info")
+    im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.bug_report, {x=imgsize, y=imgsize}, levelFilter.D and iconColors.D.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
       levelFilter.D = not levelFilter.D
     end
     im.tooltip("Debug")
+    im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.help, {x=imgsize, y=imgsize}, levelFilter.A and iconButtonFgColor.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
             --iconIncr = iconIncr-1
       levelFilter.A = not levelFilter.A
     end
     im.tooltip("Other")
+    im.SameLine()
 
     im.Spacing()
 
@@ -531,6 +563,7 @@ local function onUpdate(dtReal, dtSim, dtRaw)
     im.tooltip("BeamMP")
 
     im.Spacing()
+    im.SameLine()
 
     local vehicleButtonBgColor = im.GetStyleColorVec4(im.Col_Button)
     if gui.uiIconImageButton(gui.icons.directions_car,{x=imgsize, y=imgsize}, enableVehicleControls and iconButtonFgColor.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
@@ -542,33 +575,38 @@ local function onUpdate(dtReal, dtSim, dtRaw)
       setVehicleControlActive(enableVehicleControls)
     end
     im.tooltip("Enable Vehicle control while Console window is open")
+    im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.vertical_align_bottom, {x=imgsize, y=imgsize}, forceAutoScroll and iconButtonFgColor.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
       forceAutoScroll = not forceAutoScroll
     end
     im.tooltip("Force scroll bar down")
+    im.SameLine()
 
     im.Spacing()
+    im.SameLine()
 
     im.TextUnformatted("Filter(s):")
+    im.SameLine()
     im.ShowHelpMarker(helpstr, false) --broken, goes billow text
+    im.SameLine()
     -- im.TextUnformatted("(?)")
     --im.tooltip(helpstr)
 
     -- invalidOriginFilter = checkPattern(ffi.string(originFilterImC))
     -- im.PushItemWidth(260)
     im.TextUnformatted("Origin")
+    im.SameLine()
     if invalidOriginFilter then
       im.PushStyleColor2(im.Col_FrameBg, im.ImColorByRGB(255,0,0,255).Value)
     end
     gui.uiInputSearch(nil, originFilterImC, 260 * uiScale)
     -- im.InputText('Origin Filter', originFilterImC, nil)
     if invalidOriginFilter then
+      im.SameLine()
       im.TextColored(im.ImVec4(1.0, 0.0, 0.0, 1.0), tostring(filterErr) )
       im.PopStyleColor()
     end
-
-    im.EndHorizontal()
 
     local numColm = (viewColumn.time[0] and 1 or 0 ) + (viewColumn.level[0] and 1 or 0 ) + (viewColumn.origin[0] and 1 or 0 ) + (viewColumn.msg[0] and 1 or 0 )
     if im.BeginChild1("LogsChild", im.ImVec2(0, -30 * uiScale), true) and numColm>0 then
@@ -800,24 +838,32 @@ local function onUpdate(dtReal, dtSim, dtRaw)
               or (i == 4 and not viewColumn.msg[0])
               then goto continue_skipcol end
 
-            im.TextColored(lcol,"%s",tostring(v) )
+            -- im.TextColored(lcol,"%s",tostring(v))
             local txtwidth = im.CalcTextSize(tostring(v)).x
             if v ~= 2 and im.GetContentRegionAvailWidth() < txtwidth then
+              im.TextColored(lcol,"%s",tostring(v):sub(1,256) )
               txtwidth = txtwidth * (1/fontConsoleFact[0])
-              local vp = im.GetWindowViewport() 
+              local vp = im.GetWindowViewport()
               local chunkSize = tostring(v):len() * vp.Size.x / txtwidth
               if txtwidth > vp.Size.x or tostring(v):len()>chunkSize then
                 local bt = tostring(v)
                 local chunk = ""
-                while(bt:len() > chunkSize) do
+                while(bt:len() > chunkSize and chunk:len() < 2048) do
                   chunk = chunk..bt:sub(1,chunkSize).."\n"
                   bt = bt:sub(chunkSize+1)
                 end
-                chunk = chunk..bt
+                if bt:len() < chunkSize then
+                  chunk = chunk..bt
+                else
+                  chunk = chunk.."\n...\nToo long to display, check the log file"
+                  --chunk = chunk.."\nlsize="..tostring(v):len()
+                end
                 im.tooltip(chunk)
               else
                 im.tooltip(tostring(v))
               end
+            else
+              im.TextColored(lcol,"%s",tostring(v))
             end
             im.NextColumn()
             ::continue_skipcol::

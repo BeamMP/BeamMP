@@ -51,9 +51,6 @@ angular.module('beamng.stuff')
   }
 })
 
-
-
-
 .value('UiUnitsOptions', {
   highLvlOpt: {
     'imperial': 'Imperial',
@@ -145,11 +142,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     bngApi.engineLua(`settings.setState(${bngApi.serializeToLua(stateObj || vm.data.values)})`);
   }
 
-  function mpSetting(opt, val) {
-    vm.multiplayer.values.showNameTags;
-    console.log(`MP SETTING. OPT: ${opt}, VAL: ${val}, SET: ${vm.data.values.showNameTags}`)
-    bngApi.engineLua(`mpConfig.setConfigState(${opt}, ${vm.data.values.showNameTags})`);
-  }
 
   function refreshGraphicsState () {
     bngApi.engineLua(`core_settings_graphic.refreshGraphicsState(${bngApi.serializeToLua(vm.data.values)})`);
@@ -234,6 +226,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
   vm.resetGamma = function () {
     settings.applyState({GraphicGamma: 1.0});
   };
+
 
   /**
    * @ngdoc method
@@ -596,10 +589,10 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
             <span ng-hide="hideName">{{ viewerObj.control | uppercase | replace:' ':' + ' | replace:'-':' + '}}</span>
           </span>
         </kbd>
-        <div ng-style="{'-webkit-filter': (!dark ? 'invert(1)' : '')}" ng-if="viewerObj !== undefined && viewerObj.special" style="height: 1.4em; width: 1.4em;">
+        <div ng-style="{'-webkit-filter': (!dark ? 'invert(1) brightness(1.5)' : '')}" ng-if="viewerObj !== undefined && viewerObj.special" style="height: 1.4em; width: 1.4em;">
           <object style="max-height: 100%; max-width: 100%; pointer-events: none;" type="image/svg+xml" data="{{viewerObj.url}}"></object>
         </div>
-        <div ng-style="{'-webkit-filter': (!dark ? 'invert(1)' : '')}" ng-if="viewerObj === undefined" style="height: 1.4em; width: 1.4em;">
+        <div ng-style="{'-webkit-filter': (!dark ? 'invert(1) brightness(1.5)' : '')}" ng-if="viewerObj === undefined" style="height: 1.4em; width: 1.4em;">
           <object style="max-height: 100%; max-width: 100%; type="image/svg+xml" data="modules/options/deviceIcons/unknown.svg"></object>
         </div>
       </span>
@@ -634,6 +627,16 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
         , thumbly: 'xbox/x_thumb_left_y'
         , thumbrx: 'xbox/x_thumb_right_x'
         , thumbry: 'xbox/x_thumb_right_y'
+        , btn_rt: 'xbox/x_thumb_right'
+        , btn_lt: 'xbox/x_thumb_left'
+        },
+        mouse:
+        { button0: 'mouse/button0'
+        , button1: 'mouse/button1'
+        , button2: 'mouse/button2'
+        , xaxis: 'mouse/xaxis'
+        , yaxis: 'mouse/yaxis'
+        , zaxis: 'mouse/zaxis'
         }
       }
 
@@ -676,6 +679,36 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     }
   };
 }])
+
+/**
+ * @ngdoc directive
+ * @name beamng.stuff:assignControl
+ *
+ * @description
+ * A small directive to give feedback to the user about the input
+ * being captured */
+.directive('assignControl', function () {
+    // @example
+    // <example module="beamng.stuff">
+    //   <file name="controls.js">
+    //     <hardware-control width="80" name="thumblry"></hardware-control>
+    //   </file>
+    // </example>
+
+  return {
+    template: '<div flex>' +
+                '{{ ::name }}' +
+                '<div style="position: relative; height: 5px; background-color: white; border: solid grey 1px">' +
+                  '<div style="position: absolute; top: 0; left: 0; height: 100%; background-color: darkgrey; width: {{ value }}%"></div>' +
+                '</div>' +
+              '<div>',
+    replace: true,
+    scope: {
+      name: '@',
+      value: '@'
+    },
+  };
+})
 
 /**
  * @ngdoc directive
@@ -775,56 +808,46 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
 
         <md-list-item md-no-ink>
           <p>Inverted</p>
-          <md-checkbox ng-model="data.isForceInverted"></md-checkbox>
+          <md-checkbox ng-model="data.isForceInverted" ng-disabled="!data.isForceEnabled"></md-checkbox>
           <md-tooltip md-direction="">Use this if your wheel force is acting on the opposite direction it should</md-tooltip>
         </md-list-item>
 
         <md-list-item layout>
           <span flex="35">Strength</span>
           <md-tooltip md-direction="top">Tweak to increase or decrease the overall strength of the Force Feedback</md-tooltip>
-          <md-slider ng-model="data.ffb.forceCoef" flex min="0" max="1000" step="10" aria-label="_"></md-slider>
+          <md-slider ng-model="data.ffb.forceCoef" flex min="0" max="1000" step="10" ng-disabled="!data.isForceEnabled" aria-label="_"></md-slider>
           <md-input-container class="bng-controls-aux-input">
-            <input aria-label="_" type="number" min="0" max="1000" step="10" ng-model="data.ffb.forceCoef">
+            <input aria-label="_" type="number" min="0" max="1000" step="10" ng-model="data.ffb.forceCoef" ng-disabled="!data.isForceEnabled">
           </md-input-container>
         </md-list-item>
 
         <md-list-item layout>
           <span flex="35">Smoothing</span>
           <md-tooltip md-direction="">Reduces vibrations (but also increases response times and removes detail)</md-tooltip>
-          <md-slider ng-model="data.ffb.smoothing" flex min="0" max="500" step="10" aria-label="_"></md-slider>
+          <md-slider ng-model="data.ffb.smoothing" flex min="0" max="500" step="10" ng-disabled="!data.isForceEnabled" aria-label="_"></md-slider>
           <md-input-container class="bng-controls-aux-input">
-            <input aria-label="_" type="number" min="0" max="500" step="10" ng-model="data.ffb.smoothing">
+            <input aria-label="_" type="number" min="0" max="500" step="10" ng-model="data.ffb.smoothing" ng-disabled="!data.isForceEnabled">
           </md-input-container>
         </md-list-item>
 
         <md-divider></md-divider>
         <md-list-item md-no-ink>
-          <p>Reduce strength at low speeds</p>
-          <md-checkbox ng-model="data.ffb.lowspeedCoef"></md-checkbox>
-          <md-tooltip md-direction="top">Can help with vibrations</md-tooltip>
+          <p>Reduce strength while parked</p>
+          <md-checkbox ng-model="data.ffb.lowspeedCoef" ng-disabled="!data.isForceEnabled"></md-checkbox>
+          <md-tooltip md-direction="top">Will help with oscillations while parked</md-tooltip>
         </md-list-item>
 
         <md-list-item layout>
           <span flex="35">Side Accel Feedback</span>
           <md-tooltip md-direction="">Adds steering forces to emulate the sideways force on the driver</md-tooltip>
-          <md-slider ng-model="uidata.ffb.gforceCoef" flex min="0" max="20" step="1" aria-label="_"></md-slider>
+          <md-slider ng-model="uidata.ffb.gforceCoef" flex min="0" max="20" step="1" ng-disabled="!data.isForceEnabled" aria-label="_"></md-slider>
           {{ uidata.ffb.gforceCoef }} %
-        </md-list-item>
-
-        <md-list-item layout layout="row">
-          <span flex="35">Max strength</span>
-          <md-tooltip md-direction="">Safety guard against too strong forces (they will be capped at the specified limit)</md-tooltip>
-          <md-slider ng-model="uidata.ffb.forceLimit" flex min="0" max="100" step="1" aria-label="_"></md-slider>
-          <md-input-container class="bng-controls-aux-input">
-            <input aria-label="_" type="number" min="0" max="100" step="1" ng-model="uidata.ffb.forceLimit">
-          </md-input-container>
-          %
         </md-list-item>
 
         <md-list-item layout>
           <p>Update rate limit</p>
           <md-tooltip md-direction="">How often force feedback updates are allowed to reach the device drivers. Greater rates are better, assuming hardware and firmware support them.</md-tooltip>
-          <md-select flex ng-model="data.ffb.frequency" aria-label="_" class="bng-select-fullwidth">
+          <md-select flex ng-model="data.ffb.frequency" ng-disabled="!data.isForceEnabled" aria-label="_" class="bng-select-fullwidth">
             <md-option value="0" md-no-ink>Automatic</md-option>
             <md-option ng-repeat="i in [2000, 1500, 1250, 1000, 750, 600, 500, 400, 333, 250, 200, 150, 100, 75, 60, 50, 30]" value="{{i}}" md-no-ink>{{i}} Hz</md-option>
           </md-select>
@@ -833,7 +856,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
         <md-list-item layout>
           <p>Update type</p>
           <md-tooltip md-direction="">Certain FFB systems may require full updates to work</md-tooltip>
-          <md-select flex ng-model="data.ffbUpdateType" aria-label="_" class="bng-select-fullwidth">
+          <md-select flex ng-model="data.ffbUpdateType" ng-disabled="!data.isForceEnabled" aria-label="_" class="bng-select-fullwidth">
             <md-option value="0" md-no-ink>Fast (default)</md-option>
             <md-option value="1" md-no-ink>Full</md-option>
           </md-select>
@@ -841,7 +864,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
 
         <md-list-item md-no-ink>
           <p>Use Response Correction Curve</p>
-          <md-checkbox ng-model="data.ffb.responseCorrected"></md-checkbox>
+          <md-checkbox ng-model="data.ffb.responseCorrected" ng-disabled="!data.isForceEnabled"></md-checkbox>
           <md-tooltip md-direction="top">Allows to BeamNG.drive to compensate for the non-linear nature of most force feedback hardware, increasing the response fidelity</md-tooltip>
         </md-list-item>
         <div ng-show="data.ffb.responseCorrected">
@@ -1029,7 +1052,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       };
 
       scope.uidata = {};
-      mapUI(scope.data, scope.uidata, "ffb.forceLimit", v=>Math.round(v*10), v=>v/10); //0-10 => 0-100
       mapUI(scope.data, scope.uidata, "ffb.gforceCoef", v=>Math.round(v*100), v=>v/100); //0-0.2 => 0-20
     }
   };
@@ -1056,15 +1078,15 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
           <input aria-label="_" type="number" min="0" max="6000" step="10" ng-model="data.details.angle" ng-change="inputResponseCurveRender()">
         </md-input-container>
       </md-list-item>
-      <md-list-item layout style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType != '0' && data.details.angle <= 0">
+      <md-list-item layout ng-if="data.details.action == 'steering'" style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType != '0' && data.details.angle <= 0">
         <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
         <p>{{:: 'ui.controls.lockType.warningMissingAngle' | translate}}</p>
       </md-list-item>
-      <md-list-item layout style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType == '0' && data.details.angle > 0">
+      <md-list-item layout ng-if="data.details.action == 'steering'" style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType == '0' && data.details.angle > 0">
         <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
         <p>{{:: 'ui.controls.lockType.warningAdvice' | translate}}</p>
       </md-list-item>
-      <md-list-item layout>
+      <md-list-item layout ng-if="data.details.action == 'steering'">
         <span flex="35">{{:: "ui.controls.lockType" | translate }}</span>
         <md-select flex ng-model="data.details.lockType" aria-label="_" class="bng-select-fullwidth">
           <md-option value="0" md-no-ink>{{:: "ui.controls.lockTypes.0" | translate }}</md-option>
@@ -1352,7 +1374,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @name beamng.stuff:ControlsUtils
  * @description Various controls-related utility functions
 **/
-.factory('ControlsUtils', ['$filter', '$log', '$q', '$rootScope', 'bngApi', 'controlsContents', function ($filter, $log, $q, $rootScope, bngApi, controlsContents) {
+.factory('ControlsUtils', ['$filter', '$log', '$q', '$rootScope', 'bngApi', 'controlsContents', '$translate', '$timeout', function ($filter, $log, $q, $rootScope, bngApi, controlsContents, $translate, $timeout) {
   var _captureHelper = {
     devName: null,
     stopListening: null
@@ -1393,6 +1415,8 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       }
 
       controlsContents.categories = data.actionCategories;
+      // console.log(controlsContents.categories);
+
       controlsContents.bindings   = data.bindings;
       controlsContents.bindingTemplate = data.bindingTemplate;
 
@@ -1427,6 +1451,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       Object.keys(controlsContents.categories).map(function (category) {
         controlsContents.categoriesList.push(angular.merge({key: category}, controlsContents.categories[category]));
       });
+
     });
   });
 
@@ -1583,79 +1608,81 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
      */
     captureBinding: function (devName) {
       var controlCaptured = false
-        , eventsRegister = { axis: {}, button: {}, key: [null, null] }
+        , eventsRegister = {}
         , d = $q.defer()
       ;
 
-      _captureHelper.devName = devName;
       var capturingBinding = true;
 
       _captureHelper.stopListening = $rootScope.$on('RawInputChanged', function (event, data) {
         if (!capturingBinding) return; // Not trying to capture bindings, ignore
         if (controlCaptured) return; // No business listening to incoming events.
 
-        // If we are commited to listening to a specified device,
-        // we don't care if another device is triggering
-        if (!_captureHelper.devName || data.devName == _captureHelper.devName) {
-          d.notify(data);
-          var valid = false;
+        var devName = data.devName;
+        if (! eventsRegister[devName]) {
+          eventsRegister[devName] = { axis: {}, button: {}, key: [null, null] }
+        }
 
-          // Register the received input. The control types are handled
-          // separately, because different criteria apply to each one of them.
-          switch(data['controlType']) {
-            case 'axis':
-              if (! eventsRegister.axis[data.control])
-                eventsRegister.axis[data.control] = { start: data.value, end: data.value }
-              else
-                eventsRegister.axis[data.control].end = data.value;
+        d.notify(eventsRegister);
+        var valid = false;
 
-              // If we are working with axes (i.e. the axis property has been populated) we
-              // should be a little strict because there will probably be noise (mouse movements
-              // are a perfect example). The criterion is if there is *enough* motion in a given
-              // direction.
-              valid = Math.abs(eventsRegister.axis[data.control].end - eventsRegister.axis[data.control].start) > 0.25;
-              break;
+        // Register the received input. The control types are handled
+        // separately, because different criteria apply to each one of them.
+        switch(data['controlType']) {
+          case 'axis':
+            var detectionThreshold = data.devName.startsWith('mouse')? 1 : 0.5;
+            if (! eventsRegister[devName].axis[data.control]) {
+              eventsRegister[devName].axis[data.control] = { first: data.value, last: data.value, accumulated: 0 }
+            } else {
+              eventsRegister[devName].axis[data.control].accumulated += Math.abs(eventsRegister[devName].axis[data.control].last - data.value)/detectionThreshold;
+              eventsRegister[devName].axis[data.control].last = data.value;
+            }
 
-            case 'button':
-            case 'pov':
-              if (!eventsRegister.button[data.control])
-                eventsRegister.button[data.control] = 1;
-              else
-                eventsRegister.button[data.control] += 1;
+            // If we are working with axes (i.e. the axis property has been populated) we
+            // should be a little strict because there will probably be noise (mouse movements
+            // are a perfect example). The criterion is if there is *enough* accumulated motion
+            valid = eventsRegister[devName].axis[data.control].accumulated >= 1;
+            break;
 
-              // Buttons are the easiest, we just have to listen to 2 events of
-              // the same button (i.e. an on-off event cycle).
-              valid = eventsRegister.button[data.control] > 1;
-              break;
+          case 'button':
+          case 'pov':
+            if (!eventsRegister[devName].button[data.control])
+              eventsRegister[devName].button[data.control] = 1;
+            else
+              eventsRegister[devName].button[data.control] += 1;
 
-            case 'key':
-              eventsRegister.key.push(data.control);
-              eventsRegister.key = eventsRegister.key.slice(-2);
+            // Buttons are the easiest, we just have to listen to 2 events of
+            // the same button (i.e. an on-off event cycle).
+            valid = eventsRegister[devName].button[data.control] > 1;
+            break;
 
-              // Keys are easy too but not as trivial as buttons, because there can be
-              // key combinations. We keep track of the last two key events, if they
-              // coincide (again an on-off event cycle, like the case with buttons), we
-              // can assign the control.
-              valid = eventsRegister.key[0] == eventsRegister.key[1];
-              break;
-            default:
-              $log.error("Unrecognized raw input controlType: %o", data);
-          }
+          case 'key':
+            eventsRegister[devName].key.push(data.control);
+            eventsRegister[devName].key = eventsRegister[devName].key.slice(-2);
 
-          // Want to blacklist something? Put it here!
-          if (valid) {
-            // No right mouse click
-            if(data.devName.startsWith('mouse') && data.control == 'button1')
-              valid = false;
-          }
+            // Keys are easy too but not as trivial as buttons, because there can be
+            // key combinations. We keep track of the last two key events, if they
+            // coincide (again an on-off event cycle, like the case with buttons), we
+            // can assign the control.
+            valid = eventsRegister[devName].key[0] == eventsRegister[devName].key[1];
+            break;
+          default:
+            $log.error("Unrecognized raw input controlType: %o", data);
+        }
 
-          if (valid) {
-            controlCaptured = true;
-            capturingBinding = false;
-            data.direction = data['controlType'] == 'axis' ? Math.sign(eventsRegister.axis[data.control].end - eventsRegister.axis[data.control].start) : 0;
-            d.resolve(data);
-            _captureHelper.stopListening();
-          }
+        // Want to blacklist something? Put it here!
+        if (valid) {
+          // No right mouse click
+          if(data.devName.startsWith('mouse') && data.control == 'button1')
+            valid = false;
+        }
+
+        if (valid) {
+          controlCaptured = true;
+          capturingBinding = false;
+          data.direction = data['controlType'] == 'axis' ? Math.sign(eventsRegister[devName].axis[data.control].last - eventsRegister[devName].axis[data.control].first) : 0;
+          d.resolve(data);
+          _captureHelper.stopListening();
         }
       });
 
@@ -1718,6 +1745,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       } else {
         deviceContents.bindings.push(bindingData);
       }
+
 
       bngApi.engineLua(`extensions.core_input_bindings.saveBindingsToDisk(${bngApi.serializeToLua(deviceContents)})`);
     },
@@ -1788,10 +1816,20 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @requires beamng.stuff:ControlsUtils
  * @description
 **/
-.controller('ControlsController', ['$scope',  'bngApi', 'controlsContents', 'ControlsUtils',
-function ($scope, bngApi, controlsContents, ControlsUtils) {
+.controller('ControlsController', ['$scope',  'bngApi', 'controlsContents', 'ControlsUtils', '$translate',
+function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
   var vm = this;
-  vm.data = controlsContents;
+  vm.data = angular.copy(controlsContents);
+
+  $scope.$evalAsync(function () {
+    for (var x in vm.data.categoriesList) {
+      for (var y in vm.data.categoriesList[x].actions) {
+        vm.data.categoriesList[x].actions[y].title = $translate.instant(controlsContents.categoriesList[x].actions[y].title);
+        vm.data.categoriesList[x].actions[y].desc = $translate.instant(controlsContents.categoriesList[x].actions[y].desc);
+      }
+    }
+  });
+
   $scope.isShipping = beamng.shipping;
 }])
 
@@ -1841,7 +1879,7 @@ function ($scope, bngApi, controlsContents, ControlsUtils) {
   vm.newBinding = angular.copy(vm.oldBinding);
 
   vm.conflicts = [];
-  vm.listening = {msg: '', status: 0};
+  vm.listening = {data: '', status: 0};
   vm.showFfbOptions = $stateParams.showFfb || false;
 
   var getConflicts = function () {
@@ -1874,8 +1912,10 @@ function ($scope, bngApi, controlsContents, ControlsUtils) {
         });
       }, function (error) {
         // EMPTY CALLBACK (no rejection)
-      }, function (data) {
-        $scope.$evalAsync(function () { vm.listening.msg = data.devName + ', ' + data.control; });
+      }, function (eventsRegister) {
+        $scope.$evalAsync(function () {
+          vm.listening.data = eventsRegister;
+        });
       });
     }, 300);
   };

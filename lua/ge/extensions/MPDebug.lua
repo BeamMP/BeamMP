@@ -28,10 +28,10 @@ end
 
 
 local function getPlayerNames() --returns a table where the key is username, value is an owned vehid (can be ignored)
-	if not MPVehicleGE return {} end
-	
+	if not MPVehicleGE then return {} end
+
 	local names = {}
-	
+
 	for k,v in pairs(MPVehicleGE.getNicknameMap() or {}) do
 		names[v] = k
 	end

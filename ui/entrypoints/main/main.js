@@ -4,9 +4,8 @@ angular.module('beamng.garage', []);
 angular.module('beamng.color', []);
 angular.module('beamng.gamepadNav', []);
 angular.module('beamng.controls', []);
-angular.module('beamng.ui2Ports', []);
 
-angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
+angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
 
 .factory('customTranslationsLoader', ['$rootScope', '$timeout', '$q', function ($rootScope, $timeout, $q) {
   var data = {};
@@ -1312,6 +1311,7 @@ $scope.$on('requestUIInitialised', () => {
   vm.physicsPaused = false;
   vm.physicsMaybePaused = false;
   vm.showPauseIcon = false;
+  vm.showCrosshair = false;
   var updatePauseIcon = function() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused;
       var gamePaused = vm.physicsPaused || vm.replayPaused;
@@ -1370,6 +1370,11 @@ $scope.$on('requestUIInitialised', () => {
     }
   });
 
+  $scope.$on('onCrosshairVisibilityChanged', function (event, visible) {
+    $scope.$applyAsync(function () {
+      vm.showCrosshair = visible;
+    });
+  });
 
   vm.showApps = true;
   vm.mainmenu = true;
@@ -1449,7 +1454,6 @@ $scope.$on('requestUIInitialised', () => {
     vm.menuEntries.freeroam.push({ translateid: 'Icons', icon: 'new_releases', state: 'iconViewer', advanced: true });
     // vm.menuEntries.freeroam.push({ translateid: 'Drag Race', icon: 'flag', state: 'menu.dragRaceOverview', advanced: false });
     // vm.menuEntries.freeroam.push({ translateid: 'ui.dashboard.template', icon: 'crop_free',    state: 'template', advanced: true});
-    vm.menuEntries.freeroam.push({ translateid: 'UI Protoype', icon: 'new_releases',    state: '.', action: () => window.location.href = "local://local/ui2/drive/index.html"});
   }
 
   // downloader start

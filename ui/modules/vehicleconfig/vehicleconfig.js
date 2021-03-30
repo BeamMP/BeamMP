@@ -177,7 +177,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   // LICENSE PLATE STUFF
   vm.licensePlate = '';
 
-  bngApi.engineLua('core_vehicles.getVehicleLicenseName()', function (str) {
+  bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0)', function (str) {
     $scope.$evalAsync(() => { vm.licensePlate = str; });
   });
 
@@ -196,7 +196,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   vm.genLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText(nil,nil,nil,nil,true);`);
 
-    bngApi.engineLua('core_vehicles.getVehicleLicenseName()', function (str) {
+    bngApi.engineLua('core_vehicles.regenerateVehicleLicenseText(be:getPlayerVehicle(0)', function (str) {
       $scope.$evalAsync(() => { vm.licensePlate = str; });
     });
   };

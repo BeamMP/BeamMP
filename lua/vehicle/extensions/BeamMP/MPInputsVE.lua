@@ -14,7 +14,7 @@ local lastInputs = {}
 local timeSinceLastApply = 0
 local applyTime --when a new apply occurs, this mirrors timeSinceLastApply and is used to interpolate.
 local currentApply = {}
-local lastApply = {}
+local lastApply = nil
 local steering = 0
 local setSteeringSlope
 local steeringSlope --I know slopes are kind of archiac, but it really is to just smooth steering back out.
@@ -27,7 +27,7 @@ local function updateGFX(dt)
 	timeSinceLastApply = timeSinceLastApply + dt
 
 	--if appliedBefore then --v.mpVehicleType is acting up, so I had to use this workaround
-	if v.mpVehicleType == "R" then
+	if lastApply then
 
 		--all of this to make the steering wheel smooth, I understand that the steering is now techically going to be delayed, but I think this will make watching another car in first person actually managable.
 		if steeringSlope then

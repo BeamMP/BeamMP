@@ -263,9 +263,9 @@ local function toggleCouplers()
   if autoCouplingActive then
     obj:stopLatching()
     disableAutoCoupling()
-    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
+    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\', \'..obj:getID()..\')") end -- ////////////////////////////////////////////////// BEAMMP
   else
-    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'"..obj:getID().."\')") end -- ////////////////////////////////////////////////// BEAMMP
+    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\', \'..obj:getID()..\')") end -- ////////////////////////////////////////////////// BEAMMP
     if isCouplerAttached() then
       detachCouplers()
     else
@@ -417,6 +417,12 @@ local function deflateTire(wheelid)
     if wheel.sideBeams ~= nil then
       for _, beamcid in pairs(wheel.sideBeams) do
         obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.05, 0, -1, -1)
+      end
+    end
+
+    if wheel.peripheryBeams ~= nil then
+      for _, beamcid in pairs(wheel.peripheryBeams) do
+        --obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.05, 0, -1, -1)
       end
     end
 
@@ -710,40 +716,39 @@ end
 local function updateCollTris()
   local vehicle = v.data
   if vehicle.beams and vehicle.triangles then
-    local beamIndex = {}
+    local beamIndex = table.new(0, #vehicle.beams)
 
     for _, beam in pairs(vehicle.beams) do
-      if type(beam.id1) == "number" and type(beam.id2) == "number" then
-        beamIndex[math.min(beam.id1, beam.id2) .. "\0" .. math.max(beam.id1, beam.id2)] = beam
+      local b1, b2 = beam.id1, beam.id2
+      if type(b1) == "number" and type(b2) == "number" then
+        beamIndex[min(b1, b2) + max(b1, b2) * 1e+8] = beam
       end
     end
 
     for _, tri in pairs(vehicle.triangles) do
-      if type(tri.id1) == "number" and type(tri.id2) == "number" and type(tri.id3) == "number" then
+      local t1, t2, t3 = tri.id1, tri.id2, tri.id3
+      if type(t1) == "number" and type(t2) == "number" and type(t3) == "number" then
         local beamCount = 0
-
-        local b = math.min(tri.id1, tri.id2) .. "\0" .. math.max(tri.id1, tri.id2)
-        if beamIndex[b] then
-          if not beamIndex[b].collTris then
-            beamIndex[b].collTris = {}
-          end
-          table.insert(beamIndex[b].collTris, tri.cid)
+        local bi = beamIndex[min(t1, t2) + max(t1, t2) * 1e+8]
+        local tcid = tri.cid
+        if bi then
+          local coltris = bi.collTris or table.new(2,0)
+          table.insert(coltris, tcid)
+          bi.collTris = coltris
           beamCount = beamCount + 1
         end
-        b = math.min(tri.id1, tri.id3) .. "\0" .. math.max(tri.id1, tri.id3)
-        if beamIndex[b] then
-          if not beamIndex[b].collTris then
-            beamIndex[b].collTris = {}
-          end
-          table.insert(beamIndex[b].collTris, tri.cid)
+        bi = beamIndex[min(t1, t3) + max(t1, t3) * 1e+8]
+        if bi then
+          local coltris = bi.collTris or table.new(2,0)
+          table.insert(coltris, tcid)
+          bi.collTris = coltris
           beamCount = beamCount + 1
         end
-        b = math.min(tri.id2, tri.id3) .. "\0" .. math.max(tri.id2, tri.id3)
-        if beamIndex[b] then
-          if not beamIndex[b].collTris then
-            beamIndex[b].collTris = {}
-          end
-          table.insert(beamIndex[b].collTris, tri.cid)
+        bi = beamIndex[min(t2, t3) + max(t2, t3) * 1e+8]
+        if bi then
+          local coltris = bi.collTris or table.new(2,0)
+          table.insert(coltris, tcid)
+          bi.collTris = coltris
           beamCount = beamCount + 1
         end
         tri.beamCount = beamCount
@@ -790,9 +795,9 @@ local function init()
           end
         end
         if t.pressureGroup then
-          pressureBeams[min(t.id1, t.id2) .. "\0" .. max(t.id1, t.id2)] = t.pressureGroup
-          pressureBeams[min(t.id1, t.id3) .. "\0" .. max(t.id1, t.id3)] = t.pressureGroup
-          pressureBeams[min(t.id2, t.id3) .. "\0" .. max(t.id2, t.id3)] = t.pressureGroup
+          pressureBeams[min(t.id1, t.id2) + max(t.id1, t.id2) * 1e+8] = t.pressureGroup
+          pressureBeams[min(t.id1, t.id3) + max(t.id1, t.id3) * 1e+8] = t.pressureGroup
+          pressureBeams[min(t.id2, t.id3) + max(t.id2, t.id3) * 1e+8] = t.pressureGroup
         end
       end
     end
@@ -830,20 +835,20 @@ local function init()
 
     if n.couplerTag or n.tag then
       couplerTags[n.couplerTag or n.tag] = true
-    end
 
-    if (n.couplerTag or n.tag) and n.cid then
-      local data = shallowcopy(n)
-      couplerCache[n.cid] = data
-      hasActiveCoupler = n.couplerTag ~= nil or hasActiveCoupler
+      if n.cid then
+        local data = shallowcopy(n)
+        couplerCache[n.cid] = data
+        hasActiveCoupler = n.couplerTag ~= nil or hasActiveCoupler
 
-      if n.breakGroup then
-        local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or {n.breakGroup}
-        for _, g in pairs(breakGroups) do
-          if not couplerBreakGroupCache[g] then
-            couplerBreakGroupCache[g] = {}
+        if n.breakGroup then
+          local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or {n.breakGroup}
+          for _, g in pairs(breakGroups) do
+            if not couplerBreakGroupCache[g] then
+              couplerBreakGroupCache[g] = {}
+            end
+            table.insert(couplerBreakGroupCache[g], n.cid)
           end
-          table.insert(couplerBreakGroupCache[g], n.cid)
         end
       end
     end
@@ -909,6 +914,7 @@ local function init()
   local yGroup1 = yMin + yRangeThird
   local yGroup2 = yGroup1 + yRangeThird
   local xGroup1 = xMin + xRangeHalf
+  local nodes = v.data.nodes
 
   if v.data.beams then
     for bid, b in pairs(v.data.beams) do
@@ -936,16 +942,16 @@ local function init()
         end
       end
 
-      local pid = min(b.id1, b.id2) .. "\0" .. max(b.id1, b.id2)
-      if pressureBeams[pid] and v.data.pressureGroups[pressureBeams[pid]] then
-        b.pressureGroupId = pressureBeams[pid]
+      local pbId = pressureBeams[min(b.id1, b.id2) + max(b.id1, b.id2) * 1e+8]
+      if pbId and v.data.pressureGroups[pbId] then
+        b.pressureGroupId = pbId
       end
 
       if b.breakGroup then
         local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or {b.breakGroup}
         for _, g in pairs(breakGroups) do
           if not breakGroupCache[g] then
-            breakGroupCache[g] = {}
+            breakGroupCache[g] = table.new(2,0)
           end
           table.insert(breakGroupCache[g], b.cid)
         end
@@ -954,17 +960,10 @@ local function init()
       if b.deformGroup then
         local deformGroups = type(b.deformGroup) == "table" and b.deformGroup or {b.deformGroup}
         for _, g in pairs(deformGroups) do
-          local group = M.deformGroupDamage[g]
-          if not group then
-            M.deformGroupDamage[g] = {}
-            group = M.deformGroupDamage[g]
-            group.eventCount = 0
-            group.damage = 0
-            group.maxEvents = 0
-            group.invMaxEvents = 0
-          end
-          group.maxEvents = group.maxEvents + 1 / (max(b.deformationTriggerRatio or 1, 0.01))
+          local group = M.deformGroupDamage[g] or {eventCount = 0, damage = 0, maxEvents = 0, invMaxEvents = 0}
+          group.maxEvents = group.maxEvents + 1 / max(b.deformationTriggerRatio or 1, 0.01)
           group.invMaxEvents = 1 / group.maxEvents
+          M.deformGroupDamage[g] = group
         end
       end
 
@@ -973,35 +972,22 @@ local function init()
       end
 
       if not b.wheelID then
-        local beamNode1Pos = v.data.nodes[b.id1].pos
-        local beamNode2Pos = v.data.nodes[b.id2].pos
+        local beamNode1Pos = nodes[b.id1].pos
+        local beamNode2Pos = nodes[b.id2].pos
         local beamPosX = (beamNode1Pos.x + beamNode2Pos.x) * 0.5
         local beamPosY = (beamNode1Pos.y + beamNode2Pos.y) * 0.5
-        local xChar, yChar
-
-        if beamPosY <= yGroup1 then
-          yChar = "F"
-        elseif beamPosY <= yGroup2 then
-          yChar = "M"
-        else
-          yChar = "R"
-        end
-
-        if beamPosX <= xGroup1 then
-          xChar = "R"
-        else
-          xChar = "L"
-        end
-
+        local yChar = beamPosY <= yGroup1 and "F" or (beamPosY <= yGroup2 and "M" or "R")
+        local xChar = beamPosX <= xGroup1 and "R" or "L"
         local bodyPart = yChar .. xChar
         beamBodyPartLookup[b.cid] = bodyPart
         invBodyPartBeamCount[bodyPart] = invBodyPartBeamCount[bodyPart] + 1
       end
 
-      if b.partOrigin and partDamageData[b.partOrigin] then
-        partDamageData[b.partOrigin].beamCount = partDamageData[b.partOrigin].beamCount + 1
-        partBeams[b.partOrigin] = partBeams[b.partOrigin] or {}
-        table.insert(partBeams[b.partOrigin], b.cid)
+      local bpo = b.partOrigin
+      if bpo and partDamageData[bpo] then
+        partDamageData[bpo].beamCount = partDamageData[bpo].beamCount + 1
+        partBeams[bpo] = partBeams[bpo] or table.new(2,0)
+        table.insert(partBeams[bpo], b.cid)
       end
     end
   end
@@ -1226,13 +1212,13 @@ local function getVehicleState(...)
   log("W", "", "getVehicleState delay")
   local timer, fakeDelay = HighPerfTimer(), 1
   while fakeDelay > 0 do
-    fakeDelay = fakeDelay - timer:stopAndReset()/1000
+    fakeDelay = fakeDelay - timer:stopAndReset() / 1000
   end
 
   local pos = vec3(obj:getPosition())
   local front = vec3(obj:getDirectionVector())
   local up = vec3(obj:getDirectionVectorUp())
-  local vehicleState = {objId=obj:getID(), partsCondition=partCondition.getConditions(), itemId=v.config.itemId, pos=pos, front=front, up=up}
+  local vehicleState = {objId = obj:getID(), partsCondition = partCondition.getConditions(), itemId = v.config.itemId, pos = pos, front = front, up = up}
   return vehicleState, ...
 end
 

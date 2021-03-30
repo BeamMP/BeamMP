@@ -482,6 +482,20 @@ end
 local initDB = extensions.core_jobsystem.wrap(function(job)
   --log('D', 'initDB', 'initDB() ...')
 
+  local disableAllMods = false
+  local updatedFromVersion = nil
+  local cmdArgs = Engine.getStartingArgs()
+  for i, v in ipairs(cmdArgs) do
+    if v == '-versionUpdated' then
+      if #cmdArgs > i then
+        updatedFromVersion = cmdArgs[i + 1]
+      end
+      log('I', 'initDB', "Version update found. Coming from version '" .. tostring(updatedFromVersion) .. "'")
+      disableAllMods = true
+      break
+    end
+  end
+
   -- check DB version number
   if not dbHeader or dbHeader.version ~= 1.1 then
     mods = {} -- rebuild DB
@@ -511,6 +525,11 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
 
       local mod, modFiles = updateZIPEntry(filename)
       if mod and isSafeMode() then mod.active = false end
+
+      if mod and disableAllMods then
+        mod.active = false
+      end
+
       if mod and mod.active ~= false then
         log('D', 'initDB', 'mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
         addMountEntryToList(mountList, filename, mod.mountPoint)
@@ -856,14 +875,19 @@ local function unpackMod(modname)
     return
   end
   local files = zip:getFileList()
+
+  Engine.Platform.taskbarSetProgress(0.0)
+  Engine.Platform.taskbarSetProgressState(2)
   --dump(files)
   local extractionRes = true
   for i,v in ipairs(files) do
     --print('extractFile: ' .. tostring(v) .. ' -> ' .. tostring(targetPath) .. v)
+    Engine.Platform.taskbarSetProgress(i / #files)
     if not zip:extractFile(v, targetPath .. v) then
       extractionRes = false
       guihooks.trigger('modmanagerError', 'Error extracting file: ' .. tostring(v))
       log('E', 'unpackMod', 'error extracting file: ' .. tostring(v))
+      Engine.Platform.taskbarSetProgressState(4)
     end
   end
   zip:close()
@@ -872,15 +896,18 @@ local function unpackMod(modname)
     safeDeleteFolder(targetPath)
     mods[modname] = zipOldCopy
     guihooks.trigger('modmanagerError', 'Error extracting file: ' .. tostring(v))
+    Engine.Platform.taskbarSetProgressState(0)
     return
   end
 
   if not safeDelete(filename) then
+    Engine.Platform.taskbarSetProgressState(4)
     guihooks.trigger('modmanagerError', 'Error : could not safe delete: ' .. dumps(filename))
     log('E', 'unpackMod', 'Error : could not safe delete: ' .. dumps(filename))
     messageBox("BeamNG.drive - Modmager",
     "The zip file could not be deleted properlly.\nThis happens when it's open by another software.\nYou need to close that software and manually delete the file bellow :\n"..dumps(filename), 0, 0)
   end
+  Engine.Platform.taskbarSetProgressState(0)
 
   FS:mount(targetPathOrg)
   mods[modname].dirname, mods[modname].filename = path.split(targetPathOrg)
@@ -932,7 +959,12 @@ local function packMod(dirPath)
     return false
   end
 
+  Engine.Platform.taskbarSetProgressState(1)
+
   local fileList = FS:findFiles( mods[modname].unpackedPath, "*", -1, false, false )
+
+  Engine.Platform.taskbarSetProgress(0.0)
+  Engine.Platform.taskbarSetProgressState(2)
 
   for k,v in pairs(fileList) do
     local zipPath = v
@@ -945,8 +977,10 @@ local function packMod(dirPath)
     end
     log('D', 'packMod', 'zip-addfile: ' .. tostring(v) .. ' > ' .. tostring(zipPath))
     zip:addFile(v, zipPath)
+    Engine.Platform.taskbarSetProgress(k/#fileList)
   end
   zip:close()
+  Engine.Platform.taskbarSetProgressState(0)
 
   -- debug output the files in there
   --zip = ZipArchive()

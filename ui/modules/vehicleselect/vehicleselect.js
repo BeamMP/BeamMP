@@ -347,7 +347,7 @@ angular.module('beamng.stuff')
     if (vm.mode.name !== "lightRunner") {
       for (var key in vm.configs) {
         if (vm.configs[key].key === "powerglow") {
-          delete vm.configs[key]
+          delete vm.configs[key];
         }
       }
     }
@@ -367,12 +367,15 @@ angular.module('beamng.stuff')
       vm.configs = ownedConfigs;
     }
     else if ($stateParams.mode === "busRoutes") {
-      vm.configs = vm.configs.filter((e) => {
-        // filtering out every vehicle except for Official Buses
-        if (e.aggregates["Body Style"] && e.aggregates["Body Style"]["Bus"])
-          return true;
-      })
-    }
+      var filteredConfigs = {};
+      for (var key in vm.configs) {
+        var e = vm.configs[key];
+        if (e.aggregates && e.aggregates["Body Style"] && e.aggregates["Body Style"]["Bus"]) {
+          filteredConfigs[key] = e;
+        }
+      }
+      vm.configs = filteredConfigs;
+	}
 
     // so we can be sure the ranges list exists
     Vehicles.populate().then(() => {

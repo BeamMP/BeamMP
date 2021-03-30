@@ -159,7 +159,7 @@
 
     <!-- .............. pause screen overlay ..............  -->
     <div ng-if="app.showPauseIcon" style="position:absolute; top:100px; right: 0; background:transparent; z-index:10" class="md-padding" ng-click="app.unpause()">
-    <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
+      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
         <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
           {{::'ui.inputActions.general.press' | translate}}
           <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
@@ -168,7 +168,10 @@
         <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
           pause_circle_outline
         </span>
-    </span>
+      </span>
+    </div>
+  <!-- .............. crosshair overlay ..............  -->
+  <div ng-if="app.showCrosshair" style="position:absolute; margin:0;padding:0;transform: translate(-50%, -200%); top:50%; left:50%; background:transparent; z-index:20;background-image: url('/ui/images/crosshair.png'); width:8px;height:8px;background-size: cover; background-position: center center;pointer-events:none" class="md-padding">
   </div>
 
     <game-indicators-layer></game-indicators-layer>

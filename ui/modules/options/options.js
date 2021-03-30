@@ -153,15 +153,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
 
   /**
    * @ngdoc method
-   * @name mpSetting
-   * @methodOf beamng.stuff.controllers:OptionsController
-   * @param {object} [stateObj] The settings to be changed. If not provided, all the current settings will be applied.
-   * @description Applies the current settings to the game
-   */
-  vm.mpSetting = RateLimiter.debounce(mpSetting, 100);
-
-  /**
-   * @ngdoc method
    * @name clearLauncherCache
    * @methodOf beamng.stuff.controllers:SettingsAudioCtrl
    * @description Toggles Master volume.

@@ -545,25 +545,22 @@ local function onUpdate(dtReal, dtSim, dtRaw)
     im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.help, {x=imgsize, y=imgsize}, levelFilter.A and iconButtonFgColor.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
-            --iconIncr = iconIncr-1
       levelFilter.A = not levelFilter.A
     end
     im.tooltip("Other")
     im.SameLine()
 
     im.Spacing()
-
-	--local iconname, iconfile = getIconByIndex(iconIncr) --levelFilter.M
+    im.SameLine()
 
     if gui.uiIconImageButton(gui.icons.people, {x=imgsize, y=imgsize}, levelFilter.M and iconColors.M.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then
-      --iconIncr = iconIncr+1
 	  levelFilter.M = not levelFilter.M
     end
     --im.tooltip(iconname)
     im.tooltip("BeamMP")
 
-    im.Spacing()
     im.SameLine()
+    im.Spacing()
 
     local vehicleButtonBgColor = im.GetStyleColorVec4(im.Col_Button)
     if gui.uiIconImageButton(gui.icons.directions_car,{x=imgsize, y=imgsize}, enableVehicleControls and iconButtonFgColor.Value or iconButtonNoColor.Value, nil, iconButtonBgColor.Value) then

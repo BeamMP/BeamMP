@@ -4115,7 +4115,7 @@
     "supporttool.submit_description": "This utility sends files to the BeamNG support team in order to help with your problems.",
     "supporttool.submit_collapsed_ctrl": "Show sent information details",
     "supporttool.submit_expanded_ctrl": "Hide sent information details",
-    "supporttool.submit_expanded_info": "The information that will be sent:\n - All available BeamNG log files, installed mods, hashes of installed files\n - Computer information:\n  - Software: DirectX SDK version, graphics cards driver information, installed/running programs\n  - Hardware: (CPU/GPU/RAM/power info), including anonymous hardware hash\n - Steam user id\n"
+    "supporttool.submit_expanded_info": "The information that will be sent:\n - All available BeamNG log files, installed mods, hashes of installed files\n - Computer information:\n  - Software: DirectX SDK version, graphics cards driver information, installed/running programs\n  - Hardware: (CPU/GPU/RAM/power info), including anonymous hardware hash\n - Steam user id\n",
 
 
 

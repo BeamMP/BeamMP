@@ -244,7 +244,7 @@ local function updateVehicle(serverID, data)
 		local id = string.match(serverID,"^(.*)-")
 		local playerNickname = nickIDMap[id] or "unknown"
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
-		UI.showNotification('edit received and queued for '..playerNickname)
+		UI.showNotification('Edit received and queued for '..playerNickname)
 	else
 		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
@@ -282,7 +282,7 @@ local function applyVehSpawn(event)
 
 	local decodedData     = jsonDecode(event.data)
 	if not decodedData then --JSON decode failed
-		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."!")
+		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..event.playerNickname.."!")
 		return
 	end
 
@@ -376,13 +376,14 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 		if settings.getValue("enableSpawnQueue") then
 
-			if not vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = {} end
-			table.insert(vehicleSpawnQueue[serverVehicleID], eventdata)
+			--if not vehicleSpawnQueue[serverVehicleID] then  end
+			--table.insert(vehicleSpawnQueue[serverVehicleID], )
+			vehicleSpawnQueue[serverVehicleID] = eventdata
 			print('queue enabled adding spawn for '..playerNickname)
 			
 			UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 
-			UI.showNotification('spawn received and queued for '..playerNickname)
+			UI.showNotification('Spawn received and queued for '..playerNickname)
 
 		else
 
@@ -459,8 +460,13 @@ end
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
 local function onServerVehicleRemoved(serverVehicleID)
-	if vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = nil end
-	if vehicleEditQueue[serverVehicleID] then vehicleEditQueue[serverVehicleID] = nil end
+	if vehicleSpawnQueue[serverVehicleID] or vehicleEditQueue[serverVehicleID] then
+		vehicleSpawnQueue[serverVehicleID] = nil
+		vehicleEditQueue[serverVehicleID] = nil
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+		print("Vehicle "..serverVehicleID.." is still in the queue, can't remove")
+		return
+	end
 
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
@@ -841,31 +847,25 @@ local function focusCameraOnPlayer(targetName)
 end
 
 local function applyQueuedEvents()
-	if not vehicleSpawnQueue then return end
+	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+	--if not vehicleSpawnQueue then return end
 
 	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
-
-	for vehicleID, spawns in pairs(vehicleSpawnQueue) do
-		--dump(vehicleID)
-		for k, spawn in pairs(spawns) do
-			print("spawn")
-			applyVehSpawn(spawn)
-		end
+	--dump(vehicleSpawnQueue)
+	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
+		print("spawn")
+		applyVehSpawn(spawn)
 		vehicleSpawnQueue[vehicleID] = nil
-		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
-	if not vehicleEditQueue then return end
-
+	--if not vehicleEditQueue then return end
+	--dump(vehicleEditQueue)
 	for vehicleID, edit in pairs(vehicleEditQueue) do
-		--dump(vehicleID)
-		--for k, event in pairs(edits) do
-			print("edit")
-			applyVehEdit(vehicleID, edit)
-			--table.remove(edits, k)
-		--end
+		print("edit")
+		applyVehEdit(vehicleID, edit)
 		vehicleEditQueue[vehicleID] = nil
-		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix

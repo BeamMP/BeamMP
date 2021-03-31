@@ -206,9 +206,9 @@ local function applyVehEdit(serverID, data)
 		if configChanged or colorChanged then
 			tableMerge(playerVehicle.config, vehicleConfig)
 
-			dump(configChanged)
-			dump(partsDiff)
-			dump(tuningDiff)
+			--dump(configChanged)
+			--dump(partsDiff)
+			--dump(tuningDiff)
 
 			if configChanged then
 				veh:respawn(serialize(playerVehicle.config))
@@ -374,13 +374,11 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		eventdata.serverVehicleID = serverVehicleID
 		eventdata.data = data
 
-		if settings.getValue("enableSpawnQueue") then
+		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 
-			--if not vehicleSpawnQueue[serverVehicleID] then  end
-			--table.insert(vehicleSpawnQueue[serverVehicleID], )
 			vehicleSpawnQueue[serverVehicleID] = eventdata
 			print('queue enabled adding spawn for '..playerNickname)
-			
+
 			UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 
 			UI.showNotification('Spawn received and queued for '..playerNickname)
@@ -460,11 +458,14 @@ end
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
 local function onServerVehicleRemoved(serverVehicleID)
-	if vehicleSpawnQueue[serverVehicleID] or vehicleEditQueue[serverVehicleID] then
-		vehicleSpawnQueue[serverVehicleID] = nil
-		vehicleEditQueue[serverVehicleID] = nil
-		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+	vehicleEditQueue[serverVehicleID] = nil
+	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+
+	if vehicleSpawnQueue[serverVehicleID] then
 		print("Vehicle "..serverVehicleID.." is still in the queue, can't remove")
+		print(vehicleSpawnQueue[serverVehicleID])
+		vehicleSpawnQueue[serverVehicleID] = nil
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 		return
 	end
 
@@ -515,9 +516,16 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	if MPCoreNetwork.isMPSession() then -- If TCP connected
 		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
 		if newServerVehicleID then -- If it's not null
-			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableSize(ownMap) > 0 then
+			if not isOwn(newGameVehicleID) and (settings.getValue("skipOtherPlayersVehicles") or jbeamMap[newGameVehicleID] == "unicycle") and tableSize(ownMap) > 0 then
 				be:enterNextVehicle(0, 1) extensions.hook('trackNewVeh')
 			end
+
+			-- enter a remote car as a passenger
+			if not isOwn(newGameVehicleID) and jbeamMap[oldGameVehicleID] == "unicycle" then
+				core_camera.setByName(0,"onboard.rider") -- citybus
+				core_camera.setByName(0,"onboard.passenger") -- everything else
+			end
+
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end

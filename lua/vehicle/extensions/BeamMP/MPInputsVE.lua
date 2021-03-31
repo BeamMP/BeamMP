@@ -81,7 +81,7 @@ local function updateGFX(dt)
 		--input.event("brake", lastApply.b, 3)
 		--input.event("parkingbrake", lastApply.p, 3)
 		--input.event("clutch", lastApply.c, 3)
-		lastSteering = steering
+		--lastSteering = steering
 	end
 end
 

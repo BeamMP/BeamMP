@@ -44,7 +44,11 @@ end
 
 
 local function updateQueue(spawns, edits, s)
-	local UIqueue = {spawnCount = tableSize(spawns), editCount = tableSize(edits), show = s}
+	local UIqueue = {spawnCount = tableSize(spawns), editCount = tableSize(edits)}
+	if s == nil then
+		s = UIqueue.spawnCount+UIqueue.editCount>0
+	end
+	UIqueue.show = s
 	guihooks.trigger("setQueue", UIqueue)
 end
 

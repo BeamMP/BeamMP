@@ -20,6 +20,12 @@
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAutoSkipRemote.tooltip' | translate }}</md-tooltip>
       <md-checkbox ng-model="options.data.values.queueAutoSkipRemote" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>
+
+    <md-list-item md-no-ink>
+      <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSkipUnicycle' | translate }}</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSkipUnicycle.tooltip' | translate }}</md-tooltip>
+      <md-checkbox ng-model="options.data.values.queueSkipUnicycle" ng-change="options.applyState()"></md-checkbox>
+    </md-list-item>
   </div>
 
 

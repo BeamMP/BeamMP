@@ -475,6 +475,7 @@ local function crouch(value)
 end
 
 local function toggleCrouch()
+  electrics.values.isCrouching = isCrouching
   isCrouching = not isCrouching
   crouch(isCrouching and -1 or 1)
 end

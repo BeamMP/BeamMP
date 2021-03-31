@@ -267,6 +267,13 @@ local function applyElectrics(data)
 			end
 		end
 
+		if decodedData.isCrouching ~= nil then
+			local playerController = controller.getController('playerController')
+			if playerController then
+				playerController.crouch(decodedData.isCrouching and -1 or 1)
+			end
+		end
+
 		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v

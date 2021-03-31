@@ -117,7 +117,7 @@
         {"collision":true},
         //dash cam
         ["dash", 0.41, 0.337, 1.2, 55, "f1ll","f2r","f3ll","f4ll","f4r", {"beamDeform":5001000,"beamStrength":"FLT_MAX"}],
-		["onboard.passenger", -0.39, 0.337, 1.2, 55, "f1ll","f2r","f3ll","f4ll","f4r", {"beamDeform":5001000,"beamStrength":"FLT_MAX"}],
+		["passenger", -0.39, 0.337, 1.2, 55, "f1ll","f2r","f3ll","f4ll","f4r", {"beamDeform":5001000,"beamStrength":"FLT_MAX"}],
     ],
     "flexbodies": [
         ["mesh", "[group]:", "nonFlexMaterials"],

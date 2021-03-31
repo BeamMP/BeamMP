@@ -49,7 +49,7 @@ local ui_strings = {}
 
 local function getTranslations(_, content)
 	local data = jsonDecode(content)
-	if data[1] and data[1] == "translationFileUpdate" then
+	if data and data[1] and data[1] == "translationFileUpdate" then
 		local languageMap = require('utils/languageMap')
 		local selectedLang = Lua:getSelectedLanguage()
 
@@ -66,8 +66,8 @@ local function onExtensionLoaded()
 
 
 
-	guihooks.updateListener("beammpui", getTranslations)
-	core_modmanager.requestTranslations()
+	--guihooks.updateListener("beammpui", getTranslations)
+	--core_modmanager.requestTranslations()
 end
 
 

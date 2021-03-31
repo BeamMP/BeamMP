@@ -75,10 +75,43 @@ local function getElectricsTickrate()
   return electricsTickrate
 end
 
+local function checkForOldConfig()
+  if not FS:directoryExists("BeamMP") then
+    return false
+  end
+
+  if not FS:directoryExists("settings/BeamMP") then
+    FS:directoryCreate("settings/BeamMP")
+  end
+
+  local movedfiles = false
+
+  local oldfav = '/BeamMP/favorites.json'
+  local newfav = '/settings/BeamMP/favorites.json'
+  if FS:fileExists(oldfav) then
+    FS:copyFile(oldfav, newfav)
+	FS:removeFile(oldfav)
+	movedfiles = true
+  end
+
+  local oldconf = '/BeamMP/config.json'
+  local newconf = '/settings/BeamMP/config.json'
+  if FS:fileExists(oldconf) then
+    FS:copyFile(oldconf, newconf)
+	FS:removeFile(oldconf)
+	movedfiles = true
+  end
+  return movedfiles
+end
+
 
 local function getFavorites()
   if not FS:directoryExists("settings/BeamMP") then
-    return nil
+    if checkForOldConfig() then
+      return getFavorites()
+    else
+      return nil
+    end
   end
 
   local favs = nil
@@ -105,7 +138,11 @@ end
 
 local function getConfig()
   if not FS:directoryExists("settings/BeamMP") then
-    return nil
+    if checkForOldConfig() then
+      return getConfig()
+    else
+      return nil
+    end
   end
 
   local file = '/settings/BeamMP/config.json'

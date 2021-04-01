@@ -522,8 +522,10 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 
 			-- enter a remote car as a passenger
 			if not isOwn(newGameVehicleID) and jbeamMap[oldGameVehicleID] == "unicycle" then
-				core_camera.setByName(0,"onboard.rider") -- citybus
-				core_camera.setByName(0,"onboard.passenger") -- everything else
+				--core_camera.setByName(0,"onboard.rider") -- citybus
+				core_camera.setByName(0,"passenger") -- auto generated
+				core_camera.setByName(0,"onboard.passenger") -- custom
+				print("enter passenger")
 			end
 
 			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))

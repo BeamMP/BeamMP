@@ -211,7 +211,7 @@ local function resetSession(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	connectToLauncher()
-	UI.readyReset()
+	--UI.readyReset()
 	status = "" -- Reset status
 	if goBack then returnToMainMenu() end
 	MPModManager.cleanUpSessionMods()

@@ -6,6 +6,7 @@ log("I", "Multiplayer Gamemode", "Gamemode Loaded")
 local inputActionFilter = extensions.core_input_actionFilter
 
 local readyCalled = false
+local originalGetDriverData = nop
 
 
 local function startMultiplayerHelper (level, startPointName)
@@ -167,6 +168,15 @@ local function modifiedGetDriverData(veh)
 	local id, right = core_camera.getDriverDataById(veh and veh:getID())
 	return id, not right
   end
+  return core_camera.getDriverDataById(veh and veh:getID())
+
+end
+
+local function onUpdate(dt)
+	if core_camera.getDriverData ~= modifiedGetDriverData then
+		originalGetDriverData = core_camera.getDriverData
+		core_camera.getDriverData = modifiedGetDriverData
+	end
 end
 
 -- public interface
@@ -178,5 +188,7 @@ M.onClientStartMission      = onClientStartMission
 M.onClientEndMission        = onClientEndMission
 M.onVehicleSwitched         = onVehicleSwitched
 M.onResetGameplay           = onResetGameplay
+
+M.onUpdate                  = onUpdate
 
 return M

@@ -7,6 +7,7 @@ local inputActionFilter = extensions.core_input_actionFilter
 
 local readyCalled = false
 local originalGetDriverData = nop
+local originalToggleWalkingMode = nop
 
 
 local function startMultiplayerHelper (level, startPointName)
@@ -162,20 +163,32 @@ local function onResetGameplay(playerID)
 end
 
 local function modifiedGetDriverData(veh)
-  if not veh then return nil end
-  local caller = debug.getinfo(2).name
-  if caller and caller == "getDoorsidePosRot" and veh.mpVehicleType and veh.mpVehicleType == 'R' then
-	local id, right = core_camera.getDriverDataById(veh and veh:getID())
-	return id, not right
-  end
-  return core_camera.getDriverDataById(veh and veh:getID())
+	if not veh then return nil end
+	local caller = debug.getinfo(2).name
+	if caller and caller == "getDoorsidePosRot" and veh.mpVehicleType and veh.mpVehicleType == 'R' then
+		local id, right = core_camera.getDriverDataById(veh and veh:getID())
+		return id, not right
+	end
+	return core_camera.getDriverDataById(veh and veh:getID())
+end
 
+local function modifiedToggleWalkingMode()
+	if gameplay_walk.isWalking() then
+		local veh = gameplay_walk.getVehicleInFront()
+		if not veh or veh:getJBeamFilename() == "unicycle" then return end
+	end
+	originalToggleWalkingMode()
+	--gameplay_walk.setWalkingMode( not gameplay_walk.isWalking() )
 end
 
 local function onUpdate(dt)
 	if core_camera.getDriverData ~= modifiedGetDriverData then
 		originalGetDriverData = core_camera.getDriverData
 		core_camera.getDriverData = modifiedGetDriverData
+	end
+	if gameplay_walk and gameplay_walk.toggleWalkingMode ~= modifiedToggleWalkingMode then
+		originalToggleWalkingMode = gameplay_walk.toggleWalkingMode
+		gameplay_walk.toggleWalkingMode = modifiedToggleWalkingMode
 	end
 end
 

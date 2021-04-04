@@ -26,7 +26,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
+		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
 	end
 end

@@ -223,12 +223,11 @@ local function applyVehEdit(serverID, data)
 		log('W','beammp.applyEdit',"The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
 
 
-		local c   = vehicleConfig.colors[1] and vehicleConfig.colors[1][1] and ColorF(vehicleConfig.colors[1][1],vehicleConfig.colors[1][2],vehicleConfig.colors[1][3],vehicleConfig.colors[1][4]) or nil
-		local p0  = vehicleConfig.colors[2] and vehicleConfig.colors[2][1] and ColorF(vehicleConfig.colors[2][1],vehicleConfig.colors[2][2],vehicleConfig.colors[2][3],vehicleConfig.colors[2][4]) or nil
-		local p1  = vehicleConfig.colors[3] and vehicleConfig.colors[3][1] and ColorF(vehicleConfig.colors[3][1],vehicleConfig.colors[3][2],vehicleConfig.colors[3][3],vehicleConfig.colors[3][4]) or nil
+		local c   = decodedData.col and ColorF(decodedData.col[1],decodedData.col[2],decodedData.col[3],decodedData.col[4]) or nil
+		local p0  = decodedData.cpz and ColorF(decodedData.cpz[1],decodedData.cpz[2],decodedData.cpz[3],decodedData.cpz[4]) or nil
+		local p1  = decodedData.cpo and ColorF(decodedData.cpo[1],decodedData.cpo[2],decodedData.cpo[3],decodedData.cpo[4]) or nil
 		local pos = veh:getPosition()
 		local rot = quat(veh:getRotation())
-
 
 		print("Updating vehicle from server "..vehicleName.." with id "..serverID)
 		spawn.setVehicleObject(veh, vehicleName, serialize(vehicleConfig), pos, rot, c, p0, p1, true)
@@ -318,7 +317,7 @@ local function applyVehSpawn(event)
 	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
 
 	if spawnedVeh then
-		print("Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
+		print("(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
 		spawn.setVehicleObject(spawnedVeh, vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), true)
 	else
 		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false)

@@ -11,7 +11,7 @@ print("Loading MPInputsGE...")
 
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() or {} -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then

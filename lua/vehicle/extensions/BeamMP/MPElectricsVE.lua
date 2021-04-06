@@ -144,6 +144,8 @@ local disallowedKeys = {
 	["steering"] = 1,
 	["steering_input"] = 1,
 	["throttle_input"] = 1,
+	["parkingbrake"] = 1,
+	["parkingbrake_input"] = 1,
 	["abs"] = 1,
 	["lights"] = 1,
 	["wheelaxleFR"] = 1,
@@ -167,7 +169,9 @@ local disallowedKeys = {
 	["clutchRatio1"] = 1,
 	["lockupClutchRatio"] = 1,
 	["throttleOverride"] = 1,
-	["cruiseControlTarget"] = 1
+	["cruiseControlTarget"] = 1,
+	["isShifting"] = 1,
+	["unicycle_body"] = 1
 }
 
 local function checkGears()

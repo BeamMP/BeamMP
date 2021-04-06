@@ -784,34 +784,6 @@ local function groundmarkerFollowPlayer(targetName, dontfollow)
 	end
 end
 
-local function onPreRender(dt)
-	local vehicle = be:getPlayerVehicle(0)
-	if not vehicle then return end
-
-	lastQuery = lastQuery - dt
-	if lastQuery <= 0 then
-		lastQuery = 0.2
-		local vehiclePos = vehicle:getPosition()
-		queryRoadNodeToPosition(vehiclePos, 'player')
-		if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
-	end
-
-	local playerRoadData = groundmarkerRoads['player']
-	if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
-		for target,data in pairs(groundmarkerRoads) do
-			if target ~= 'player' then
-				if data.best then
-					core_groundMarkers.setFocus(data.best)
-				end
-			end
-		end
-	end
-end
-
-
-
-
-
 local function teleportVehToPlayer(targetName)
 	local activeVehicle = be:getPlayerVehicle(0)
 
@@ -879,7 +851,36 @@ local function applyQueuedEvents()
 	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 end
 
+
 local function onUpdate(dt)
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		localCounter = localCounter + dt
+	end
+end
+
+local function onPreRender(dt)
+	local vehicle = be:getPlayerVehicle(0)
+	if vehicle then
+		lastQuery = lastQuery - dt
+		if lastQuery <= 0 then
+			lastQuery = 0.2
+			local vehiclePos = vehicle:getPosition()
+			queryRoadNodeToPosition(vehiclePos, 'player')
+			if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
+		end
+
+		local playerRoadData = groundmarkerRoads['player']
+		if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
+			for target,data in pairs(groundmarkerRoads) do
+				if target ~= 'player' then
+					if data.best then
+						core_groundMarkers.setFocus(data.best)
+					end
+				end
+			end
+		end
+	end
+
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 
 		local cameraPos = vec3(getCameraPosition())
@@ -892,7 +893,7 @@ local function onUpdate(dt)
 		else applyQueuedEvents() end
 
 		if not be:getPlayerVehicle(0) and not commands.isFreeCamera() then
-			commands.setFreeCamera()         -- Fix camera
+			commands.setFreeCamera()		 -- Fix camera
 		end
 
 		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
@@ -904,7 +905,7 @@ local function onUpdate(dt)
 		end
 
 		for i = 0, be:getObjectCount()-1 do -- For each vehicle
-			local veh = be:getObject(i) --  Get vehicle
+			local veh = be:getObject(i) --	Get vehicle
 			local gameVehicleID = veh:getID()
 			if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] then
 				local pos = veh:getPosition()
@@ -920,28 +921,30 @@ local function onUpdate(dt)
 					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 					local backColor = roleInfo.backcolor
 
-					if distanceMap[gameVehicleID] > 10 then
-						local d
+					if distanceMap[gameVehicleID] > 10 and settings.getValue("nameTagShowDistance") then
+						local unit
+						local mapEntry = distanceMap[gameVehicleID]
 						if settings.getValue("uiUnitLength") == "imperial" then
-							local ft = distanceMap[gameVehicleID]*3.28084
-							if ft > 5280 then
-								local mi = math.floor( (ft / 5280 * 100) + 0.5) / 100
-								d = tostring(mi).." mi"
+							mapEntry = mapEntry * 3.28084
+							if mapEntry > 5280 then
+								mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
+								unit = "mi"
 							else
-								d = tostring(math.floor(ft)).." ft"
+								mapEntry = math.floor(mapEntry)
+								unit = "ft"
 							end
 						else
-							if distanceMap[gameVehicleID] > 1000 then
-								local km = math.floor((distanceMap[gameVehicleID] / 10) + 0.5) / 100
-								d = tostring(km).." km"
+							if mapEntry >= 1000 then
+								mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
+								unit = "km"
 							else
-								d = tostring(math.floor(distanceMap[gameVehicleID])).." m"
+								mapEntry = math.floor(mapEntry)
+								unit = "m"
 							end
 						end
-						dist = " "..d
-					end
 
-					if not settings.getValue("nameTagShowDistance") then dist = "" end
+						dist = string.format(" %s %s", tostring(mapEntry), unit)
+					end
 
 					if settings.getValue("fadeVehicles") then
 						if currveh:getID() == gameVehicleID then veh:setMeshAlpha(1, "", false)
@@ -977,11 +980,8 @@ local function onUpdate(dt)
 				end
 			end
 		end
-		localCounter = localCounter + dt
 	end
 end
-
-
 
 --DEBUG
 M.queryRoadNodeToPosition = queryRoadNodeToPosition

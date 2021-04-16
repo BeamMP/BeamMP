@@ -57,11 +57,12 @@ end
 
 
 local function handle(rawData)
-	rawData = string.sub(rawData,3)
-	local serverVehicleID = string.match(rawData,"^.-:")
-	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-	local data = string.match(rawData,":(.*)")
-	applyPos(data, serverVehicleID)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	if code == 'p' then
+		applyPos(data, serverVehicleID)
+	else
+		print("unknown positionGE code arrived: "..rawData)
+	end
 end
 
 

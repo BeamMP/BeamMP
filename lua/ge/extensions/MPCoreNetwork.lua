@@ -173,11 +173,12 @@ local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
-	if params == "ldone" and status == "LoadingResources" then
-		send('Mrequest')
-		status = "LoadingMap"
-	end
-	if code == "p" then
+	if code == "l" then
+		if data == "done" and status == "LoadingResources" then
+			send('Mrequest')
+			status = "LoadingMap"
+		end
+	elseif code == "p" and isMpSession then
 		UI.setPing(data.."")
 		positionGE.setPing(data)
 	end

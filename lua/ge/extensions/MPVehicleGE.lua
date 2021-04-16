@@ -240,7 +240,7 @@ local function updateVehicle(serverID, data)
 	if settings.getValue("enableSpawnQueue") then
 		vehicleEditQueue[serverID] = data
 		print('edit received and queued')
-		local id = string.match(serverID,"^(.*)-")
+		local id = string.match(serverID,"^(%d*)-")
 		local playerNickname = nickIDMap[id] or "unknown"
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 		UI.showNotification('Edit received and queued for '..playerNickname)
@@ -593,38 +593,43 @@ end
 
 local HandleNetwork = {
 	['s'] = function(rawData) -- spawn
-		local playerRole = string.match(rawData,"(%w+)%:") -- Get the player role
-		rawData = rawData:gsub(playerRole..":", "")
-		local playerNickname = string.match(rawData,"^.-:")
-		playerNickname = playerNickname:sub(1, #playerNickname - 1) -- Get the player nickname
-		rawData = rawData:sub((#playerNickname + 2), #rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1) -- Get the serverVehicleID
-		local data = string.match(rawData,":(.*)") -- Get the vehicle data
-		--dump(rawData)
-		--print(playerRole, playerNickname, serverVehicleID)
-		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
+		local playerRole, playerNickname, serverVehicleID, data = string.match(rawData, "^(%w+)%:(%w+)%:(%d+%-%d+)%:({.+})") -- 'ROLE:name:0-0:{jsonstring}'
+
+		if playerRole ~= nil then
+			onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
+		else
+			print("Spawn PATTERN MATCH FAILED")
+		end
 	end,
 	['r'] = function(rawData) -- reset
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleResetted(serverVehicleID, data)
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+
+		if serverVehicleID ~= nil then
+			onServerVehicleResetted(serverVehicleID, data)
+		else
+			print("Reset PATTERN MATCH FAILED")
+		end
 	end,
 	['c'] = function(rawData) -- config sync
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		updateVehicle(serverVehicleID, data)
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+
+		if serverVehicleID ~= nil then
+			updateVehicle(serverVehicleID, data)
+		else
+			print("Config Sync PATTERN MATCH FAILED")
+		end
 	end,
 	['d'] = function(rawData) -- remove
 		onServerVehicleRemoved(rawData)
 	end,
 	['t'] = function(rawData) -- coupler
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleCoupled(serverVehicleID, data)
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%w+)") -- '0-0:true'
+
+		if serverVehicleID ~= nil then
+			onServerVehicleCoupled(serverVehicleID, data)
+		else
+			print("Coupler packet PATTERN MATCH FAILED")
+		end
 	end
 }
 

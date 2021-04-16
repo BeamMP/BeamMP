@@ -44,11 +44,10 @@ end
 
 
 local function handle(rawData)
-	rawData = string.sub(rawData,3)
-	local serverVehicleID = string.match(rawData,"^.-:")
-	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-	local data = string.match(rawData,":(.*)")
-	applyInputs(data, serverVehicleID)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	if code == 'i' then
+		applyInputs(data, serverVehicleID)
+	end
 end
 
 

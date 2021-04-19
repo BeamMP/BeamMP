@@ -511,24 +511,69 @@ end
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	--print("Vehicle switched from "..oldID.." to "..newID)
+	print("Vehicle switched from "..oldGameVehicleID.." to "..newGameVehicleID)
+
 	if MPCoreNetwork.isMPSession() then -- If TCP connected
-		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
-		if newServerVehicleID then -- If it's not null
-			if not isOwn(newGameVehicleID) and (settings.getValue("skipOtherPlayersVehicles") or jbeamMap[newGameVehicleID] == "unicycle") and tableSize(ownMap) > 0 then
-				be:enterNextVehicle(0, 1) extensions.hook('trackNewVeh')
-			end
 
-			-- enter a remote car as a passenger
-			if not isOwn(newGameVehicleID) and jbeamMap[oldGameVehicleID] == "unicycle" then
-				--core_camera.setByName(0,"onboard.rider") -- citybus
-				core_camera.setByName(0,"passenger") -- auto generated
-				core_camera.setByName(0,"onboard.passenger") -- custom
-				print("enter passenger")
-			end
 
-			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
-		end
+			if newGameVehicleID and newGameVehicleID > -1 then
+				local skipOthers = settings.getValue("skipOtherPlayersVehicles") or false
+				local oldVehicle = be:getObjectByID(oldGameVehicleID or -1)
+				local newVehicle = be:getObjectByID(newGameVehicleID or -1)
+
+				-- enter a remote car as a passenger
+				if not isOwn(newGameVehicleID) and oldVehicle and oldVehicle:getJBeamFilename() == "unicycle" then
+					--core_camera.setByName(0,"onboard.rider") -- citybus
+					core_camera.setByName(0,"passenger") -- auto generated
+					core_camera.setByName(0,"onboard.passenger") -- custom
+				elseif not isOwn(newGameVehicleID) and ((skipOthers and tableSize(ownMap) > 0) or newVehicle:getJBeamFilename() == "unicycle") then
+					-- switch away from this vehicle if it shouldn't be accessible
+
+					local vehicles = getAllVehicles()
+					--local oldIndex = nil -- the old vehicle's index
+					local curIndex = nil -- the current (new) vehicle's index
+					for index,vehicle in ipairs(vehicles) do
+						local id = vehicle and vehicle:getID()
+						--if id == oldGameVehicleID then
+						--	oldIndex = index
+						--end
+						if id == newGameVehicleID then
+							curIndex = index
+						end
+						if --[[(oldGameVehicleID == -1 or oldIndex) and]] curIndex then break end
+					end
+					curIndex = curIndex or #vehicles
+					print("current vehicle index is " .. curIndex)
+
+					local findFunc = function(from, to)
+						for i = from, to do
+							local id = vehicles[i] and vehicles[i]:getID()
+							if isOwn(id) or not skipOthers and vehicles[i]:getJBeamFilename() ~= "unicycle" then
+								print("found suitable vehicle after current, " .. vehicles[i]:getJBeamFilename())
+								return i
+							end
+						end
+						return nil
+					end
+					
+					--print("direction:")
+					--print(oldIndex or -1 < curIndex)
+
+					local nextIndex = findFunc(curIndex+1, #vehicles) or findFunc(1, curIndex) -- could flip these if we knew the direction
+
+					if vehicles[nextIndex] then -- found a good vehicle, swtich to it
+						be:enterVehicle(0, vehicles[nextIndex])
+					else -- no suitable vehicle found, go to freecam
+						be:exitVehicle(0)
+					end
+				end
+
+
+				local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player switched to
+				if newServerVehicleID then -- If it's not null
+					MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
+				end
+			end
 	end
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================

@@ -909,7 +909,7 @@ local function applyQueuedEvents()
 	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	--dump(vehicleSpawnQueue)
 	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
-		print("spawn")
+		print("applying queued spawn")
 		applyVehSpawn(spawn)
 		vehicleSpawnQueue[vehicleID] = nil
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
@@ -918,7 +918,7 @@ local function applyQueuedEvents()
 	--if not vehicleEditQueue then return end
 	--dump(vehicleEditQueue)
 	for vehicleID, edit in pairs(vehicleEditQueue) do
-		print("edit")
+		print("applying queued edit")
 		applyVehEdit(vehicleID, edit)
 		vehicleEditQueue[vehicleID] = nil
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})

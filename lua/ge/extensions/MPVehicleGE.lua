@@ -183,7 +183,6 @@ end
 
 
 local function applyVehEdit(serverID, data)
-
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then log('W','beammp.applyEdit',"gameVehicleID for "..serverID.." not found") return end
 
@@ -206,11 +205,8 @@ local function applyVehEdit(serverID, data)
 		if configChanged or colorChanged then
 			tableMerge(playerVehicle.config, vehicleConfig)
 
-			--dump(configChanged)
-			--dump(partsDiff)
-			--dump(tuningDiff)
-
 			if configChanged then
+				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
 				veh:respawn(serialize(playerVehicle.config))
 			else
 				print("only color changed")
@@ -407,11 +403,11 @@ local function onVehicleSpawned(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 
 
-	print("SPAWN")
-	dump(veh.mpVehicleType)
-	dump(isOwn(gameVehicleID) ~= 1)
-	dump(getServerVehicleID(gameVehicleID) == nil)
-	dump(jbeamMap[gameVehicleID])
+	--print("SPAWN")
+	--dump(veh.mpVehicleType)
+	--dump(isOwn(gameVehicleID) ~= 1)
+	--dump(getServerVehicleID(gameVehicleID) == nil)
+	--dump(jbeamMap[gameVehicleID])
 
 
 	if not jbeamMap[gameVehicleID] then -- If it's not an edit
@@ -436,19 +432,19 @@ local function onVehicleSpawned(gameVehicleID)
 			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 
-			if onVehicleSpawnedAllowed then -- if false then we spawned it (from server)
+			if onVehicleSpawnedAllowed then -- if false then the server spawned it
 				sendCustomVehicleData(gameVehicleID) -- Send it to the server (as a sync)
 			end
 
 			onVehicleSpawnedAllowed = true
-			
+
 		else
 			print("Vehicle "..gameVehicleID.." was edited")
 			syncTimer = 0
 			vehiclesToSync[gameVehicleID] = 1.
 		end
 	end
-	
+
 	jbeamMap[gameVehicleID] = veh:getJBeamFilename()
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
@@ -475,9 +471,10 @@ local function onServerVehicleRemoved(serverVehicleID)
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
 			onVehicleDestroyedAllowed = false
-			commands.setFreeCamera() -- Fix camera
+			local currveh = be:getPlayerVehicle(0)
+			local isCurrent = (currveh and currveh:getID() == gameVehicleID) or false
 			veh:delete() -- Remove it
-			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+			if isCurrent then be:enterNextVehicle(0,1) end-- Fix camera
 			vehiclesMap[gameVehicleID] = nil
 			invertedVehiclesMap[serverVehicleID] = nil
 		end
@@ -909,7 +906,7 @@ local function applyQueuedEvents()
 	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	--if not vehicleSpawnQueue then return end
 
-	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 	--dump(vehicleSpawnQueue)
 	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
 		print("spawn")
@@ -927,7 +924,7 @@ local function applyQueuedEvents()
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
-	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
 end
 
 local function onUpdate(dt)
@@ -1011,11 +1008,11 @@ local function onUpdate(dt)
 					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
 					local prefix = ""
-					for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+					for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {})
 						do prefix = prefix..tag.." " end
-					
+
 					local suffix = ""
-					for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+					for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {})
 						do suffix = suffix..tag.." " end
 
 					pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside

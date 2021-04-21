@@ -621,12 +621,13 @@ end
 
 local HandleNetwork = {
 	['s'] = function(rawData) -- spawn
-		local playerRole, playerNickname, serverVehicleID, data = string.match(rawData, "^(%w+)%:(%w+)%:(%d+%-%d+)%:({.+})") -- 'ROLE:name:0-0:{jsonstring}'
+		local playerRole, playerNickname, serverVehicleID, data = string.match(rawData, "^(%w+)%:([%g%s]+)%:(%d+%-%d+)%:({.+})") -- 'ROLE:name:0-0:{jsonstring}'
 
 		if playerRole ~= nil then
 			onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 		else
 			log('E', "HandleNetwork", "Spawn pattern match failed")
+			print(rawData)
 		end
 	end,
 	['r'] = function(rawData) -- reset

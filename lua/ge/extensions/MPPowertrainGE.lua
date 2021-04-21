@@ -44,13 +44,8 @@ end
 
 
 local function handle(rawData)
-	--print("MPPowertrainGE.handle: "..rawData)
-	local code = string.sub(rawData, 1, 1)
-	local rawData = string.sub(rawData, 3)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == "l" then
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
 		applyLivePowertrain(data, serverVehicleID)
 	end
 end

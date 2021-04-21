@@ -12,7 +12,6 @@ print("Loading UI...")
 
 local players = {} -- { 'apple', 'banana', 'meow' }
 local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
-local readyCalled = false
 
 
 local function updateLoading(data)
@@ -122,7 +121,7 @@ end
 
 
 local function ready(src)
-	print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
+	print("UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
 
 	if MPCoreNetwork.isMPSession() then
 
@@ -143,24 +142,7 @@ local function ready(src)
 			end
 			print("---------------------------------------------------------------")
 		end
-
-		if src == "MP-GAMESTATE" then -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
-			if not readyCalled then
-				readyCalled = true
-				print("[BeamMP] First Session Vehicle Removed")
-				--core_vehicles.removeCurrent(); -- 0.20 Fix
-				--commands.setFreeCamera()         -- Fix camera
-				--if core_camera then core_camera.setVehicleCameraByIndexOffset(0, 1) extensions.hook('trackCamMode') end
-				MPGameNetwork.connectToLauncher()
-			end
-		end
 	end
-end
-
-
-
-local function readyReset()
-  readyCalled = false
 end
 
 
@@ -175,19 +157,9 @@ local function setVehPing(vehicleID, ping)
 	end
 end
 
-local function GSUpdate(state)
-	print('New GameState received')
-	if tableSize(state) == 0 then
-		print("GameState empty, are we in the menu?")
-	else
-		dump(state)
-	end
-end
-
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
 M.ready = ready
-M.readyReset = readyReset
 M.setPing = setPing
 M.setNickname = setNickname
 M.setStatus = setStatus
@@ -196,7 +168,6 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
-M.onGameStateUpdate = GSUpdate
 M.updateQueue = updateQueue
 
 

@@ -32,7 +32,8 @@ angular.module('beamng.stuff')
           } else {
             elOptions[elOptions.length] = {
               name: slotPart.description,
-              val: slotPartName
+              val: slotPartName,
+              value: data.availableParts[slotPartName].value
             };
             optionCount++;
             if (data.chosenParts[slotType] == slotPartName) {
@@ -46,7 +47,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: ''});
+        element.options.unshift({name: 'Empty', val: '', value: ''});
       } else {
         element.open = true;
       }

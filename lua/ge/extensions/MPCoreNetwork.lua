@@ -44,7 +44,7 @@ local function connectToLauncher()
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444));
+		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444));
 		launcherConnectionStatus = 1
 	end
 end
@@ -139,6 +139,7 @@ local function connectToServer(ip, port)
 	if getMissionFilename() ~= "" then Lua:requestReload() end
 	local ipString
 	if ip and port then -- Direct connect
+		currentServer = nil
 		ipString = ip..':'..port
 		send('C'..ipString..'')
 	else -- Server list connect
@@ -173,11 +174,12 @@ local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
-	if params == "ldone" and status == "LoadingResources" then
-		send('Mrequest')
-		status = "LoadingMap"
-	end
-	if code == "p" then
+	if code == "l" then
+		if data == "done" and status == "LoadingResources" then
+			send('Mrequest')
+			status = "LoadingMap"
+		end
+	elseif code == "p" and isMpSession then
 		UI.setPing(data.."")
 		positionGE.setPing(data)
 	end
@@ -211,7 +213,7 @@ local function resetSession(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	connectToLauncher()
-	UI.readyReset()
+	--UI.readyReset()
 	status = "" -- Reset status
 	if goBack then returnToMainMenu() end
 	MPModManager.cleanUpSessionMods()

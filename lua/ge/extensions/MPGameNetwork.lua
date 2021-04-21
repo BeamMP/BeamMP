@@ -26,7 +26,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
+		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
 	end
 end
@@ -62,10 +62,9 @@ local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
 	if code == "s" then
-		local players = string.match(data,"(.*)%:")
-		data = string.match(data, ":(.*)")
-		UI.updatePlayersList(data)
-		UI.setPlayerCount(players)
+		local playerCount, playerList = string.match(data, "^(%d+%/%d+)%:(.*)") -- 1/10:player1,player2
+		UI.setPlayerCount(playerCount)
+		UI.updatePlayersList(playerList)
 	elseif code == "n" then
 		UI.setNickname(data)
 		MPConfig.setNickname(data)

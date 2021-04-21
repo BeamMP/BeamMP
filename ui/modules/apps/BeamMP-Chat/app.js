@@ -1,4 +1,4 @@
-  var app = angular.module('beamng.apps');
+var app = angular.module('beamng.apps');
 
 
 app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
@@ -17,6 +17,8 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		var chatinput = document.getElementById("chat-input");
 		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
 		chatinput.addEventListener("mouseout", function(){ chatShown = false; });
+		chatinput.addEventListener('keydown', onKeyDown); //used for 'up arrow' last msg functionality
+
 		var chatlist = document.getElementById("chat-list");
 		chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
 		chatlist.addEventListener("mouseout", function(){ chatShown = false; });
@@ -92,6 +94,7 @@ app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
 		let chatinput = document.getElementById("chat-input");
 		const text = chatinput.value
 		if (text) {
+			lastSentMessage = text;
 			if (text.length > 150) addMessage("Your message should not be longer than 150 characters!");
 			else {
 				bngApi.engineLua("UI.chatSend(\""+ text.replace(/"/g, '\'') + "\")");
@@ -195,4 +198,14 @@ function addMessage(msg) {
 	const chatwindow = document.getElementById("chat-window");
 	if (chatwindow.style.flexDirection != "column-reverse") chatlist.scrollTop = chatlist.scrollHeight;
 	else chatlist.scrollTop = 0;
+}
+
+var lastSentMessage = "";
+
+function onKeyDown(e) {
+	if (e.key == "ArrowUp") {
+		console.log(e);
+		document.getElementById("chat-input").value = lastSentMessage;
+		e.target.setSelectionRange(lastSentMessage.length, lastSentMessage.length);
+	}
 }

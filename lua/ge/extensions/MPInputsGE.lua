@@ -11,7 +11,7 @@ print("Loading MPInputsGE...")
 
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() or {} -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -44,11 +44,10 @@ end
 
 
 local function handle(rawData)
-	rawData = string.sub(rawData,3)
-	local serverVehicleID = string.match(rawData,"^.-:")
-	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-	local data = string.match(rawData,":(.*)")
-	applyInputs(data, serverVehicleID)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	if code == 'i' then
+		applyInputs(data, serverVehicleID)
+	end
 end
 
 

@@ -890,6 +890,7 @@ local function onPreRender(dt)
 			end
 		end
 
+
 		local cameraPos = vec3(getCameraPosition())
 		if currentVeh then
 			local vel = vec3()

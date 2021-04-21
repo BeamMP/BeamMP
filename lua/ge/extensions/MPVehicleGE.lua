@@ -741,7 +741,7 @@ local gmTargetPlayer = nil
 local function queryRoadNodeToPosition(targetPosition, owner)
 	if not owner then owner = "target" end
 	targetPosition = vec3(targetPosition)
-	local first, second, distance = map.findClosestRoad(pos)
+	local first, second, distance = map.findClosestRoad(targetPosition)
 	if not first and not second then return false end
 
 	groundmarkerRoads[owner] = {position=targetPosition}
@@ -892,7 +892,7 @@ local function onPreRender(dt)
 
 
 		local cameraPos = vec3(getCameraPosition())
-		if currentVeh then
+		if activeVeh then
 			local vel = vec3()
 			vel:set(activeVeh:getVelocity())
 			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end

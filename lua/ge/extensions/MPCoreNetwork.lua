@@ -139,6 +139,7 @@ local function connectToServer(ip, port)
 	if getMissionFilename() ~= "" then Lua:requestReload() end
 	local ipString
 	if ip and port then -- Direct connect
+		currentServer = nil
 		ipString = ip..':'..port
 		send('C'..ipString..'')
 	else -- Server list connect

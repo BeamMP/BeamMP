@@ -134,7 +134,7 @@ function clearPlayerList() {
 
 function teleportToPlayer(targetPlayerName) {
 	console.log("teleportEvent: " + targetPlayerName);
-	bngApiScope.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
+	//bngApiScope.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
 }
 
 function showPlayerInfo(targetPlayerName) {

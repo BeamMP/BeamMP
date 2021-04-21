@@ -388,6 +388,7 @@ local function onVehicleSpawned(gameVehicleID)
 	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
 
 	local veh = be:getObjectByID(gameVehicleID)
+	local newJbeamName = veh:getJBeamFilename()
 
 
 	--print("SPAWN")
@@ -398,7 +399,7 @@ local function onVehicleSpawned(gameVehicleID)
 
 
 	if not jbeamMap[gameVehicleID] then -- If it's not an edit
-		log("D", "onVehicleSpawned", "New Vehicle Spawned "..gameVehicleID)
+		log("I", "onVehicleSpawned", "New Vehicle Spawned "..gameVehicleID)
 
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
@@ -412,10 +413,8 @@ local function onVehicleSpawned(gameVehicleID)
 
 
 	else
-		local newJbeamName = veh:getJBeamFilename()
-
 		if jbeamMap[gameVehicleID] ~= newJbeamName then
-			log("D", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, jbeamMap[gameVehicleID], newJbeamName))
+			log("I", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, jbeamMap[gameVehicleID], newJbeamName))
 
 			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
@@ -427,7 +426,7 @@ local function onVehicleSpawned(gameVehicleID)
 			onVehicleSpawnedAllowed = true
 
 		else
-			log("D", "onVehicleSpawned", "Vehicle " .. gameVehicleID .. " edited")
+			log("I", "onVehicleSpawned", "Vehicle " .. gameVehicleID .. " edited")
 			syncTimer = 0
 			vehiclesToSync[gameVehicleID] = 1.
 		end
@@ -701,6 +700,26 @@ local function spawnDefaultRequest()
 		core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 	end
 	extensions.hook("trackNewVeh")
+end
+
+local function spawnRequest(model, config, colors)
+	dump(model)
+	dump(config)
+	if colors then
+		local colors = core_vehicle_colors.colorStringToColorTable(colors)
+		colors[4] = colors[4]*2
+	end
+	dump(colors)
+	local currentVehicle = be:getPlayerVehicle(0)
+	if currentVehicle and isOwn(currentVehicle:getID()) and not config.spawnNew then
+		jbeamMap[currentVehicle:getID()] = '-'
+		return core_vehicles.replaceVehicle(model, config or {})
+		--core_vehicles.replaceVehicle(model, config and {config = config, color = colors or nil, licenseText = config.licenseName} or {})
+	else
+		return core_vehicles.spawnNewVehicle(model, config or {})
+		--core_vehicles.spawnNewVehicle(model, config and {config = config, color = colors or nil, licenseText = config.licenseName} or {})
+	end
+	--extensions.hook("trackNewVeh")
 end
 
 local function saveConfigRequest(configfilename)

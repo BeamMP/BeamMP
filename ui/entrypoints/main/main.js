@@ -1257,9 +1257,11 @@ angular.module('beamng.stuff')
       }
 
       if (useGamepadNavigation) {
-        console.log(actions[action]);
-        // console.log(actions[action][0]);
-        $rootScope.$evalAsync(actions[action][0].func);
+		if (actions[action] !== undefined) { // added by deer, this caused the right click error in the console
+          console.log(actions[action]);
+          // console.log(actions[action][0]);
+          $rootScope.$evalAsync(actions[action][0].func);
+        }
       }
     });
 

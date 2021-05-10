@@ -1,13 +1,105 @@
 var bngApiScope;
-var setVersion;
 var highlightedServer;
-var launcherVersion = "";
 var servers = [];
 var favorites = [];
 var recents = [];
 
 
 angular.module('beamng.stuff')
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	TOS CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerTOSController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	$scope.validate = function () {
+		localStorage.setItem("tosAccepted", "true");
+		$state.go('menu.multiplayer');
+	};
+
+	$scope.openExternalLink = function(url) {
+		bngApi.engineLua(`openWebBrowser("`+url+`")`);
+	}
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	LAUNCHER CONNECTION CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerLauncherController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	$scope.connect = function () {
+		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
+	};
+	
+	$scope.$on('launcherConnected', function (event, data) {
+		$state.go('menu.multiplayer');
+	});
+	
+	// The game's lua has an auto launcher reconnect in case
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	LOGIN CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerLoginController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	var vm = this;
+	$scope.login = function() {
+		var u = document.getElementById('loginUsername').value.trim();
+		var p = document.getElementById('loginPassword').value.trim();
+		if (u == "" || p == ""){
+			document.getElementById('loginHeader').textContent = 'Missing credentials';
+			return;
+		}	
+		document.getElementById('loginPassword').value = '';
+		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ username: u, password: p }) + "')");
+	}
+
+	$scope.switchConnection = function() {
+		var x = document.getElementById('LOGINERRORFIELD').textContent = "";
+		var loginContainer = document.getElementById('LoginContainer');
+		var guestContainer = document.getElementById('GuestContainer');
+		if (loginContainer.style.display == "none") {
+			loginContainer.style.display = 'block';
+			guestContainer.style.display = 'none';
+		} else {
+			loginContainer.style.display = 'none';
+			guestContainer.style.display = 'block';
+		}
+		
+	}
+
+	$scope.guestLogin = function() {
+		var u = document.getElementById('guestUsername').value;
+		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
+		document.getElementById('guestUsername').value = '';
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ guest: u }) + "')");
+	}
+	
+	$scope.$on('LoggedIn', function (event, data) {
+		$state.go('menu.multiplayer');
+	});
+	
+	$scope.$on('LoginError', function (event, data) {
+		var x = document.getElementById('LOGINERRORFIELD').textContent= data;
+	});
+	
+	// Try to auto login
+	bngApi.engineLua('MPCoreNetwork.autoLogin()');
+}])
+
+
+
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,114 +108,54 @@ angular.module('beamng.stuff')
 	bngApiScope = bngApi;
 
 	// Display the servers list page once the page is loaded
-	$scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
 		if (toState.url == "/multiplayer") {
 			// local://local/ui/#/menu/multiplayer/mpservers
 			document.getElementById('servers-btn').click();
+			
 		}
-	});
 
-	this.receiveServers = receiveServers;
-
-	vm.switchToLogin = function() {
-		document.getElementById('loginHeader').textContent = 'Login with your BeamMP account.';
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		document.getElementById('GuestContainer').style.display = 'none'
-		document.getElementById('LoginContainer').style.display = 'block'
-	}
-
-	vm.login = function() {
-		var u = document.getElementById('loginUsername').value.trim();
-		var p = document.getElementById('loginPassword').value.trim();
-
-		if (u == "" || p == ""){
-			document.getElementById('loginHeader').textContent = 'Missing credentials';
+		// Check if the user as aknowledged tos
+		const tosAccepted = localStorage.getItem("tosAccepted");
+		if (!tosAccepted || tosAccepted == "false") {
+			$state.go('menu.multiplayer.tos');
 			return;
 		}
 
-		document.getElementById('loginUsername').value = '';
-		document.getElementById('loginPassword').value = '';
-		var d = {
-			username: u,
-			password: p
+		// Check launcher is not connected
+		const launcherConnected = await isLauncherConnected();
+		if (!launcherConnected) {
+			$state.go('menu.multiplayer.launcher');
+			return;
 		}
 
-		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
+		// Check if we are logged in
+		const loggedIn = await isLoggedIn();
+		if (!loggedIn) {
+			$state.go('menu.multiplayer.login');
+			return;
+		}
+	});
+	
+	$scope.$on('LauncherConnectionLost', function (event, data) {
+		$state.go('menu.multiplayer.launcher');
+	});
 
-		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
-	}
-
-	vm.logout = function() {
-		document.getElementById('MultiplayerLoginBody').style.display = 'block';
-		vm.switchToLogin();
+	$scope.logout = function() {
 		bngApi.engineLua(`MPCoreNetwork.logout()`);
+		$state.go('menu.multiplayer');
 	}
-
-	vm.switchToGuest = function() {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		document.getElementById('LoginContainer').style.display = 'none'
-		document.getElementById('GuestContainer').style.display = 'block'
-	}
-
-	vm.guestLogin = function() {
-		var u = document.getElementById('guestUsername').value;
-		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
-		document.getElementById('guestUsername').value = '';
-		var d = {
-			guest: u
-		}
-		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
-	}
-
-	$scope.$on('LoginContainerController', function (event, data) {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		if (data.hide) { //login successful
-			document.getElementById('MultiplayerLoginBody').style.display = 'none'
-
-			if (data.message !== undefined) {
-				console.log(data.message);
-				localStorage.setItem('welcomeMessage',data.message.replace('Authentication Successful. ',''));
-				document.getElementById('topRightStatus').textContent = data.message;
-			} else {
-				document.getElementById('topRightStatus').textContent = localStorage.getItem('welcomeMessage')||"";
-			}
-		} else {
-			document.getElementById('MultiplayerLoginBody').style.display = 'block';
-		}
-	});
-
-	$scope.$on('LoginError', function (event, data) {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent=data.message;    // Change the content
-		}
-	});
 
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
 		console.log(src.value);
 	}
 
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
-	}
-
 	vm.refreshList = function() {
 		logger.debug("Attempting to refresh server list.")
 		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
-
+	
 	vm.clearRecents = function() {
 		localStorage.removeItem("recents");
 		vm.refreshList();
@@ -146,14 +178,14 @@ angular.module('beamng.stuff')
 		document.getElementById('addCustomFav').style.display = 'block';
 	};
 
-	vm.addCustomServer = function() {
+	vm.addCustomServer = async function() {
 		var ip = document.getElementById('customFavIP');
 		var port = document.getElementById('customFavPort');
 		var name = document.getElementById('customFavName');
 		var valid = (ip.value.length > 0) && (port.value.length > 0) && !isNaN(port.value)
 		if (!valid) return;
 		var server = {
-			cversion: launcherVersion, ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
+			cversion: await getLauncherVersion(), ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
 			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
 			custom: true, port: port.value
 		};
@@ -246,14 +278,14 @@ angular.module('beamng.stuff')
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerServersController] destroyed.');
 	});
-
+	
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = receiveServers(JSON.parse(data));
+		servers = await receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
-
+	
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -278,14 +310,14 @@ angular.module('beamng.stuff')
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
 	var vm = this;
-
+	
 	vm.searchText = "";
 
 	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	// Called when getServers() answered
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = receiveServers(JSON.parse(data));
+		servers = await receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
@@ -326,12 +358,6 @@ angular.module('beamng.stuff')
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerRecentController] destroyed.');
 	});
-
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
-	}
 }])
 
 
@@ -356,15 +382,15 @@ angular.module('beamng.stuff')
 		logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
-
+	
 	// Called when getServers() answered
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = receiveServers(JSON.parse(data));
+		servers = await receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
-
+	
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -380,12 +406,6 @@ angular.module('beamng.stuff')
 			bngApi
 		);
 	};
-
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
-	}
 
 	var timeOut = $timeout(function() {
 		if (vm.loadingPage === true) {
@@ -403,12 +423,6 @@ angular.module('beamng.stuff')
 		if (row.rowIndex % 2 == 0) row.style.backgroundColor = "white";
 		else row.style.backgroundColor = "#f2f2f2";
 	}
-
-	function setClientVersion(v) {
-		launcherVersion = v;
-	};
-
-	setVersion = setClientVersion;
 }])
 
 
@@ -443,10 +457,6 @@ function(logger, $scope, $state, $timeout, bngApi) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FUNCTIONS
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-function setClientVersion(v) {
-	launcherVersion = v;
-};
-
 // Set the first letter of each word upper case
 function toTitleCase(str) {
 	return str.replace(/\w\S*/g, function(txt){
@@ -770,8 +780,9 @@ function openForumLink(){
 function getServerInfoHTML(d) {
 		// `d` is the original data object for the row
 		var favButton;
-		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
-		else favButton = `<md-button id="addFav-button" class="button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
+		console.log(d);
+		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
+		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
 		return `
 				<td colspan="5">
 					<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
@@ -794,7 +805,7 @@ function getServerInfoHTML(d) {
 						</div>
 					</div>
 					<div class="row" style="padding-left: 10px;">
-						<md-button id="serverconnect-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect()" style="margin-left: 10px;">Connect</md-button>
+						<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect(` + d.ip + `, ` + d.port + `)" style="margin-left: 10px;">Connect</md-button>
 						` + favButton + `
 					</div>
 					<div class="row">
@@ -833,15 +844,15 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 
 		// Filter by search
 		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) shown = false;
-
+		
 		// Filter by empty or full
 		else if(checkIsEmpty && server.players > 0) shown = false;
 		else if(checkIsNotEmpty && server.players == 0) shown = false;
 		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
-
+		
 		// Filter by mod size
 		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;
-
+	
 		// Filter by map
 		else if((selectMap != "Any" && selectMap != smoothMapName)) shown = false;
 
@@ -865,7 +876,7 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 			if (isRecent) addRecent(server, true);
 		}
 	}
-
+	
 	// Here we check if some favorited / recents servers are offline or not
 	if (type == 1 || type == 2) {
 		var toCheck = type == 1 ? favorites : recents
@@ -893,14 +904,14 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 }
 
 // Used to connect to the backend with ids
-function connect(bngApi) {
+function connect(ip, port) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	bngApiScope.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ')');
 }
 
 // Used to select a row (when it's clicked)
@@ -913,7 +924,7 @@ function select(row, bngApi) {
 	row.classList.add("highlight");
 	row.selected = true;
 	table.selectedRow = row;
-
+	
 	// Add the highlight menu
 	var server = row.server;
 	highlightedServer = server; // Set it as the selected server
@@ -927,8 +938,8 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(bngApi) };
-
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port) };
+	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');
 		removeFavButton.onclick = function() { removeFav(server); }
@@ -938,15 +949,12 @@ function select(row, bngApi) {
 		var addFavButton = document.getElementById('addFav-button');
 		addFavButton.onclick = function() { addFav(server) };
 	}
-
-	// Set the currently selected server lua side
-	bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
 }
 
-function receiveServers(data) {
+async function receiveServers(data) {
 	var serversArray = new Array();
+	var launcherVersion = await getLauncherVersion();
 	// Parse the data to a nice looking Array
-	//console.log(data)
 	for (var i = 0; i < data.length; i++) {
 		var v = data[i]
 		if(v.cversion == launcherVersion){
@@ -973,6 +981,30 @@ function deselect(row) {
 	// Remove the information thing if it was shown
 	var oldInfoRow = document.getElementById('ServerInfoRow')
 	if (oldInfoRow) oldInfoRow.remove();
+}
+
+async function getLauncherVersion() {
+	return new Promise(function(resolve, reject) {
+		bngApiScope.engineLua("MPCoreNetwork.getLauncherVersion()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+async function isLoggedIn() {
+	return new Promise(function(resolve, reject) {
+		bngApiScope.engineLua("MPCoreNetwork.isLoggedIn()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+async function isLauncherConnected() {
+	return new Promise(function(resolve, reject) {
+		bngApiScope.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
+			resolve(data);
+		});
+	});
 }
 
 var reverse = -1;

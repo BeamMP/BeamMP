@@ -1,3 +1,11 @@
+.offset-div {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: -90px;
+	top: -50px;
+}
+
 #top-bar {
 	background:#404040b8;
 }
@@ -48,18 +56,18 @@ table#serversTable {
 .button {
   color: white;
   text-align: center;
+  background-color: rgb(212, 100, 26);
   text-decoration: none;
   font-size: 15px;
-  transition-duration: 0.2s;
+  width:100%;
+  transition-duration: 0.15s;
   cursor: pointer;
 }
 
-.button {
-	background-color: rgb(212, 100, 26);
-	color: white;
-	margin:0px;
-	margin-bottom:20px;
-	margin-left: 15px;
+.servers-button {
+  width: 200px;
+  margin: 0 0 0 10px;
+  height: 40px;
 }
 
 .button:hover {
@@ -142,7 +150,7 @@ div#addCustomFav {
 }
 
 
-input[type="text"] {
+input {
   display: block;
   width: 400px;
   margin: 0 0 20px;
@@ -152,16 +160,6 @@ input[type="text"] {
   color:white;
 }
 
-input[type="password"] {
-  display: block;
-  width: 400px;
-  margin: 0 0 20px;
-  padding: 8px 12px 10px 12px;
-  border: 1px solid rgba(0,0,0,.5);
-  background: rgba(0,0,0,.25);
-  color:white;
-  margin-right: 15px;
-}
 
 .row {
     width: 100%;
@@ -235,20 +233,4 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 
 .text-red {
 	color: red;
-}
-
-#MultiplayerLoginBody {
-	position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(1,1,1,0.7);
-  z-index: 3;
-}
-
-.GuestLoginContainer {
-	width: 500px;
-  height: 500px;
-  left: calc(50vw - 500px);
-  top: calc(50vh - 500px);
-  position: absolute;
 }

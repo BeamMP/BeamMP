@@ -4178,6 +4178,9 @@
 	"ui.multiplayer.modSlider": "Mod size limiter",
 	"ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
 
+	"ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the launcher and press the connect button or restart your game using the launcher. If nothing happen after you clicked the button, please check the launcher console.",
+	"ui.multiplayerlauncher.connect": "Connect",
+
 	"ui.multiplayertos.title": "Rules and terms of service",
 	"ui.multiplayertos.tos": "Terms of service",
 	"ui.multiplayertos.rules": "Rules",

@@ -4,8 +4,9 @@ angular.module('beamng.garage', []);
 angular.module('beamng.color', []);
 angular.module('beamng.gamepadNav', []);
 angular.module('beamng.controls', []);
+angular.module('beamng.ui2Ports', []);
 
-angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
+angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
 
 .factory('customTranslationsLoader', ['$rootScope', '$timeout', '$q', function ($rootScope, $timeout, $q) {
   var data = {};
@@ -225,17 +226,30 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     })
 	
 	// -------------------------------------- BEAMMP -------------------------------------- //
-	.state('menu.multiplayertos', {
-	  url: '/multiplayertos',
-	  templateUrl: 'modules/multiplayertos/tos.html',
-	  controller: 'MultiplayerTOSController as multiplayertos'
-	})
 	
 	.state('menu.multiplayer', {
 	  url: '/multiplayer',
 	  templateUrl: 'modules/multiplayer/multiplayer.html',
 	  controller: 'MultiplayerController as multiplayer'
 	})
+	
+	  .state('menu.multiplayer.tos', {
+	    url: '/mptos',
+	    templateUrl: 'modules/multiplayer/tos.partial.html',
+	    controller: 'MultiplayerTOSController as multiplayertos'
+	  })
+	  
+	  .state('menu.multiplayer.launcher', {
+	    url: '/mplauncher',
+	    templateUrl: 'modules/multiplayer/launcher.partial.html',
+	    controller: 'MultiplayerLauncherController as multiplayerlauncher'
+	  })
+	  
+	  .state('menu.multiplayer.login', {
+	    url: '/mplogin',
+	    templateUrl: 'modules/multiplayer/login.partial.html',
+	    controller: 'MultiplayerLoginController as multiplayerlogin'
+	  })
 
 	  .state('menu.multiplayer.servers', {
 	    url: '/mpservers',
@@ -1132,7 +1146,7 @@ angular.module('beamng.stuff')
     { translateid: 'ui.playmodes.scenarios',    icon: 'material_movie_creation', disabled: false,            targetState: 'scenarios',                      },
     { translateid: 'ui.playmodes.freeroam',     icon: 'material_terrain',        disabled: false,            targetState: 'levels',                         },
     // ------------------------------------ BEAMMP ------------------------------------ //
-	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayertos',                 },
+	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                 },
 	// ------------------------------------ BEAMMP ------------------------------------ //
 	{ translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
     { translateid: 'ui.playmodes.bus',          icon: 'material_directions_bus', disabled: false,            targetState: 'busRoutes',                      },
@@ -1257,11 +1271,9 @@ angular.module('beamng.stuff')
       }
 
       if (useGamepadNavigation) {
-		if (actions[action] !== undefined) { // added by deer, this caused the right click error in the console
-          console.log(actions[action]);
-          // console.log(actions[action][0]);
-          $rootScope.$evalAsync(actions[action][0].func);
-        }
+        console.log(actions[action]);
+        // console.log(actions[action][0]);
+        $rootScope.$evalAsync(actions[action][0].func);
       }
     });
 
@@ -1313,7 +1325,6 @@ $scope.$on('requestUIInitialised', () => {
   vm.physicsPaused = false;
   vm.physicsMaybePaused = false;
   vm.showPauseIcon = false;
-  vm.showCrosshair = false;
   var updatePauseIcon = function() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused;
       var gamePaused = vm.physicsPaused || vm.replayPaused;
@@ -1372,11 +1383,6 @@ $scope.$on('requestUIInitialised', () => {
     }
   });
 
-  $scope.$on('onCrosshairVisibilityChanged', function (event, visible) {
-    $scope.$applyAsync(function () {
-      vm.showCrosshair = visible;
-    });
-  });
 
   vm.showApps = true;
   vm.mainmenu = true;
@@ -1456,6 +1462,7 @@ $scope.$on('requestUIInitialised', () => {
     vm.menuEntries.freeroam.push({ translateid: 'Icons', icon: 'new_releases', state: 'iconViewer', advanced: true });
     // vm.menuEntries.freeroam.push({ translateid: 'Drag Race', icon: 'flag', state: 'menu.dragRaceOverview', advanced: false });
     // vm.menuEntries.freeroam.push({ translateid: 'ui.dashboard.template', icon: 'crop_free',    state: 'template', advanced: true});
+    vm.menuEntries.freeroam.push({ translateid: 'UI Protoype', icon: 'new_releases',    state: '.', action: () => window.location.href = "local://local/ui2/drive/index.html"});
   }
 
   // downloader start

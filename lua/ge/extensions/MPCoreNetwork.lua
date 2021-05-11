@@ -11,7 +11,7 @@ print("Loading MPCoreNetwork...")
 
 
 -- ============= VARIABLES =============
-local l = "CoreNetwork"
+local loggerPrefix = "CoreNetwork"
 local TCPLauncherSocket -- Launcher socket
 local currentServer -- Store the server we are on
 local Servers = {} -- Store all the servers
@@ -48,7 +48,7 @@ end
 
 local function connectToLauncher()
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
-		log('M', l, "Connecting to launcher")
+		log('M', loggerPrefix, "Connecting to launcher")
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
@@ -59,7 +59,7 @@ end
 
 local function disconnectLauncher(reconnect)
 	if launcherConnectionStatus > 0 then -- If player was connected
-		log('M', l, "Disconnecting from launcher")
+		log('M', loggerPrefix, "Disconnecting from launcher")
 		TCPLauncherSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		launcherConnectionTimer = 0

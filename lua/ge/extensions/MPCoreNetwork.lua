@@ -209,11 +209,11 @@ local function loginReceived(params)
 	log('M', l, 'Logging result received')
 	local result = jsonDecode(params)
 	if (result.success == true or result.Auth == 1) then
-		log('M', l, 'Logged successfully')
+		log('M', l, 'Login successful')
 		loggedIn = true
 		guihooks.trigger('LoggedIn', result.message or '')
 	else
-		log('M', l, 'Logging credentials incorrect')
+		log('M', l, 'Login credentials incorrect')
 		loggedIn = false
 		guihooks.trigger('LoginError', result.message or '')
 	end

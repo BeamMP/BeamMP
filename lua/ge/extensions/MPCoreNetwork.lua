@@ -118,7 +118,7 @@ local function logout()
 end
 local function getServers()
 	print(launcherVersion)
-	log('M', l, "Getting the servers list")
+	log('M', loggerPrefix, "Getting the servers list")
 	send('B') -- Ask for the servers list
 end
 -- ================ UI ================
@@ -206,14 +206,14 @@ local function handleU(params)
 end
 
 local function loginReceived(params)
-	log('M', l, 'Logging result received')
+	log('M', loggerPrefix, 'Logging result received')
 	local result = jsonDecode(params)
 	if (result.success == true or result.Auth == 1) then
-		log('M', l, 'Login successful')
+		log('M', loggerPrefix, 'Login successful')
 		loggedIn = true
 		guihooks.trigger('LoggedIn', result.message or '')
 	else
-		log('M', l, 'Login credentials incorrect')
+		log('M', loggerPrefix, 'Login credentials incorrect')
 		loggedIn = false
 		guihooks.trigger('LoginError', result.message or '')
 	end
@@ -282,13 +282,13 @@ local function onExtensionLoaded()
 	if not layouts then
 		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
 		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("M", l, "default UI layout added")
+		log("M", loggerPrefix, "default UI layout added")
 	end
 	-- Then check that multiplayer layout is inside
 	if not layouts.multiplayer then
 		layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
 		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("M", l, "multiplayer UI layout added")
+		log("M", loggerPrefix, "multiplayer UI layout added")
 	end
 
 	-- First we connect to the launcher
@@ -333,7 +333,7 @@ local function onUpdate(dt)
 		end
 		-- Check the launcher connection
 		if launcherConnectionTimer > 2 then
-			log('M', l, "Connection to launcher was lost")
+			log('M', loggerPrefix, "Connection to launcher was lost")
 			guihooks.trigger('LauncherConnectionLost')
 			disconnectLauncher(true)
 			launcherConnectionTimer = 0

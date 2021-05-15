@@ -105,7 +105,7 @@ local function isLauncherConnected()
 	return launcherConnectionStatus == 2
 end
 local function login(identifiers)
-	log('M', l, 'Attempting login')
+	log('M', loggerPrefix, 'Attempting login')
 	send('N:'..identifiers)
 end
 local function autoLogin()

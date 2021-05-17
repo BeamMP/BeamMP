@@ -1260,6 +1260,7 @@ local function getModList()
   return mods
 end
 M.getModList = getModList
+log("I","BeamMP"," Custom modmanager injected.")
 -- ///////////////////////////////////////////////////////////////////
 
 -- public interface

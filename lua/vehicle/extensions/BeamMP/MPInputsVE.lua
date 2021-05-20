@@ -71,17 +71,18 @@ local function updateGFX(dt)
 		end
 		
 		--we set the electrics values directly because it results in instantanious changes & disallows someone from "ghost controlling a car" where they get the illusion they have influence over someone else's vehicle
-		electrics.values.steering_input = steering
-		electrics.values.throttleOverride = lastApply.t
-		electrics.values.brake = lastApply.b
-		electrics.values.parkingbrake = lastApply.p
-		electrics.values.clutch_input = lastApply.c
+		--electrics.values.steering_input = steering
 
-		--input.event("throttle", lastApply.t, 3)
-		--input.event("brake", lastApply.b, 3)
-		--input.event("parkingbrake", lastApply.p, 3)
-		--input.event("clutch", lastApply.c, 3)
-		--lastSteering = steering
+		--electrics.values.throttleOverride = lastApply.t
+		--electrics.values.brake = lastApply.b
+		--electrics.values.parkingbrake = lastApply.p
+		--electrics.values.clutch_input = lastApply.c
+		input.event("steering", steering, 2)			-- reverted back to using input.event because setting through electrics has some of the following issues 
+		input.event("throttle", currentApply.t, 2)		-- 4 wheel steering doesn't sync when setting through electrics
+		input.event("brake", currentApply.b, 2)			-- brake lights wouldn't activate on some cars
+		input.event("parkingbrake", currentApply.p, 2)	-- setting the clutch through electrics doesn't work at all
+		input.event("clutch", currentApply.c, 2)		-- changed filters to something more responsive resulting in a better synced experience
+		--lastSteering = steering						-- reverted to using currentApply because lastApply currently has issues with inputs getting stuck when no input is present
 	end
 end
 

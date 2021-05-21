@@ -467,12 +467,12 @@ local function applyElectrics(data)
 		end
 		-- Bus door syncing
 		if decodedData.dooropen ~= nil then
-			local doorsController = controller.getController('doors')
+			local doorsController = controller.getControllerSafe('doors')
 			if doorsController then
 				if decodedData.dooropen == 1 then
-					controller.getControllerSafe('doors').setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
+					doorsController.setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
 				else
-					controller.getControllerSafe('doors').setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
+					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
 				end
 			end
 		end	

@@ -67,19 +67,14 @@ local function applyGear(data)
 		local index = tonumber(string.sub(data, 2, 3))
 		if not index then return end
 		local gearIndex = electrics.values.gearIndex
-		print("state from data: "..state)
-		print("index from data: ".. index)
-		print("gearIndex from electrics: "..gearIndex)
 		if state == 'M' then
 			if localGearMode ~= 'M' then
 				if localGearMode == 'S' or localGearMode == 'D' then
 					controller.mainController.shiftUp() -- this is so it doesn't go into M1 when switching into M modes at higher speed
 					localGearMode = 'M'
-					print("Shifted up from S or D mode into M")
 				else
 					controller.mainController.shiftToGearIndex(translationTable[state])	--shifts into M1
 					localGearMode = state
-					print("Shifted into gear index M")
 					localCurrentGear = 'M1'
 					gearIndex = 1
 				end
@@ -88,11 +83,9 @@ local function applyGear(data)
 				if gearIndex < index then
 					controller.mainController.shiftUp()
 					localCurrentGear = tostring('M'..gearIndex + 1)
-					print("-----Shifted up-----")
 				elseif gearIndex > index then
 					controller.mainController.shiftDown()
 					localCurrentGear = tostring('M'..gearIndex - 1)
-					print("-----Shifted down-----")
 				elseif gearIndex == index then
 					localCurrentGear = tostring('M'..gearIndex)
 				end
@@ -458,7 +451,7 @@ local function applyElectrics(data)
 				end
 			end
 		end
-		-- Player crouch snycing
+		-- Player crouch syncing
 		if decodedData.isCrouching ~= nil then
 			local playerController = controller.getController('playerController')
 			if playerController then

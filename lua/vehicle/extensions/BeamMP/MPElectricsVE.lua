@@ -117,7 +117,7 @@ local disallowedKeys = {
 	["engineLoad"] = 1,
 	["exhaustFlow"] = 1,
 	["fuel"] = 1,
-	["fuelVolume"] = 1,
+	--["fuelVolume"] = 1,
 	["oiltemp"] = 1,
 	["rpm"] = 1,
 	["rpmTacho"] = 1,
@@ -180,6 +180,10 @@ local function checkGears()
 	end
 end
 
+local function round2(num, numDecimalPlaces)
+  return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
+end
+
 local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
@@ -187,10 +191,18 @@ local function check()
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
 		if not disallowedKeys[k] then -- If it's not a disallowed key
-			if lastElectrics[k] ~= v then -- If the value changed
-				electricsChanged = true -- Send electrics
-				lastElectrics[k] = v -- Define the new value
-				electricsToSend[k] = v
+			if k == "fuelVolume" then
+				if lastElectrics[k] ~= round2(v, 2) then -- If the value changed
+					electricsChanged = true -- Send electrics
+					lastElectrics[k] = round2(v, 1) -- Define the new value
+					electricsToSend[k] = round2(v, 1)
+				end
+			else
+				if lastElectrics[k] ~= v then -- If the value changed
+					electricsChanged = true -- Send electrics
+					lastElectrics[k] = v -- Define the new value
+					electricsToSend[k] = v
+				end
 			end
 		end
 	end
@@ -198,7 +210,6 @@ local function check()
 		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', "..obj:getID()..")")
 	end
 end
-
 
 
 local lastLeftSignal = 0
@@ -239,6 +250,13 @@ local function applyElectrics(data)
 		end
 		if decodedData.fog then
 			electrics.set_fog_lights(decodedData.fog)
+		end
+
+		-- Fuel Level syncing
+		if decodedData.fuelVolume then
+			for name, storage in pairs(energyStorage.getStorages()) do
+				storage:setRemainingVolume(decodedData.fuelVolume)
+			end
 		end
 
 		-- Gear syncing

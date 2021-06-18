@@ -531,6 +531,7 @@ var descStyleMap = {
 
 function applyDescCode(string, codes) {
     var elem = document.createElement('span');
+		elem.style.fontSize = 'initial';
     string = string.replace(/\x00*/g, '');
     for(var i = 0, len = codes.length; i < len; i++) {
         elem.style.cssText += descStyleMap[codes[i]] + ';';
@@ -555,6 +556,8 @@ function formatDescriptionName(string) {
     if(indexes[0] !== 0) {
         final.appendChild( applyDescCode( string.substring(0, indexes[0]), [] ) );
     }
+
+		// Find all color and formatting codes
     for(i = 0; i < len; i++) {
     	indexDelta = indexes[i + 1] - indexes[i];
         if(indexDelta === 2) {
@@ -582,6 +585,7 @@ function formatDescriptionName(string) {
 
 function applyCode(string, codes) {
     var elem = document.createElement('span');
+		elem.style.fontSize = 'initial';
     string = string.replace(/\x00*/g, '');
     for(var i = 0, len = codes.length; i < len; i++) {
         elem.style.cssText += serverStyleMap[codes[i]] + ';';
@@ -815,17 +819,41 @@ function getServerInfoHTML(d) {
 			</td>`;
 };
 
+function formatHealth(pps) {
+	let signel = '';
+	if (pps > 40) {
+		signel = 'signal-4'
+	} else if (pps > 20) {
+		signel = 'signal-3'
+	} else if (pps > 10) {
+		signel = 'signal-2'
+	} else if (pps > 5) {
+		signel = 'signal-1'
+	} else {
+		signel = 'signal-0'
+	}
+	return `
+	<i class="icon__signal-strength ${signel}">
+		<span class="bar-1"></span>
+		<span class="bar-2"></span>
+		<span class="bar-3"></span>
+		<span class="bar-4"></span>
+	</i>
+	`
+}
+
 function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) {
 	let newRow = table.insertRow(table.length);
+	newRow.style.fontSize = 0;
 	newRow.server = server;
 	newRow.server.favorite = isFavorite;
 	newRow.server.recent = isRecent;
 	newRow.innerHTML = `
-		<td style="background-color:${bgcolor};">${server.location}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;"><i class="flag flag-${server.location}"></i> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
-		<td style="background-color:${bgcolor};">${SmoothMapName(server.map)}</td>
-		<td style="background-color:${bgcolor};">${server.players}/${server.maxplayers}</td>
-		<td style="background-color:${bgcolor};">${server.pps}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${formatHealth(server.pps)}${server.pps}</td>
 	`;
 	newRow.onclick = function() { select(this, bngApi); };
 }

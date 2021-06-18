@@ -1146,9 +1146,9 @@ angular.module('beamng.stuff')
     { translateid: 'ui.playmodes.scenarios',    icon: 'material_movie_creation', disabled: false,            targetState: 'scenarios',                      },
     { translateid: 'ui.playmodes.freeroam',     icon: 'material_terrain',        disabled: false,            targetState: 'levels',                         },
     // ------------------------------------ BEAMMP ------------------------------------ //
-	{ translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                 },
-	// ------------------------------------ BEAMMP ------------------------------------ //
-	{ translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
+	  { translateid: 'ui.playmodes.multiplayer',  icon: 'material_people',         disabled: false,            targetState: 'multiplayer',                 },
+	  // ------------------------------------ BEAMMP ------------------------------------ //
+	  { translateid: 'ui.playmodes.quickrace',    icon: 'material_alarm_on',       disabled: false,            targetState: 'quickraceOverview',              },
     { translateid: 'ui.playmodes.bus',          icon: 'material_directions_bus', disabled: false,            targetState: 'busRoutes',                      },
     { translateid: 'ui.playmodes.lightRunner',  icon: 'general_light_runner',    disabled: false,            targetState: 'lightrunnerOverview'             },
     { translateid: 'ui.playmodes.trackBuilder', icon: 'material_all_inclusive',  disabled: false,            targetState: '.',     levelName: "glow_city", },
@@ -1271,9 +1271,11 @@ angular.module('beamng.stuff')
       }
 
       if (useGamepadNavigation) {
-        console.log(actions[action]);
+        //console.log(actions[action]);
         // console.log(actions[action][0]);
-        $rootScope.$evalAsync(actions[action][0].func);
+        if (actions[action] != undefined) { // Fix for game error Spam in Cef UI Console. #Titch2000 / Starystars67
+          $rootScope.$evalAsync(actions[action][0].func);
+        }
       }
     });
 
@@ -1457,13 +1459,6 @@ $scope.$on('requestUIInitialised', () => {
       { translateid: 'ui.dashboard.mainmenu',      icon: 'exit_to_app', state: '.', action: () => $timeout(() => vm.quit()), bottom: true},
     ]
   };
-
-  if(!beamng.shipping) {
-    vm.menuEntries.freeroam.push({ translateid: 'Icons', icon: 'new_releases', state: 'iconViewer', advanced: true });
-    // vm.menuEntries.freeroam.push({ translateid: 'Drag Race', icon: 'flag', state: 'menu.dragRaceOverview', advanced: false });
-    // vm.menuEntries.freeroam.push({ translateid: 'ui.dashboard.template', icon: 'crop_free',    state: 'template', advanced: true});
-    vm.menuEntries.freeroam.push({ translateid: 'UI Protoype', icon: 'new_releases',    state: '.', action: () => window.location.href = "local://local/ui2/drive/index.html"});
-  }
 
   // downloader start
   var dlinfo = {};

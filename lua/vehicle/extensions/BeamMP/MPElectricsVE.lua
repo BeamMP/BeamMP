@@ -272,8 +272,8 @@ local function applyElectrics(data)
 		end
 
 		-- LineLock syncing
-		if decodedData.lineLock ~= nil then
-			if electrics.values.lineLock ~= decodedData.linelock then
+		if decodedData.linelock ~= nil then
+			if electrics.values.linelock ~= decodedData.linelock then
 				controller.getController("lineLock").setLineLock(decodedData.linelock)
 			end
 		end

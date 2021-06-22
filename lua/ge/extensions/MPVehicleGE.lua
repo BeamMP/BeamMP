@@ -37,10 +37,11 @@ local roleToInfo = {
 	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]" },
 	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]" },
 	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Support]" },
+	['STAFF'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [BeamMP Staff]" },
 	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]" },
 	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]" },
 	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]" },
-	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]" }
+	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [BeamMP Dev]" }
 }
 
 -- ============= VARIABLES =============

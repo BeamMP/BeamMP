@@ -16,6 +16,8 @@ local electricsChanged = false
 local latestGearData
 local localGearMode
 local localCurrentGear = 0
+local absBehavior = settings.getValue("absBehavior") or "realistic"
+local localSwingwing = 0 -- for DH Super bolide
 -- ============= VARIABLES =============
 
 
@@ -53,56 +55,82 @@ local function applyGear(data)
 		if not index then return end
 		if electrics.values.gearIndex < index then
 			controller.mainController.shiftUp()
-			localCurrentGear = tostring(localCurrentGear + 1)
+			localCurrentGear = localCurrentGear + 1
 		elseif electrics.values.gearIndex > index then
 			controller.mainController.shiftDown()
-			localCurrentGear = tostring(localCurrentGear - 1)
+			localCurrentGear = localCurrentGear - 1
 		end
-
-	-- Nothing special
-	elseif gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
-		local index = translationTable[data]
-		local state = string.sub(data, 1, 1)
-		if localGearMode ~= state then
-			controller.mainController.shiftToGearIndex(translationTable[state])
-		end
-		if state == 'M' and localGearMode == state then
-			local index = tonumber(string.sub(data, 2, 2))
-			if electrics.values.gearIndex < index then
-				controller.mainController.shiftUp()
-			elseif electrics.values.gearIndex > index then
-				controller.mainController.shiftDown()
-			end
-		end
-		localGearMode = state
-		localCurrentGear = data
-
 	-- We use the same thing as automatic for all the first gears, and we use
 	-- the same type of shifting as sequential for M gears.
-	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" then
+	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
 		local state = string.sub(data, 1, 1)
+		local index = tonumber(string.sub(data, 2, 3))
+		if not index then return end
+		local gearIndex = electrics.values.gearIndex
 		if state == 'M' then
 			if localGearMode ~= 'M' then
-				controller.mainController.shiftToGearIndex(translationTable[state])
-				localGearMode = 'M'
+				if localGearMode == 'S' or localGearMode == 'D' then
+					controller.mainController.shiftUp() -- this is so it doesn't go into M1 when switching into M modes at higher speed
+					localGearMode = 'M'
+				else
+					controller.mainController.shiftToGearIndex(translationTable[state])	--shifts into M1
+					localGearMode = state
+					localCurrentGear = 'M1'
+					gearIndex = 1
+				end
 			end
-			local index = tonumber(string.sub(data, 2, 2))
-			if electrics.values.gearIndex < index then
-				controller.mainController.shiftUp()
-			elseif electrics.values.gearIndex > index then
-				controller.mainController.shiftDown()
+			if localGearMode == 'M' then
+				if gearIndex < index then
+					controller.mainController.shiftUp()
+					localCurrentGear = tostring('M'..gearIndex + 1)
+				elseif gearIndex > index then
+					controller.mainController.shiftDown()
+					localCurrentGear = tostring('M'..gearIndex - 1)
+				elseif gearIndex == index then
+					localCurrentGear = tostring('M'..gearIndex)
+				end
 			end
 		else
 			local index = translationTable[state]
-			controller.mainController.shiftToGearIndex(index)
+			controller.mainController.shiftToGearIndex(index) -- shifts into gear using translation table
 			localGearMode = state
+			localCurrentGear = data
 		end
-		localCurrentGear = data
 	end
 end
 
 local function setGear(gear)
 	latestGearData = gear
+end
+
+local function getEsc()
+	local driveModesController = controller.getController('driveModes')
+	local escController = controller.getController('esc')
+	if driveModesController ~= nil then
+		return driveModesController.serialize().activeDriveModeKey
+	elseif escController ~= nil then
+		return escController.serialize().escConfigKey
+	end
+end
+
+local function setEsc(key)
+	local driveModesController = controller.getController('driveModes')
+	local escController = controller.getController('esc')
+	if driveModesController ~= nil then
+		driveModesController.setDriveMode(key)
+	elseif escController ~= nil then
+		escController.setESCMode(key)
+	end
+end
+
+local function getAbsBehavior()
+	return absBehavior
+end
+
+local function setAbsBehavior(absMode)
+	if wheels then
+		wheels.setABSBehavior(absMode)
+	end
 end
 
 local disallowedKeys = {
@@ -111,13 +139,27 @@ local disallowedKeys = {
 	["airspeed"] = 1,
 	["altitude"] = 1,
 	["avgWheelAV"] = 1,
+	["throttle_input"] = 1,
+	["brake_input"] = 1,
 	["clutch_input"] = 1,
+	["steering_input"] = 1,
+	["parkingbrake_input"] = 1,
+	["throttle"] = 1,
+	["brake"] = 1,
+	["clutch"] = 1,
+	["steering"] = 1,
+	["brakelights"] = 1,
+	["clutchRatio"] = 1,
+	["parkingbrake"] = 1,
 	["driveshaft"] = 1,
 	["driveshaft_F"] = 1,
+	["driveshaft_R"] = 1,
 	["engineLoad"] = 1,
 	["exhaustFlow"] = 1,
 	["fuel"] = 1,
 	--["fuelVolume"] = 1,
+	["fuelCapacity"] = 1,
+	["jatofuel"] = 1,
 	["oiltemp"] = 1,
 	["rpm"] = 1,
 	["rpmTacho"] = 1,
@@ -135,18 +177,6 @@ local disallowedKeys = {
 	["turboRPM"] = 1,
 	["turboRpmRatio"] = 1,
 	["engineThrottle"] = 1,
-	["throttle"] = 1,
-	["brake_input"] = 1,
-	["brake"] = 1,
-	["brakelights"] = 1,
-	["clutch"] = 1,
-	["clutchRatio"] = 1,
-	["steering"] = 1,
-	["steering_input"] = 1,
-	["throttle_input"] = 1,
-	["parkingbrake"] = 1,
-	["parkingbrake_input"] = 1,
-	["abs"] = 1,
 	["lights"] = 1,
 	["wheelaxleFR"] = 1,
 	["wheelaxleFL"] = 1,
@@ -162,16 +192,165 @@ local disallowedKeys = {
 	["tcs"] = 1,
 	["escActive"] = 1,
 	["absActive"] = 1,
+	["abs"] = 1,
+	["hasABS"] = 1,
+	["disp_P"] = 1,
+	["disp_R"] = 1,
 	["disp_N"] = 1,
+	["disp_D"] = 1,
 	["regenThrottle"] = 1,
 	["disp_1"] = 1,
 	["tcsActive"] = 1,
 	["clutchRatio1"] = 1,
+	["clutchRatio2"] = 1,
 	["lockupClutchRatio"] = 1,
 	["throttleOverride"] = 1,
 	["cruiseControlTarget"] = 1,
 	["isShifting"] = 1,
-	["unicycle_body"] = 1
+	["unicycle_body"] = 1,
+	["led"] = 1,
+	["led0"] = 1,
+	["led1"] = 1,
+	["led2"] = 1,
+	["led3"] = 1,
+	["led4"] = 1,
+	["led5"] = 1,
+	["led6"] = 1,
+	["led7"] = 1,
+	["red_1"] = 1,
+	["red_2"] = 1,
+	["red_3"] = 1,
+	["blue_1"] = 1,
+	["blue_2"] = 1,
+	["blue_3"] = 1,
+	["white_1"] = 1,
+	["white_2"] = 1,
+	["white_3"] = 1,
+	["shouldShift"] = 1,
+	["intershaft"] = 1,
+	["lightbar_r"] = 1,
+	["lightbar_l"] = 1,
+	["lightbar_b"] = 1,
+	["lightbar_r1"] = 1,
+	["lightbar_r2"] = 1,
+	["flasher_special_1"] = 1,
+	["flasher_special_2"] = 1,
+	["flasher_special_3"] = 1,
+	["flasher_special_4"] = 1,
+	["flasher_special_5"] = 1,
+	["flasher_special_6"] = 1,
+	["flasher_special_7"] = 1,
+	["flasher_special_8"] = 1,
+	["flasher_special_9"] = 1,
+	["flasher_special_10"] = 1,
+	["flasher_special_11"] = 1,
+	["flasher_special_12"] = 1,
+	["doorLever"] = 1,
+	["gear_M"] = 1,
+	["gear_A"] = 1,
+	["cruiseControlActive"] = 1,
+	["beaconSpin"] = 1,
+	["rr1"] = 1,
+	["rr2"] = 1,
+	["rr3"] = 1,
+	["rr4"] = 1,
+	["rl1"] = 1,
+	["rl2"] = 1,
+	["rl3"] = 1,
+	["rl4"] = 1,
+	["wl1"] = 1,
+	["w1"] = 1,
+	["wr1"] = 1,
+	["dseColor"] = 1,
+	["clockh"] = 1,
+	["clockmin"] = 1,
+	["isYCBrakeActive"] = 1,
+	["isTCBrakeActive"] = 1,
+	["throttleFactor"] = 1,
+	["spoiler"] = 1,
+	["disp_2"] = 1,
+	["disp_3"] = 1,
+	["disp_4"] = 1,
+	["disp_5"] = 1,
+	["disp_6"] = 1,
+	["throttleTop"] = 1,
+	["throttleBottom"] = 1,
+	["targetRPMRatioDecreate"] = 1,
+	["4ws"] = 1,
+	["disp_P_cvt"] = 1,
+	["disp_R_cvt"] = 1,
+	["disp_N_cvt"] = 1,
+	["disp_D_cvt"] = 1,
+	["disp_L_cvt"] = 1,
+	["disp_Pa"] = 1,
+	["disp_Ra"] = 1,
+	["disp_Na"] = 1,
+	["disp_Da"] = 1,
+	["boost_1"] = 1,
+	["boost_2"] = 1,
+	["boost_3"] = 1,
+	["boost_4"] = 1,
+	["boost_5"] = 1,
+	["boost_6"] = 1,
+	["boost_7"] = 1,
+	["boost_8"] = 1,
+	["boost_9"] = 1,
+	["boost_10"] = 1,
+	["boost_11"] = 1,
+	["nitrousOxideActive"] = 1,
+	["FL"] = 1,
+	["FR"] = 1,
+	["RL"] = 1,
+	["RR"] = 1,
+	["FFL"] = 1,
+	["FFR"] = 1,
+	["RRL"] = 1,
+	["RRR"] = 1,
+	---modded vehicles -- 
+	-- me262 plane ------
+	["inst_pitch"] = 1,
+	["inst_roll"] = 1,
+	["vsi"] = 1,
+	["gun1_muzzleflash"] = 1,
+	["gun2_muzzleflash"] = 1,
+	["gun3_muzzleflash"] = 1,
+	["gun4_muzzleflash"] = 1,
+	["engSoundL"] = 1,
+	["engSoundR"] = 1,
+	["thrustL"] = 1,
+	["thrustR"] = 1,
+	-- DH Super GNAT
+	["heli_pitchDeg"] = 1,
+	["tail_rotor"] = 1,
+	["main_rotor"] = 1,
+	["heli_rollDeg"] = 1,
+	-- DH Hyper bolide
+	["super_speed"] = 1,
+	["barrelspin"] = 1,
+	["super_roll"] = 1,
+	["super_thruster"] = 1,
+	["super_throttle"] = 1,
+	-- DH Quadcopter
+	["dhq_throttle_rl"] = 1,
+	["dhq_throttle_rr"] = 1,
+	["dhq_throttle_fr"] = 1,
+	["dhq_throttle_fl"] = 1,
+	["dhq_rotorfl"] = 1,
+	["dhq_rotorrl"] = 1,
+	["dhq_rotorfr"] = 1,
+	["dhq_rotorrr"] = 1,
+	["shaft_rl"] = 1,
+	["shaft_rr"] = 1,
+	["shaft_fr"] = 1,
+	["shaft_fl"] = 1,
+	["shaftgau"] = 1,
+	-- Pigeon STi-G
+	["RPM_led2"] = 1,
+	["RPM_led3"] = 1,
+	-- DH Sport Bike
+	["steeringBike"] = 1,
+	["steeringBike2"] = 1,
+	["steeringBike3"] = 1
 }
 
 local function checkGears()
@@ -187,6 +366,8 @@ end
 local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
+	electrics.values.escMode = getEsc()
+	electrics.values.absMode = getAbsBehavior()
 	local e = electrics.values
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
@@ -263,11 +444,11 @@ local function applyElectrics(data)
 		if decodedData.gear then
 			latestGearData = decodedData.gear
 		end
-
+		
 		-- Transbrake syncing
 		if decodedData.transbrake ~= nil then
 			if electrics.values.transbrake ~= decodedData.transbrake then
-				controller.getController("transbrake").setTransbreak(decodedData.transbrake)
+				controller.getController("transbrake").setTransbrake(decodedData.transbrake)
 			end
 		end
 
@@ -288,15 +469,64 @@ local function applyElectrics(data)
 				end
 			end
 		end
-
+		-- Player crouch syncing
 		if decodedData.isCrouching ~= nil then
 			local playerController = controller.getController('playerController')
 			if playerController then
 				playerController.crouch(decodedData.isCrouching and -1 or 1)
 			end
 		end
-
-		-- Anything else
+		-- Bus door syncing
+		if decodedData.dooropen ~= nil then
+			local doorsController = controller.getControllerSafe('doors')
+			if doorsController then
+				if decodedData.dooropen == 1 then
+					doorsController.setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
+				else
+					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
+				end
+			end
+		end	
+		-- Bus suspension height syncing
+		if decodedData.kneel == 1 then
+			local airbagsController = controller.getController('airbags')
+			if airbagsController then
+				airbagsController.setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
+			end
+		elseif decodedData.rideheight == 1 then
+			local airbagsController = controller.getController('airbags')
+			if airbagsController then
+				airbagsController.setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
+			end
+		elseif decodedData.rideheight == 0 then
+			local airbagsController = controller.getController('airbags')
+			if airbagsController then
+				airbagsController.setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
+			end
+		end
+		-- ESC Mode syncing
+		if decodedData.escMode then
+			setEsc(decodedData.escMode)
+		end
+		-- ABS Behavior syncing
+		if decodedData.absMode then
+			setAbsBehavior(decodedData.absMode)
+		end
+		-- ME262 missile sync
+		if decodedData.missile4_motor == 1 or decodedData.missile3_motor == 1 or decodedData.missile2_motor == 1 or decodedData.missile1_motor == 1 then
+			if controller.getController('missiles') ~= nil then
+				controller.mainController.deployWeaponDown()
+				controller.mainController.deployWeaponUp()
+			end
+		end
+		-- DH Super bolide
+		if decodedData.swingwing and supertact then
+			if decodedData.swingwing ~= localSwingwing then
+				supertact.toggleFlightMode()
+				localSwingwing = decodedData.swingwing
+			end
+		end
+			-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v
 		end
@@ -311,6 +541,7 @@ local function onReset()
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
 		localCurrentGear = 0
+		localSwingwing = 0
 	end
 end
 

@@ -9,6 +9,7 @@ local M = {}
 
 local connectedBeams = {}
 local isConnectedNode = {}
+local nodes = {}
 local parentNode = nil
 local beamsChanged = false
 local physicsFPS = 0
@@ -38,6 +39,7 @@ local function findConnectedNodesRecursive(parentID)
 	if isConnectedNode[parentID] then return end
 
 	isConnectedNode[parentID] = true
+	nodes[#nodes+1] = {parentID, obj:getNodeMass(parentID)*physicsFPS}
 
 	-- Apparently normal for loop is twice as fast as ipairs()
 	local beams = connectedBeams[parentID] or {}
@@ -59,6 +61,7 @@ end
 -- Trigger finding of connected nodes
 local function findConnectedNodes()
 	isConnectedNode = {}
+	nodes = {}
 	findConnectedNodesRecursive(parentNode)
 	
 	calcCOG()
@@ -126,6 +129,7 @@ local function onInit()
 		print("Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
 	        isConnectedNode[n.cid] = true
+			nodes[#nodes+1] = {n.cid, obj:getNodeMass(n.cid)*physicsFPS}
 	    end
 		calcCOG()
 	end
@@ -146,23 +150,18 @@ local function addVelocity(x, y, z)
 		findConnectedNodes()
 	end
 
-	local vel = vec3(x, y, z)
-	--print("addVelocity: x: "..x..", y: "..y..", z: "..z)
-	for nid, connected in pairs(isConnectedNode) do
-		local nodeWeight = obj:getNodeMass(nid)
-		local forceVec = vel*nodeWeight*physicsFPS -- calculate force for desired acceleration
-
-		obj:applyForceVector(nid, forceVec:toFloat3())
+	for i=1, #nodes do
+		local node = nodes[i]
+		
+		obj:applyForceVector(node[1], float3(x*node[2], y*node[2], z*node[2]))
 	end
 end
 
 -- Instantly set vehicle velocity in m/s
 local function setVelocity(x, y, z)
-	local vel = vec3(x, y, z)
-	local vvel = vec3(obj:getVelocity())
-	local velDiff = vel - vvel
-
-	addVelocity(velDiff.x, velDiff.y, velDiff.z)
+	local vvel = obj:getVelocity()
+	
+	addVelocity(x - vvel.x, y - vvel.y, z - vvel.z)
 end
 
 
@@ -178,16 +177,22 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local cog = M.cogRel:rotated(rot)
 	
-	local rvel = vec3(pitchAV, rollAV, yawAV)
-	local vel = vec3(x, y, z)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
-	for nid, connected in pairs(isConnectedNode) do
-		local nodeWeight = obj:getNodeMass(nid)
-		local nodePos = vec3(obj:getNodePosition(nid)) - cog
-		local targetAcc = vel + nodePos:cross(rvel)
-		local forceVec = targetAcc*nodeWeight*physicsFPS -- calculate force for desired acceleration
-
-		obj:applyForceVector(nid, forceVec:toFloat3())
+	for i=1, #nodes do
+		local node = nodes[i]
+		local cid = node[1]
+		local mul = node[2]
+		local nodePos = obj:getNodePosition(cid)
+		local posX = nodePos.x - cog.x
+		local posY = nodePos.y - cog.y
+		local posZ = nodePos.z - cog.z
+		
+		-- Calculate linear force from torque axis and node position using vector cross product
+		local forceX = (x + posY * yawAV - posZ * rollAV)*mul
+		local forceY = (y + posZ * pitchAV - posX * yawAV)*mul
+		local forceZ = (z + posX * rollAV - posY * pitchAV)*mul
+		
+		obj:applyForceVector(cid, float3(forceX, forceY, forceZ))
 	end
 end
 

@@ -306,7 +306,7 @@ local disallowedKeys = {
 	["FFR"] = 1,
 	["RRL"] = 1,
 	["RRR"] = 1,
-	---modded vehicles -- 
+	---modded vehicles --
 	-- me262 plane ------
 	["inst_pitch"] = 1,
 	["inst_roll"] = 1,
@@ -444,7 +444,7 @@ local function applyElectrics(data)
 		if decodedData.gear then
 			latestGearData = decodedData.gear
 		end
-		
+
 		-- Transbrake syncing
 		if decodedData.transbrake ~= nil then
 			if electrics.values.transbrake ~= decodedData.transbrake then
@@ -486,7 +486,7 @@ local function applyElectrics(data)
 					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
 				end
 			end
-		end	
+		end
 		-- Bus suspension height syncing
 		if decodedData.kneel == 1 then
 			local airbagsController = controller.getController('airbags')

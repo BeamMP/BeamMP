@@ -65,7 +65,7 @@ local function applyGear(data)
 	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
 		local state = string.sub(data, 1, 1)
 		local index = tonumber(string.sub(data, 2, 3))
-		if not index then return end
+		-- if not index then return end -- Removed due to reports it stops Auto Transmissions from working/syncing
 		local gearIndex = electrics.values.gearIndex
 		if state == 'M' then
 			if localGearMode ~= 'M' then

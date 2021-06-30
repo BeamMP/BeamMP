@@ -1,4 +1,3 @@
-var bngApiScope;
 var highlightedServer;
 var servers = [];
 var favorites = [];
@@ -9,7 +8,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	TOS CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerTOSController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+.controller('MultiplayerTOSController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
@@ -28,7 +28,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	LAUNCHER CONNECTION CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerLauncherController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+.controller('MultiplayerLauncherController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
@@ -48,7 +49,7 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	LOGIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerLoginController', ['$scope', 'bngApi', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
@@ -103,9 +104,10 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
-	bngApiScope = bngApi;
+	bngApi = bngApi;
 
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
@@ -246,7 +248,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	SERVERS TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 
 	var vm = this;
 	vm.checkIsEmpty = false;
@@ -308,7 +311,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	RECENT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
 	
 	vm.searchText = "";
@@ -365,7 +369,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FAVORITE TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
 
 	vm.checkIsEmpty = false;
@@ -430,8 +435,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	DIRECT CONNECT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
-function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout',
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
 
 	var timeOut = $timeout(function() {
@@ -450,7 +455,28 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerDirectController] destroyed.');
 	});
-}]);
+}])
+
+.directive('compile', ['$compile', function ($compile) {
+  return function(scope, element, attrs) {
+    scope.$watch(
+      function(scope) {
+        // watch the 'compile' expression for changes
+        return scope.$eval(attrs.compile);
+      },
+      function(value) {
+        // when the 'compile' expression changes
+        // assign it into the current DOM
+        element.html(value);
+				// compile the new DOM and link it to the current
+			  // scope.
+			  // NOTE: we only compile .childNodes so that
+			  // we don't get into infinite loop compiling ourselves
+			  $compile(element.contents())(scope);
+			}
+		);
+	};
+}])
 
 
 
@@ -638,9 +664,9 @@ function formatServerName(string) {
 function officialMark(o, s) {
 	if (o) {
 		if (s) {
-			return '<img src="./modules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
+			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
 		} else {
-			return '<img src="./modules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
+			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
 		}
 
 	} else {
@@ -729,7 +755,7 @@ function stripCustomFormatting(name){
 
 async function getFavorites() {
 	return new Promise(function(resolve, reject) {
-		bngApiScope.engineLua("MPConfig.getFavorites()", (data) => {
+		bngApi.engineLua("MPConfig.getFavorites()", (data) => {
 			if (!data) { resolve([]); return; }
 			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
 			resolve(data || []);
@@ -741,7 +767,7 @@ function addFav(server, isUpdate) {
 	server.addTime = Date.now();
 	favorites.push(server);
 	saveFav();
-	if (!isUpdate) bngApiScope.engineLua('MPCoreNetwork.getServers()');
+	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.getServers()');
 }
 
 function removeFav(server) {
@@ -752,11 +778,11 @@ function removeFav(server) {
 		}
 	}
 	saveFav();
-	bngApiScope.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 }
 
 function saveFav() {
-	bngApiScope.engineLua('MPConfig.setFavorites(\'' + JSON.stringify(favorites) + '\')');
+	bngApi.engineLua('MPConfig.setFavorites(\'' + JSON.stringify(favorites) + '\')');
 }
 
 function getRecents() {
@@ -774,7 +800,7 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 }
 
 function openExternalLink(url){
-	bngApiScope.engineLua(`openWebBrowser("`+url+`")`);
+	bngApi.engineLua(`openWebBrowser("`+url+`")`);
 }
 
 function openForumLink(){
@@ -939,7 +965,7 @@ function connect(ip, port) {
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApiScope.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ')');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ')');
 }
 
 // Used to select a row (when it's clicked)
@@ -1013,7 +1039,7 @@ function deselect(row) {
 
 async function getLauncherVersion() {
 	return new Promise(function(resolve, reject) {
-		bngApiScope.engineLua("MPCoreNetwork.getLauncherVersion()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.getLauncherVersion()", (data) => {
 			resolve(data);
 		});
 	});
@@ -1021,7 +1047,7 @@ async function getLauncherVersion() {
 
 async function isLoggedIn() {
 	return new Promise(function(resolve, reject) {
-		bngApiScope.engineLua("MPCoreNetwork.isLoggedIn()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.isLoggedIn()", (data) => {
 			resolve(data);
 		});
 	});
@@ -1029,7 +1055,7 @@ async function isLoggedIn() {
 
 async function isLauncherConnected() {
 	return new Promise(function(resolve, reject) {
-		bngApiScope.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
 			resolve(data);
 		});
 	});

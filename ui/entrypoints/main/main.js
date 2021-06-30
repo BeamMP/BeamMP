@@ -4,30 +4,12 @@ angular.module('beamng.garage', []);
 angular.module('beamng.color', []);
 angular.module('beamng.gamepadNav', []);
 angular.module('beamng.controls', []);
-angular.module('beamng.ui2Ports', []);
 
-angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
-
-.factory('customTranslationsLoader', ['$rootScope', '$timeout', '$q', function ($rootScope, $timeout, $q) {
-  var data = {};
-  $rootScope.$on('translationFileUpdate', (ev, d) => {data = d});
-  return function (options) {
-    var deferred = $q.defer();
-    $timeout(() => {
-      if (data[options.key]) {
-        return deferred.resolve(data[options.key].translations);
-      }
-      return deferred.reject(options.key);
-    }, 100);
-    return deferred.promise;
-  };
-}])
+angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 'ngMaterial', 'ngAnimate', 'ui.router', 'beamng.stuff', 'beamng.gameUI', 'beamng.apps', 'beamng.color', 'beamng.garage', 'pascalprecht.translate', 'beamng.gamepadNav', 'beamng.controls', 'fc.paging','ngSanitize','jkAngularRatingStars','ngFitText'])
 
 .config(['$compileProvider', '$logProvider', 'loggerProvider', '$stateProvider', '$urlRouterProvider', '$mdThemingProvider', '$translateProvider', 'AppDefaults', 'toastrConfig', '$provide',
   function($compileProvider, $logProvider, loggerProvider, $stateProvider, $urlRouterProvider, $mdThemingProvider, $translateProvider, AppDefaults, toastrConfig, $provide) {
 
-  // removed custom loader for now: does not work when changing languages
-  // $translateProvider.useLoader('customTranslationsLoader');
   $translateProvider.useStaticFilesLoader({
     prefix: '/locales/',
     suffix: '.json'
@@ -73,9 +55,9 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
   loggerProvider.crazyAlign(false);
   loggerProvider.align(false);
   // Define classes:
-  loggerProvider.addClasses(['HookManager', 'spatialNav', 'spine', 'spinePerf', 'mainMenu', 'jsonDump', 'AppCtrl', 'StreamsManager', 'AppLayout', 'app-container', 'Modmanager', 'App', 'vehicleconfig', 'garageParts', 'gamepadNav', 'authGame', 'scenarioControl', 'UiUnits']);
+  loggerProvider.addClasses(['HookManager', 'spatialNav', 'spine', 'spinePerf', 'mainMenu', 'jsonDump', 'AppCtrl', 'UIAppStorage', 'app-container', 'Modmanager', 'App', 'vehicleconfig', 'garageParts', 'gamepadNav', 'authGame', 'scenarioControl']);
   // show everything except specified
-  loggerProvider.hideMessages(['HookManager', 'spatialNav', 'spine', 'spinePerf', 'mainMenu', 'jsonDump', 'AppCtrl', 'StreamsManager', 'AppLayout', 'app-container', 'Modmanager', 'vehicleconfig', 'garageParts', 'scenarioControl', 'gamepadNav'], true);
+  loggerProvider.hideMessages(['HookManager', 'spatialNav', 'spine', 'spinePerf', 'mainMenu', 'jsonDump', 'AppCtrl', 'UIAppStorage', 'app-container', 'Modmanager', 'vehicleconfig', 'garageParts', 'scenarioControl', 'gamepadNav'], true);
   // hide everything except specified
   // loggerProvider.hideMessages(['warn', 'log'], false);
 
@@ -84,81 +66,81 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 
   .state('menu', {
     url: '/menu',
-    templateUrl: 'entrypoints/main/menu.html',
+    templateUrl: '/ui/entrypoints/main/menu.html',
     controller: 'MenuController as menuCtrl'
   })
 
     .state('menu.mainmenu', {
       url: '/mainmenu',
-      templateUrl: `modules/mainmenu/${beamng.product}/mainmenu.html`,
+      templateUrl: `/ui/modules/mainmenu/${beamng.product}/mainmenu.html`,
       controller: 'MainMenuController',
     })
 
     .state('menu.onlineFeatures', {
       url: '/onlineFeatures',
-      templateUrl: `modules/onlineFeatures/online.html`,
+      templateUrl: `/ui/modules/onlineFeatures/online.html`,
       controller: 'OnlineFeaturesController',
     })
 
     .state('menu.playmodes', {
       url: '/playmodes',
-      templateUrl: 'modules/playmodes/playmodes.html',
+      templateUrl: '/ui/modules/playmodes/playmodes.html',
       controller: 'PlayModesController as modes'
     })
 
     .state('menu.levels', {
       url: '/levels',
-      templateUrl: 'modules/levelselect/levelselect.html',
+      templateUrl: '/ui/modules/levelselect/levelselect.html',
       controller:  'LevelSelectController as levels'
     })
 
     .state('menu.levelDetails', {
       url: '/levels-details/:level/:spawnPoint',
-      templateUrl: 'modules/levelselect/levelselect-details.html',
+      templateUrl: '/ui/modules/levelselect/levelselect-details.html',
       controller:  'LevelSelectDetailsController as levelsDetails'
     })
 
     .state('menu.busRoutes', {
       url: '/bus',
-      templateUrl: 'modules/busRoute/busRoute.html',
+      templateUrl: '/ui/modules/busRoute/busRoute.html',
       controller: 'BusRoutesController as busCtrl'
     })
 
     .state('menu.busRoutesLevelSelect', {
       url: '/bus/level',
-      templateUrl: 'modules/busRoute/levelSelect.html',
+      templateUrl: '/ui/modules/busRoute/levelSelect.html',
       controller: 'BusRoutesLevelController'
     })
 
 
     .state('menu.busRoutesRouteSelect', {
       url: '/bus/route',
-      templateUrl: 'modules/busRoute/routeSelect.html',
+      templateUrl: '/ui/modules/busRoute/routeSelect.html',
       controller: 'BusRoutesRouteController'
     })
 
     .state('menu.environment', {
       url: '/environment',
-      templateUrl: 'modules/environment/environment.html',
+      templateUrl: '/ui/modules/environment/environment.html',
       controller:  'EnvironmentController as environment'
     })
 
     // Track Builder
     // .state('menu.trackBuilder', {
     //   url: '/trackBuilder',
-    //   templateUrl: 'modules/trackBuilder/trackBuilder.html',
+    //   templateUrl: '/ui/modules/trackBuilder/trackBuilder.html',
     //   controller:  'TrackBuilderController as trackBuilder'
     // })
 
     .state('menu.scenarios', {
       url: '/scenarios',
-      templateUrl: 'modules/scenarioselect/scenarioselect.html',
+      templateUrl: '/ui/modules/scenarioselect/scenarioselect.html',
       controller: 'ScenarioSelectController'
     })
 
     .state('menu.campaigns', {
       url: '/campaigns',
-      templateUrl: 'modules/campaignselect/campaignselect.html',
+      templateUrl: '/ui/modules/campaignselect/campaignselect.html',
       controller: 'CampaignSelectController as campaignSelect'
     })
 
@@ -166,62 +148,62 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 
     .state('appedit', {
       url: '/appedit',
-      templateUrl: 'modules/appselect/appedit.html',
+      templateUrl: '/ui/modules/appselect/appedit.html',
       controller: 'AppEditController'
     })
 
     // modWizard
     // .state('menu.modwizard', {
     //   url: '/modwizard',
-    //   templateUrl: 'modules/modwizard/modwizard.html',
+    //   templateUrl: '/ui/modules/modwizard/modwizard.html',
     //   controller:  'ModWizardController as modWzrdCtrl'
     // })
 
     // .state('menu.skinwizard', {
     //   url: '/modwizard/skin',
-    //   templateUrl: 'modules/modwizard/skinWizard/skinwizard.html',
+    //   templateUrl: '/ui/modules/modwizard/skinWizard/skinwizard.html',
     //   controller:  'SkinWizardController as skinWzrdCtrl'
     // })
 
     // .state('menu.vehiclewizard', {
     //   url: '/modwizard/vehicle',
-    //   templateUrl: 'modules/modwizard/vehicleWizard/vehiclewizard.html',
+    //   templateUrl: '/ui/modules/modwizard/vehicleWizard/vehiclewizard.html',
     //   controller:  'VehicleWizardController as vhclWzrdCtrl'
     // })
 
     // .state('menu.terrainwizard', {
     //   url: '/modwizard/terrain',
-    //   templateUrl: 'modules/modwizard/terrainWizard/terrainwizard.html',
+    //   templateUrl: '/ui/modules/modwizard/terrainWizard/terrainwizard.html',
     //   controller:  'TerrainWizardController as terrWzrdCtrl'
     // })
 
     // .state('menu.appwizard', {
     //   url: '/modwizard/app',
-    //   templateUrl: 'modules/modwizard/appwizard.html',
+    //   templateUrl: '/ui/modules/modwizard/appwizard.html',
     //   controller:  'appWizardController as appWizard'
     // })
 
     // .state('menu.configwizard', {
     //   url: '/modwizard/config',
-    //   templateUrl: 'modules/modwizard/configwizard.html',
+    //   templateUrl: '/ui/modules/modwizard/configwizard.html',
     //   controller:  'configWizardController as configWizard'
     // })
 
     .state('appselect', {
       url: '/appselect',
-      templateUrl: 'modules/appselect/appselect.html',
+      templateUrl: '/ui/modules/appselect/appselect.html',
       controller: 'AppSelectController as apps'
     })
 
     .state('menu.vehicles', {
       url: '/vehicleselect/:garage/:mode/:event',
-      templateUrl: 'modules/vehicleselect/vehicleselect.html',
+      templateUrl: '/ui/modules/vehicleselect/vehicleselect.html',
       controller: 'VehicleSelectController as vehicles',
     })
 
     .state('menu.vehicleDetails', {
       url: '/vehicle-details/:model/:config/:mode/:event',
-      templateUrl: 'modules/vehicleselect/vehicleselect-details.html',
+      templateUrl: '/ui/modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle'
     })
 	
@@ -229,126 +211,126 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 	
 	.state('menu.multiplayer', {
 	  url: '/multiplayer',
-	  templateUrl: 'modules/multiplayer/multiplayer.html',
+	  templateUrl: '/ui/modules/multiplayer/multiplayer.html',
 	  controller: 'MultiplayerController as multiplayer'
 	})
 	
 	  .state('menu.multiplayer.tos', {
 	    url: '/mptos',
-	    templateUrl: 'modules/multiplayer/tos.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/tos.partial.html',
 	    controller: 'MultiplayerTOSController as multiplayertos'
 	  })
 	  
 	  .state('menu.multiplayer.launcher', {
 	    url: '/mplauncher',
-	    templateUrl: 'modules/multiplayer/launcher.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
 	    controller: 'MultiplayerLauncherController as multiplayerlauncher'
 	  })
 	  
 	  .state('menu.multiplayer.login', {
 	    url: '/mplogin',
-	    templateUrl: 'modules/multiplayer/login.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/login.partial.html',
 	    controller: 'MultiplayerLoginController as multiplayerlogin'
 	  })
 
 	  .state('menu.multiplayer.servers', {
 	    url: '/mpservers',
-	    templateUrl: 'modules/multiplayer/servers.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/servers.partial.html',
 	    controller: 'MultiplayerServersController as multiplayermenu'
 	  })
 
 	  .state('menu.multiplayer.recent', {
 	    url: '/mprecent',
-	    templateUrl: 'modules/multiplayer/recent.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/recent.partial.html',
 	    controller: 'MultiplayerRecentController as multiplayermenu'
 	  })
 
   	  .state('menu.multiplayer.favorites', {
   	    url: '/mpfavorites',
-  	    templateUrl: 'modules/multiplayer/favorites.partial.html',
+  	    templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
   	    controller: 'MultiplayerFavoritesController as multiplayermenu'
   	  })
 
 	  .state('menu.multiplayer.direct', {
 	    url: '/mpdirect',
-	    templateUrl: 'modules/multiplayer/direct.partial.html',
+	    templateUrl: '/ui/modules/multiplayer/direct.partial.html',
 	    controller: 'MultiplayerDirectController as multiplayermenu'
 	  })
 	// -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.options', {
       url: '/options',
-      templateUrl: 'modules/options/options.html',
+      templateUrl: '/ui/modules/options/options.html',
       controller: 'OptionsController',
       controllerAs: 'options',
       abstract: true
     })
       .state('menu.options.graphics', {
         url: '/graphics',
-        templateUrl: 'modules/options/graphics.partial.html',
+        templateUrl: '/ui/modules/options/graphics.partial.html',
         controller: 'SettingsGraphicsCtrl as opt'
       })
 
       .state('menu.options.audio', {
         url: '/audio',
-        templateUrl: 'modules/options/audio.partial.html',
+        templateUrl: '/ui/modules/options/audio.partial.html',
         controller: 'SettingsAudioCtrl as opt'
       })
 
       .state('menu.options.gameplay', {
         url: '/gameplay',
-        templateUrl: 'modules/options/gameplay.partial.html',
+        templateUrl: '/ui/modules/options/gameplay.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 
       .state('menu.options.camera', {
         url: '/camera',
-        templateUrl: 'modules/options/camera.partial.html',
+        templateUrl: '/ui/modules/options/camera.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 
       .state('menu.options.userInterface', {
         url: '/userInterface',
-        templateUrl: 'modules/options/userinterface.partial.html',
+        templateUrl: '/ui/modules/options/userinterface.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 
       .state('menu.options.language', {
         url: '/language',
-        templateUrl: 'modules/options/language.partial.html',
+        templateUrl: '/ui/modules/options/language.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 
       .state('menu.options.other', {
         url: '/other',
-        templateUrl: 'modules/options/other.partial.html',
+        templateUrl: '/ui/modules/options/other.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 	  
 	  // -------------------------------------- BEAMMP -------------------------------------- //
 	  .state('menu.options.multiplayer', {
         url: '/multiplayer',
-        templateUrl: 'modules/options/multiplayer.partial.html',
+        templateUrl: '/ui/modules/options/multiplayer.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 	  // -------------------------------------- BEAMMP -------------------------------------- //
 
       .state('menu.options.licenses', {
         url: '/licenses',
-        templateUrl: 'modules/options/licenses.partial.html',
+        templateUrl: '/ui/modules/options/licenses.partial.html',
         controller: 'SettingsGameplayCtrl as opt'
       })
 
       .state('menu.options.controls', {
         url: '/controls',
-        templateUrl: 'modules/options/controls.html',
+        templateUrl: '/ui/modules/options/controls.html',
         controller: 'ControlsController as controls'
       })
         .state('menu.options.controls.bindings', {
           views: {
             '': {
               url: '/bindings',
-              templateUrl: 'modules/options/controls-bindings.html',
+              templateUrl: '/ui/modules/options/controls-bindings.html',
               controller: 'ControlsBindingsCtrl as controlsBindings'
             }
           }
@@ -357,7 +339,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
               views: {
                 'edit@menu.options': {
                   url: '/edit',
-                  templateUrl: 'modules/options/controls-edit.html',
+                  templateUrl: '/ui/modules/options/controls-edit.html',
                   controller: 'ControlsEditCtrl as controlsEdit'
                 }
               },
@@ -368,7 +350,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
           views: {
             '': {
               url: '/filters',
-              templateUrl: 'modules/options/controls-filters.html',
+              templateUrl: '/ui/modules/options/controls-filters.html',
               controller: 'ControlsFiltersCtrl as controlsFilters'
             }
           }
@@ -378,7 +360,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
           views: {
             '': {
               url: '/ffb',
-              templateUrl: 'modules/options/controls-ffb.html',
+              templateUrl: '/ui/modules/options/controls-ffb.html',
               controller: 'ControlsFfbCtrl as controlsFfb'
             }
           }
@@ -388,7 +370,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
               views: {
                 'edit@menu.options': {
                   url: '/edit',
-                  templateUrl: 'modules/options/controls-edit.html',
+                  templateUrl: '/ui/modules/options/controls-edit.html',
                   controller: 'ControlsEditCtrl as controlsEdit'
                 }
               },
@@ -399,7 +381,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             url: '/hardware',
-            templateUrl: 'modules/options/controls-hardware.html',
+            templateUrl: '/ui/modules/options/controls-hardware.html',
             controller: 'ControlsHardwareCtrl as controlsHw'
           }
         }
@@ -407,45 +389,45 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 
     .state('menu.debug', {
       url: '/debug',
-      templateUrl: 'modules/debug/debug.html',
+      templateUrl: '/ui/modules/debug/debug.html',
       controller:  'DebugController as debug'
     })
 
     .state('menu.vehicleconfig', {
       url: '/vehicle-config',
-      templateUrl: 'modules/vehicleconfig/vehicleconfig.html',
+      templateUrl: '/ui/modules/vehicleconfig/vehicleconfig.html',
       controller: 'VehicleconfigCtrl',
       redirectTo: 'menu.vehicleconfig.parts'
     })
 
     .state('menu.vehicleconfig.parts', {
       url: '/vehicle-config/parts',
-      templateUrl: 'modules/vehicleconfig/partial.parts.html',
+      templateUrl: '/ui/modules/vehicleconfig/partial.parts.html',
       controller: 'Vehicleconfig_parts as vehConf_parts'
     })
 
     .state('menu.vehicleconfig.tuning', {
       url: '/vehicle-config/tuning',
-      templateUrl: 'modules/vehicleconfig/partial.tuning.html',
+      templateUrl: '/ui/modules/vehicleconfig/partial.tuning.html',
       controller: 'Vehicleconfig_tuning as vehConf_tuning'
     })
 
     .state('menu.vehicleconfig.color', {
       url: '/vehicle-config/color',
-      templateUrl: 'modules/vehicleconfig/partial.color.html',
+      templateUrl: '/ui/modules/vehicleconfig/partial.color.html',
       controller: 'Vehicleconfig_color as vehConf_color'
     })
 
     .state('menu.vehicleconfig.save', {
       url: '/vehicle-config/save',
-      templateUrl: 'modules/vehicleconfig/partial.save.html',
+      templateUrl: '/ui/modules/vehicleconfig/partial.save.html',
       controller: 'Vehicleconfig_save as vehConf_save'
     })
 
 
     .state('menu.help', {
       url: '/help:pageIndex',
-      templateUrl: 'modules/help/help.html',
+      templateUrl: '/ui/modules/help/help.html',
       controller: 'HelpController'
     })
 
@@ -460,13 +442,13 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'LocalModController as modLoclCtrl',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.local': {
-            templateUrl: 'modules/modmanager/local.html'
+            templateUrl: '/ui/modules/modmanager/local.html'
           },
           'filter@menu.mods.local': {
-            templateUrl: 'modules/modmanager/filter.html'
+            templateUrl: '/ui/modules/modmanager/filter.html'
           }
         }
       })
@@ -476,10 +458,10 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'DownloadModController as modDwlCtrl',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.downloaded': {
-            templateUrl: 'modules/modmanager/downloaded.html',
+            templateUrl: '/ui/modules/modmanager/downloaded.html',
           }
         }
       })
@@ -489,13 +471,13 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'ScheduledModController as modSchCtrl',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.scheduled': {
-            templateUrl: 'modules/modmanager/scheduled.html',
+            templateUrl: '/ui/modules/modmanager/scheduled.html',
           },
           'filter@menu.mods.scheduled': {
-            templateUrl: 'modules/modmanager/scheduled_conflict.html'
+            templateUrl: '/ui/modules/modmanager/scheduled_conflict.html'
           }
         }
       })
@@ -505,13 +487,13 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'RepositoryController as repo',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.repository': {
-            templateUrl: 'modules/repository/repository.html'
+            templateUrl: '/ui/modules/repository/repository.html'
           },
           'filter@menu.mods.repository': {
-            templateUrl: 'modules/repository/filter.html'
+            templateUrl: '/ui/modules/repository/filter.html'
           }
         }
       })
@@ -521,13 +503,13 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'AutomationController as automation',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.automation': {
-            templateUrl: 'modules/automation/automation.html'
+            templateUrl: '/ui/modules/automation/automation.html'
           },
           'filter@menu.mods.automation': {
-            templateUrl: 'modules/automation/filter.html'
+            templateUrl: '/ui/modules/automation/filter.html'
           }
         },
 
@@ -538,13 +520,13 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'AutomationDetailsController as automationDetailCtrl',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.automationDetails': {
-            templateUrl: 'modules/automation/automation-details.html'
+            templateUrl: '/ui/modules/automation/automation-details.html'
           },
           'filter@menu.mods.automationDetails': {
-            templateUrl: 'modules/automation/info.html'
+            templateUrl: '/ui/modules/automation/info.html'
           }
         },
       })
@@ -554,26 +536,26 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         views: {
           '': {
             controller: 'RepositoryDetailsController as repoDetailCtrl',
-            templateUrl: 'modules/modmanager/mods.html'
+            templateUrl: '/ui/modules/modmanager/mods.html'
           },
           'content@menu.mods.details': {
-            templateUrl: 'modules/repository/repository-details.html'
+            templateUrl: '/ui/modules/repository/repository-details.html'
           },
           'filter@menu.mods.details': {
-            templateUrl: 'modules/repository/info.html'
+            templateUrl: '/ui/modules/repository/info.html'
           }
         },
       })
 
     .state('menu.modsDetails', {
       url: '/modmanager/details:modFilePath',
-      templateUrl: 'modules/modmanager/info.html',
+      templateUrl: '/ui/modules/modmanager/info.html',
       controller: 'ModManagerControllerDetails'
     })
 
     .state('menu.audiodebug', {
       url: '/audiodebug',
-      templateUrl: 'modules/audiodebug/audiodebug.html',
+      templateUrl: '/ui/modules/audiodebug/audiodebug.html',
       controller: 'AudioDebugController'
     })
 
@@ -583,7 +565,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     params: {
       data: {}
     },
-    templateUrl: 'modules/scenariocontrol/start.html',
+    templateUrl: '/ui/modules/scenariocontrol/start.html',
     controller: 'ScenarioStartController as scenarioStart'
   })
 
@@ -594,7 +576,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         rewards: {},
         portrait: {}
     },
-    templateUrl: 'modules/scenariocontrol/end.html',
+    templateUrl: '/ui/modules/scenariocontrol/end.html',
     controller: 'ScenarioEndController'
   })
 
@@ -603,7 +585,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     params: {
         stats: {}
     },
-    templateUrl: 'modules/scenariocontrol/quickraceEnd.html',
+    templateUrl: '/ui/modules/scenariocontrol/quickraceEnd.html',
     controller: 'ScenarioEndController'
   })
 
@@ -612,7 +594,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     params: {
         stats: {}
     },
-    templateUrl: 'modules/scenariocontrol/end.html',
+    templateUrl: '/ui/modules/scenariocontrol/end.html',
     controller: 'ScenarioEndController'
   })
 
@@ -620,7 +602,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
   // Until this chanages, keep the url hash to "loading".
   .state('loading', {
     url: '/loading',
-    templateUrl: 'modules/loading/loading.html',
+    templateUrl: '/ui/modules/loading/loading.html',
     controller:  'LoadingController as loading',
     transitionAnimation: 'moduleBlendOnLeave',
   })
@@ -630,107 +612,118 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     params: {
         comiclist: {}
     },
-    templateUrl: 'modules/comic/comic.html',
+    templateUrl: '/ui/modules/comic/comic.html',
     controller: 'ComicController'
   })
 
   .state('photomode', {
     url: '/photo-mode',
-    templateUrl: 'modules/photomode/photomode.html',
+    templateUrl: '/ui/modules/photomode/photomode.html',
     controller:  'PhotoModeController as photo'
   })
 
   .state('menu.replay', {
     url: '/replay',
-    templateUrl: 'modules/replay/replay.html',
+    templateUrl: '/ui/modules/replay/replay.html',
     controller:  'ReplayController as replay'
   })
 
   .state('credits', {
     url: '/credits',
-    templateUrl: 'modules/credits/credits.html',
+    templateUrl: '/ui/modules/credits/credits.html',
     controller: 'CreditsController as credits'
   })
 
   .state('startScreen', {
     url: '/startScreen',
-    templateUrl: 'modules/startScreen/startScreen.html',
+    templateUrl: '/ui/modules/startScreen/startScreen.html',
     controller: 'startScreenController as startScreen',
-    transitionAnimation: 'moduleStartScreenFade',
+    transitionAnimation: 'moduleStartScreenFade'
   })
 
   .state('iconViewer', {
     url: '/iconViewer',
-    templateUrl: 'modules/iconView/icons.html',
-    controller: 'iconViewerCtrl as iconCtrl',
+    templateUrl: '/ui/modules/iconView/icons.html',
+    controller: 'iconViewerCtrl as iconCtrl'
+  })
+
+  .state('fadeScreen', {
+    url: '/fadeScreen',
+    templateUrl: '/ui/modules/fadeScreen/fadeScreen.html',
+    params: {
+        fadeIn: 1,
+        pause: 0,
+        fadeOut: 1
+    },
+    controller: 'fadeScreen'
   })
 
 
   .state('garage', {
       url: '/garageNew',
-      templateUrl: 'modules/garageNew/garage.html',
+      templateUrl: '/ui/modules/garageNew/garage.html',
       controller: 'garageCtrl'
     })
 
       .state('garage.menu', {
         url: '/garageNew',
-        templateUrl: 'modules/garageNew/garageMenu/menu.html',
+        templateUrl: '/ui/modules/garageNew/garageMenu/menu.html',
         controller: 'garageMenuCtrl as gp'
       })
 
 
       .state('garage.menu.select', {
         url: '/garageNew/select',
-        templateUrl: 'modules/garageNew/garageSelect/select.html',
+        templateUrl: '/ui/modules/garageNew/garageSelect/select.html',
         controller: 'garageSelect as gpSelect'
       })
 
       .state('garage.menu.parts', {
         url: '/garageNew/parts',
-        templateUrl: 'modules/garageNew/garageParts/parts.html',
+        templateUrl: '/ui/modules/garageNew/garageParts/parts.html',
         controller: 'garageParts as gpParts'
       })
 
       .state('garage.menu.tune', {
         url: '/garageNew/tune',
-        templateUrl: 'modules/garageNew/garageTune/tune.html',
+        templateUrl: '/ui/modules/garageNew/garageTune/tune.html',
         controller: 'garageTune as gpTune'
       })
 
       .state('garage.menu.paint', {
         url: '/garageNew/paint',
-        templateUrl: 'modules/garageNew/garagePaint/paint.html',
+        templateUrl: '/ui/modules/garageNew/garagePaint/paint.html',
         controller: 'garagePaint as gpPaint'
       })
 
       .state('garage.menu.photo', {
         url: '/garageNew/photo',
-        templateUrl: 'modules/garageNew/garagePhoto/photo.html',
+        templateUrl: '/ui/modules/garageNew/garagePhoto/photo.html',
         controller: 'garagePhoto as gpPhoto'
       })
 
       .state('garage.menu.load', {
         url: '/garageNew/load',
-        templateUrl: 'modules/garageNew/garageLoad/load.html',
+        templateUrl: '/ui/modules/garageNew/garageLoad/load.html',
         controller: 'garageLoad as gpLoad'
       })
 
       .state('garage.save', {
         url: '/garageNew/save',
-        templateUrl: 'modules/garageNew/garageSave/save.html',
+        templateUrl: '/ui/modules/garageNew/garageSave/save.html',
         controller: 'garageSave as gpSave'
       })
 
     // ingame garage prototype
     .state('garageProto', {
       url: '/garageProto',
-      templateUrl: 'modules/garagePrototype/garage.html',
+      templateUrl: '/ui/modules/garagePrototype/garage.html',
       controller: 'garageProtoCtrl'
     })
 
       .state('garageProto.menu', {
         url: '/garageProto',
-        templateUrl: 'modules/garagePrototype/garageMenu/menu.html',
+        templateUrl: '/ui/modules/garagePrototype/garageMenu/menu.html',
         controller: 'garageProtoMenuCtrl as gpProtoMenu'
       })
 
@@ -741,14 +734,14 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
           mode:     {},
           money:    {}
         },
-        templateUrl: 'modules/garagePrototype/garageSelect/select.html',
+        templateUrl: '/ui/modules/garagePrototype/garageSelect/select.html',
         controller: 'garageProtoSelect as gpProtoSelect'
       })
 
 
     .state('mapview', {
       url: '/mapview',
-      templateUrl: 'modules/mapview/mapview.html',
+      templateUrl: '/ui/modules/mapview/mapview.html',
       controller: 'MapViewCtrl as mapview',
       params: {
         data: {}
@@ -763,42 +756,43 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     //Dragrace states WIP
     .state('menu.dragRaceOverview', {
       url: '/dragrace/overview',
-      templateUrl: 'modules/dragrace/overview.html',
+      templateUrl: '/ui/modules/dragrace/overview.html',
       controller: 'DragRaceController',
       params: {
-        results: {}
+        results: {},
+        cinematicEnabled: true
       }
     })
 
     // LightRunner States
     .state('menu.lightrunnerOverview', {
       url: '/lightrunner/overview',
-      templateUrl: 'modules/lightrunner/overview.html',
+      templateUrl: '/ui/modules/lightrunner/overview.html',
       controller: 'LightRunnerController',
     })
 
     .state('menu.lightrunnerTrackSelect', {
       url: '/lightrunner/track',
-      templateUrl: 'modules/lightrunner/trackSelect.html',
+      templateUrl: '/ui/modules/lightrunner/trackSelect.html',
       controller: 'LightRunnerTrackController'
     })
 
     //Quickrace states WIP
     .state('menu.quickraceOverview', {
       url: '/quickrace/overview',
-      templateUrl: 'modules/quickrace/overview.html',
+      templateUrl: '/ui/modules/quickrace/overview.html',
       controller: 'QuickraceController',
     })
 
     .state('menu.quickraceLevelselect', {
       url: '/quickrace/level',
-      templateUrl: 'modules/quickrace/levelSelect.html',
+      templateUrl: '/ui/modules/quickrace/levelSelect.html',
       controller: 'QuickraceLevelController'
     })
 
     .state('menu.quickraceTrackselect', {
       url: '/quickrace/track',
-      templateUrl: 'modules/quickrace/trackSelect.html',
+      templateUrl: '/ui/modules/quickrace/trackSelect.html',
       controller: 'QuickraceTrackController'
     })
 
@@ -814,81 +808,81 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
         track: {},
         vehicles: {},
       },
-      templateUrl: 'modules/quickrace/overview.html',
+      templateUrl: '/ui/modules/quickrace/overview.html',
       controller: 'QuickraceController'
     })
 
     .state('campaign.quickraceLevelselect', {
       url: '/quickrace/level',
-      templateUrl: 'modules/quickrace/levelSelect.html',
+      templateUrl: '/ui/modules/quickrace/levelSelect.html',
       controller: 'QuickraceLevelController'
     })
 
 
     .state('campaign.quickraceTrackselect', {
       url: '/quickrace/track',
-      templateUrl: 'modules/quickrace/trackSelect.html',
+      templateUrl: '/ui/modules/quickrace/trackSelect.html',
       controller: 'QuickraceTrackController'
     })
 
     .state('campaign.vehicles', {
       url: '/vehicleselect/:garage/:mode',
-      templateUrl: 'modules/vehicleselect/vehicleselect.html',
+      templateUrl: '/ui/modules/vehicleselect/vehicleselect.html',
       controller: 'VehicleSelectController as vehicles',
     })
 
     .state('campaign.vehicleDetails', {
       url: '/vehicle-details/:model/:config/:mode',
-      templateUrl: 'modules/vehicleselect/vehicleselect-details.html',
+      templateUrl: '/ui/modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle'
     })
 
     //-------------------------------------------------------------- UI3 states ---- test space ----------------------------------***************************
     .state('menu.menu2view', {
       url: '/menu2',
-      templateUrl: `modules/mainmenu2/menu2view.html`,
+      templateUrl: `/ui/modules/mainmenu2/menu2view.html`,
       controller: 'MainMenu2Controller',
     })
 
     .state('menu.menu2view.mainMenu2', {
       url: '/mainmenu2',
-      templateUrl: `modules/mainmenu2/mainmenu2.html`,
+      templateUrl: `/ui/modules/mainmenu2/mainmenu2.html`,
       controller: '',
     })
 
     .state('menu.menu2view.quickPlayMenu', {
       url: '/quickplay',
-      templateUrl: 'modules/quickplaymenu/quickplaymenu.html',
+      templateUrl: '/ui/modules/quickplaymenu/quickplaymenu.html',
       controller: '' //TODO
     })
 
     .state('menu.menu2view.freePlay', {
       url: '/freeplay',
-      templateUrl: 'modules/freeplay/freeplay.html',
+      templateUrl: '/ui/modules/freeplay/freeplay.html',
       controller: 'FreePlayController as fpctrl'
     })
 
     .state('menu.menu2view.freePlaySpawn', {
       url: '/freeplay/:level',
-      templateUrl: 'modules/freeplay-spawn/freeplay-spawn.html',
+      templateUrl: '/ui/modules/freeplay-spawn/freeplay-spawn.html',
       controller: 'FreePlaySpawnController as fpsctrl'
     })
 
     .state('menu.menu2view.modManager2', {
       url: '/modmanager',
-      templateUrl: 'modules/modmanager2/modmanager2.html',
+      templateUrl: '/ui/modules/modmanager2/modmanager2.html',
       controller: '' //TODO
     })
 
     .state('menu.menu2view.options2', {
       url: '/options',
-      templateUrl: 'modules/options2/options2.html',
+      templateUrl: '/ui/modules/options2/options2.html',
       controller: '' //TODO
     })
 
     .state('menu.menu2view.graphicsBasic', {
       url: '/options/graphicsbasic',
-      templateUrl: 'modules/options2/graphicsbasic/graphicsbasic.html',
+      templateUrl: '/ui/modules/options2/graphicsbasic/graphicsbasic.html',
       controller: 'OptionsGraphicsController' //TODO
     })
 
@@ -906,7 +900,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
       if (!AppDefaults.playModes[key].disabled) {
         $stateProvider.state('menu.career', {
           url: '/career',
-          templateUrl: 'modules/careerselect/careerselect.html',
+          templateUrl: '/ui/modules/careerselect/careerselect.html',
           controller: 'CareerSelectController as careerSelect'
         });
       }
@@ -951,7 +945,7 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
     'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
                                         // on this palette should be dark or light
     'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default
-     '200', '300', '400', 'A100'],
+    '200', '300', '400', 'A100'],
     'contrastLightColors': undefined    // could also specify this if default was 'dark'
   });
 
@@ -978,31 +972,40 @@ angular.module('BeamNG.ui', ['beamng.ui2Ports', 'beamng.core', 'beamng.component
 
 }])
 
-.run(['$animate', '$http', 'logger', '$rootScope', '$templateCache', '$window', '$translate', 'AppLayout', 'Aux', 'bngApi', 'Settings', 'SettingsAuxData',
-function ($animate, $http, logger, $rootScope, $templateCache, $window, $translate,  AppLayout, Aux, bngApi, Settings, SettingsAuxData) {
+.run(['$animate', '$http', 'logger', '$rootScope', '$templateCache', '$window', '$translate', 'UIAppStorage', 'Aux', 'Settings', 'SettingsAuxData', 'bngWSApi',
+function ($animate, $http, logger, $rootScope, $templateCache, $window, $translate,  UIAppStorage, Aux, Settings, SettingsAuxData, bngWSApi) {
 
-  $http.get('modules/vehicleconfig/vehicle-config-tree.html').then(function (tmpl) {
+  $http.get('/ui/modules/vehicleconfig/vehicle-config-tree.html').then(function (tmpl) {
     $templateCache.put('vehicle-config-tree', tmpl.data);
   });
 
-  $http.get('assets/sprites/svg-symbols.svg')
+  $http.get('/ui/assets/sprites/svg-symbols.svg')
   .success(svgSprite => {
     var iconsSprite = angular.element(svgSprite);
     angular.element(document.head).append(iconsSprite);
   });
 
 
-   $http.get('modules/options/settingsPresets.json')
+  $http.get('/ui/modules/options/settingsPresets.json')
   .success(presets => {
     SettingsAuxData.graphicPresets = presets;
   });
 
-  //$animate.enabled(false);
+  registerWindowHooks($rootScope, $window);
 
-  bngApi.engineLua('ui_apps.getLayouts()', function (data) {
-    logger.AppLayout.log('got layouts: %o', data);
-    for (var key in data)
-      AppLayout[key] = data[key];
+  /* --- VUE3 START --- */
+  // i18n vue3 basics
+
+  // apply language settings
+  $rootScope.$on('SettingsChanged', function(evt, data) {
+    if(data.values.uiLanguage) {
+      let lang = data.values.uiLanguage;
+      if(lang == '') lang = 'en-US'
+      $http.get(`/locales/${lang}.json`,).then(function(res) {
+        vueI18n.global.locale = lang
+        vueI18n.global.setLocaleMessage(lang, res.data)
+      });
+    }
   });
 
 	// -------------------------------------- BEAMMP -------------------------------------- //
@@ -1017,6 +1020,7 @@ function ($animate, $http, logger, $rootScope, $templateCache, $window, $transla
 
 	// -------------------------------------- BEAMMP -------------------------------------- //
 
+  bngApi.engineLua('ui_apps.requestUIAppsData()');
 
   // ..... Define all objects attached directly to the window object here
 
@@ -1034,12 +1038,6 @@ function ($animate, $http, logger, $rootScope, $templateCache, $window, $transla
    * Angular's event system manages the listener's removal on the $destroy event of
    * the current scope.
   **/
-  bngApi.registerGlobalCallback('hooks', function () {
-    // variadic: accept any number of arguments
-    logger.HookManager.log.apply(undefined, arguments);
-    $rootScope.$broadcast.apply($rootScope, arguments);
-    // console.log(arguments, Array.prototype.slice.call(arguments));
-  });
 
   // listen to the window resize event. Maybe this can also be handled from the CEF side.
   angular.element($window).bind('resize', function () {
@@ -1052,16 +1050,6 @@ function ($animate, $http, logger, $rootScope, $templateCache, $window, $transla
   // $window.updateProgress = function(val, txt) {
   //   $rootScope.$broadcast('UpdateProgress', {value: Math.floor(100 * val), text: txt });
   // };
-
-
-  $window.sendCompleteObjectState = function (value, txt) {
-    //logger.log('completeObjectState', value, 'and', txt);
-  };
-
-  $window.updatePhysicsState = function (value) {
-    // logger.log('[$window] got updatePhysicsState w/', value);
-    $rootScope.$broadcast('updatePhysicsState', value);
-  };
 
   // Update game state each time a route change is triggered.
   // Maybe an overkill, but why not be sure?
@@ -1270,8 +1258,8 @@ angular.module('beamng.stuff')
 
       }
 
-      if (useGamepadNavigation) {
-        //console.log(actions[action]);
+      if (useGamepadNavigation && actions[action]) {
+        console.log(actions[action]);
         // console.log(actions[action][0]);
         if (actions[action] != undefined) { // Fix for game error Spam in Cef UI Console. #Titch2000 / Starystars67
           $rootScope.$evalAsync(actions[action][0].func);
@@ -1298,8 +1286,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', 'logger', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'AppDefaults', 'Aux', 'bngApi', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', 'SimpleStateNav', 'SpatialNavigation', '$injector', '$location',
-  function($document, $log, logger, $rootScope, $scope, $sce, $compile, $state, $translate, $window, AppDefaults, Aux, bngApi, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, SimpleStateNav, SpatialNavigation, $injector, $location) {
+.controller('AppCtrl', ['$document', '$log', 'logger', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'AppDefaults', 'Aux', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', 'SimpleStateNav', 'SpatialNavigation', '$injector', '$location',
+  function($document, $log, logger, $rootScope, $scope, $sce, $compile, $state, $translate, $window, AppDefaults, Aux, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, SimpleStateNav, SpatialNavigation, $injector, $location) {
   var vm = this;
 
   // hack to fix backspace navigating between different menus.
@@ -1327,6 +1315,7 @@ $scope.$on('requestUIInitialised', () => {
   vm.physicsPaused = false;
   vm.physicsMaybePaused = false;
   vm.showPauseIcon = false;
+  vm.showCrosshair = false;
   var updatePauseIcon = function() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused;
       var gamePaused = vm.physicsPaused || vm.replayPaused;
@@ -1375,16 +1364,24 @@ $scope.$on('requestUIInitialised', () => {
   });
 
   $scope.$on('ChangeState', function (event, data, ifCurrent) {
-    logger.AppCtrl.debug('received ForceStateChange w/', data, ifCurrent, $state.current.name, transitioningTo);
+    //console.log('received ForceStateChange w/', data, ifCurrent, $state.current.name, transitioningTo);
     params = data.params || {};
+
+
     state = (typeof data === 'string' ? data : data.state);
     help = (transitioningTo !== undefined && transitioningTo !== $state.current.name ? transitioningTo : $state.current.name);
     if (help === ifCurrent || ifCurrent === undefined || (Array.isArray(ifCurrent) && ifCurrent.indexOf(help) !== -1)) {
-      logger.AppCtrl.log(`switching to state: ${state}`);
-      stateTransitioning = $state.go(state, params, {reload: true});
+      //console.log(`switching to state: ${state}`);
+      var stateTransitioning = $state.go(state, params, {reload: true});
+      //console.log(`switched: ${stateTransitioning}`);
     }
   });
 
+  $scope.$on('onCrosshairVisibilityChanged', function (event, visible) {
+    $scope.$applyAsync(function () {
+      vm.showCrosshair = visible;
+    });
+  });
 
   vm.showApps = true;
   vm.mainmenu = true;
@@ -1460,6 +1457,12 @@ $scope.$on('requestUIInitialised', () => {
     ]
   };
 
+  if(!beamng.shipping) {
+    vm.menuEntries.freeroam.push({ translateid: 'Icons', icon: 'new_releases', state: 'iconViewer', advanced: true });
+    // vm.menuEntries.freeroam.push({ translateid: 'Drag Race', icon: 'flag', state: 'menu.dragRaceOverview', advanced: false });
+    // vm.menuEntries.freeroam.push({ translateid: 'ui.dashboard.template', icon: 'crop_free',    state: 'template', advanced: true});
+  }
+
   // downloader start
   var dlinfo = {};
   function cancelHelper (id, ctr) {
@@ -1479,7 +1482,7 @@ $scope.$on('requestUIInitialised', () => {
   $window.downloadStateChanged = function(data) {
     if(data.filename == '') return;
 
-    logger.log('downloadStateChanged', data);
+    //logger.log('downloadStateChanged', data);
     if(data.state == 'working' && !dlinfo[data.id]) {
       // the 0% is imporatne here, so the toaster library doesn't think the success msg later one to be a duplicate, so please leave it there
       var t = toastr.info(data.filename + ': 0%', 'Downloading mod', {
@@ -1672,12 +1675,18 @@ $scope.$on('requestUIInitialised', () => {
 
   vm.aux = Aux;
 
-  $scope.$on('hide_ui', function (event, data) {
+  $scope.$on('onCefVisibilityChanged', function (event, cefVisible) {
     $scope.$evalAsync(function () {
-        Aux.uiVisible = data !== undefined ? !data: !Aux.uiVisible;
+        Aux.uiVisible = cefVisible
         // logger.log("Aux.uiVisible = ", Aux.uiVisible);
-    });
-  });
+    })
+  })
+
+  $scope.$on('hide_ui', function (event, visible) {
+    let cmd = (visible === undefined) ? `extensions.ui_visibility.toggleCef()` : `extensions.ui_visibility.set(${visible})`
+    console.error('The hide_ui function is deprecated and will stop working in the future. Please use ' + cmd)
+    bngApi.engineLua(cmd)
+  })
 
   // This is only needed for closing current state when user clicks
   // on the same icon. Not sure why this is good...
@@ -1705,34 +1714,10 @@ $scope.$on('requestUIInitialised', () => {
 
   $scope.$on('quit', vm.quit);
 
-  // **************************************************************************
-  // language switching tests
-  var langid = 0;
-  var lang_available = ['en-US', 'de-DE', 'ru', 'ar'];
-  function toggle_lang_example() {
-    langid++;
-    if(langid >= lang_available.length) langid = 0;
-    // logger.log('switched language to: ', lang_available[langid]);
-    $scope.$evalAsync(function() {
-      $scope.$broadcast('languageChange');
-      $translate.use(lang_available[langid]);
-    });
-    // console.log(`using lang: ${lang_available[langid]}`);
-    $timeout(toggle_lang_example, 3000);
-  }
-  // toggle_lang_example();
-
-  $scope.$on('translationFileUpdate',  $translate.refresh);
-  bngApi.engineLua('core_modmanager.requestTranslations()');
-
-  // **************************************************************************
-  var previousLanguage = undefined;
   $scope.$on('SettingsChanged', (ev, data) => {
     if(data.values.uiLanguage && data.values.uiLanguage != '') {
       $rootScope.$eval(function() {
-        //console.log("USING NEW LANGUAGE: " + data.values.uiLanguage);
         $translate.use(data.values.uiLanguage);
-        previousLanguage = data.values.uiLanguage;
       });
     }
   });
@@ -1791,7 +1776,7 @@ $scope.$on('requestUIInitialised', () => {
     }
   });
 
-  $scope.$on('updatePhysicsState', function (event, state) {
+  $scope.$on('physicsStateChanged', function (event, state) {
     $scope.$evalAsync(function () {
       vm.physicsMaybePaused = !state;
       updatePauseIcon();
@@ -1812,7 +1797,7 @@ $scope.$on('requestUIInitialised', () => {
   };
 
   $scope.$on('requestPhysicsState', function (event) {
-    $scope.$broadcast('updatePhysicsState', !vm.physicsPaused);
+    $scope.$broadcast('physicsStateChanged', !vm.physicsPaused);
   });
 
 
@@ -1827,163 +1812,6 @@ $scope.$on('requestUIInitialised', () => {
       }
     });
   });
-
-
-  //messages app port:
-  (function () {
-    /* Devlog mini code start */
-    // Devlog function only enabled in non-shipping builds
-
-    function pluralHelper (counts, string) {
-      var count = 0;
-      for (var i in counts) {
-        count += counts[i];
-      }
-
-      var frakton = 1000;
-      if (count > frakton && count < 2 * frakton) {
-        return 'Frakton of ' + string + 's';
-      } else if (count > 2 * frakton){
-        return Math.round(count / frakton) + ' Frakton of ' + string + 's';
-      } else if (count > 1) {
-        return count + ' ' + string + 's';
-      } else {
-        return string;
-      }
-    }
-
-    function descHelper (counts, msg) {
-      var types = {
-        'Lua': 0,
-        'TS': 0,
-        'UI': 0,
-        'Cef': 0
-      };
-      var str = '';
-      var type;
-      var unknown = 0;
-
-      if (msg !== undefined) {
-        var total = 0;
-        for (type in types) {
-          if (msg.origin.toLowerCase().indexOf(type.toLowerCase()) !== -1) {
-            if (counts[type] === undefined) { counts[type] = 0; }
-            counts[type] += 1;
-            total += 1;
-          }
-        }
-
-        if (total < 1) {
-          if (counts['unknown'] === undefined) { counts['unknown'] = 0; }
-          counts['Unknown'] += 1;
-          // logger.log(list[i].origin);
-        }
-      }
-
-      for (type in counts) {
-        if (counts[type] !== undefined && counts[type] > 0) {
-          str += type + ': ' + counts[type] + ', ';
-        }
-      }
-      str = str.slice(0, -2);
-      return str;
-    }
-
-    function openErrorLog(level) {
-      // TODO: FIXME
-      logger.log("the error log should open here for level: ", level);
-      // $scope.logBuffer = logBuffer;
-      // var newWin = open('local://local/ui/index.html','windowName','height=300,width=600');
-    }
-
-    if (!vm.shipping) {
-      var errorCount = {};
-      var warningCount = {};
-      // clear messages on level change
-      $scope.$on('PreStartMission', function () { errorCount = {}; warningCount = {};});
-
-      var args = {
-        positionClass: 'toast-top-right',
-        timeOut: 0,
-        extendedTimeOut: 0,
-        closeButton: true,
-        tapToDismiss: false,
-      };
-
-      var warningToast = null;
-      var errorToast = null;
-      var missingImgs = [];
-      $scope.$on('DevLog', function (event, data) {
-        // logger.log(data);
-
-        // fix up missing imgs beeing counted separate, but only show one error
-        if(data.origin === 'ui.imgErrorDir') {
-          if (missingImgs.indexOf(data.msg) === -1) {
-            missingImgs.push(data.msg);
-          } else {
-            data.level = 'ignore';
-          }
-        }
-
-        if(data.level == 'E') {
-          if(errorToast === null) {
-            args.onTap = function () { openErrorLog(data.level); };
-            errorToast = toastr.error(descHelper(errorCount, data), pluralHelper(errorCount, 'Error'), args);
-          }
-          if(errorToast && errorToast.scope) {
-              // it happens that we reset the logBuffer while this tries to run, resulting in an error
-            errorToast.scope.title = $sce.trustAsHtml(pluralHelper(errorCount, 'Error'));
-            errorToast.scope.message = $sce.trustAsHtml(descHelper(errorCount, data));
-          }
-        }
-
-        if(data.level == 'W') {
-          if(warningToast === null) {
-            args.onTap = function () { openErrorLog(data.level); };
-            warningToast = toastr.warning(descHelper(warningCount, data), pluralHelper(warningCount, 'Warning'), args);
-          }
-          if(warningToast && warningToast.scope) {
-              // it happens that we reset the logBuffer while this tries to run, resulting in an error
-            warningToast.scope.title = $sce.trustAsHtml(pluralHelper(warningCount, 'Warning'));
-            warningToast.scope.message = $sce.trustAsHtml(descHelper(warningCount, data));
-          }
-        }
-
-      });
-    }
-
-    /* Devlog mini code end */
-
-    // started on toastr hook, will continue later
-    // listener for toasts
-    // $scope.$on('toast', function (event, data) {
-    //   var type = data.type || 'info';
-    //   var args = data.args || {};
-
-    //   if (data.msg && data.title) {
-    //     toastr[type](data.msg, data.title, args);
-    //   } else if (data.msg || data.title) {
-    //     toastr[type]((data.msg || data.title), args);
-    //   } else {
-    //     logger.error('Error creating Toast');
-    //   }
-    // });
-
-    // // listener for
-    // $scope.$on('toast', function (event, data) {
-
-    // });
-
-    window.debug = {$injector: $injector, state: $state, vm: vm, bngApi: bngApi, translate: $translate, scope: $scope, stateNav: SimpleStateNav};
-
-    window.triggerSeveralEngineLua = function (cmd) {
-      bngApi.engineLua(cmd);
-      bngApi.engineLua(cmd);
-      bngApi.engineLua(cmd);
-    };
-
-    $scope.$on('appJsonDump', (ev, data) => logger.jsonDump.log(data));
-  })();
 
 }]);
 

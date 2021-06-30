@@ -227,8 +227,7 @@ local function applyVehEdit(serverID, data)
 		local rot = quat(veh:getRotation())
 
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
-		spawn.setVehicleObject(veh, vehicleName, serialize(vehicleConfig), pos, rot, c, p0, p1, true)
-
+		spawn.setVehicleObject(veh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
 		--playerVehicle:setField('name', '', vehicleName or "")
 	end
 end
@@ -314,12 +313,12 @@ local function applyVehSpawn(event)
 
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
-		spawn.setVehicleObject(spawnedVeh, vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), true)
+		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
 	else
-		log('W', 'applyVehSpawn', "(spawn) Spawning vehicle from server "..vehicleName.." with id "..gameVehicleID)
-		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, {ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true, false})
+		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true })
 		spawnedVehID = spawnedVeh:getID()
-		log('W', 'applyVehSpawn', "New vehicle spawned from server "..vehicleName.." with id "..spawnedVehID)
+		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
 		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
 		nicknameMap[spawnedVehID] = {
 			nickname = event.playerNickname,
@@ -391,7 +390,6 @@ local function onVehicleSpawned(gameVehicleID)
 
 	local veh = be:getObjectByID(gameVehicleID)
 	local newJbeamName = veh:getJBeamFilename()
-
 
 	--print("SPAWN")
 	--dump(veh.mpVehicleType)
@@ -510,7 +508,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 				--core_camera.setByName(0,"onboard.rider") -- citybus
 				core_camera.setByName(0,"passenger") -- auto generated
 				core_camera.setByName(0,"onboard.passenger") -- custom
-			elseif not isOwn(newGameVehicleID) and ((skipOthers and tableSize(ownMap) > 0) or newVehicle:getJBeamFilename() == "unicycle") then
+			elseif not isOwn(newGameVehicleID) and ((skipOthers and tableSize(ownMap) > 0) or jbeamMap[newGameVehicleID] == "unicycle") then
 				-- switch away from this vehicle if it shouldn't be accessible
 
 				local vehicles = getAllVehicles()
@@ -664,13 +662,12 @@ local HandleNetwork = {
 	end
 }
 
-
-
 local function handle(rawData)
 	local code = string.sub(rawData, 1, 1)
 	local rawData = string.sub(rawData, 3)
 	HandleNetwork[code](rawData)
 end
+
 
 
 local function saveDefaultRequest()
@@ -706,13 +703,9 @@ local function spawnDefaultRequest()
 end
 
 local function spawnRequest(model, config, colors)
-	dump(model)
-	dump(config)
-	if colors then
-		local colors = core_vehicle_colors.colorStringToColorTable(colors)
-		colors[4] = colors[4]*2
-	end
-	dump(colors)
+	--dump(model)
+	--dump(config)
+	--dump(colors)
 	local currentVehicle = be:getPlayerVehicle(0)
 	if currentVehicle and isOwn(currentVehicle:getID()) and not config.spawnNew then
 		jbeamMap[currentVehicle:getID()] = '-'
@@ -759,6 +752,7 @@ end
 local lastGmQuery = -1 --get player pos on first run
 local groundmarkerRoads = {}
 local gmTargetPlayer = nil
+local lastGmFocus = nil
 
 local function queryRoadNodeToPosition(targetPosition, owner)
 	if not owner then owner = "target" end
@@ -781,13 +775,19 @@ local function queryRoadNodeToPosition(targetPosition, owner)
 
 			if sqrDist1 < sqrDist2 then groundmarkerRoads[owner].best = first
 			else groundmarkerRoads[owner].best = second end
-			return true
+
+			return true, groundmarkerRoads[owner].best
 		end
 	end
-	return false
+	return false, nil
 end
 
 local function groundmarkerToPlayer(targetName)
+	if not targetName then
+		groundmarkerRoads["targetVeh"] = nil
+		lastGmFocus = nil
+		core_groundMarkers.setFocus(nil)
+	end
 	for i,n in pairs(nicknameMap) do
 		if n.nickname == targetName then
 			local targetVeh = be:getObjectByID(i)
@@ -808,6 +808,8 @@ local function groundmarkerFollowPlayer(targetName, dontfollow)
 		else
 			gmTargetPlayer = nil
 			groundmarkerRoads["targetVeh"] = nil
+			lastGmFocus = nil
+			core_groundMarkers.setFocus(nil)
 		end
 	end
 end
@@ -902,10 +904,17 @@ local function onPreRender(dt)
 
 			local playerRoadData = groundmarkerRoads['player']
 			if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
-				for target,data in pairs(groundmarkerRoads) do
+				for target, data in pairs(groundmarkerRoads) do
 					if target ~= 'player' then
-						if data.best then
-							core_groundMarkers.setFocus(data.best)
+						if data.best and data.best ~= lastGmFocus then
+							if (activeVehPos - data.position):squaredLength() > 200 then
+								core_groundMarkers.setFocus(data.best)
+								print("setting focus to") print(data.best)
+								lastGmFocus = data.best
+							else
+								core_groundMarkers.setFocus(nil)
+								groundmarkerRoads[target] = nil
+							end
 						end
 					end
 				end

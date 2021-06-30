@@ -47,8 +47,8 @@ angular.module('beamng.stuff')
  *
  * @description Handles all vehicles-related stuff
 **/
-.service('Vehicles', ['logger', '$q', '$rootScope', '$timeout', 'bngApi', 'InstalledContent', 'UiUnits', 'Utils',
-  function (logger, $q, $rootScope, $timeout, bngApi, InstalledContent, UiUnits, Utils) {
+.service('Vehicles', ['logger', '$q', '$rootScope', '$timeout', 'InstalledContent', 'Utils',
+  function (logger, $q, $rootScope, $timeout, InstalledContent, Utils) {
     'use strict';
 
     function updateFilters (vehicles) {
@@ -128,7 +128,7 @@ angular.module('beamng.stuff')
       response.origFilters = angular.copy(response.filters);
       response.filters = updateFilters(response);
       InstalledContent.vehicles = response;
-      // console.log(InstalledContent);
+
     });
 
     return {
@@ -217,7 +217,12 @@ angular.module('beamng.stuff')
           }
 
           if (color) {
-            luaArgs.color = color;
+            var values = color.split(' ').slice(0, 8);
+            luaArgs.paint = {"baseColor":[values[0], values[1], values[2], values[3]],
+                        "metallic": values[4],
+                        "roughness": values[5],
+                        "clearcoat": values[6],
+                        "clearcoatRoughness": values[7]};
           }
 
           if (typeof model === 'object') {
@@ -246,8 +251,8 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleDetailsController
  * @description
 **/
-.controller('VehicleDetailsController', ['$scope', 'logger', '$stateParams', 'bngApi', 'Vehicles', 'InstalledContent', 'UiUnits', 'VehicleOpenTab', '$state', 'VehicleSelectConfig',
-  function ($scope, logger, $stateParams, bngApi, Vehicles, InstalledContent, UiUnits, VehicleOpenTab, $state, VehicleSelectConfig) {
+.controller('VehicleDetailsController', ['$scope', 'logger', '$stateParams', 'Vehicles', 'InstalledContent', 'VehicleOpenTab', '$state', 'VehicleSelectConfig',
+  function ($scope, logger, $stateParams, Vehicles, InstalledContent, VehicleOpenTab, $state, VehicleSelectConfig) {
   var vm = this;
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default'];
   // logger.log($stateParams);
@@ -315,17 +320,7 @@ angular.module('beamng.stuff')
   vm.showData = (title, performance) => (vm.selectedConfig[title] !== undefined ? Vehicles.showData(title, true, performance) : false);
 
   vm.launchConfig = function (spawnNew) {
-    //if(!spawnNew) bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.removeRequest('\"..obj:getID()..\"')\")");
-    console.log(vm.selectedConfig);
-    console.log(vm.model);
-    console.log(spawnNew);
-    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew, vm.isMPSession);  //dont touch dis - deer
-	//if (vm.isMPSession) {
-	//	if (spawnNew) bngApi.engineLua(`MPVehicleGE.spawnRequest("`+vm.model.key+`", "`+vm.selectedConfig.key+`", "`+vm.selectedColor+`", true)`);
-	//	else          bngApi.engineLua(`MPVehicleGE.spawnRequest("`+vm.model.key+`", "`+vm.selectedConfig.key+`", "`+vm.selectedColor+`", false)`);
-	//} else {
-	//	vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew);
-	//}
+    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew, vm.isMPSession);
   };
 
   // because of bug in non compete iirc
@@ -337,6 +332,20 @@ angular.module('beamng.stuff')
     vm.model          = response.model;
     vm.hasConfigs     = Object.keys(response.configs).length > 1;
     vm.configs        = response.configs;
+
+
+    if (vm.model !== undefined && vm.model.paints !== undefined) {
+      $scope.$evalAsync(() => {
+        let colors = {}
+        for (var paintName in vm.model.paints) {
+          let paint = vm.model.paints[paintName]
+          let color = paint.baseColor[0] + " " + paint.baseColor[1] + " " + paint.baseColor[2] + " " + paint.baseColor[3] + " " + paint.metallic + " " + paint.roughness + " " + paint.clearcoat + " " + paint.clearcoatRoughness;
+          colors[paintName] = color
+        }
+        vm.model.paints = colors;
+        console.log("model", vm.model);
+      });
+    }
 
     for (var key in vm.configs) {
       var config = vm.configs[key]
@@ -375,7 +384,7 @@ angular.module('beamng.stuff')
         }
       }
       vm.configs = filteredConfigs;
-	}
+    }
 
     // so we can be sure the ranges list exists
     Vehicles.populate().then(() => {
@@ -397,13 +406,18 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleSelectController
  * @description <TODO>
 **/
-.controller('VehicleSelectController', ['logger', '$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'bngApi', 'InstalledContent', 'Settings', 'Vehicles', 'VehiclePrefs', 'VehicleSelectConfig', '$filter',
-function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, InstalledContent, Settings, Vehicles, VehiclePrefs, VehicleSelectConfig, $filter) {
+.controller('VehicleSelectController', ['logger', '$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'InstalledContent', 'Settings', 'Vehicles', 'VehiclePrefs', 'VehicleSelectConfig', '$filter',
+function (logger, $scope, $state, $timeout, $stateParams, $rootScope, InstalledContent, Settings, Vehicles, VehiclePrefs, VehicleSelectConfig, $filter) {
   var vm = this;
   vm.data = angular.copy(InstalledContent.vehicles);
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default'];
   vm.shownData;
 
+  $scope.isBig = function(str) {
+    if(str){
+      return str.length > 28
+    }
+  }
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -468,6 +482,7 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     vm.filterKeyList = InstalledContent.vehicles.displayInfo.filterData;
     vm.filterFromConfig();
     vm.applyFilters();
+    // checkOverflow();
   });
 
   vm.openRepo = function () {
@@ -494,10 +509,6 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
       //else 
 		  vm.mode.selected(model, model.key, null, null, false, vm.isMPSession)
     }
-
-	$state.go('menu');
-    $rootScope.$broadcast('MenuHide');
-
   };
 
   vm.showData = (key) => Vehicles.showData(key, false);
@@ -568,11 +579,11 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
     return vm.data.displayInfo.ranges.all.indexOf(title) !== -1;
   };
 
-  // show filters side bar if advanced usage mode is active
-  vm.showFiltersBar = false;
-  if(Settings.values.devMode !== undefined) {
-    vm.showFiltersBar = Settings.values.devMode;
-  }
+  // show filters side bar by default
+  vm.showFiltersBar = true;
+  // if(Settings.values.devMode !== undefined) {
+  //   vm.showFiltersBar = Settings.values.devMode;
+  // }
 
   vm.tilesOrder = function (vehicle) {
     var types = vehicle.aggregates.Type;
@@ -584,10 +595,8 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
         prepend = index;
       }
     }
-    // console.log(vehicle);
-    // console.log(vehicle.Name)
+
     var help = prepend  + (vehicle.Name || '') + (vehicle.model_key || '') + vehicle.key;
-    // console.log(help);
     return help;
   };
 
@@ -637,6 +646,19 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
   vm.applyFilters = function () {
     // vehicles.data.list | filter: vehicles.query | filter: vehicles.userFilters | orderBy: vehicles.tilesOrder
     vm.shownData = $filter("orderBy")($filter("filter")($filter("filter")(vm.data.list, vm.userFilters), vm.query), vm.tilesOrder);
+    // count how many configs per model we have, to display with the small 'folder' icon
+    let configAmount = {};
+    for (let i in vm.data.configs) {
+      let model = vm.data.configs[i];
+      let key = model.model_key;
+      if (configAmount[key] === undefined) configAmount[key] = 0;
+      configAmount[key]++;
+    }
+    for (let i in vm.shownData) {
+      let model = vm.shownData[i];
+      let key = vm.showConfigurations ? model.model_key : model.key;
+      model.configsAmount = configAmount[key];
+    }
   };
 
   vm.filterFromConfig = function() {
@@ -678,7 +700,11 @@ function (logger, $scope, $state, $timeout, $stateParams, $rootScope, bngApi, In
       });
       bngApi.engineLua('extensions.hook("trackNewVeh")');
     });
-
+  };
+  vm.resetAll = function() {
+    bngApi.engineLua('resetGameplay(-1)');
+    $state.go('menu');
+    $rootScope.$broadcast('MenuHide');
   };
   vm.removeCurrentVehicle = function() {
     //bngApi.engineLua("MPVehicleGE.removeRequest('\"..obj:getID()..\"'\)");

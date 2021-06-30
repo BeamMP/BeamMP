@@ -4,9 +4,9 @@
 
 local M = {}
 
-local max = math.max
-local min = math.min
-local floor = math.floor
+local max, min, floor = math.max, math.min, math.floor
+					
+						
 
 local wheelsL = {}
 M.damage = 0
@@ -189,8 +189,8 @@ M.debugDraw = nop
 local function debugDraw(focusPos)
   -- highlight all coupling nodes
   for _, coupler in pairs(couplerCache) do
-    --local ccol = getContrastColor(stringHash(coupler.couplerTag or coupler.tag))
-    --obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, color(ccol.r, ccol.g, ccol.b, 150))
+																				  
+																							  
     obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
   end
 end
@@ -207,6 +207,7 @@ local function activateAutoCoupling(_nodetag)
   if not hasActiveCoupler then
     return
   end
+
   autoCouplingNodeTag = _nodetag
   autoCouplingActive = true
   autoCouplingTimeoutTimer = 0
@@ -250,11 +251,20 @@ local function detachCouplers(_nodetag, forceLocked, forceWelded)
 end
 
 local function isCouplerAttached()
+  -- check for manual coupler
+  for nid, c in pairs(couplerCache) do
+    if not c.couplerWeld and not c.couplerLock and c.couplerTag then
+      return attachedCouplers[nid] ~= nil
+    end
+  end
+
+  -- relaxed check
   for nid, _ in pairs(attachedCouplers) do
     if couplerCache[nid] and not couplerCache[nid].couplerWeld then
       return true
     end
   end
+
   return false
 end
 
@@ -287,7 +297,7 @@ local function updateRemoteElectrics()
   recievedElectrics = {}
 end
 
-local function couplerAttached(nodeId, obj2id, obj2nodeId)
+local function onCouplerAttached(nodeId, obj2id, obj2nodeId)
   disableAutoCoupling()
   attachedCouplers[nodeId] = {obj2id = obj2id, obj2nodeId = obj2nodeId}
 
@@ -306,12 +316,12 @@ local function couplerAttached(nodeId, obj2id, obj2nodeId)
   end
 
   --print(string.format("coupler attached %s.%s->%s.%s", obj:getID(),nodeId,obj2id, obj2nodeId))
-  if objectId <= obj2id then
+  if objectId < obj2id then
     obj:queueGameEngineLua(string.format("onCouplerAttached(%s,%s,%s,%s)", objectId, obj2id, nodeId, obj2nodeId))
   end
 end
 
-local function couplerDetached(nodeId, obj2id, obj2nodeId)
+local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
   --print(string.format("coupler detached %s.%s->%s.%s", obj:getID(),nodeId,obj2id, obj2nodeId))
   attachedCouplers[nodeId] = nil
   transmitCouplers[nodeId] = nil
@@ -328,12 +338,12 @@ local function couplerDetached(nodeId, obj2id, obj2nodeId)
     end
   end
 
-  if objectId <= obj2id then
+  if objectId < obj2id then
     obj:queueGameEngineLua(string.format("onCouplerDetached(%s,%s)", objectId, obj2id))
   end
 end
 
-local function getCouplerOffset()
+local function getCouplerOffset(callback)
   if next(couplerCache) == nil then
     return
   end
@@ -343,7 +353,7 @@ local function getCouplerOffset()
     local pos = v.data.nodes[c.cid].pos
     cOff[c.cid] = {x = pos.x - ref.x, y = pos.y - ref.y, z = pos.z - ref.z}
   end
-  obj:queueGameEngineLua(string.format("core_trailerRespawn.addCouplerOffset(%s,%s)", obj:getId(), dumps(cOff)))
+  obj:queueGameEngineLua(string.format(callback, obj:getId(), dumps(cOff)))
 end
 
 -- called from the vehicle that wants to import electrics
@@ -404,7 +414,7 @@ local function deflateTire(wheelid)
     if wheels.wheels[wheelid] then
       wheels.wheels[wheelid].isTireDeflated = true
     end
-    gui.message({txt = "vehicle.beamstate.tireDeflated", context = {wheelName = wheel.name}}, 5, "vehicle.damage.deflated." .. wheel.name)
+    guihooks.message({txt = "vehicle.beamstate.tireDeflated", context = {wheelName = wheel.name}}, 5, "vehicle.damage.deflated." .. wheel.name)
     damageTracker.setDamage("wheels", "tire" .. wheel.name, true)
 
     sounds.playSoundOnceFollowNode("event:>Vehicle>Tire_Burst", wheel.node1, 1)
@@ -544,7 +554,7 @@ local function updateGFX(dt)
     damageSum = damageSum + partValue * damageCoef
   end
   if damageSum > lastDisplayedDamage * 1.05 then
-    --gui.message(string.format("Car Damage: $%.2f", damageSum), 5, "vehicle.damageSum")
+    --guihooks.message(string.format("Car Damage: $%.2f", damageSum), 5, "vehicle.damageSum")
     lastDisplayedDamage = damageSum
   end
 
@@ -1261,8 +1271,8 @@ M.addDamage = addDamage
 M.activateAutoCoupling = activateAutoCoupling
 M.disableAutoCoupling = disableAutoCoupling
 M.couplerFound = couplerFound
-M.couplerAttached = couplerAttached
-M.couplerDetached = couplerDetached
+M.onCouplerAttached = onCouplerAttached
+M.onCouplerDetached = onCouplerDetached
 M.getCouplerOffset = getCouplerOffset
 M.setCouplerVisiblityExternal = setCouplerVisiblityExternal
 M.exportCouplerData = exportCouplerData

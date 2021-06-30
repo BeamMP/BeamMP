@@ -201,7 +201,7 @@ local function applyVehEdit(serverID, data)
 		local tuningDiff = MPHelpers.tableDiff(playerVehicle.config.vars, vehicleConfig.vars)
 
 		local configChanged = tableSize(partsDiff) > 0 or tableSize(tuningDiff) > 0
-		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.colors, vehicleConfig.colors)
+		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
 
 		if configChanged or colorChanged then
 			tableMerge(playerVehicle.config, vehicleConfig)

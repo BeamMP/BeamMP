@@ -1,14 +1,17 @@
 {
-  "name": "Multiplayer Session",
-  "author": "Titch2000",
-  "version": "0.2",
-  "description": "Host and Join multiplayer games",
-  "directive": "multiplayersession",
   "domElement": "<multiplayersession></multiplayersession>",
+  "name": "Multiplayer Session",
+  "types": [
+    "ui.apps.categories.multiplayer"
+  ],
   "css": {
   	"left": "50%",
   	"top": "0px",
   	"width": "700px",
     "height": "40px"
-  }
+  },
+  "description": "Host and Join multiplayer games",
+  "author": "BeamMP",
+  "version": "1.0",
+  "directive": "multiplayersession"
 }

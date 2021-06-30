@@ -276,6 +276,13 @@ local HandleNetwork = {
 }
 
 
+
+-- ============= Init =============
+local function onInit()
+	if not core_modmanager.getModList then Lua:requestReload() end
+end
+
+
 -- ====================================== ENTRY POINT ======================================
 local function onExtensionLoaded()
 	--Preston (Cobalt) insert the custom multiplayer layout inside the game's layout file
@@ -375,6 +382,7 @@ M.disconnectLauncher   = disconnectLauncher
 M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
+M.onInit = onInit
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady

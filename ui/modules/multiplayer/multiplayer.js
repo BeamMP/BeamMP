@@ -958,14 +958,14 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 }
 
 // Used to connect to the backend with ids
-function connect(ip, port) {
+function connect(ip, port, mods, name) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ')');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
 }
 
 // Used to select a row (when it's clicked)
@@ -992,7 +992,7 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port) };
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.modlist, row.server.strippedName) };
 	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');

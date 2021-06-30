@@ -373,7 +373,7 @@ local function check()
 	for k,v in pairs(e) do -- For each electric value
 		if not disallowedKeys[k] then -- If it's not a disallowed key
 			if k == "fuelVolume" then
-				if lastElectrics[k] ~= round2(v, 2) then -- If the value changed
+				if lastElectrics[k] ~= round2(v, 1) then -- If the value changed
 					electricsChanged = true -- Send electrics
 					lastElectrics[k] = round2(v, 1) -- Define the new value
 					electricsToSend[k] = round2(v, 1)

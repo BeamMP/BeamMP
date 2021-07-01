@@ -201,8 +201,8 @@ local function applyVehEdit(serverID, data)
 		local tuningDiff = MPHelpers.tableDiff(playerVehicle.config.vars, vehicleConfig.vars)
 
 		local configChanged = tableSize(partsDiff) > 0 or tableSize(tuningDiff) > 0
-		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
-
+		local colorChanged = MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
+		--print(colorChanged)
 		if configChanged or colorChanged then
 			tableMerge(playerVehicle.config, vehicleConfig)
 
@@ -211,7 +211,9 @@ local function applyVehEdit(serverID, data)
 				veh:respawn(serialize(playerVehicle.config))
 			else
 				log('I','applyVehEdit', "only color changed")
-				extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID)
+				for k, v in pairs(vehicleConfig.paints) do
+					extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
+				end
 			end
 		else
 			log('I','applyVehEdit', "received edit matches local copy, ignoring message")
@@ -313,10 +315,10 @@ local function applyVehSpawn(event)
 
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
-		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
+		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true, paint=vehicleConfig.paint})
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
-		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true })
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, paint=vehicleConfig.paint })
 		spawnedVehID = spawnedVeh:getID()
 		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
 		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map

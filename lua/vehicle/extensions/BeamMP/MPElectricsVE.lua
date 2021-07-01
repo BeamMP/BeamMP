@@ -436,7 +436,9 @@ local function applyElectrics(data)
 		-- Fuel Level syncing
 		if decodedData.fuelVolume then
 			for name, storage in pairs(energyStorage.getStorages()) do
-				storage:setRemainingVolume(decodedData.fuelVolume)
+				if string.match(name, "mainTank") then -- This might not work with boats, aircraft or others but should work with stock vehicles.
+					storage:setRemainingVolume(decodedData.fuelVolume)
+				end
 			end
 		end
 

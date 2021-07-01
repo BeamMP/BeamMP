@@ -1,15 +1,16 @@
 var app = angular.module('beamng.apps');
 
-app.directive('multiplayersession', ['UiUnits', function (UiUnits) {
+app.directive('multiplayersession', [function () {
 	return {
-		templateUrl: 'modules/apps/BeamMP-Session/app.html',
+		templateUrl: '/ui/modules/apps/BeamMP-Session/app.html',
 		replace: true,
 		restrict: 'EA',
-		scope: true
+		scope: true,
+		controllerAs: 'ctrl'
 	}
 }]);
 
-app.controller("Session", ['$scope', 'bngApi', function ($scope, bngApi) {
+app.controller("Session", ['$scope', function ($scope) {
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
 	};

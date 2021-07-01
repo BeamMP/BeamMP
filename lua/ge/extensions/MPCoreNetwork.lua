@@ -13,7 +13,7 @@ print("Loading MPCoreNetwork...")
 -- ============= VARIABLES =============
 local loggerPrefix = "CoreNetwork"
 local TCPLauncherSocket -- Launcher socket
-local currentServer -- Store the server we are on
+local currentServer = {} -- Store the server we are on
 local Servers = {} -- Store all the servers
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local launcherConnectionTimer = 0
@@ -22,6 +22,7 @@ local launcherVersion = ""
 local currentMap = ""
 local loggedIn = false
 local mapLoaded = false
+local MapLoadingTimeout = 0
 local isMpSession = false
 local isGoingMpSession = false
 local launcherTimeout = 0
@@ -139,7 +140,8 @@ local function setMods(modsString)
 end
 
 local function getCurrentServer()
-    return currentServer
+	--dump(currentServer)
+  return currentServer
 end
 
 local function setCurrentServer(ip, port, modsString, name)
@@ -154,18 +156,19 @@ local function setCurrentServer(ip, port, modsString, name)
 end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
-local function connectToServer(ip, port)
+local function connectToServer(ip, port, mods, name)
 	-- Prevent the user from connecting to a server when already connected to one
 	if getMissionFilename() ~= "" then Lua:requestReload() end
 	local ipString
 	if ip and port then -- Direct connect
 		currentServer = nil
+		setCurrentServer(ip, port, mods, name)
 		ipString = ip..':'..port
 		send('C'..ipString..'')
 	else -- Server list connect
 		ipString = currentServer.ip..':'..currentServer.port
 		send('C'..ipString..'')
-    end
+  end
 	print("Connecting to server "..ipString)
 	status = "LoadingResources"
 end
@@ -274,6 +277,13 @@ local HandleNetwork = {
 }
 
 
+
+-- ============= Init =============
+local function onInit()
+	if not core_modmanager.getModList then Lua:requestReload() end
+end
+
+
 -- ====================================== ENTRY POINT ======================================
 local function onExtensionLoaded()
 	--Preston (Cobalt) insert the custom multiplayer layout inside the game's layout file
@@ -373,6 +383,7 @@ M.disconnectLauncher   = disconnectLauncher
 M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
+M.onInit = onInit
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady

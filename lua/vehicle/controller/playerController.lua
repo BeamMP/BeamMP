@@ -216,7 +216,6 @@ local function setBallLock(locked)
     obj:setBeamLength(cid, obj:getBeamLength(cid))
     obj:setBeamSpringDamp(cid, locked and 100000 or 0, locked and 50 or 0, -1, -1)
   end
-
   isBallLocked = locked
 end
 
@@ -316,7 +315,7 @@ local function updateFixedStep(dt)
   local bodyRotation = quat(obj:getRotation()):toEulerYXZ().x
   
   if playerInfo.anyPlayerSeated then
-	electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
+	  electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
   end
   
   electrics.values.unicycle_body = (math.deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360

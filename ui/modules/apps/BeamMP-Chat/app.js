@@ -1,17 +1,18 @@
 var app = angular.module('beamng.apps');
 
 
-app.directive('multiplayerchat', ['UiUnits', function (UiUnits) {
+app.directive('multiplayerchat', [function () {
 	return {
-		templateUrl: 'modules/apps/BeamMP-Chat/app.html',
+		templateUrl: '/ui/modules/apps/BeamMP-Chat/app.html',
 		replace: true,
 		restrict: 'EA',
-		scope: true
+		scope: true,
+		controllerAs: 'ctrl'
 	}
 }]); 
 
 
-app.controller("Chat", ['$scope', 'bngApi', function ($scope, bngApi) {
+app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");

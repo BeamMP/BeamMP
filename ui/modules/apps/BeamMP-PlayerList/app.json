@@ -1,15 +1,18 @@
 {
-  "name": "Multiplayer Player List",
-  "author": "meow",
-  "version": "0.70",
-  "description": "The playerlist for the multiplayer session.",
-  "directive": "multiplayerplayerlist",
   "domElement": "<multiplayerplayerlist></multiplayerplayerlist>",
+  "name": "Multiplayer Player List",
+  "types": [
+    "ui.apps.categories.multiplayer"
+  ],
   "css": {
   	"right": "0px",
   	"top": "90px",
     "min-width": "240px",
   	"width": "auto",
-    "height": "927px"
-  }
+    "height": "527px"
+  },
+  "description": "The playerlist for the multiplayer session.",
+  "author": "BeamMP Team",
+  "version": "1.0",
+  "directive": "multiplayerplayerlist"
 }

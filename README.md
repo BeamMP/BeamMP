@@ -55,4 +55,4 @@ Additionally, you can join the [Discord](https://discord.gg/BeamMP), where regul
 - [Error Codes](https://wiki.beammp.com/en/error-codes)
 - [Server Auth Key](https://www.beammp.com/keymaster)
 
-If none of these fix your issue, we have a dedicated support team on our [Discord](https://discord.gg/BeamMP), and a wonderful up-to-date troubleshooting channel (#before-you-ask)!
+If none of these fix your issue, we have a dedicated support team on our [Discord](https://discord.gg/BeamMP), and a wonderful up-to-date troubleshooting channel ([#before-you-ask](https://discord.gg/UwA35fXUTz))!

@@ -22,6 +22,7 @@ local launcherVersion = ""
 local currentMap = ""
 local loggedIn = false
 local mapLoaded = false
+local MapLoadingTimeout = 0
 local isMpSession = false
 local isGoingMpSession = false
 local launcherTimeout = 0

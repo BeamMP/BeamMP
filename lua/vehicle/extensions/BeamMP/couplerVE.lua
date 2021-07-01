@@ -14,6 +14,7 @@ local function toggleCouplerState(state)
         beamstate.activateAutoCoupling()
     else
         beamstate.disableAutoCoupling()
+	beamstate.detachCouplers() --added this line since disableAutoCoupling doesn't decouple
     end
 end
 

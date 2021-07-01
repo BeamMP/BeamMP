@@ -49,7 +49,7 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	LOGIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, bngApi, $state, $timeout, $document) {
+.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again

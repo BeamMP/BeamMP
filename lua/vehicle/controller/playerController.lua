@@ -14,47 +14,36 @@ M.brake = 0
 M.clutchRatio = 0
 -----
 
---local settings = require("simplesettings")
-
 local min = math.min
 local max = math.max
 local abs = math.abs
 local acos = math.acos
-local atan2 = math.atan2
-
-local pi = math.pi
-local halfPi = pi * 0.5
-local twoPi = pi * 2
 
 local stabilizationMaxForce = 8000
-local propulsionMaxForce = 2000
-local positionHoldingMaxForce = 1500
+
+--local stabilizationMaxTorque = 1500
 local yawMaxForce = 100
 
 local movementSpeedNormal = 1.8
 local movementSpeedSprint = 5
 
-local ballPressureNormal = 1
-local ballPressureCrouch = 0.5
-local ballPressurePreJump = 0.7
-local ballPressureJump = 1.5
-local ballPressurePreSprintJump = 1.0
-local ballPressureSprintJump = 3.5
+local maxAllowedBallAV = 14
+local maxBallTorque = 500
 
-local propulsionNodes = {
-  center = 0,
-  front = 0,
-  rear = 0,
-  left = 0,
-  right = 0
-}
+local ballPressureNormal = 1.0
+local ballPressureCrouch = 0.5
 
 local stabilizationNodes = {
-  center = 0,
-  front = 0,
-  rear = 0,
-  left = 0,
-  right = 0
+  topCenter = 0,
+  topFront = 0,
+  topRear = 0,
+  topLeft = 0,
+  topRight = 0,
+  bottomCenter = 0,
+  bottomFront = 0,
+  bottomRear = 0,
+  bottomLeft = 0,
+  bottomRight = 0
 }
 
 local stabilizationBeams = {
@@ -69,7 +58,21 @@ local stabilizationBeams = {
   rearRight = 0
 }
 
+local ballCenterNode = -1
+
 local ballNodes = {}
+local ballGroundContactNodesNew = {}
+local ballGroundContactNodesPast = {}
+local ballCenterVelocity = vec3(0, 0, 0)
+local ballBasedPlayerVelocity = vec3(0, 0, 0)
+local ballTorqueSmoother = newTemporalSmoothing(10, 1)
+
+local jumpForce = 50000
+local jumpForceTimer = 0
+local jumpForceTime = 0.01
+
+local lockBeams = {}
+local isBallLocked = false
 
 M.engineInfo = {
   0,
@@ -99,63 +102,68 @@ local isFrozen = false
 
 local debugVectors = {}
 local cameraRotation = quat(0, 0, 0, 0)
+local cameraRotationStandardVector = vec3(0, 1, 0)
 local walkVector = vec3(0, 0, 0)
-local movementDirectionVector = vec3(0, 0, 0)
 local movementSpeedCoef = 0
-local movementTargetVector
 
-local targetPosition = nil
-local lastPosition = nil
-
-local hasGroundContactTimer = 0
-local hasVehicleContactTimer = 0
-local isFlyingTimer = 0
 local isTouchingWater = false
 local isTouchingGround = false
-local isTouchingVehicle = false
-local isFlying = false
-local touchedVehicleVelocity = vec3(0, 0, 0)
 
-local jumpTimer = 0
 local jumpCooldown = 0
-local isPreparingJump = false
 local isCrouching = false
 local isUnCrouching = false
 local unCrouchingPressureRatio = 0
 
-local isCommandingMoveTimer = 0
-local isCommandingMoveTime = 4 / movementSpeedSprint -- a bit less than 1s at full speed
-
-local stabilizationForcePIDs = {
-  frontRear = newPIDParallel(1, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
-  leftRight = newPIDParallel(1, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
+local stabilizationPIDs = {
+  frontRear = newPIDParallel(2, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
+  leftRight = newPIDParallel(2, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
+  --upright = newPIDParallel(0.5, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
   yaw = newPIDParallel(1, 0.5, 0.0, -1, 1)
 }
 
-local propulsionPID = newPIDParallel(0.5, 0.2, 0.0, -1, 1, 20, 20, -1, 1)
-local positionHoldingPID = newPIDParallel(0.1, 0.5, 0.05, -1, 1, 2000, 2000, -1, 1)
+--local stabilizationTorqueNodes = {}
+--local stabilizationTorqueAxis = vec3(0, 0, 0)
+--local stabilizationDesiredTorque = 0
+
+local ballTorqueNodes = {}
+local ballTorqueAxis = vec3(0, 0, 0)
+local ballDesiredTorque = 0
+local ballAVSmoother = newExponentialSmoothing(25)
 
 --forces to be applied at physics step
 --stabilization
-local frontRearForce = 0
-local leftRightForce = 0
+local forceVectorFront = vec3()
+local forceVectorLeft = vec3()
 --yaw
 local yawLeftForce = 0
 local yawRightForce = 0
---propulsion
-local forceFront = 0
-local forceRear = 0
-local forceLeft = 0
-local forceRight = 0
 
 local function debugDraw(focusPos)
   for _, v in pairs(debugVectors) do
     obj.debugDrawProxy:drawNodeVector3d(v.thickness or 0.05, v.cid, (v.vector):toFloat3(), v.color)
   end
+end
 
-  if movementTargetVector then
-    obj.debugDrawProxy:drawNodeVector3d(0.05, stabilizationNodes.center, (-movementTargetVector):toFloat3(), color(55, 114, 255, 255))
-  end
+local slipUsageCoef = 1 --coef for testing different amounts of node slip compensation, we might want to not automatically compensate for slip (gameplay decision)
+
+local function nodeCollision(p)
+  --take a look at physics particles and use the node and slip velocities to estimate a ball center velocity that is local to the unicycle
+  local slipVelocity = vec3(p.slipVec)
+  local nodeVelocity = vec3(p.nodeVel)
+  ballBasedPlayerVelocity = ballCenterVelocity - nodeVelocity + (slipVelocity * slipUsageCoef)
+  table.insert(ballGroundContactNodesNew, p.id1)
+end
+
+local function applyTorque(axis, node1, node2, node3, torque)
+  obj:apply3nodeTorque(axis:toFloat3(), torque, node1, node2, node3)
+end
+
+local function applyTorque2Nodes(axis, node1, node2, torque)
+  obj:apply2nodeTorque(axis:toFloat3(), torque, node1, node2)
+end
+
+local function applyForceVector(node, forceVec)
+  obj:applyForceVector(node, forceVec:toFloat3())
 end
 
 local function applyForce(node1, node2, force)
@@ -164,45 +172,72 @@ end
 
 local function update(dt)
   --stabilization
-  applyForce(stabilizationNodes.front, stabilizationNodes.center, -frontRearForce)
-  applyForce(stabilizationNodes.left, stabilizationNodes.center, -leftRightForce)
+  --applyTorque2Nodes(stabilizationTorqueAxis, stabilizationTorqueNodes[0], stabilizationTorqueNodes[1], -stabilizationDesiredTorque)
+
+  applyForceVector(stabilizationNodes.topCenter, forceVectorFront)
+  applyForceVector(stabilizationNodes.bottomCenter, -forceVectorFront)
+
+  applyForceVector(stabilizationNodes.topCenter, forceVectorLeft)
+  applyForceVector(stabilizationNodes.bottomCenter, -forceVectorLeft)
 
   --yaw
-  applyForce(stabilizationNodes.front, stabilizationNodes.left, yawLeftForce)
-  applyForce(stabilizationNodes.rear, stabilizationNodes.right, yawLeftForce)
-  applyForce(stabilizationNodes.front, stabilizationNodes.right, yawRightForce)
-  applyForce(stabilizationNodes.rear, stabilizationNodes.left, yawRightForce)
+  applyForce(stabilizationNodes.topFront, stabilizationNodes.topLeft, yawLeftForce)
+  applyForce(stabilizationNodes.topRear, stabilizationNodes.topRight, yawLeftForce)
+  applyForce(stabilizationNodes.topFront, stabilizationNodes.topRight, yawRightForce)
+  applyForce(stabilizationNodes.topRear, stabilizationNodes.topLeft, yawRightForce)
 
   --propulsion
-  applyForce(propulsionNodes.front, propulsionNodes.center, forceFront)
-  applyForce(propulsionNodes.rear, propulsionNodes.center, forceRear)
-  applyForce(propulsionNodes.left, propulsionNodes.center, forceLeft)
-  applyForce(propulsionNodes.right, propulsionNodes.center, forceRight)
+  applyTorque(ballTorqueAxis, ballTorqueNodes[0], ballTorqueNodes[1], ballTorqueNodes[2], ballDesiredTorque)
+
+  --jumping
+  if jumpForceTimer > 0 then
+    jumpForceTimer = jumpForceTimer - dt
+
+    --local isSprinting = movementSpeedCoef > 0 and walkVector:length() > 0
+
+    local vectorUp = vec3(obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, stabilizationNodes.bottomCenter)):normalized()
+    obj:applyForceVector(stabilizationNodes.topCenter, (vectorUp * jumpForce):toFloat3())
+    local ballNodeForce = jumpForce / #ballGroundContactNodesPast
+    local ballNodeForceVector = (-vectorUp * ballNodeForce):toFloat3()
+    for _, cid in ipairs(ballGroundContactNodesPast) do
+      obj:applyForceVector(cid, ballNodeForceVector)
+    end
+  else
+    jumpForceTimer = 0
+  end
+end
+
+local function setBallLock(locked)
+  if locked == isBallLocked then
+    return
+  end
+
+  for _, cid in ipairs(lockBeams) do
+    obj:setBeamLength(cid, obj:getBeamLength(cid))
+    obj:setBeamSpringDamp(cid, locked and 100000 or 0, locked and 50 or 0, -1, -1)
+  end
+
+  isBallLocked = locked
 end
 
 local function updateFixedStep(dt)
-  --TODO: IF touching vehicle, calculate relative velocity by looking at node velocity of touching ball nodes, possibly acocunt for slippage by looking at node slip velocity
-  --TODO IF in the air, switch to a torque based stabilization system
+  ballCenterVelocity = vec3(obj:getNodeVelocityVector(ballCenterNode))
+  local enableStabilizationCoef = 1
 
-  local currentVelocityZ0 = vec3(obj:getVelocity()):z0()
+  --actual up vector of the unicycle
+  local vectorUp = vec3(obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, stabilizationNodes.bottomCenter)):normalized()
 
-  --local enableStabilizationCoef = (hasGroundContactTimer > 0) and 1 or 0
-  --local enableStabilizationCoef = linearScale(currentVelocityZ0:length(), 30, 50, 1, 0)
-  local enableStabilizationCoef = isFlyingTimer > 3 and 0 or 1
-  local enableSpeedHoldingCoef = walkVector:length() == 0 and 0 or 1
-  local enablePositionHoldingCoef = (hasGroundContactTimer > 0 and walkVector:length() == 0 and hasVehicleContactTimer <= 0) and 1 or 0
+  -- local accVector = -vec3(obj:getNodeForceVectorNonInertialXYZ(stabilizationNodes.bottomCenter)):normalized()
+  -- local forceBias = 0.0
+  -- --desired up vector of the unicycle
+  -- local targetVector = (vec3(0, 0, 1) * (1 - forceBias) + forceBias * accVector)
 
-  local vectorUp = vec3(obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, propulsionNodes.center)):normalized()
+  -- stabilizationTorqueAxis = targetVector:cross(vectorUp)
+  -- local stabilizationError = (targetVector - vectorUp):length()
+  -- local uprightStabilizationTorqueCoef = stabilizationPIDs.upright:get(-stabilizationError, 0, dt)
+  -- stabilizationDesiredTorque = uprightStabilizationTorqueCoef * stabilizationMaxTorque
 
-  local vectorTopFront = vec3(obj:getBeamVectorFromNode(stabilizationBeams.centerFront, stabilizationNodes.center)):normalized()
-  local vectorTopLeft = vec3(obj:getBeamVectorFromNode(stabilizationBeams.centerLeft, stabilizationNodes.center)):normalized()
-
-  --used for debug draw
-  --local vectorTopFrontLeft = -vec3(obj:getBeamVectorFromNode(stabilizationBeams.frontLeft, stabilizationNodes.front)):normalized()
-  --local vectorTopFrontRight = -vec3(obj:getBeamVectorFromNode(stabilizationBeams.frontRight, stabilizationNodes.front)):normalized()
-  --local vectorTopRearLeft = -vec3(obj:getBeamVectorFromNode(stabilizationBeams.rearLeft, stabilizationNodes.rear)):normalized()
-  --local vectorTopRearRight = -vec3(obj:getBeamVectorFromNode(stabilizationBeams.rearRight, stabilizationNodes.rear)):normalized()
-
+  local vectorTopLeft = vec3(obj:getBeamVectorFromNode(stabilizationBeams.centerLeft, stabilizationNodes.topCenter)):normalized()
   local normalLeft = vectorTopLeft:cross(-vectorUp):normalized()
   local normalRight = normalLeft:cross(vectorUp):normalized()
   local targetVector = vec3(0, 0, 1)
@@ -219,129 +254,79 @@ local function updateFixedStep(dt)
   local leftRightAngle = angleHorizontal * horizontalAngleSign
 
   local forceMultiplier = stabilizationMaxForce * enableStabilizationCoef
-  local frontRearForceCoef = stabilizationForcePIDs.frontRear:get(-frontRearAngle, 0, dt)
-  local leftRightForceCoef = stabilizationForcePIDs.leftRight:get(-leftRightAngle, 0, dt)
+  local frontRearForceCoef = stabilizationPIDs.frontRear:get(-frontRearAngle, 0, dt)
+  local leftRightForceCoef = stabilizationPIDs.leftRight:get(-leftRightAngle, 0, dt)
 
-  frontRearForce = frontRearForceCoef * forceMultiplier
-  leftRightForce = leftRightForceCoef * forceMultiplier
-
-  debugVectors = {}
-
-  --table.insert(debugVectors, {cid = stabilizationNodes.center, vector = vectorTopFront * frontRearForce * 0.001, color = color(55, 114, 255, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.center, vector = vectorTopLeft * leftRightForce * 0.001, color = color(253, 202, 64, 255)})
-
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = normalLeft, color = color(255, 0, 0, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = normalRight, color = color(0, 255, 0, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.center, vector = vectorUp * 5, color = color(128, 128, 0, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = projectedVertical * 5, color = color(0, 128, 0, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = projectedHorizontal * 5, color = color(128, 0, 0, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.center, vector = targetVector, color = color(0, 0, 255, 255), thickness = 0.05})
+  forceVectorFront = vec3(obj:getNodesVector(stabilizationNodes.topCenter, stabilizationNodes.topFront)):normalized() * frontRearForceCoef * forceMultiplier
+  forceVectorLeft = vec3(obj:getNodesVector(stabilizationNodes.topCenter, stabilizationNodes.topLeft)):normalized() * leftRightForceCoef * forceMultiplier
 
   ----------------
   ---Propulsion---
   ----------------
-  local currentPosition = vec3(obj:getPosition()):z0()
-  local positionDifference = (targetPosition - currentPosition) * enablePositionHoldingCoef
-  --dump(positionDifference)
-
-  local desiredMovementSpeed = linearScale(movementSpeedCoef, 0, 1, movementSpeedNormal, movementSpeedSprint)
-  local guardedWalkVector = walkVector:z0()
+  local frozenCoef = isFrozen and 0 or 1
+  local desiredMovementSpeed = linearScale(movementSpeedCoef, 0, 1, movementSpeedNormal, movementSpeedSprint) * frozenCoef --0 movement speed when locked
+  local guardedWalkVector = walkVector:z0() * frozenCoef --set this to zero if frozen to keep the ball locked
   if guardedWalkVector:length() > 1 then
     guardedWalkVector:normalize()
   end
-  if cameraRotation then
-    movementDirectionVector = (cameraRotation * guardedWalkVector)
-  --:normalized()
-  end
-  local targetDirection = -movementDirectionVector * desiredMovementSpeed
-  local velocityVectorZ0 = (-currentVelocityZ0 + touchedVehicleVelocity) * enableSpeedHoldingCoef
-  targetDirection = targetDirection + -velocityVectorZ0 - positionDifference
-  movementTargetVector = targetDirection --for debug renderer
-  local topFrontZ0Normalized = vectorTopFront:z0():normalized()
-  local propulsionAngle = atan2(targetDirection:normalized().y, targetDirection:normalized().x) - atan2(topFrontZ0Normalized.y, topFrontZ0Normalized.x)
-  if propulsionAngle > twoPi then
-    propulsionAngle = propulsionAngle - twoPi
-  end
-  if propulsionAngle < 0 then
-    propulsionAngle = propulsionAngle + twoPi
-  end
-  propulsionAngle = propulsionAngle - pi
 
-  forceFront = 0
-  forceRear = 0
-  forceLeft = 0
-  forceRight = 0
+  local desiredMovementVector = cameraRotation * guardedWalkVector * desiredMovementSpeed
 
-  if (propulsionAngle <= -halfPi and propulsionAngle >= -pi) or (propulsionAngle <= pi and propulsionAngle >= halfPi) then
-    forceFront = linearScale(abs(propulsionAngle), pi, halfPi, 1, 0)
-  end
+  --local actualMovementVector = vec3(obj:getVelocity()):z0() --used to very ball based velocity
+  local actualMovementVector = ballBasedPlayerVelocity:z0()
+  local movementVectorDifference = desiredMovementVector - actualMovementVector
+  local actualSpeed = actualMovementVector:length()
+  local speedError = max(desiredMovementSpeed - actualSpeed, 0)
+  speedError = ballTorqueSmoother:getUncapped(speedError, dt)
 
-  if propulsionAngle <= halfPi and propulsionAngle >= -halfPi then
-    forceRear = linearScale(abs(propulsionAngle), 0, halfPi, 1, 0)
-  end
-
-  if propulsionAngle <= 0 and propulsionAngle >= -halfPi then
-    forceLeft = linearScale(propulsionAngle, -halfPi, 0, 1, 0)
-  end
-
-  if propulsionAngle <= -halfPi and propulsionAngle >= -pi then
-    forceLeft = linearScale(propulsionAngle, -halfPi, -pi, 1, 0)
-  end
-
-  if propulsionAngle >= 0 and propulsionAngle <= halfPi then
-    forceRight = linearScale(propulsionAngle, halfPi, 0, 1, 0)
-  end
-
-  if propulsionAngle >= halfPi and propulsionAngle <= pi then
-    forceRight = linearScale(propulsionAngle, halfPi, pi, 1, 0)
-  end
-
-  local propulsionForceLimitCoef = 0
-  if enableSpeedHoldingCoef > 0 or guardedWalkVector:length() > 0 then
-    local speedError = ((-movementDirectionVector * desiredMovementSpeed) - -velocityVectorZ0):length()
-    propulsionForceLimitCoef = -propulsionPID:get(speedError, 0, dt) * enableStabilizationCoef * propulsionMaxForce
-  end
-
-  if enablePositionHoldingCoef > 0 then
-    local positionError = targetDirection:length()
-    propulsionForceLimitCoef = -positionHoldingPID:get(positionError, 0, dt) * enableStabilizationCoef * positionHoldingMaxForce
+  if guardedWalkVector:length() > 0 then
+    ballTorqueAxis = (desiredMovementVector + movementVectorDifference):z0():cross(vectorUp)
+    ballDesiredTorque = speedError * maxBallTorque
+    setBallLock(false)
   else
-    positionHoldingPID:reset()
+    ballTorqueAxis = (cameraRotation * cameraRotationStandardVector):z0():cross(vectorUp)
+    ballDesiredTorque = 0
+    setBallLock(true)
   end
 
-  forceFront = forceFront * propulsionForceLimitCoef
-  forceRear = forceRear * propulsionForceLimitCoef
-  forceLeft = forceLeft * propulsionForceLimitCoef
-  forceRight = forceRight * propulsionForceLimitCoef
+  local ballAV = obj:get3nodeAngularVelocity(ballTorqueAxis:toFloat3(), ballTorqueNodes[0], ballTorqueNodes[1], ballTorqueNodes[2])
+  if isnan(ballAV) then
+    ballAV = 0
+    ballAVSmoother:set(0)
+  else
+    ballAV = ballAVSmoother:get(ballAV)
+  end
 
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = vectorTopFront * forceFront * 0.001, color = color(55, 114, 255, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = vectorTopLeft * forceLeft * 0.001, color = color(253, 202, 64, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = -vectorTopFront * forceRear * 0.001, color = color(55, 114, 255, 255)})
-  -- table.insert(debugVectors, {cid = stabilizationNodes.center, vector = -vectorTopLeft * forceRight * 0.001, color = color(253, 202, 64, 255)})
+  local ballAVTorqueCoef = linearScale(abs(ballAV), maxAllowedBallAV, maxAllowedBallAV + 1, 1, 0)
+  ballDesiredTorque = ballDesiredTorque * ballAVTorqueCoef
 
   local yaw = obj:getYawAngularVelocity()
-  local yawForceCoef = stabilizationForcePIDs.yaw:get(yaw, 0, dt)
+  local yawForceCoef = stabilizationPIDs.yaw:get(yaw, 0, dt)
   local yawLeftForceCoef = abs(min(yawForceCoef, 0))
   local yawRightForceCoef = abs(max(yawForceCoef, 0))
   local yawForceMultiplier = yawMaxForce * enableStabilizationCoef
   yawLeftForce = (yawLeftForceCoef + linearScale(yawRightForceCoef, 0, 0.01, 0.1, 0)) * yawForceMultiplier
   yawRightForce = (yawRightForceCoef + linearScale(yawLeftForceCoef, 0, 0.01, 0.1, 0)) * yawForceMultiplier
 
-  --table.insert(debugVectors, {cid = stabilizationNodes.left, vector = vectorTopFrontLeft * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.right, vector = vectorTopRearRight * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.right, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
-  --table.insert(debugVectors, {cid = stabilizationNodes.left, vector = vectorTopRearLeft * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
+  --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopFrontLeft * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
+  --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopRearRight * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
+  --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
+  --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopRearLeft * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
+
+  local bodyRotation = quat(obj:getRotation()):toEulerYXZ().x
+  
+  if playerInfo.anyPlayerSeated then
+	electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
+  end
+  
+  electrics.values.unicycle_body = (math.deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360
+  
+  --print(electrics.values.unicycle_body)
 end
 
 local function updateGFX(dt)
-  isCommandingMoveTimer = max(isCommandingMoveTimer - dt, 0)
-
-  if jumpTimer > 0 then
-    jumpTimer = max(jumpTimer - dt, 0)
-    if jumpTimer <= 0 then
-      obj:setGroupPressureRel(v.data.pressureGroups["ball"], ballPressureNormal)
-    end
-  end
+  ballGroundContactNodesPast, ballGroundContactNodesNew = ballGroundContactNodesNew, ballGroundContactNodesPast
+  table.clear(ballGroundContactNodesNew)
 
   if isUnCrouching then
     unCrouchingPressureRatio = min(unCrouchingPressureRatio + dt * 2, ballPressureNormal)
@@ -358,84 +343,28 @@ local function updateGFX(dt)
     isTouchingWater = isTouchingWater or obj:inWater(nodeCid)
     isTouchingGround = isTouchingGround or obj:isNodeColliding(nodeCid)
   end
-  isTouchingVehicle = #mapmgr.objectCollisionIds > 0
 
-  if isTouchingGround or isTouchingWater then
-    hasGroundContactTimer = 0.5
+  if isTouchingWater then
+    ballBasedPlayerVelocity = vec3(0, 0, 0) --ball based AV doesn't work in water, make sure to reset the measured value to 0
   end
 
-  touchedVehicleVelocity = vec3(0, 0, 0)
-  if isTouchingVehicle then
-    hasVehicleContactTimer = 1
-    for _, id in ipairs(mapmgr.objectCollisionIds) do
-      if mapmgr.objects[id] and mapmgr.objects[id].vel then
-        local velocity = mapmgr.objects[id].vel
-        if velocity:length() > touchedVehicleVelocity:length() then
-          touchedVehicleVelocity = velocity
-        end
-      end
-    end
-  end
-
-  local positionBasedSpeed = 0
-  local currentPosition = vec3(obj:getPosition()):z0()
-  if lastPosition then
-    positionBasedSpeed = (lastPosition - currentPosition):length() / dt
-  end
-
-  isFlying = not isTouchingGround and not isTouchingWater and not isTouchingVehicle
-
-  if walkVector:length() > 0 or hasVehicleContactTimer > 0 or isCommandingMoveTimer > 0 or isFlying or positionBasedSpeed > movementSpeedSprint * 10 or not targetPosition then
-    targetPosition = vec3(obj:getPosition()):z0()
-  end
-
-  local bodyRotation = -cameraRotation:toEulerYXZ().x
-  local vectorTopFront = vec3(obj:getBeamVectorFromNode(stabilizationBeams.centerFront, stabilizationNodes.center)):z0():normalized()
-  local bodyQuat = quatFromDir(vectorTopFront, vec3(0,0,1))
-  local bodyAngle = -bodyQuat:toEulerYXZ().x
-  --local test = (atan2(vectorTopFront:cross(vec3(0, 1, 0)):dot(vec3(0, 0, 1)), vectorTopFront:dot(vec3(0, 1, 0))))
-  --dump(test)
-  if v.mpVehicleType == "L" then
-    electrics.values.unicycle_body = math.deg(bodyRotation - bodyAngle)+45
-    electrics.values.unicycle_camera = bodyRotation
-  else
-    electrics.values.unicycle_body = math.deg((electrics.values.unicycle_camera or 0) - bodyAngle)+45
-  end
-  --dump(cameraRotation)
-
-  --local currentBallPressure = obj:getGroupPressure(v.data.pressureGroups["ball"])
-  --local currentEnvPressure = obj:getEnvPressure()
-  --local overPressure = currentBallPressure - currentEnvPressure
-
-  hasGroundContactTimer = max(0, hasGroundContactTimer - dt)
-  hasVehicleContactTimer = max(0, hasVehicleContactTimer - dt)
-  if isFlying then
-    isFlyingTimer = isFlyingTimer + dt
-  else
-    isFlyingTimer = 0
-    jumpCooldown = max(jumpCooldown - dt, 0)
-  end
-  lastPosition = currentPosition
+  jumpCooldown = max(jumpCooldown - dt, 0)
 end
 
 local function walkLeftRightRaw(value)
   walkVector.x = value
-  isCommandingMoveTimer = isCommandingMoveTime
 end
 
 local function walkLeftRight(value)
   walkVector.x = walkVector.x + value
-  isCommandingMoveTimer = isCommandingMoveTime
 end
 
 local function walkUpDownRaw(value)
   walkVector.y = value
-  isCommandingMoveTimer = isCommandingMoveTime
 end
 
 local function walkUpDown(value)
   walkVector.y = walkVector.y + value
-  isCommandingMoveTimer = isCommandingMoveTime
 end
 
 local function setSpeed(value)
@@ -447,24 +376,21 @@ local function toggleSpeed()
 end
 
 local function jump(value)
-  if jumpCooldown > 0 then
+  if jumpCooldown > 0 or isFrozen then
     return
   end
 
-  local isSprinting = movementSpeedCoef > 0 and walkVector:length() > 0
-  if value < 0 then
-    obj:setGroupPressureRel(v.data.pressureGroups["ball"], isSprinting and ballPressurePreSprintJump or ballPressurePreJump)
-    isPreparingJump = true
-  elseif value > 0 and isPreparingJump then
-    obj:setGroupPressureRel(v.data.pressureGroups["ball"], isSprinting and ballPressureSprintJump or ballPressureJump)
-    jumpTimer = 0.15
+  if #ballGroundContactNodesPast > 0 then
+    jumpForceTimer = jumpForceTime
     jumpCooldown = 0.5
-    isCommandingMoveTimer = isCommandingMoveTime
-    isPreparingJump = false
   end
 end
 
 local function crouch(value)
+  if isFrozen then
+    return
+  end
+
   if value < 0 then
     obj:setGroupPressureRel(v.data.pressureGroups["ball"], ballPressureCrouch)
     isCrouching = true
@@ -475,7 +401,10 @@ local function crouch(value)
 end
 
 local function toggleCrouch()
-  electrics.values.isCrouching = isCrouching
+  if isFrozen then
+    return
+  end
+
   isCrouching = not isCrouching
   crouch(isCrouching and -1 or 1)
 end
@@ -490,28 +419,23 @@ end
 local function init(jbeamData)
   isCrouching = false
   isUnCrouching = false
-  jumpTimer = 0
 
-  frontRearForce = 0
-  leftRightForce = 0
   yawLeftForce = 0
   yawRightForce = 0
-  forceFront = 0
-  forceRear = 0
-  forceLeft = 0
-  forceRight = 0
 
-  propulsionNodes.center = jbeamData.propulsionCenter
-  propulsionNodes.front = jbeamData.propulsionFront
-  propulsionNodes.rear = jbeamData.propulsionRear
-  propulsionNodes.left = jbeamData.propulsionLeft
-  propulsionNodes.right = jbeamData.propulsionRight
+  stabilizationNodes.topCenter = jbeamData.stabilizationTopCenter
+  stabilizationNodes.topFront = jbeamData.stabilizationTopFront
+  stabilizationNodes.topRear = jbeamData.stabilizationTopRear
+  stabilizationNodes.topLeft = jbeamData.stabilizationTopLeft
+  stabilizationNodes.topRight = jbeamData.stabilizationTopRight
 
-  stabilizationNodes.center = jbeamData.stabilizationCenter
-  stabilizationNodes.front = jbeamData.stabilizationFront
-  stabilizationNodes.rear = jbeamData.stabilizationRear
-  stabilizationNodes.left = jbeamData.stabilizationLeft
-  stabilizationNodes.right = jbeamData.stabilizationRight
+  stabilizationNodes.bottomCenter = jbeamData.stabilizationBottomCenter
+  stabilizationNodes.bottomFront = jbeamData.stabilizationBottomFront
+  stabilizationNodes.bottomRear = jbeamData.stabilizationBottomRear
+  stabilizationNodes.bottomLeft = jbeamData.stabilizationBottomLeft
+  stabilizationNodes.bottomRight = jbeamData.stabilizationBottomRight
+
+  ballCenterNode = jbeamData.ballCenter
 
   for _, beam in pairs(v.data.beams) do
     if beam.tag == jbeamData.stabilizationBeamFront then
@@ -532,6 +456,8 @@ local function init(jbeamData)
       stabilizationBeams.rearRight = beam.cid
     elseif beam.tag == jbeamData.stabilizationBeamBottomTop then
       stabilizationBeams.bottomTop = beam.cid
+    elseif beam.tag == "lockBeam" then
+      table.insert(lockBeams, beam.cid)
     end
   end
 
@@ -539,9 +465,26 @@ local function init(jbeamData)
     if node.tag == "ball" then
       ballNodes[node.cid] = true
     end
-  end
+    if node.name == "ib7" then
+      ballTorqueNodes[0] = node.cid
+    end
+    if node.name == "ib2" then
+      ballTorqueNodes[1] = node.cid
+    end
+    if node.name == "ib8" then
+      ballTorqueNodes[2] = node.cid
+    end
 
-  targetPosition = nil
+    -- if node.name == "r2" then
+    --   stabilizationTorqueNodes[0] = node.cid
+    -- end
+    -- if node.name == "r1" then
+    --   stabilizationTorqueNodes[1] = node.cid
+    -- end
+    -- if node.name == "bc8" then
+    --   stabilizationTorqueNodes[2] = node.cid
+    -- end
+  end
 
   mapmgr.enableTracking()
   obj:setSleepingEnabled(false)
@@ -551,35 +494,25 @@ local function initLastStage()
 end
 
 local function reset()
-  isFlying = false
-  isTouchingVehicle = false
+  isFrozen = false
+  isBallLocked = false
   isTouchingGround = false
   isTouchingWater = false
   isCrouching = false
   isUnCrouching = false
-  jumpTimer = 0
-  isCommandingMoveTimer = 0
-  lastPosition = nil
   jumpCooldown = 0
-  isPreparingJump = false
 
-  frontRearForce = 0
-  leftRightForce = 0
+  forceVectorFront = vec3()
+  forceVectorLeft = vec3()
+
   yawLeftForce = 0
   yawRightForce = 0
-  forceFront = 0
-  forceRear = 0
-  forceLeft = 0
-  forceRight = 0
-
-  targetPosition = nil
 
   walkVector = vec3(0, 0, 0)
-  stabilizationForcePIDs.frontRear:reset()
-  stabilizationForcePIDs.leftRight:reset()
-  stabilizationForcePIDs.yaw:reset()
-  propulsionPID:reset()
-  positionHoldingPID:reset()
+  stabilizationPIDs.frontRear:reset()
+  stabilizationPIDs.leftRight:reset()
+  --stabilizationPIDs.upright:reset()
+  stabilizationPIDs.yaw:reset()
 end
 
 local function vehicleActivated()
@@ -612,7 +545,7 @@ M.onSerialize = onSerialize
 M.setAggressionOverride = nop
 M.setDefaultForwardMode = nop
 
---M.nodeCollision = nodeCollision
+M.nodeCollision = nodeCollision
 
 --Mandatory main controller API
 M.shiftUp = nop
@@ -628,7 +561,7 @@ M.sendTorqueData = nop
 M.vehicleActivated = vehicleActivated
 -------------------------------
 
---M.debugDraw = debugDraw
+M.debugDraw = debugDraw
 
 M.setCameraControlData = setCameraControlData
 M.jump = jump

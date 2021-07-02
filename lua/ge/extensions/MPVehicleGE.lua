@@ -79,6 +79,11 @@ local function isOwn(gameVehicleID)
     return ownMap[gameVehicleID] ~= nil
 end
 
+-- SET IF A USER OWNS A VEHICLE
+local function setOwn(vehID, own)
+	ownMap[vehID] = own or nil
+end
+
 -- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
     return ownMap
@@ -264,7 +269,7 @@ end
 
 local function onServerVehicleCoupled(serverVehicleID, state)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if isOwn(gameVehicleID) ~= 1 then
+	if not isOwn(gameVehicleID) then
 		local veh = be:getObjectByID(gameVehicleID)
 		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
 	end
@@ -351,7 +356,6 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
-		ownMap[gameVehicleID] = true -- Insert vehicle in own map
 		log("I", "onServerVehicleSpawned", "ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 
@@ -408,6 +412,7 @@ local function onVehicleSpawned(gameVehicleID)
 
 
 		if onVehicleSpawnedAllowed then -- if false then we spawned it (from server)
+			setOwn(gameVehicleID, true) -- Insert vehicle in own map
 			sendVehicle(gameVehicleID) -- Send it to the server
 		end
 
@@ -483,7 +488,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if serverVehicleID then
 				MPGameNetwork.send('Od:'..serverVehicleID)
-				ownMap[gameVehicleID] = nil
+				setOwn(gameVehicleID, false)
 			end
 		else
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by server", gameVehicleID, serverVehicleID or "?"))
@@ -1046,6 +1051,7 @@ M.onVehicleResetted        = onVehicleResetted
 -- FUNCTIONS
 M.isOwn                    = isOwn                    -- takes: vehID  returns: bool
 M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
+M.setOwn                   = setOwn                   -- takes: number vehID, bool own
 M.getDistanceMap           = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
 M.getVehicleMap            = getVehicleMap            -- takes: -
 M.getNicknameMap           = getNicknameMap           -- takes: -

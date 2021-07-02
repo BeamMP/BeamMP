@@ -316,11 +316,14 @@ local function updateFixedStep(dt)
   
   if playerInfo.anyPlayerSeated then
 	  electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
+	  electrics.values.unicycle_walk_x = guardedWalkVector.x
+	  electrics.values.unicycle_walk_y = guardedWalkVector.y
+	  electrics.values.unicycle_jump = jumpCooldown > 0.1
+	  electrics.values.unicycle_crouch = isCrouching
+	  electrics.values.unicycle_speed = movementSpeedCoef
   end
   
   electrics.values.unicycle_body = (math.deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360
-  
-  --print(electrics.values.unicycle_body)
 end
 
 local function updateGFX(dt)
@@ -393,7 +396,7 @@ local function crouch(value)
   if value < 0 then
     obj:setGroupPressureRel(v.data.pressureGroups["ball"], ballPressureCrouch)
     isCrouching = true
-  elseif value > 0 then
+  elseif value > 0 and isUnCrouching == false then
     isUnCrouching = true
     unCrouchingPressureRatio = 0.5
   end

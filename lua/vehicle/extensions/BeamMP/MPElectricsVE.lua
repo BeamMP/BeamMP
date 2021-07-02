@@ -471,11 +471,33 @@ local function applyElectrics(data)
 				end
 			end
 		end
-		-- Player crouch syncing
-		if decodedData.isCrouching ~= nil then
-			local playerController = controller.getController('playerController')
-			if playerController then
-				playerController.crouch(decodedData.isCrouching and -1 or 1)
+
+		-- Unicycle syncing
+		local playerController = controller.getController('playerController')
+		if playerController then
+			-- direction
+			if decodedData.unicycle_camera ~= nil then
+				playerController.setCameraControlData({cameraRotation = quatFromEuler(0, 0, -decodedData.unicycle_camera)})
+			end
+			-- walking left/right
+			if decodedData.unicycle_walk_x ~= nil then
+				playerController.walkLeftRightRaw(decodedData.unicycle_walk_x)
+			end
+			-- walking forward/backward
+			if decodedData.unicycle_walk_y ~= nil then
+				playerController.walkUpDownRaw(decodedData.unicycle_walk_y)
+			end
+			-- jump, check if boolean because there are sometimes 0s in the received values
+			if decodedData.unicycle_jump == true then
+				playerController.jump(1)
+			end
+			-- crouch, check if boolean because there are sometimes 0s in the received values
+			if decodedData.unicycle_crouch == true or decodedData.unicycle_crouch == false then
+				playerController.crouch(decodedData.unicycle_crouch and -1 or 1)
+			end
+			-- sprint
+			if decodedData.unicycle_speed ~= nil then
+				playerController.setSpeedCoef(decodedData.unicycle_speed)
 			end
 		end
 		-- Bus door syncing
@@ -528,7 +550,7 @@ local function applyElectrics(data)
 				localSwingwing = decodedData.swingwing
 			end
 		end
-			-- Anything else
+		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v
 		end

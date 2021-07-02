@@ -173,12 +173,17 @@ local function modifiedGetDriverData(veh)
 end
 
 local function modifiedToggleWalkingMode()
-	if gameplay_walk.isWalking() then
+	local unicycle = gameplay_walk.getPlayerUnicycle()
+	if unicycle ~= nil then
 		local veh = gameplay_walk.getVehicleInFront()
 		if not veh or veh:getJBeamFilename() == "unicycle" then return end
 	end
 	originalToggleWalkingMode()
-	--gameplay_walk.setWalkingMode( not gameplay_walk.isWalking() )
+	
+	-- If we were in a unicycle and entered a vehicle, delete it so it disappears for other players as well
+	if unicycle ~= nil then
+		unicycle:delete()
+	end
 end
 
 local function onUpdate(dt)

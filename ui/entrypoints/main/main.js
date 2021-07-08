@@ -1157,6 +1157,27 @@ angular.module('beamng.stuff')
   engineChangeData: null
 })
 
+.service('translateService', ['$translate', function($translate){
+  contextTranslate = function(val) {
+    if(typeof val == "string") {
+      return $translate.instant(val)
+    } else {
+      return $translate.instant(val.txt, val.context);
+    }
+  }
+  multiContextTranslate = function(val) {
+    let description = ""
+    for (var i = 0; i < val.length; i++) {
+      description = description + contextTranslate(val[i])
+    }
+    return description
+  }
+  return {
+    contextTranslate: contextTranslate,
+    multiContextTranslate: multiContextTranslate
+  }
+}])
+
 .service('gamepadNav', ['logger', '$rootScope', '$state', 'SpatialNavigation',
   function (logger, $rootScope, $state, SpatialNavigation) {
     'use strict';
@@ -1286,8 +1307,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', 'logger', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'AppDefaults', 'Aux', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', 'SimpleStateNav', 'SpatialNavigation', '$injector', '$location',
-  function($document, $log, logger, $rootScope, $scope, $sce, $compile, $state, $translate, $window, AppDefaults, Aux, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, SimpleStateNav, SpatialNavigation, $injector, $location) {
+.controller('AppCtrl', ['$document', '$log', 'logger', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'AppDefaults', 'Aux', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', 'SimpleStateNav', 'SpatialNavigation', '$injector', '$location', 'translateService',
+  function($document, $log, logger, $rootScope, $scope, $sce, $compile, $state, $translate, $window, AppDefaults, Aux, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, SimpleStateNav, SpatialNavigation, $injector, $location, translateService) {
   var vm = this;
 
   // hack to fix backspace navigating between different menus.

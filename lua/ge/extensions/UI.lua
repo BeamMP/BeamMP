@@ -93,7 +93,7 @@ local function showNotification(text, type)
 	else
 		print("[Message] > "..text)
 	end
-	ui_message(''..text, 10, 0, 0)
+	ui_message(''..text, 10, nil, nil)
 end
 
 

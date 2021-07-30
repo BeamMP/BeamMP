@@ -7,6 +7,8 @@
 
 local M = {}
 
+local maxBeamLengthRatio = 2 -- If a beam becomes longer than its original length by this factor, it will be treated as broken
+
 local connectedBeams = {}
 local isConnectedNode = {}
 local nodes = {}
@@ -46,7 +48,7 @@ local function findConnectedNodesRecursive(parentID)
 
 	for i=1, #beams do
 		local bid = beams[i]
-		if not obj:beamIsBroken(bid) then
+		if not obj:beamIsBroken(bid) and (obj:getBeamCurLengthRefRatio(bid) < maxBeamLengthRatio) then
 			local b = v.data.beams[bid]
 
 			if parentID == b.id1 then

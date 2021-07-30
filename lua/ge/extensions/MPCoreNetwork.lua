@@ -260,6 +260,7 @@ end
 
 
 local function resetSession(goBack)
+	if goBack == undefined then goBack = true end
 	isMpSession = false
 	isGoingMpSession = false
 	print("Reset Session Called! " .. tostring(goBack))

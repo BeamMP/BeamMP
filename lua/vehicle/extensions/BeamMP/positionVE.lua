@@ -50,14 +50,16 @@ end
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
-local maxAcc = 500             -- Maximum acceleration (m/s^2)
+local maxPosForce = 100        -- Maximum position correction force (m/s^2)
+local maxAcc = 100             -- Maximum acceleration in received data (m/s^2)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
 local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
-local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
+local maxRotForce = 50         -- Maximum rotation correction force (rad/s^2)
+local maxRacc = 50             -- Maximum angular acceleration in received data (rad/s^2)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
 
 -- Teleport
@@ -130,6 +132,19 @@ end
 
 
 
+-- Limit vector length
+local function limitVecLength(vec, length)
+	local vecLength = vec:length()
+	
+	if vecLength > length then
+		return vec*(length/vecLength)
+	end
+	
+	return vec
+end
+
+
+
 local function onReset()
 	-- Reset smoothers and state variables
 	tpVelSmoother:reset()
@@ -150,6 +165,7 @@ local function onReset()
 	remoteData.acc = vec3(0,0,0)
 	remoteData.racc = vec3(0,0,0)
 end
+
 
 
 local function update(dtSim)
@@ -293,8 +309,8 @@ local function updateGFX(dt)
 	local raccError = raccErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
 	--print("RaccError: "..tostring(raccError:length()/dt))
 
-	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)
-	local targetRacc = (rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1)
+	local targetAcc = limitVecLength((velError + posError*posCorrectMul)*min(posForceMul*dt,1), maxPosForce*dt)
+	local targetRacc = limitVecLength((rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1), maxRotForce*dt)
 
 	local targetAccMul = 1-min(max(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError*dt),0),1)
 	--print("Force multiplier: "..targetAccMul)
@@ -352,27 +368,12 @@ local function setVehiclePosRot(data)
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
-	-- Sanity checks for acceleration
-	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
-		remoteData.acc = (vel - remoteData.vel)/remoteDT
-		remoteData.vel = vel
-	else
-		--print("Acceleration too high! Vehicle ID: "..obj:getID())
-		remoteData.acc = vec3(0,0,0)
-		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
-	end
-
-	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
-		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
-		remoteData.rvel = rvel
-	else
-		--print("Angular acceleration too high! Vehicle ID: "..obj:getID())
-		remoteData.racc = vec3(0,0,0)
-		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
-	end
-
 	remoteData.pos = pos
 	remoteData.rot = rot
+	remoteData.vel = vel
+	remoteData.rvel = rvel
+	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
+	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer

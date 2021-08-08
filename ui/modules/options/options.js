@@ -75,8 +75,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controllers:OptionsController
  * @description Controller for the abstract Settings view.
  */
-.controller('OptionsController', ['$scope', 'bngApi', 'SettingsAuxData', 'UiUnitsOptions', '$state', '$timeout', 'RateLimiter',
-function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, RateLimiter) {
+.controller('OptionsController', ['$scope', 'SettingsAuxData', 'UiUnitsOptions', '$state', '$timeout', 'RateLimiter',
+function($scope, SettingsAuxData, UiUnitsOptions, $state, $timeout, RateLimiter) {
 
   var vm = this;
   vm.shipping = beamng.shipping;
@@ -102,6 +102,12 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     });
   });
 
+  $scope.$on('externalUIURL', function (event, data) {
+    $scope.$eval(function () {
+      $scope.options.externalUIURL = data;
+    });
+  });
+
   $scope.$watch('options.data.values.GraphicDynReflectionTexsize', function(value) {
     if (value == 0) { $scope.GraphicDynReflectionTexsizeText = "128"; }
     if (value == 1) { $scope.GraphicDynReflectionTexsizeText = "256"; }
@@ -110,6 +116,8 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
   });
 
   bngApi.engineLua('settings.requestState()');
+
+  bngApi.engineLua('if ui_extApp then ui_extApp.requestUIData() end');
 
   vm.applyLanguage = function () {
     // unload current page, save language, then reload current page
@@ -142,7 +150,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     bngApi.engineLua(`settings.setState(${bngApi.serializeToLua(stateObj || vm.data.values)})`);
   }
 
-
   function refreshGraphicsState () {
     bngApi.engineLua(`core_settings_graphic.refreshGraphicsState(${bngApi.serializeToLua(vm.data.values)})`);
   }
@@ -151,13 +158,20 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     bngApi.engineLua(`core_settings_graphic.applyGraphicsState()`);
   }
 
-  /**
-   * @ngdoc method
-   * @name clearLauncherCache
-   * @methodOf beamng.stuff.controllers:SettingsAudioCtrl
-   * @description Toggles Master volume.
-   */
-  vm.clearLauncherCache = function () {
+  $scope.monitorWindowAction = "ui.inputActions.large_crusher.open.title";
+
+  function openMonitorConfiguration() {
+    bngApi.engineLua(`core_settings_graphic.openMonitorConfiguration()`);
+    $scope.$evalAsync(function() {
+      if ($scope.monitorWindowAction == "ui.inputActions.large_crusher.open.title")
+      {
+        $scope.monitorWindowAction = "ui.inputActions.large_crusher.close.title"
+      }
+      else {
+        $scope.monitorWindowAction = "ui.inputActions.large_crusher.open.title"
+      }
+    });
+
 
   }
 
@@ -171,6 +185,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
   vm.applyState = RateLimiter.debounce(applyState, 100);
   vm.refreshGraphicsState = RateLimiter.debounce(refreshGraphicsState, 100);
   vm.applyGraphicsState = RateLimiter.debounce(applyGraphicsState, 100);
+  vm.openMonitorConfiguration = RateLimiter.debounce(openMonitorConfiguration, 100);
 
   /**
    * @ngdoc method
@@ -204,7 +219,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @name beamng.stuff.controllers:SettingsGraphicsCtrl
  * @description Controller for the graphics settings view
  */
-.controller('SettingsGraphicsCtrl', ['$scope', 'bngApi', 'SettingsAuxData', function ($scope, bngApi, SettingsAuxData) {
+ .controller('SettingsGraphicsCtrl', ['$scope', 'SettingsAuxData', function ($scope, SettingsAuxData) {
   var vm = this;
   var settings = $scope.$parent.options;
 
@@ -381,14 +396,14 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @name beamng.stuff.controllers:SettingsGameplayCtrl
  * @description Controller for the gameplay settings view
  */
-.controller('SettingsGameplayCtrl', ['$location', '$scope', 'bngApi', 'mdx', 'ControlsUtils', 'UiUnitsOptions', 'AppDefaults' , function ($location, $scope, bngApi, mdx, ControlsUtils, UiUnitsOptions, AppDefaults) {
+.controller('SettingsGameplayCtrl', ['$location', '$scope', 'mdx', 'ControlsUtils', 'UiUnitsOptions', 'AppDefaults' , function ($location, $scope, mdx, ControlsUtils, UiUnitsOptions, AppDefaults) {
   var vm = this;
   var settings = $scope.$parent.options;
   vm.cameraConfig = [];
   vm.cameraBindings = [];
-   for (i = 1; i < 11; i++) {
-       vm.cameraBindings[i] = ControlsUtils.findBindingForAction("camera_"+i);
-   }
+  for (i = 1; i < 11; i++) {
+    vm.cameraBindings[i] = ControlsUtils.findBindingForAction("camera_"+i);
+  }
 
   vm.focusedCamName;
   vm.lastSlotId = 0;
@@ -504,6 +519,10 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
     vm.paletteChanged();
   };
 
+
+  vm.openBrowserURL = function(url) {
+    bngApi.engineLua('openWebBrowser("' + url + '")');
+  }
   // Logs all color rgbs in mdColorPalette
   // console.log($scope.uiConfig);
   // var help = {};
@@ -526,12 +545,12 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @name beamng.stuff.controllers:SettingsAudioCtrl
  * @description Controller for the audio settings view
  */
-.controller('SettingsAudioCtrl', ['$scope', 'bngApi', function ($scope, bngApi) {
+ .controller('SettingsAudioCtrl', ['$scope', function ($scope) {
   var vm = this;
   var settings = $scope.$parent.options;
 
   var lastMasterVol = 0.8;
-  vm.lastMaxChannels = settings.data.values.AudioMaxVoices;
+  vm.lastMaxChannels = settings.data.values.AudioMaximumVoices;
 
   /**
    * @ngdoc method
@@ -581,10 +600,10 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
           </span>
         </kbd>
         <div ng-style="{'-webkit-filter': (!dark ? 'invert(1) brightness(1.5)' : '')}" ng-if="viewerObj !== undefined && viewerObj.special" style="height: 1.4em; width: 1.4em;">
-          <object style="max-height: 100%; max-width: 100%; pointer-events: none;" type="image/svg+xml" data="{{viewerObj.url}}"></object>
+          <object style="max-height: 100%; max-width: 100%; pointer-events: none;" type="image/svg+xml" ng-attr-data="{{viewerObj.url}}"></object>
         </div>
         <div ng-style="{'-webkit-filter': (!dark ? 'invert(1) brightness(1.5)' : '')}" ng-if="viewerObj === undefined" style="height: 1.4em; width: 1.4em;">
-          <object style="max-height: 100%; max-width: 100%; type="image/svg+xml" data="modules/options/deviceIcons/unknown.svg"></object>
+          <object style="max-height: 100%; max-width: 100%; type="image/svg+xml" data="/ui/modules/options/deviceIcons/unknown.svg"></object>
         </div>
       </span>
     `,
@@ -635,6 +654,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       scope.$watch(() => scope.action + ' ' + scope.device + ' ' + scope.key, getBinding);
 
       function getBinding () {
+        //console.log("Device order on this machine ===>", controlsContents.bindings);
         var helper = {};
         if (scope.key !== undefined) {
           helper = {
@@ -658,7 +678,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
             if (device && icons[device] !== undefined && icons[device][helper.control]) {
               scope.viewerObj = {
                 special: true,
-                url: `modules/options/deviceIcons/${icons[device][helper.control]}.svg`
+                url: `/ui/modules/options/deviceIcons/${icons[device][helper.control]}.svg`
               }
             } else {
               helper.special = false;
@@ -1062,22 +1082,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       <md-divider></md-divider>
 
       <md-list-item layout ng-if="data.details.action == 'steering'">
-        <span flex="30">Steering Lock Angle</span>
-        <md-tooltip md-direction="">How much your steering wheel can turn, from lock to lock. Advice: use the same number displayed in the drivers configuration panel, which should be set to the maximum your steering wheel supports.</md-tooltip>
-        <md-slider ng-model="data.details.angle" ng-change="inputResponseCurveRender()" flex min="0" max="6000" step="10" aria-label="_"></md-slider>
-        <md-input-container class="bng-controls-aux-input" >
-          <input aria-label="_" type="number" min="0" max="6000" step="10" ng-model="data.details.angle" ng-change="inputResponseCurveRender()">
-        </md-input-container>
-      </md-list-item>
-      <md-list-item layout ng-if="data.details.action == 'steering'" style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType != '0' && data.details.angle <= 0">
-        <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
-        <p>{{:: 'ui.controls.lockType.warningMissingAngle' | translate}}</p>
-      </md-list-item>
-      <md-list-item layout ng-if="data.details.action == 'steering'" style="margin: 0px 16px; color: red; border: red 1px solid; border-radius: 4px;" class="md-caption md-padding" ng-if="data.details.lockType == '0' && data.details.angle > 0">
-        <strong style="margin: 0px 12px 0px 0px;">{{:: 'ui.options.graphics.Warning' | translate}}</strong>
-        <p>{{:: 'ui.controls.lockType.warningAdvice' | translate}}</p>
-      </md-list-item>
-      <md-list-item layout ng-if="data.details.action == 'steering'">
         <span flex="35">{{:: "ui.controls.lockType" | translate }}</span>
         <md-select flex ng-model="data.details.lockType" aria-label="_" class="bng-select-fullwidth">
           <md-option value="0" md-no-ink>{{:: "ui.controls.lockTypes.0" | translate }}</md-option>
@@ -1085,6 +1089,14 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
           <md-option value="2" md-no-ink>{{:: "ui.controls.lockTypes.2" | translate }}</md-option>
         </md-select>
         <md-tooltip md-direction="">How BeamNG.drive will attempt to match your steering wheel to the vehicle you're driving. Any 1:1 lock type is recommended over 1:N</md-tooltip>
+      </md-list-item>
+      <md-list-item layout ng-if="data.details.action == 'steering'" ng-style="data.details.lockType == 0 && {'opacity':'0.5'} || (data.details.angle == 0 && {'color':'red', 'font-weight':'bold'} || {})">
+        <span flex="30" ng-disabled="data.details.lockType == 0">Steering Lock Angle Degrees</span>
+        <md-tooltip ng-disabled="data.details.lockType == 0" md-direction="">How much your steering wheel can turn, from lock to lock. Advice: use the same number displayed in the drivers configuration panel, which should be set to the maximum your steering wheel supports.</md-tooltip>
+        <md-slider ng-disabled="data.details.lockType == 0" ng-model="data.details.angle" ng-change="inputResponseCurveRender()" flex min="0" max="6000" step="10" aria-label="_"></md-slider>
+        <md-input-container ng-disabled="data.details.lockType == 0" class="bng-controls-aux-input">
+          <input aria-label="_" type="number" min="0" max="6000" step="10" ng-model="data.details.angle" ng-change="inputResponseCurveRender()" ng-disabled="data.details.lockType == 0" ng-style="(data.details.lockType != 0 && data.details.angle == 0) && {'color':'red', 'font-weight':'bold'}">
+        </md-input-container>
       </md-list-item>
 
       <div style="width:310px; height: 150px; position:relative; border: solid grey 2px; margin-left: 20px;">
@@ -1365,7 +1377,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @name beamng.stuff:ControlsUtils
  * @description Various controls-related utility functions
 **/
-.factory('ControlsUtils', ['$filter', '$log', '$q', '$rootScope', 'bngApi', 'controlsContents', '$translate', '$timeout', function ($filter, $log, $q, $rootScope, bngApi, controlsContents, $translate, $timeout) {
+.factory('ControlsUtils', ['$filter', '$log', '$q', '$rootScope', 'controlsContents', '$translate', '$timeout', function ($filter, $log, $q, $rootScope, controlsContents, $translate, $timeout) {
   var _captureHelper = {
     devName: null,
     stopListening: null
@@ -1406,7 +1418,6 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       }
 
       controlsContents.categories = data.actionCategories;
-      // console.log(controlsContents.categories);
 
       controlsContents.bindings   = data.bindings;
       controlsContents.bindingTemplate = data.bindingTemplate;
@@ -1443,6 +1454,21 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
         controlsContents.categoriesList.push(angular.merge({key: category}, controlsContents.categories[category]));
       });
 
+
+
+      for (var x in controlsContents.categoriesList) {
+        for (var y in controlsContents.categoriesList[x].actions) {
+          controlsContents.categoriesList[x].actions[y].titleTranslated = $translate.instant(controlsContents.categoriesList[x].actions[y].title);
+          controlsContents.categoriesList[x].actions[y].descTranslated = $translate.instant(controlsContents.categoriesList[x].actions[y].desc);
+          for(var z in controlsContents.categoriesList[x].actions[y].tags) {
+            if (controlsContents.categoriesList[x].actions[y].tagsTranslated === undefined) {
+              controlsContents.categoriesList[x].actions[y].tagsTranslated = [];
+            }
+            controlsContents.categoriesList[x].actions[y].tagsTranslated[z] = $translate.instant(controlsContents.categoriesList[x].actions[y].tags[z]);
+          }
+        }
+      }
+
     });
   });
 
@@ -1457,7 +1483,7 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
       ;
 
       // it's fortunate the controler is before the keyboard in this list, since one would prefer having the controler keys over the keyboard, if one is pluged in
-      for (var i = 0; i < controlsContents.bindings.length && !found && (devname === undefined || devname === controlsContents.bindings[i].devname); i += 1) {
+      for (var i = controlsContents.bindings.length - 1; i >= 0  && !found && (devname === undefined || devname === controlsContents.bindings[i].devname); i -= 1) {
         var toSearch = controlsContents.bindings[i].contents.bindings.map((x) => x.action)
           , index;
         if ((index = toSearch.indexOf(action)) !== -1) {
@@ -1807,16 +1833,24 @@ function($scope, bngApi, SettingsAuxData, UiUnitsOptions, $state, $timeout, Rate
  * @requires beamng.stuff:ControlsUtils
  * @description
 **/
-.controller('ControlsController', ['$scope',  'bngApi', 'controlsContents', 'ControlsUtils', '$translate',
-function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
+.controller('ControlsController', ['$scope',  'controlsContents', 'ControlsUtils', '$translate',
+function ($scope, controlsContents, ControlsUtils, $translate) {
   var vm = this;
-  vm.data = angular.copy(controlsContents);
+  vm.data = controlsContents;
+
+
 
   $scope.$evalAsync(function () {
     for (var x in vm.data.categoriesList) {
       for (var y in vm.data.categoriesList[x].actions) {
-        vm.data.categoriesList[x].actions[y].title = $translate.instant(controlsContents.categoriesList[x].actions[y].title);
-        vm.data.categoriesList[x].actions[y].desc = $translate.instant(controlsContents.categoriesList[x].actions[y].desc);
+        vm.data.categoriesList[x].actions[y].titleTranslated = $translate.instant(controlsContents.categoriesList[x].actions[y].title);
+        vm.data.categoriesList[x].actions[y].descTranslated = $translate.instant(controlsContents.categoriesList[x].actions[y].desc);
+        for(var z in vm.data.categoriesList[x].actions[y].tags) {
+          if (vm.data.categoriesList[x].actions[y].tagsTranslated === undefined) {
+            vm.data.categoriesList[x].actions[y].tagsTranslated = [];
+          }
+          vm.data.categoriesList[x].actions[y].tagsTranslated[z] = $translate.instant(controlsContents.categoriesList[x].actions[y].tags[z]);
+        }
       }
     }
   });
@@ -1852,8 +1886,8 @@ function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
  * @name beamng.stuff:ControlsEditCtrl
  * @description [TODO: Add description]
  */
-.controller('ControlsEditCtrl', ['$scope', '$state', '$stateParams', 'bngApi', 'controlsContents', 'ControlsUtils',
- function ($scope, $state, $stateParams, bngApi, controlsContents, ControlsUtils) {
+.controller('ControlsEditCtrl', ['$scope', '$state', '$stateParams', 'controlsContents', 'ControlsUtils',
+ function ($scope, $state, $stateParams, controlsContents, ControlsUtils) {
   var vm = this;
   var listeningTimeout;
 
@@ -1950,12 +1984,12 @@ function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
   });
 }])
 
-.controller('ControlsFiltersCtrl', ['$scope', '$state', 'bngApi', 'ControlsUtils', 'mdx', 'UiUnits', function ($scope, $state, bngApi, ControlsUtils, mdx, UiUnits) {
+.controller('ControlsFiltersCtrl', ['$scope', '$state', 'ControlsUtils', 'mdx', function ($scope, $state, ControlsUtils, mdx) {
   var vm = this;
   var settings = $scope.$parent.options;
   vm.order = [ 0, 3, 1, 2];
   vm.filters = {};
-  vm.unit = UiUnits.buildString;
+  vm.unit = function(...args) { return UiUnits.buildString(...args); }
 
   var settingTypes = [ "limitEnabled", "limitStartSpeed", "limitEndSpeed", "limitMultiplier" ];
   $scope.$on('SettingsChanged', function (_, data) {
@@ -2105,12 +2139,13 @@ function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
  * @name beamng.stuff:ControlsHardwareCtrl
  * @description [TODO: Add description]
  */
-.controller('ControlsHardwareCtrl', ['$scope', 'bngApi', 'controlsContents', 'ControlsUtils',
-  function ($scope, bngApi, controlsContents, ControlsUtils) {
+.controller('ControlsHardwareCtrl', ['$scope', 'controlsContents', 'ControlsUtils',
+  function ($scope, controlsContents, ControlsUtils) {
     var vm = this;
     vm.utils = ControlsUtils;
 
     vm.showAndroid = false;
+    vm.qrPass = null;
     vm.qrData = null;
     vm.qrData2 = null;
     vm.remoteBlocked = false;
@@ -2141,15 +2176,21 @@ function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
 
     bngApi.engineLua('core_remoteController.getQRCode()', function (data) {
       $scope.$evalAsync(function () {
-        vm.qrData = data;
+        vm.qrPass = data;
       });
     });
 
-    bngApi.engineLua('core_remoteController.getQRCodeIOS()', function (data2) {
-      $scope.$evalAsync(function () {
-        vm.qrData2 = data2;
+    vm.generateQrCode = function(){
+      //need to generate everytime it is ticked. ng-if remove the elements
+      vm.qrData = new QRCode(document.getElementById("QRremoteiOS"), {
+        text: "https://itunes.apple.com/ca/app/beamng.drive-remote-control/id1163096150#"+vm.qrPass,
+        correctLevel : QRCode.CorrectLevel.L
       });
-    });
+      vm.qrData2 = new QRCode(document.getElementById("QRremoteAndroid"), {
+        text: "https://play.google.com/store/apps/details?id=com.beamng.remotecontrol#"+vm.qrPass,
+        correctLevel : QRCode.CorrectLevel.L
+      });
+    }
 
     vm.addFirewallException = function () {
 
@@ -2184,3 +2225,26 @@ function ($scope, bngApi, controlsContents, ControlsUtils, $translate) {
     {action: 'accelerate_brake', parts: ['accelerate', 'brake']}
   ]
 })
+
+
+.directive('compile', ['$compile', function ($compile) {
+  return function(scope, element, attrs) {
+      scope.$watch(
+        function(scope) {
+           // watch the 'compile' expression for changes
+          return scope.$eval(attrs.compile);
+        },
+        function(value) {
+          // when the 'compile' expression changes
+          // assign it into the current DOM
+          element.html(value);
+
+      // compile the new DOM and link it to the current
+      // scope.
+      // NOTE: we only compile .childNodes so that
+      // we don't get into infinite loop compiling ourselves
+      $compile(element.contents())(scope);
+    }
+);
+};
+}])

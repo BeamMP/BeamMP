@@ -65,7 +65,7 @@ local function applyGear(data)
 	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
 		local state = string.sub(data, 1, 1)
 		local index = tonumber(string.sub(data, 2, 3))
-		if not index then return end
+		-- if not index then return end -- Removed due to reports it stops Auto Transmissions from working/syncing
 		local gearIndex = electrics.values.gearIndex
 		if state == 'M' then
 			if localGearMode ~= 'M' then
@@ -157,7 +157,7 @@ local disallowedKeys = {
 	["engineLoad"] = 1,
 	["exhaustFlow"] = 1,
 	["fuel"] = 1,
-	["fuelVolume"] = 1,
+	--["fuelVolume"] = 1,
 	["fuelCapacity"] = 1,
 	["jatofuel"] = 1,
 	["oiltemp"] = 1,
@@ -306,7 +306,7 @@ local disallowedKeys = {
 	["FFR"] = 1,
 	["RRL"] = 1,
 	["RRR"] = 1,
-	---modded vehicles -- 
+	---modded vehicles --
 	-- me262 plane ------
 	["inst_pitch"] = 1,
 	["inst_roll"] = 1,
@@ -359,6 +359,10 @@ local function checkGears()
 	end
 end
 
+local function round2(num, numDecimalPlaces)
+  return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
+end
+
 local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
@@ -368,10 +372,18 @@ local function check()
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
 		if not disallowedKeys[k] then -- If it's not a disallowed key
-			if lastElectrics[k] ~= v then -- If the value changed
-				electricsChanged = true -- Send electrics
-				lastElectrics[k] = v -- Define the new value
-				electricsToSend[k] = v
+			if k == "fuelVolume" then
+				if lastElectrics[k] ~= round2(v, 1) then -- If the value changed
+					electricsChanged = true -- Send electrics
+					lastElectrics[k] = round2(v, 1) -- Define the new value
+					electricsToSend[k] = round2(v, 1)
+				end
+			else
+				if lastElectrics[k] ~= v then -- If the value changed
+					electricsChanged = true -- Send electrics
+					lastElectrics[k] = v -- Define the new value
+					electricsToSend[k] = v
+				end
 			end
 		end
 	end
@@ -379,7 +391,6 @@ local function check()
 		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', "..obj:getID()..")")
 	end
 end
-
 
 
 local lastLeftSignal = 0
@@ -422,11 +433,20 @@ local function applyElectrics(data)
 			electrics.set_fog_lights(decodedData.fog)
 		end
 
+		-- Fuel Level syncing
+		if decodedData.fuelVolume then
+			for name, storage in pairs(energyStorage.getStorages()) do
+				if string.match(name, "mainTank") then -- This might not work with boats, aircraft or others but should work with stock vehicles.
+					storage:setRemainingVolume(decodedData.fuelVolume)
+				end
+			end
+		end
+
 		-- Gear syncing
 		if decodedData.gear then
 			latestGearData = decodedData.gear
 		end
-		
+
 		-- Transbrake syncing
 		if decodedData.transbrake ~= nil then
 			if electrics.values.transbrake ~= decodedData.transbrake then
@@ -435,8 +455,8 @@ local function applyElectrics(data)
 		end
 
 		-- LineLock syncing
-		if decodedData.lineLock ~= nil then
-			if electrics.values.lineLock ~= decodedData.linelock then
+		if decodedData.linelock ~= nil then
+			if electrics.values.linelock ~= decodedData.linelock then
 				controller.getController("lineLock").setLineLock(decodedData.linelock)
 			end
 		end
@@ -451,11 +471,33 @@ local function applyElectrics(data)
 				end
 			end
 		end
-		-- Player crouch syncing
-		if decodedData.isCrouching ~= nil then
-			local playerController = controller.getController('playerController')
-			if playerController then
-				playerController.crouch(decodedData.isCrouching and -1 or 1)
+
+		-- Unicycle syncing
+		local playerController = controller.getController('playerController')
+		if playerController then
+			-- direction
+			if decodedData.unicycle_camera ~= nil then
+				playerController.setCameraControlData({cameraRotation = quatFromEuler(0, 0, -decodedData.unicycle_camera)})
+			end
+			-- walking left/right
+			if decodedData.unicycle_walk_x ~= nil then
+				playerController.walkLeftRightRaw(decodedData.unicycle_walk_x)
+			end
+			-- walking forward/backward
+			if decodedData.unicycle_walk_y ~= nil then
+				playerController.walkUpDownRaw(decodedData.unicycle_walk_y)
+			end
+			-- jump, check if boolean because there are sometimes 0s in the received values
+			if decodedData.unicycle_jump == true then
+				playerController.jump(1)
+			end
+			-- crouch, check if boolean because there are sometimes 0s in the received values
+			if decodedData.unicycle_crouch == true or decodedData.unicycle_crouch == false then
+				playerController.crouch(decodedData.unicycle_crouch and -1 or 1)
+			end
+			-- sprint
+			if decodedData.unicycle_speed ~= nil then
+				playerController.setSpeedCoef(decodedData.unicycle_speed)
 			end
 		end
 		-- Bus door syncing
@@ -468,7 +510,7 @@ local function applyElectrics(data)
 					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
 				end
 			end
-		end	
+		end
 		-- Bus suspension height syncing
 		if decodedData.kneel == 1 then
 			local airbagsController = controller.getController('airbags')
@@ -508,7 +550,7 @@ local function applyElectrics(data)
 				localSwingwing = decodedData.swingwing
 			end
 		end
-			-- Anything else
+		-- Anything else
 		for k,v in pairs(decodedData) do
 			electrics.values[k] = v
 		end

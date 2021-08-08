@@ -7,7 +7,7 @@ angular.module('beamng.stuff')
  * @description
  * Helper functions for editing a vehicle's configuration
  */
-.factory('VehicleConfig', ['logger', '$q', 'bngApi', 'Utils', function (logger, $q, bngApi, Utils) {
+.factory('VehicleConfig', ['logger', '$q', 'Utils', function (logger, $q, Utils) {
   var _generateTreeBranch = function (data, part, simple, depth) {
     var res = [];
     if(depth>200) return;
@@ -32,8 +32,7 @@ angular.module('beamng.stuff')
           } else {
             elOptions[elOptions.length] = {
               name: slotPart.description,
-              val: slotPartName,
-              value: data.availableParts[slotPartName].value
+              val: slotPartName
             };
             optionCount++;
             if (data.chosenParts[slotType] == slotPartName) {
@@ -47,7 +46,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: '', value: ''});
+        element.options.unshift({name: 'Empty', val: ''});
       } else {
         element.open = true;
       }
@@ -137,8 +136,8 @@ angular.module('beamng.stuff')
  * @require beamng.stuff:bngApi
  * @require beamng.stuff:VehicleConfig
 **/
-.controller('Vehicleconfig_parts', ['$filter', 'logger', '$scope', '$window', 'bngApi', 'RateLimiter', 'VehicleConfig', 'StreamsManager',
-function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, StreamsManager) {
+.controller('Vehicleconfig_parts', ['$filter', 'logger', '$scope', '$window', 'RateLimiter', 'VehicleConfig',
+function ($filter, logger, $scope, $window, RateLimiter, VehicleConfig) {
   var vm = this;
 
   // Multi Part Highlighting
@@ -178,7 +177,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   // LICENSE PLATE STUFF
   vm.licensePlate = '';
 
-  bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0)', function (str) {
+  bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
     $scope.$evalAsync(() => { vm.licensePlate = str; });
   });
 
@@ -197,7 +196,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   vm.genLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText(nil,nil,nil,nil,true);`);
 
-    bngApi.engineLua('core_vehicles.regenerateVehicleLicenseText(be:getPlayerVehicle(0)', function (str) {
+    bngApi.engineLua('core_vehicles.regenerateVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
       $scope.$evalAsync(() => { vm.licensePlate = str; });
     });
   };
@@ -552,7 +551,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
     return $sce.trustAsHtml(unescape(escape(text).replace(new RegExp(escape(search), 'gi'), ' <span class="highlightResults">$&</span>')));
   }
 })
-.controller('Vehicleconfig_tuning', ["logger", "RateLimiter", "VehicleConfig", "bngApi", "$scope", "$filter", function (logger,RateLimiter, VehicleConfig, bngApi, $scope, $filter) {
+.controller('Vehicleconfig_tuning', ["logger", "RateLimiter", "VehicleConfig", "$scope", "$filter", function (logger, RateLimiter, VehicleConfig, $scope, $filter) {
   var vm = this;
 
   vm.open = {};
@@ -631,7 +630,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config));
 }])
 
-.controller('Vehicleconfig_color', ["$scope", "bngApi", function ($scope, bngApi) {
+.controller('Vehicleconfig_color', ["$scope", function ($scope) {
   var vm = this;
   vm.updateColor = function (index, value) {
     bngApi.engineLua(`core_vehicle_colors.setVehicleColor(${index}, "${value}");`);
@@ -658,9 +657,15 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
   function getVehicleColors () {
     bngApi.engineLua('core_vehicles.getCurrentVehicleDetails()', (data) => {
-      if (data.model !== undefined && data.model.colors !== undefined) {
+      if (data.model !== undefined && data.model.paints !== undefined) {
         $scope.$evalAsync(() => {
-          vm.carColorPresets = data.model.colors;
+          let colors = {}
+          for (var paintName in data.model.paints) {
+            let paint = data.model.paints[paintName]
+            let color = paint.baseColor[0] + " " + paint.baseColor[1] + " " + paint.baseColor[2] + " " + paint.baseColor[3] + " " + paint.metallic + " " + paint.roughness + " " + paint.clearcoat + " " + paint.clearcoatRoughness;
+            colors[paintName] = color
+          }
+          vm.carColorPresets = colors;
         });
       }
     });
@@ -673,7 +678,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
   $scope.$on('VehicleChangeColor', fetchDefinedColors);
 }])
 
-.controller('Vehicleconfig_save', ["$scope", "$mdDialog", "VehicleConfig", "bngApi", function ($scope, $mdDialog, VehicleConfig, bngApi) {
+.controller('Vehicleconfig_save', ["$scope", "$mdDialog", "VehicleConfig", function ($scope, $mdDialog, VehicleConfig) {
   var vm = this;
   vm.saveThumbnail = true;
 
@@ -683,10 +688,9 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
 
   vm.save = function (configName) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`);
-    //bngApi.engineLua(`MPVehicleGE.saveConfigRequest("${configName}.pc")`);
 
     if (vm.saveThumbnail == true) {
-      $scope.$emit('hide_ui', true);
+      bngApi.engineLua("extensions.ui_visibility.set(false)")
       // This function starts a chain to hide the UI, set up the camera and take a screenshot.
       // See lua/ge/extensions/core/vehicles/partmgmt.lua
       setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100);
@@ -701,7 +705,7 @@ function ($filter, logger, $scope, $window, bngApi, RateLimiter, VehicleConfig, 
       $scope.$on('saveLocalScreenshot_stage3', function () {
         bngApi.engineLua(`setCameraFov(60)`);
         bngApi.engineLua(`commands.setGameCamera()`);
-        $scope.$emit('hide_ui', false);
+        bngApi.engineLua("extensions.ui_visibility.set(true)")
       });
     };
   };

@@ -8,17 +8,14 @@
 local M = {}
 
 local function colorMatch(old, new) -- we assume the new color object has more data
-	for k,v in ipairs(new) do
-		for kk, vv in ipairs(v) do
-			--dump(k, v, kk, vv)
-			if not old[k] or not old[k][kk] or tostring(old[k][kk]):sub(1,7) ~= tostring(vv):sub(1,7) then
-				--print(tostring(old[k][kk]))
-				--print(tostring(vv))
-				return false
-			end
+	if new ~= nil and old ~= nil then
+		if serialize(new) ~= serialize(old) then
+			return true
 		end
+		return false
+	else
+		return false
 	end
-	return true
 end
 
 local function tableDiff(old, new)

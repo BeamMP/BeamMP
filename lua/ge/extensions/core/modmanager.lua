@@ -34,24 +34,6 @@ local checkStartup = false
 local checkingModUpdate = false
 local autoMount = true
 
-local function updateTranslations ()
-  local files = FS:findFiles('/locales/', '*.json', -1, true, false)
-  local lang = {}
-
-  for _, v in pairs(files) do
-    -- this counter could later be used to indcate how much of the specific language is translated
-    local index = v:match('.*%/(.*)%.json')
-    if lang[index] == nil then
-      lang[index] = {files = 1, translations = jsonReadFile(v)}
-    else
-      lang[index] = {files = lang[index].files + 1, translations = tableMergeRecursive(lang[index].translations, jsonReadFile(v))}
-    end
-  end
-  -- guihooks.trigger('appJsonDump', {lang = lang, files = files})
-  guihooks.trigger('translationFileUpdate', lang)
-end
-
-
 local function sendGUIState()
   --local list = {}
   --for k, v in pairs(mods) do
@@ -79,8 +61,6 @@ end
 local function stateChanged()
   -- send new state to gui: as a list
   sendGUIState()
-  -- update language and send to ui
-  updateTranslations()
 
   -- and save it to disc (if not in safe mode)
   if not isSafeMode() then
@@ -109,7 +89,10 @@ local function mountEntry(filename, mountPoint)
   extensions.hook('onBeforeMountEntry', filename, mountPoint)
   local mountList = {}
   addMountEntryToList( mountList, filename, mountPoint )
-  FS:mountList(mountList)
+  if not FS:mountList(mountList) then
+    guihooks.trigger('modmanagerError', 'Error mounting mods')
+    log('E', 'mountEntry', 'mountList Error')
+  end
 end
 
 local function getModNameFromPath(path)
@@ -241,7 +224,12 @@ local function updateZIPEntry(filename)
   --log('I', 'updateZIPEntry', "filename : "..dumps(filename))
   local modname = getModNameFromPath(filename)
   local zip = ZipArchive()
-  zip:openArchiveName( filename, "R" )
+  if not zip:openArchiveName( filename, "R" ) and FS:fileExists(filename) then
+    local errMsg = "Invalid ZIP file: "..dumps(filename)
+    log("E","updZipEntry", errMsg)
+    guihooks.trigger('modmanagerError', errMsg)
+    return nil,nil
+  end
   local filesInZIP = zip:getFileList()
 
   if mods[modname] and mods[modname].fullpath == filename then
@@ -483,18 +471,18 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
   --log('D', 'initDB', 'initDB() ...')
 
   local disableAllMods = false
-  local updatedFromVersion = nil
-  local cmdArgs = Engine.getStartingArgs()
-  for i, v in ipairs(cmdArgs) do
-    if v == '-versionUpdated' then
-      if #cmdArgs > i then
-        updatedFromVersion = cmdArgs[i + 1]
-      end
-      log('I', 'initDB', "Version update found. Coming from version '" .. tostring(updatedFromVersion) .. "'")
-      disableAllMods = true
-      break
-    end
-  end
+  --local updatedFromVersion = nil
+  --local cmdArgs = Engine.getStartingArgs()
+  --for i, v in ipairs(cmdArgs) do
+  --  if v == '-versionUpdated' then
+  --    if #cmdArgs > i then
+  --      updatedFromVersion = cmdArgs[i + 1]
+  --    end
+  --    log('I', 'initDB', "Version update found. Coming from version '" .. tostring(updatedFromVersion) .. "'")
+  --    disableAllMods = true
+  --    break
+  --  end
+  --end
 
   -- check DB version number
   if not dbHeader or dbHeader.version ~= 1.1 then
@@ -533,7 +521,9 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
       if mod and mod.active ~= false then
         log('D', 'initDB', 'mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
         addMountEntryToList(mountList, filename, mod.mountPoint)
-        newMountedFiles = arrayConcat(newMountedFiles,modFiles)
+        if modFiles and #modFiles>0 then
+          newMountedFiles = arrayConcat(newMountedFiles,modFiles)
+        end
         job.yield()
       end
     end
@@ -541,7 +531,10 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
   end
 
   if( #mountList > 0) then
-    FS:mountList(mountList)
+    if not FS:mountList(mountList) then
+      guihooks.trigger('modmanagerError', 'Error mounting mods')
+      log('E', 'initDB', 'mountList Error')
+    end
   end
   --log('D', 'initDB', '... finished')
 
@@ -607,12 +600,7 @@ end)
 
 local function deactivateAllMods()
   for modname, v in pairs(mods) do
-    if FS:isMounted(v.fullpath) then
-      FS:unmount(v.fullpath)
-    end
-    if mods[modname] then
-      mods[modname].active = false
-    end
+    M.deactivateMod(modname)
   end
   stateChanged()
 end
@@ -642,9 +630,8 @@ local function safeDelete(filename)
   if not FS:fileExists(filename) and not FS:directoryExists(filename) then
     return true
   end
-  if FS:removeFile(filename) ~= 0 then
-    local errMsg = FS:getLastError() or ''
-    log('E', 'safeDelete', 'unable to delete file: ' .. dumps(filename) .. ' : ' .. errMsg)
+  if FS:remove(filename) ~= 0 then
+    log('E', 'safeDelete', 'unable to delete : ' .. dumps(filename))
     return false
   end
   return true
@@ -652,12 +639,12 @@ end
 
 local function safeDeleteFolder(folderPath)
   -- delete old files in reverse order for empty folders before try to delete it
-  local deleteFileList = FS:findFiles( folderPath, "*", -1, true, true )
+  -- local deleteFileList = FS:findFiles( folderPath, "*", -1, true, true )
   --dump(deleteFileList)
-  for i = #deleteFileList, 1, -1 do
-    safeDelete( deleteFileList[i] )
-  end
-  safeDelete(folderPath)
+  -- for i = #deleteFileList, 1, -1 do
+  --   safeDelete( deleteFileList[i] )
+  -- end
+  safeDelete(folderPath) --FS:remove is recursive and deletes both folder and dir
 end
 
 -- WIP ZIP interface
@@ -713,6 +700,86 @@ local function _cleanPathFromHash(p)
   return p:gsub("\\","")
 end
 
+-- avoid calling for unpacked mods because of perf reason
+-- does not work with specific mountpath
+local function _getModFsNotifFileList(modname,reason) --reason ["added", "deleted"]
+  if not mods[modname] then
+    log('E', '_getModContentFileList', 'mod not existing ' .. tostring(modname))
+    return {}
+  end
+
+  local mountedFilesChange = {}
+
+  if mods[modname].modData and mods[modname].modData.hashes then --repo mod
+    for i,e in ipairs(mods[modname].modData.hashes) do
+      mountedFilesChange[i] = {filename = "/" .. _cleanPathFromHash(e[1]) , type = reason } --e[2] is hash
+    end
+  elseif mods[modname].unpackedPath then --unpacked, no fs notif because too slow to do findfiles on everything
+    local modFiles = FS:findFiles(mods[modname].unpackedPath, '*', -1, true, false)
+    for i,e in ipairs(modFiles) do
+      mountedFilesChange[i] = {filename = e, type = reason }
+    end
+
+  else--packed zip with no info
+    local zip = ZipArchive()
+    if zip:openArchiveName( mods[modname].fullpath, "R" ) and FS:fileExists(mods[modname].fullpath) then
+      local filesInZIP = zip:getFileList()
+      for k,v in ipairs(filesInZIP) do
+        mountedFilesChange[#mountedFilesChange+1] = {filename = v, type = reason }
+      end
+    else
+      log("E","_getModFsNotifFileList", "Invalid ZIP file: "..dumps(mods[modname].fullpath))
+      mountedFilesChange = {}
+    end
+    zip:close()
+    zip = nil
+  end
+
+  return mountedFilesChange
+end
+
+local function _getModScriptFiles(modname)
+  if not mods[modname] then
+    log('E', '_getModContentFileList', 'mod not existing ' .. tostring(modname))
+    return nil
+  end
+
+  local modScripts = {}
+
+  if mods[modname].modData and mods[modname].modData.hashes then --repo mod
+    for i,e in ipairs(mods[modname].modData.hashes) do
+      local fp = "/" .. _cleanPathFromHash(e[1]) --e[2] is hash
+      if (string.startswith(fp,'/scripts/') or string.startswith(fp,'/mods_data/'))
+      and string.endswith(fp,'/modScript.lua') then
+        modScripts[#modScripts+1] = fp
+      end
+    end
+  elseif mods[modname].unpackedPath then --unpacked, no fs notif because too slow to do findfiles on everything
+    local modScriptFiles = FS:findFiles(mods[modname].unpackedPath .. '/scripts/', 'modScript.lua', -1, true, false)
+    modScripts = arrayConcat(modScripts,modScriptFiles)
+
+    modScriptFiles = FS:findFiles(mods[modname].unpackedPath .. '/mods_data/', 'modScript.lua', 1, true, false)
+    modScripts = arrayConcat(modScripts,modScriptFiles)
+
+  else--packed zip with no info
+    local zip = ZipArchive()
+    if zip:openArchiveName( mods[modname].fullpath, "R" ) and FS:fileExists(mods[modname].fullpath) then
+      local filesInZIP = zip:getFileList()
+      for k,v in ipairs(filesInZIP) do
+        if (string.startswith(v,'/scripts/') or string.startswith(v,'/mods_data/'))
+        and string.endswith(v,'/modScript.lua') then
+          modScripts[#modScripts+1] = v
+        end
+      end
+    else
+      log("E","activateMod.modScript", "Invalid ZIP file: "..dumps(mods[modname].fullpath))
+    end
+    zip:close()
+    zip = nil
+  end
+  return modScripts
+end
+
 local function deactivateMod(modname)
   if not mods[modname] then
     log('I', 'deactivateMod', 'mod not existing ' .. tostring(modname))
@@ -723,20 +790,21 @@ local function deactivateMod(modname)
     FS:unmount(filename)
   end
 
-  local mountedFilesChange = {}
+  local mountedFilesChange = nil
   local mountPoint = ""
   if mods[modname].mountPoint then
     mountPoint = mods[modname].mountPoint
   end
-  if mods[modname].modData and mods[modname].modData.hashes then
-    for i,e in ipairs(mods[modname].modData.hashes) do
-      mountedFilesChange[i] = {filename = "/"..mountPoint.._cleanPathFromHash(e[1]), type = "deleted" } --e[2] is hash
-    end
+
+  if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
+    mountedFilesChange = _getModFsNotifFileList(modname,"deleted")
   end
 
   mods[modname].active = false
   extensions.hook('onModDeactivated', deepcopy(mods[modname]))
-  _G.onFileChanged(mountedFilesChange) --main.lua
+  if mountedFilesChange then
+    _G.onFileChanged(mountedFilesChange) --main.lua
+  end
   stateChanged()
   
   MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
@@ -770,20 +838,31 @@ local function activateMod(modname)
     mountEntry(mods[modname].fullpath, mods[modname].mountPoint)
   end
 
-  local mountedFilesChange = {}
+  local mountedFilesChange
+  if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
+    mountedFilesChange = _getModFsNotifFileList(modname,"added")
+  end
+  local modScripts = _getModScriptFiles(modname)
   local mountPoint = ""
   if mods[modname].mountPoint then
     mountPoint = mods[modname].mountPoint
   end
-  if mods[modname].modData and mods[modname].modData.hashes then
-    for i,e in ipairs(mods[modname].modData.hashes) do
-      mountedFilesChange[i] = {filename = "/"..mountPoint.._cleanPathFromHash(e[1]), type = "added" } --e[2] is hash
+
+  log('D', 'activateMod', 'modScripts' .. dumps(modScripts))
+
+  for k,v in ipairs(modScripts) do
+    local status, ret = pcall(dofile, v)
+    if not status then
+      log('E', 'activateMod.modScript', 'Failed to execute ' .. v)
+      log('E', 'activateMod.modScript', dumps(ret))
     end
   end
 
   mods[modname].active = true
   extensions.hook('onModActivated', deepcopy(mods[modname]))
-  _G.onFileChanged(mountedFilesChange) --main.lua
+  if mountedFilesChange and #mountedFilesChange>0 then
+    _G.onFileChanged(mountedFilesChange) --main.lua
+  end
 
   stateChanged()
   
@@ -801,18 +880,47 @@ end
 
 local function activateAllMods()
   local mountList = {}
+  local mountedFilesChange = {}
+  local modScripts = {}
   for modname, v in pairs(mods) do
     if not FS:isMounted(v.fullpath) then
       addMountEntryToList( mountList, v.fullpath, v.mountPoint )
+
+      --fs notif and modscript
+      if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
+        local newMountedFilesChange = _getModFsNotifFileList(modname,"added")
+        mountedFilesChange = arrayConcat(mountedFilesChange,newMountedFilesChange)
+      end
+      local newModScripts = _getModScriptFiles(modname)
+      if newModScripts and #newModScripts>0 then
+        modScripts = arrayConcat(modScripts,newModScripts)
+      end
     end
-    if mods[modname] then
+
+    if mods[modname] and not mods[modname].active then
       mods[modname].active = true
       extensions.hook('onModActivated', deepcopy(mods[modname]))
     end
   end
+
   if( #mountList > 0) then
-    FS:mountList(mountList)
+    if not FS:mountList(mountList) then
+      guihooks.trigger('modmanagerError', 'Error mounting mods')
+      log('E', 'activateAllMods', 'mountList Error')
+    end
   end
+
+  log('D', 'activateAllMods', 'modScripts' .. dumps(modScripts))
+
+  for k,v in ipairs(modScripts) do
+    local status, ret = pcall(dofile, v)
+    if not status then
+      log('E', 'activateAllMods.modScript', 'Failed to execute ' .. v)
+      log('E', 'activateAllMods.modScript', dumps(ret))
+    end
+  end
+  _G.onFileChanged(mountedFilesChange) --main.lua
+
   stateChanged()
 end
 
@@ -826,8 +934,14 @@ local function deleteMod(modname)
   local filename = mods[modname].fullpath
   if FS:isMounted(filename) then
     if not FS:unmount(filename) then
-      log("E", "deleteMod", "unmount failed :"..dumps(FS:getLastError()))
+      log("E", "deleteMod", "unmount failed")
     end
+
+    --fs notif
+    if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
+      local rmMountedFilesChange = _getModFsNotifFileList(modname,"deleted")
+    end
+
   end
 
   if not safeDelete(filename) then return false end
@@ -1005,16 +1119,16 @@ local function workOffChangedMod(filename, type)
   local modname = getModNameFromPath(filename)
   if mods[modname] and mods[modname].unpackedPath and type == 'added' then
     safeDelete(filename)
-    log('E', 'onFileChanged', 'You have a unpacked version of [ '..modname..' ]. Need to be Packed before update')
+    log('E', '', 'You have a unpacked version of [ '..modname..' ]. Need to be Packed before update')
     guihooks.trigger('modmanagerError', 'You have a unpacked version of [ '..modname..' ]. Need to be Packed before update')
     return
   end
   local dir, basefilename, ext = path.splitWithoutExt(filename)
   if ext == 'zip' and FS:fileExists(filename) and (type == 'added' or type == 'modified') then
-    log('D', 'onFileChanged', tostring(filename) .. ' : ' .. tostring(type) .. ' > ' .. tostring(ext))
+    log('D', '', tostring(filename) .. ' : ' .. tostring(type) .. ' > ' .. tostring(ext))
     local mod, files = updateZIPEntry(filename)
     if mod and mod.active ~= false then
-      log('D', 'onFileChanged', 'activateMod -- ' .. tostring(filename))
+      log('D', '', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
 	  MPCoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
     end
@@ -1275,7 +1389,7 @@ M.openModFolderInExplorer = openModFolderInExplorer
 M.packMod = packMod
 M.onUiReady = onUiReady
 M.requestState = sendGUIState
-M.requestTranslations = updateTranslations
+
 M.updateZipMod = updateZipMod
 
 M.getModNameFromID = getModNameFromID

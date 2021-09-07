@@ -113,7 +113,7 @@ local function autoLogin()
 	send('Nc')
 end
 local function logout()
-	log('M', l, 'Attempting logout')
+	log('M', loggerPrefix, 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
 end

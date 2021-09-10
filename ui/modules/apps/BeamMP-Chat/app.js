@@ -1,5 +1,7 @@
 var app = angular.module('beamng.apps');
 
+let lastSentMessage = "";
+let lastReceivedMessage = "";
 
 app.directive('multiplayerchat', [function () {
 	return {
@@ -12,8 +14,11 @@ app.directive('multiplayerchat', [function () {
 }]); 
 
 
-app.controller("Chat", ['$scope', function ($scope) {
+app.controller("Chat", ['$scope', '$rootScope', function ($scope, $rootScope) {
 	$scope.init = function() {
+    // try to unregister existing chatMessage listener
+    $rootScope.$$listeners.chatMessage = [] 
+
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
 		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
@@ -182,6 +187,13 @@ function addMessage(msg) {
 	var time = hour + ":" + minute + ":" + second;
 	msg = time + " " + msg;
 
+  // make sure that the last message isn't a dupe
+  if (msg === lastReceivedMessage) {
+    return;
+  } else {
+    lastReceivedMessage = msg;
+  }
+
 	// Create the message node and add it
 	let node = document.createElement("li");
 	node.style.padding = "3px 0px 3px 0px";
@@ -200,8 +212,6 @@ function addMessage(msg) {
 	if (chatwindow.style.flexDirection != "column-reverse") chatlist.scrollTop = chatlist.scrollHeight;
 	else chatlist.scrollTop = 0;
 }
-
-var lastSentMessage = "";
 
 function onKeyDown(e) {
 	if (e.key == "ArrowUp") {

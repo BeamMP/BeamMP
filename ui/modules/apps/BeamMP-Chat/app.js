@@ -14,7 +14,7 @@ app.directive('multiplayerchat', [function () {
 }]); 
 
 
-app.controller("Chat", ['$scope', '$rootScope', function ($scope, $rootScope) {
+app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
     // try to unregister existing chatMessage listener
     $rootScope.$$listeners.chatMessage = [] 
@@ -92,9 +92,8 @@ app.controller("Chat", ['$scope', '$rootScope', function ($scope, $rootScope) {
 		else setChatDirection("bottom");
 	}
 
-	$rootScope.$on('chatMessage', function (event, message) {
-    if (event.target === event.scope) {
-		addMessage(message);}
+	$scope.$on('chatMessage', function (event, message) {
+		addMessage(message);
 	});
 
 	$scope.chatSend = function() {

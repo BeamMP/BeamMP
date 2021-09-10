@@ -16,8 +16,8 @@ app.directive('multiplayerchat', [function () {
 
 app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
-    // try to unregister existing chatMessage listener
-    $rootScope.$$listeners.chatMessage = [] 
+	// try to unregister existing chatMessage listener
+	$rootScope.$$listeners.chatMessage = [] 
 
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
@@ -176,55 +176,55 @@ async function showChat() {
 
 // -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //
 function applyCode(string, codes) {
-  var elem = document.createElement("span");
-  elem.style.fontSize = "initial";
-  string = string.replace(/\x00*/g, "");
-  for (var i = 0, len = codes.length; i < len; i++) {
-      elem.style.cssText += serverStyleMap[codes[i]] + ";";
-  }
-  elem.innerHTML = string;
-  return elem;
+	var elem = document.createElement("span");
+	elem.style.fontSize = "initial";
+	string = string.replace(/\x00*/g, "");
+	for (var i = 0, len = codes.length; i < len; i++) {
+		elem.style.cssText += serverStyleMap[codes[i]] + ";";
+	}
+	elem.innerHTML = string;
+	return elem;
 }
 
 function formatRichString(string) {
-  let tempAreaElement = document.createElement('div');
-  tempAreaElement.setAttribute("id", "TEMPAREA");
+	let tempAreaElement = document.createElement('div');
+	tempAreaElement.setAttribute("id", "TEMPAREA");
 
-  var codes = string.match(/\^.{1}/g) || [],
-      indexes = [],
-      apply = [],
-      tmpStr,
-      deltaIndex,
-      noCode,
-      final = document.createDocumentFragment(),
-      i;
+	var codes = string.match(/\^.{1}/g) || [],
+		indexes = [],
+		apply = [],
+		tmpStr,
+		deltaIndex,
+		noCode,
+		final = document.createDocumentFragment(),
+		i;
 
-  for (i = 0, len = codes.length; i < len; i++) {
-      indexes.push(string.indexOf(codes[i]));
-      string = string.replace(codes[i], "\x00\x00");
-  }
+	for (i = 0, len = codes.length; i < len; i++) {
+		indexes.push(string.indexOf(codes[i]));
+		string = string.replace(codes[i], "\x00\x00");
+	}
 
-  if (indexes[0] !== 0) {
-      final.appendChild(applyCode(string.substring(0, indexes[0]), []));
-  }
+	if (indexes[0] !== 0) {
+		final.appendChild(applyCode(string.substring(0, indexes[0]), []));
+	}
 
-  for (i = 0; i < len; i++) {
-      indexDelta = indexes[i + 1] - indexes[i];
-      if (indexDelta === 2) {
-          while (indexDelta === 2) {
-              apply.push(codes[i]);
-              i++;
-              indexDelta = indexes[i + 1] - indexes[i];
-          }
-          apply.push(codes[i]);
-      } else {
-          apply.push(codes[i]);
-      }
-      if (apply.lastIndexOf("^r") > -1) {
-          apply = apply.slice(apply.lastIndexOf("^r") + 1);
-      }
-      tmpStr = string.substring(indexes[i], indexes[i + 1]);
-      final.appendChild(applyCode(tmpStr, apply));
+	for (i = 0; i < len; i++) {
+		indexDelta = indexes[i + 1] - indexes[i];
+		if (indexDelta === 2) {
+			while (indexDelta === 2) {
+				apply.push(codes[i]);
+				i++;
+				indexDelta = indexes[i + 1] - indexes[i];
+			}
+			apply.push(codes[i]);
+		} else {
+			apply.push(codes[i]);
+		}
+		if (apply.lastIndexOf("^r") > -1) {
+			apply = apply.slice(apply.lastIndexOf("^r") + 1);
+		}
+		tmpStr = string.substring(indexes[i], indexes[i + 1]);
+		final.appendChild(applyCode(tmpStr, apply));
   }
   tempAreaElement.innerHTML = final;
   var innerHTML = [...final.childNodes].map((n) => n.outerHTML).join("\n");
@@ -238,62 +238,60 @@ function formatRichString(string) {
 
 function addMessage(msg) {
 	//getting current time and adding it to the message before displaying
-	const now = new Date();
-  var hour = now.getHours();
-  var minute = now.getMinutes();
-  var second = now.getSeconds();  
-    if(hour < 10) hour = '0'+hour;
-    if(minute < 10) minute = '0'+minute;
-    if(second < 10) second = '0'+second;
+	var now = new Date();
+	var hour    = now.getHours();
+	var minute  = now.getMinutes();
+	var second  = now.getSeconds();
+	if(hour < 10) hour = '0'+hour;
+	if(minute < 10) minute = '0'+minute;
+	if(second < 10) second = '0'+second;
 
-	const time = hour + ":" + minute + ":" + second;
+	var time = hour + ":" + minute + ":" + second;
 
-  const msgText = "" + msg
+  	const msgText = "" + msg
 	msg = time + " " + msg;
 
-  // make sure that the last message isn't a dupe
+	// Create the message node
+	const chatMessageNode = document.createElement("li");
+	chatMessageNode.className = "chat-message";
+	fadeNode(chatMessageNode);
 
-  // Create the message node
-  const chatMessageNode = document.createElement("li");
-  chatMessageNode.className = "chat-message";
-  fadeNode(chatMessageNode);
+	// create node for the timestamp
+	const messageTimestampNode = document.createElement("span");
+	messageTimestampNode.className = "chat-message-timestamp";
 
-  // create node for the timestamp
-  const messageTimestampNode = document.createElement("span");
-  messageTimestampNode.className = "chat-message-timestamp";
+	const timestampTextNode = document.createTextNode(time);
+	messageTimestampNode.appendChild(timestampTextNode);
 
-  const timestampTextNode = document.createTextNode(time);
-  messageTimestampNode.appendChild(timestampTextNode);
+	chatMessageNode.appendChild(messageTimestampNode)
 
-  chatMessageNode.appendChild(messageTimestampNode)
+	// create text for the message itself, add it to chat message list
+	const chatList = document.getElementById("chat-list");
 
-  // create text for the message itself, add it to chat message list
-  const chatList = document.getElementById("chat-list");
+	// check if this message is a server message before
+	// doing rich formatting
+	if (msgText.startsWith("Server: ")) {
+		const formattedInnerHtml = formatRichString(msgText);
+		chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
+	} else {
+		const textNode = document.createTextNode(msgText);
+		chatMessageNode.appendChild(textNode);
+	}
 
-  // check if this message is a server message before
-  // doing rich formatting
-  if (msgText.startsWith("Server: ")) {
-    const formattedInnerHtml = formatRichString(msgText);
-    chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
-  } else {
-    const textNode = document.createTextNode(msgText);
-    chatMessageNode.appendChild(textNode);
-  }
-
-  chatList.appendChild(chatMessageNode);
+	chatList.appendChild(chatMessageNode);
 
 	// Delete oldest chat message if more than 70 messages exist
 	if (chatList.children.length > 70) {
-    chatList.removeChild(chatList.children[0]);
-  }
+		chatList.removeChild(chatList.children[0]);
+	}
 
 	// Scroll the chat depending on its direction
 	const chatwindow = document.getElementById("chat-window");
 	if (chatwindow.style.flexDirection != "column-reverse") {
-    chatList.scrollTop = chatList.scrollHeight
-  } else {
-    chatList.scrollTop = 0
-  };
+		chatList.scrollTop = chatList.scrollHeight
+	} else {
+		chatList.scrollTop = 0
+	};
 }
 
 function onKeyDown(e) {

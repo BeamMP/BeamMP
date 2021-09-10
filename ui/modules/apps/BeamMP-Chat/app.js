@@ -92,8 +92,9 @@ app.controller("Chat", ['$scope', '$rootScope', function ($scope, $rootScope) {
 		else setChatDirection("bottom");
 	}
 
-	$scope.$on('chatMessage', function (event, message) {
-		addMessage(message);
+	$rootScope.$on('chatMessage', function (event, message) {
+    if (event.target === event.scope) {
+		addMessage(message);}
 	});
 
 	$scope.chatSend = function() {
@@ -239,23 +240,19 @@ function formatRichString(string) {
 function addMessage(msg) {
 	//getting current time and adding it to the message before displaying
 	const now = new Date();
-    var hour    = now.getHours();
-    var minute  = now.getMinutes();
-    var second  = now.getSeconds();
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  var second = now.getSeconds();  
     if(hour < 10) hour = '0'+hour;
     if(minute < 10) minute = '0'+minute;
     if(second < 10) second = '0'+second;
-	const time = hour + ":" + minute + ":" + second;
-  const msgText = "" + msg
 
+	const time = hour + ":" + minute + ":" + second;
+
+  const msgText = "" + msg
 	msg = time + " " + msg;
 
   // make sure that the last message isn't a dupe
-  if (msg === lastReceivedMessage) {
-    return;
-  } else {
-    lastReceivedMessage = msg;
-  }
 
   // Create the message node
   const chatMessageNode = document.createElement("li");

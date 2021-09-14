@@ -342,7 +342,7 @@ local function onUpdate(dt)
 			else send('Up') end -- Server heartbeat
 		end
 		-- Check the launcher connection
-		if launcherConnectionTimer > 2 then
+		if launcherConnectionTimer > 10 then
 			log('M', loggerPrefix, "Connection to launcher was lost")
 			guihooks.trigger('LauncherConnectionLost')
 			disconnectLauncher(true)

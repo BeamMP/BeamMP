@@ -1,12 +1,11 @@
 <md-content id="bng-credits-wrapper" tabindex="0" ng-keypress="credits.exit($event)">
 
-  <audio autoplay loop preload style="display:none"
-         id="bng-credits-playback">
-    <source src="modules/credits/lonle.ogg"/>
+  <audio controls autoplay loop preload>
+    <source src="/ui/modules/credits/lonle.ogg"/>
   </audio>
 
   <div class="bng-credits-content">
-    <img src="modules/credits/beammp.png">
+    <img src="/ui/modules/credits/beammp.png">
 
     <div>
       <job>BeamMP Mod Developers</job>
@@ -40,21 +39,22 @@
       </div>
     </div>
 
-    <img src="modules/credits/beamngdrive.png" style="margin-top: 150px;">
+    <img src="/ui/modules/credits/beamngdrive.png"" style="margin-top: 150px;">
 
-    <div ng-repeat="contrib in credits.contributors">
-      <job>{{ ::contrib.translateId | translate }}</job>
-      <div ng-repeat="member in contrib.members">
-        <name>
+    <div ng-repeat="category in credits.credits">
+      <creditsCategory>{{ ::category.translateId | translate }}</creditsCategory>
+      <div ng-repeat="member in category.members">
+        <creditsMember>
           {{ ::member.first }}
-		    <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
+          <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
           {{ ::member.last }}
 
-          <span ng-if="::member.title" class="title">.{{ ::member.title }}</span>
-        </name>
+          <span ng-if="::member.title" class="title">.{{ ::member.title | translate }}</span>
+          &nbsp;<!-- allow to print blank lines using empty fields-->
+        </creditsMember>
       </div>
     </div>
   </div>
 
-  <img src="modules/credits/beamngdrive.png" class="bng-credits-end">
+  <img src="/ui/modules/credits/beamngdrive.png" class="bng-credits-end">
 </md-content>

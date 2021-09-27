@@ -8,19 +8,19 @@
     <img src="/ui/modules/credits/beammp.png">
 
     <div>
-      <job>BeamMP Mod Developers</job>
+      <job>BeamMP Development Team</job>
       <div>
         <name>
-		    <span>Titch2000</span>
-			<span style="color:#0059ff">.Lead BeamMP developer</span>
+	  <span>Titch2000</span>
+	  <span style="color:#0059ff">.BeamMP Project Lead</span>
         </name>
         <name>
-  		   <span>Anonymous275</span>
-			<span style="color:#0059ff">.Lead BeamMP developer</span>
+  	  <span>Anonymous275</span>
+	  <span style="color:#0059ff">.Lead (Client) BeamMP developer</span>
         </name>
         <name>
-    		<span>Jojos38</span>
-			<span style="color:#0059ff">.Lead BeamMP developer</span>
+    	  <span>Jojos38</span>
+	  <span style="color:#0059ff">.Lead (Server) BeamMP developer</span>
         </name>
       </div>
     </div>
@@ -29,12 +29,12 @@
       <job>BeamMP Contributors</job>
       <div>
         <name>
-		    <span>stefan750</span>
-			<span style="color:#0059ff">.pushing cars around</span>
+	  <span>stefan750</span>
+	  <span style="color:#0059ff">.pushing cars around</span>
         </name>
         <name>
-  		   <span>deer boi</span>
-			<span style="color:#0059ff">.Lead deer developer</span>
+  	  <span>deer boi</span>
+	  <span style="color:#0059ff">.Lead deer developer</span>
         </name>
       </div>
     </div>
@@ -46,7 +46,7 @@
       <div ng-repeat="member in category.members">
         <creditsMember>
           {{ ::member.first }}
-          <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
+            <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
           {{ ::member.last }}
 
           <span ng-if="::member.title" class="title">.{{ ::member.title | translate }}</span>

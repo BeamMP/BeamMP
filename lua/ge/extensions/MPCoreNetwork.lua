@@ -90,6 +90,7 @@ local function checkLauncherConnection()
 		launcherConnectionStatus = 2
 		guihooks.trigger('launcherConnected', nil)
 	end
+	guihooks.trigger('showConnectionIssues', false)
 end
 -- ============= LAUNCHER RELATED =============
 
@@ -367,7 +368,13 @@ local function onUpdate(dt)
 		-- Check the launcher connection
 		if launcherConnectionTimer > 2 then
 			log('M', loggerPrefix, "it's been 2 seconds since the last ping so lua was probably frozen for a while")
-			--guihooks.trigger('LauncherConnectionLost')
+
+			if scenetree.missionGroup then
+				guihooks.trigger('showConnectionIssues', true)
+			else
+				guihooks.trigger('LauncherConnectionLost')
+			end
+
 			--disconnectLauncher(true)
 			launcherConnectionTimer = 0
 		end

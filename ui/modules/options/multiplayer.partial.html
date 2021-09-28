@@ -3,26 +3,33 @@
   <md-subheader class="md-no-sticky">General</md-subheader>
 
   <md-list-item md-no-ink>
-    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.beammpAlternateModloading" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
     <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+
   <div style="margin: 0px 16px 16px 16px; border: 1px solid rgba(0,0,0,0.12);" ng-show="options.data.values.enableSpawnQueue">
     <md-list-item md-no-ink>
-      <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
+      <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
       <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>
 
     <md-list-item md-no-ink>
-      <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueAutoSkipRemote' | translate }}</p>
+      <p>{{:: 'ui.options.multiplayer.queueAutoSkipRemote' | translate }}</p>
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAutoSkipRemote.tooltip' | translate }}</md-tooltip>
       <md-checkbox ng-model="options.data.values.queueAutoSkipRemote" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>
 
     <md-list-item md-no-ink>
-      <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSkipUnicycle' | translate }}</p>
+      <p>{{:: 'ui.options.multiplayer.queueSkipUnicycle' | translate }}</p>
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSkipUnicycle.tooltip' | translate }}</md-tooltip>
       <md-checkbox ng-model="options.data.values.queueSkipUnicycle" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>

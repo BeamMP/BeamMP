@@ -1821,6 +1821,14 @@ $scope.$on('requestUIInitialised', () => {
     $scope.$broadcast('physicsStateChanged', !vm.physicsPaused);
   });
 
+	// -------------------------------------- BEAMMP -------------------------------------- //
+  //ingame red connection warning
+  $scope.$on('showConnectionIssues', function(evt, data) {
+    vm.showConnectionIssues = data;
+  });
+
+	// -------------------------------------- BEAMMP -------------------------------------- //
+
 
 
   vm.isWaiting = false;

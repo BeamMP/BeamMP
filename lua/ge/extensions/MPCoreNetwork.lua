@@ -343,9 +343,9 @@ local function onUpdate(dt)
 		end
 		-- Check the launcher connection
 		if launcherConnectionTimer > 2 then
-			log('M', loggerPrefix, "Connection to launcher was lost")
-			guihooks.trigger('LauncherConnectionLost')
-			disconnectLauncher(true)
+			log('M', loggerPrefix, "it's been 2 seconds since the last ping so lua was probably frozen for a while")
+			--guihooks.trigger('LauncherConnectionLost')
+			--disconnectLauncher(true)
 			launcherConnectionTimer = 0
 		end
 	end

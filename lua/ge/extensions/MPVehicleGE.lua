@@ -115,12 +115,16 @@ local function getNicknameFromID(id)
 end
 
 local function setPlayerNickPrefix(targetName, tagSource, text)
+	if targetName == nil then return end
 	if text == nil then text = tagSource; tagSource = "default" end
-	nicknamePrefixMap[targetName] = { [tagSource] = text }
+	if not nicknamePrefixMap[targetName] then nicknamePrefixMap[targetName] = {} end
+	nicknamePrefixMap[targetName][tagSource] = text
 end
 local function setPlayerNickSuffix(targetName, tagSource, text)
+	if targetName == nil then return end
 	if text == nil then text = tagSource; tagSource = "default" end
-	nicknameSuffixMap[targetName] = { [tagSource] = text }
+	if not nicknameSuffixMap[targetName] then nicknameSuffixMap[targetName] = {} end
+	nicknameSuffixMap[targetName][tagSource] = text
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)

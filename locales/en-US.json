@@ -4355,6 +4355,8 @@
     "ui.options.multiplayer.clearLauncherCache": "Clear the launchers mod cache",
     "ui.options.multiplayer.clearLauncherCache.tooltip": "Enabling this will clear the currently download mod cache of the launcher. Doing this will result in you having to download all mods for each server you join again.",
 	"ui.options.multiplayer.skipOtherPlayersVehicles": "Disable switching to other players vehicles",
+	"ui.options.multiplayer.alternateModloading": "Alternate mod loading",
+	"ui.options.multiplayer.alternateModloading.tooltip": "This method allows you to unfocus the BeamNG window whilst loading mods, but it can not guarantee loading unstable mods.",
     "ui.multiplayer.clear": "Clear Launcher Cache",
 
 	"ui.options.multiplayer.nameTagTitle": "Nametags",

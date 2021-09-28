@@ -118,7 +118,9 @@ local function loadJBeamFile(dir, filename, addToCache)
       local partDesc = {
         description = part.information.name or "",
         authors = part.information.authors or "",
+        ---------- BEAMMP ----------
         value = part.information.value or "",
+        ---------- BEAMMP ----------
         slots = slotInfo
       }
       if modManager then -- only available on the game engine side

@@ -8,13 +8,12 @@
     <md-checkbox ng-model="options.data.values.beammpAlternateModloading" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
     <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
-
-
   <div style="margin: 0px 16px 16px 16px; border: 1px solid rgba(0,0,0,0.12);" ng-show="options.data.values.enableSpawnQueue">
     <md-list-item md-no-ink>
       <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>

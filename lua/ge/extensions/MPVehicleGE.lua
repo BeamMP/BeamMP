@@ -210,10 +210,10 @@ local function applyVehEdit(serverID, data)
 		local tuningDiff = MPHelpers.tableDiff(playerVehicle.config.vars, vehicleConfig.vars)
 
 		local configChanged = tableSize(partsDiff) > 0 or tableSize(tuningDiff) > 0
-		local colorChanged = MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
-		--print(colorChanged)
+		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
+		--print("colorchanged: " .. tostring(colorChanged))
 		if configChanged or colorChanged then
-			tableMerge(playerVehicle.config, vehicleConfig)
+			tableMerge(playerVehicle.config, vehicleConfig) -- add new parts to the existing config
 
 			if configChanged then
 				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
@@ -228,18 +228,25 @@ local function applyVehEdit(serverID, data)
 			log('I','applyVehEdit', "received edit matches local copy, ignoring message")
 		end
 	else
-		log('W','applyVehEdit', "The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
+		log('W','applyVehEdit', "The received data for '"..vehicleName.."' does not correspond with the vehicle '"..veh:getJBeamFilename().."'")
 
+		--fresh spawns dont contain paint data?
+		if not vehicleConfig.paints then
+			vehicleConfig.paints = {}
+			if decodedData.col then vehicleConfig.paints[1] = {baseColor=decodedData.col} end
+			if decodedData.cpz then vehicleConfig.paints[2] = {baseColor=decodedData.cpz} end
+			if decodedData.cpo then vehicleConfig.paints[3] = {baseColor=decodedData.cpo} end
+		end
 
-		local c   = decodedData.col and ColorF(decodedData.col[1],decodedData.col[2],decodedData.col[3],decodedData.col[4]) or nil
-		local p0  = decodedData.cpz and ColorF(decodedData.cpz[1],decodedData.cpz[2],decodedData.cpz[3],decodedData.cpz[4]) or nil
-		local p1  = decodedData.cpo and ColorF(decodedData.cpo[1],decodedData.cpo[2],decodedData.cpo[3],decodedData.cpo[4]) or nil
-		local pos = veh:getPosition()
-		local rot = quat(veh:getRotation())
+		local options = {
+			model = vehicleName,
+			config = serialize(vehicleConfig),
+			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
+			paint = vehicleConfig.paints[1], paint2 = vehicleConfig.paints[2], paint3 = vehicleConfig.paints[3]
+		}
 
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
-		spawn.setVehicleObject(veh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
-		--playerVehicle:setField('name', '', vehicleName or "")
+		spawn.setVehicleObject(veh, options)
 	end
 end
 
@@ -317,17 +324,23 @@ local function applyVehSpawn(event)
 		return
 	end
 
+	--fresh spawns dont contain paint data?
+	if not vehicleConfig.paints then
+		vehicleConfig.paints = {}
+		if c   then vehicleConfig.paints[1] = {baseColor=c} end
+		if cP0 then vehicleConfig.paints[2] = {baseColor=cP0} end
+		if cP1 then vehicleConfig.paints[3] = {baseColor=cP1} end
+	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
-
 	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
 
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
-		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true, paint=vehicleConfig.paint})
+		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
-		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, paint=vehicleConfig.paint })
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
 		spawnedVehID = spawnedVeh:getID()
 		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
 		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map

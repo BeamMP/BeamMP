@@ -7,15 +7,8 @@
 
 local M = {}
 
-local function colorMatch(old, new) -- we assume the new color object has more data
-	if new ~= nil and old ~= nil then
-		if serialize(new) ~= serialize(old) then
-			return true
-		end
-		return false
-	else
-		return false
-	end
+local function colorMatch(old, new)
+	return serialize(old) == serialize(new)
 end
 
 local function tableDiff(old, new)

@@ -173,7 +173,10 @@ function(logger, $scope, $state, $timeout) {
 
 	vm.closePopup =  function() {
 		document.getElementById('addCustomFav').style.display = 'none';
+	};
+	vm.closeLoadingPopup =  function() {
 		document.getElementById('LoadingServer').style.display = 'none';
+		bngApi.engineLua('MPCoreNetwork.resetSession()');
 	};
 
 	vm.showCustomServer = function() {

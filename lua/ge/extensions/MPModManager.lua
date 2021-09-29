@@ -37,30 +37,33 @@ local function checkMod(mod)
 	local modname = mod.modname
 	local modAllowed = IsModAllowed(modname)
 	if not modAllowed and mod.active then -- This mod is not allowed to be running
-		print("This mod should not be running: "..modname)
+		log('W', 'checkMod', "This mod should not be running: "..modname)
 		core_modmanager.deactivateMod(modname)
-		if string.match(string.lower(modname), 'multiplayer') then
+		if mods.dirname == '/mods/multiplayer/' then
 			core_modmanager.deleteMod(modname)
 		end
 	elseif modAllowed then
 		if mod.active then -- this mod just got enabled for MP, run modscript
+			--dump(mod)
 			local dir, basefilename, ext = path.splitWithoutExt(mod.fullpath)
+			--dump(path.splitWithoutExt(mod.fullpath))
 
 			local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
-			print(mod.filename)
-			print("Loaded mod " .. basefilename)
+			--print(mod.filename)
+			log('I', 'checkMod', "Loaded  " .. basefilename)
 			
 			
 			local f = io.open(modscriptpath, "r")
-			if f == nil or not io.close(f) then return end
+			if f == nil or not io.close(f) then print(modscriptpath.." cant be opened") return end -- modscript file not found
 			
 			local status, ret = pcall(dofile, modscriptpath)
 			if not status then
 				log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
 				log('E', 'initDB.modScript', dumps(ret))
+			else
+				log('I', 'checkMod', "Ran modscript ("..modscriptpath..")")
+				loadCoreExtensions()
 			end
-
-			loadCoreExtensions()
 		else
 			print("Inactive Mod but Should be Active: "..modname)
 			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
@@ -73,8 +76,8 @@ end
 
 local function checkAllMods()
 	for modname, mod in pairs(core_modmanager.getModList()) do
-		checkMod(mod)
 		print("Checking mod "..mod.modname)
+		checkMod(mod)
 	end
 end
 

@@ -1,6 +1,5 @@
 var app = angular.module('beamng.apps');
 
-let lastSentMessage = "";
 let lastReceivedMessage = "";
 
 app.directive('multiplayerchat', [function () {
@@ -16,9 +15,6 @@ app.directive('multiplayerchat', [function () {
 
 app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
-	// try to unregister existing chatMessage listener
-	$rootScope.$$listeners.chatMessage = [] 
-
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
 		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
@@ -293,6 +289,8 @@ function addMessage(msg) {
 		chatList.scrollTop = 0
 	};
 }
+
+var lastSentMessage = "";
 
 function onKeyDown(e) {
 	if (e.key == "ArrowUp") {

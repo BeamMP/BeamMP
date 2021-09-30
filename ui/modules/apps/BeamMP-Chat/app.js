@@ -1,6 +1,6 @@
 var app = angular.module('beamng.apps');
 
-let lastReceivedMessage = "";
+let lastSentMessage = "";
 
 app.directive('multiplayerchat', [function () {
 	return {
@@ -289,8 +289,6 @@ function addMessage(msg) {
 		chatList.scrollTop = 0
 	};
 }
-
-var lastSentMessage = "";
 
 function onKeyDown(e) {
 	if (e.key == "ArrowUp") {

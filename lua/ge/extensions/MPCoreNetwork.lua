@@ -23,6 +23,7 @@ local currentMap = ""
 local loggedIn = false
 local mapLoaded = false
 local MapLoadingTimeout = 0
+local currentModHasLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
 local launcherTimeout = 0
@@ -89,6 +90,7 @@ local function checkLauncherConnection()
 		launcherConnectionStatus = 2
 		guihooks.trigger('launcherConnected', nil)
 	end
+	guihooks.trigger('showConnectionIssues', false)
 end
 -- ============= LAUNCHER RELATED =============
 
@@ -113,7 +115,7 @@ local function autoLogin()
 	send('Nc')
 end
 local function logout()
-	log('M', l, 'Attempting logout')
+	log('M', loggerPrefix, 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
 end
@@ -174,6 +176,7 @@ local function connectToServer(ip, port, mods, name)
 end
 
 local function loadLevel(map)
+	log("W","loadLevel", "loading map " ..map)
 	-- Map loading has a 5 seconds timeout in case it doesn't work
 	MPModManager.backupLoadedMods() -- Backup the current loaded mods before loading the map
 	MapLoadingTimeout = 0
@@ -191,6 +194,12 @@ end
 -- ============= SERVER RELATED =============
 
 
+local function modLoaded(modname)
+	if modname ~= "beammp" then -- We don't want to check beammp mod
+		send('R'..modname..'')
+	end
+end
+
 
 -- ============= OTHERS =============
 local function handleU(params)
@@ -198,6 +207,27 @@ local function handleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if code == "l" then
+		--log('W',"handleU", data)
+		if settings.getValue('beammpAlternateModloading') then
+			if data == "start" then-- starting modloading, disable automount
+				log('W',"handleU", "starting mod dl process, disabling automount")
+				core_modmanager.disableAutoMount()
+
+			elseif string.match(data, "^Loading Resource") then
+				log('W',"handleU", "mod downloaded, manually check for it")
+				--core_modmanager.enableAutoMount()
+				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(%g+)%.zip")
+
+				if currentModHasLoaded then
+					modLoaded(modName)
+					currentModHasLoaded = false
+				else
+					core_modmanager.initDB() -- manually check for new mod
+					currentModHasLoaded = true
+				end
+			end
+		end
+
 		if data == "done" and status == "LoadingResources" then
 			send('Mrequest')
 			status = "LoadingMap"
@@ -222,12 +252,6 @@ local function loginReceived(params)
 	end
 end
 
-
-local function modLoaded(modname)
-	if modname ~= "beammp" then -- We don't want to check beammp mod
-		send('R'..modname..'')
-	end
-end
 
 local function resetSession(goBack)
 	isMpSession = false
@@ -343,9 +367,15 @@ local function onUpdate(dt)
 		end
 		-- Check the launcher connection
 		if launcherConnectionTimer > 2 then
-			log('M', loggerPrefix, "Connection to launcher was lost")
-			guihooks.trigger('LauncherConnectionLost')
-			disconnectLauncher(true)
+			log('M', loggerPrefix, "it's been 2 seconds since the last ping so lua was probably frozen for a while")
+
+			if scenetree.missionGroup then
+				guihooks.trigger('showConnectionIssues', true)
+			else
+				guihooks.trigger('LauncherConnectionLost')
+			end
+
+			--disconnectLauncher(true)
 			launcherConnectionTimer = 0
 		end
 	end

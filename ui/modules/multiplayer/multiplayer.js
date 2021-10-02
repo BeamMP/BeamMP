@@ -2,7 +2,7 @@ var highlightedServer;
 var servers = [];
 var favorites = [];
 var recents = [];
-
+var mdDialog;
 
 angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,11 +104,11 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', '$mdDialog', 
+function(logger, $scope, $state, $timeout, $mdDialog) {
 	var vm = this;
 	bngApi = bngApi;
-
+	mdDialog = $mdDialog;
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
 		if (toState.url == "/multiplayer") {
@@ -141,6 +141,19 @@ function(logger, $scope, $state, $timeout) {
 	
 	$scope.$on('LauncherConnectionLost', function (event, data) {
 		$state.go('menu.multiplayer.launcher');
+	});
+
+	$scope.$on('showMdDialog', function (event, data) {
+		switch(data.dialogtype) {
+			case "alert":
+				mdDialog.show(
+					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
+				).then(function() {
+					if (data.okJS !== undefined) { eval(data.okJS); return; }
+					else if (data.okLua !== undefined) { bngApi.engineLua(data.okLua); return; }
+				})
+				break;
+		}
 	});
 
 	$scope.logout = function() {

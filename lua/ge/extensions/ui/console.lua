@@ -11,7 +11,7 @@ local guiModule = require("ge/extensions/editor/api/gui")
 local settingsPath = '/settings/consoleNG.json'
 local gui = {setupEditorGuiTheme = nop}
 local logs = {}
-local logsLimit = 1000
+local logsLimit = 5000
 local colors = {D = im.ImVec4(0.12,0.75,1,1), I = im.ImVec4(0.3,1,0.3,1), W = im.ImVec4(1,1,0,1), E = im.ImVec4(1,0.2,0.2,1), M = im.ImVec4(1,0.7,0.4,1)}
 local iconColors = {D = im.ImColorByRGB(32,196,255,255), I = im.ImColorByRGB(96,255,96,255), W = im.ImColorByRGB(255,255,0,255), E = im.ImColorByRGB(255,64,64,255), M = im.ImColorByRGB(255,144,64,255)}
 local iconButtonBgColor = im.ImColorByRGB(0, 0, 0, 0)

@@ -33,8 +33,6 @@ M.tableDiff    = tableDiff
 
 
 local function onExtensionLoaded()
-
-	dump("ONEXTENSIONLOADED:")
 	if MPVehicleGE then
 		print("MPVehicleGE exists!")
 		M.isOwn                    = MPVehicleGE.isOwn                    -- takes: vehID  returns: bool

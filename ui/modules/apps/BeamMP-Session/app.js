@@ -1,4 +1,5 @@
 var app = angular.module('beamng.apps');
+var mdDialog;
 
 app.directive('multiplayersession', [function () {
 	return {
@@ -10,10 +11,12 @@ app.directive('multiplayersession', [function () {
 	}
 }]);
 
-app.controller("Session", ['$scope', function ($scope) {
+app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
 	};
+
+	mdDialog = $mdDialog;
 
 	$scope.mpquit = function() {
 		bngApi.engineLua('MPCoreNetwork.resetSession(1)');
@@ -30,6 +33,19 @@ app.controller("Session", ['$scope', function ($scope) {
 	$scope.select = function() {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
+
+	$scope.$on('showMdDialog', function (event, data) {
+		switch(data.dialogtype) {
+			case "alert":
+				mdDialog.show(
+					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
+				).then(function() {
+					if (data.okJS !== undefined) { eval(data.okJS); return; }
+					else if (data.okLua !== undefined) { bngApi.engineLua(data.okLua); return; }
+				})
+				break;
+		}
+	});
 
 	$scope.$on('setPing', function (event, ping) {
 		document.getElementById("Session-Ping").innerHTML = ping;

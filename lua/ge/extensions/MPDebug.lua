@@ -253,11 +253,11 @@ end
 
 local function packetSent(bytes)
 	sentPacketCount = sentPacketCount+1
-	sentPacketSize = sentPacketSize + bytes or 0
+	sentPacketSize = sentPacketSize + (bytes or 0)
 end
 local function packetReceived(bytes)
 	receivedPacketCount = receivedPacketCount+1
-	receivedPacketSize = receivedPacketSize + bytes or 0
+	receivedPacketSize = receivedPacketSize + (bytes or 0)
 end
 
 

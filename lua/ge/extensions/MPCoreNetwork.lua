@@ -262,7 +262,7 @@ end
 local function resetSession(goBack)
 	isMpSession = false
 	isGoingMpSession = false
-	print("Reset Session Called!")
+	print("Reset Session Called! " .. tostring(goBack))
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
@@ -286,13 +286,6 @@ local function isGoingMPSession()
 	return isGoingMpSession
 end
 
-local function quitMP(reason)
-	isMpSession = false
-	isGoingMpSession = false
-	print("Quit MP Called!")
-	print("reason: "..tostring(reason))
-	send('QG') -- Quit game
-end
 -- ============= OTHERS =============
 
 
@@ -306,7 +299,7 @@ local HandleNetwork = {
 	['N'] = function(params) loginReceived(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
-	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
+	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
 	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
 }
 

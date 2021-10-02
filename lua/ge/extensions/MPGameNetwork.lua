@@ -43,11 +43,13 @@ end
 
 
 local function sendData(s)
-	local r = TCPSocket:send(string.len(s)..'>'..s)
-	if settings.getValue("showDebugOutput") == true then
-		print('[MPGameNetwork] Sending Data ('..r..'): '..s)
+	if TCPSocket then
+		local r = TCPSocket:send(string.len(s)..'>'..s)
+		if settings.getValue("showDebugOutput") == true then
+			print('[MPGameNetwork] Sending Data ('..r..'): '..s)
+		end
+		if MPDebug then MPDebug.packetSent(r) end
 	end
-	if MPDebug then MPDebug.packetSent(r) end
 end
 
 
@@ -69,6 +71,18 @@ local function sessionData(data)
 		UI.setNickname(data)
 		MPConfig.setNickname(data)
 	end
+end
+
+local function quitMP(reason)
+	log('M','quitMP',"Quit MP Called!")
+	print("reason: "..tostring(reason))
+
+	UI.showMdDialog({
+		dialogtype="alert", title="You have been kicked from the server", text="Reason: ".. reason or "none", okText="Return to menu",
+		okLua="MPCoreNetwork.resetSession(true)" -- leave map when clicking OK
+	})
+
+	--send('QG') -- Quit game
 end
 
 -------------------------------------------------------------------------------
@@ -110,7 +124,8 @@ local HandleNetwork = {
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
-	['T'] = function(params) MPCoreNetwork.resetSession('true') end, -- Event For another Resource
+	['T'] = nop,--function(params) MPCoreNetwork.resetSession(params) end, -- Event For another Resource
+	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
 

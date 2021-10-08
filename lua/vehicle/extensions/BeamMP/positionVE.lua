@@ -147,6 +147,8 @@ end
 
 local function onReset()
 	-- Reset smoothers and state variables
+	localVelSmoother:reset()
+	localRvelSmoother:reset()
 	tpVelSmoother:reset()
 	tpRvelSmoother:reset()
 	remoteVelSmoother:reset()
@@ -161,7 +163,9 @@ local function onReset()
 
 	lastAcc = nil
 	lastRacc = nil
-	
+
+	smoothVel = vec3(0,0,0)
+	smoothRvel = vec3(0,0,0)
 	remoteData.acc = vec3(0,0,0)
 	remoteData.racc = vec3(0,0,0)
 end
@@ -188,6 +192,9 @@ local function updateGFX(dt)
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
+	
+	-- Since the line above returns end if there is no remote data we know this vehicle should be remote if this runs
+	if v.mpVehicleType == "L" then v.mpVehicleType = "R" end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
@@ -335,7 +342,7 @@ end
 
 
 local function getVehicleRotation()
-	
+	-- this sends a full table of nan if there is an instability causing desync unltil a reset has happened, needs to be investigated
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local rvel = smoothRvel:rotated(rot)
 	

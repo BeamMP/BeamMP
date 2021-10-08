@@ -511,6 +511,7 @@ local function reset()
   yawRightForce = 0
 
   walkVector = vec3(0, 0, 0)
+  ballTorqueAxis = vec3(0, 0, 0)
   stabilizationPIDs.frontRear:reset()
   stabilizationPIDs.leftRight:reset()
   --stabilizationPIDs.upright:reset()

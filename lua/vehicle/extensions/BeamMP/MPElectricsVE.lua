@@ -407,7 +407,7 @@ local function applyElectrics(data)
 		lastRightSignal = decodedData.signal_right_input
 		lastHazards = decodedData.hazard_enabled
 
-		if decodedData.hazard_enabled then -- Apply hazard lights
+		if decodedData.hazard_enabled == 1 then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData.hazard_enabled)
 			electrics.update(0) -- Update electrics values
 		end
@@ -462,8 +462,8 @@ local function applyElectrics(data)
 		end
 
 		-- Ignition syncing
-		if decodedData.ignition ~= nil then
-			if electrics.values.ignition ~= decodedData.ignition then
+		if decodedData.ignition ~= nil and electrics.values.ignition ~= nil then
+			if electrics.values.ignition == 1 and not decodedData.ignition or electrics.values.ignition == 0 and decodedData.ignition then -- since received data is true or false and the electric is 1 or 0 it used to run when it shouldn't
 				if decodedData.ignition == true then
 					controller.mainController.setStarter(true)
 				else
@@ -574,8 +574,6 @@ end
 local function onExtensionLoaded()
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
-		controller.mainController.setStarter(true)
-		controller.mainController.setEngineIgnition(true)
 	end
 end
 

@@ -218,7 +218,7 @@ local function applyVehEdit(serverID, data)
 			if configChanged then
 				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
 				veh:respawn(serialize(playerVehicle.config))
-			else
+			elseif vehicleConfig.paints then
 				log('I','applyVehEdit', "only color changed")
 				for k, v in pairs(vehicleConfig.paints) do
 					extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
@@ -887,8 +887,8 @@ local function applyQueuedEvents()
 	--dump(vehicleSpawnQueue)
 	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
 		log('I', "applyQueuedEvents", "Applying queued spawn")
-		applyVehSpawn(spawn)
 		vehicleSpawnQueue[vehicleID] = nil
+		applyVehSpawn(spawn)
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
@@ -896,8 +896,8 @@ local function applyQueuedEvents()
 	--dump(vehicleEditQueue)
 	for vehicleID, edit in pairs(vehicleEditQueue) do
 		log('I', "applyQueuedEvents", "Applying queued edit")
-		applyVehEdit(vehicleID, edit)
 		vehicleEditQueue[vehicleID] = nil
+		applyVehEdit(vehicleID, edit)
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 

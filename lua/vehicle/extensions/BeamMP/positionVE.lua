@@ -342,14 +342,15 @@ end
 
 
 local function getVehicleRotation()
-	-- this sends a full table of nan if there is an instability causing desync unltil a reset has happened, needs to be investigated
+	-- this attempts to send a full table of nan if there are several rapid instability causing VE lua to break after next vehicle reload, seems to be caused by a game issue
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+
 	local rvel = smoothRvel:rotated(rot)
 	
 	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
 	local vel = smoothVel + cog:cross(rvel)
-	
+	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
 		vel = {vel.x, vel.y, vel.z},

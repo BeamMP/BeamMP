@@ -1,4 +1,7 @@
 # BeamMP
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
 # Important Links
@@ -56,3 +59,23 @@ Additionally, you can join the [Discord](https://discord.gg/BeamMP), where regul
 - [Server Auth Key](https://www.beammp.com/keymaster)
 
 If none of these fix your issue, we have a dedicated support team on our [Discord](https://discord.gg/BeamMP), and a wonderful up-to-date troubleshooting channel (#before-you-ask)!
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Starystars67"><img src="https://avatars.githubusercontent.com/u/15389482?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Starystars67</b></sub></a><br /><a href="https://github.com/BeamMP/BeamMP/commits?author=Starystars67" title="Code">💻</a> <a href="#content-Starystars67" title="Content">🖋</a> <a href="#business-Starystars67" title="Business development">💼</a> <a href="https://github.com/BeamMP/BeamMP/commits?author=Starystars67" title="Documentation">📖</a> <a href="#eventOrganizing-Starystars67" title="Event Organizing">📋</a> <a href="#infra-Starystars67" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#projectManagement-Starystars67" title="Project Management">📆</a> <a href="https://github.com/BeamMP/BeamMP/pulls?q=is%3Apr+reviewed-by%3AStarystars67" title="Reviewed Pull Requests">👀</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

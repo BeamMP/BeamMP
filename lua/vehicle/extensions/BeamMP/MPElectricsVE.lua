@@ -463,7 +463,7 @@ local function applyElectrics(data)
 
 		-- Ignition syncing
 		if decodedData.ignition ~= nil and electrics.values.ignition ~= nil then
-			if electrics.values.ignition == 1 and not decodedData.ignition or electrics.values.ignition == 0 and decodedData.ignition then -- since received data is true or false and the electric is 1 or 0 it used to run when it shouldn't
+			if electrics.values.ignition ~= (decodedData.ignition and 1 or 0) then -- since received data is true or false and the electric is 1 or 0 it used to run when it shouldn't
 				if decodedData.ignition == true then
 					controller.mainController.setStarter(true)
 				else

@@ -1,4 +1,7 @@
 # BeamMP
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
 # Important Links
@@ -56,3 +59,23 @@ Additionally, you can join the [Discord](https://discord.gg/BeamMP), where regul
 - [Server Auth Key](https://www.beammp.com/keymaster)
 
 If none of these fix your issue, we have a dedicated support team on our [Discord](https://discord.gg/BeamMP), and a wonderful up-to-date troubleshooting channel (#before-you-ask)!
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="http://kortlepel.com"><img src="https://avatars.githubusercontent.com/u/29932116?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lion</b></sub></a><br /><a href="https://github.com/BeamMP/BeamMP/commits?author=lionkor" title="Code">💻</a> <a href="#content-lionkor" title="Content">🖋</a> <a href="https://github.com/BeamMP/BeamMP/commits?author=lionkor" title="Documentation">📖</a> <a href="#mentoring-lionkor" title="Mentoring">🧑‍🏫</a> <a href="#maintenance-lionkor" title="Maintenance">🚧</a> <a href="#platform-lionkor" title="Packaging/porting to new platform">📦</a> <a href="https://github.com/BeamMP/BeamMP/pulls?q=is%3Apr+reviewed-by%3Alionkor" title="Reviewed Pull Requests">👀</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

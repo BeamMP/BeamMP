@@ -1,0 +1,31 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Starystars67",
+      "name": "Starystars67",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15389482?v=4",
+      "profile": "https://github.com/Starystars67",
+      "contributions": [
+        "code",
+        "content",
+        "business",
+        "doc",
+        "eventOrganizing",
+        "infra",
+        "projectManagement",
+        "review"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "BeamMP",
+  "projectOwner": "BeamMP",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

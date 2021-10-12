@@ -1,0 +1,30 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "lionkor",
+      "name": "Lion",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29932116?v=4",
+      "profile": "http://kortlepel.com",
+      "contributions": [
+        "code",
+        "content",
+        "doc",
+        "mentoring",
+        "maintenance",
+        "platform",
+        "review"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "BeamMP",
+  "projectOwner": "BeamMP",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

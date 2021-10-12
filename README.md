@@ -1,6 +1,6 @@
 # BeamMP
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
@@ -70,6 +70,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/Starystars67"><img src="https://avatars.githubusercontent.com/u/15389482?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Starystars67</b></sub></a><br /><a href="https://github.com/BeamMP/BeamMP/commits?author=Starystars67" title="Code">💻</a> <a href="#content-Starystars67" title="Content">🖋</a> <a href="#business-Starystars67" title="Business development">💼</a> <a href="https://github.com/BeamMP/BeamMP/commits?author=Starystars67" title="Documentation">📖</a> <a href="#eventOrganizing-Starystars67" title="Event Organizing">📋</a> <a href="#infra-Starystars67" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#projectManagement-Starystars67" title="Project Management">📆</a> <a href="https://github.com/BeamMP/BeamMP/pulls?q=is%3Apr+reviewed-by%3AStarystars67" title="Reviewed Pull Requests">👀</a></td>
+    <td align="center"><a href="https://github.com/Anonymous-275"><img src="https://avatars.githubusercontent.com/u/36374260?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Anonymous275</b></sub></a><br /><a href="https://github.com/BeamMP/BeamMP/commits?author=Anonymous-275" title="Code">💻</a> <a href="#content-Anonymous-275" title="Content">🖋</a> <a href="#business-Anonymous-275" title="Business development">💼</a> <a href="https://github.com/BeamMP/BeamMP/commits?author=Anonymous-275" title="Documentation">📖</a> <a href="#maintenance-Anonymous-275" title="Maintenance">🚧</a> <a href="#projectManagement-Anonymous-275" title="Project Management">📆</a> <a href="https://github.com/BeamMP/BeamMP/pulls?q=is%3Apr+reviewed-by%3AAnonymous-275" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 

@@ -1,0 +1,25 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Olrosse",
+      "name": "Olrosse",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10835721?v=4",
+      "profile": "https://github.com/Olrosse",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "BeamMP",
+  "projectOwner": "BeamMP",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

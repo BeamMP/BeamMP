@@ -1,0 +1,29 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Anonymous-275",
+      "name": "Anonymous275",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36374260?v=4",
+      "profile": "https://github.com/Anonymous-275",
+      "contributions": [
+        "code",
+        "content",
+        "business",
+        "doc",
+        "projectManagement",
+        "review"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "BeamMP",
+  "projectOwner": "BeamMP",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

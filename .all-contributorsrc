@@ -20,6 +20,21 @@
         "projectManagement",
         "review"
       ]
+    },
+    {
+      "login": "Anonymous-275",
+      "name": "Anonymous275",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36374260?v=4",
+      "profile": "https://github.com/Anonymous-275",
+      "contributions": [
+        "code",
+        "content",
+        "business",
+        "doc",
+        "maintenance",
+        "projectManagement",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,

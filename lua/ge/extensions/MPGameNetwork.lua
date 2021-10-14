@@ -15,6 +15,10 @@ local TCPSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local sysTime = 0
 local eventTriggers = {}
+--keypress handling
+local keyStates = {} -- table of keys and their states, used as a reference
+local keysToPoll = {} -- list of keys we want to poll for state changes
+local keypressTriggers = {}
 -- ============= VARIABLES =============
 
 
@@ -74,12 +78,11 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
-	log('M','quitMP',"Quit MP Called!")
-	print("reason: "..tostring(reason))
+	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
 	UI.showMdDialog({
 		dialogtype="alert", title="You have been kicked from the server", text="Reason: ".. reason or "none", okText="Return to menu",
-		okLua="MPCoreNetwork.resetSession(true)" -- leave map when clicking OK
+		okLua="MPCoreNetwork.resetSession(true)" -- return to main menu when clicking OK
 	})
 
 	--send('QG') -- Quit game
@@ -108,9 +111,54 @@ function TriggerClientEvent(n, d)
 end
 
 function AddEventHandler(n, f)
-	print("Adding Event Handler: Name = "..tostring(n))
+	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
 	table.insert(eventTriggers, {name = n, func = f})
 end
+
+-------------------------------------------------------------------------------
+-- Keypress handling
+-------------------------------------------------------------------------------
+function onKeyPressed(keyname, f)
+	addKeyEventListener(keyname, f, 'down')
+end
+function onKeyReleased(keyname, f)
+	addKeyEventListener(keyname, f, 'up')
+end
+
+function addKeyEventListener(keyname, f, type)
+	f = f or function() end
+	log('W','[GE] AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
+	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
+	table.insert(keysToPoll, keyname)
+
+	be:queueAllObjectLua("MPVehicleVE.addKeyEventListener(".. serialize(keysToPoll) ..")")
+end
+
+local function onKeyStateChanged(key, state)
+	keyStates[key] = state
+	--dump(keyStates)
+	--dump(keypressTriggers)
+	for i=1,#keypressTriggers do
+		if keypressTriggers[i].key == key and (keypressTriggers[i].type == 'both' or keypressTriggers[i].type == (state and 'down' or 'up')) then
+			keypressTriggers[i].func(state)
+		end
+	end
+end
+
+function getKeyState(key)
+	return keyStates[key] or false
+end
+
+local function onVehicleReady(gameVehicleID)
+	local veh = be:getObjectByID(gameVehicleID)
+	if not veh then
+		log('R', 'onVehicleReady', 'Vehicle does not exist!')
+		return
+	end
+	veh:queueLuaCommand("MPVehicleVE.addKeyEventListener(".. serialize(keysToPoll) ..")")
+end
+
+-------------------------------------------------------------------------------
 
 local HandleNetwork = {
 	['V'] = function(params) MPInputsGE.handle(params) end,
@@ -153,15 +201,21 @@ local function connectionStatus()
 end
 
 
-
+--events
 M.onUpdate = onUpdate
-M.connectToLauncher = connectToLauncher
-M.disconnectLauncher = disconnectLauncher
-M.send = sendData
-M.sendSplit = sendDataSplit
-M.connectionStatus = connectionStatus
-M.CallEvent = handleEvents
+M.onKeyStateChanged = onKeyStateChanged
 
+--functions
+M.connectionStatus    = connectionStatus
+M.connectToLauncher   = connectToLauncher
+M.disconnectLauncher  = disconnectLauncher
+M.send                = sendData
+M.sendSplit           = sendDataSplit
+M.CallEvent           = handleEvents
+
+M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
+M.getKeyState         = getKeyState         -- takes: string keyName
+M.onVehicleReady      = onVehicleReady
 
 print("MPGameNetwork loaded")
 return M

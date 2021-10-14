@@ -692,7 +692,19 @@ local function handle(rawData)
 	HandleNetwork[code](rawData)
 end
 
+local function onVehicleReady(gameVehicleID)
+	log('M', 'onVehicleReady', 'Vehicle '..tostring(gameVehicleID)..' signaled that it is ready')
+	local veh = be:getObjectByID(gameVehicleID)
+	if not veh then
+		log('R', 'onVehicleReady', 'Vehicle does not exist!')
+		return
+	end
 
+	if veh.mpVehicleType then
+		veh:queueLuaCommand("MPVehicleVE.setVehicleType('".. veh.mpVehicleType .."')")
+	end
+	MPGameNetwork.onVehicleReady(gameVehicleID)
+end
 
 local function saveDefaultRequest()
 	local currentVehicle = be:getPlayerVehicle(0)
@@ -1089,8 +1101,8 @@ M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetNam
 M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
 M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
 M.queryRoadNodeToPosition  = queryRoadNodeToPosition  -- takes: vec3 target position, optional string targetname
-M.sendCustomVehicleData    = sendCustomVehicleData    -- UI sync button
---M.sendVehicle            = sendVehicle              -- this shouldnt be public?
+M.sendCustomVehicleData    = sendCustomVehicleData    -- UI 'Sync' button
+M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 
 print("MPVehicleGE loaded")
 return M

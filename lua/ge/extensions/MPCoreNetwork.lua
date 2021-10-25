@@ -190,6 +190,12 @@ local function loadLevel(map)
 	currentMap = map
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
+
+	-- replaces the instability detected function with one that doesn't pause physics or sends messages to the UI
+	-- but left logging in so you can still see what car it is -- credit to deerboi for showing me that this is possible
+	-- it resets to default on leaving the server
+	-- we should probably consider a system to detect if a vehicle is in a instability loop and then delete it or respawn it (rapid instabilities causes VE to break on reload so it would need to be respawned)
+	onInstabilityDetected = function(jbeamFilename) if not settings.getValue("disableInstabilityPausing") then bullettime.pause(true) ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning") end log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename)) end
 end
 -- ============= SERVER RELATED =============
 
@@ -265,6 +271,10 @@ local function resetSession(goBack)
 	--UI.readyReset()
 	status = "" -- Reset status
 	if goBack then returnToMainMenu() end
+
+	-- resets the instability function back to default
+	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
+
 	MPModManager.cleanUpSessionMods()
 end
 

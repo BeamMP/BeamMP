@@ -4357,6 +4357,8 @@
 	"ui.options.multiplayer.skipOtherPlayersVehicles": "Disable switching to other players vehicles",
 	"ui.options.multiplayer.alternateModloading": "Alternate mod loading",
 	"ui.options.multiplayer.alternateModloading.tooltip": "This method allows you to unfocus the BeamNG window whilst loading mods, but it can not guarantee loading unstable mods.",
+	"ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",
+	"ui.options.multiplayer.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
     "ui.multiplayer.clear": "Clear Launcher Cache",
 
 	"ui.options.multiplayer.nameTagTitle": "Nametags",

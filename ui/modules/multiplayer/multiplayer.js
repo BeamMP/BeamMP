@@ -177,9 +177,9 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 	}
 
 	vm.directConnect = function() {
-		console.log('Clicked')
-		var ip = document.getElementById('directip').value;
-		var port = document.getElementById('directport').value;
+		//console.log('Clicked')
+		var ip = document.getElementById('directip').value.trim();
+		var port = document.getElementById('directport').value.trim();
 		document.getElementById('LoadingServer').style.display = 'block';
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};

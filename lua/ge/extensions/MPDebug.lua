@@ -74,6 +74,8 @@ end
 
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
+	local players = getPlayerNames()
+	if tableIsEmpty(players) then return end
 	gui.setupWindow("MPplayerList")
     im.SetNextWindowBgAlpha(0.4)
 	im.Begin("MP Developer Tools")
@@ -91,7 +93,7 @@ local function drawPlayerList()
 	im.Text("") im.NextColumn()
 
 	local listIndex = 1
-	for name, ping in pairs(getPlayerNames()) do
+	for name, ping in pairs(players) do
 		if name ~= "" then
 			listIndex = listIndex+1
 

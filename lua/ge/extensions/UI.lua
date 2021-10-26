@@ -112,7 +112,7 @@ end
 local function chatSend(msg)
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
-	TriggerClientEvent("ChatMessageSent", message)
+	TriggerClientEvent("ChatMessageSent", c)
 end
 
 

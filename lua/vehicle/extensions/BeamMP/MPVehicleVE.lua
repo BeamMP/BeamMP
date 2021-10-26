@@ -28,7 +28,7 @@ function onKeyReleased(keyname, f)
 	addKeyEventListener(keyname, f, 'up')
 end
 
-function addKeyEventListener(keyname, f, type)
+function addKeyEventListener(keyname, f, t)
 	if type(keyname) == "table" then -- multiple keys were requested, this probably came from GE
 		for _,v in pairs(keyname) do
 			table.insert(keysToPoll, v)
@@ -37,7 +37,7 @@ function addKeyEventListener(keyname, f, type)
 		f = f or function() end
 		log('W','[VE] AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
-		table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
+		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
 		table.insert(keysToPoll, v)
 	end
 end

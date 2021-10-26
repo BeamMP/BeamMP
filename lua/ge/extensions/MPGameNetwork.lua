@@ -131,7 +131,7 @@ function addKeyEventListener(keyname, f, type)
 	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
 	table.insert(keysToPoll, keyname)
 
-	be:queueAllObjectLua("MPVehicleVE.addKeyEventListener(".. serialize(keysToPoll) ..")")
+	be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
 end
 
 local function onKeyStateChanged(key, state)
@@ -155,7 +155,7 @@ local function onVehicleReady(gameVehicleID)
 		log('R', 'onVehicleReady', 'Vehicle does not exist!')
 		return
 	end
-	veh:queueLuaCommand("MPVehicleVE.addKeyEventListener(".. serialize(keysToPoll) ..")")
+	veh:queueLuaCommand("addKeyEventListener(".. serialize(keysToPoll) ..")")
 end
 
 -------------------------------------------------------------------------------

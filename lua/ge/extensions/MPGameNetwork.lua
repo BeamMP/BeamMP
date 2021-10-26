@@ -78,10 +78,11 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
+	text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
 	UI.showMdDialog({
-		dialogtype="alert", title="You have been kicked from the server", text="Reason: ".. reason or "none", okText="Return to menu",
+		dialogtype="alert", title="You have been kicked from the server", text=text, okText="Return to menu",
 		okLua="MPCoreNetwork.resetSession(true)" -- return to main menu when clicking OK
 	})
 
@@ -173,8 +174,8 @@ local HandleNetwork = {
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
-	['T'] = nop,--function(params) MPCoreNetwork.resetSession(params) end, -- Event For another Resource
-	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
+	['T'] = function(params) quitMP(params) end, -- Player Kicked Event (old, doesn't contain reason)
+	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
 

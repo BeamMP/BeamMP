@@ -3,6 +3,7 @@ var servers = [];
 var favorites = [];
 var recents = [];
 var mdDialog;
+var mdDialogVisible = false;
 
 angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,12 +147,17 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 	$scope.$on('showMdDialog', function (event, data) {
 		switch(data.dialogtype) {
 			case "alert":
+				if (mdDialogVisible) { return; }
+				console.log(data);
+				console.log(mdDialogVisible);
+				mdDialogVisible = true;
 				mdDialog.show(
 					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
 				).then(function() {
+					mdDialogVisible = false;
 					if (data.okJS !== undefined) { eval(data.okJS); return; }
 					else if (data.okLua !== undefined) { bngApi.engineLua(data.okLua); return; }
-				})
+				}, function() { mdDialogVisible = false; })
 				break;
 		}
 	});

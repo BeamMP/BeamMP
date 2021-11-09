@@ -1,0 +1,71 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Starystars67",
+      "name": "Starystars67",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15389482?v=4",
+      "profile": "https://github.com/Starystars67",
+      "contributions": [
+        "code",
+        "content",
+        "business",
+        "doc",
+        "eventOrganizing",
+        "infra",
+        "projectManagement",
+        "review"
+      ]
+    },
+    {
+      "login": "Anonymous-275",
+      "name": "Anonymous275",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36374260?v=4",
+      "profile": "https://github.com/Anonymous-275",
+      "contributions": [
+        "code",
+        "content",
+        "business",
+        "doc",
+        "maintenance",
+        "projectManagement",
+        "review"
+      ]
+    },
+    {
+      "login": "lionkor",
+      "name": "Lion",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29932116?v=4",
+      "profile": "http://kortlepel.com",
+      "contributions": [
+        "code",
+        "content",
+        "doc",
+        "mentoring",
+        "maintenance",
+        "platform",
+        "review"
+      ]
+    },
+    {
+      "login": "Olrosse",
+      "name": "Olrosse",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10835721?v=4",
+      "profile": "https://github.com/Olrosse",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "BeamMP",
+  "projectOwner": "BeamMP",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

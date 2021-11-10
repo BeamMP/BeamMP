@@ -190,6 +190,12 @@ local function loadLevel(map)
 	currentMap = map
 	multiplayer_multiplayer.startMultiplayer(map)
 	isMpSession = true
+
+	-- replaces the instability detected function with one that doesn't pause physics or sends messages to the UI
+	-- but left logging in so you can still see what car it is -- credit to deerboi for showing me that this is possible
+	-- it resets to default on leaving the server
+	-- we should probably consider a system to detect if a vehicle is in a instability loop and then delete it or respawn it (rapid instabilities causes VE to break on reload so it would need to be respawned)
+	onInstabilityDetected = function(jbeamFilename) if not settings.getValue("disableInstabilityPausing") then bullettime.pause(true) ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning") end log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename)) end
 end
 -- ============= SERVER RELATED =============
 
@@ -257,7 +263,7 @@ local function resetSession(goBack)
 	if goBack == undefined then goBack = true end
 	isMpSession = false
 	isGoingMpSession = false
-	print("Reset Session Called!")
+	print("Reset Session Called! " .. tostring(goBack))
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
@@ -266,6 +272,10 @@ local function resetSession(goBack)
 	--UI.readyReset()
 	status = "" -- Reset status
 	if goBack then returnToMainMenu() end
+
+	-- resets the instability function back to default
+	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
+
 	MPModManager.cleanUpSessionMods()
 end
 
@@ -277,13 +287,6 @@ local function isGoingMPSession()
 	return isGoingMpSession
 end
 
-local function quitMP(reason)
-	isMpSession = false
-	isGoingMpSession = false
-	print("Quit MP Called!")
-	print("reason: "..tostring(reason))
-	send('QG') -- Quit game
-end
 -- ============= OTHERS =============
 
 
@@ -297,7 +300,7 @@ local HandleNetwork = {
 	['N'] = function(params) loginReceived(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
-	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
+	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
 	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
 }
 

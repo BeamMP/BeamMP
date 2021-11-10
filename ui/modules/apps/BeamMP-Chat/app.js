@@ -1,7 +1,6 @@
 var app = angular.module('beamng.apps');
 
 let lastSentMessage = "";
-let lastReceivedMessage = "";
 
 app.directive('multiplayerchat', [function () {
 	return {
@@ -16,9 +15,6 @@ app.directive('multiplayerchat', [function () {
 
 app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
-	// try to unregister existing chatMessage listener
-	$rootScope.$$listeners.chatMessage = [] 
-
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
 		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });

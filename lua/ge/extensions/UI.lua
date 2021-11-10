@@ -96,7 +96,9 @@ local function showNotification(text, type)
 	ui_message(''..text, 10, nil, nil)
 end
 
-
+local function showMdDialog(options)
+	guihooks.trigger("showMdDialog", options)
+end
 
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
@@ -110,6 +112,7 @@ end
 local function chatSend(msg)
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
+	TriggerClientEvent("ChatMessageSent", c)
 end
 
 
@@ -168,7 +171,7 @@ M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
 M.updateQueue = updateQueue
-
+M.showMdDialog = showMdDialog
 
 print("UI loaded")
 return M

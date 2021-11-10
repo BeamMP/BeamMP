@@ -2,7 +2,8 @@ var highlightedServer;
 var servers = [];
 var favorites = [];
 var recents = [];
-
+var mdDialog;
+var mdDialogVisible = false;
 
 angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,11 +105,11 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', '$mdDialog', 
+function(logger, $scope, $state, $timeout, $mdDialog) {
 	var vm = this;
 	bngApi = bngApi;
-
+	mdDialog = $mdDialog;
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
 		if (toState.url == "/multiplayer") {
@@ -143,6 +144,24 @@ function(logger, $scope, $state, $timeout) {
 		$state.go('menu.multiplayer.launcher');
 	});
 
+	$scope.$on('showMdDialog', function (event, data) {
+		switch(data.dialogtype) {
+			case "alert":
+				if (mdDialogVisible) { return; }
+				console.log(data);
+				console.log(mdDialogVisible);
+				mdDialogVisible = true;
+				mdDialog.show(
+					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
+				).then(function() {
+					mdDialogVisible = false;
+					if (data.okJS !== undefined) { eval(data.okJS); return; }
+					else if (data.okLua !== undefined) { bngApi.engineLua(data.okLua); return; }
+				}, function() { mdDialogVisible = false; })
+				break;
+		}
+	});
+
 	$scope.logout = function() {
 		bngApi.engineLua(`MPCoreNetwork.logout()`);
 		$state.go('menu.multiplayer');
@@ -164,9 +183,9 @@ function(logger, $scope, $state, $timeout) {
 	}
 
 	vm.directConnect = function() {
-		console.log('Clicked')
-		var ip = document.getElementById('directip').value;
-		var port = document.getElementById('directport').value;
+		//console.log('Clicked')
+		var ip = document.getElementById('directip').value.trim();
+		var port = document.getElementById('directport').value.trim();
 		document.getElementById('LoadingServer').style.display = 'block';
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};

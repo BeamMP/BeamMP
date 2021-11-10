@@ -74,6 +74,8 @@ end
 
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
+	local players = getPlayerNames()
+	if tableIsEmpty(players) then return end
 	gui.setupWindow("MPplayerList")
     im.SetNextWindowBgAlpha(0.4)
 	im.Begin("MP Developer Tools")
@@ -91,7 +93,7 @@ local function drawPlayerList()
 	im.Text("") im.NextColumn()
 
 	local listIndex = 1
-	for name, ping in pairs(getPlayerNames()) do
+	for name, ping in pairs(players) do
 		if name ~= "" then
 			listIndex = listIndex+1
 
@@ -253,11 +255,11 @@ end
 
 local function packetSent(bytes)
 	sentPacketCount = sentPacketCount+1
-	sentPacketSize = sentPacketSize + bytes or 0
+	sentPacketSize = sentPacketSize + (bytes or 0)
 end
 local function packetReceived(bytes)
 	receivedPacketCount = receivedPacketCount+1
-	receivedPacketSize = receivedPacketSize + bytes or 0
+	receivedPacketSize = receivedPacketSize + (bytes or 0)
 end
 
 

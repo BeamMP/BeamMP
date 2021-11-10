@@ -67,7 +67,7 @@ local tpDelayAdd = 1           -- Additional teleport delay (s)
 local tpDistAdd = 1            -- Additional teleport distance (m)
 local tpDistMul1 = 0.1         -- Multiplier for delayed teleport distance based on velocity (m per m/s)
 local tpDistMul2 = 0.5         -- Multiplier for instant teleport distance based on velocity (m per m/s)
-local tpRotAdd = 0.3           -- Additional teleport rotation (rad)
+local tpRotAdd = 0.8           -- Additional teleport rotation (rad)
 local tpRotMul1 = 0.2          -- Multiplier for delayed teleport rotation based on rotation velocity (rad per rad/s)
 local tpRotMul2 = 0.5          -- Multiplier for instant teleport rotation based on rotation velocity (rad per rad/s)
 local tpVelSmoother = newTemporalSmoothingNonLinear(2,50)  -- Smoother for filtering low velocities during collisions
@@ -145,8 +145,19 @@ end
 
 
 
+-- Rotate the vehicle relative to its current rotation
+local function rotateVehicle(rot)
+	for _, n in pairs(v.data.nodes) do
+		obj:setNodePosition(n.cid, vec3(obj:getNodePosition(n.cid)):rotated(rot):toFloat3())
+	end
+end
+
+
+
 local function onReset()
 	-- Reset smoothers and state variables
+	localVelSmoother:reset()
+	localRvelSmoother:reset()
 	tpVelSmoother:reset()
 	tpRvelSmoother:reset()
 	remoteVelSmoother:reset()
@@ -161,7 +172,9 @@ local function onReset()
 
 	lastAcc = nil
 	lastRacc = nil
-	
+
+	smoothVel = vec3(0,0,0)
+	smoothRvel = vec3(0,0,0)
 	remoteData.acc = vec3(0,0,0)
 	remoteData.racc = vec3(0,0,0)
 end
@@ -188,6 +201,9 @@ local function updateGFX(dt)
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
+	
+	-- Since the line above returns end if there is no remote data we know this vehicle should be remote if this runs
+	if v.mpVehicleType == "L" then v.mpVehicleType = "R" end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
@@ -242,8 +258,9 @@ local function updateGFX(dt)
 
 	-- Error correction
 	local posError = pos - vehPos
-	local rotError = (rot / vehRot):toEulerYXZ()
-	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
+	local rotErrorQuat = vehRot:inversed() * rot
+	local rotError = rotErrorQuat:toEulerYXZ()
+	rotError = vec3(rotError.y, rotError.z, rotError.x)
 	
 	-- Calculate teleport thresholds
 	local maxVel = tpVelSmoother:get(max(vel:length(), vehVel:length()), dt)
@@ -271,16 +288,11 @@ local function updateGFX(dt)
 	if tpTimer > (tpDelayAdd + abs(predictTime)) or posErrorLen > tpDist2 or rotErrorLen > tpRot2 then
 		-- Subtract COG offset because setPosition works relative to refNode
 		local tpPos = pos - velocityVE.cogRel:rotated(rot)
-		-- Offset teleport rotation for vehicles with different JBeam orientations
-		local tpRot = quat(obj:getRotation())/vehRot*rot
+		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
 		
 		if rotErrorLen > tpRot1 or rotErrorLen > tpRot2 then
-			-- Resets the vehicle, try to avoid unless absolutely necessary
-			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
+			rotateVehicle(rotErrorQuat)
 			--print("Teleport Rotation "..obj:getID())
-		else
-			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
-			--print("Teleport "..obj:getID())
 		end
 
 		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
@@ -335,14 +347,14 @@ end
 
 
 local function getVehicleRotation()
-	
+	-- this attempts to send a full table of nan if there are several rapid instability causing VE lua to break after next vehicle reload, seems to be caused by a game issue
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local rvel = smoothRvel:rotated(rot)
 	
 	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
 	local vel = smoothVel + cog:cross(rvel)
-	
+	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
 		vel = {vel.x, vel.y, vel.z},

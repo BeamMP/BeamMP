@@ -341,6 +341,7 @@ end
 
 
 local function onUpdate(dt)
+	launcherTimeout = 0
 	--print(launcherConnectionTimer)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected

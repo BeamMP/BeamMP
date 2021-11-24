@@ -21,7 +21,7 @@ local oneSecCounter = 0
 --local nicknameSuffixMap = {}
 local distanceMap = {}
 local nicknamesAllowed = true
---local invertedVehiclesMap = {}
+local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local onVehicleSpawnedAllowed = true
 local syncTimer = 0
@@ -54,11 +54,11 @@ local vehicles = {}
 
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
-	--return invertedVehiclesMap[serverVehicleID]
-	for gameVehicleID,v in pairs(vehicles) do
-		if v.serverVehicleString == serverVehicleID then return gameVehicleID end
-	end
-	return -1
+	return invertedVehiclesMap[serverVehicleID]
+	--for gameVehicleID,v in pairs(vehicles) do
+	--	if v.serverVehicleString == serverVehicleID then return gameVehicleID end
+	--end
+	--return -1
 end
 
 -- GAME VEHICLE ID ----> SERVER VEHICLE ID
@@ -227,6 +227,10 @@ function Vehicle:new(data)
 		if data.ownerID then o.ownerID = tonumber(data.ownerID) end
 		if data.serverVehicleID then o.serverVehicleID = tonumber(data.serverVehicleID) end
 		if o.ownerID and o.serverVehicleID then o.serverVehicleString = tostring(o.ownerID)..'-'..tostring(o.serverVehicleID) end
+	end
+
+	if o.serverVehicleString then
+		invertedVehiclesMap[o.serverVehicleString] = o.gameVehicleID
 	end
 
 	o.ownerName = data.ownerName

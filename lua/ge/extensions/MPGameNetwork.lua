@@ -114,7 +114,11 @@ end
 
 function AddEventHandler(n, f)
 	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
-	table.insert(eventTriggers, {name = n, func = f})
+	if type(f) ~= "function" or f == nop then
+		log('W', 'AddEventHandler', "Event handler function can not be nil")
+	else
+		table.insert(eventTriggers, {name = n, func = f})
+	end
 end
 
 -------------------------------------------------------------------------------

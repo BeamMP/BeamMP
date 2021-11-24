@@ -382,7 +382,7 @@ local function updateVehicle(serverID, data)
 	if settings.getValue("enableSpawnQueue") then
 		vehicleEditQueue[serverID] = data
 		log('I', 'updateVehicle', "edit received and queued")
-		local id = string.match(serverID,"^(%d*)%-")
+		local id = tonumber(string.match(serverID,"^(%d*)%-") or -1)
 		local playerNickname = players[id] and players[id].name or "unknown"
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 		UI.showNotification('Edit received and queued for '..playerNickname)
@@ -1158,7 +1158,7 @@ local function onPreRender(dt)
 			local veh = be:getObjectByID(gameVehicleID) --	Get vehicle
 			if not veh then break end -- not spawned in yet
 			local owner = v:getOwner()
-			if true then --not v.isLocal and owner ~= nil then
+			if not v.isLocal and owner ~= nil then
 				local pos = veh:getPosition()
 				local nametagAlpha = 1
 				local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40

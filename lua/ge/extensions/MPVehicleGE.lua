@@ -215,7 +215,7 @@ function Vehicle:new(data)
 	data = data or {}
 	setmetatable(o, self)
 
-	o.jbeamname = data.jbeamname
+	o.jbeam = data.jbeam
 
 	o.gameVehicleID = tonumber(data.gameVehicleID) or -1
 
@@ -231,6 +231,10 @@ function Vehicle:new(data)
 
 	o.ownerName = data.ownerName
 	o.isLocal = data.isLocal or false
+	o.isSpawned = data.isSpawned or true
+
+	o.position = nil
+	o.rotation = nil
 
 	o.spectators = {}
 
@@ -282,7 +286,7 @@ local function sendVehicle(gameVehicleID)
 		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 
-		local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeamname=vehicleTable.jbm, ownerID=vehicleTable.pid })
+		local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
 
 		if not players[vehObj.ownerID] then
 			players[vehObj.ownerID] = Player:new({name=vehObj.ownerName, playerID=vehObj.ownerID, isLocal=true })
@@ -478,7 +482,7 @@ local function applyVehSpawn(event)
 		--}
 
 		local vehObject =
-			Vehicle:new({gameVehicleID=spawnedVehID, serverVehicleString=event.serverVehicleID, ownerName=event.playerNickname, jbeamname=vehicleName})
+			Vehicle:new({gameVehicleID=spawnedVehID, serverVehicleString=event.serverVehicleID, ownerName=event.playerNickname, jbeam=vehicleName})
 
 		if not players[vehObject.ownerID] then
 			players[vehObject.ownerID] =
@@ -510,7 +514,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 
 	players[playerServerID] =
-		Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
+		Player:new({name=playerNickname, playerID=playerServerID, role=playerRole, isSpawned=false})
 
 
 	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID)
@@ -572,7 +576,7 @@ local function onVehicleSpawned(gameVehicleID)
 	--dump(jbeamMap[gameVehicleID])
 
 
-	if not vehicles[gameVehicleID] or not vehicles[gameVehicleID].jbeamname then -- If it's not an edit
+	if not vehicles[gameVehicleID] or not vehicles[gameVehicleID].jbeam then -- If it's not an edit
 		log("I", "onVehicleSpawned", "New Vehicle Spawned "..gameVehicleID)
 
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
@@ -588,8 +592,8 @@ local function onVehicleSpawned(gameVehicleID)
 
 
 	else
-		if vehicles[gameVehicleID].jbeamname ~= newJbeamName then
-			log("I", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, vehicles[gameVehicleID].jbeamname, newJbeamName))
+		if vehicles[gameVehicleID].jbeam ~= newJbeamName then
+			log("I", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, vehicles[gameVehicleID].jbeam, newJbeamName))
 
 			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
@@ -607,7 +611,7 @@ local function onVehicleSpawned(gameVehicleID)
 		end
 	end
 
-	if vehicles[gameVehicleID] then vehicles[gameVehicleID].jbeamname = newJbeamName end
+	if vehicles[gameVehicleID] then vehicles[gameVehicleID].jbeam = newJbeamName end
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 
@@ -690,7 +694,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 				--core_camera.setByName(0,"onboard.rider") -- citybus
 				core_camera.setByName(0,"passenger") -- auto generated
 				core_camera.setByName(0,"onboard.passenger") -- custom
-			elseif not newVehObj.isLocal and ((skipOthers and localVehiclesExist()) or vehicles[newGameVehicleID].jbeamname == "unicycle") then
+			elseif not newVehObj.isLocal and ((skipOthers and localVehiclesExist()) or vehicles[newGameVehicleID].jbeam == "unicycle") then
 				-- switch away from this vehicle if it shouldn't be accessible
 
 				local allVehicles = getAllVehicles()
@@ -900,7 +904,7 @@ local function spawnDefaultRequest()
 
 	if currentVehicle then
 		local gameVehicleID = currentVehicle:getID()
-		vehicles[gameVehicleID].jbeamname = '-'
+		vehicles[gameVehicleID].jbeam = '-'
 		if isOwn(gameVehicleID) then
 			core_vehicles.replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		else
@@ -918,7 +922,7 @@ local function spawnRequest(model, config, colors)
 	--dump(colors)
 	local currentVehicle = be:getPlayerVehicle(0)
 	if currentVehicle and isOwn(currentVehicle:getID()) and not config.spawnNew then
-		vehicles[gameVehicleID].jbeamname = '-'
+		vehicles[gameVehicleID].jbeam = '-'
 		return core_vehicles.replaceVehicle(model, config or {})
 		--core_vehicles.replaceVehicle(model, config and {config = config, color = colors or nil, licenseText = config.licenseName} or {})
 	else
@@ -1155,106 +1159,111 @@ local function onPreRender(dt)
 		end
 
 		for gameVehicleID, v in pairs(vehicles) do
-			local veh = be:getObjectByID(gameVehicleID) --	Get vehicle
-			if not veh then break end -- not spawned in yet
 			local owner = v:getOwner()
-			if not v.isLocal and owner ~= nil then
-				local pos = veh:getPosition()
-				local nametagAlpha = 1
-				local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
+			if v.isLocal or not owner then break end
 
-				local distfloat = (cameraPos or vec3()):distance(pos)
-				nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-				distanceMap[gameVehicleID] = distfloat
+			if v.isSpawned then -- update position
+				local veh = be:getObjectByID(gameVehicleID)
+				v.position = veh:getPosition()
+			end
 
-				if not settings.getValue("hideNameTags") and nicknamesAllowed then
-					local dist = ""
-					if distanceMap[gameVehicleID] > 10 and settings.getValue("nameTagShowDistance") then
-						local unit
-						local mapEntry = distanceMap[gameVehicleID]
-						if settings.getValue("uiUnitLength") == "imperial" then
-							mapEntry = mapEntry * 3.28084
-							if mapEntry > 5280 then
-								mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
-								unit = "mi"
-							else
-								mapEntry = math.floor(mapEntry)
-								unit = "ft"
-							end
+			local pos = v.position
+			if not pos then break end -- return if no position has been received yet
+
+			local nametagAlpha = 1
+			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
+
+			local distfloat = (cameraPos or vec3()):distance(pos)
+			distanceMap[gameVehicleID] = distfloat
+			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
+
+			if not settings.getValue("hideNameTags") and nicknamesAllowed then
+
+				local dist = ""
+				if distanceMap[gameVehicleID] > 10 and settings.getValue("nameTagShowDistance") then
+					local unit
+					local mapEntry = distanceMap[gameVehicleID]
+					if settings.getValue("uiUnitLength") == "imperial" then
+						mapEntry = mapEntry * 3.28084
+						if mapEntry > 5280 then
+							mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
+							unit = "mi"
 						else
-							if mapEntry >= 1000 then
-								mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
-								unit = "km"
-							else
-								mapEntry = math.floor(mapEntry)
-								unit = "m"
-							end
+							mapEntry = math.floor(mapEntry)
+							unit = "ft"
 						end
-
-						dist = string.format(" %s %s", tostring(mapEntry), unit)
-					end
-
-					if settings.getValue("fadeVehicles") then
-						if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
-						else veh:setMeshAlpha(1-nametagAlpha, "", false) end
-					end
-
-					if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
-						if settings.getValue("nameTagFadeInvert") then
-							nametagAlpha = 1 - nametagAlpha
+					else
+						if mapEntry >= 1000 then
+							mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
+							unit = "km"
 						else
-							dist = ""
+							mapEntry = math.floor(mapEntry)
+							unit = "m"
 						end
 					end
 
-					if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
+					dist = string.format(" %s %s", tostring(mapEntry), unit)
+				end
 
-					local roleInfo = owner.role
-					local backColor = roleInfo.backcolor
+				if settings.getValue("fadeVehicles") then
+					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
+					else veh:setMeshAlpha(1-nametagAlpha, "", false) end
+				end
 
-					backColor = ColorI(backColor.r, backColor.g, backColor.b, math.floor(nametagAlpha*127))
-
-					local prefix = ""
-					for source, tag in pairs(owner.nickPrefixes)
-						do prefix = prefix..tag.." " end
-
-					local suffix = ""
-					for source, tag in pairs(owner.nickSuffixes)
-						do suffix = suffix..tag.." " end
-
-					pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
-
-					local spectators = ""
-
-					-- draw spectators
-					for spectatorID in pairs(v.spectators) do
-						local spectator = players[spectatorID]
-						spectators = spectators .. spectator.name .. (next(v.spectators, spectatorID) and ', ' or '')
+				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
+					if settings.getValue("nameTagFadeInvert") then
+						nametagAlpha = 1 - nametagAlpha
+					else
+						dist = ""
 					end
-					if spectators ~= "" then
-						debugDrawer:drawTextAdvanced(
-							pos, -- Location
-							String(" ".. spectators .." "), -- Text
-							ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
-							backColor -- Background Color
-						)
-						pos.z = pos.z + 0.01
-					end
+				end
 
-					-- draw main nametag
+				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
+
+				local roleInfo = owner.role
+				local backColor = roleInfo.backcolor
+
+				backColor = ColorI(backColor.r, backColor.g, backColor.b, math.floor(nametagAlpha*127))
+
+				local prefix = ""
+				for source, tag in pairs(owner.nickPrefixes)
+					do prefix = prefix..tag.." " end
+
+				local suffix = ""
+				for source, tag in pairs(owner.nickSuffixes)
+					do suffix = suffix..tag.." " end
+
+				pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
+
+				local spectators = ""
+
+				-- draw spectators
+				for spectatorID in pairs(v.spectators) do
+					local spectator = players[spectatorID]
+					spectators = spectators .. spectator.name .. (next(v.spectators, spectatorID) and ', ' or '')
+				end
+				if spectators ~= "" then
 					debugDrawer:drawTextAdvanced(
 						pos, -- Location
-						String(" "..prefix..tostring(owner.name)..suffix..roleInfo.tag..dist.." "), -- Text
+						String(" ".. spectators .." "), -- Text
 						ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
 						backColor -- Background Color
 					)
+					pos.z = pos.z + 0.01
 				end
+
+				-- draw main nametag
+				debugDrawer:drawTextAdvanced(
+					pos, -- Location
+					String(" "..prefix..tostring(owner.name)..suffix..roleInfo.tag..dist.." "), -- Text
+					ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
+					backColor -- Background Color
+				)
 			end
 		end
 	end
 end
 
---DEBUG
 
 
 -- EVENTS

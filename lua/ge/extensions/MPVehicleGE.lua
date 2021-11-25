@@ -61,6 +61,10 @@ local function getGameVehicleID(serverVehicleID)
 	--return -1
 end
 
+local function getVehicleByServerID(serverVehicleID)
+	return vehicles[invertedVehiclesMap[serverVehicleID]]
+end
+
 -- GAME VEHICLE ID ----> SERVER VEHICLE ID
 local function getServerVehicleID(gameVehicleID)
 	if type(gameVehicleID) == "string" then
@@ -235,7 +239,7 @@ function Vehicle:new(data)
 
 	o.ownerName = data.ownerName
 	o.isLocal = data.isLocal or false
-	o.isSpawned = data.isSpawned or true
+	o.isSpawned = data.isSpawned ~= false --default to true
 
 	o.position = nil
 	o.rotation = nil
@@ -247,19 +251,11 @@ function Vehicle:new(data)
 end
 
 function Vehicle:getOwner()
-	for k,v in pairs(players) do
-		if self.ownerID == v.playerID then
-			return players[k], k
-		end
-	end
+	return players[self.ownerID], self.ownerID
 end
 
 function getPlayers() return players end
 function getVehicles() return vehicles end
-
-
-
-
 
 
 --called by onVehicleSpawned
@@ -407,11 +403,8 @@ end
 
 
 local function onDisconnect()
-	-- Clear all maps
-	--ownMap = {}
-	--vehiclesMap = {}
-	--invertedVehiclesMap = {}
-	--nicknameMap = {}
+	vehicles = {}
+	players = {}
 end
 
 local function onServerVehicleCoupled(serverVehicleID, state)
@@ -511,20 +504,19 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		return
 	end
 
-	local playerServerID   = tonumber(decodedData.pid) -- Server ID of the player that sent the vehicle
-	local gameVehicleID    = tonumber(decodedData.vid) -- gameVehicleID of the player that sent the vehicle
+	local playerServerID   = tonumber(decodedData.pid) -- Server ID of the owner
+	local gameVehicleID    = tonumber(decodedData.vid) -- remote gameVehicleID
 
-	--nickIDMap[playerServerID] = playerNickname
-
-
-	players[playerServerID] =
-		Player:new({name=playerNickname, playerID=playerServerID, role=playerRole, isSpawned=false})
-
+	--create player object if this is their first vehicle
+	if not players[playerServerID] then
+		players[playerServerID] =
+			Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
+	end
 
 	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID)
 
-	if MPConfig.getPlayerServerID() == decodedData.pid then -- If player ID = received player ID seems it's his own vehicle then sync it
-		--insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
+
+	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
 		local _, vehID = string.match(serverVehicleID,"^(%d*)%-(%d*)")
 		vehicles[gameVehicleID].serverVehicleID = tonumber(vehID)
 		vehicles[gameVehicleID].serverVehicleString = serverVehicleID
@@ -533,10 +525,20 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		players[playerServerID]:addVehicle(vehicles[gameVehicleID])
 
 		log("I", "onServerVehicleSpawned", "ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
-	else
 
+	else
+		--create temporary vehicle object
+		local invertedTempID = gameVehicleID * -1
+
+		local vehObject =
+			Vehicle:new({gameVehicleID=invertedTempID, serverVehicleString=serverVehicleID, ownerName=playerNickname, isSpawned=false})
+
+		vehicles[invertedTempID] = vehObject
+		players[playerServerID]:addVehicle(vehObject)
+		invertedVehiclesMap[serverVehicleID] = invertedTempID
+
+		-- queue system
 		local eventdata = {
-			playerRole = playerRole,
 			playerNickname = playerNickname,
 			serverVehicleID = serverVehicleID,
 			data = data
@@ -1078,7 +1080,6 @@ local function applyQueuedEvents()
 	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 
 	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
-	--dump(vehicleSpawnQueue)
 	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
 		log('I', "applyQueuedEvents", "Applying queued spawn")
 		vehicleSpawnQueue[vehicleID] = nil
@@ -1086,13 +1087,17 @@ local function applyQueuedEvents()
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
-	--if not vehicleEditQueue then return end
-	--dump(vehicleEditQueue)
 	for vehicleID, edit in pairs(vehicleEditQueue) do
 		log('I', "applyQueuedEvents", "Applying queued edit")
 		vehicleEditQueue[vehicleID] = nil
 		applyVehEdit(vehicleID, edit)
 		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+	end
+
+	for k,v in pairs(vehicles) do
+		if k<0 then
+			vehicles[k] = nil
+		end
 	end
 
 	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
@@ -1164,15 +1169,15 @@ local function onPreRender(dt)
 
 		for gameVehicleID, v in pairs(vehicles) do
 			local owner = v:getOwner()
-			if v.isLocal or not owner then break end
+			if v.isLocal or not owner then goto skip_vehicle end
 
-			if v.isSpawned then -- update position
-				local veh = be:getObjectByID(gameVehicleID)
+			local veh = be:getObjectByID(gameVehicleID)
+			if v.isSpawned and veh then -- update position if available
 				v.position = veh:getPosition()
 			end
 
-			local pos = v.position
-			if not pos then break end -- return if no position has been received yet
+			if not v.position then goto skip_vehicle end -- return if no position has been received yet
+			local pos = Point3F(v.position.x, v.position.y, v.position.z)
 
 			local nametagAlpha = 1
 			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
@@ -1227,6 +1232,12 @@ local function onPreRender(dt)
 				local roleInfo = owner.role
 				local backColor = roleInfo.backcolor
 
+				if not v.isSpawned then
+				
+					debugDrawer:drawSphere(pos, 1, ColorF(backColor.r/255, backColor.g/255, backColor.b/255, 0.5))
+				
+				end
+
 				backColor = ColorI(backColor.r, backColor.g, backColor.b, math.floor(nametagAlpha*127))
 
 				local prefix = ""
@@ -1264,6 +1275,7 @@ local function onPreRender(dt)
 					backColor -- Background Color
 				)
 			end
+			:: skip_vehicle ::
 		end
 	end
 end
@@ -1286,6 +1298,7 @@ M.onVehicleResetted        = onVehicleResetted
 
 
 -- FUNCTIONS
+M.getVehicleByServerID = getVehicleByServerID
 M.isOwn                    = isOwn                    -- takes: vehID  returns: bool
 M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
 M.setOwn                   = setOwn                   -- takes: number vehID, bool own

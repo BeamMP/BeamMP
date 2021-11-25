@@ -43,8 +43,10 @@ end
 
 
 local function applyPos(data, serverVehicleID)
-	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
-	local veh = be:getObjectByID(gameVehicleID)
+	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
+	--dump(vehicle)
+	if not vehicle then return end
+	local veh = be:getObjectByID(vehicle.gameVehicleID)
 	if veh then
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
@@ -52,6 +54,9 @@ local function applyPos(data, serverVehicleID)
 		end
 		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
+	local d = jsonDecode(data)
+	d = d.pos
+	vehicle.position = Point3F(d[1],d[2],d[3])
 end
 
 

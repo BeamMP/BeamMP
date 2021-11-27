@@ -23,6 +23,38 @@ local function tableDiff(old, new)
 	return diff, o, n
 end
 
+function simpletraces(level)
+	level = (level or 2) +1
+	--level = level+1
+	--print('simpletraces level: '..level)
+	local info = debug.getinfo(level)
+	if info then
+		return string.format("%s:%i, %s %s", info.source, info.currentline, info.namewhat, info.name)
+	else
+		return "unknown"
+	end
+end
+function simpletrace(level)
+	level = (level or 1) +1
+	--print('simpletrace level: '..level)
+	log('I', 'simpletrace', "Code was called from: "..simpletraces(level+1))
+end
+
+do 
+local _pairs = pairs 
+function pairs (value) 
+	local g = getmetatable(value) 
+	if g then 
+		if type(g.__pairs) == "function" then 
+			return g.__pairs(value) 
+		else 
+			return _pairs(value) 
+		end 
+	else 
+		return _pairs(value) 
+	end 
+end 
+end
 
 --generic
 M.tableLength  = tableSize

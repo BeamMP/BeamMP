@@ -9,7 +9,6 @@ local M = {}
 print("Loading MPDebug...")
 
 
-
 local function tpPlayerToPos(targetPos)
 	local activeVehicle = be:getPlayerVehicle(0)
 
@@ -74,14 +73,11 @@ end
 
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
-	local players = getPlayerNames()
+	local players = MPVehicleGE.getPlayers()
 	if tableIsEmpty(players) then return end
 	gui.setupWindow("MPplayerList")
     im.SetNextWindowBgAlpha(0.4)
 	im.Begin("MP Developer Tools")
-
-	local thisUser = MPConfig.getNickname() or ""
-
 
 	im.Columns(5, "Bar") -- gimme ein táblázat
 
@@ -93,29 +89,27 @@ local function drawPlayerList()
 	im.Text("") im.NextColumn()
 
 	local listIndex = 1
-	for name, ping in pairs(players) do
-		if name ~= "" then
-			listIndex = listIndex+1
+	for playerID, player in pairs(players) do
+		listIndex = listIndex+1
 
-			if name == thisUser then im.TextColored(im.ImVec4(0.0, 1.0, 1.0, 1.0), name) --teal if current user
-			else im.Text(name) end
-			im.NextColumn()
+		if player.isLocal then im.TextColored(im.ImVec4(0.0, 1.0, 1.0, 1.0), player.name) --teal if current user
+		else im.Text(player.name) end
+		im.NextColumn()
 
-			--im.Text(tostring(ping))
-			--im.NextColumn()
+		--im.Text(tostring(ping))
+		--im.NextColumn()
 
-			if im.Button("Camera##"..tostring(listIndex)) then MPVehicleGE.teleportCameraToPlayer(name) end --focusCameraOnPlayer
-			im.NextColumn()
+		if im.Button("Camera##"..tostring(listIndex)) then MPVehicleGE.teleportCameraToPlayer(player.name) end --focusCameraOnPlayer
+		im.NextColumn()
 
-			if im.Button("GPS##"..tostring(listIndex)) then MPVehicleGE.groundmarkerToPlayer(name) end
-			im.NextColumn()
+		if im.Button("GPS##"..tostring(listIndex)) then MPVehicleGE.groundmarkerToPlayer(player.name) end
+		im.NextColumn()
 
-			if im.Button("Follow##"..tostring(listIndex)) then MPVehicleGE.groundmarkerFollowPlayer(name) end
-			im.NextColumn()
+		if im.Button("Follow##"..tostring(listIndex)) then MPVehicleGE.groundmarkerFollowPlayer(player.name) end
+		im.NextColumn()
 
-			if im.Button("Teleport##"..tostring(listIndex)) then MPVehicleGE.teleportVehToPlayer(name) end
-			im.NextColumn()
-		end
+		if im.Button("Teleport##"..tostring(listIndex)) then MPVehicleGE.teleportVehToPlayer(player.name) end
+		im.NextColumn()
 	end
 
 	im.Columns(1);

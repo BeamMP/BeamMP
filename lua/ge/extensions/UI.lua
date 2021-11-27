@@ -1,45 +1,26 @@
 --====================================================================================
--- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- All work by Titch2000, jojos38 & 20dka.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("UI Initialising...")
+print("Loading UI...")
 
 
 
-local players = {}
-local pings = {}
-
+local players = {} -- { 'apple', 'banana', 'meow' }
+local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
 
 
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
 	local msg = string.sub(data, 2)
 	if code == "l" then
-		if msg == "Loading..." then MPCoreNetwork.addRecent() end
 		guihooks.trigger('LoadingInfo', {message = msg})
 	end
 end
-
-
-
-local function typeof(var)
-    local _type = type(var);
-    if(_type ~= "table" and _type ~= "userdata") then
-        return _type;
-    end
-    local _meta = getmetatable(var);
-    if(_meta ~= nil and _meta._NAME ~= nil) then
-        return _meta._NAME;
-    else
-        return _type;
-    end
-end
-
-
 
 local function split(s, sep)
     local fields = {}
@@ -50,8 +31,6 @@ local function split(s, sep)
 
     return fields
 end
-
-
 
 local function updatePlayersList(playersString)
 	--print(playersString)
@@ -64,7 +43,11 @@ end
 
 
 local function updateQueue(spawns, edits, s)
-	local UIqueue = {spawnCount = tableLength(spawns), editCount = tableLength(edits), show = s}
+	local UIqueue = {spawnCount = tableSize(spawns), editCount = tableSize(edits)}
+	if s == nil then
+		s = UIqueue.spawnCount+UIqueue.editCount>0
+	end
+	UIqueue.show = s
 	guihooks.trigger("setQueue", UIqueue)
 end
 
@@ -104,26 +87,13 @@ end
 
 
 
-local function error(text)
-	print("UI Error > "..text)
-	ui_message(''..text, 10, 0, 0)
-end
-
-
-
-local function message(text)
-	print("[Message] > "..text)
-	ui_message(''..text, 10, 0, 0)
-end
-
-
-
 local function showNotification(text, type)
 	if type and type == "error" then
-		error(text)
+		print("UI Error > "..text)
 	else
-		message(text)
+		print("[Message] > "..text)
 	end
+	ui_message(''..text, 10, nil, nil)
 end
 
 
@@ -131,7 +101,6 @@ end
 local function chatMessage(rawMessage)
 	local message = string.sub(rawMessage, 2)
 	print("Message received: "..message) -- DO NOT REMOVE
-	--be:executeJS('addMessage("'..message..'")')
 	guihooks.trigger("chatMessage", message)
 	TriggerClientEvent("ChatMessageReceived", message)
 end
@@ -145,61 +114,34 @@ end
 
 
 
-local ready = true
-local deletenext = true
+
+
 
 
 
 local function ready(src)
-  print("UI / Game Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
-  -- Now start the TCP connection to the launcher to allow the sending and receiving of the vehicle / session data
+	print("UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
 
-  if src == "FIRSTVEH" and MPCoreNetwork.isMPSession() then
-    deletenext = true
-  end
-  if src == "MP-SESSION" then
-		setPing("-2")
-    if deletenext and MPCoreNetwork.isMPSession() then
-      print("[BeamMP] First Session Vehicle Removed, Maybe now request the vehicles in the game?")
-      core_vehicles.removeCurrent(); -- 0.20 Fix
-      commands.setFreeCamera()		 -- Fix camera
-      deletenext = false
-    end
+	if MPCoreNetwork.isMPSession() then
 
-
-    deletenext = false
-  end
-
-  if src == "MP-SESSION" or src == "FIRSTVEH" then
-  	if ready and MPCoreNetwork.isMPSession() then
-  	  ready = false
-  	  MPGameNetwork.connectToLauncher()
-  	end
-
-		if MPCoreNetwork.isMPSession() then
-	    local Server = MPCoreNetwork.getCurrentServer()
-	    print("---------------------------------------------------------------")
-	    --dump(Server)
-			if Server ~= nil then
-				local name = Server.name
-	    	print(name)
+		if src == "MP-SESSION" then
+			setPing("-2")
+			local Server = MPCoreNetwork.getCurrentServer()
+			print("---------------------------------------------------------------")
+			--dump(Server)
+			if Server then
+				if Server.name then
+					print('Server name: '..Server.name)
+					setStatus("Server: "..Server.name)
+				else
+					print('Server.name = nil')
+				end
 			else
-				print('Server.name == nil')
+				print('Server = nil')
 			end
-	    print("---------------------------------------------------------------")
-
-	  	if Server ~= nil and Server.name ~= nil then
-	  	  setStatus("Server: "..Server.name)
-	  	end
+			print("---------------------------------------------------------------")
 		end
-  end
-end
-
-
-
-local function readyReset()
-  ready = true
-  deletenext = true
+	end
 end
 
 
@@ -214,15 +156,9 @@ local function setVehPing(vehicleID, ping)
 	end
 end
 
-local function GSUpdate(state)
-	print('NEW GS STATE')
-	dump(state)
-end
-
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
 M.ready = ready
-M.readyReset = readyReset
 M.setPing = setPing
 M.setNickname = setNickname
 M.setStatus = setStatus
@@ -231,8 +167,8 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setVehPing = setVehPing
-M.onGameStateUpdate = GSUpdate
 M.updateQueue = updateQueue
 
 
+print("UI loaded")
 return M

@@ -1,53 +1,23 @@
-<link type="text/css" rel="stylesheet" href="modules/multiplayer/multiplayer.css">
+<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayer/multiplayer.css">
 
 <div id="LoadingServer" style="display: none;">
     <div id="LoadingBody">
+		<md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closeLoadingPopup()"> X </md-button>
         <h1>{{:: 'ui.multiplayer.connecting' | translate}}</h1>
         <span id="LoadingStatus">{{:: 'ui.multiplayer.loading' | translate}}</span>
     </div>
 </div>
 
-<div id="MultiplayerLoginBody" style="">
-    <div id="LoginContainer" class="GuestLoginContainer">
-        <div class="col-2">
-			<img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
-        </div>
-        <form class="col-2">
-			<h2 class="text-white" id="loginHeader">Login with your BeamMP account.</h2>
-			<h2 class="text-red LOGINERRORFIELD"></h2>
-			<input (keyup.enter)="multiplayer.login()" type="text" id="loginUsername" placeholder="Username / Email"/>
-			<input (keyup.enter)="multiplayer.login()" type="password" id="loginPassword" placeholder="Password"/>
-			<md-button id="" class="button" ng-click="multiplayer.login()">Login</md-button>
-			<md-button id="" class="button" ng-click="multiplayer.switchToGuest()">Play as Guest</md-button>
-			<md-button id="" class="button" onclick="openExternalLink('https://forum.beammp.com/register')">Register</md-button>
-        </form>
-    </div>
-    <div id="GuestContainer" class="GuestLoginContainer" style="display: none;">
-        <div class="col-2">
-          <img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
-        </div>
-        <form class="col-2">
-          <h2 class="text-white">Please enter a Username to play with.</h2>
-          <h2 class="text-red LOGINERRORFIELD"></h2>
-          <input type="text" id="guestUsername" placeholder="Username"/>
-      		<md-button id="" class="button" ng-click="multiplayer.guestLogin()">Play</md-button>
-          <md-button id="" class="button" ng-click="multiplayer.switchToLogin()">Login</md-button>
-        </form>
-    </div>
-</div>
-
 <div id="addCustomFav" style="display: none;">
-
-	<md-list-item layout class="md-padding" style="padding-top: 15px; padding-bottom: 0;">
+	<md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </md-button>
+	<md-list-item layout class="md-padding">
 		<h1>Add custom server :</h1>
-		<md-button id="" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </md-button>
 	</md-list-item>
-
 	<center>
 		<input type="text" id="customFavName" name="customFavName" placeholder="Custom server"/>
 		<input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP"/>
 		<input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814"/>
-		<md-button id="" class="button" ng-click="multiplayer.addCustomServer()">Save</md-button>
+		<md-button class="button" ng-click="multiplayer.addCustomServer()">Save</md-button>
 	</center>
 </div>
 
@@ -93,7 +63,7 @@
 	    
 	    <div flex="" style="max-height: none;"></div>
 	    
-        <md-button id="direct-connect-btn" ng-click="multiplayer.logout()" class="md-raised md-accent" style="text-align:left;">
+        <md-button id="direct-connect-btn" ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
           <md-icon class="material-icons">exit_to_app</md-icon>
 				  Logout
         </md-button>

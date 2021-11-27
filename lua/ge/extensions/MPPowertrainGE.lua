@@ -1,12 +1,12 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("MPPowertrainGE Initialising...")
+print("Loading MPPowertrainGE...")
 
 
 
@@ -44,13 +44,8 @@ end
 
 
 local function handle(rawData)
-	--print("MPPowertrainGE.handle: "..rawData)
-	local code = string.sub(rawData, 1, 1)
-	local rawData = string.sub(rawData, 3)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == "l" then
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
 		applyLivePowertrain(data, serverVehicleID)
 	end
 end
@@ -64,5 +59,5 @@ M.sendLivePowertrain     = sendLivePowertrain
 
 
 
-print("MPPowertrainGE Loaded.")
+print("MPPowertrainGE loaded")
 return M

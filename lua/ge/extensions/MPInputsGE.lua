@@ -1,17 +1,17 @@
 --====================================================================================
 -- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("MPInputsGE Initialising...")
+print("Loading MPInputsGE...")
 
 
 
 local function tick() -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
+	local ownMap = MPVehicleGE.getOwnMap() or {} -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
@@ -44,11 +44,10 @@ end
 
 
 local function handle(rawData)
-	rawData = string.sub(rawData,3)
-	local serverVehicleID = string.match(rawData,"^.-:")
-	serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-	local data = string.match(rawData,":(.*)")
-	applyInputs(data, serverVehicleID)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	if code == 'i' then
+		applyInputs(data, serverVehicleID)
+	end
 end
 
 
@@ -59,5 +58,5 @@ M.sendInputs  = sendInputs
 M.applyInputs = applyInputs
 
 
-
+print("MPInputsGE loaded")
 return M

@@ -1,135 +1,167 @@
--- FIXME
--- This should be removed?
+--====================================================================================
+-- All work by Titch2000.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+
 
 local M = {}
-print("mpConfig Initialising...")
+print("Loading mpConfig...")
 
 -- MP VARIABLES
 local Nickname = ""
 local PlayerServerID = -1
 
--- MP TICK SETTINGS
-local nodesDelay = 0
-local nodesTickrate = 1.0 -- in seconds
+local enabledByDefaultSettings = {
+	"autoSyncVehicles", "nameTagShowDistance",
+	-- queue system
+	"enableSpawnQueue", "enableQueueAuto", "queueSkipUnicycle",
+	-- show custom vehicles in vehicle selector
+	"showPcs"
+}
 
-local positionDelay = 0
-local positionTickrate = 0.020 -- 0.016
+local function onExtensionLoaded()
+	for _,v in pairs(enabledByDefaultSettings) do
+		if settings.getValue(v) == nil then settings.setValue(v, true) end
+	end
+end
 
-local inputsDelay = 0
-local inputsTickrate = 0.02 --0.05
-
-local electricsDelay = 0
-local electricsTickrate = 0.02
 
 local function setNickname(x)
-  print("Nickname Set To: "..x)
-  Nickname = x
+	print("Nickname Set To: "..x)
+	Nickname = x
 end
 
 local function getNickname()
-  return Nickname
+	return Nickname
 end
 
 local function setPlayerServerID(x)
-  PlayerServerID = x
+	PlayerServerID = x
 end
 
 local function getPlayerServerID()
 	return PlayerServerID
 end
 
+local function checkForOldConfig()
+	if not FS:directoryExists("BeamMP") then
+		return false
+	end
 
-local function setNodesTickrate(x)
-  nodesTickrate = x
-end
+	if not FS:directoryExists("settings/BeamMP") then
+		FS:directoryCreate("settings/BeamMP")
+	end
 
-local function getNodesTickrate()
-  return nodesTickrate
-end
+	local movedfiles = false
 
-local function setPositionTickrate(x)
-  positionTickrate = x
-end
+	local oldfav = '/BeamMP/favorites.json'
+	local newfav = '/settings/BeamMP/favorites.json'
+	if FS:fileExists(oldfav) then
+		FS:copyFile(oldfav, newfav)
+		FS:removeFile(oldfav)
+		movedfiles = true
+	end
 
-local function getPositionTickrate()
-  return positionTickrate
-end
-
-local function setInputsTickrate(x)
-  inputsTickrate = x
-end
-
-local function getInputsTickrate()
-  return inputsTickrate
-end
-
-local function setElectricsTickrate(x)
-  electricsTickrate = x
-end
-
-local function getElectricsTickrate()
-  return electricsTickrate
+	local oldconf = '/BeamMP/config.json'
+	local newconf = '/settings/BeamMP/config.json'
+	if FS:fileExists(oldconf) then
+		FS:copyFile(oldconf, newconf)
+		FS:removeFile(oldconf)
+		movedfiles = true
+	end
+	return movedfiles
 end
 
 
 local function getFavorites()
-  if not FS:directoryExists("BeamMP") then
-    return nil
-  end
+	if not FS:directoryExists("settings/BeamMP") then
+		if checkForOldConfig() then
+			return getFavorites()
+		else
+			return nil
+		end
+	end
 
-  local favs = nil
-  local favsfile = '/BeamMP/favorites.json'
-  if FS:fileExists(favsfile) then
-    favs = jsonReadFile(favsfile)
-  else
-	print("favs file doesnt exist")
-  end
-  return favs
+	local favs = nil
+	local favsfile = '/settings/BeamMP/favorites.json'
+	if FS:fileExists(favsfile) then
+		favs = jsonReadFile(favsfile)
+	else
+		print("favs file doesnt exist")
+	end
+	return favs
 end
 
 
 local function setFavorites(favstr)
-  if not FS:directoryExists("BeamMP") then
-    FS:directoryCreate("BeamMP")
-  end
+	if not FS:directoryExists("settings/BeamMP") then
+		FS:directoryCreate("settings/BeamMP")
+	end
 
-  local favs = json.decode(favstr)
-  local favsfile = '/BeamMP/favorites.json'
-  jsonWriteFile(favsfile, favs)
+	local favs = json.decode(favstr)
+	local favsfile = '/settings/BeamMP/favorites.json'
+	jsonWriteFile(favsfile, favs)
+end
+
+
+local function getConfig()
+	if not FS:directoryExists("settings/BeamMP") then
+		if checkForOldConfig() then
+			return getConfig()
+		else
+			return nil
+		end
+	end
+
+	local file = '/settings/BeamMP/config.json'
+	if FS:fileExists(file) then
+		return jsonReadFile(file)
+	else
+		print("config file doesnt exist")
+		return nil
+	end
+end
+
+local function setConfig(settingName, settingVal)
+	local config = getConfig()
+	if not config then config = {} end
+
+	config[settingName] = settingVal
+
+	local favsfile = '/settings/BeamMP/config.json'
+	jsonWriteFile(favsfile, config)
+end
+
+
+local function acceptTos()
+	local config = getConfig()
+	if not config then config = {} end
+
+	config.tos = true
+
+	local favsfile = '/settings/BeamMP/config.json'
+	jsonWriteFile(favsfile, config)
 end
 
 
 
--- Variables
-M.ShowNameTags = ShowNameTags
-M.Nickname = Nickname
-M.PlayerServerID = PlayerServerID
+-- Functions
+
+M.onExtensionLoaded = onExtensionLoaded
+
 M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
-M.State = State
-M.nodesDelay = nodesDelay
-M.nodesTickrate = nodesTickrate
-M.positionDelay = positionDelay
-M.positionTickrate = positionTickrate
-M.inputsDelay = inputsDelay
-M.inputsTickrate = inputsTickrate
-M.electricsDelay = electricsDelay
-M.electricsTickrate = electricsTickrate
 
--- Functions
-M.setNickname = setNickname
 M.getNickname = getNickname
-M.setNodesTickrate = setNodesTickrate
-M.getNodesTickrate = getNodesTickrate
-M.setPositionTickrate = setPositionTickrate
-M.getPositionTickrate = getPositionTickrate
-M.setInputsTickrate = setInputsTickrate
-M.getInputsTickrate = getInputsTickrate
-M.setElectricsTickrate = setElectricsTickrate
-M.getElectricsTickrate = getElectricsTickrate
+M.setNickname = setNickname
 
 M.getFavorites = getFavorites
 M.setFavorites = setFavorites
+M.getConfig = getConfig
+M.setConfig = setConfig
 
-print("mpConfig Loaded.")
+M.acceptTos = acceptTos
+
+print("mpConfig loaded")
 return M

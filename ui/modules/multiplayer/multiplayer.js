@@ -1,127 +1,156 @@
-var bngApiScope;
-var setVersion;
 var highlightedServer;
-var launcherVersion = "";
 var servers = [];
-
+var favorites = [];
+var recents = [];
 
 
 angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
-*	MAIN CONTROLLER
+*	TOS CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
-	var vm = this;
-	bngApiScope = bngApi;
+.controller('MultiplayerTOSController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	$scope.validate = function () {
+		localStorage.setItem("tosAccepted", "true");
+		$state.go('menu.multiplayer');
+	};
 
-	// Display the servers list page once the page is loaded
-	$scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
-		if (toState.url == "/multiplayer") {
-			// local://local/ui/#/menu/multiplayer/mpservers
-			document.getElementById('servers-btn').click();
-		}
+	$scope.openExternalLink = function(url) {
+		bngApi.engineLua(`openWebBrowser("`+url+`")`);
+	}
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	LAUNCHER CONNECTION CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerLauncherController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	$scope.connect = function () {
+		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
+	};
+	
+	$scope.$on('launcherConnected', function (event, data) {
+		$state.go('menu.multiplayer');
 	});
 	
-	this.receiveServers = receiveServers;
+	// The game's lua has an auto launcher reconnect in case
+}])
 
-	vm.switchToLogin = function() {
-		document.getElementById('loginHeader').textContent = 'Login with your BeamMP account.';
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		document.getElementById('GuestContainer').style.display = 'none'
-		document.getElementById('LoginContainer').style.display = 'block'
-	}
 
-	vm.login = function() {
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	LOGIN CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, $state, $timeout, $document) {
+	'use strict';
+	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
+	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
+	var vm = this;
+	$scope.login = function() {
 		var u = document.getElementById('loginUsername').value.trim();
 		var p = document.getElementById('loginPassword').value.trim();
-		
 		if (u == "" || p == ""){
 			document.getElementById('loginHeader').textContent = 'Missing credentials';
 			return;
+		}	
+		document.getElementById('loginPassword').value = '';
+		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ username: u, password: p }) + "')");
+	}
+
+	$scope.switchConnection = function() {
+		var x = document.getElementById('LOGINERRORFIELD').textContent = "";
+		var loginContainer = document.getElementById('LoginContainer');
+		var guestContainer = document.getElementById('GuestContainer');
+		if (loginContainer.style.display == "none") {
+			loginContainer.style.display = 'block';
+			guestContainer.style.display = 'none';
+		} else {
+			loginContainer.style.display = 'none';
+			guestContainer.style.display = 'block';
 		}
 		
-		document.getElementById('loginUsername').value = '';
-		document.getElementById('loginPassword').value = '';
-		var d = {
-			username: u,
-			password: p
-		}
-
-		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
-
-		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
 	}
 
-	vm.logout = function() {
-		document.getElementById('MultiplayerLoginBody').style.display = 'block';
-		vm.switchToLogin();
-		bngApi.engineLua(`MPCoreNetwork.logout()`);
-	}
-
-	vm.switchToGuest = function() {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		document.getElementById('LoginContainer').style.display = 'none'
-		document.getElementById('GuestContainer').style.display = 'block'
-	}
-
-	vm.guestLogin = function() {
+	$scope.guestLogin = function() {
 		var u = document.getElementById('guestUsername').value;
 		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
 		document.getElementById('guestUsername').value = '';
-		var d = {
-			guest: u
-		}
-		bngApi.engineLua(`MPCoreNetwork.login('${JSON.stringify(d)}')`);
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ guest: u }) + "')");
 	}
-
-	$scope.$on('LoginContainerController', function (event, data) {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent='';    // Change the content
-		}
-		if (data.hide) { //login successful
-			document.getElementById('MultiplayerLoginBody').style.display = 'none'
-			
-			if (data.message !== undefined) {
-				console.log(data.message);
-				localStorage.setItem('welcomeMessage',data.message.replace('Authentication Successful. ',''));
-				document.getElementById('topRightStatus').textContent = data.message;
-			} else {
-				document.getElementById('topRightStatus').textContent = localStorage.getItem('welcomeMessage')||"";
-			}
-		} else {
-			document.getElementById('MultiplayerLoginBody').style.display = 'block'
-		}
+	
+	$scope.$on('LoggedIn', function (event, data) {
+		$state.go('menu.multiplayer');
 	});
-
+	
 	$scope.$on('LoginError', function (event, data) {
-		var x = document.getElementsByClassName('LOGINERRORFIELD')
-		for(var i = 0; i < x.length; i++){
-			x[i].textContent=data.message;    // Change the content
+		var x = document.getElementById('LOGINERRORFIELD').textContent= data;
+	});
+	
+	// Try to auto login
+	bngApi.engineLua('MPCoreNetwork.autoLogin()');
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	MAIN CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
+	var vm = this;
+	bngApi = bngApi;
+
+	// Display the servers list page once the page is loaded
+	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
+		if (toState.url == "/multiplayer") {
+			// local://local/ui/#/menu/multiplayer/mpservers
+			document.getElementById('servers-btn').click();
+			
+		}
+
+		// Check if the user as aknowledged tos
+		const tosAccepted = localStorage.getItem("tosAccepted");
+		if (!tosAccepted || tosAccepted == "false") {
+			$state.go('menu.multiplayer.tos');
+			return;
+		}
+
+		// Check launcher is not connected
+		const launcherConnected = await isLauncherConnected();
+		if (!launcherConnected) {
+			$state.go('menu.multiplayer.launcher');
+			return;
+		}
+
+		// Check if we are logged in
+		const loggedIn = await isLoggedIn();
+		if (!loggedIn) {
+			$state.go('menu.multiplayer.login');
+			return;
 		}
 	});
-
-	$scope.$on('addRecent', function (event, data) {
-		console.log("recent received from lua");
-		addRecent(data);
+	
+	$scope.$on('LauncherConnectionLost', function (event, data) {
+		$state.go('menu.multiplayer.launcher');
 	});
+
+	$scope.logout = function() {
+		bngApi.engineLua(`MPCoreNetwork.logout()`);
+		$state.go('menu.multiplayer');
+	}
 
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
-		console.log("ok");
 		console.log(src.value);
-	}
-
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
 	}
 
 	vm.refreshList = function() {
@@ -130,7 +159,7 @@ angular.module('beamng.stuff')
 	}
 	
 	vm.clearRecents = function() {
-		localStorage.removeItem("recent");
+		localStorage.removeItem("recents");
 		vm.refreshList();
 	}
 
@@ -139,34 +168,37 @@ angular.module('beamng.stuff')
 		var ip = document.getElementById('directip').value;
 		var port = document.getElementById('directport').value;
 		document.getElementById('LoadingServer').style.display = 'block';
-		//addRecent({name:ip, ip:ip, port:port});
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
 	vm.closePopup =  function() {
 		document.getElementById('addCustomFav').style.display = 'none';
+	};
+	vm.closeLoadingPopup =  function() {
 		document.getElementById('LoadingServer').style.display = 'none';
+		bngApi.engineLua('MPCoreNetwork.resetSession()');
 	};
 
 	vm.showCustomServer = function() {
 		document.getElementById('addCustomFav').style.display = 'block';
 	};
 
-	vm.addCustomServer = function() {
-		var valid = (document.getElementById('customFavIP').value.length > 0) && (document.getElementById('customFavPort').value.length > 0) && !isNaN(document.getElementById('customFavPort').value)
-
+	vm.addCustomServer = async function() {
+		var ip = document.getElementById('customFavIP');
+		var port = document.getElementById('customFavPort');
+		var name = document.getElementById('customFavName');
+		var valid = (ip.value.length > 0) && (port.value.length > 0) && !isNaN(port.value)
 		if (!valid) return;
-
-		addFav(document.getElementById('customFavName').value,
-					document.getElementById('customFavIP').value,
-					document.getElementById('customFavPort').value);
-
-
-
+		var server = {
+			cversion: await getLauncherVersion(), ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
+			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
+			custom: true, port: port.value
+		};
+		addFav(server);
 		document.getElementById('addCustomFav').style.display = 'none';
-		document.getElementById('customFavName').value = '';
-		document.getElementById('customFavIP').value = '';
-		document.getElementById('customFavPort').value = '';
+		name.value = '';
+		ip.value = '';
+		port.value = '';
 		vm.refreshList();
 	};
 
@@ -219,15 +251,17 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	SERVERS TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 
 	var vm = this;
-	vm.check_isEmpty = false;
-	vm.check_isNotEmpty = false;
-	vm.check_isNotFull = false;
-	vm.check_modSlider = false;
-	vm.slider_maxModSize = 500; //should be almost a terabyte
-	vm.select_map = "Any"
+	vm.checkIsEmpty = false;
+	vm.checkIsNotEmpty = false;
+	vm.checkIsNotFull = false;
+	vm.checkModSlider = false;
+	vm.sliderMaxModSize = 500; //should be almost a terabyte
+	vm.selectMap = "Any"
+	vm.searchText = "";
 
 	// Request for the servers
 	bngApi.engineLua('MPCoreNetwork.getServers()');
@@ -251,56 +285,28 @@ angular.module('beamng.stuff')
 		logger.debug('[MultiplayerServersController] destroyed.');
 	});
 	
-	this.createTableRow = createTableRow
-	vm.displayServers = function() {
-		// Clear the servers table
-		var serversTable = document.getElementById("serversTableBody");
-		serversTable.innerHTML = "";
-			
-		var mapNames = new Array(); //["Any"];
-		var html = "";
-		for (var i = 0; i < servers.length; i++) {
-			var shown = true;
-			
-			// Filter by search
-			if (!servers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase())) shown = false;
-			
-			// Filter by empty or full
-			else if(vm.check_isEmpty && servers[i].players > 0) shown = false;
-			else if(vm.check_isNotEmpty && servers[i].players == 0) shown = false;
-			else if(vm.check_isNotFull && servers[i].players == servers[i].maxplayers) shown = false;
-			
-			// Filter by mod size
-			else if(vm.check_modSlider && vm.slider_maxModSize * 1048576 < servers[i].modstotalsize) shown = false;
-
-			// Filter by map
-			else if(!mapNames.includes(SmoothMapName(servers[i].map))) mapNames.push(SmoothMapName(servers[i].map));
-			else if(vm.select_map != "Any" && (vm.select_map != SmoothMapName(servers[i].map))) shown = false;
-			
-			// If the server passed the filter 
-			if(shown) createTableRow(serversTable, i, 0, false, bngApi);
-		}
-		mapNames.sort(); // Sort the maps by name
-		mapNames.unshift("Any"); // Set Any to the beginning
-		vm.availableMaps = mapNames; // Set the list of available maps
-	};
+	$scope.$on('onServersReceived', async function (event, data) {
+		servers = await receiveServers(JSON.parse(data));
+		favorites = await getFavorites();
+		recents = await getRecents();
+		vm.repopulate();
+	});
 	
-	$scope.$on('onServersReceived', function (event, data) {
-		servers = receiveServers(JSON.parse(data));
-		vm.displayServers(servers);
-	});
-
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
+	vm.repopulate = async function() {
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			servers,
+			0, // Favorite, Recent or Servers tab
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+	};
 }])
 
 
@@ -308,24 +314,37 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	RECENT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
-
-	vm.check_isEmpty = false;
-	vm.check_isNotEmpty = false;
-	vm.check_isNotFull = false;
-	vm.check_modSlider = false;
-	vm.slider_maxModSize = 500; //should be almost a terabyte
-	vm.select_map = "Any"
+	
+	vm.searchText = "";
 
 	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	// Called when getServers() answered
-	$scope.$on('onServersReceived', function (event, data) {
-		console.log("Servers received");
-		servers = receiveServers(JSON.parse(data));
-		vm.displayServers(servers);
+	$scope.$on('onServersReceived', async function (event, data) {
+		servers = await receiveServers(JSON.parse(data));
+		favorites = await getFavorites();
+		recents = await getRecents();
+		vm.repopulate();
 	});
+
+	vm.repopulate = async function() {
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			servers,
+			2, // Favorite, Recent or Servers tab
+			vm.searchText,
+			false,
+			false,
+			false,
+			false,
+			500,
+			"Any",
+			bngApi
+		);
+	};
 
 	// When controller is unloaded
 	vm.exit = function ($event) {
@@ -346,69 +365,6 @@ angular.module('beamng.stuff')
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerRecentController] destroyed.');
 	});
-
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
-	}
-
-	// Add a server inside the table
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
-
-	vm.displayServers = function(servers) {
-		var table = document.getElementById("serversTableBody");
-		table.innerHTML = "";
-
-		for(var i in servers) servers[i].id = i;
-		var recentjson = JSON.parse(localStorage.getItem('recent'))
-		var recentServers = new Array();
-
-		for(var i in recentjson){
-			recentjson[i].sname      = "❓ " + recentjson[i].name;
-			recentjson[i].location   = "N/A";
-			recentjson[i].map        = "Unknown";
-			recentjson[i].players    = "?";
-			recentjson[i].maxplayers = "?";
-			recentjson[i].pps        = "?";
-
-			var foundServers = servers.filter(s=>s.ip == recentjson[i].ip).filter(s=>s.port == recentjson[i].port)
-			if (foundServers.length > 0) {
-				foundServers[0].recid = i;
-				recentServers.push(foundServers[0]);
-			} else {
-				recentjson[i].id = -1;
-				recentjson[i].recid = i;
-				recentServers.push(recentjson[i]);
-			}
-		}
-
-		if (recentServers.length == 0) {
-			var bgcolor = 'rgba(0,0,0,0)!important';
-			var html = `
-			<tr>
-			<td style="background-color:${bgcolor};"></td>
-			<td style="background-color:${bgcolor};"><center>No recent servers found. Join a server for something to show up here!</center></td>
-			<td style="background-color:${bgcolor};"></td>
-			<td style="background-color:${bgcolor};"></td>
-			<td style="background-color:${bgcolor};"></td>
-			</tr>
-			`;
-			document.getElementById('serversTableBody').innerHTML += html
-		}
-
-		for (var i = 0; i < recentServers.length; i++) createTableRow(table, i, 1, false, bngApi, recentServers);
-	};
 }])
 
 
@@ -416,15 +372,17 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FAVORITE TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 'bngApi', function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
 
-	vm.check_isEmpty = false;
-	vm.check_isNotEmpty = false;
-	vm.check_isNotFull = false;
-	vm.check_modSlider = false;
-	vm.slider_maxModSize = 500; //should be almost a terabyte
-
+	vm.checkIsEmpty = false;
+	vm.checkIsNotEmpty = false;
+	vm.checkIsNotFull = false;
+	vm.checkModSlider = false;
+	vm.sliderMaxModSize = 500; //should be almost a terabyte
+	vm.selectMap = "Any";
+	vm.searchText = "";
 	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	vm.exit = function ($event) {
@@ -434,17 +392,28 @@ angular.module('beamng.stuff')
 	};
 	
 	// Called when getServers() answered
-	$scope.$on('onServersReceived', function (event, data) {
-		console.log("Servers received");
-		servers = receiveServers(JSON.parse(data));
-		vm.displayServers(servers);
+	$scope.$on('onServersReceived', async function (event, data) {
+		servers = await receiveServers(JSON.parse(data));
+		favorites = await getFavorites();
+		recents = await getRecents();
+		vm.repopulate();
 	});
-
-	vm.connect = function() {
-		logger.debug("Attempting to call connect to server.")
-		document.getElementById('LoadingServer').style.display = 'block'
-		bngApi.engineLua('MPCoreNetwork.connectToServer()');
-	}
+	
+	vm.repopulate = async function() {
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			servers,
+			1, // Favorite, Recent or Servers tab
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+	};
 
 	var timeOut = $timeout(function() {
 		if (vm.loadingPage === true) {
@@ -462,58 +431,6 @@ angular.module('beamng.stuff')
 		if (row.rowIndex % 2 == 0) row.style.backgroundColor = "white";
 		else row.style.backgroundColor = "#f2f2f2";
 	}
-
-	$scope.$on('addServer', function (event, data) {
-		var table = document.getElementById("servers-table");
-		var row = table.insertRow(table.rows.length);
-		row.insertCell(0).innerHTML = data.location;
-		row.insertCell(1).innerHTML = data.description;
-		row.insertCell(2).innerHTML = data.map;
-		row.insertCell(3).innerHTML = data.players + "/" + data.maxPlayers;
-		row.insertCell(4).innerHTML = data.pps;
-		row.servData = data;
-		row.onclick = selectRow;
-	});
-
-	vm.displayServers = function() {
-		var table = document.getElementById("serversTableBody");
-		table.innerHTML = "";
-		for(var i in servers) servers[i].id = i;
-
-		getFavs()
-
-		var favjson = JSON.parse(localStorage.getItem('favorites'))
-
-		if (favjson == null) return;
-		var favoriteServers = new Array();
-		for(var i in favjson){
-			favjson[i].sname  = "❓ " + favjson[i].sname;
-			var foundServers = servers.filter(s=>s.ip == favjson[i].ip).filter(s=>s.port == favjson[i].port)
-			if (foundServers.length>0) {
-				foundServers[0].favid = i;
-				favoriteServers.push(foundServers[0]);
-			} else {
-				favjson[i].id = -1;
-				favjson[i].favid = i;
-				favoriteServers.push(favjson[i]);
-			}
-		}
-
-		for (var i = 0; i < favoriteServers.length - 1; i++) {
-			var filtered = favoriteServers[i].strippedName.toLowerCase().includes(document.getElementById("search").value.toLowerCase());
-			if(filtered && vm.check_isEmpty && favoriteServers[i].players>0) filtered = false;
-			if(filtered && vm.check_isNotEmpty && favoriteServers[i].players==0) filtered = false;
-			if(filtered && vm.check_isNotFull && favoriteServers[i].players==favoriteServers[i].maxplayers) filtered = false;
-			if(vm.check_modSlider && vm.slider_maxModSize*1048576 < favoriteServers[i].modstotalsize) filtered = false;
-			if(filtered) createTableRow(table, i, 1, true, bngApi, favoriteServers);
-		}
-	};
-
-	function setClientVersion(v) {
-		launcherVersion = v;
-	};
-
-	setVersion = setClientVersion;
 }])
 
 
@@ -521,8 +438,8 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	DIRECT CONNECT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout', 'bngApi',
-function(logger, $scope, $state, $timeout, bngApi) {
+.controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout',
+function(logger, $scope, $state, $timeout) {
 	var vm = this;
 
 	var timeOut = $timeout(function() {
@@ -541,17 +458,35 @@ function(logger, $scope, $state, $timeout, bngApi) {
 		$timeout.cancel(timeOut);
 		logger.debug('[MultiplayerDirectController] destroyed.');
 	});
-}]);
+}])
+
+.directive('compile', ['$compile', function ($compile) {
+  return function(scope, element, attrs) {
+    scope.$watch(
+      function(scope) {
+        // watch the 'compile' expression for changes
+        return scope.$eval(attrs.compile);
+      },
+      function(value) {
+        // when the 'compile' expression changes
+        // assign it into the current DOM
+        element.html(value);
+				// compile the new DOM and link it to the current
+			  // scope.
+			  // NOTE: we only compile .childNodes so that
+			  // we don't get into infinite loop compiling ourselves
+			  $compile(element.contents())(scope);
+			}
+		);
+	};
+}])
 
 
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FUNCTIONS
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-function setClientVersion(v) {
-	launcherVersion = v;
-};
-
+// Set the first letter of each word upper case
 function toTitleCase(str) {
 	return str.replace(/\w\S*/g, function(txt){
 		return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -559,25 +494,21 @@ function toTitleCase(str) {
 }
 
 function SmoothMapName(map) {
-	if (map != "Any Map") {
-		map = map.replace("/info.json","")
-		map = map.split('/').pop().replace(/\s*/g,'')
-		map = map.replace(/_/g," ")
-		map = map.replace(/-/g," ")
-		map = toTitleCase(map)
-	}
+	if (!map) return;
+	map = map.replace("/info.json","")
+	map = map.split('/').pop().replace(/\s*/g,'')
+	map = map.replace(/_/g," ")
+	map = map.replace(/-/g," ")
+	map = toTitleCase(map)
 	return map
 }
 
 function formatBytes(bytes = 0, decimals = 2) {
     if (bytes == 0 || bytes == undefined) return '0 Bytes';
-
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
@@ -625,11 +556,11 @@ var descStyleMap = {
     '^m': 'text-decoration:line-through',
     '^n': 'text-decoration:underline',
     '^o': 'font-style:italic',
-    '^p': 'display:block'
 };
 
 function applyDescCode(string, codes) {
     var elem = document.createElement('span');
+		elem.style.fontSize = 'initial';
     string = string.replace(/\x00*/g, '');
     for(var i = 0, len = codes.length; i < len; i++) {
         elem.style.cssText += descStyleMap[codes[i]] + ';';
@@ -654,6 +585,8 @@ function formatDescriptionName(string) {
     if(indexes[0] !== 0) {
         final.appendChild( applyDescCode( string.substring(0, indexes[0]), [] ) );
     }
+
+		// Find all color and formatting codes
     for(i = 0; i < len; i++) {
     	indexDelta = indexes[i + 1] - indexes[i];
         if(indexDelta === 2) {
@@ -681,6 +614,7 @@ function formatDescriptionName(string) {
 
 function applyCode(string, codes) {
     var elem = document.createElement('span');
+		elem.style.fontSize = 'initial';
     string = string.replace(/\x00*/g, '');
     for(var i = 0, len = codes.length; i < len; i++) {
         elem.style.cssText += serverStyleMap[codes[i]] + ';';
@@ -733,9 +667,9 @@ function formatServerName(string) {
 function officialMark(o, s) {
 	if (o) {
 		if (s) {
-			return '<img src="./modules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
+			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
 		} else {
-			return '<img src="./modules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
+			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
 		}
 
 	} else {
@@ -822,86 +756,66 @@ function stripCustomFormatting(name){
 	return name;
 }
 
-function removeFav() {
-	var favjson = JSON.parse(localStorage.getItem('favorites'));
-	var favArray = new Array();
-
-	if(favjson != null)
-		for(var i in favjson)
-			if(favArray.filter(s=>s.ip == favjson[i].ip).filter(s=>s.port == favjson[i].port).length==0)
-				favArray.push(favjson[i]);
-
-	for(var i in favArray)
-		if(favArray[i].ip == highlightedServer.ip && favArray[i].port == highlightedServer.port) {
-			favArray.splice(i, 1);
-		}
-
-	localStorage.setItem('favorites', JSON.stringify(favArray))
-	saveFavs();
-	bngApiScope.engineLua('MPCoreNetwork.getServers()');
-}
-
-function getFavs(){
-	bngApiScope.engineLua(`MPConfig.getFavorites()`, (data) => {
-		if (data == null) return;
-		localStorage.setItem("favorites", JSON.stringify(data));
+async function getFavorites() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPConfig.getFavorites()", (data) => {
+			if (!data) { resolve([]); return; }
+			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
+			resolve(data || []);
+		});
 	});
 }
 
-function saveFavs(){
-	bngApiScope.engineLua(`MPConfig.setFavorites(`+JSON.stringify(localStorage.getItem("favorites"))+`)`);
+function addFav(server, isUpdate) {
+	server.addTime = Date.now();
+	favorites.push(server);
+	saveFav();
+	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.getServers()');
 }
 
-function addRecent(recentstr){ // has to have name, ip, port
-	var json = JSON.parse(recentstr);
-	console.log(json);
-	var recents = JSON.parse(localStorage.getItem("recent"));
-	if (recents == null) recents = new Array();
+function removeFav(server) {
+	for (let i = 0; i < favorites.length; i++) {
+		let tmpServer = favorites[i];
+		if (tmpServer.ip == server.ip && tmpServer.port == server.port) {
+			favorites.splice(i, 1);
+		}
+	}
+	saveFav();
+	bngApi.engineLua('MPCoreNetwork.getServers()');
+}
 
-	json.sname = json.name;
+function saveFav() {
+	bngApi.engineLua('MPConfig.setFavorites(\'' + JSON.stringify(favorites) + '\')');
+}
 
-	json.location = "N/A"    ,
-	json.map = "Unknown"     ,
-	json.modlist = ""        ,
-	json.modstotal = "N/A"   ,
-	json.modstotalsize = 0   ,
-	json.official = 0        ,
-	json.owner = ""          ,
-	json.players = "N"       ,
-	json.maxplayers = "A"    ,
-	json.playerslist = ""    ,
-	json.pps = "N/A"         ,
-	json.private = false     ,
-	json.time = 0            ,
-	json.version = "-1"      ,
-	json.id = -1
+function getRecents() {
+	return new Promise(function(resolve, reject) {
+		var tmpRecents = JSON.parse(localStorage.getItem("recents"));
+		resolve(tmpRecents || []);
+	});
+}
 
-	var arr = Array(1).fill(json);
-
-	console.log(recents);
-
-	for(var i=0; i < Math.min(recents.length, 9); i++)
-		if(arr.filter(s=>s.ip == recents[i].ip).filter(s=>s.port == recents[i].port).length==0)
-			arr.push(recents[i]);
-
-	//recents = recents.slice(0, 10); //keep the last 10 entries
-	localStorage.setItem("recent", JSON.stringify(arr));
+function addRecent(server, isUpdate) { // has to have name, ip, port
+	server.addTime = Date.now();
+	recents.push(server);
+	recents = recents.slice(-1 * 10); //keep the last 10 entries
+	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
 function openExternalLink(url){
-	bngApiScope.engineLua(`openWebBrowser("`+url+`")`);
+	bngApi.engineLua(`openWebBrowser("`+url+`")`);
 }
 
 function openForumLink(){
 	openExternalLink("http://forum.beammp.com");
 }
 
-function getServerInfoHTML(d, fav) {
+function getServerInfoHTML(d) {
 		// `d` is the original data object for the row
 		var favButton;
-		if (fav) favButton = `<md-button id="removeFav-button"     class="button md-button md-default-theme" ng-class="" ng-click="removeFav()"           style="margin-left: 10px;">Remove Favorite</md-button>`;
-		else favButton = `<md-button id="addFav-button"        class="button md-button md-default-theme" ng-class="" ng-click="addFav()"            style="margin-left: 10px;">Add Favorite</md-button>`;
-		
+		console.log(d);
+		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
+		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
 		return `
 				<td colspan="5">
 					<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
@@ -924,7 +838,7 @@ function getServerInfoHTML(d, fav) {
 						</div>
 					</div>
 					<div class="row" style="padding-left: 10px;">
-						<md-button id="serverconnect-button" class="button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect()" style="margin-left: 10px;">Connect</md-button>
+						<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect(` + d.ip + `, ` + d.port + `)" style="margin-left: 10px;">Connect</md-button>
 						` + favButton + `
 					</div>
 					<div class="row">
@@ -934,95 +848,131 @@ function getServerInfoHTML(d, fav) {
 			</td>`;
 };
 
-function addFav(fname, fip, fport) {
-	var serverToAdd = new Object();
-	if (fname !== undefined) {
-		serverToAdd.ip = fip            ,
-		serverToAdd.port = fport        ,
-		serverToAdd.sdesc = fname       ,
-		serverToAdd.sname = fname       ,
-		serverToAdd.strippedName = fname,
-
-		serverToAdd.cversion = "-1"     ,
-		serverToAdd.location = "N/A"    ,
-		serverToAdd.map = "Unknown"     ,
-		serverToAdd.modlist = ""        ,
-		serverToAdd.modstotal = "N/A"   ,
-		serverToAdd.modstotalsize = 0   ,
-		serverToAdd.official = 0        ,
-		serverToAdd.owner = ""          ,
-		serverToAdd.players = "N"       ,
-		serverToAdd.maxplayers = "A"    ,
-		serverToAdd.playerslist = ""    ,
-		serverToAdd.pps = "N/A"         ,
-		serverToAdd.private = false     ,
-		serverToAdd.time = 0            ,
-		serverToAdd.version = "-1"      ,
-		serverToAdd.id = -1
+function formatHealth(pps) {
+	let signel = '';
+	if (pps > 40) {
+		signel = 'signal-4'
+	} else if (pps > 20) {
+		signel = 'signal-3'
+	} else if (pps > 10) {
+		signel = 'signal-2'
+	} else if (pps > 5) {
+		signel = 'signal-1'
+	} else {
+		signel = 'signal-0'
 	}
-	else
-	{
-		serverToAdd = highlightedServer;
-		serverToAdd.players  = 0;
-		serverToAdd.maxplayers  = 0;
-		serverToAdd.time = 0;
-		serverToAdd.pps = 0;
-		serverToAdd.id = -1;
-	}
-
-	getFavs();
-
-	var favjson = JSON.parse(localStorage.getItem('favorites'));
-
-	var favArray = new Array();
-
-	if(favjson != null)
-		for(var i in favjson)
-			if(favArray.filter(s=>s.ip == favjson[i].ip).filter(s=>s.port == favjson[i].port).length==0)
-				favArray.push(favjson[i]);
-
-	if(favArray.filter(s=>s.ip == serverToAdd.ip).filter(s=>s.port == serverToAdd.port).length==0)
-		favArray.push(serverToAdd);
-
-	favArray.sort((a, b) => (a.official > b.official) ? -1 : 1)
-	localStorage.setItem('favorites', JSON.stringify(favArray))
-	saveFavs();
-	bngApiScope.engineLua('MPCoreNetwork.getServers()');
+	return `
+	<i class="icon__signal-strength ${signel}">
+		<span class="bar-1"></span>
+		<span class="bar-2"></span>
+		<span class="bar-3"></span>
+		<span class="bar-4"></span>
+	</i>
+	`
 }
 
-function createTableRow(table, i, type, fav, bngApi, serversList) {
-	var server = serversList ? serversList[i] : servers[i];
-	var bgcolor = 'rgba(0,0,0,0)!important';
-	if (server.official) bgcolor = 'rgba(255,106,0,0.25)!important';
-	// Create the row and set it's attributes
+function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) {
 	let newRow = table.insertRow(table.length);
-	var bgcolor = server.official ? 'rgba(255,106,0,0.25)!important' : 'rgba(0,0,0,0)!important';
-	var tempHTML = `
-		<td style="background-color:${bgcolor};">${server.location}</td>
-		<td style="background-color:${bgcolor};">${formatServerName(server.sname)}</td>
-		<td style="background-color:${bgcolor};">${SmoothMapName(server.map)}</td>
-		<td style="background-color:${bgcolor};">${server.players}/${server.maxplayers}</td>
-		<td style="background-color:${bgcolor};">${server.pps}</td>
+	newRow.style.fontSize = 0;
+	newRow.server = server;
+	newRow.server.favorite = isFavorite;
+	newRow.server.recent = isRecent;
+	newRow.innerHTML = `
+		<td style="background-color:${bgcolor}; font-size: initial;"><i class="flag flag-${server.location}"></i> ${server.location}</td>
+		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${formatHealth(server.pps)}${server.pps}</td>
 	`;
-	newRow.innerHTML = tempHTML;
-	if (type == 0) newRow.setAttribute('data-id', i);
-	else newRow.setAttribute('data-id', server.id + "," + server.recid);
-	newRow.onclick = function() { select(this, type, fav, bngApi) };
+	newRow.onclick = function() { select(this, bngApi); };
+}
+
+// /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
+async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap, bngApi) {
+	var newTbody = document.createElement('tbody');
+	newTbody.id = "serversTableBody";
+	var mapNames = new Array(); //["Any"];
+	for (var i = 0; i < servers.length; i++) {
+		var shown = true;
+		var server = servers[i];
+		var smoothMapName = SmoothMapName(server.map);
+		var isFavorite = false;
+		var isRecent = false;
+
+		// Filter by search
+		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) shown = false;
+		
+		// Filter by empty or full
+		else if(checkIsEmpty && server.players > 0) shown = false;
+		else if(checkIsNotEmpty && server.players == 0) shown = false;
+		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
+		
+		// Filter by mod size
+		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;
+	
+		// Filter by map
+		else if((selectMap != "Any" && selectMap != smoothMapName)) shown = false;
+
+		// Add the maps to the combobox on the UI
+		if(!mapNames.includes(smoothMapName)) mapNames.push(smoothMapName);
+
+		// Favorite
+		for (let tmpServer of favorites) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isFavorite = tmpServer.addTime;
+		if (type == 1 && !isFavorite) shown = false; // If it's favorite tab, we only show favorites
+
+		// Recents
+		for (let tmpServer of recents) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isRecent = tmpServer.addTime;
+		if (type == 2 && !isRecent) shown = false; // Everything happens underneath for recents
+
+		// If the server passed the filter
+		if(shown) {
+			// Set the color relative to either favorite, official or normal
+			var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.official ? 'rgba(255,106,0,0.25)!important' : 'rgba(0,0,0,0)!important';
+			createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
+			if (isFavorite) addFav(server, true);
+			if (isRecent) addRecent(server, true);
+		}
+	}
+	
+	// Here we check if some favorited / recents servers are offline or not
+	if (type == 1 || type == 2) {
+		var toCheck = type == 1 ? favorites : recents
+		for (let tmpServer1 of toCheck) {
+			let stillOk = true;
+			for (let i = 0; i < servers.length; i++) {
+				var tmpServer2 = servers[i];
+				if (tmpServer1.ip == tmpServer2.ip && tmpServer1.port == tmpServer2.port) { stillOk = true; break; }
+				else stillOk = false;
+			}
+			if (!stillOk) {
+				var bgcolor = "";
+				var name = tmpServer1.sname;
+				if (!tmpServer1.custom) { name += " [OFFLINE]"; bgcolor = "rgba(0, 0, 0, 0.35)!important"; }
+				else { name += " [CUSTOM]"; bgcolor = "rgba(255, 215, 0, 0.35)!important" }
+				createRow(newTbody, tmpServer1, bgcolor, bngApi, type == 1, type == 2, name);
+			}
+		}
+	}
+	tableTbody.parentNode.replaceChild(newTbody, tableTbody);
+	mapNames.sort(); // Sort the maps by name
+	mapNames.unshift("Any"); // Set Any to the beginning
+	if (type == 2) sortTable("recent", true, -1);
+	return mapNames; // Set the list of available maps
 }
 
 // Used to connect to the backend with ids
-function connect(bngApi) {
+function connect(ip, port, mods, name) {
 	console.log("Attempting to call connect to server...")
+	// Add server to recents
+	addRecent(highlightedServer);
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer()');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
 }
 
 // Used to select a row (when it's clicked)
-// Type 0 is normal servers
-// Type 1 is saved servers (recent, favorite...)
-function select(row, type, fav, bngApi) {
+function select(row, bngApi) {
 	var table = document.getElementById("serversTable");
 	// Deselect the old row
 	deselect(table.selectedRow);
@@ -1033,67 +983,37 @@ function select(row, type, fav, bngApi) {
 	table.selectedRow = row;
 	
 	// Add the highlight menu
-	var id = row.getAttribute("data-id")
+	var server = row.server;
+	highlightedServer = server; // Set it as the selected server
 
-	if (id) {
-		
-		var server;
-		if (type == 0) var server = servers[id]; // Get the server of the selected row
-		else {
-			id = id.split(',');
-			if(id[0] > -1) {
-				id = id[0];
-				server = servers[id];
-			}
-			else {
-				id = id[1];
-				server = JSON.parse(localStorage.getItem('recent'))[id];
-			}
-		}	
-		
-		highlightedServer = servers[id]; // Set it as the selected server
+	// Create and insert the server info tr
+	var serverInfoRow = document.createElement("tr");
+	serverInfoRow.innerHTML = getServerInfoHTML(server);
+	serverInfoRow.setAttribute("id", "ServerInfoRow");
+	serverInfoRow.server = row.server;
+	row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
 
-		// Create and insert the server info tr
-		var serverInfoRow = document.createElement("tr");
-		serverInfoRow.innerHTML = getServerInfoHTML(server, fav);
-		serverInfoRow.setAttribute("id", "ServerInfoRow");	
-		row.parentNode.insertBefore(serverInfoRow, row.nextSibling);
-		
-		// Add the connect button
-		var connectToServerButton = document.getElementById('serverconnect-button');
-		var createClickHandler = function() {
-			return function() { connect(bngApi) };
-		};
-		connectToServerButton.onclick = createClickHandler();
-		
-		if (!fav) {
-			// Add the favorite button
-			var addServer2FavButton = document.getElementById('addFav-button');
-			var createClickHandler2 = function() {
-				return function() { addFav() };
-			};
-			addServer2FavButton.onclick = createClickHandler2();
-		}
-		else {
-			var remServer2FavButton = document.getElementById('removeFav-button');
-			var createClickHandler2 = function() {
-				return function() {
-					removeFav()
-				};
-			};
-			remServer2FavButton.onclick = createClickHandler2();
-		}
-
-		// Set the currently selected server lua side
-		bngApi.engineLua(`MPCoreNetwork.setCurrentServer("${id}", "${server.ip}", "${server.port}", "${server.modlist}", "${server.strippedName}")`);
+	// Add the connect button
+	var connectToServerButton = document.getElementById('serverconnect-button');
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.modlist, row.server.strippedName) };
+	
+	if (server.favorite) {
+		var removeFavButton = document.getElementById('removeFav-button');
+		removeFavButton.onclick = function() { removeFav(server); }
+	}
+	else {
+		// Add the favorite button
+		var addFavButton = document.getElementById('addFav-button');
+		addFavButton.onclick = function() { addFav(server) };
 	}
 }
 
-function receiveServers(data) {
+async function receiveServers(data) {
 	var serversArray = new Array();
+	var launcherVersion = await getLauncherVersion();
 	// Parse the data to a nice looking Array
 	for (var i = 0; i < data.length; i++) {
-		var v = data[i][Object.keys(data[i])[0]]
+		var v = data[i]
 		if(v.cversion == launcherVersion){
 			v.strippedName = stripCustomFormatting(v.sname);
 			serversArray.push(v);
@@ -1105,7 +1025,7 @@ function receiveServers(data) {
 		else if (a.official) return -1;
 		else if (b.official) return 1;
 		return 0;
-	});	
+	});
 	return serversArray;
 };
 
@@ -1118,4 +1038,41 @@ function deselect(row) {
 	// Remove the information thing if it was shown
 	var oldInfoRow = document.getElementById('ServerInfoRow')
 	if (oldInfoRow) oldInfoRow.remove();
+}
+
+async function getLauncherVersion() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.getLauncherVersion()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+async function isLoggedIn() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.isLoggedIn()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+async function isLauncherConnected() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+var reverse = -1;
+function sortTable(sortType, isNumber, dir) {
+	if (dir) reverse = dir;
+	var table = document.getElementById("serversTable");
+    var tb = table.tBodies[0], tr = Array.prototype.slice.call(tb.rows, 0);
+	var headers = document.querySelectorAll("#serversTable > thead > tr > th")
+	tr = tr.sort(function (a, b) { // sort rows
+		return reverse * (a.server[sortType].toString().localeCompare(b.server[sortType].toString(), undefined, {'numeric': isNumber}));
+    });
+    for(var i = 0; i < tr.length; ++i) tb.appendChild(tr[i]); // append each row in order
+	reverse = -((+reverse) || -1);
 }

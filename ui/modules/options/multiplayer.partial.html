@@ -3,16 +3,49 @@
   <md-subheader class="md-no-sticky">General</md-subheader>
 
   <md-list-item md-no-ink>
-    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
-    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
-    <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.beammpAlternateModloading" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
   <md-list-item md-no-ink>
-    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
-    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
-    <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.disableInstabilityPausing' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableInstabilityPausing.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.disableInstabilityPausing" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
+
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <div style="margin: 0px 16px 16px 16px; border: 1px solid rgba(0,0,0,0.12);" ng-show="options.data.values.enableSpawnQueue">
+    <md-list-item md-no-ink>
+      <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
+      <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
+    </md-list-item>
+
+    <md-list-item md-no-ink>
+      <p>{{:: 'ui.options.multiplayer.queueAutoSkipRemote' | translate }}</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAutoSkipRemote.tooltip' | translate }}</md-tooltip>
+      <md-checkbox ng-model="options.data.values.queueAutoSkipRemote" ng-change="options.applyState()"></md-checkbox>
+    </md-list-item>
+
+    <md-list-item md-no-ink>
+      <p>{{:: 'ui.options.multiplayer.queueSkipUnicycle' | translate }}</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSkipUnicycle.tooltip' | translate }}</md-tooltip>
+      <md-checkbox ng-model="options.data.values.queueSkipUnicycle" ng-change="options.applyState()"></md-checkbox>
+    </md-list-item>
+  </div>
+
+
+  <!--<md-list-item md-no-ink>
+    <p><span style="color: coral; font-weight: bold;">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.luaOptimisations' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.luaOptimisations.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.luaOptimisations" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>-->
 
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.autoSyncVehicles' | translate }}</p>
@@ -23,12 +56,6 @@
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
     <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
-  </md-list-item>
-
-  <md-list-item md-no-ink>
-    <p>{{:: 'ui.options.multiplayer.luaOptimisations' | translate }}</p>
-    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.luaOptimisations.tooltip' | translate }}</md-tooltip>
-    <md-checkbox ng-model="options.data.values.luaOptimisations" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
   <md-list-item md-no-ink>
@@ -59,26 +86,27 @@
     <md-checkbox ng-model="options.data.values.nameTagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
+  <div style="margin: 0px 16px 16px 16px; border: 1px solid rgba(0,0,0,0.12);" ng-show="options.data.values.nameTagFadeEnabled">
 
-  <md-list-item ng-if="options.data.values.nameTagFadeEnabled" layout class="md-padding" style="padding-top:0; padding-bottom:0">
-    <md-tooltip md-direction="right">How far nametags will start fading in/stop fading out</md-tooltip>
-  <p flex="30">Fade distance</p>
-  <md-slider flex
-    ng-model="options.data.values.nameTagFadeDistance" min="0" max="150" step="1" aria-label="_"
-    ng-change="options.applyState()">
-  </md-slider>
-  <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
-  <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
-  </md-list-item>
+    <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+      <md-tooltip md-direction="right">How far nametags will start fading in/stop fading out</md-tooltip>
+    <p flex="30">Fade distance</p>
+    <md-slider flex
+      ng-model="options.data.values.nameTagFadeDistance" min="0" max="150" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
+    <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
+    </md-list-item>
 
-  <md-list-item ng-if="options.data.values.nameTagFadeEnabled" md-no-ink>
-    <p>Invert nametag fade direction</p>
-	<span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
-	<span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
-    <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
-  </md-list-item>
+    <md-list-item md-no-ink>
+      <p>Invert nametag fade direction</p>
+	  <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
+	  <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
+      <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
+    </md-list-item>
 
-
+  </div>
 
 
 
@@ -90,13 +118,15 @@
 
   <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
-      <p flex="50" bng-translate="ui.options.multiplayer.launcherPort"></p>
-    <md-slider flex
-      ng-model="options.data.values.launcherPort" min="4444" max="4466" step="1" aria-label="_"
-      ng-change="options.applyState()">
-    </md-slider>
-    <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">{{ options.data.values.launcherPort }}</span>
-    <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">4444 (Default)</span>
+      <p flex="70" bng-translate="ui.options.multiplayer.launcherPort"></p>
+    
+    <md-input-container style="padding-top:25px">
+      <input mdInput type="number" ng-model="options.data.values.launcherPort"
+        min="4444" max="6789" step="1" aria-label="_" />
+    </md-input-container>
+
+    <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">Default is 4444</span>
+    <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">(Default)</span>
   </md-list-item>
 
   <!--<md-list-item md-no-ink>

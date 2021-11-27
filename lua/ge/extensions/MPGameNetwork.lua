@@ -1,6 +1,6 @@
 --====================================================================================
--- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- All work by Titch2000, jojos38 & 20dka.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
@@ -26,7 +26,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444)+1); -- Connecting
+		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
 	end
 end
@@ -47,6 +47,7 @@ local function sendData(s)
 	if settings.getValue("showDebugOutput") == true then
 		print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 	end
+	if MPDebug then MPDebug.packetSent(r) end
 end
 
 
@@ -61,10 +62,9 @@ local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
 	if code == "s" then
-		local players = string.match(data,"(.*)%:")
-		data = string.match(data, ":(.*)")
-		UI.updatePlayersList(data)
-		UI.setPlayerCount(players)
+		local playerCount, playerList = string.match(data, "^(%d+%/%d+)%:(.*)") -- 1/10:player1,player2
+		UI.setPlayerCount(playerCount)
+		UI.updatePlayersList(playerList)
 	elseif code == "n" then
 		UI.setNickname(data)
 		MPConfig.setNickname(data)
@@ -96,7 +96,6 @@ end
 function AddEventHandler(n, f)
 	print("Adding Event Handler: Name = "..tostring(n))
 	table.insert(eventTriggers, {name = n, func = f})
-	dump(eventTriggers)
 end
 
 local HandleNetwork = {
@@ -127,6 +126,7 @@ local function onUpdate(dt)
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)
+			if MPDebug then MPDebug.packetReceived(string.len(received)) end
 		end
 	end
 end
@@ -148,5 +148,5 @@ M.connectionStatus = connectionStatus
 M.CallEvent = handleEvents
 
 
-
+print("MPGameNetwork loaded")
 return M

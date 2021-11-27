@@ -1,0 +1,29 @@
+<link type="text/css" rel="stylesheet" href="modules/multiplayer/multiplayer.css">
+
+
+<div style="height:100%; background-color: rgba(0, 0, 0, 0.50);">
+	<div class="offset-div">
+		<div id="MultiplayerLoginBody" style="display:flex; height:100%; flex-direction:column; align-items: center; justify-content: center;">
+			<img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
+			<h2 class="text-red" id="LOGINERRORFIELD"></h2>
+			<form id="LoginContainer">
+				<h2 class="text-white" id="loginHeader">Login with your BeamMP account.</h2>
+				<input (keyup.enter)="multiplayer.login()" type="text" id="loginUsername" placeholder="Username / Email"/>
+				<input (keyup.enter)="multiplayer.login()" type="password" id="loginPassword" placeholder="Password"/>
+				<div style="display:flex; align-content: space-evenly;">
+					<md-button class="button" ng-click="login()">Login</md-button>
+					<md-button class="button" ng-click="switchConnection()">Play as Guest</md-button>
+					<md-button class="button" onclick="openExternalLink('https://forum.beammp.com/signup')">Register</md-button>
+				</div>
+			</form>
+			<form id="GuestContainer" style="display: none;">
+				<h2 class="text-white">Please enter a Username to play with.</h2>
+				<input type="text" id="guestUsername" placeholder="Username"/>
+				<div style="display:flex; align-content: space-evenly;">
+					<md-button class="button" ng-click="guestLogin()">Play</md-button>
+					<md-button class="button" ng-click="switchConnection()">I have an account</md-button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

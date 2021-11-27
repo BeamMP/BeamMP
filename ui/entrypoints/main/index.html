@@ -2,127 +2,142 @@
 <html lang="en" ng-app="BeamNG.ui">
   <head>
     <meta charset="utf-8">
-    <base href="/ui/">
     <title>BeamNG Main UI</title>
 
-    <!-- checks if the ui is loaded in an external browser and sets up communication via websocket to the game if that's the case -->
-    <script src="entrypoints/main/setupCommunication.js"></script>
+    <!-- for external clients: emulation over websocket -->
+    <script src="/ui/entrypoints/main/comms.js"></script>
 
+    <!-- Vue START -->
+    <script src="/ui/lib/ext/vue3/vue.global.prod.js"></script>
+    <script src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
+    <script src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
+    <script src="/ui/lib/int/vueService.js"></script>
+    <!-- Vue END -->
 
     <!-- 3rd party includes -->
-    <script src="lib/ext/angular.min.js"></script>
-    <script src="lib/ext/angular-ui-router.min.js"></script>
-    <script src="lib/ext/angular-animate.min.js"></script>
-    <script src="lib/ext/angular-sanitize.min.js"></script>
-    <script src="lib/ext/angular-aria.min.js"></script>
-    <script src="lib/ext/angular-material.min.js"></script>
-    <script src="lib/ext/smoothie.min.js"></script>
-    <script src="lib/ext/angular-translate.min.js"></script>
-    <script src="lib/ext/angular-translate-loader-static-files.min.js"></script>
-    <script src="lib/ext/ocLazyLoad.min.js"></script>
-    <script src="lib/ext/angular-toastr.tpls.min.js"></script>
-    <script src="lib/ext/spine-canvas.js"></script>
-    <script src="lib/ext/angular-material-paging.js"></script>
-    <script src="lib/ext/jk-rating-stars.min.js"></script>
-    <script src="lib/ext/chartist.min.js"></script>
-    <script src="lib/ext/hu.js"></script>
+    <script src="/ui/lib/ext/angular/angular.js"></script>
+    <script src="/ui/lib/ext/angular/angular-animate.js"></script>
+    <script src="/ui/lib/ext/angular/angular-aria.js"></script>
+    <script src="/ui/lib/ext/angular/angular-sanitize.js"></script>
+
+    <script src="/ui/lib/ext/angular-ui-router.min.js"></script>
+    <script src="/ui/lib/ext/angular-material/angular-material.js"></script>
+    <script src="/ui/lib/ext/smoothie.min.js"></script>
+    <script src="/ui/lib/ext/angular-translate.min.js"></script>
+    <script src="/ui/lib/ext/angular-translate-loader-static-files.min.js"></script>
+    <script src="/ui/lib/ext/ocLazyLoad.min.js"></script>
+    <script src="/ui/lib/ext/angular-toastr.tpls.min.js"></script>
+    <script src="/ui/lib/ext/spine-canvas.js"></script>
+    <script src="/ui/lib/ext/angular-material-paging.js"></script>
+    <script src="/ui/lib/ext/jk-rating-stars.min.js"></script>
+    <script src="/ui/lib/ext/chartist.min.js"></script>
+    <script src="/ui/lib/ext/hu.js"></script>
+
+
+    <script src="/ui/lib/ext/qrcode.min.js"></script>
 
     <!--3rd party test -->
-    <script src="lib/ext/ng-FitText.js"></script>
+    <script src="/ui/lib/ext/ng-FitText.js"></script>
 
 
-    <link type="text/css" rel="stylesheet" href="lib/ext/angular-material.min.css">
-    <link type="text/css" rel="stylesheet" href="lib/ext/angular-toastr.min.css">
-    <link type="text/css" rel="stylesheet" href="lib/ext/angular-material-paging.css">
-    <link type="text/css" rel="stylesheet" href="lib/ext/jk-rating-stars.min.css">
-    <link type="text/css" rel="stylesheet" href="lib/ext/chartist.min.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-material/angular-material-no-animate.min.css">
+
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-toastr.min.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-material-paging.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/jk-rating-stars.min.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/chartist.min.css">
 
     <!-- BeamNG UI -->
-    <script src="entrypoints/main/main.js"></script>
+    <script src="/ui/entrypoints/main/main.js"></script>
 
-    <script src="lib/int/beamng-core.js"></script>
-    <script src="lib/int/utilities.js"></script>
-    <script src="lib/int/beamng-data.js"></script>
-    <script src="lib/ext/mdx.js"></script>
-    <script src="lib/int/logger.js"></script>
-    <script src="lib/int/SpatialNavigation.js"></script>
-    <script src="lib/ext/crossfire-chrome.js"></script>
+    <script src="/ui/lib/int/beamng-core.js"></script>
+    <script src="/ui/lib/int/utilities.js"></script>
+    <script src="/ui/lib/int/beamng-data.js"></script>
+    <script src="/ui/lib/ext/mdx.js"></script>
+    <script src="/ui/lib/int/logger.js"></script>
+    <script src="/ui/lib/int/SpatialNavigation.js"></script>
+    <script src="/ui/lib/ext/crossfire-chrome.js"></script>
 
-    <script src="lib/int/beamng.controls.js"></script>
-    <link type="text/css" rel="stylesheet" href="lib/int/beamng.controls.css">
-    <link type="text/css" rel="stylesheet" href="lib/int/main.min.css">
+    <script src="/ui/lib/int/beamng.controls.js"></script>
+    <link type="text/css" rel="stylesheet" href="/ui/lib/int/beamng.controls.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/int/main.min.css">
 
-    <script src="modules/levelselect/levelselect.js"></script>
-    <script src="modules/photomode/photomode.js"></script>
-    <script src="modules/replay/replay.js"></script>
-    <script src="modules/environment/environment.js"></script>
-    <script src="modules/scenarioselect/scenarioselect.js"></script>
-    <script src="modules/scenariocontrol/scenariocontrol.js"></script>
-    <script src="modules/comic/comic.js"></script>
-    <script src="modules/vehicleselect/vehicleselect.js"></script>
-    <script src="modules/options/options.js"></script>
-    <script src="modules/debug/debug.js"></script>
-    <script src="modules/credits/credits.js"></script>
-	<script src="modules/multiplayer/multiplayer.js"></script> <!-- --------------------------------- BEAMMP --------------------------------- -->
-	<script src="modules/multiplayerTOS/tos.js"></script> <!-- --------------------------------- BEAMMP --------------------------------- -->
-    <script src="modules/startScreen/startScreen.js"></script>
-    <script src="modules/vehicleconfig/vehicleconfig.js"></script>
-    <script src="modules/loading/loading.js"></script>
-    <script src="modules/repository/repository.js"></script>
-    <script src="modules/automation/automation.js"></script>
-    <script src="modules/quickrace/quickrace.js"></script>
-    <script src="modules/lightrunner/lightrunner.js"></script>
-    <script src="modules/dragrace/dragrace.js"></script>
-    <script src="modules/mapview/mapview.js"></script>
-    <script src="modules/mission-popups/mission-popups.js"></script>
+    <script src="/ui/modules/levelselect/levelselect.js"></script>
+    <script src="/ui/modules/photomode/photomode.js"></script>
+    <script src="/ui/modules/replay/replay.js"></script>
+    <script src="/ui/modules/environment/environment.js"></script>
+    <script src="/ui/modules/scenarioselect/scenarioselect.js"></script>
+    <script src="/ui/modules/scenariocontrol/scenariocontrol.js"></script>
+    <script src="/ui/modules/comic/comic.js"></script>
+    <script src="/ui/modules/vehicleselect/vehicleselect.js"></script>
+    <script src="/ui/modules/options/options.js"></script>
+    <script src="/ui/modules/debug/debug.js"></script>
+    <script src="/ui/modules/credits/credits.js"></script>
+    <script src="/ui/modules/startScreen/startScreen.js"></script>
+    <script src="/ui/modules/vehicleconfig/vehicleconfig.js"></script>
+    <script src="/ui/modules/loading/loading.js"></script>
+    <script src="/ui/modules/repository/repository.js"></script>
+    <script src="/ui/modules/automation/automation.js"></script>
+    <script src="/ui/modules/quickrace/quickrace.js"></script>
+    <script src="/ui/modules/lightrunner/lightrunner.js"></script>
+    <script src="/ui/modules/dragrace/dragrace.js"></script>
+    <script src="/ui/modules/mapview/mapview.js"></script>
+    <script src="/ui/modules/mission-popups/mission-popups.js"></script>
 
 
-    <script src="modules/mainmenu/mainmenu.js"></script>
-    <script src="modules/onlineFeatures/online.js"></script>
-    <script src="modules/newFeatures/newFeatures.js"></script>
+    <script src="/ui/modules/mainmenu/mainmenu.js"></script>
+    <!-- <script src="/ui/modules/mainmenu2/mainmenu2.js"></script> -->
+    <script src="/ui/modules/onlineFeatures/online.js"></script>
 
-    <script src="modules/appselect/appselect.js"></script>
-    <script src="modules/colorpicker/color.js"></script>
-    <script src="modules/help/help.js"></script>
-    <script src="modules/modmanager/modmanager.js"></script>
-    <script src="modules/playmodes/playmodes.js"></script>
-    <script src="modules/apps/app-container.js"></script>
+    <script src="/ui/modules/appselect/appselect.js"></script>
+    <script src="/ui/modules/colorpicker/color.js"></script>
+    <script src="/ui/modules/help/help.js"></script>
+    <script src="/ui/modules/modmanager/modmanager.js"></script>
+    <script src="/ui/modules/playmodes/playmodes.js"></script>
+    <script src="/ui/modules/apps/app-container.js"></script>
 
-    <script src="modules/ui-components/bng-components.js"></script>
-    <script src="modules/campaignselect/campaignselect.js"></script>
+    <script src="/ui/modules/ui-components/bng-components.js"></script>
+    <script src="/ui/modules/campaignselect/campaignselect.js"></script>
 
-    <script src="modules/careerselect/careerselect.js"></script>
+    <script src="/ui/modules/careerselect/careerselect.js"></script>
 
-    <script src="modules/garageNew/garage.js"></script>
-    <script src="modules/garageNew/garageSelect/select.js"></script>
-    <script src="modules/garageNew/garageParts/parts.js"></script>
-    <script src="modules/garageNew/garageTune/tune.js"></script>
-    <script src="modules/garageNew/garagePaint/paint.js"></script>
-    <script src="modules/garageNew/garagePhoto/photo.js"></script>
-    <script src="modules/garageNew/garageLoad/load.js"></script>
-    <script src="modules/garageNew/garageSave/save.js"></script>
+    <script src="/ui/modules/garageNew/garage.js"></script>
+    <script src="/ui/modules/garageNew/garageSelect/select.js"></script>
+    <script src="/ui/modules/garageNew/garageParts/parts.js"></script>
+    <script src="/ui/modules/garageNew/garageTune/tune.js"></script>
+    <script src="/ui/modules/garageNew/garagePaint/paint.js"></script>
+    <script src="/ui/modules/garageNew/garagePhoto/photo.js"></script>
+    <script src="/ui/modules/garageNew/garageLoad/load.js"></script>
+    <script src="/ui/modules/garageNew/garageSave/save.js"></script>
 
-    <script src="modules/busRoute/busRoute.js"></script>
-    <script src="modules/iconView/icons.js"></script>
+    <script src="/ui/modules/busRoute/busRoute.js"></script>
+    <script src="/ui/modules/iconView/icons.js"></script>
+
+    
+    <!-- --------------------------------- BEAMMP --------------------------------- -->
+    <script src="/ui/modules/multiplayer/multiplayer.js"></script> 
+
+    <script src="/ui/modules/fadeScreen/fadeScreen.js"></script>
 
     <!-- UIv3 Imports -->
 
-    <!-- <script src="modules/options2/graphicsbasic/graphicsbasic.js"></script> -->
-    <script src="modules/freeplay/freeplay.js"></script>
-    <script src="modules/freeplay-spawn/freeplay-spawn.js"></script>
-    <!-- <script src="modules/modmanager2/modmanager2.js"></script> -->
+    <!-- <script src="/ui/modules/options2/graphicsbasic/graphicsbasic.js"></script> -->
+    <script src="/ui/modules/freeplay/freeplay.js"></script>
+    <script src="/ui/modules/freeplay-spawn/freeplay-spawn.js"></script>
+    <!-- <script src="/ui/modules/modmanager2/modmanager2.js"></script> -->
 
     <!-- Mod Wizard -->
-    <script src="modules/modwizard/modwizard.js"></script>
-    <script src="modules/modwizard/skinWizard/skinwizard.js"></script>
-    <script src="modules/modwizard/vehicleWizard/vehiclewizard.js"></script>
-    <script src="modules/modwizard/terrainWizard/terrainwizard.js"></script>
+    <!-- <script src="/ui/modules/modwizard/modwizard.js"></script>
+    <script src="/ui/modules/modwizard/skinWizard/skinwizard.js"></script>
+    <script src="/ui/modules/modwizard/vehicleWizard/vehiclewizard.js"></script>
+    <script src="/ui/modules/modwizard/terrainWizard/terrainwizard.js"></script> -->
 
-    <link rel="stylesheet" type="text/css" href="modules/ui-components/bng-components.css">
+    <link rel="stylesheet" type="text/css" href="/ui/modules/ui-components/bng-components.css">
 
-    <link type="text/css" rel="stylesheet" href="entrypoints/main/main.css">
-    <link type="text/css" rel="stylesheet" href="lib/ext/keys.css">
-    <link type="text/css" rel="stylesheet" href="modules/mainmenu/mainmenu.css">
+    <link type="text/css" rel="stylesheet" href="/ui/entrypoints/main/main.css">
+    <link type="text/css" rel="stylesheet" href="/ui/lib/ext/keys.css">
+    <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu/mainmenu.css">
+    <!-- <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu2/mainmenu2.css"> -->
 
   </head>
 
@@ -134,11 +149,11 @@
 
   <!-- <div ng-if="!app.shipping"> -->
     <!-- Ingame garage prototype -->
-    <!-- <script src="modules/garagePrototype/garage.js"></script>
-    <script src="modules/garagePrototype/garageSelect/select.js"></script>
+    <!-- <script src="/ui/modules/garagePrototype/garage.js"></script>
+    <script src="/ui/modules/garagePrototype/garageSelect/select.js"></script>
 
-    <script src="modules/dialogsystem/dialogsystem.js"></script>
-    <script src="modules/imageviewer/imageviewer.js"></script>
+    <script src="/ui/modules/dialogsystem/dialogsystem.js"></script>
+    <script src="/ui/modules/imageviewer/imageviewer.js"></script>
   </div> -->
 
     <!--  .............. connection failed overlay ..............  -->
@@ -150,6 +165,15 @@
       </span>
     </div>
 
+
+    <div id="reconnectScreen" ng-if="!$root.ingame && $root.connectionState != 'open'">
+      <div class="reconnectScreenText">
+        <center>
+          <div style="font-size:2vh;margin:3vh;">... reconnecting ...</div>
+        </center>
+      </div>
+    </div>
+
     <!--  .............. waiting screen overlay ..............  -->
     <div ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: 999;" layout="row" layout-align="center center">
       <ng-md-icon class="material-icons" style="font-size: 20rem; color: white; text-shadow: -1px 1px 8px #DB7B00, 1px -1px 8px #DB7B00; z-index:10;">
@@ -159,7 +183,7 @@
 
     <!-- .............. pause screen overlay ..............  -->
     <div ng-if="app.showPauseIcon" style="position:absolute; top:100px; right: 0; background:transparent; z-index:10" class="md-padding" ng-click="app.unpause()">
-    <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
+      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
         <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
           {{::'ui.inputActions.general.press' | translate}}
           <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
@@ -170,6 +194,9 @@
         </span>
     </span>
   </div>
+  <!-- .............. crosshair overlay ..............  -->
+  <div ng-if="app.showCrosshair" style="position:absolute; margin:0;padding:0;transform: translate(-50%, -200%); top:50%; left:50%; background:transparent; z-index:20;background-image: url('/ui/images/crosshair.png'); width:8px;height:8px;background-size: cover; background-position: center center;pointer-events:none" class="md-padding">
+  </div>
 
     <game-indicators-layer></game-indicators-layer>
 
@@ -178,7 +205,7 @@
     </mission-popups>
 
     <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
-    <app-container ng-show="app.showApps" class="app-container {{ align }}">
+    <app-container id="mainContainer" ng-show="app.showApps" class="app-container {{ align }}">
       <canvas id="alignment-canvas"  width="1" height="1"></canvas>
       <bng-app style="display:none"></bng-app>
     </app-container>

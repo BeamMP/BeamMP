@@ -1,12 +1,12 @@
 --====================================================================================
 -- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("MPModManager initialising...")
+print("Loading MPModManager...")
 
 
 
@@ -37,30 +37,33 @@ local function checkMod(mod)
 	local modname = mod.modname
 	local modAllowed = IsModAllowed(modname)
 	if not modAllowed and mod.active then -- This mod is not allowed to be running
-		print("This mod should not be running: "..modname)
+		log('W', 'checkMod', "This mod should not be running: "..modname)
 		core_modmanager.deactivateMod(modname)
-		if string.match(string.lower(modname), 'multiplayer') then
+		if mods.dirname == '/mods/multiplayer/' then
 			core_modmanager.deleteMod(modname)
 		end
 	elseif modAllowed then
 		if mod.active then -- this mod just got enabled for MP, run modscript
+			--dump(mod)
 			local dir, basefilename, ext = path.splitWithoutExt(mod.fullpath)
+			--dump(path.splitWithoutExt(mod.fullpath))
 
 			local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
-			print(mod.filename)
-			print("Loaded mod " .. basefilename)
+			--print(mod.filename)
+			log('I', 'checkMod', "Loaded  " .. basefilename)
 			
 			
 			local f = io.open(modscriptpath, "r")
-			if f == nil or not io.close(f) then return end
+			if f == nil or not io.close(f) then print(modscriptpath.." cant be opened") return end -- modscript file not found
 			
 			local status, ret = pcall(dofile, modscriptpath)
 			if not status then
 				log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
 				log('E', 'initDB.modScript', dumps(ret))
+			else
+				log('I', 'checkMod', "Ran modscript ("..modscriptpath..")")
+				loadCoreExtensions()
 			end
-
-			loadCoreExtensions()
 		else
 			print("Inactive Mod but Should be Active: "..modname)
 			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
@@ -73,25 +76,28 @@ end
 
 local function checkAllMods()
 	for modname, mod in pairs(core_modmanager.getModList()) do
-		checkMod(mod)
 		print("Checking mod "..mod.modname)
+		checkMod(mod)
 	end
 end
 
 
 
 local function cleanUpSessionMods()
-	-- At this point isMPSession is false so we disable mods backup so that
-	-- the call doesn't backup when it shouldn't
-	backupAllowed = false
-	for k,v in pairs(serverMods) do
-		core_modmanager.deactivateMod(string.lower(v))
-		if string.match(string.lower(v), 'multiplayer') then
-			core_modmanager.deleteMod(string.lower(v))
-		end
+	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
+	local modsDB = jsonReadFile("mods/db.json")
+	if modsDB then
+			backupAllowed = false
+			local modsFound = false
+			for modname, mod in pairs(modsDB.mods) do
+					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+							core_modmanager.deleteMod(modname)
+							modsFound = true
+					end
+			end
+			backupAllowed = true
+			if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
 	end
-	backupAllowed = true
-	Lua:requestReload() -- reload Lua to make sure we don't have any leftover GE files
 end
 
 
@@ -216,4 +222,5 @@ M.onInit = onInit
 
 
 
+print("MPModManager loaded")
 return M

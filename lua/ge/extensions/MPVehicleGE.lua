@@ -1,22 +1,12 @@
 --====================================================================================
 -- All work by Titch2000, jojos38 and 20dka.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
--- HOW DOES IT WORK :
--- When player connect to server for the first time, it send all his spawned vehicles to the server
--- The server add all vehicles create ID for them and then send them back to the client with client ID
--- If the received vehicle is the one that have been spawned by the client (check using client ID) then
-	-- It sync the client in-game vehicle ID with the server ID
--- Else
-	-- It spawn the received vehicle and then get the spawned vehicle ID and sync it with the received one
-
-
-
 local M = {}
-print("MPVehicleGE Initialising...")
+print("Loading MPVehicleGE...")
 
 
 -- ============= VARIABLES =============
@@ -24,20 +14,19 @@ local lastResetTime = {}
 local oneSecCounter = 0
 local ownMap = {}
 local vehiclesMap = {}
+local jbeamMap = {}
 local nicknameMap = {}
 local nickIDMap = {}
 local nicknamePrefixMap = {}
 local nicknameSuffixMap = {}
 local distanceMap = {}
 local nicknamesAllowed = true
-local latestVeh
 local invertedVehiclesMap = {}
 local onVehicleDestroyedAllowed = true
 local onVehicleSpawnedAllowed = true
 local syncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
-local activeVehicle = 0
 
 local vehicleSpawnQueue = {}
 local vehicleEditQueue = {}
@@ -48,10 +37,11 @@ local roleToInfo = {
 	['YT'] = { backcolor = ColorI(200, 0, 0, 127), tag = " [YouTuber]" },
 	['ET'] = { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]" },
 	['SUPPORT'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Support]" },
+	['STAFF'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [BeamMP Staff]" },
 	['MOD'] = { backcolor = ColorI(68, 109, 184, 127), tag = " [Moderator]" },
 	['ADM'] = { backcolor = ColorI(218, 0, 78, 127), tag = " [Admin]" },
 	['GDEV'] = { backcolor = ColorI(252, 107, 3, 127), tag = " [BeamNG Staff]" },
-	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [MP DEV]" }
+	['MDEV'] = { backcolor = ColorI(194, 55, 55, 127), tag = " [BeamMP Dev]" }
 }
 
 -- ============= VARIABLES =============
@@ -59,32 +49,39 @@ local roleToInfo = {
 
 
 --============== SOME FUNCTIONS ==============
--- GET A TABLE LENGTH
-function tableLength(T)
-  local count = 0
-  for _ in pairs(T) do count = count + 1 end
-  return count
-end
 
 -- SERVER VEHICLE ID ----> GAME VEHICLE ID
 local function getGameVehicleID(serverVehicleID)
-	return invertedVehiclesMap[tostring(serverVehicleID)]
+	return invertedVehiclesMap[serverVehicleID]
 end
 
 -- GAME VEHICLE ID ----> SERVER VEHICLE ID
 local function getServerVehicleID(gameVehicleID)
-	return vehiclesMap[tostring(gameVehicleID)]
+	if type(gameVehicleID) == "string" then
+		log('W', "getServerVehicleID", "received string ID, please use numbers")
+		gameVehicleID = tonumber(gameVehicleID)
+	end
+	return vehiclesMap[gameVehicleID]
 end
 
 -- INSERT A VEHICLE SPAWNED TO THE MAP
 local function insertVehicleMap(gameVehicleID, serverVehicleID)
-	vehiclesMap[tostring(gameVehicleID)] = tostring(serverVehicleID)
-	invertedVehiclesMap[tostring(serverVehicleID)] = tostring(gameVehicleID)
+	vehiclesMap[gameVehicleID] = serverVehicleID
+	invertedVehiclesMap[serverVehicleID] = gameVehicleID
 end
 
 -- CHECK IF A USER OWNS A VEHICLE
 local function isOwn(gameVehicleID)
-    return ownMap[tostring(gameVehicleID)] ~= nil
+	if type(gameVehicleID) == "string" then
+		log('W', "isOwn", "received string ID, please use numbers")
+		gameVehicleID = tonumber(gameVehicleID)
+	end
+    return ownMap[gameVehicleID] ~= nil
+end
+
+-- SET IF A USER OWNS A VEHICLE
+local function setOwn(vehID, own)
+	ownMap[vehID] = own or nil
 end
 
 -- RETURN THE MAP OF OWNED VEHICLES
@@ -109,7 +106,7 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 		nicknameSimple[k] = v.nickname
 	end
 	local thisNick =  MPConfig.getNickname()
-	for k,v in pairs(ownMap) do nicknameSimple[tonumber(k)] = thisNick end
+	for k,v in pairs(ownMap) do nicknameSimple[k] = thisNick end
     return nicknameSimple
 end
 
@@ -117,11 +114,17 @@ local function getNicknameFromID(id)
 	return nickIDMap[id]
 end
 
-local function setPlayerNickPrefix(name, tagSource, prefix)
-	nicknamePrefixMap[name][tagSource] = prefix
+local function setPlayerNickPrefix(targetName, tagSource, text)
+	if targetName == nil then return end
+	if text == nil then text = tagSource; tagSource = "default" end
+	if not nicknamePrefixMap[targetName] then nicknamePrefixMap[targetName] = {} end
+	nicknamePrefixMap[targetName][tagSource] = text
 end
-local function setPlayerNickSuffix(name, tagSource, suffix)
-	nicknameSuffixMap[name][tagSource] = suffix
+local function setPlayerNickSuffix(targetName, tagSource, text)
+	if targetName == nil then return end
+	if text == nil then text = tagSource; tagSource = "default" end
+	if not nicknameSuffixMap[targetName] then nicknameSuffixMap[targetName] = {} end
+	nicknameSuffixMap[targetName][tagSource] = text
 end
 
 -- SET WHETHER NICKNAMES ARE ALLOWED TO BE VISIBLE (can be used by mods in minigames)
@@ -131,23 +134,7 @@ end
 --============== SOME FUNCTIONS ==============
 
 
-
---============================ DELETE ALL VEHICLES ==============================
-local function deleteAllVehicles()
-	if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
-	commands.setFreeCamera()
-	for i = 0, be:getObjectCount() - 1 do -- For each vehicle
-		local veh = be:getObject(0) --  Get vehicle
-		if veh then
-			onVehicleDestroyedAllowed = false
-			veh:delete()
-		end
-	end
-end
---============================ DELETE ALL VEHICLES ==============================
-
-
-
+--called by onVehicleSpawned
 --============================ SEND ONE VEHICLE ==============================
 local function sendVehicle(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID) -- Get spawned vehicle ID
@@ -162,7 +149,7 @@ local function sendVehicle(gameVehicleID)
 		local rot          = quat(veh:getRotation())
 
 		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
-		vehicleTable.vid = tostring(gameVehicleID) -- Game Vehicle ID
+		vehicleTable.vid = gameVehicleID -- Game Vehicle ID
 		vehicleTable.jbm = veh:getJBeamFilename() -- JBeam
 		vehicleTable.vcf = vehicleData.config -- Vehicle Config
 		vehicleTable.col = {c.x, c.y, c.z, c.w} -- Color Palette
@@ -173,13 +160,13 @@ local function sendVehicle(gameVehicleID)
 
 		local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
-		print("Vehicle "..gameVehicleID.." was sent")
+		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 	end
 end
 --============================ SEND ONE VEHICLE ==============================
 
 
-
+--called by autosync and the ui (sync button)
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 local function sendCustomVehicleData(gameVehicleID)
 	local vehicleTable = {} -- Vehicle table
@@ -198,7 +185,7 @@ local function sendCustomVehicleData(gameVehicleID)
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
-	print("Vehicle custom data "..gameVehicleID.." was sent")
+	log('I', "sendCustomVehicleData", "Vehicle custom data "..gameVehicleID.." was sent")
 	vehiclesToSync[gameVehicleID] = nil
 end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
@@ -206,38 +193,78 @@ end
 
 
 local function applyVehEdit(serverID, data)
-
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
-	if not gameVehicleID then log('W','beammp.applyEdit',"gameVehicleID for "..serverID.." not found") return end
+	if not gameVehicleID then log('E','applyVehEdit',"gameVehicleID for "..serverID.." not found") return end
 
-	local veh = be:getObjectByID(tonumber(gameVehicleID)) -- Get the vehicle
-	if not veh then log('W','beammp.applyEdit',"Vehicle "..gameVehicleID.." not found") return end
+	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
+	if not veh then log('E','applyVehEdit',"Vehicle "..gameVehicleID.." not found") return end
 
 	local decodedData     = jsonDecode(data) -- Decode the data
 	local vehicleName     = decodedData.jbm -- Vehicle name
 	local vehicleConfig   = decodedData.vcf -- Vehicle config
 	if vehicleName == veh:getJBeamFilename() then
-		latestVeh = be:getPlayerVehicle(0) -- Camera fix
-		log('W','beammp.applyEdit',"Updating vehicle "..gameVehicleID.." config")
-		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(tonumber(gameVehicleID))
-		tableMerge(playerVehicle.config, vehicleConfig)
-		veh:respawn(serialize(playerVehicle.config))
+		log('I','applyVehEdit',"Updating vehicle "..gameVehicleID.." config")
+		local playerVehicle = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
+
+		local partsDiff = MPHelpers.tableDiff(playerVehicle.config.parts, vehicleConfig.parts)
+		local tuningDiff = MPHelpers.tableDiff(playerVehicle.config.vars, vehicleConfig.vars)
+
+		local configChanged = tableSize(partsDiff) > 0 or tableSize(tuningDiff) > 0
+		local colorChanged = not MPHelpers.colorMatch(playerVehicle.config.paints, vehicleConfig.paints)
+		--print("colorchanged: " .. tostring(colorChanged))
+		if configChanged or colorChanged then
+			tableMerge(playerVehicle.config, vehicleConfig) -- add new parts to the existing config
+
+			if configChanged then
+				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
+				veh:respawn(serialize(playerVehicle.config))
+			elseif vehicleConfig.paints then
+				log('I','applyVehEdit', "only color changed")
+				for k, v in pairs(vehicleConfig.paints) do
+					extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
+				end
+			end
+		else
+			log('I','applyVehEdit', "received edit matches local copy, ignoring message")
+		end
 	else
-		log('W','beammp.applyEdit',"The received data for "..vehicleName.." does not correspond with the vehicle "..veh:getJBeamFilename())
+		log('W','applyVehEdit', "The received data for '"..vehicleName.."' does not correspond with the vehicle '"..veh:getJBeamFilename().."'")
+
+		--fresh spawns dont contain paint data?
+		if not vehicleConfig.paints then
+			vehicleConfig.paints = {}
+			if decodedData.col then vehicleConfig.paints[1] = {baseColor=decodedData.col} end
+			if decodedData.cpz then vehicleConfig.paints[2] = {baseColor=decodedData.cpz} end
+			if decodedData.cpo then vehicleConfig.paints[3] = {baseColor=decodedData.cpo} end
+		end
+
+		local options = {
+			model = vehicleName,
+			config = serialize(vehicleConfig),
+			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
+			paint = vehicleConfig.paints[1], paint2 = vehicleConfig.paints[2], paint3 = vehicleConfig.paints[3]
+		}
+
+		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
+		spawn.setVehicleObject(veh, options)
 	end
 end
 
 local function updateVehicle(serverID, data)
 	if settings.getValue("enableSpawnQueue") then
 		vehicleEditQueue[serverID] = data
-		print('edit received and queued')
-		local id = string.match(serverID,"^(.*)-")
+		log('I', 'updateVehicle', "edit received and queued")
+		local id = string.match(serverID,"^(%d*)-")
 		local playerNickname = nickIDMap[id] or "unknown"
 		UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
-		UI.showNotification('edit received and queued for '..playerNickname)
+		UI.showNotification('Edit received and queued for '..playerNickname)
 	else
+		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+
 		applyVehEdit(serverID, data)
 		UI.updateQueue({}, {}, false)
+
+		if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 	end
 end
 
@@ -253,7 +280,7 @@ end
 
 local function onServerVehicleCoupled(serverVehicleID, state)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
-	if isOwn(gameVehicleID) ~= 1 then
+	if not isOwn(gameVehicleID) then
 		local veh = be:getObjectByID(gameVehicleID)
 		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
 	end
@@ -265,10 +292,9 @@ end
 
 
 local function applyVehSpawn(event)
-
 	local decodedData     = jsonDecode(event.data)
 	if not decodedData then --JSON decode failed
-		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."!")
+		log("E", "applyVehSpawn", "Failed to spawn vehicle from "..event.playerNickname.."!")
 		return
 	end
 
@@ -282,82 +308,97 @@ local function applyVehSpawn(event)
 	local pos             = vec3(decodedData.pos)
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
-	print("Received a vehicle from server with serverVehicleID "..event.serverVehicleID)
-	print("It is for "..event.playerNickname)
+	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
+	log('I', 'applyVehSpawn', "It is for "..event.playerNickname)
 
-	onVehicleSpawnedAllowed = false
-	
+	onVehicleSpawnedAllowed = false -- this flag is used to indicate whether the next spawn is remote or not
+
 	local allowed = false
 	local vehiclesList = extensions.core_vehicles.getModelNames()
 	for index, value in ipairs(vehiclesList) do
 		if vehicleName == value then allowed = true end
 	end
 	if not allowed then
-		print("This received vehicle "..vehicleName.." is not currently installed on the game, cancelling the spawn")
+		log('W', 'applyVehSpawn', "The received vehicle "..vehicleName.." is not valid, cancelling the spawn (likely a missing mod)")
 		UI.showNotification("info", "Player "..event.playerNickname.." spawned an illegal vehicle ("..vehicleName.."), it was skipped")
 		return
 	end
-	
-	local spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, ColorF(c[1],c[2],c[3],c[4]), ColorF(cP0[1],cP0[2],cP0[3],cP0[4]), ColorF(cP1[1],cP1[2],cP1[3],cP1[4]), "multiplayerVeh", true)
-	spawnedVeh.mpVehicleType = "R";
-	local spawnedVehID = spawnedVeh:getID()
-	print("New vehicle spawn from server "..vehicleName.." with id "..spawnedVehID)
-	insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
-	nicknameMap[spawnedVehID] = {
-		nickname = event.playerNickname,
-		role = event.playerRole
-	}
+
+	--fresh spawns dont contain paint data?
+	if not vehicleConfig.paints then
+		vehicleConfig.paints = {}
+		if c   then vehicleConfig.paints[1] = {baseColor=c} end
+		if cP0 then vehicleConfig.paints[2] = {baseColor=cP0} end
+		if cP1 then vehicleConfig.paints[3] = {baseColor=cP1} end
+	end
+
+	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
+	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
+
+	if spawnedVeh then -- if a vehicle with this ID was found update the obj
+		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
+		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
+	else
+		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
+		spawnedVehID = spawnedVeh:getID()
+		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
+		insertVehicleMap(spawnedVehID, event.serverVehicleID) -- Insert new vehicle ID in map
+		nicknameMap[spawnedVehID] = {
+			nickname = event.playerNickname,
+			role = event.playerRole
+		}
+	end
+
+	jbeamMap[spawnedVehID] = vehicleName
+
 	core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
+	spawnedVeh:queueLuaCommand("hydros.onFFBConfigChanged(nil)")
 end
 
 --================================= ON VEHICLE SPAWNED (SERVER) ===================================
 local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
-
 	local decodedData = jsonDecode(data)
 	if not decodedData then --JSON decode failed
-		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."!")
+		log("E", "onServerVehicleSpawned", "Failed to spawn vehicle from "..playerNickname.."! (Invalid JSON data)")
 		return
 	end
 
-	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
-	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
+	local playerServerID   = decodedData.pid -- Server ID of the player that sent the vehicle
+	local gameVehicleID    = tonumber(decodedData.vid) -- gameVehicleID of the player that sent the vehicle
 
-	local id = string.match(serverVehicleID,"^(.*)-")
+	nickIDMap[playerServerID] = playerNickname
 
-	print('player '..playerNickname.." has id "..id)
-	nickIDMap[id] = playerNickname
+	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID)
 
-	print("Received a vehicle from server with serverVehicleID "..serverVehicleID)
-	print("It is for "..playerNickname)
 	if MPConfig.getPlayerServerID() == playerServerID then -- If player ID = received player ID seems it's his own vehicle then sync it
 		insertVehicleMap(gameVehicleID, serverVehicleID) -- Insert new vehicle ID in map
-		ownMap[tostring(gameVehicleID)] = true -- Insert vehicle in own map
-		print("ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
+		log("I", "onServerVehicleSpawned", "ID is same as received ID, syncing vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 	else
 
-		local eventdata = {}
-		eventdata.playerRole = playerRole
-		eventdata.playerNickname = playerNickname
-		eventdata.serverVehicleID = serverVehicleID
-		eventdata.data = data
+		local eventdata = {
+			playerRole = playerRole,
+			playerNickname = playerNickname,
+			serverVehicleID = serverVehicleID,
+			data = data
+		}
 
-		if settings.getValue("enableSpawnQueue") then
+		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
+			vehicleSpawnQueue[serverVehicleID] = eventdata
+			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
 
-			if not vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = {} end
-			table.insert(vehicleSpawnQueue[serverVehicleID], eventdata)
-			print('queue enabled adding spawn for '..playerNickname)
-			
 			UI.updateQueue(vehicleSpawnQueue, vehicleEditQueue, true)
 
-			UI.showNotification('spawn received and queued for '..playerNickname)
-
+			UI.showNotification('Spawn received and queued for '..playerNickname)
 		else
+			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle now")
 
-			print('queue disabled, spawning now')
+			--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 
 			applyVehSpawn(eventdata)
 			UI.updateQueue({}, {}, false)
 
+			--if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
 		end
 	end
 end
@@ -367,28 +408,55 @@ end
 
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 local function onVehicleSpawned(gameVehicleID)
+
+	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+
 	local veh = be:getObjectByID(gameVehicleID)
-	if isOwn(gameVehicleID) ~= 1 and getServerVehicleID(gameVehicleID) == nil then -- If it's not an edit
-		print("Vehicle Spawned "..gameVehicleID)
-		local veh = be:getObjectByID(gameVehicleID)
+	local newJbeamName = veh:getJBeamFilename()
+
+	--print("SPAWN")
+	--dump(veh.mpVehicleType)
+	--dump(isOwn(gameVehicleID) ~= 1)
+	--dump(getServerVehicleID(gameVehicleID) == nil)
+	--dump(jbeamMap[gameVehicleID])
+
+
+	if not jbeamMap[gameVehicleID] then -- If it's not an edit
+		log("I", "onVehicleSpawned", "New Vehicle Spawned "..gameVehicleID)
+
 		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
 		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
-		if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
-			if onVehicleSpawnedAllowed then
-				sendVehicle(gameVehicleID) -- Send it to the server
-			else
-				onVehicleSpawnedAllowed = true
-			end
+
+
+		if onVehicleSpawnedAllowed then -- if false then we spawned it (from server)
+			setOwn(gameVehicleID, true) -- Insert vehicle in own map
+			sendVehicle(gameVehicleID) -- Send it to the server
 		end
+
+		onVehicleSpawnedAllowed = true
+
+
 	else
-		print("Vehicle "..gameVehicleID.." was edited")
-		syncTimer = 0
-		vehiclesToSync[gameVehicleID] = 1.
-		if latestVeh then
-			be:enterVehicle(0, latestVeh)
-			latestVeh = nil
-		end -- Camera fix
+		if jbeamMap[gameVehicleID] ~= newJbeamName then
+			log("I", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, jbeamMap[gameVehicleID], newJbeamName))
+
+			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
+			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
+
+			if onVehicleSpawnedAllowed then -- if false then the server spawned it
+				sendCustomVehicleData(gameVehicleID) -- Send it to the server (as a sync)
+			end
+
+			onVehicleSpawnedAllowed = true
+
+		else
+			log("I", "onVehicleSpawned", "Vehicle " .. gameVehicleID .. " edited")
+			syncTimer = 0
+			vehiclesToSync[gameVehicleID] = 1.
+		end
 	end
+
+	jbeamMap[gameVehicleID] = newJbeamName
 end
 --================================= ON VEHICLE SPAWNED (CLIENT) ===================================
 
@@ -396,23 +464,32 @@ end
 
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
 local function onServerVehicleRemoved(serverVehicleID)
-	if vehicleSpawnQueue[serverVehicleID] then vehicleSpawnQueue[serverVehicleID] = nil end
-	if vehicleEditQueue[serverVehicleID] then vehicleEditQueue[serverVehicleID] = nil end
+	vehicleEditQueue[serverVehicleID] = nil
+	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+
+	if vehicleSpawnQueue[serverVehicleID] then
+		log('W', "onServerVehicleRemoved", "Vehicle "..serverVehicleID.." is still in the queue, removing from there")
+		vehicleSpawnQueue[serverVehicleID] = nil
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
+		return
+	end
 
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if gameVehicleID then
-		print("Vehicle destroyed by server "..serverVehicleID)
+		if nicknameMap[gameVehicleID] then nicknameMap[gameVehicleID] = nil end
+		log('I', "onServerVehicleRemoved", string.format("Vehicle %i (%s) removed by server ", gameVehicleID, serverVehicleID))
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
 			onVehicleDestroyedAllowed = false
-			commands.setFreeCamera() -- Fix camera
+			local currveh = be:getPlayerVehicle(0)
+			local isCurrent = (currveh and currveh:getID() == gameVehicleID) or false
 			veh:delete() -- Remove it
-			if commands.isFreeCamera(player) then commands.setGameCamera() end -- Fix camera
+			if isCurrent then be:enterNextVehicle(0,1) end-- Fix camera
 			vehiclesMap[gameVehicleID] = nil
 			invertedVehiclesMap[serverVehicleID] = nil
 		end
 	else
-		print("Removing vehicle "..serverVehicleID.." failed")
+		log('W', "onServerVehicleRemoved", "Failed removing vehicle "..serverVehicleID..", ID is unknown")
 	end
 end
 --================================= ON VEHICLE REMOVED (SERVER) ===================================
@@ -421,15 +498,17 @@ end
 
 --================================= ON VEHICLE REMOVED (CLIENT) ===================================
 local function onVehicleDestroyed(gameVehicleID)
-	print("Vehicle destroyed by user "..gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+		nicknameMap[gameVehicleID] = nil
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
 			local serverVehicleID = getServerVehicleID(gameVehicleID) -- Get the serverVehicleID
+			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if serverVehicleID then
 				MPGameNetwork.send('Od:'..serverVehicleID)
-				ownMap[tostring(gameVehicleID)] = nil
+				setOwn(gameVehicleID, false)
 			end
 		else
+			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by server", gameVehicleID, serverVehicleID or "?"))
 			onVehicleDestroyedAllowed = true
 		end
 	end
@@ -440,17 +519,69 @@ end
 
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	--print("Vehicle switched from "..oldID.." to "..newID)
 	if MPCoreNetwork.isMPSession() then -- If TCP connected
-		local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player is driving
-		if newServerVehicleID then -- If it's not null
-			if not isOwn(newGameVehicleID) and settings.getValue("skipOtherPlayersVehicles") and tableLength(ownMap) > 0 then
-				be:enterNextVehicle(0, 1) extensions.hook('trackNewVeh')
+		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
+
+		if newGameVehicleID and newGameVehicleID > -1 then
+			local skipOthers = settings.getValue("skipOtherPlayersVehicles") or false
+			local oldVehicle = be:getObjectByID(oldGameVehicleID or -1)
+			local newVehicle = be:getObjectByID(newGameVehicleID or -1)
+
+			-- enter a remote car as a passenger
+			if not isOwn(newGameVehicleID) and oldVehicle and oldVehicle:getJBeamFilename() == "unicycle" then
+				--core_camera.setByName(0,"onboard.rider") -- citybus
+				core_camera.setByName(0,"passenger") -- auto generated
+				core_camera.setByName(0,"onboard.passenger") -- custom
+			elseif not isOwn(newGameVehicleID) and ((skipOthers and tableSize(ownMap) > 0) or jbeamMap[newGameVehicleID] == "unicycle") then
+				-- switch away from this vehicle if it shouldn't be accessible
+
+				local vehicles = getAllVehicles()
+				--local oldIndex = nil -- the old vehicle's index
+				local curIndex = nil -- the current (new) vehicle's index
+				for index,vehicle in ipairs(vehicles) do
+					local id = vehicle and vehicle:getID()
+					--if id == oldGameVehicleID then
+					--	oldIndex = index
+					--end
+					if id == newGameVehicleID then
+						curIndex = index
+					end
+					if --[[(oldGameVehicleID == -1 or oldIndex) and]] curIndex then break end
+				end
+				curIndex = curIndex or #vehicles
+				--print("current vehicle index is " .. curIndex)
+
+				local findFunc = function(from, to)
+					for i = from, to do
+						local id = vehicles[i] and vehicles[i]:getID()
+						local jbeamName = vehicles[i]:getJBeamFilename()
+						if isOwn(id) or not skipOthers and jbeamName ~= "unicycle" then
+							log('I', "onVehicleSwitched", "Found suitable vehicle " .. jbeamName)
+							return i
+						end
+					end
+					return nil
+				end
+
+				--print("direction:")
+				--print(oldIndex or -1 < curIndex)
+
+				local nextIndex = findFunc(curIndex+1, #vehicles) or findFunc(1, curIndex) -- could flip these if we knew the direction
+
+				if vehicles[nextIndex] then -- found a good vehicle, swtich to it
+					be:enterVehicle(0, vehicles[nextIndex])
+				else -- no suitable vehicle found, go to freecam
+					be:exitVehicle(0)
+					log('E', "onVehicleSwitched", "Could not find a suitable vehicle to switch to, exiting current veh")
+				end
+			else
+				local newServerVehicleID = getServerVehicleID(newGameVehicleID) -- Get new serverVehicleID of the new vehicle the player switched to
+				if newServerVehicleID then -- If it's not null
+					MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
+				end
 			end
-			MPGameNetwork.send('Om:'..newServerVehicleID)--Network.buildPacket(1, 2122, newID, ""))
 		end
 	end
-	activeVehicle = newGameVehicleID
 end
 --======================= ON VEHICLE SWITCHED (CLIENT) =======================
 
@@ -499,11 +630,11 @@ local function onServerVehicleResetted(serverVehicleID, data)
 				if pr then
 					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w) -- Apply position
 				else
-				    print('onServerVehicleResetted data corrupted')
+				    log('E', "onServerVehicleResetted", "Could not parse posrot JSON")
 				end
 			end
 		else
-			print("gameVehicleID for serverVehicleID "..serverVehicleID.." not found")
+			log('E', "onServerVehicleResetted", "gameVehicleID for "..serverVehicleID.." not found")
 		end
 	end
 	lastResetTime[serverVehicleID] = localCounter
@@ -513,44 +644,47 @@ end
 
 
 local HandleNetwork = {
-	['s'] = function(rawData)
-		print(rawData)
-		local playerRole = string.match(rawData,"(%w+)%:") -- Get the player role
-		rawData = rawData:gsub(playerRole..":", "")
-		local playerNickname = string.match(rawData,"^.-:")
-		playerNickname = playerNickname:sub(1, #playerNickname - 1) -- Get the player nickname
-		rawData = rawData:sub((#playerNickname + 2), #rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1) -- Get the serverVehicleID
-		local data = string.match(rawData,":(.*)") -- Get the vehicle data
-		--dump(rawData)
-		--print(playerRole, playerNickname, serverVehicleID)
-		onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
+	['s'] = function(rawData) -- spawn
+		local playerRole, playerNickname, serverVehicleID, data = string.match(rawData, "^(%w+)%:([%g%s]+)%:(%d+%-%d+)%:({.+})") -- 'ROLE:name:0-0:{jsonstring}'
+
+		if playerRole ~= nil then
+			onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
+		else
+			log('E', "HandleNetwork", "Spawn pattern match failed")
+			print(rawData)
+		end
 	end,
-	['r'] = function(rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleResetted(serverVehicleID, data)
+	['r'] = function(rawData) -- reset
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+
+		if serverVehicleID ~= nil then
+			onServerVehicleResetted(serverVehicleID, data)
+		else
+			log('E', "HandleNetwork", "Reset pattern match failed")
+		end
 	end,
-	['c'] = function(rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		updateVehicle(serverVehicleID, data)
+	['c'] = function(rawData) -- config sync
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+
+		if serverVehicleID ~= nil then
+			updateVehicle(serverVehicleID, data)
+		else
+			log('E', "HandleNetwork", "Config pattern match failed")
+		end
 	end,
-	['d'] = function(rawData)
+	['d'] = function(rawData) -- remove
 		onServerVehicleRemoved(rawData)
 	end,
-	['t'] = function(rawData)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
-		onServerVehicleCoupled(serverVehicleID, data)
+	['t'] = function(rawData) -- coupler
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%w+)") -- '0-0:true'
+
+		if serverVehicleID ~= nil then
+			onServerVehicleCoupled(serverVehicleID, data)
+		else
+			log('E', "HandleNetwork", "Coupler pattern match failed")
+		end
 	end
 }
-
-
 
 local function handle(rawData)
 	local code = string.sub(rawData, 1, 1)
@@ -560,15 +694,69 @@ end
 
 
 
-local function removeRequest(gameVehicleID)
-	if isOwn(gameVehicleID) or not MPCoreNetwork.isMPSession() then
-		core_vehicles.removeCurrent(); commands.setFreeCamera() --extensions.hook("trackNewVeh")
-		print("Request to remove car id "..gameVehicleID.." DONE")
+local function saveDefaultRequest()
+	local currentVehicle = be:getPlayerVehicle(0)
+	if not MPCoreNetwork.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
+		extensions.core_vehicle_partmgmt.savedefault()
+		log('I', "saveDefaultRequest", "Request to save vehicle accepted")
 	else
-		print("Request to remove car id "..gameVehicleID.." DENIED")
+		guihooks.trigger('Message', {ttl = 5, msg = "Cant't set another player's vehicle as default", icon = 'error'})
+		log('W', "saveDefaultRequest", "Request to save vehicle denied")
 	end
 end
 
+local function spawnDefaultRequest()
+	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
+
+
+	local currentVehicle = be:getPlayerVehicle(0)
+	local defaultConfig = jsonReadFile('settings/default.pc')
+
+	if currentVehicle then
+		local gameVehicleID = currentVehicle:getID()
+		jbeamMap[gameVehicleID] = '-'
+		if isOwn(gameVehicleID) then
+			core_vehicles.replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+		else
+			core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+		end
+	else
+		core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+	end
+	extensions.hook("trackNewVeh")
+end
+
+local function spawnRequest(model, config, colors)
+	--dump(model)
+	--dump(config)
+	--dump(colors)
+	local currentVehicle = be:getPlayerVehicle(0)
+	if currentVehicle and isOwn(currentVehicle:getID()) and not config.spawnNew then
+		jbeamMap[currentVehicle:getID()] = '-'
+		return core_vehicles.replaceVehicle(model, config or {})
+		--core_vehicles.replaceVehicle(model, config and {config = config, color = colors or nil, licenseText = config.licenseName} or {})
+	else
+		return core_vehicles.spawnNewVehicle(model, config or {})
+		--core_vehicles.spawnNewVehicle(model, config and {config = config, color = colors or nil, licenseText = config.licenseName} or {})
+	end
+	--extensions.hook("trackNewVeh")
+end
+
+local function saveConfigRequest(configfilename)
+	if not MPCoreNetwork.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
+
+	local currentVehicle = be:getPlayerVehicle(0)
+
+	if currentVehicle and isOwn(currentVehicle:getID()) then
+		extensions.core_vehicle_partmgmt.saveLocal(configfilename)
+		log('I', "saveConfigRequest", "Saved config")
+	else
+		guihooks.trigger("saveLocalScreenshot_stage3", {})
+		guihooks.trigger('Message', {ttl = 10, msg = "Saving another player's vehicle is disabled on this server", icon = 'error'})
+		log('W', "saveConfigRequest", "Saving configs is not allowed on this server")
+		print("didnt save config")
+	end
+end
 
 
 local function syncVehicles()
@@ -576,60 +764,115 @@ local function syncVehicles()
 		local veh = be:getObjectByID(k) --  Get vehicle
 		if veh then -- For loop always return one empty vehicle ?
 			local gameVehicleID = veh:getID()
-			print("Autosyncing vehicle "..gameVehicleID)
+			log('I', "syncVehicles", "Autosyncing vehicle "..gameVehicleID)
 			sendCustomVehicleData(gameVehicleID)
 		end
 	end
 	vehiclesToSync = {}
 end
 
-local function teleportVehToPlayer(targetName)
-	print("tp vehicle to: "..targetName)
-	if activeVehicle then
-		local veh = be:getObjectByID(tonumber(activeVehicle))
-		if veh then
-			for i,n in pairs(nicknameMap) do
-				if n.nickname == targetName then
-					print("teleporting to ",i)
 
-					local targetVeh = be:getObjectByID(i)
-					local targetVehPos = targetVeh:getPosition()
-					local targetVehRot = quat(targetVeh:getRotation()) -- vehicles forward are inverted
 
-					targetVehPos.x = targetVehPos.x + 2.5
-					targetVehPos.y = targetVehPos.y + 2.5
+local lastGmQuery = -1 --get player pos on first run
+local groundmarkerRoads = {}
+local gmTargetPlayer = nil
+local lastGmFocus = nil
 
-					--local up = vec3(0, 0, 1)
-					--local yDir = vec3(0, 1, 0)
-					--local rot = quatFromDir(yDir:rotated(quatFromDir(-vec3(targetVeh:getDirectionVector()), up)), up)
-					--veh:setPositionRotation(targetVehPos.x, targetVehPos.y, targetVehPos.z, rot.x, rot.y, rot.z, rot.w) -- this reset the vehicle :()
+local function queryRoadNodeToPosition(targetPosition, owner)
+	if not owner then owner = "target" end
+	targetPosition = vec3(targetPosition)
+	local first, second, distance = map.findClosestRoad(targetPosition)
+	if not first and not second then return false end
 
-					veh:setPosition(targetVehPos)
-					--veh:autoplace(false)
-					print("donesies")
-					return
-				end
-			end
-		else
-			print("no veh, teleporting camera instead")
-			teleportCameraToPlayer(targetName)
+	groundmarkerRoads[owner] = {position=targetPosition}
+	if first ~= 'nil' and second ~= 'nil' then
+		groundmarkerRoads[owner].first = first
+		groundmarkerRoads[owner].next = second
+
+		local mapData = map.getMap()
+		local node1 = mapData.nodes[first]
+		local node2 = mapData.nodes[second]
+		if node1 and node2 then
+			-- find which node is closest to the owner
+			local sqrDist1 = (targetPosition - node1.pos):squaredLength()
+			local sqrDist2 = (targetPosition - node2.pos):squaredLength()
+
+			if sqrDist1 < sqrDist2 then groundmarkerRoads[owner].best = first
+			else groundmarkerRoads[owner].best = second end
+
+			return true, groundmarkerRoads[owner].best
 		end
-	else
-		print("no active vehicle, teleporting camera instead")
-		teleportCameraToPlayer(targetName)
+	end
+	return false, nil
+end
+
+local function groundmarkerToPlayer(targetName)
+	if not targetName then
+		groundmarkerRoads["targetVeh"] = nil
+		lastGmFocus = nil
+		core_groundMarkers.setFocus(nil)
+	end
+	for i,n in pairs(nicknameMap) do
+		if n.nickname == targetName then
+			local targetVeh = be:getObjectByID(i)
+			local targetVehPos = targetVeh:getPosition()
+			local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
+
+			queryRoadNodeToPosition(vec3Pos, "targetVeh")
+			return
+		end
 	end
 end
 
-local function teleportCameraToPlayer(targetName)
-	print("tp camera to: "..targetName)
-	local nickmap = getNicknameMap()
-	for i,n in pairs(nickmap) do
-		if n == targetName then
-			print("found vehicle ",i, "active ",activeVehicle)
-			local targetVeh = be:getObjectByID(i)
+local function groundmarkerFollowPlayer(targetName, dontfollow)
+	if dontfollow then --static
+		groundmarkerToPlayer(targetName)
+	else
+		if targetName then gmTargetPlayer = targetName
+		else
+			gmTargetPlayer = nil
+			groundmarkerRoads["targetVeh"] = nil
+			lastGmFocus = nil
+			core_groundMarkers.setFocus(nil)
+		end
+	end
+end
 
-			if i ~= tonumber(activeVehicle) and targetVeh then
-				print("entering vehicle ",i)
+local function teleportVehToPlayer(targetName)
+	local activeVehicle = be:getPlayerVehicle(0)
+
+	if activeVehicle then
+		for i,n in pairs(nicknameMap) do
+			if n.nickname == targetName then
+				--print("teleporting to "..tostring(i))
+				local targetVeh = be:getObjectByID(i)
+				local targetVehPos = targetVeh:getPosition()
+				local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
+
+				local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
+
+				spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
+				return
+			end
+		end
+	else
+		log('W', "teleportVehToPlayer", "no active vehicle found, teleporting camera instead")
+		focusCameraOnPlayer(targetName)
+	end
+end
+
+local function focusCameraOnPlayer(targetName)
+	local activeVehicle = be:getPlayerVehicle(0)
+	local activeVehicleID = activeVehicle and activeVehicle:getID() or nil
+	log('I', "focusCameraOnPlayer", "Teleporting camera to: "..targetName)
+	local nickmap = getNicknameMap()
+	for gameVehicleID, ownerNick in pairs(nickmap) do
+		if ownerNick == targetName then
+			log('I', "focusCameraOnPlayer", "Found vehicle: "..gameVehicleID)
+			local targetVeh = be:getObjectByID(gameVehicleID)
+
+			if gameVehicleID ~= activeVehicleID and targetVeh then
+				log('I', "focusCameraOnPlayer", "Entering vehicle "..gameVehicleID)
 				be:enterVehicle(0,targetVeh)
 				return
 			end
@@ -638,49 +881,86 @@ local function teleportCameraToPlayer(targetName)
 end
 
 local function applyQueuedEvents()
-	if not vehicleSpawnQueue then return end
+	UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 
-	local currentVeh = be:getPlayerVehicle(0) -- Camera fix
-
-	for vehicleID, spawns in pairs(vehicleSpawnQueue) do
-		--dump(vehicleID)
-		for k, spawn in pairs(spawns) do
-			print("spawn")
-			applyVehSpawn(spawn)
-		end
+	--local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+	--dump(vehicleSpawnQueue)
+	for vehicleID, spawn in pairs(vehicleSpawnQueue) do
+		log('I', "applyQueuedEvents", "Applying queued spawn")
 		vehicleSpawnQueue[vehicleID] = nil
-		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
+		applyVehSpawn(spawn)
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
-	if not vehicleEditQueue then return end
-
+	--if not vehicleEditQueue then return end
+	--dump(vehicleEditQueue)
 	for vehicleID, edit in pairs(vehicleEditQueue) do
-		--dump(vehicleID)
-		--for k, event in pairs(edits) do
-			print("edit")
-			applyVehEdit(vehicleID, edit)
-			--table.remove(edits, k)
-		--end
+		log('I', "applyQueuedEvents", "Applying queued edit")
 		vehicleEditQueue[vehicleID] = nil
-		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {}, false)
+		applyVehEdit(vehicleID, edit)
+		UI.updateQueue(vehicleSpawnQueue or {}, vehicleEditQueue or {})
 	end
 
-	if currentVeh then be:enterVehicle(0, currentVeh) end -- Camera fix
+	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
 end
+
 
 local function onUpdate(dt)
 	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+		localCounter = localCounter + dt
+	end
+end
+
+local function onPreRender(dt)
+	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+
+		local activeVeh = be:getPlayerVehicle(0)
+		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil
+		local activeVehID = activeVeh and activeVeh:getID() or nil
+
+		if activeVehPos then
+			lastGmQuery = lastGmQuery - dt
+			if lastGmQuery <= 0 then
+				lastGmQuery = 0.2
+				queryRoadNodeToPosition(activeVehPos, 'player')
+				if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
+			end
+
+			local playerRoadData = groundmarkerRoads['player']
+			if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
+				for target, data in pairs(groundmarkerRoads) do
+					if target ~= 'player' then
+						if data.best and data.best ~= lastGmFocus then
+							if (activeVehPos - data.position):squaredLength() > 200 then
+								core_groundMarkers.setFocus(data.best)
+								print("setting focus to") print(data.best)
+								lastGmFocus = data.best
+							else
+								core_groundMarkers.setFocus(nil)
+								groundmarkerRoads[target] = nil
+							end
+						end
+					end
+				end
+			end
+		end
+
 
 		local cameraPos = vec3(getCameraPosition())
-		local currveh = be:getPlayerVehicle(0)
-		if currveh then
+		if activeVeh then
 			local vel = vec3()
-			vel:set(currveh:getVelocity())
-			if not isOwn(currveh:getID()) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
-			if not commands.isFreeCamera() then cameraPos = vec3(currveh:getPosition()) end
-		else applyQueuedEvents() end
+			vel:set(activeVeh:getVelocity())
+			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
+			if not commands.isFreeCamera() then cameraPos = activeVehPos end
+		else
+			applyQueuedEvents()
+			if not commands.isFreeCamera() then
+				commands.setFreeCamera()		 -- Fix camera
+			end
+		end
 
-		if be:getObjectCount() == 0 then return end -- If no vehicle do nothing
+
+		if not activeVeh and be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		-- Vehicles syncing timer
 		syncTimer = syncTimer + dt
 		if syncTimer > 10 then
@@ -689,7 +969,7 @@ local function onUpdate(dt)
 		end
 
 		for i = 0, be:getObjectCount()-1 do -- For each vehicle
-			local veh = be:getObject(i) --  Get vehicle
+			local veh = be:getObject(i) --	Get vehicle
 			local gameVehicleID = veh:getID()
 			if not isOwn(gameVehicleID) and nicknameMap[gameVehicleID] then
 				local pos = veh:getPosition()
@@ -705,31 +985,33 @@ local function onUpdate(dt)
 					local roleInfo = roleToInfo[nicknameMap[gameVehicleID].role] or roleToInfo['USER']
 					local backColor = roleInfo.backcolor
 
-					if distanceMap[gameVehicleID] > 10 then
-						local d
+					if distanceMap[gameVehicleID] > 10 and settings.getValue("nameTagShowDistance") then
+						local unit
+						local mapEntry = distanceMap[gameVehicleID]
 						if settings.getValue("uiUnitLength") == "imperial" then
-							local ft = distanceMap[gameVehicleID]*3.28084
-							if ft > 5280 then
-								local mi = math.floor( (ft / 5280 * 100) + 0.5) / 100
-								d = tostring(mi).." mi"
+							mapEntry = mapEntry * 3.28084
+							if mapEntry > 5280 then
+								mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
+								unit = "mi"
 							else
-								d = tostring(math.floor(ft)).." ft"
+								mapEntry = math.floor(mapEntry)
+								unit = "ft"
 							end
 						else
-							if distanceMap[gameVehicleID] > 1000 then
-								local km = math.floor((distanceMap[gameVehicleID] / 10) + 0.5) / 100
-								d = tostring(km).." km"
+							if mapEntry >= 1000 then
+								mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
+								unit = "km"
 							else
-								d = tostring(math.floor(distanceMap[gameVehicleID])).." m"
+								mapEntry = math.floor(mapEntry)
+								unit = "m"
 							end
 						end
-						dist = " "..d
+
+						dist = string.format(" %s %s", tostring(mapEntry), unit)
 					end
 
-					if not settings.getValue("nameTagShowDistance") then dist = "" end
-
 					if settings.getValue("fadeVehicles") then
-						if currveh:getID() == gameVehicleID then veh:setMeshAlpha(1, "", false)
+						if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
 						else veh:setMeshAlpha(1-nametagAlpha, "", false) end
 					end
 
@@ -745,11 +1027,11 @@ local function onUpdate(dt)
 					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
 					local prefix = ""
-					for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+					for source, tag in pairs(nicknamePrefixMap[nicknameMap[gameVehicleID].nickname] or {})
 						do prefix = prefix..tag.." " end
-					
+
 					local suffix = ""
-					for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {}) 
+					for source, tag in pairs(nicknameSuffixMap[nicknameMap[gameVehicleID].nickname] or {})
 						do suffix = suffix..tag.." " end
 
 					pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
@@ -762,43 +1044,53 @@ local function onUpdate(dt)
 				end
 			end
 		end
-		localCounter = localCounter + dt
 	end
 end
 
+--DEBUG
 
 
-M.setCurrentVehicle		  = setCurrentVehicle
-M.removeRequest			  = removeRequest
-M.onUpdate                = onUpdate
-M.handle                  = handle
-M.onVehicleSwitched       = onVehicleSwitched
-M.onDisconnect            = onDisconnect
-M.isOwn                   = isOwn
-M.getOwnMap               = getOwnMap
-M.getDistanceMap          = getDistanceMap
-M.getVehicleMap           = getVehicleMap
-M.getNicknameMap          = getNicknameMap
-M.setPlayerNickPrefix     = setPlayerNickPrefix
-M.setPlayerNickSuffix     = setPlayerNickSuffix
-M.hideNicknames           = hideNicknames
-M.getGameVehicleID        = getGameVehicleID
-M.getServerVehicleID      = getServerVehicleID
-M.onVehicleDestroyed      = onVehicleDestroyed
-M.onVehicleSpawned        = onVehicleSpawned
-M.deleteAllVehicles       = deleteAllVehicles
-M.sendVehicle             = sendVehicle
-M.sendVehicleData         = sendVehicleData
-M.sendCustomVehicleData   = sendCustomVehicleData
-M.onServerVehicleSpawned  = onServerVehicleSpawned
-M.onServerVehicleRemoved  = onServerVehicleRemoved
-M.onVehicleResetted       = onVehicleResetted
-M.onServerVehicleResetted = onServerVehicleResetted
-M.sendBeamstate           = sendBeamstate
-M.onServerVehicleCoupled  = onServerVehicleCoupled
-M.applyQueuedEvents       = applyQueuedEvents
-M.teleportVehToPlayer     = teleportVehToPlayer
-M.teleportCameraToPlayer  = teleportCameraToPlayer
+-- EVENTS
+M.onUpdate                 = onUpdate
+M.onPreRender              = onPreRender
+M.onDisconnect             = onDisconnect
+M.handle                   = handle
+M.onVehicleSpawned         = onVehicleSpawned
+M.onVehicleDestroyed       = onVehicleDestroyed
+M.onVehicleSwitched        = onVehicleSwitched
+M.onVehicleResetted        = onVehicleResetted
+--M.onServerVehicleSpawned   = onServerVehicleSpawned
+--M.onServerVehicleRemoved   = onServerVehicleRemoved
+--M.onServerVehicleResetted  = onServerVehicleResetted
+--M.onServerVehicleCoupled   = onServerVehicleCoupled
 
-print("MPVehicleGE Loaded.")
+
+-- FUNCTIONS
+M.isOwn                    = isOwn                    -- takes: vehID  returns: bool
+M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
+M.setOwn                   = setOwn                   -- takes: number vehID, bool own
+M.getDistanceMap           = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
+M.getVehicleMap            = getVehicleMap            -- takes: -
+M.getNicknameMap           = getNicknameMap           -- takes: -
+M.hideNicknames            = hideNicknames            -- takes: bool   returns: -
+M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
+M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
+M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
+M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
+M.saveConfigRequest        = saveConfigRequest        -- takes: string configFilename
+M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
+M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: -
+M.spawnRequest             = spawnRequest             -- takes: jbeamName, options table containing 'spawnNew' key
+M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
+M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
+M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
+M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
+M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName
+M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
+M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
+M.queryRoadNodeToPosition  = queryRoadNodeToPosition  -- takes: vec3 target position, optional string targetname
+M.sendCustomVehicleData    = sendCustomVehicleData    -- UI sync button
+--M.sendVehicle            = sendVehicle              -- this shouldnt be public?
+
+print("MPVehicleGE loaded")
 return M

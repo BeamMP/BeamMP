@@ -1,12 +1,12 @@
 --====================================================================================
 -- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
 
 
 local M = {}
-print("MPElectricsGE Initialising...")
+print("Loading MPElectricsGE...")
 
 
 
@@ -54,7 +54,7 @@ local function applyElectrics(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not MPVehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn(gameVehicleID) then
 			veh:queueLuaCommand("MPElectricsVE.applyElectrics(\'"..data.."\')")
 		end
 	end
@@ -66,7 +66,7 @@ local function applyGear(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		if not MPVehicleGE.isOwn() then
+		if not MPVehicleGE.isOwn(gameVehicleID) then
 			veh:queueLuaCommand("MPElectricsVE.setGear(\'"..data.."\')")
 		end
 	end
@@ -76,17 +76,11 @@ end
 
 local function handle(rawData)
 	--print("MPElectricsGE.handle: "..rawData)
-	local code = string.sub(rawData, 1, 1)
-	local rawData = string.sub(rawData, 3)
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+
 	if code == "e" then -- Electrics (indicators, lights etc...)
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
 		applyElectrics(data, serverVehicleID)
 	elseif code == "g" then -- Gears
-		local serverVehicleID = string.match(rawData,"^.-:")
-		serverVehicleID = serverVehicleID:sub(1, #serverVehicleID - 1)
-		local data = string.match(rawData,":(.*)")
 		applyGear(data, serverVehicleID)
 	end
 end
@@ -101,5 +95,5 @@ M.sendElectrics  = sendElectrics
 M.applyElectrics = applyElectrics
 
 
-
+print("MPElectricsGE loaded")
 return M

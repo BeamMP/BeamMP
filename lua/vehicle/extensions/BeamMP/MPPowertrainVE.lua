@@ -1,9 +1,9 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Powertrain sync related functions
+--====================================================================================
 
 local M = {}
 
@@ -48,7 +48,7 @@ local function check()
 		end
 	end
 	if next(devicesToSend) then
-		obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', \'"..obj:getID().."\')")
+		obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', "..obj:getID()..")")
 		-- print("Devices "..jsonEncode(devicesToSend).." sent")
 	end
 end

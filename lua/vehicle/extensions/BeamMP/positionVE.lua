@@ -1,9 +1,9 @@
 --====================================================================================
 -- All work by jojos38 & Titch2000 & stefan750.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
+-- Get and set the position of multiplayer vehicles while keeping collisions active
+--====================================================================================
 
 local M = {}
 
@@ -50,23 +50,36 @@ end
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
 local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
-local maxAcc = 500             -- Maximum acceleration (m/s^2)
-local maxPosError = 3          -- Max allowed continuous position error (m)
+local maxPosForce = 100        -- Maximum position correction force (m/s^2)
+local maxAcc = 100             -- Maximum acceleration in received data (m/s^2)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
 
 -- Rotation
 local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
 local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
-local maxRacc = 500            -- Maximum angular acceleration (rad/s^2)
-local maxRotError = 2          -- Max allowed rotation error (rad)
+local maxRotForce = 50         -- Maximum rotation correction force (rad/s^2)
+local maxRacc = 50             -- Maximum angular acceleration in received data (rad/s^2)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
+
+-- Teleport
+local tpDelayAdd = 1           -- Additional teleport delay (s)
+local tpDistAdd = 1            -- Additional teleport distance (m)
+local tpDistMul1 = 0.1         -- Multiplier for delayed teleport distance based on velocity (m per m/s)
+local tpDistMul2 = 0.5         -- Multiplier for instant teleport distance based on velocity (m per m/s)
+local tpRotAdd = 0.3           -- Additional teleport rotation (rad)
+local tpRotMul1 = 0.2          -- Multiplier for delayed teleport rotation based on rotation velocity (rad per rad/s)
+local tpRotMul2 = 0.5          -- Multiplier for instant teleport rotation based on rotation velocity (rad per rad/s)
+local tpVelSmoother = newTemporalSmoothingNonLinear(2,50)  -- Smoother for filtering low velocities during collisions
+local tpRvelSmoother = newTemporalSmoothingNonLinear(2,50) -- Smoother for filtering low rotation velocities during collisions
 
 -- Prediction
 local maxPredict = 0.3         -- Maximum prediction limit (s)
 local packetTimeout = 0.1      -- Stop prediction if no packet received within this time (s)
 
 -- Smoothing
+local localVelSmoother = newVectorSmoothing(50)             -- Smoother for local velocity
+local localRvelSmoother = newVectorSmoothing(50)            -- Smoother for local angular velocity
 local remoteVelSmoother = newVectorSmoothing(2)             -- Smoother for received velocity
 local remoteRvelSmoother = newVectorSmoothing(2)            -- Smoother for received angular velocity
 local remoteAccSmoother = newVectorSmoothing(1)             -- Smoother for acceleration calculated from received data
@@ -100,6 +113,11 @@ local remoteData = {
 	recTime = 0
 }
 
+local smoothVel = vec3(0,0,0)
+local smoothRvel = vec3(0,0,0)
+
+local physHandlerAdded = false
+
 local debugDrawer = obj.debugDrawProxy
 -- ============= VARIABLES =============
 
@@ -114,20 +132,78 @@ end
 
 
 
+-- Limit vector length
+local function limitVecLength(vec, length)
+	local vecLength = vec:length()
+	
+	if vecLength > length then
+		return vec*(length/vecLength)
+	end
+	
+	return vec
+end
+
+
+
+local function onReset()
+	-- Reset smoothers and state variables
+	localVelSmoother:reset()
+	localRvelSmoother:reset()
+	tpVelSmoother:reset()
+	tpRvelSmoother:reset()
+	remoteVelSmoother:reset()
+	remoteRvelSmoother:reset()
+	remoteAccSmoother:reset()
+	remoteRaccSmoother:reset()
+	accErrorSmoother:reset()
+	raccErrorSmoother:reset()
+	
+	lastVehVel = nil
+	lastVehRvel = nil
+
+	lastAcc = nil
+	lastRacc = nil
+
+	smoothVel = vec3(0,0,0)
+	smoothRvel = vec3(0,0,0)
+	remoteData.acc = vec3(0,0,0)
+	remoteData.racc = vec3(0,0,0)
+end
+
+
+
+local function update(dtSim)
+	-- Smooth vehicle velocity to prevent vibrating
+	smoothVel = localVelSmoother:get(vec3(obj:getVelocity()), dtSim)
+	smoothRvel = localRvelSmoother:get(vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()), dtSim)
+end
+
+
+
 local function updateGFX(dt)
 	timer = timer + dt
 	lastDT = dt
 
+	-- Add physics update handler
+	if not physHandlerAdded and MPVehicleVE then
+        MPVehicleVE.AddPhysUpdateHandler('positionVE', M.update) --register to get phys updates
+        physHandlerAdded = true
+    end
+
+	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
+	
+	-- Since the line above returns end if there is no remote data we know this vehicle should be remote if this runs
+	if v.mpVehicleType == "L" then v.mpVehicleType = "R" end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
-	local vehRvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(vehRot)
+	local vehRvel = smoothRvel:rotated(vehRot)
 	local vehRacc = vehRvel-(lastVehRvel or vehRvel)
 	
 	local cog = velocityVE.cogRel:rotated(vehRot)
 	local vehPos = vec3(obj:getPosition()) + cog
-	local vehVel = vec3(obj:getVelocity()) + cog:cross(vehRvel)
+	local vehVel = smoothVel + cog:cross(vehRvel)
 	local vehAcc = vehVel-(lastVehVel or vehVel)
 
 	lastVehVel = vehVel
@@ -176,24 +252,39 @@ local function updateGFX(dt)
 	local rotError = (rot / vehRot):toEulerYXZ()
 	rotError = vec3(rotError.y, rotError.z, rotError.x):rotated(vehRot)
 	
-	if posError:length() > maxPosError or rotError:length() > maxRotError then
+	-- Calculate teleport thresholds
+	local maxVel = tpVelSmoother:get(max(vel:length(), vehVel:length()), dt)
+	local tpDist1 = tpDistAdd + maxVel*tpDistMul1
+	local tpDist2 = tpDistAdd + maxVel*tpDistMul2
+	
+	-- Debug for teleport distances
+	--debugDrawer:drawSphere(tpDist1, vehPos:toFloat3(), color(0,0,255,50))
+	--debugDrawer:drawSphere(tpDist2, vehPos:toFloat3(), color(255,0,0,50))
+	
+	local maxRvel = tpRvelSmoother:get(max(rvel:length(), vehRvel:length()), dt)
+	local tpRot1 = tpRotAdd + maxRvel*tpRotMul1
+	local tpRot2 = tpRotAdd + maxRvel*tpRotMul2
+	
+	local posErrorLen = posError:length()
+	local rotErrorLen = rotError:length()
+	
+	if posErrorLen > tpDist1 or rotErrorLen > tpRot1 then
 		tpTimer = tpTimer + dt
-		posError = posError:normalized()*maxPosError
 	else
 		tpTimer = 0
 	end
 
-	-- If position error is larger than limit, teleport the vehicle
-	if tpTimer > (0.5+abs(predictTime)*2) then
+	-- If instant teleport distance or teleport timer exceeded, teleport
+	if tpTimer > (tpDelayAdd + abs(predictTime)) or posErrorLen > tpDist2 or rotErrorLen > tpRot2 then
 		-- Subtract COG offset because setPosition works relative to refNode
 		local tpPos = pos - velocityVE.cogRel:rotated(rot)
 		-- Offset teleport rotation for vehicles with different JBeam orientations
-		local tpRot = rot*vehRot/quat(obj:getRotation())
+		local tpRot = quat(obj:getRotation())/vehRot*rot
 		
-		if rotError:length() > maxRotError then
+		if rotErrorLen > tpRot1 or rotErrorLen > tpRot2 then
 			-- Resets the vehicle, try to avoid unless absolutely necessary
 			obj:queueGameEngineLua("vehicleSetPositionRotation("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..","..tpRot.x..","..tpRot.y..","..tpRot.z..","..tpRot.w..")")
-			--print("Teleport Angle "..obj:getID())
+			--print("Teleport Rotation "..obj:getID())
 		else
 			obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
 			--print("Teleport "..obj:getID())
@@ -225,8 +316,8 @@ local function updateGFX(dt)
 	local raccError = raccErrorSmoother:get((lastRacc or vehRacc) - vehRacc, dt)
 	--print("RaccError: "..tostring(raccError:length()/dt))
 
-	local targetAcc = (velError + posError*posCorrectMul)*min(posForceMul*dt,1)
-	local targetRacc = (rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1)
+	local targetAcc = limitVecLength((velError + posError*posCorrectMul)*min(posForceMul*dt,1), maxPosForce*dt)
+	local targetRacc = limitVecLength((rvelError + rotError*rotCorrectMul)*min(rotForceMul*dt,1), maxRotForce*dt)
 
 	local targetAccMul = 1-min(max(targetAcc:dot(accError)/(targetAcc:squaredLength()+maxAccError*maxAccError*dt),0),1)
 	--print("Force multiplier: "..targetAccMul)
@@ -251,14 +342,14 @@ end
 
 
 local function getVehicleRotation()
-	
+	-- this attempts to send a full table of nan if there are several rapid instability causing VE lua to break after next vehicle reload, seems to be caused by a game issue
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
-	local rvel = vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()):rotated(rot)
+	local rvel = smoothRvel:rotated(rot)
 	
 	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
-	local vel = vec3(obj:getVelocity()) + cog:cross(rvel)
-	
+	local vel = smoothVel + cog:cross(rvel)
+	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
 		vel = {vel.x, vel.y, vel.z},
@@ -267,7 +358,7 @@ local function getVehicleRotation()
 		tim = timer,
 		ping = ownPing + lastDT
 	}
-	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', \'"..obj:getID().."\')") -- Send it
+	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', "..obj:getID()..")") -- Send it
 end
 
 
@@ -284,37 +375,24 @@ local function setVehiclePosRot(data)
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
-	-- Sanity checks for acceleration
-	if vel:length() < (remoteData.vel:length() + maxAcc*remoteDT) then
-		remoteData.acc = (vel - remoteData.vel)/remoteDT
-		remoteData.vel = vel
-	else
-		--print("Acceleration too high! Vehicle ID: "..obj:getID())
-		remoteData.acc = vec3(0,0,0)
-		remoteData.vel = vel:normalized()*(vel:length()+maxAcc*remoteDT)
-	end
-
-	if rvel:length() < (remoteData.rvel:length() + maxRacc*remoteDT) then
-		remoteData.racc = (rvel - remoteData.rvel)/remoteDT
-		remoteData.rvel = rvel
-	else
-		--print("Angular acceleration too high! Vehicle ID: "..obj:getID())
-		remoteData.racc = vec3(0,0,0)
-		remoteData.rvel = rvel:normalized()*(rvel:length()+maxRacc*remoteDT)
-	end
-
 	remoteData.pos = pos
 	remoteData.rot = rot
+	remoteData.vel = vel
+	remoteData.rvel = rvel
+	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
+	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
 
 	--print("OwnPing = "..ownPing.." Ping = "..ping)
-	obj:queueGameEngineLua("UI.setVehPing(\'"..obj:getID().."\', \'".. math.floor(ping*1000) .."\')") -- Send ping
+	obj:queueGameEngineLua("UI.setVehPing("..obj:getID()..", \'".. math.floor(ping*1000) .."\')") -- Send ping
 end
 
 
 
+M.onReset            = onReset
+M.update             = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot

@@ -1,0 +1,107 @@
+<div style=" display: flex; width: 100%;">
+  <div class="md-padding" style="display:flex; max-height: 1000px; min-width: 500px; width: 70%; max-width: 80%; margin: 2.5% auto; background-color: rgba(255, 255, 255, 0.85); color: rgb(62, 62, 62); overflow-y: scroll">
+    <style>
+      md-radio-button .md-container {
+        display:none;
+      }
+
+      .onlineDialogue .md-button {
+        color: rgba(0, 0, 0, 0.87);
+        background-color: white;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+      }
+
+      .onlineDialogue .md-button:hover {
+        background-color:rgba(83, 79, 76, 0.8);
+        color:white;
+      }
+
+      .onlineDialogue .md-button.affirmative:hover {
+        background-color:rgba(255, 102, 0, 0.555);
+        color:white;
+      }
+
+      .onlineDialogue .md-button.md-raised:not([disabled]) {
+        background-color:rgba(83, 79, 76, 1.0);
+        color:white;
+      }
+
+      .onlineDialogue .md-button.affirmative.md-raised:not([disabled]) {
+        background-color:rgb(255,102,0);
+        color:white;
+      }
+
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      md-radio-button .md-label {
+        margin-left:0;
+      }
+
+      .onlineDialogue .md-button[disabled], .onlineDialogue .md-button[disabled]:hover {
+        background-color: rgba(98, 94, 91, 0.4) !important;
+        color: rgba(200, 200, 200, 0.75) !important;
+      }
+    </style>
+    <div style="position: relative; top: 50%; transform: translateY(-50%); width: 100%;">
+    <div>
+      <h1>{{ 'ui.multiplayertos.title' | translate }}</h1>
+    </div>
+    <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
+    <h2>{{ 'ui.multiplayertos.tos' | translate }}</h2>
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	  <span bng-translate="ui.multiplayertos.tos.description1"></span>
+	  <a href="http-external://forum.beammp.com/topic/94/terms-of-use-v1-0" ng-click="openExternalLink('https://forum.beammp.com/topic/94/terms-of-use-v1-0')">here</a>.
+	  <span bng-translate="ui.multiplayertos.tos.description2"></span>
+	</div>
+    <div style="display: flex;">
+      <span style="flex: 1 1;"></span>
+    <md-radio-group ng-model="tos" class="onlineDialogue">
+      <md-radio-button value="enable" class="md-button affirmative" ng-class="{'md-raised': tos === 'enable'}" aria-label="OK">
+        Yes
+      </md-radio-button>
+      <md-radio-button value="disable" class="md-button" ng-class="{'md-raised': tos === 'disable'}" aria-label="NoThanks">
+        No, thanks
+      </md-radio-button>
+    </md-radio-group>
+    </div>
+    <div>
+      <h2>{{ 'ui.multiplayertos.rules' | translate }}</h2>
+    </div>
+    <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	  <span bng-translate="ui.multiplayertos.rules.description1"></span>
+	  <a href="http-external://forum.beammp.com/topic/29/rules-please-read" ng-click="openExternalLink('https://forum.beammp.com/topic/29/rules-please-read')">here</a>.
+	  <span bng-translate="ui.multiplayertos.rules.description2"></span>
+	</div>
+    <div style="display: flex">
+      <span style="flex: 1 1;"></span>
+      <md-radio-group ng-model="rules" class="onlineDialogue">
+        <md-radio-button value="enable" class="md-button affirmative" ng-class="{'md-raised': rules === 'enable'}" aria-label="OK">
+          Yes
+        </md-radio-button>
+        <md-radio-button value="disable" class="md-button" ng-class="{'md-raised': rules === 'disable'}" aria-label="NoThanks">
+          No, thanks
+        </md-radio-button>
+      </md-radio-group>
+    </div>
+      <md-divider style="border-color: rgb(62, 62, 62);"></md-divider>
+	  <div style="padding-bottom: 10px; display: inline-block; text-align: justify;">
+	    <span bng-translate="ui.multiplayertos.info1"></span>
+	    <a href="http-external://www.beammp.com" ng-click="openExternalLink('https://www.beammp.com')">official website</a>.
+	    <span bng-translate="ui.multiplayertos.info2"></span>
+	    <a href="http-external://www.discord.gg/beammp" ng-click="openExternalLink('https://www.discord.gg/beammp')">official discord</a>.
+	  </div>
+      <div style="margin-bottom: 1em;margin-top: 1em; display: flex">
+        <span style="flex: 1 1;"></span>
+        <md-button ng-if="(tos != 'disable' && tos != 'enable') || (tos == 'enable' && (rules != 'disable' && rules != 'enable'))" ng-disabled="true" class="md-raised md-primary">
+            Please choose the options above
+        </md-button>
+        <md-button ng-click="validate()" ng-if="tos == 'enable' && rules == 'enable'" class="md-raised md-primary">
+          {{ 'ui.common.continue' | translate}}
+      </md-button>
+
+      </div>
+    </div>
+  </div>
+</div>

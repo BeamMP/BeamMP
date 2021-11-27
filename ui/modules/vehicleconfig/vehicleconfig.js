@@ -297,7 +297,7 @@ function ($filter, logger, $scope, $window, RateLimiter, VehicleConfig) {
 
   vm.mpapply = function () {
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
-    bngApi.engineLua("MPVehicleGE.sendCustomVehicleData(be:getPlayerVehicle(0):getID())");
+    bngApi.engineLua("MPVehicleGE.sendVehicleEdit(be:getPlayerVehicle(0):getID())");
   }
   // --------------------------------------- BEAMMP --------------------------------------- //
 

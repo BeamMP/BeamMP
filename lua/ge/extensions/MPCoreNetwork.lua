@@ -124,6 +124,24 @@ local function getServers()
 	log('M', loggerPrefix, "Getting the servers list")
 	send('B') -- Ask for the servers list
 end
+
+-- sends the current state to the user interface. It can request it via online.requestState()
+local function sendBeamMPInfo()
+	if not Servers then return end
+	local servers = jsonDecode(Servers)
+	if tableIsEmpty(servers) then return end
+	local p, s = 0, 0
+	for _,server in pairs(servers) do
+		p = p + server.players
+		s = s + 1
+	end
+	print(p, s)
+  -- send steam data as well if available
+  guihooks.trigger('BeamMPInfo', {
+    players = ''..p,
+		servers = ''..s
+  })
+end
 -- ================ UI ================
 
 
@@ -294,7 +312,7 @@ end
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) checkLauncherConnection() end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params) end, -- Serverlist received
+	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Serverlist received
 	['U'] = function(params) handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end, -- Login system
@@ -418,6 +436,7 @@ M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
 M.onInit = onInit
+M.requestPlayers       = sendBeamMPInfo
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady

@@ -82,24 +82,6 @@ angular.module('beamng.stuff')
           </div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
-        <div style="text-align:right; color:white;margin-left:16px;">
-          <div layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
-            <div layout="row" layout-align="start center" ng-cloak >
-              <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
-              <div layout="row" style="padding: 5px">
-                <span style="padding-left: 5px;">Players: {{ ::steamData.branch }}</span>
-              </div>
-            </div>
-            <div id="onlineplayers">
-              {{ ::beammpData.players }}
-            </div>
-          </div>
-        </div>
-        <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
-        <div style="text-align:right; color:white;margin-left:16px;">
-          <div ng-show='!showBuildInfo'>BeamMP v4.2.0</div>
-        </div>
-        <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
           <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }} <br/> {{ ::buildInfoStr }}</div>
@@ -139,15 +121,6 @@ angular.module('beamng.stuff')
         })
       })
       bngApi.engineLua('core_online.requestState()')
-
-      // beammp info
-      scope.$on('BeamMPInfo', function (event, data) {
-        scope.$apply(function () {
-          scope.beammpData = data
-          console.log(scope.beammpData)
-        })
-      })
-      bngApi.engineLua('MPCoreNetwork.requestPlayers()')
     }
   }
 }])
@@ -361,11 +334,6 @@ angular.module('beamng.stuff')
     },
     {
       list: [
-        {
-          translateid: 'ui.playmodes.multiplayer',
-          icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
-          targetState: 'menu.multiplayer.tos'
-        },
         {
           translateid: 'ui.playmodes.lightRunner',
           icon: '/ui/modules/mainmenu/drive/icons/lightrunner.svg',

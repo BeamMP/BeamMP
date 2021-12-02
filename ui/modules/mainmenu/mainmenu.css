@@ -354,6 +354,14 @@
     padding: 5px;
 }
 
+#onlineplayers {
+  /* border-bottom:2px solid #56D70B; */
+  color: rgb(255, 255, 255);;
+  text-align:center;
+  padding:5px;
+  font-weight: 700;
+}
+
 #onlinestate {
   /* border-bottom:2px solid #56D70B; */
   color: #56D70B;

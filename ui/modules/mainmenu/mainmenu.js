@@ -336,7 +336,7 @@ angular.module('beamng.stuff')
       list: [
         {
           translateid: 'ui.playmodes.multiplayer',
-          icon: '/ui/modules/mainmenu/drive/icons/lightrunner.svg',
+          icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
           targetState: 'menu.lightrunnerOverview'
         },
         {

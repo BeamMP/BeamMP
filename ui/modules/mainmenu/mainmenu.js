@@ -144,7 +144,6 @@ angular.module('beamng.stuff')
       scope.$on('BeamMPInfo', function (event, data) {
         scope.$apply(function () {
           scope.beammpData = data
-          console.log(scope.beammpData)
         })
       })
       bngApi.engineLua('MPCoreNetwork.requestPlayers()')

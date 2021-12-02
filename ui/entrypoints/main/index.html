@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8">
     <title>BeamNG Main UI</title>
-
+  
     <!-- for external clients: emulation over websocket -->
     <script src="/ui/entrypoints/main/comms.js"></script>
-
+  
     <!-- Vue START -->
     <script src="/ui/lib/ext/vue3/vue.global.prod.js"></script>
     <script src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
     <script src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
     <script src="/ui/lib/int/vueService.js"></script>
     <!-- Vue END -->
-
+  
     <!-- 3rd party includes -->
     <script src="/ui/lib/ext/angular/angular.js"></script>
     <script src="/ui/lib/ext/angular/angular-animate.js"></script>
     <script src="/ui/lib/ext/angular/angular-aria.js"></script>
     <script src="/ui/lib/ext/angular/angular-sanitize.js"></script>
-
+  
     <script src="/ui/lib/ext/angular-ui-router.min.js"></script>
     <script src="/ui/lib/ext/angular-material/angular-material.js"></script>
     <script src="/ui/lib/ext/smoothie.min.js"></script>
@@ -32,36 +32,34 @@
     <script src="/ui/lib/ext/jk-rating-stars.min.js"></script>
     <script src="/ui/lib/ext/chartist.min.js"></script>
     <script src="/ui/lib/ext/hu.js"></script>
-
-
+  
+  
     <script src="/ui/lib/ext/qrcode.min.js"></script>
-
+  
     <!--3rd party test -->
     <script src="/ui/lib/ext/ng-FitText.js"></script>
-
-
+  
+  
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-material/angular-material-no-animate.min.css">
-
+  
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-toastr.min.css">
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/angular-material-paging.css">
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/jk-rating-stars.min.css">
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/chartist.min.css">
-
+  
     <!-- BeamNG UI -->
     <script src="/ui/entrypoints/main/main.js"></script>
-
+  
     <script src="/ui/lib/int/beamng-core.js"></script>
     <script src="/ui/lib/int/utilities.js"></script>
     <script src="/ui/lib/int/beamng-data.js"></script>
     <script src="/ui/lib/ext/mdx.js"></script>
-    <script src="/ui/lib/int/logger.js"></script>
     <script src="/ui/lib/int/SpatialNavigation.js"></script>
     <script src="/ui/lib/ext/crossfire-chrome.js"></script>
-
+  
     <script src="/ui/lib/int/beamng.controls.js"></script>
     <link type="text/css" rel="stylesheet" href="/ui/lib/int/beamng.controls.css">
-    <link type="text/css" rel="stylesheet" href="/ui/lib/int/main.min.css">
-
+  
     <script src="/ui/modules/levelselect/levelselect.js"></script>
     <script src="/ui/modules/photomode/photomode.js"></script>
     <script src="/ui/modules/replay/replay.js"></script>
@@ -71,7 +69,6 @@
     <script src="/ui/modules/comic/comic.js"></script>
     <script src="/ui/modules/vehicleselect/vehicleselect.js"></script>
     <script src="/ui/modules/options/options.js"></script>
-    <script src="/ui/modules/debug/debug.js"></script>
     <script src="/ui/modules/credits/credits.js"></script>
     <script src="/ui/modules/startScreen/startScreen.js"></script>
     <script src="/ui/modules/vehicleconfig/vehicleconfig.js"></script>
@@ -82,79 +79,71 @@
     <script src="/ui/modules/lightrunner/lightrunner.js"></script>
     <script src="/ui/modules/dragrace/dragrace.js"></script>
     <script src="/ui/modules/mapview/mapview.js"></script>
-    <script src="/ui/modules/mission-popups/mission-popups.js"></script>
-
-
+    <script src="/ui/lib/int/mission-popups/mission-popups.js"></script>
+    <script src="/ui/modules/gameContext/gameContext.js"></script>
+    <script src="/ui/modules/bigmap/bigmap.js"></script>
+  
     <script src="/ui/modules/mainmenu/mainmenu.js"></script>
-    <!-- <script src="/ui/modules/mainmenu2/mainmenu2.js"></script> -->
+    <script src="/ui/modules/menu/menu.js"></script>
     <script src="/ui/modules/onlineFeatures/online.js"></script>
-
+  
     <script src="/ui/modules/appselect/appselect.js"></script>
-    <script src="/ui/modules/colorpicker/color.js"></script>
-    <script src="/ui/modules/help/help.js"></script>
+    <script src="/ui/modules/appedit/appedit.js"></script>
+    <script src="/ui/lib/int/colorpicker/color.js"></script>
     <script src="/ui/modules/modmanager/modmanager.js"></script>
-    <script src="/ui/modules/playmodes/playmodes.js"></script>
+    <script src="/ui/modules/play/play.js"></script>
+    <script src="/ui/modules/apps/app-service.js"></script>
     <script src="/ui/modules/apps/app-container.js"></script>
-
-    <script src="/ui/modules/ui-components/bng-components.js"></script>
+    <script src="/ui/modules/apps/app.js"></script>
+  
+    <script src="/ui/lib/int/ui-components/bng-components.js"></script>
     <script src="/ui/modules/campaignselect/campaignselect.js"></script>
-
-    <script src="/ui/modules/careerselect/careerselect.js"></script>
-
-    <script src="/ui/modules/garageNew/garage.js"></script>
-    <script src="/ui/modules/garageNew/garageSelect/select.js"></script>
-    <script src="/ui/modules/garageNew/garageParts/parts.js"></script>
-    <script src="/ui/modules/garageNew/garageTune/tune.js"></script>
-    <script src="/ui/modules/garageNew/garagePaint/paint.js"></script>
-    <script src="/ui/modules/garageNew/garagePhoto/photo.js"></script>
-    <script src="/ui/modules/garageNew/garageLoad/load.js"></script>
-    <script src="/ui/modules/garageNew/garageSave/save.js"></script>
-
+  
     <script src="/ui/modules/busRoute/busRoute.js"></script>
     <script src="/ui/modules/iconView/icons.js"></script>
 
-    
     <!-- --------------------------------- BEAMMP --------------------------------- -->
     <script src="/ui/modules/multiplayer/multiplayer.js"></script> 
-
+  
     <script src="/ui/modules/fadeScreen/fadeScreen.js"></script>
-
-    <!-- UIv3 Imports -->
-
-    <!-- <script src="/ui/modules/options2/graphicsbasic/graphicsbasic.js"></script> -->
-    <script src="/ui/modules/freeplay/freeplay.js"></script>
-    <script src="/ui/modules/freeplay-spawn/freeplay-spawn.js"></script>
-    <!-- <script src="/ui/modules/modmanager2/modmanager2.js"></script> -->
-
-    <!-- Mod Wizard -->
-    <!-- <script src="/ui/modules/modwizard/modwizard.js"></script>
-    <script src="/ui/modules/modwizard/skinWizard/skinwizard.js"></script>
-    <script src="/ui/modules/modwizard/vehicleWizard/vehiclewizard.js"></script>
-    <script src="/ui/modules/modwizard/terrainWizard/terrainwizard.js"></script> -->
-
-    <link rel="stylesheet" type="text/css" href="/ui/modules/ui-components/bng-components.css">
-
+  
+    <link rel="stylesheet" type="text/css" href="/ui/lib/int/ui-components/bng-components.css">
+  
     <link type="text/css" rel="stylesheet" href="/ui/entrypoints/main/main.css">
     <link type="text/css" rel="stylesheet" href="/ui/lib/ext/keys.css">
     <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu/mainmenu.css">
-    <!-- <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu2/mainmenu2.css"> -->
-
+  
   </head>
 
   <body ng-controller="AppCtrl as app" ng-show="app.aux.uiVisible" use-lang-font="1" class="container">
-
-  <div ng-if="app.shipping">
-
-  </div>
-
-  <!-- <div ng-if="!app.shipping"> -->
-    <!-- Ingame garage prototype -->
-    <!-- <script src="/ui/modules/garagePrototype/garage.js"></script>
-    <script src="/ui/modules/garagePrototype/garageSelect/select.js"></script>
-
-    <script src="/ui/modules/dialogsystem/dialogsystem.js"></script>
-    <script src="/ui/modules/imageviewer/imageviewer.js"></script>
-  </div> -->
+    
+    <md-content ng-if="app.uitest" layout="column" style="border:2px solid #aaa;position:absolute;width:400px;height:160px;top:50%;right:0;z-index:98;padding:2px;font-family:monospace;border-radius:5px;">
+      <div layout="column">
+        UI Debug - Press CTRL+U to toggle visibility.
+        <div layout="row" style="background-color:rgb(102, 35, 35);">
+          <p flex=35>Current UI state:</p>
+          <md-select ng-model="app.currentStateName" ng-change="app.switchState(app.currentStateName)" flex>
+            <md-option ng-repeat="(idx, state) in app.states track by $index" ng-value="state.name">{{state.name}}</md-option>
+          </md-select>
+        </div>
+        <div layout="row" style="background-color:rgb(102, 35, 35);">
+          <md-button flex md-no-ink style="display:block;z-index:999999" class="md-button" ng-click="app.prevState()">&lt; previous</md-button>
+          <md-button flex md-no-ink style="display:block;z-index:999999" class="md-button" ng-click="app.nextState()">next &gt;</md-button>
+        </div>
+        <div layout="row" layout-align="start center">
+          <md-checkbox  ng-model="app.showApps">Show apps</md-checkbox>
+          <div>Gamestate: <span style="color:rgb(68, 207, 68)">{{app.gameState}}</span></div>
+          <md-button  ng-click="app.reloadUI()">reload</md-button>
+        </div>
+      </div>
+    </md-content>
+    <div id="reconnectScreen" ng-if="!$root.ingame && $root.connectionState != 'open'">
+      <div class="reconnectScreenText">
+        <center>
+          <div style="font-size:2vh;margin:3vh;">... reconnecting ...</div>
+        </center>
+      </div>
+    </div>
 
     <!--  .............. connection failed overlay ..............  -->
     <div ng-if="app.showConnectionIssues" id="showConnectionIssues" style="position:absolute; top:100px; right: 0; background:transparent; z-index:1000" class="md-padding">
@@ -165,38 +154,20 @@
       </span>
     </div>
 
-
-    <div id="reconnectScreen" ng-if="!$root.ingame && $root.connectionState != 'open'">
-      <div class="reconnectScreenText">
-        <center>
-          <div style="font-size:2vh;margin:3vh;">... reconnecting ...</div>
-        </center>
-      </div>
-    </div>
-
     <!--  .............. waiting screen overlay ..............  -->
-    <div ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: 999;" layout="row" layout-align="center center">
+    <div ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: 97;" layout="row" layout-align="center center">
       <ng-md-icon class="material-icons" style="font-size: 20rem; color: white; text-shadow: -1px 1px 8px #DB7B00, 1px -1px 8px #DB7B00; z-index:10;">
         access_time
       </ng-md-icon>
     </div>
 
-    <!-- .............. pause screen overlay ..............  -->
-    <div ng-if="app.showPauseIcon" style="position:absolute; top:100px; right: 0; background:transparent; z-index:10" class="md-padding" ng-click="app.unpause()">
-      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
-        <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;" layout="row" layout-align="center center">
-          {{::'ui.inputActions.general.press' | translate}}
-          <binding action="pause" style="margin: 5px; text-shadow: -0px 0px 0px #00000000, 0px 0px 0px #00000000; box-shadow: 0px 3px 5px #00000000; font-size: 15px;"></binding>
-          {{::'ui.inputActions.general.pause.toResume' | translate}}
-        </div>
-        <span class="material-icons" style="align:center;font-size: 178px;text-shadow: -3px 3px 15px rgba(0, 0, 0, 0.5), 3px -3px 15px rgba(0, 0, 0, 0.5);">
-          pause_circle_outline
-        </span>
-    </span>
-  </div>
-  <!-- .............. crosshair overlay ..............  -->
-  <div ng-if="app.showCrosshair" style="position:absolute; margin:0;padding:0;transform: translate(-50%, -200%); top:50%; left:50%; background:transparent; z-index:20;background-image: url('/ui/images/crosshair.png'); width:8px;height:8px;background-size: cover; background-position: center center;pointer-events:none" class="md-padding">
-  </div>
+    <!-- pause indicator (show only while paused), not to be confused with the pause button (shown only while not paused). see menu.html -->
+    <div ng-if="!app.mainmenu && app.showPauseIcon && app.uiVisible" class="dashBrdButtonEnd dashMenuHeight">
+      <div style="" class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()" bng-sound-class="bng_button_main_ui_default" >
+        <span style="padding:0; margin:0" bng-translate="ui.inputActions.general.pause.binding" class="bng-binding dashBrdSvgIcon"></span>
+        <span class="dashBrdText">{{ 'ui.inputActions.general.pause.title' | translate }}</span>
+      </div>
+    </div>
 
     <game-indicators-layer></game-indicators-layer>
 
@@ -204,17 +175,20 @@
       <mission-info></mission-info>
     </mission-popups>
 
+    <game-context-mini-info></game-context-mini-info>
+
     <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
-    <app-container id="mainContainer" ng-show="app.showApps" class="app-container {{ align }}">
+    <app-container ng-show="app.showApps" style="position:absolute !important;top:0;right:0;bottom:0;left:0;">
       <canvas id="alignment-canvas"  width="1" height="1"></canvas>
       <bng-app style="display:none"></bng-app>
     </app-container>
-
-
-    <div style="width: 100%; height: 100%; box-sizing: border-box;" ng-class="app.transitionAnimation" ui-view></div>
-
+  
+    <!-- fullscreen LOADING view, covers the real view -->
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:50" ng-class="app.transitionAnimation" ui-view="loader" ng-show="$state.current.loaderVisible"></div>
+    <!-- fullscreen DEFAULT view -->
+    <div style="width: 100%; height: 100%; box-sizing: border-box;z-index:0" ng-class="app.transitionAnimation" ui-view></div>
+  
     <!--  .............. confirm dialog overlay ..............  -->
     <bng-dialog></bng-dialog>
-
   </body>
 </html>

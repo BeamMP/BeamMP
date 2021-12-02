@@ -42,12 +42,9 @@ local function updatePlayersList(playersString)
 end
 
 
-local function updateQueue(spawns, edits, s)
-	local UIqueue = {spawnCount = tableSize(spawns), editCount = tableSize(edits)}
-	if s == nil then
-		s = UIqueue.spawnCount+UIqueue.editCount>0
-	end
-	UIqueue.show = s
+local function updateQueue( spawnCount, editCount)
+	local UIqueue = {spawnCount = spawnCount, editCount = editCount}
+	UIqueue.show = spawnCount+editCount > 0
 	guihooks.trigger("setQueue", UIqueue)
 end
 
@@ -89,9 +86,13 @@ end
 
 local function showNotification(text, type)
 	if type and type == "error" then
-		print("UI Error > "..text)
+		log('I', 'showNotification', "[UI Error] > "..tostring(text))
 	else
-		print("[Message] > "..text)
+		log('I', 'showNotification', "[Message] > "..tostring(text))
+		local leftName = string.match(text, "^(.+) left the server!$")
+		if leftName then MPVehicleGE.onPlayerLeft(leftName) end
+		--local joinedName = string.match(text, "^Welcome (.+)!$")
+		--if joinedName then MPVehicleGE.onPlayerJoined(joinedName) end
 	end
 	ui_message(''..text, 10, nil, nil)
 end
@@ -148,15 +149,8 @@ local function ready(src)
 end
 
 
-
-local function setVehPing(vehicleID, ping)
-	--print("Vehicle "..vehicleID.." has ping "..ping)
-	local nickmap = MPVehicleGE.getNicknameMap()
-
-	if not MPVehicleGE.isOwn(vehicleID) and nickmap[tonumber(vehicleID)] ~= nil then
-		pings[nickmap[tonumber(vehicleID)]] = ping
-		--print("belongs to: "..nickmap[tonumber(vehicleID)])
-	end
+local function setPlayerPing(playerName, ping)
+	pings[playerName] = ping
 end
 
 M.updateLoading = updateLoading
@@ -169,7 +163,7 @@ M.chatMessage = chatMessage
 M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
-M.setVehPing = setVehPing
+M.setPlayerPing = setPlayerPing
 M.updateQueue = updateQueue
 M.showMdDialog = showMdDialog
 

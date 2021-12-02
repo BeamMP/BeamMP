@@ -114,7 +114,11 @@ end
 
 function AddEventHandler(n, f)
 	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
-	table.insert(eventTriggers, {name = n, func = f})
+	if type(f) ~= "function" or f == nop then
+		log('W', 'AddEventHandler', "Event handler function can not be nil")
+	else
+		table.insert(eventTriggers, {name = n, func = f})
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -129,7 +133,7 @@ end
 
 function addKeyEventListener(keyname, f, type)
 	f = f or function() end
-	log('W','[GE] AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
+	log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
 	table.insert(keysToPoll, keyname)
 

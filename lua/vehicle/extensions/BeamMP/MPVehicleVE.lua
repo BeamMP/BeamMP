@@ -21,6 +21,8 @@ local keypressTriggers = {}
 -- Keypress handling
 -------------------------------------------------------------------------------
 
+setmetatable(_G,{}) -- temporarily disable global notifications
+
 function onKeyPressed(keyname, f)
 	addKeyEventListener(keyname, f, 'down')
 end
@@ -35,7 +37,7 @@ function addKeyEventListener(keyname, f, t)
 		end
 	else
 		f = f or function() end
-		log('W','[VE] AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
+		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
 		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
 		table.insert(keysToPoll, v)
@@ -107,9 +109,12 @@ local function onExtensionLoaded()
 	obj:queueGameEngineLua("MPVehicleGE.onVehicleReady("..obj:getID()..")")
 end
 
+setmetatable(input.keys, {}) -- disable deprecated warning
+detectGlobalWrites() -- reenable global write notifications
+
 M.updateGFX = updateGFX
 M.onExtensionLoaded    = onExtensionLoaded
-M.onReset			   = onReset
+M.onReset              = onReset
 
 M.setVehicleType       = setVehicleType
 M.AddPhysUpdateHandler = AddPhysUpdateHandler

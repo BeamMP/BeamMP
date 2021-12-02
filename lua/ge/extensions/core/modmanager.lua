@@ -33,6 +33,7 @@ local modeDef = {
 local checkStartup = false
 local checkingModUpdate = false
 local autoMount = true
+local modDisabledCheckedOnce = false
 
 local function sendGUIState()
   --local list = {}
@@ -54,8 +55,7 @@ local function sendGUIState()
   guihooks.trigger('ModManagerModsChanged', mods)
   guihooks.trigger('ModManagerVehiclesChanged', vehicles)
 
-  guihooks.trigger('InstalledContentUpdate', {context='levels', list=extensions.core_levels.getList()})
-
+  extensions.core_levels.requestData() -- send levels to the UI
 end
 
 local function stateChanged()
@@ -105,6 +105,18 @@ local function getModNameFromPath(path)
   modname = modname:gsub('.zip$', '')
   --log('I', 'getModNameFromPath', "getModNameFromPath path = "..path .."    name = "..dumps(modname) )
   return modname
+end
+
+local function getModFromPath(vfsPath, withHashes)
+  local realPath = FS:findOverrides(vfsPath) or {}
+  for _, p in ipairs(realPath) do
+    p = string.lower(p:gsub('\\', '/'))
+    local _, filename, ext = path.splitWithoutExt(p)
+    local mod = mods[filename]
+    if mod then
+      return mod.modID or mod.modname
+    end
+  end
 end
 
 -- checks the type of a mod based on the existing files
@@ -360,6 +372,12 @@ local function updateZIPEntry(filename)
     if FS:directoryExists(filename.."vehicles/") then
       filesInZIP[#filesInZIP+1] = "/vehicles/foo/bar.jbeam" --dirty hack to refresh veh list
     end
+    local modFiles = FS:findFiles(filename, '*', -1, true, false)
+    for i,e in ipairs(modFiles) do
+      local tmp = e:gsub(filename, "")
+      if tmp:sub(1,1) ~= "/" then tmp = "/"..tmp end
+      filesInZIP[#filesInZIP+1] = tmp
+    end
   end
 
   return mods[modname], filesInZIP
@@ -467,22 +485,44 @@ local function checkDuplicatedMods(filelist)
   return outFilelist
 end
 
+
+local function getModsDisabledAfterUpdate()
+  if not modDisabledCheckedOnce then
+    local updatedFromVersion = nil
+    local cmdArgs = Engine.getStartingArgs()
+    for i, v in ipairs(cmdArgs) do
+      if v == '-versionUpdated' then
+        if #cmdArgs > i then
+          updatedFromVersion = cmdArgs[i + 1]
+        end
+        log('I', 'initDB', "Version update found. Coming from version '" .. tostring(updatedFromVersion) .. "'")
+
+        -- check if mods exist
+        local modData = jsonReadFile(persistencyfile)
+        local modsInstalled = (type(modData) == 'table' and type(modData.mods) == 'table' and not tableIsEmpty(modData.mods))
+        if modsInstalled then
+          -- only disable mods if some were installed in the first place
+          settings.setValue('disableModsAfterUpdate', true)
+        end
+        break
+      end
+    end
+    modDisabledCheckedOnce = true
+  end
+
+  return settings.getValue('disableModsAfterUpdate')
+end
+
 local initDB = extensions.core_jobsystem.wrap(function(job)
   --log('D', 'initDB', 'initDB() ...')
 
-  local disableAllMods = false
-  --local updatedFromVersion = nil
-  --local cmdArgs = Engine.getStartingArgs()
-  --for i, v in ipairs(cmdArgs) do
-  --  if v == '-versionUpdated' then
-  --    if #cmdArgs > i then
-  --      updatedFromVersion = cmdArgs[i + 1]
-  --    end
-  --    log('I', 'initDB', "Version update found. Coming from version '" .. tostring(updatedFromVersion) .. "'")
-  --    disableAllMods = true
-  --    break
-  --  end
-  --end
+  if getModsDisabledAfterUpdate() then
+    log('I', '', 'Mods disabled by setting disableModsAfterUpdate')
+    ready = true
+    extensions.hook('onModManagerReady')
+    guihooks.trigger('ModManagerReady')
+    return
+  end
 
   -- check DB version number
   if not dbHeader or dbHeader.version ~= 1.1 then
@@ -513,10 +553,6 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
 
       local mod, modFiles = updateZIPEntry(filename)
       if mod and isSafeMode() then mod.active = false end
-
-      if mod and disableAllMods then
-        mod.active = false
-      end
 
       if mod and mod.active ~= false then
         log('D', 'initDB', 'mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
@@ -605,9 +641,9 @@ local function deactivateAllMods()
   stateChanged()
 end
 
-
-
 local function onUiReady()
+  if getModsDisabledAfterUpdate() then return end
+
   if ready then return end
   local data = nil
   data = jsonReadFile(persistencyfile)
@@ -621,6 +657,10 @@ local function onUiReady()
   initDB()
 end
 
+local function enableModsAfterUpdate()
+  settings.setValue('disableModsAfterUpdate', false)
+  onUiReady()
+end
 
 local function safeDelete(filename)
   if not string.startswith(filename, '/mods/') or filename:find("%.%.") ~= nil then
@@ -717,7 +757,9 @@ local function _getModFsNotifFileList(modname,reason) --reason ["added", "delete
   elseif mods[modname].unpackedPath then --unpacked, no fs notif because too slow to do findfiles on everything
     local modFiles = FS:findFiles(mods[modname].unpackedPath, '*', -1, true, false)
     for i,e in ipairs(modFiles) do
-      mountedFilesChange[i] = {filename = e, type = reason }
+      local tmp = e:gsub(mods[modname].unpackedPath, "")
+      if tmp:sub(1,1) ~= "/" then tmp = "/"..tmp end
+      mountedFilesChange[i] = {filename = tmp, type = reason }
     end
 
   else--packed zip with no info
@@ -796,9 +838,7 @@ local function deactivateMod(modname)
     mountPoint = mods[modname].mountPoint
   end
 
-  if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
-    mountedFilesChange = _getModFsNotifFileList(modname,"deleted")
-  end
+  mountedFilesChange = _getModFsNotifFileList(modname,"deleted")
 
   mods[modname].active = false
   extensions.hook('onModDeactivated', deepcopy(mods[modname]))
@@ -839,9 +879,7 @@ local function activateMod(modname)
   end
 
   local mountedFilesChange
-  if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
-    mountedFilesChange = _getModFsNotifFileList(modname,"added")
-  end
+  mountedFilesChange = _getModFsNotifFileList(modname,"added")
   local modScripts = _getModScriptFiles(modname)
   local mountPoint = ""
   if mods[modname].mountPoint then
@@ -887,10 +925,8 @@ local function activateAllMods()
       addMountEntryToList( mountList, v.fullpath, v.mountPoint )
 
       --fs notif and modscript
-      if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
-        local newMountedFilesChange = _getModFsNotifFileList(modname,"added")
-        mountedFilesChange = arrayConcat(mountedFilesChange,newMountedFilesChange)
-      end
+      local newMountedFilesChange = _getModFsNotifFileList(modname,"added")
+      mountedFilesChange = arrayConcat(mountedFilesChange,newMountedFilesChange)
       local newModScripts = _getModScriptFiles(modname)
       if newModScripts and #newModScripts>0 then
         modScripts = arrayConcat(modScripts,newModScripts)
@@ -938,10 +974,7 @@ local function deleteMod(modname)
     end
 
     --fs notif
-    if not mods[modname].unpackedPath then --FS notif ONLY if not unpacked
-      local rmMountedFilesChange = _getModFsNotifFileList(modname,"deleted")
-    end
-
+    local rmMountedFilesChange = _getModFsNotifFileList(modname,"deleted")
   end
 
   if not safeDelete(filename) then return false end
@@ -1401,6 +1434,7 @@ M.deactivateModId = deactivateModId
 M.activateMod = activateMod
 M.activateModId = activateModId
 
+M.enableModsAfterUpdate = enableModsAfterUpdate
 M.deactivateAllMods = deactivateAllMods
 M.activateAllMods = activateAllMods
 M.deleteAllMods = deleteAllMods
@@ -1411,6 +1445,7 @@ M.getConflict = getConflict
 M.getModDB = getModDB
 M.modIsUnpacked = modIsUnpacked
 M.check4Update = check4Update
+M.getModFromPath = getModFromPath
 
 M.getModForFilename = getModForFilename
 

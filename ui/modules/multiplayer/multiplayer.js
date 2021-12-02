@@ -16,7 +16,7 @@ function($scope, $state, $timeout, $document) {
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.validate = function () {
 		localStorage.setItem("tosAccepted", "true");
-		$state.go('menu.multiplayer');
+		$state.go('menu.multiplayer.servers');
 	};
 
 	$scope.openExternalLink = function(url) {
@@ -105,8 +105,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['logger', '$scope', '$state', '$timeout', '$mdDialog', 
-function(logger, $scope, $state, $timeout, $mdDialog) {
+.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 
+function($scope, $state, $timeout, $mdDialog) {
 	var vm = this;
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
@@ -173,7 +173,7 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 	}
 
 	vm.refreshList = function() {
-		logger.debug("Attempting to refresh server list.")
+		console.log("Attempting to refresh server list.")
 		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
 	
@@ -249,7 +249,7 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 
 	vm.exit = function ($event) {
 		if ($event)
-		logger.debug('[MultiplayerController] exiting by keypress event %o', $event);
+		console.log('[MultiplayerController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
 
@@ -261,7 +261,7 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerController] destroyed.');
+		console.log('[MultiplayerController] destroyed.');
 	});
 }])
 
@@ -270,8 +270,8 @@ function(logger, $scope, $state, $timeout, $mdDialog) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	SERVERS TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerServersController', ['logger', '$scope', '$state', '$timeout', 
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerServersController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
 
 	var vm = this;
 	vm.checkIsEmpty = false;
@@ -287,7 +287,7 @@ function(logger, $scope, $state, $timeout) {
 
 	// Go back to the main menu on exit
 	vm.exit = function ($event) {
-		if ($event) logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
+		if ($event) console.log('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
 
@@ -301,7 +301,7 @@ function(logger, $scope, $state, $timeout) {
 	// Called when the page is left
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerServersController] destroyed.');
+		console.log('[MultiplayerServersController] destroyed.');
 	});
 	
 	$scope.$on('onServersReceived', async function (event, data) {
@@ -333,8 +333,8 @@ function(logger, $scope, $state, $timeout) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	RECENT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerRecentController', ['logger', '$scope', '$state', '$timeout', 
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerRecentController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
 	var vm = this;
 	
 	vm.searchText = "";
@@ -368,7 +368,7 @@ function(logger, $scope, $state, $timeout) {
 	// When controller is unloaded
 	vm.exit = function ($event) {
 		if ($event)
-		logger.debug('[MultiplayerRecentController] exiting by keypress event %o', $event);
+		console.log('[MultiplayerRecentController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
 
@@ -382,7 +382,7 @@ function(logger, $scope, $state, $timeout) {
 	// When page is unloaded
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerRecentController] destroyed.');
+		console.log('[MultiplayerRecentController] destroyed.');
 	});
 }])
 
@@ -391,8 +391,8 @@ function(logger, $scope, $state, $timeout) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FAVORITE TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerFavoritesController', ['logger', '$scope', '$state', '$timeout', 
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerFavoritesController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
 	var vm = this;
 
 	vm.checkIsEmpty = false;
@@ -406,7 +406,7 @@ function(logger, $scope, $state, $timeout) {
 
 	vm.exit = function ($event) {
 		if ($event)
-		logger.debug('[MultiplayerServersController] exiting by keypress event %o', $event);
+		console.log('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
 	
@@ -442,7 +442,7 @@ function(logger, $scope, $state, $timeout) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerServersController] destroyed.');
+		console.log('[MultiplayerServersController] destroyed.');
 	});
 
 	function setColor(row) {
@@ -457,8 +457,8 @@ function(logger, $scope, $state, $timeout) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	DIRECT CONNECT TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerDirectController', ['logger', '$scope', '$state', '$timeout',
-function(logger, $scope, $state, $timeout) {
+.controller('MultiplayerDirectController', ['$scope', '$state', '$timeout',
+function($scope, $state, $timeout) {
 	var vm = this;
 
 	var timeOut = $timeout(function() {
@@ -469,13 +469,13 @@ function(logger, $scope, $state, $timeout) {
 
 	vm.exit = function ($event) {
 		if ($event)
-		logger.debug('[MultiplayerDirectController] exiting by keypress event %o', $event);
+		console.log('[MultiplayerDirectController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		logger.debug('[MultiplayerDirectController] destroyed.');
+		console.log('[MultiplayerDirectController] destroyed.');
 	});
 }])
 

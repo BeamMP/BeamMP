@@ -1,19 +1,21 @@
-<md-content layout="column" class="filler" style="position: relatvie; background: transparent;">
-  <md-toolbar class="md-primary">
-    <h1 class="md-toolbar-tools">{{:: 'ui.options.options' | translate}}
-      <span>
-        &nbsp; > &nbsp;{{'ui.options.' + options.stateName.split('.')[2]  | translate}}
-      </span>
-    </h1>
-  </md-toolbar>
+<link rel="stylesheet" type="text/css" href="/ui/modules/options/options.css" />
 
-  <div flex layout="row" style="overflow: auto;">
-    <md-content layout="column" style="border-right:1px solid #ddd;">
+<md-content layout="column" class="filler" style="position: relative; background: transparent;" layout-align="start start">
+
+  <div bng-frustum-mover="left" bng-blur="true" flex layout="row" style="overflow: auto;" ng-class="{'optionsSideBarFullscreen': fullscreenOptions === true, 'optionsSideBarMinimal': fullscreenOptions !== true, }">
+    <md-content layout="column" style="border-right:1px solid #ddd;" layout>
       <md-button
         ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.graphics') !== -1)}"
         ui-sref="menu.options.graphics" style="text-align:left;" bng-sound-class="bng_button_default">
-        <md-icon class="material-icons">desktop_windows</md-icon>
+        <md-icon class="material-icons">satellite</md-icon>
         {{:: 'ui.options.graphics' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.display') !== -1)}"
+        ui-sref="menu.options.display" style="text-align:left;" bng-sound-class="bng_button_default">
+        <md-icon class="material-icons">desktop_windows</md-icon>
+        {{:: 'ui.options.display' | translate}}
       </md-button>
 
       <md-button
@@ -59,29 +61,55 @@
       </md-button>
 
       <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.multiplayer') !== -1)}"
+        ui-sref="menu.options.multiplayer"  style="text-align:left;">
+        <md-icon class="material-icons">people</md-icon>
+        {{:: 'ui.options.multiplayer' | translate}}
+      </md-button>
+
+      <md-button
         ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.other') !== -1)}"
         ui-sref="menu.options.other"  style="text-align:left;" bng-sound-class="bng_button_default">
         <md-icon class="material-icons">more_horiz</md-icon>
         {{:: 'ui.options.other' | translate}}
       </md-button>
 
+      <div flex style="max-height: none;"></div>
+
+      <!--
+      <md-checkbox ng-model="fullscreenOptions">Fullscreen Options</md-checkbox>
+      -->
+
       <md-button
-        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.multiplayer') !== -1)}"
-        ui-sref="menu.options.multiplayer"  style="text-align:left;">
-        <md-icon class="material-icons">more_horiz</md-icon>
-        {{:: 'ui.options.multiplayer' | translate}}
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.help') !== -1)}"
+        ui-sref="menu.options.help" style="text-align:left;" bng-sound-class="bng_button_default">
+        <md-icon class="material-icons">help</md-icon>
+        {{:: 'ui.mainmenu.help' | translate}}
       </md-button>
 
-      <div flex="" style="max-height: none;"></div>
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.performance') !== -1)}"
+        ui-sref="menu.options.performance" style="text-align:left;" bng-sound-class="bng_button_default">
+        <md-icon class="material-icons">equalizer</md-icon>
+        {{:: 'ui.dashboard.performance' | translate}}
+      </md-button>
+
+      <md-button
+        ng-class="{'md-primary md-raised': false }"
+        ui-sref="credits" style="text-align:left;" bng-sound-class="bng_button_default">
+        <md-icon class="material-icons">people</md-icon>
+        {{ 'ui.mainmenu.credits' | translate }}
+      </md-button>
 
       <md-button
         ng-class="{'md-raised': (options.stateName.indexOf('options.licenses') !== -1)}"
         ui-sref="menu.options.licenses"  style="text-align:left;">
+        <md-icon class="material-icons">assignment</md-icon>
         {{:: 'ui.options.licenses' | translate}}
       </md-button>
     </md-content>
 
-    <div flex style="position: relative; max-width: 550px;">
+    <div flex style="position: relative; width:100%">
       <md-content ui-view class="container" style="overflow: auto;"></md-content>
     </div>
 

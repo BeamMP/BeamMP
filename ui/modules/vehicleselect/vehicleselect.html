@@ -3,19 +3,10 @@
 <md-content bng-nav-root flex style="height: 100%" layout="column" class="VehicleSelect">
   <md-toolbar >
     <div class="md-toolbar-tools">
-      <md-button md-no-ink class="md-icon-button md-default" aria-label="Back" ui-sref="{{vehicles.mode.backButtonRef}}" ng-if="vehicles.mode.backButtonRef">
-        <md-icon class="material-icons">arrow_back</md-icon>
-      </md-button>
       <div style="margin: 8px">Vehicles</div>
 
       <!-- Align elements to the right -->
       <span flex></span>
-
-      <md-button style="min-width: fit-content; font-size: 70%; margin-right: 12px;" class="md-raised" ng-click="vehicles.showFiltersBar = !vehicles.showFiltersBar">
-        <md-icon class="material-icons"  style="color:black;;">filter_list</md-icon>
-        {{"ui.options.gameplay.showFilters" | translate}}
-      </md-button>
-
       </div>
   </md-toolbar>
 
@@ -38,7 +29,7 @@
                 <!-- <md-icon style="margin-left: 0.14em; width: 1em; position: absolute; font-size:185%" class="material-icons">folder_open</md-icon> -->
 
               </div>
-              <span ng-if="model.configsAmount > 1" style="margin: 0; width: 3.1em; position: relative; text-align:right; font-size: 80%; opacity:0.9" bng-all-clicks single="vehicles.goToConfigs(model)" double="vehicles.goToConfigs(model)">{{model.configsAmount}}</span>
+              <span ng-if="model.configsAmount > 1" style="margin: 0; width: 3.1em; position: relative; text-align:right; font-size: 80%; opacity:0.9">{{model.configsAmount}}</span>
 
             </div>
           </div>
@@ -58,27 +49,27 @@
 
     <div layout="row" layout-wrap layout-align="center center" style="min-height: fit-content; border-bottom: 1px solid rgba(0, 0, 0, .2); padding-bottom: 10px;">
 
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">sd_storage</md-icon>
         {{ ::'ui.options.gameplay.defaultToCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">folder_open</md-icon>
         {{ ::'ui.options.gameplay.loadDefaultVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">content_copy</md-icon>
         {{ ::'ui.options.gameplay.cloneCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-accent" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.resetAll()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-accent" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.resetAll()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">settings_backup_restore</md-icon>
         Reset All
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">delete</md-icon>
         {{ ::'ui.options.gameplay.removeCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns && !vehicles.isMPSession" ng-click="vehicles.removeAllExceptCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns && !vehicles.isMPSession" ng-click="vehicles.removeAllExceptCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">delete_sweep</md-icon>
         {{ ::'ui.options.gameplay.removeOtherVehicles' | translate }}
       </md-button>

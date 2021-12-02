@@ -125,7 +125,7 @@ local function getServers()
 	send('B') -- Ask for the servers list
 end
 
--- sends the current state to the user interface. It can request it via online.requestState()
+-- sends the current player and server count.
 local function sendBeamMPInfo()
 	if not Servers then return end
 	local servers = jsonDecode(Servers)
@@ -135,8 +135,7 @@ local function sendBeamMPInfo()
 		p = p + server.players
 		s = s + 1
 	end
-	print(p, s)
-  -- send steam data as well if available
+  -- send player and server values to front end.
   guihooks.trigger('BeamMPInfo', {
     players = ''..p,
 		servers = ''..s

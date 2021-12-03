@@ -1,4 +1,4 @@
-{
+ {
     "engine.welcome": "Welcome to BeamNG.drive in US English :)",
     "engine.lua.reloaded": "Main LUA instance reloaded",
     "engine.cef.subprocessdied.title": "Unresponsive UI Process",
@@ -425,6 +425,7 @@
     "ui.dashboard.debug": "Debug",
     "ui.dashboard.feedback": "Feedback",
     "ui.dashboard.photomode": "Photo Mode",
+    "ui.dashboard.radialmenu": "[action=toggleRadialMenu] Radial Menu",
     "ui.dashboard.replay": "Replays",
     "ui.dashboard.credits": "Credits",
     "ui.dashboard.vehicleconfig": "Vehicle Config",
@@ -1438,7 +1439,7 @@
     "ui.options.audio.audioProvider": "Audio Provider",
     "ui.options.audio.volume": "Volume",
     "ui.options.audio.masterVol": "Master Vol.",
-    "ui.options.audio.effectsVol": "Effects Vol.",
+    "ui.options.audio.effectsVol": "Effects and UI Vol.",
     "ui.options.audio.musicVol": "Music Vol.",
     "ui.options.audio.ambienceVol": "Ambience Vol.",
     "ui.options.audio.mute": "Mute",
@@ -2812,7 +2813,7 @@
     "scenarios.west_coast_usa.speedyScramble.stopped":"Looks like you stopped there. Well, here's what you managed to get!",
 
     "scenarios.west_coast_usa.drift001.title": "Diner drift",
-    "scenarios.west_coast_usa.drift001.description" : "I hope you're hungry. This drift route will take you through the city right to the nearest dinner's. The road is large so not much risk to damage your ride",
+    "scenarios.west_coast_usa.drift001.description" : "I hope you're hungry. This drift route will take you through the city right to the nearest diner. The road is large so not much risk to damage your ride",
 
     "scenarios.west_coast_usa.west_coast_chase_1.title":"Goliath",
     "scenarios.west_coast_usa.west_coast_chase_1.description":"A semi truck is causing havoc on the highway.\n\nWe must stop it at all costs! That won't be easy, but you don't have to worry about damaging your vehicle.",
@@ -3963,8 +3964,8 @@
     "ui.inputActions.gameplay.toggle_minimap.title": "Toggle minimap",
     "ui.inputActions.gameplay.toggle_timeTrialsScreen.description": "Opens the configuration menu when in in Time Trials",
     "ui.inputActions.gameplay.toggle_timeTrialsScreen.title": "Change Time Trials Configuration",
-    "ui.inputActions.gameplay.toggleRadialMenu.title": "Show Quick Access menu",
-    "ui.inputActions.gameplay.toggleRadialMenu.description": "Toggles the quick access menu (radial menu, pie menu)",
+    "ui.inputActions.gameplay.toggleRadialMenu.title": "Show Radial menu",
+    "ui.inputActions.gameplay.toggleRadialMenu.description": "Toggles the radial access menu (quick access menu, pie menu)",
     "ui.inputActions.general.doBigScreenShot.description": "Takes and saves a high resolution screenshot",
     "ui.inputActions.general.doBigScreenShot.title": "Take Big Screenshot",
     "ui.inputActions.general.doHugeScreenShot.description": "Takes and saves a maximum resolution screenshot",
@@ -4616,7 +4617,7 @@
 
 
 
-    "ui.playmodes.multiplayer": "Multiplayer",
+	"ui.playmodes.multiplayer": "Multiplayer",
 	"ui.options.multiplayer": "Multiplayer",
 
     "ui.options.multiplayer.autoSyncVehicles": "Enable auto part sync",

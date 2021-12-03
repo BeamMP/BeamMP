@@ -43,15 +43,30 @@ end
 
 
 local function applyPos(data, serverVehicleID)
-	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
-	local veh = be:getObjectByID(gameVehicleID)
-	if veh then
+	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
+	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
+
+	local veh = be:getObjectByID(vehicle.gameVehicleID)
+	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
 		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
+
+	local decoded = jsonDecode(data)
+
+	local deltaDt = math.max(decoded.tim - (vehicle.lastDt or 0), 0.001)
+	vehicle.lastDt = decoded.tim
+	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
+
+	vehicle.ping = ping
+	vehicle.fps = 1/deltaDt
+	vehicle.position = Point3F(decoded.pos[1],decoded.pos[2],decoded.pos[3])
+
+	local owner = vehicle:getOwner()
+	if owner then UI.setPlayerPing(owner.name, ping) end-- Send ping to UI
 end
 
 

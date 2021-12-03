@@ -124,6 +124,28 @@ local function getServers()
 	log('M', loggerPrefix, "Getting the servers list")
 	send('B') -- Ask for the servers list
 end
+
+-- sends the current player and server count.
+local function sendBeamMPInfo()
+	if not Servers then return end
+	local servers = jsonDecode(Servers)
+	if tableIsEmpty(servers) then return end
+	local p, s = 0, 0
+	for _,server in pairs(servers) do
+		p = p + server.players
+		s = s + 1
+	end
+  -- send player and server values to front end.
+  guihooks.trigger('BeamMPInfo', {
+    players = ''..p,
+		servers = ''..s
+  })
+end
+
+local function requestPlayers()
+	send('B')
+	sendBeamMPInfo()
+end
 -- ================ UI ================
 
 
@@ -260,9 +282,10 @@ end
 
 
 local function resetSession(goBack)
+	if goBack == undefined then goBack = true end
 	isMpSession = false
 	isGoingMpSession = false
-	print("Reset Session Called!")
+	print("Reset Session Called! " .. tostring(goBack))
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
@@ -286,13 +309,6 @@ local function isGoingMPSession()
 	return isGoingMpSession
 end
 
-local function quitMP(reason)
-	isMpSession = false
-	isGoingMpSession = false
-	print("Quit MP Called!")
-	print("reason: "..tostring(reason))
-	send('QG') -- Quit game
-end
 -- ============= OTHERS =============
 
 
@@ -300,13 +316,13 @@ end
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) checkLauncherConnection() end, -- Connection Alive Checking
-	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params) end, -- Serverlist received
+	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Serverlist received
 	['U'] = function(params) handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
-	['K'] = function(params) quitMP(params) end, -- Player Kicked Event
+	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
 	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
 }
 
@@ -424,6 +440,7 @@ M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
 M.onInit = onInit
+M.requestPlayers       = requestPlayers
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady

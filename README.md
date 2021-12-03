@@ -10,6 +10,7 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 - [Website](https://beammp.com)
 - [Wiki](https://wiki.beammp.com)
 - [Forum](https://forum.beammp.com)
+- `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp))
 
 # Contents
  - [Installation](#installation)
@@ -36,7 +37,7 @@ If you need help at any point, see the [troubleshooting](#troubleshooting) secti
 
 The server is usable free of charge, and the source code is available on [GitHub](https://github.com/BeamMP/BeamMP-Server).
 
-Please check out [wiki.beammp.com](https://Wiki.beammp.com) for a guide on how to setup your own server.
+Please check out [wiki.beammp.com](https://Wiki.beammp.com) for a guide on how to setup your own server. If you run into issues, join the official [Discord](https://discord.gg/BeamMP) or join us via IRC in `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp)).
 
 # How does it work?
 *This section is a technical explanation of the inner workings of the project and is not relevant for most players.*

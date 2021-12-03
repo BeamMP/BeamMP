@@ -1,28 +1,19 @@
 <link rel="stylesheet" type="text/css" href="/ui/modules/vehicleselect/vehicleselect.css" />
 
-<md-content bng-nav-root flex style="max-width:1200px; height: 100%" layout="column" class="VehicleSelect" >
+<md-content bng-nav-root flex style="height: 100%" layout="column" class="VehicleSelect">
   <md-toolbar >
     <div class="md-toolbar-tools">
-      <md-button md-no-ink class="md-icon-button md-default" aria-label="Back" ui-sref="{{vehicles.mode.backButtonRef}}" ng-if="vehicles.mode.backButtonRef">
-        <md-icon class="material-icons">arrow_back</md-icon>
-      </md-button>
       <div style="margin: 8px">Vehicles</div>
 
       <!-- Align elements to the right -->
       <span flex></span>
-
-      <md-button style="min-width: fit-content; font-size: 70%; margin-right: 12px;" class="md-raised" ng-click="vehicles.showFiltersBar = !vehicles.showFiltersBar">
-        <md-icon class="material-icons"  style="color:black;;">filter_list</md-icon>
-        {{"ui.options.gameplay.showFilters" | translate}}
-      </md-button>
-
       </div>
   </md-toolbar>
 
-  <div style="background-color: white; position: relative" flex>
+  <div style="position: relative" flex>
     <div class="container"
       bng-v-list bng-v-repeat="model in vehicles.shownData">
-      <div class="gridItem VScroll" bng-nav-item nav-item-enter-focus="{{ :: 0 === $index }}"  bng-all-clicks single="vehicles.goToConfigs(model)" double="vehicles.launchVehicle(model)">
+      <div class="gridItem VScroll" bng-nav-item nav-item-enter-focus="{{ :: 0 === $index }}"  bng-all-clicks single="vehicles.goToConfigs(model)" double="vehicles.launchVehicle(model)" bng-sound-class="bng_button_main_ui_default">
         <bng-box>
           <div ng-if="model.preview" style="background-size: cover; background-position: center center;" ng-style="{'background-image': 'url(' + model.preview + ')'}" class="filler"></div>
 
@@ -38,7 +29,7 @@
                 <!-- <md-icon style="margin-left: 0.14em; width: 1em; position: absolute; font-size:185%" class="material-icons">folder_open</md-icon> -->
 
               </div>
-              <span ng-if="model.configsAmount > 1" style="margin: 0; width: 3.1em; position: relative; text-align:right; font-size: 80%; opacity:0.9" bng-all-clicks single="vehicles.goToConfigs(model)" double="vehicles.goToConfigs(model)">{{model.configsAmount}}</span>
+              <span ng-if="model.configsAmount > 1" style="margin: 0; width: 3.1em; position: relative; text-align:right; font-size: 80%; opacity:0.9">{{model.configsAmount}}</span>
 
             </div>
           </div>
@@ -48,7 +39,7 @@
   </div>
 </md-content>
 
-<md-content ng-if="vehicles.showFiltersBar" flex="35" layout="column" style="max-width: 450px; height: 100%; width: 300px; box-sizing: border-box" >
+<md-content flex="35" layout="column" style="max-width: 450px; height: 100%; width: 300px; box-sizing: border-box" class="transparency" bng-blur="true">
   <md-toolbar class="md-primary md-hue-1">
     <div class="md-toolbar-tools">
       <span flex>{{ ::'ui.common.filters' | translate }}</span>
@@ -58,27 +49,27 @@
 
     <div layout="row" layout-wrap layout-align="center center" style="min-height: fit-content; border-bottom: 1px solid rgba(0, 0, 0, .2); padding-bottom: 10px;">
 
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">sd_storage</md-icon>
         {{ ::'ui.options.gameplay.defaultToCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.loadDefault()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">folder_open</md-icon>
         {{ ::'ui.options.gameplay.loadDefaultVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.cloneCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">content_copy</md-icon>
         {{ ::'ui.options.gameplay.cloneCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-accent" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.resetAll()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-accent" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.resetAll()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">settings_backup_restore</md-icon>
         Reset All
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">delete</md-icon>
         {{ ::'ui.options.gameplay.removeCurrentVehicle' | translate }}
       </md-button>
-      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns && !vehicles.isMPSession" ng-click="vehicles.removeAllExceptCurrentVehicle()">
+      <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns && !vehicles.isMPSession" ng-click="vehicles.removeAllExceptCurrentVehicle()" bng-sound-class="bng_button_main_ui_default">
         <md-icon class="material-icons"  style="color:white;;">delete_sweep</md-icon>
         {{ ::'ui.options.gameplay.removeOtherVehicles' | translate }}
       </md-button>
@@ -87,34 +78,34 @@
 
 
   <div layout="row" layout-align="center center" style="z-index: 1;">
-    <md-input-container flex bng-all-clicks double="vehicles.showConfigurations ? (vehicles.showConfigurations = false) : (vehicles.showConfigurations = true); vehicles.switchList()">
+    <md-input-container flex bng-all-clicks double="vehicles.showConfigurations ? (vehicles.showConfigurations = false) : (vehicles.showConfigurations = true); vehicles.switchList()" bng-sound-class="bng_button_main_ui_input">
       <label ng-if="!vehicles.query"><md-icon class="material-icons">search</md-icon>{{ ::'ui.common.search' | translate }}</label>
       <label ng-if="vehicles.query"><md-icon class="material-icons">search</md-icon>{{ ::'ui.common.vehSearch' | translate }}</label>
       <input ng-model="vehicles.query" ng-model-options="{debounce: 400}" ng-change="vehicles.applyFilters(); vehicles.switchList()" aria-label="Search">
     </md-input-container>
-    <md-button md-no-ink class="md-icon-button md-warn" ng-click="vehicles.query = ''; vehicles.showConfigurations = false; vehicles.applyFilters(); vehicles.switchList()" ng-disabled="!vehicles.query">
+    <md-button md-no-ink class="md-icon-button md-warn" ng-click="vehicles.query = ''; vehicles.showConfigurations = false; vehicles.applyFilters(); vehicles.switchList()" ng-disabled="!vehicles.query" bng-sound-class="bng_button_main_ui_default">
       <md-icon class="material-icons">close</md-icon>
     </md-button>
   </div>
 
   <div layout="row" layout-align="center center" style="z-index: 1; margin-top: -10px; margin-bottom: 10px;">
-    <md-checkbox md-no-ink ng-model="vehicles.showConfigurations" ng-change="vehicles.switchList()">{{"ui.options.gameplay.showConfigurations" | translate}}</md-checkbox>
+    <md-checkbox md-no-ink ng-model="vehicles.showConfigurations" ng-change="vehicles.switchList()" bng-sound-class="bng_button_main_ui_checkbox">{{"ui.options.gameplay.showConfigurations" | translate}}</md-checkbox>
   </div>
 
     <div style="border: 1px solid rgba(0,0,0,0.10); padding: 6px">
     <bng-accordion multiple style="overflow-y: auto; display: list-item;">
-      <bng-accordion-pane ng-repeat="key in vehicles.filterKeyList" ng-if="vehicles.showData(key);">
+      <bng-accordion-pane ng-repeat="key in vehicles.filterKeyList" ng-if="vehicles.showData(key);" bng-sound-class="bng_button_main_ui_arrowsupdown" default-open="key == 'Drivetrain' || key == 'Transmission'">
         <bng-pane-header style="padding: 10px">{{ :: key | translate}}</bng-pane-header>
 
-        <bng-pane-body style="margin-left:10px" ng-if=":: !vehicles.isRange(key);">
-          <md-checkbox md-no-ink ng-repeat="(option, _) in ::vehicles.data.filters[key] track by $index" ng-model="vehicles.data.filters[key][option]" ng-change="vehicles.applyFilters()">{{ :: option }}</md-checkbox>
+        <bng-pane-body style="margin-left:10px; column-count: 2" ng-if=":: !vehicles.isRange(key);">
+          <md-checkbox md-no-ink ng-repeat="(option, _) in ::vehicles.data.filters[key] track by $index" ng-model="vehicles.data.filters[key][option]" ng-change="vehicles.applyFilters()" bng-sound-class="bng_button_main_ui_checkbox">{{ :: option }}</md-checkbox>
         </bng-pane-body>
 
         <bng-pane-body style="margin-left:10px" ng-if=":: vehicles.isRange(key);">
           <md-content layout="row">
             <md-input-container>
               <label>FROM ({{:: vehicles.considerUnit(key, vehicles.data.filters[key].min)}})</label>
-              <input ng-model="vehicles.data.filters[key].min" type="number" style="width:80px;" step="{{vehicles.getStep(key)}}" ng-change="vehicles.applyFilters()">
+              <input ng-model="vehicles.data.filters[key].min" type="number" style="width:80px;" step="{{vehicles.getStep(key)}}" ng-change="vehicles.applyFilters()" bng-sound-class="bng_button_main_ui_input">
             </md-input-container>
             <div layout-align="center center" style="margin:10px; padding-top:15px;">
               <ng-md-icon class="material-icons">
@@ -123,7 +114,7 @@
             </div>
             <md-input-container>
               <label>TO ({{:: vehicles.considerUnit(key, vehicles.data.filters[key].max)}})</label>
-              <input ng-model="vehicles.data.filters[key].max" type="number" style="width:80px;" step="{{vehicles.getStep(key)}}" ng-change="vehicles.applyFilters()">
+              <input ng-model="vehicles.data.filters[key].max" type="number" style="width:80px;" step="{{vehicles.getStep(key)}}" ng-change="vehicles.applyFilters()" bng-sound-class="bng_button_main_ui_input">
             </md-input-container>
           </md-content>
         </bng-pane-body>
@@ -134,10 +125,10 @@
 
 
   <div layout="row" layout-align="center center" style="min-height: fit-content;">
-    <md-button class="md-primary md-raised" ng-click="vehicles.checkAll()">
+    <md-button class="md-primary md-raised" ng-click="vehicles.checkAll()" bng-sound-class="bng_button_main_ui_default">
       Reset Filter
     </md-button>
-    <md-button class=" md-raised" ng-click="vehicles.uncheckAll()">
+    <md-button class=" md-raised md-primary md-hue-1" ng-click="vehicles.uncheckAll()" bng-sound-class="bng_button_main_ui_default">
       Uncheck all
     </md-button>
   </div>

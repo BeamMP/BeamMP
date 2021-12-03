@@ -53,7 +53,7 @@
               ng-click="vehConf_parts.stopPropagation($event)" ng-change="vehConf_parts.highlightParts(entry)"></input>
             <label ng-click="vehConf_parts.stopPropagation($event)" ng-attr-for="{{:: entry}}">
               <md-icon class="material-icons md-default-theme" style="cursor: pointer"
-                ng-style="{'color': (entry.highlight) ? '#6E6E6E' : '#D4D4D4'}">remove_red_eye</md-icon>
+                ng-style="{'color': (entry.highlight) ? '#ffffff' : '#5b5b5b'}">remove_red_eye</md-icon>
             </label>
           </div>
 
@@ -121,14 +121,14 @@
           <input ng-model="vehConf_parts.licensePlate" style="width:100px;">
         </md-input-container>
         <md-input-container>
-          <md-button class="md-raised" md-no-ink ng-click="vehConf_parts.genLicensePlate()" type='button' aria-label="_"
+          <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.genLicensePlate()" type='button' aria-label="_"
             style="min-width: 20px;">
             <md-icon class="material-icons">cached</md-icon>
             <md-tooltip md-direction="top">{{ ::'ui.vehicleconfig.licensePlateGen' | translate }}</md-tooltip>
           </md-button>
         </md-input-container>
         <md-input-container>
-          <md-button class="md-raised" md-no-ink ng-click="vehConf_parts.updateLicensePlate()" type='button'
+          <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.updateLicensePlate()" type='button'
             aria-label="_" style="min-width: 20px;">
             <md-icon class="material-icons">check</md-icon>
             <md-tooltip md-direction="top">{{ ::'ui.vehicleconfig.updateLicensePlate' | translate }}</md-tooltip>
@@ -137,9 +137,11 @@
       </form>
 
       <div style="position: relative; left: 30%;">
+        <!--
         <md-checkbox ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
           {{ :: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>
+        -->
         <md-checkbox ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{ :: 'ui.vehicleconfig.simpleTree' | translate}}
         </md-checkbox>

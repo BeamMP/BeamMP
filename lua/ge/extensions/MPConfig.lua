@@ -37,7 +37,7 @@ local function getNickname()
 end
 
 local function setPlayerServerID(x)
-	PlayerServerID = x
+	PlayerServerID = tonumber(x)
 end
 
 local function getPlayerServerID()

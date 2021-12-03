@@ -12,6 +12,17 @@ angular.module('beamng.stuff')
 .controller('MultiplayerTOSController', ['$scope', '$state', '$timeout', '$document', 
 function($scope, $state, $timeout, $document) {
 	'use strict';
+
+	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
+
+		// Check if the user as aknowledged tos
+		const tosAccepted = localStorage.getItem("tosAccepted");
+		if (tosAccepted == "true") {
+			$state.go('menu.multiplayer.servers');
+			return;
+		}
+	});
+
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.validate = function () {
@@ -22,6 +33,10 @@ function($scope, $state, $timeout, $document) {
 	$scope.openExternalLink = function(url) {
 		bngApi.engineLua(`openWebBrowser("`+url+`")`);
 	}
+	
+
+
+	
 }])
 
 
@@ -112,6 +127,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	mdDialog = $mdDialog;
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
+		console.log(toState.url);
 		if (toState.url == "/multiplayer") {
 			// local://local/ui/#/menu/multiplayer/mpservers
 			document.getElementById('servers-btn').click();
@@ -120,7 +136,8 @@ function($scope, $state, $timeout, $mdDialog) {
 
 		// Check if the user as aknowledged tos
 		const tosAccepted = localStorage.getItem("tosAccepted");
-		if (!tosAccepted || tosAccepted == "false") {
+		console.log(toState.url);
+		if (tosAccepted != "true") {
 			$state.go('menu.multiplayer.tos');
 			return;
 		}

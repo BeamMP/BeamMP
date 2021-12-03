@@ -1006,7 +1006,7 @@ end
 
 local function spawnRequest(model, config, colors)
 	local currentVehicle = be:getPlayerVehicle(0)
-	local gameVehicleID = currentVehicle:getID()
+	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
 	if currentVehicle and vehicle.isLocal and not config.spawnNew then

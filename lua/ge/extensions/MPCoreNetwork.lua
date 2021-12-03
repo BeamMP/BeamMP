@@ -141,6 +141,11 @@ local function sendBeamMPInfo()
 		servers = ''..s
   })
 end
+
+local function requestPlayers()
+	send('B')
+	sendBeamMPInfo()
+end
 -- ================ UI ================
 
 
@@ -435,7 +440,7 @@ M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
 M.onInit = onInit
-M.requestPlayers       = sendBeamMPInfo
+M.requestPlayers       = requestPlayers
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onModManagerReady    = onModManagerReady

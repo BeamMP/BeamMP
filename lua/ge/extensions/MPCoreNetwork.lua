@@ -143,7 +143,9 @@ local function sendBeamMPInfo()
 end
 
 local function requestPlayers()
-	send('B')
+	if not isMpSession then
+		send('B')
+	end
 	sendBeamMPInfo()
 end
 -- ================ UI ================

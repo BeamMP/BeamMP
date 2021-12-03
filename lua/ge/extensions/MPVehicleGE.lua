@@ -482,10 +482,12 @@ local function onDisconnect()
 	end
 	players = {}
 
+	-- Sorry @20dka this seemed redundant since the game cleans the vehicles up anyway
+	--[[
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		vehicle:delete()
 	end
-	vehicles = {}
+	vehicles = {}]]
 end
 
 local function onPlayerLeft(name)

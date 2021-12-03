@@ -224,9 +224,9 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-	
+
     // -------------------------------------- BEAMMP -------------------------------------- //
-    
+
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',
@@ -234,21 +234,21 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-    
+
     .state('menu.multiplayer.tos', {
       url: '/mptos',
       templateUrl: '/ui/modules/multiplayer/tos.partial.html',
       controller: 'MultiplayerTOSController as multiplayertos',
       backState: 'BACK_TO_MENU'
     })
-      
+
     .state('menu.multiplayer.launcher', {
       url: '/mplauncher',
       templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
       controller: 'MultiplayerLauncherController as multiplayerlauncher',
       backState: 'BACK_TO_MENU'
     })
-      
+
     .state('menu.multiplayer.login', {
       url: '/mplogin',
       templateUrl: '/ui/modules/multiplayer/login.partial.html',
@@ -293,6 +293,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
+      .state('menu.options.multiplayer', {
+        url: '/multiplayer',
+        templateUrl: '/ui/modules/options/multiplayer.partial.html',
+        controller: 'SettingsGameplayCtrl as opt',
+        backState: 'BACK_TO_MENU',
+      })
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',

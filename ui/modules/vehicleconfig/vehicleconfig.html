@@ -7,7 +7,7 @@
     overflow:hidden;
   }
 
-  .contentNavVehicleconfig {
+  #contentNavVehicleconfig {
     min-width:500px;
     max-width:700px;
     width: 27%;
@@ -15,7 +15,7 @@
   }
 </style>
 
-<md-content layout="column" class="contentNavVehicleconfig" style="width: 600px;">
+<md-content bng-frustum-mover="left" layout="column" id="contentNavVehicleconfig" class="transparency" bng-blur="true" style="width: 600px;">
   <md-toolbar class="md-primary">
     <h1 class="md-toolbar-tools">
       <span flex>{{ ::'ui.vehicleconfig.vehicleconfig' | translate }}</span>
@@ -30,7 +30,8 @@
     <md-tab label="{{::'ui.vehicleconfig.tuning' | translate}}" ui-sref="menu.vehicleconfig.tuning"></md-tab>
     <md-tab label="{{ ::'ui.vehicleconfig.color' | translate }}" ui-sref="menu.vehicleconfig.color"></md-tab>
     <md-tab label="{{ ::'ui.vehicleconfig.save' | translate }} & {{ ::'ui.vehicleconfig.load' | translate }}" ui-sref="menu.vehicleconfig.save"></md-tab>
+    <md-tab label="{{ ::'ui.debug.vehicle' | translate }}" ui-sref="menu.vehicleconfig.debug"></md-tab>
   </md-tabs>
 
-  <div ui-view flex style="overflow: auto"></div>
+  <div ui-view flex style="overflow-y: overlay;"></div>
 </md-content>

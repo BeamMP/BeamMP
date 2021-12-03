@@ -5,10 +5,7 @@
 local M = {}
 
 local max, min, floor = math.max, math.min, math.floor
-					
-						
 
-local wheelsL = {}
 M.damage = 0
 M.damageExt = 0
 M.lowpressure = false
@@ -182,16 +179,30 @@ local function breakMaterial(beam)
 end
 
 local function broadcastCouplerVisibility(visible)
-  BeamEngine:queueAllObjectLua("beamstate.setCouplerVisiblityExternal(" .. tostring(obj:getID()) .. "," .. tostring(visible) .. ")")
+  BeamEngine:queueAllObjectLua("beamstate.setCouplerVisiblityExternal(" .. tostring(obj:getId()) .. "," .. tostring(visible) .. ")")
 end
 
 M.debugDraw = nop
 local function debugDraw(focusPos)
+  local hasManualCoupler = false
+  for nid, c in pairs(couplerCache) do
+    if not c.couplerWeld and not c.couplerLock and c.couplerTag then
+      hasManualCoupler = true
+      break
+    end
+  end
+
   -- highlight all coupling nodes
-  for _, coupler in pairs(couplerCache) do
-																				  
-																							  
-    obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
+  if hasManualCoupler then
+    for _, coupler in pairs(couplerCache) do
+      if coupler.couplerLock == nil and coupler.couplerTag then
+        obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
+      end
+    end
+  else
+    for _, coupler in pairs(couplerCache) do
+      obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
+    end
   end
 end
 
@@ -245,7 +256,7 @@ local function detachCouplers(_nodetag, forceLocked, forceWelded)
   for _, val in pairs(couplerCache) do
     if ((val.couplerLock ~= true or forceLocked) and (val.couplerWeld ~= true or forceWelded) and val.couplerTag and (_nodetag == nil or val.couplerTag == nodetag)) and val.cid then
       obj:detachCoupler(val.cid)
-      obj:queueGameEngineLua(string.format("onCouplerDetach(%s,%s)", obj:getID(), val.cid))
+      obj:queueGameEngineLua(string.format("onCouplerDetach(%s,%s)", obj:getId(), val.cid))
     end
   end
 end
@@ -286,7 +297,7 @@ local function toggleCouplers()
 end
 
 local function couplerFound(nodeId, obj2id, obj2nodeId)
-  --print(string.format("coupler found %s.%s->%s.%s", obj:getID(),nodeId,obj2id, obj2nodeId))
+  --print(string.format("coupler found %s.%s->%s.%s", obj:getId(),nodeId,obj2id, obj2nodeId))
 end
 
 M.updateRemoteElectrics = nop
@@ -315,14 +326,14 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId)
     couplerBreakGroupCache[g] = couplerBreakGroupCacheOrig[g]
   end
 
-  --print(string.format("coupler attached %s.%s->%s.%s", obj:getID(),nodeId,obj2id, obj2nodeId))
+  --print(string.format("coupler attached %s.%s->%s.%s", obj:getId(),nodeId,obj2id, obj2nodeId))
   if objectId < obj2id then
     obj:queueGameEngineLua(string.format("onCouplerAttached(%s,%s,%s,%s)", objectId, obj2id, nodeId, obj2nodeId))
   end
 end
 
 local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
-  --print(string.format("coupler detached %s.%s->%s.%s", obj:getID(),nodeId,obj2id, obj2nodeId))
+  --print(string.format("coupler detached %s.%s->%s.%s", obj:getId(),nodeId,obj2id, obj2nodeId))
   attachedCouplers[nodeId] = nil
   transmitCouplers[nodeId] = nil
 
@@ -343,22 +354,21 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
   end
 end
 
-local function getCouplerOffset(callback)
-  if next(couplerCache) == nil then
-    return
-  end
-  local ref = v.data.nodes[v.data.refNodes[0].ref].pos
-  local cOff = {}
+local function getCouplerOffset(couplerTag)
+  local refPos = v.data.nodes[v.data.refNodes[0].ref].pos
+  local couplerOffset = {}
   for _, c in pairs(couplerCache) do
-    local pos = v.data.nodes[c.cid].pos
-    cOff[c.cid] = {x = pos.x - ref.x, y = pos.y - ref.y, z = pos.z - ref.z}
+    if c.couplerTag == couplerTag or c.tag == couplerTag or couplerTag == "" or not couplerTag then
+      local pos = v.data.nodes[c.cid].pos
+      couplerOffset[c.cid] = {x = pos.x - refPos.x, y = pos.y - refPos.y, z = pos.z - refPos.z}
+    end
   end
-  obj:queueGameEngineLua(string.format(callback, obj:getId(), dumps(cOff)))
+  return couplerOffset
 end
 
 -- called from the vehicle that wants to import electrics
 local function exportCouplerData(nodeid, dataList)
-  --print(obj:getID().."<-exportCouplerData("..nodeid..','..dumps(dataList)..')')
+  --print(obj:getId().."<-exportCouplerData("..nodeid..','..dumps(dataList)..')')
   if attachedCouplers[nodeid] == nil then
     log("E", "beamstate.exportCouplerElectrics", "unable to export electrics: known coupled node: " .. tostring(nodeid))
     return
@@ -370,7 +380,7 @@ end
 
 -- called by the host that provides the electrics
 local function importCouplerData(nodeId, data)
-  --print(obj:getID().."<-importCouplerData("..nodeId..','..dumps(data)..')')
+  --print(obj:getId().."<-importCouplerData("..nodeId..','..dumps(data)..')')
   if data.electrics then
     table.insert(recievedElectrics, data.electrics)
   end
@@ -389,15 +399,9 @@ local function sendUISkeletonState()
 end
 
 local function deflateTire(wheelid)
-  local wheel = wheelsL[wheelid]
+  local wheel = v.data.wheels[wheelid]
   M.lowpressure = true
 
-  --local i, beam
-  --if wheel.reinforcementBeams ~= nil then
-  --    for i, beam in pairs(wheel.reinforcementBeams) do
-  --        obj:setBeamSpringDamp(beam.cid, beam.beamSpring * 0.5, -1, beam.beamSpring * 0.02, -1)
-  --    end
-  --end
   local brokenBeams = wheelBrokenBeams[wheelid] or 1
   if wheel.pressureGroup ~= nil then
     if v.data.pressureGroups[wheel.pressureGroup] ~= nil then
@@ -419,27 +423,31 @@ local function deflateTire(wheelid)
 
     sounds.playSoundOnceFollowNode("event:>Vehicle>Tire_Burst", wheel.node1, 1)
     M.damageExt = M.damageExt + 1000
-    if wheel.treadBeams ~= nil then
+    if wheel.treadNodes ~= nil and wheel.treadBeams ~= nil then
+      for _, nodecid in pairs(wheel.treadNodes) do
+        obj:setNodeFrictionSlidingCoefs(nodecid, v.data.nodes[nodecid].frictionCoef * 0.5, v.data.nodes[nodecid].slidingFrictionCoef * 0.5)
+      end
+
       for _, beamcid in pairs(wheel.treadBeams) do
-        obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.05, 0, -1, -1)
+        obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.1, 2, -1, -1)
       end
     end
 
     if wheel.sideBeams ~= nil then
       for _, beamcid in pairs(wheel.sideBeams) do
-        obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.05, 0, -1, -1)
+        obj:setBeamSpringDamp(beamcid, 0, 10, -1, -1)
       end
     end
 
     if wheel.peripheryBeams ~= nil then
       for _, beamcid in pairs(wheel.peripheryBeams) do
-        --obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.05, 0, -1, -1)
+        obj:setBeamSpringDamp(beamcid, v.data.beams[beamcid].beamSpring * 0.1, 2, -1, -1)
       end
     end
 
     if wheel.reinfBeams ~= nil then
       for _, beamcid in pairs(wheel.reinfBeams) do
-        obj:setBeamSpringDamp(beamcid, 0, 0, 0, 0)
+        obj:setBeamSpringDamp(beamcid, 0, 0.7, 0, 0)
       end
     end
 
@@ -656,7 +664,7 @@ local function beamBroken(id, energy)
 
     -- Check for punctured tire
     if beam.wheelID ~= nil then
-      deflateTire(beam.wheelID, energy)
+      deflateTire(beam.wheelID)
     elseif beam.pressureGroupId then
       obj:deflatePressureGroup(v.data.pressureGroups[beam.pressureGroupId])
     end
@@ -743,24 +751,30 @@ local function updateCollTris()
         local bi = beamIndex[min(t1, t2) + max(t1, t2) * 1e+8]
         local tcid = tri.cid
         if bi then
-          local coltris = bi.collTris or table.new(2,0)
-          table.insert(coltris, tcid)
-          bi.collTris = coltris
-          beamCount = beamCount + 1
+          local coltris = bi.collTris or table.new(2, 0)
+          if not tableContains(coltris, tcid) then
+            table.insert(coltris, tcid)
+            bi.collTris = coltris
+            beamCount = beamCount + 1
+          end
         end
         bi = beamIndex[min(t1, t3) + max(t1, t3) * 1e+8]
         if bi then
-          local coltris = bi.collTris or table.new(2,0)
-          table.insert(coltris, tcid)
-          bi.collTris = coltris
-          beamCount = beamCount + 1
+          local coltris = bi.collTris or table.new(2, 0)
+          if not tableContains(coltris, tcid) then
+            table.insert(coltris, tcid)
+            bi.collTris = coltris
+            beamCount = beamCount + 1
+          end
         end
         bi = beamIndex[min(t2, t3) + max(t2, t3) * 1e+8]
         if bi then
-          local coltris = bi.collTris or table.new(2,0)
-          table.insert(coltris, tcid)
-          bi.collTris = coltris
-          beamCount = beamCount + 1
+          local coltris = bi.collTris or table.new(2, 0)
+          if not tableContains(coltris, tcid) then
+            table.insert(coltris, tcid)
+            bi.collTris = coltris
+            beamCount = beamCount + 1
+          end
         end
         tri.beamCount = beamCount
       end
@@ -776,13 +790,6 @@ local function init()
   beamDamageTracker = {}
   skeletonStateTimer = 0.25
   beamDamageTrackerDirty = false
-
-  if v.data.wheels then
-    wheelsL = v.data.wheels
-    for _, wheel in pairs(wheelsL) do
-      wheel.pressureCoef = 1
-    end
-  end
 
   updateCollTris()
 
@@ -962,7 +969,7 @@ local function init()
         local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or {b.breakGroup}
         for _, g in pairs(breakGroups) do
           if not breakGroupCache[g] then
-            breakGroupCache[g] = table.new(2,0)
+            breakGroupCache[g] = table.new(2, 0)
           end
           table.insert(breakGroupCache[g], b.cid)
         end
@@ -997,7 +1004,7 @@ local function init()
       local bpo = b.partOrigin
       if bpo and partDamageData[bpo] then
         partDamageData[bpo].beamCount = partDamageData[bpo].beamCount + 1
-        partBeams[bpo] = partBeams[bpo] or table.new(2,0)
+        partBeams[bpo] = partBeams[bpo] or table.new(2, 0)
         table.insert(partBeams[bpo], b.cid)
       end
     end
@@ -1080,8 +1087,8 @@ local function breakHinges()
 end
 
 local function deflateTires()
-  for i, _ in pairs(wheelsL) do
-    deflateTire(i, 0)
+  for i, _ in pairs(wheels.wheels) do
+    deflateTire(i)
   end
 end
 
@@ -1124,14 +1131,13 @@ local function sendUISkeleton()
 end
 
 local function hasCouplers()
-  local couplerCount = 0
   for _, val in pairs(couplerCache) do
     if (val.couplerWeld ~= true and val.couplerTag) and val.cid then
-      couplerCount = couplerCount + 1
+      return true
     end
   end
 
-  return couplerCount > 0
+  return false
 end
 
 local function save(filename)
@@ -1141,7 +1147,7 @@ local function save(filename)
   -- TODO: color
   local save = {}
   save.format = "v2"
-  save.model = v.data.vehicleDirectory:gsub("vehicles/", ""):gsub("/", "")
+  save.model = v.data.model --.vehicleDirectory:gsub("vehicles/", ""):gsub("/", "")
   save.parts = v.userPartConfig
   save.vars = v.userVars
   save.vehicleDirectory = v.data.vehicleDirectory
@@ -1156,7 +1162,7 @@ local function save(filename)
   save.nodes = {}
   for _, node in pairs(v.data.nodes) do
     local d = {
-      vec3(obj:getNodePosition(node.cid)):toTable()
+      obj:getNodePosition(node.cid):toTable()
     }
     if math.abs(obj:getOriginalNodeMass(node.cid) - obj:getNodeMass(node.cid)) > 0.1 then
       table.insert(d, obj:getNodeMass(node.cid))
@@ -1196,7 +1202,7 @@ local function load(filename)
 
   for cid, node in pairs(save.nodes) do
     cid = tonumber(cid) - 1
-    obj:setNodePosition(cid, vec3(node[1]):toFloat3())
+    obj:setNodePosition(cid, vec3(node[1]))
     if #node > 1 then
       obj:setNodeMass(cid, node[2])
     end
@@ -1226,10 +1232,10 @@ local function getVehicleState(...)
     fakeDelay = fakeDelay - timer:stopAndReset() / 1000
   end
 
-  local pos = vec3(obj:getPosition())
-  local front = vec3(obj:getDirectionVector())
-  local up = vec3(obj:getDirectionVectorUp())
-  local vehicleState = {objId = obj:getID(), partsCondition = partCondition.getConditions(), itemId = v.config.itemId, pos = pos, front = front, up = up}
+  local pos = obj:getPosition()
+  local front = obj:getDirectionVector()
+  local up = obj:getDirectionVectorUp()
+  local vehicleState = {objId = obj:getId(), partsCondition = partCondition.getConditions(), itemId = v.config.itemId, pos = pos, front = front, up = up}
   return vehicleState, ...
 end
 

@@ -127,7 +127,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	mdDialog = $mdDialog;
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
-		console.log(toState.url);
+		//console.log(toState.url);
 		if (toState.url == "/multiplayer") {
 			// local://local/ui/#/menu/multiplayer/mpservers
 			document.getElementById('servers-btn').click();
@@ -136,7 +136,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 		// Check if the user as aknowledged tos
 		const tosAccepted = localStorage.getItem("tosAccepted");
-		console.log(toState.url);
+		//console.log(toState.url);
 		if (tosAccepted != "true") {
 			$state.go('menu.multiplayer.tos');
 			return;
@@ -849,7 +849,7 @@ function openForumLink(){
 function getServerInfoHTML(d) {
 		// `d` is the original data object for the row
 		var favButton;
-		console.log(d);
+		//console.log(d);
 		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
 		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
 		return `

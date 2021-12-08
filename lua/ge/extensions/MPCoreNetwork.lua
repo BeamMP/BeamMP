@@ -358,9 +358,9 @@ local function onExtensionLoaded()
 	-- We reload the UI to load our custom layout
 	reloadUI()
 	-- Return to main menu if not loaded into a map, workaround for BeamNG UI bug
-	if getMissionFilename() == "" then
-		returnToMainMenu()
-	end
+	--if getMissionFilename() == "" then
+	--	returnToMainMenu()
+	--end
 	-- Get the launcher version
 	send('Z')
 	-- Log-in

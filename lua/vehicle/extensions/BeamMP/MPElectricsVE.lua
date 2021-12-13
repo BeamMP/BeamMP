@@ -448,14 +448,14 @@ local function applyElectrics(data)
 		end
 
 		-- Transbrake syncing
-		if decodedData.transbrake ~= nil then
+		if decodedData.transbrake and controller.getController("transbrake") then
 			if electrics.values.transbrake ~= decodedData.transbrake then
 				controller.getController("transbrake").setTransbrake(decodedData.transbrake)
 			end
 		end
 
 		-- LineLock syncing
-		if decodedData.linelock ~= nil then
+		if decodedData.linelock and controller.getController("lineLock") then
 			if electrics.values.linelock ~= decodedData.linelock then
 				controller.getController("lineLock").setLineLock(decodedData.linelock)
 			end

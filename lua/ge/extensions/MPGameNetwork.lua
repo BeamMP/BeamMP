@@ -216,8 +216,9 @@ M.connectionStatus    = connectionStatus
 M.connectToLauncher   = connectToLauncher
 M.disconnectLauncher  = disconnectLauncher
 M.send                = sendData
-M.sendSplit           = sendDataSplit
+--M.sendSplit           = sendDataSplit -- doesn't exist
 M.CallEvent           = handleEvents
+M.quitMP               = quitMP
 
 M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
 M.getKeyState         = getKeyState         -- takes: string keyName

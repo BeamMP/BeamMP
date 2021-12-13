@@ -14,7 +14,7 @@ print("Loading MPCoreNetwork...")
 local loggerPrefix = "CoreNetwork"
 local TCPLauncherSocket -- Launcher socket
 local currentServer = {} -- Store the server we are on
-local Servers = {} -- Store all the servers
+local Servers -- Store all the servers
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local launcherConnectionTimer = 0
 local status = ""
@@ -357,6 +357,10 @@ local function onExtensionLoaded()
 	connectToLauncher()
 	-- We reload the UI to load our custom layout
 	reloadUI()
+	-- Return to main menu if not loaded into a map, workaround for BeamNG UI bug
+	--if getMissionFilename() == "" then
+	--	returnToMainMenu()
+	--end
 	-- Get the launcher version
 	send('Z')
 	-- Log-in
@@ -450,7 +454,6 @@ M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
 M.login                = login
 M.logout               = logout
-M.quitMP               = quitMP
 M.modLoaded            = modLoaded
 M.getServers           = getServers
 M.isMPSession          = isMPSession

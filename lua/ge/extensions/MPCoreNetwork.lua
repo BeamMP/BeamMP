@@ -290,12 +290,14 @@ local function resetSession(goBack)
 	print("Reset Session Called! " .. tostring(goBack))
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
+	status = "" -- Reset status
+	if goBack then returnToMainMenu() end
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	connectToLauncher()
 	--UI.readyReset()
-	status = "" -- Reset status
-	if goBack then returnToMainMenu() end
+	--status = "" -- Reset status
+	--if goBack then returnToMainMenu() end
 
 	-- resets the instability function back to default
 	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
@@ -358,9 +360,12 @@ local function onExtensionLoaded()
 	-- We reload the UI to load our custom layout
 	reloadUI()
 	-- Return to main menu if not loaded into a map, workaround for BeamNG UI bug
-	--if getMissionFilename() == "" then
-	--	returnToMainMenu()
-	--end
+	if getMissionFilename() == "" then
+		-- Put us back on the main menu rather than this blank UI page.
+		returnToMainMenu()
+		-- Hide the UI debug window.
+		guihooks.trigger('onCEFDevToolsVisibility', false)
+	end
 	-- Get the launcher version
 	send('Z')
 	-- Log-in

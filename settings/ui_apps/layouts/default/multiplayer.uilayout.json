@@ -1,27 +1,6 @@
 {
-  "version":0.47,
+  "version":0.53,
   "apps":[
-    {
-      "appName":"messages",
-      "placement":{
-        "width":"500px",
-        "height":"400px",
-        "left":"0px",
-        "top":"0px"
-      }
-    },
-    {
-      "appName":"tacho2",
-      "placement":{
-        "width":"300px",
-        "bottom":"20px",
-        "height":"300px",
-        "right":"20px"
-      },
-      "settings":{
-        "noCockpit":true
-      }
-    },
     {
       "appName":"forcedInduction",
       "placement":{
@@ -44,18 +23,6 @@
       }
     },
     {
-      "appName":"radialmenu",
-      "placement":{
-        "bottom":"0px",
-        "height":"450px",
-        "left":"0px",
-        "margin":"auto",
-        "right":"0px",
-        "top":"0px",
-        "width":"450px"
-      }
-    },
-    {
       "appName":"simplePowertrainControl",
       "placement":{
         "bottom":"0px",
@@ -72,22 +39,55 @@
       "appName":"damageApp",
       "placement":{
         "bottom":"0px",
-        "height":"320px",
+        "height":"300px",
         "left":"0px",
-        "position":"absolute",
-        "width":"180px"
-      }
-    },
-    {
-      "appName":"multiplayerchat",
-      "placement":{
-        "bottom":"0px",
-        "height":"170px",
-        "left":"180px",
         "position":"absolute",
         "right":"",
         "top":"",
-        "width":"580px"
+        "width":"168.75px"
+      }
+    },
+    {
+      "appName":"tacho2",
+      "placement":{
+        "width":"300px",
+        "bottom":"5px",
+        "height":"300px",
+        "right":"5px"
+      },
+      "settings":{
+        "noCockpit":true
+      }
+    },
+    {
+      "appName":"messages",
+      "placement":{
+        "bottom":"",
+        "height":"450px",
+        "left":"0px",
+        "position":"absolute",
+        "right":"",
+        "top":"0px",
+        "width":"470px"
+      }
+    },
+	    {
+      "appName":"multiplayerchat",
+      "placement":{
+        "width":"550px",
+        "bottom":"0px",
+        "height":"170px",
+        "left":"180px"
+      }
+    },
+    {
+      "appName":"multiplayerplayerlist",
+      "placement":{
+        "height":"527px",
+        "min-width":"240px",
+        "right":"0px",
+        "top":"90px",
+        "width":"auto"
       }
     },
     {
@@ -101,18 +101,6 @@
         "right":0,
         "top":"0px",
         "width":"700px"
-      }
-    },
-    {
-      "appName":"multiplayerplayerlist",
-      "placement":{
-        "bottom":"",
-        "height":"480px",
-        "left":"",
-        "position":"absolute",
-        "right":"0px",
-        "top":"170px",
-        "width":"220px"
       }
     }
   ],

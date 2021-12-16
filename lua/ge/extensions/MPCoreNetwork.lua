@@ -345,27 +345,25 @@ local function onExtensionLoaded()
 	local foundRadialMenu = false
 	if ui_info then wasUiReset = ui_info.wasUiReset end
 
-	if wasUiReset == true then goto skip end -- skip the whole thing if UI had been reset before / didn't contain radial menu
-
-	-- checking if the radial menu is found in the Multiplayer UI layout
-	if currentMpLayout then
-		for k,v in pairs(currentMpLayout.apps) do
-			if v.appName == "radialmenu" then
-				print("Found radial menu present in Multiplayer UI Layout!")
-				foundRadialMenu = true
+	if not wasUiReset then
+		
+		-- checking if the radial menu is found in the Multiplayer UI layout
+		if currentMpLayout then
+			for k,v in pairs(currentMpLayout.apps) do
+				if v.appName == "radialmenu" then
+					--print("Found radial menu present in Multiplayer UI Layout!")
+					foundRadialMenu = true
+					break
+				end
 			end
 		end
-	end
-	if foundRadialMenu == false then
-		info.wasUiReset = true
-		jsonWriteFile("settings/BeamMP/ui_info.json",info)
-	elseif foundRadialMenu == true then
-		print("Multiplayer UI has been reset to default!")
-		os.remove("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+		if foundRadialMenu == true then
+			--print("Multiplayer UI has been reset to default!")
+			os.remove("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+		end
 		info.wasUiReset = true
 		jsonWriteFile("settings/BeamMP/ui_info.json",info)
 	end
-	::skip::
 	-- First we connect to the launcher
 	connectToLauncher()
 	-- We reload the UI to load our custom layout

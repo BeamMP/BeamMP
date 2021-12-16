@@ -337,21 +337,33 @@ end
 
 -- ====================================== ENTRY POINT ======================================
 local function onExtensionLoaded()
-	--Preston (Cobalt) insert the custom multiplayer layout inside the game's layout file
-	-- First check that the game's layout file exists
-	local layouts = jsonReadFile("settings/uiapps-layouts.json")
-	if not layouts then
-		layouts = jsonReadFile("settings/uiapps-defaultLayout.json")
-		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("M", loggerPrefix, "default UI layout added")
-	end
-	-- Then check that multiplayer layout is inside
-	if not layouts.multiplayer then
-		layouts.multiplayer = jsonReadFile("settings/uiapps-defaultMultiplayerLayout.json")
-		jsonWriteFile("settings/uiapps-layouts.json", layouts)
-		log("M", loggerPrefix, "multiplayer UI layout added")
-	end
+	-- removing the radial menu from the Multiplayer UI layout if it's present
+	local currentMpLayout = jsonReadFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+	local ui_info = jsonReadFile("settings/BeamMP/ui_info.json")
+	local info = {}
+	local wasUiReset = false
+	local foundRadialMenu = false
+	if ui_info then wasUiReset = ui_info.wasUiReset end
 
+	if not wasUiReset then
+		
+		-- checking if the radial menu is found in the Multiplayer UI layout
+		if currentMpLayout then
+			for k,v in pairs(currentMpLayout.apps) do
+				if v.appName == "radialmenu" then
+					--print("Found radial menu present in Multiplayer UI Layout!")
+					foundRadialMenu = true
+					break
+				end
+			end
+		end
+		if foundRadialMenu == true then
+			--print("Multiplayer UI has been reset to default!")
+			os.remove("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+		end
+		info.wasUiReset = true
+		jsonWriteFile("settings/BeamMP/ui_info.json",info)
+	end
 	-- First we connect to the launcher
 	connectToLauncher()
 	-- We reload the UI to load our custom layout

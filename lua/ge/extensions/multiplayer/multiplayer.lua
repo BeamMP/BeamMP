@@ -11,6 +11,7 @@ local originalToggleWalkingMode = nop
 
 
 local function startMultiplayerHelper (level, startPointName)
+	log('D', logTag, 'Loading Helper called. Loading game mode moduels...')
 	core_gamestate.requestEnterLoadingScreen(logTag .. '.startMultiplayerHelper')
 	loadGameModeModules()
 	M.state = {}

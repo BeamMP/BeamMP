@@ -183,20 +183,24 @@ end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port, mods, name)
-	-- Prevent the user from connecting to a server when already connected to one
-	if getMissionFilename() ~= "" then Lua:requestReload() end
+	-- If we are currently in a session then we need to drop that session, run a reset and then do the connection to the server.
+	if getMissionFilename() ~= "" or isMpSession or scenetree.missionGroup then
+		local complete = MPCoreNetwork.resetSession(false)
+		Lua:requestReload()
+	end
+
 	local ipString
 	if ip and port then -- Direct connect
 		currentServer = nil
 		setCurrentServer(ip, port, mods, name)
 		ipString = ip..':'..port
-		send('C'..ipString..'')
 	else -- Server list connect
 		ipString = currentServer.ip..':'..currentServer.port
-		send('C'..ipString..'')
   end
 	print("Connecting to server "..ipString)
 	status = "LoadingResources"
+
+	send('C'..ipString..'')	
 end
 
 local function loadLevel(map)
@@ -291,18 +295,17 @@ local function resetSession(goBack)
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	status = "" -- Reset status
-	if goBack then returnToMainMenu() end
+	if goBack then endActiveGameMode() end
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	connectToLauncher()
 	--UI.readyReset()
-	--status = "" -- Reset status
-	--if goBack then returnToMainMenu() end
 
 	-- resets the instability function back to default
 	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
 
 	MPModManager.cleanUpSessionMods()
+	return true
 end
 
 local function isMPSession()
@@ -437,6 +440,12 @@ local function onClientEndMission(mission)
 		resetSession(1)
 	end
 end
+
+local function onUiReady()
+	if getMissionFilename() == "" then
+		guihooks.trigger('ChangeState', 'menu.mainmenu')
+	end
+end
 -- ============= EVENTS =============
 
 
@@ -450,7 +459,8 @@ M.disconnectLauncher   = disconnectLauncher
 M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
-M.onInit = onInit
+M.onInit               = onInit
+M.onUiReady            = onUiReady
 M.requestPlayers       = requestPlayers
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate

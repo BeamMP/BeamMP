@@ -16,30 +16,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   $translateProvider.useSanitizeValueStrategy('escaped')
   $translateProvider.preferredLanguage('en-US'); // this is the default language to load
   $translateProvider.fallbackLanguage('en-US'); // this is the fallback in case individual translations are missing
-
-  // ------------------- REMOVE THIS ASAP: ONLY FOR TRANSLATION DEBUGGING PURPOSE ------------------
-  // the filter breaks the direct translation of the gameplay page when the user changes the language setting
-  // var debugTranslationsKey = 'beamng:debugTranslations'
-
-  // if (! window.localStorage.getItem(debugTranslationsKey))
-  //   window.localStorage.setItem('beamng:debugTranslations', '0'); // normal translations by default
-
-  // window.toggleDebugTranslations = function () {
-  //   var dt = parseInt(window.localStorage.getItem(debugTranslationsKey))
-  //   window.localStorage.setItem(debugTranslationsKey, dt > 0 ? '0' : '1')
-  //   window.location.reload()
-  // }
-
-  // $provide.decorator('translateFilter',  function ($delegate) {
-  //   return function () {
-  //     var debugMode = parseInt(window.localStorage.getItem(debugTranslationsKey)) > 0
-  //     return debugMode ? arguments['0'] : $delegate.apply(this, arguments)
-  //   }
-  // })
-  // ------------------------------------------------------------------------------------------------
-
-
-
+  //$translateProvider.useLoaderCache(true); // default is false which means disable
+  //$translateProvider.forceAsyncReload(true);
 
 
   //$translateProvider.use('de-DE')
@@ -55,12 +33,15 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     templateUrl: '/ui/modules/play/play.html',
     controller: 'PlayController as playCtrl',
     menuActionMapEnabled: false, // defaults to true
+    uiAppsShown: true, // defaults to false
   })
 
   .state('menu', {
     url: '/menu',
     templateUrl: '/ui/modules/menu/menu.html',
     controller: 'MenuController as menuCtrl',
+    uiLayout: 'menu',
+    uiAppsShown: true, // defaults to false
   })
 
     // so the trick is: we load the real menu in the background in another view while the startscreen is covering it up
@@ -202,6 +183,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/appedit/appedit.html',
       controller: 'AppEditController as ctrl',
       backState: 'menu',
+      uiAppsShown: true, // defaults to false
     })
 
     .state('menu.appselect', {
@@ -218,13 +200,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
     })
 
-    .state('menu.vehicleDetails', {
+    .state('menu.vehiclesdetails', {
       url: '/vehicle-details/:model/:config/:mode/:event',
       templateUrl: '/ui/modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-
     // -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.multiplayer', {
@@ -293,12 +274,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-      .state('menu.options.multiplayer', {
-        url: '/multiplayer',
-        templateUrl: '/ui/modules/options/multiplayer.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
-        backState: 'BACK_TO_MENU',
-      })
+    .state('menu.options.multiplayer', {
+      url: '/multiplayer',
+      templateUrl: '/ui/modules/options/multiplayer.partial.html',
+      controller: 'SettingsGameplayCtrl as opt',
+      backState: 'BACK_TO_MENU',
+    })
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',
@@ -451,37 +432,40 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/vehicleconfig/vehicleconfig.html',
       controller: 'VehicleconfigCtrl',
       redirectTo: 'menu.vehicleconfig.parts',
-      backState: 'menu',
+      backState: 'play',
     })
     .state('menu.vehicleconfig.parts', {
       url: '/vehicle-config/parts',
       templateUrl: '/ui/modules/vehicleconfig/partial.parts.html',
       controller: 'Vehicleconfig_parts as vehConf_parts',
-      backState: 'menu',
+      backState: 'play',
+      uiAppsShown: true, // defaults to false
     })
     .state('menu.vehicleconfig.tuning', {
       url: '/vehicle-config/tuning',
       templateUrl: '/ui/modules/vehicleconfig/partial.tuning.html',
       controller: 'Vehicleconfig_tuning as vehConf_tuning',
-      backState: 'menu',
+      backState: 'play',
+      uiAppsShown: true, // defaults to false
     })
     .state('menu.vehicleconfig.color', {
       url: '/vehicle-config/color',
       templateUrl: '/ui/modules/vehicleconfig/partial.color.html',
       controller: 'Vehicleconfig_color as vehConf_color',
-      backState: 'menu',
+      backState: 'play',
     })
     .state('menu.vehicleconfig.save', {
       url: '/vehicle-config/save',
       templateUrl: '/ui/modules/vehicleconfig/partial.save.html',
       controller: 'Vehicleconfig_save as vehConf_save',
-      backState: 'menu',
+      backState: 'play',
     })
     .state('menu.vehicleconfig.debug', {
       url: '/vehicle-config/debug',
       templateUrl: '/ui/modules/vehicleconfig/debug.partial.html',
       controller: 'Vehicleconfig_debug as vehConf_debug',
-      backState: 'menu',
+      backState: 'play',
+      uiAppsShown: true, // defaults to false
     })
 
 
@@ -489,6 +473,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     .state('menu.mods', {
       url: '/mods',
       template: '<ui-view class="filler" style="position: relative;"></ui-view>',
+      abstract: true,
       controller: 'ModManagerController as modCtrl',
       backState: 'BACK_TO_MENU',
     })
@@ -606,7 +591,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
             templateUrl: '/ui/modules/repository/info.html'
           }
         },
-        backState: 'BACK_TO_MENU',
+        backState: 'menu.mods.repository',
       })
 
     .state('menu.modsDetails', {
@@ -1003,7 +988,6 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       })
     }
   })
-
 	// -------------------------------------- BEAMMP -------------------------------------- //
 
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
@@ -1015,9 +999,27 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
 	});
 
 	// -------------------------------------- BEAMMP -------------------------------------- //
-
   /* --- VUE3 END --- */
+  $rootScope.$on('$translateChangeSuccess', (event, data) => {
+    i18nLanguageUsed = data.language
+  })
 
+  $rootScope.$on('$translateChangeStart', () => {
+    i18NLanguageFinished = false
+  })
+
+  $rootScope.$on('$translateChangeEnd', () => {
+    i18NLanguageFinished = true
+  })
+
+  /*
+  $rootScope.$on('$translateChangeError', () => { console.log('translateChangeError')})
+  $rootScope.$on('$translateLoadingStart', () => { console.log('translateLoadingStart')})
+  $rootScope.$on('$translateLoadingSuccess', () => { console.log('translateLoadingSuccess')})
+  $rootScope.$on('$translateLoadingError', () => { console.log('translateLoadingError')})
+  $rootScope.$on('$translateLoadingEnd', () => { console.log('translateLoadingEnd')})
+  $rootScope.$on('$translatePartialLoaderStructureChanged', () => { console.log('translatePartialLoaderStructureChanged')})
+  */
 
   //$animate.enabled(false)
 
@@ -1144,8 +1146,8 @@ angular.module('beamng.stuff')
   }
 }])
 
-.service('gamepadNav', ['$rootScope', '$state', 'SpatialNavigation',
-  function ($rootScope, $state, SpatialNavigation) {
+.service('gamepadNav', ['$rootScope', '$state',
+  function ($rootScope, $state) {
     'use strict'
 
     // TODO: hook this up to lua settings
@@ -1155,7 +1157,6 @@ angular.module('beamng.stuff')
     let useCrossfire = true
     let scope = {}
     let useGamepadNavigation = false
-    let useSpatialNav = false
     let noop = () => {}
     let actions = {
       up: [{module: 'root', func: noop}],
@@ -1214,11 +1215,9 @@ angular.module('beamng.stuff')
       }
     }
 
-    SpatialNavigation.currentViewActions.toggleMenues = {cmd: () => $rootScope.$broadcast('MenuToggle'), name: 'Toggle Menues', navigation: true}
-
     $rootScope.$on('MenuItemNavigation', function (event, action, val) {
       //console.log('Got action: ' + action)
-      //console.log('Enabled Librarys', useCrossfire, useGamepadNavigation, useSpatialNav)
+      //console.log('Enabled Librarys', useCrossfire, useGamepadNavigation)
 
       if (action == 'toggleMenues') {
         $rootScope.$broadcast('MenuToggle', val)
@@ -1232,13 +1231,6 @@ angular.module('beamng.stuff')
         bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
       }
 
-      if (useSpatialNav) {
-        if(SpatialNavigation.triggerAction(action, val)) {
-          console.log(`navigation ${action} handled by SpatialNavigation`)
-          return
-        }
-      }
-
       if (useCrossfire) {
         if(action == 'confirm') {
           if (document.activeElement.classList.contains("menu-navigation")) {
@@ -1250,7 +1242,7 @@ angular.module('beamng.stuff')
           bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
           var targets = collectRects()
           navigate(targets, action)
-          console.log(`navigation ${action} handled by Crossfire`)
+          //console.log(`navigation ${action} handled by Crossfire`)
         } else if (action == 'tab-left') {
             $rootScope.$broadcast('$tabLeft')
         } else if (action == 'tab-right') {
@@ -1268,11 +1260,11 @@ angular.module('beamng.stuff')
     return {
       crossfireEnabled: () => useCrossfire,
       gamepadNavEnabled: () => useGamepadNavigation,
-      spatialNavEnabled: () => useSpatialNav,
+      spatialNavEnabled: () => useCrossfire,
       // TODO: make this intuitive (omiting the value shouldn't do something unexpected)
       enableCrossfire: (val) => useCrossfire = val,
       enableGamepadNav: (val) => useGamepadNavigation = val,
-      enableSpatialNav: (val) => useSpatialNav = val,
+      //enableSpatialNav: (val) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); useCrossfire = val },
       registerActions: assignNavFunc,
       unregisterActions: unregisterActions,
       provideScope: (scope) => scope = scope,
@@ -1285,8 +1277,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', 'SpatialNavigation', '$injector', '$location', 'translateService',
-  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, SpatialNavigation, $injector, $location, translateService) {
+.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService',
+  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService) {
   var vm = this
 
   // hack to fix backspace navigating between different menus.
@@ -1332,7 +1324,9 @@ angular.module('beamng.stuff')
   vm.states = $state.get().filter(state => !state.abstract) // filter abstract states
   //console.log("vm.states = ", vm.states)
 
-
+  vm.emitMenuNav = function(action, val) {
+    $rootScope.$broadcast('MenuItemNavigation', action, val)
+  }
   vm.switchState = function(stateName) {
     if(stateName !== undefined) {
       $state.go(stateName)
@@ -1387,6 +1381,7 @@ angular.module('beamng.stuff')
   vm.physicsMaybePaused = false
   vm.showPauseIcon = false
   vm.showCrosshair = false
+  vm.uiLayoutPrevious = false;
   function updatePauseState() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused
       vm.showPauseIcon = vm.physicsPaused || vm.replayPaused
@@ -1402,9 +1397,28 @@ angular.module('beamng.stuff')
     //console.log(`switching stage from ${fromState.name} to ${toState.name}`)
     //console.trace()
     vm.currentStateName = toState.name
+
+    // update activated action maps for UI bindings
     let menuActionMapEnabled = $state.current.menuActionMapEnabled === undefined? true : $state.current.menuActionMapEnabled // true by default
     bngApi.engineLua(`extensions.core_input_bindings.setMenuActionMapEnabled(${menuActionMapEnabled})`)
     bngApi.engineLua(`extensions.hook("onUiChangedState", "${toState.name}", "${fromState.name}")`)
+
+    // update ui apps layout
+    if ($state.current.uiLayout === undefined) {
+      // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
+      if (vm.uiLayoutPrevious) {
+        $scope.$emit('appContainer:loadLayoutByReqData', vm.uiLayoutPrevious)
+        vm.uiLayoutPrevious = null;
+      }
+    } else {
+      // this state requires a particular ui layout, set
+      vm.uiLayoutPrevious = UiAppsService.getLayout()
+      $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
+    }
+
+    // update ui apps visibility
+    let showApps = $state.current.uiAppsShown === true // defaults to false
+    $scope.$emit('ShowApps', showApps)
 
     transitioningTo = undefined
     updatePauseState()
@@ -1461,8 +1475,7 @@ angular.module('beamng.stuff')
   vm.mainmenu = true
   vm.gameState = null
   vm.settings = Settings
-
-
+  vm.uiReady = false
 
   // downloader start
   var dlinfo = {}
@@ -1525,14 +1538,14 @@ angular.module('beamng.stuff')
     }
   }
   // downloader end
+
   // let Lua know the UI is up and running
-  var uiReady = uiReady
   angular.element(document).ready(function() {
     bngApi.engineLua("uiReady()")
-    uiReady = true
+    vm.uiReady = true
   })
   $scope.$on('isUIReady', function (event) {
-    if(uiReady) bngApi.engineLua("uiReady()")
+    if(vm.uiReady) bngApi.engineLua("uiReady()")
   })
 
   $scope.$on('modmanagerError', function (event, data) {
@@ -1596,7 +1609,7 @@ angular.module('beamng.stuff')
   })
 
   $scope.$on("MenuFocusShow", function (event, enabled) {
-    if (!enabled) uncollectRects($scope)
+    //if (!enabled) uncollectRects($scope)
   })
 
   // Method used to show mods on repository when 'view ingame' on https://www.beamng.com/resources/ is clicked.
@@ -1621,7 +1634,7 @@ angular.module('beamng.stuff')
     //console.log('toggleMenu', data, $state.current)
     //console.trace()
     // *** navigation back logic here
-    if($state.current.backState && $state.current.backState !== 'play') {
+    if($state.current.backState) {
       let targetState = $state.current.backState
       if(targetState === 'BLOCK') {
         if(!$state.current.tryCounter) {
@@ -1713,7 +1726,8 @@ angular.module('beamng.stuff')
   $scope.$on('quit', vm.quit)
 
   $scope.$on('SettingsChanged', (ev, data) => {
-    if(data.values.uiLanguage && data.values.uiLanguage != '') {
+    //console.log('SettingsChanged, updating languages... ', data.values.uiLanguage)
+    if(data.values.uiLanguage && data.values.uiLanguage !== '' && i18NLanguageFinished && i18nLanguageUsed !== data.values.uiLanguage) {
       $rootScope.$eval(function() {
         $translate.use(data.values.uiLanguage)
       })
@@ -1788,7 +1802,6 @@ angular.module('beamng.stuff')
   $scope.$on('requestPhysicsState', function (event) {
     $scope.$broadcast('physicsStateChanged', !vm.physicsPaused)
   })
-
   // -------------------------------------- BEAMMP -------------------------------------- //
   //ingame red connection warning
   $scope.$on('showConnectionIssues', function(evt, data) {

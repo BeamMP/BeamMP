@@ -376,9 +376,9 @@ end
 --=========================================== SEND MODIFIED VEHICLE DATA =============================================
 
 local function checkIfVehiclenameValid(vehicleName, playerName)
-	local vehiclesList = extensions.core_vehicles.getModelNames()
-	for index, value in ipairs(vehiclesList) do
-		if vehicleName == value then return false end
+	local vehiclesList = extensions.core_vehicles.getModelList()
+	for key, value in pairs(vehiclesList.models) do
+		if vehicleName == key then return false end
 	end
 
 	log('W', 'applyVehSpawn', "The received vehicle "..vehicleName.." is not valid, cancelling the spawn (likely a missing mod)")

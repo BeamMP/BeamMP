@@ -492,7 +492,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.launchVehicle = function (model) {
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-        vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
+      vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
     }
     else if (vm.showConfigurations && model.model_key !== undefined) {
       vm.mode.selected(model, model.model_key, model.key, null, false, vm.isMPSession)

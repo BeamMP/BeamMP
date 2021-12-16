@@ -98,7 +98,7 @@ angular.module('beamng.stuff')
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div style="text-align:right; color:white;margin-left:16px;">
-          <div>BeamMP v4.2.1</div>
+          <div>BeamMP v4.2.2</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">

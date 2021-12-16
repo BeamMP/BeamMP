@@ -295,8 +295,7 @@ local function resetSession(goBack)
 	connectToLauncher()
 	--UI.readyReset()
 	status = "" -- Reset status
-	if goBack then returnToMainMenu() end
-
+	if goBack then endActiveGameMode() end
 	-- resets the instability function back to default
 	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
 
@@ -357,10 +356,6 @@ local function onExtensionLoaded()
 	connectToLauncher()
 	-- We reload the UI to load our custom layout
 	reloadUI()
-	-- Return to main menu if not loaded into a map, workaround for BeamNG UI bug
-	--if getMissionFilename() == "" then
-	--	returnToMainMenu()
-	--end
 	-- Get the launcher version
 	send('Z')
 	-- Log-in
@@ -432,6 +427,12 @@ local function onClientEndMission(mission)
 		resetSession(1)
 	end
 end
+
+local function onUiReady()
+	if getMissionFilename() == "" then
+		guihooks.trigger('ChangeState', 'menu.mainmenu')
+	end
+end
 -- ============= EVENTS =============
 
 
@@ -445,7 +446,8 @@ M.disconnectLauncher   = disconnectLauncher
 M.autoLogin			       = autoLogin
 --M.onUiChangedState	   = onUiChangedState
 
-M.onInit = onInit
+M.onInit               = onInit
+M.onUiReady            = onUiReady
 M.requestPlayers       = requestPlayers
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate

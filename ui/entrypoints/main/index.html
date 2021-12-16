@@ -23,8 +23,10 @@
   <script src="/ui/lib/ext/angular-ui-router.min.js"></script>
   <script src="/ui/lib/ext/angular-material/angular-material.js"></script>
   <script src="/ui/lib/ext/smoothie.min.js"></script>
-  <script src="/ui/lib/ext/angular-translate.min.js"></script>
-  <script src="/ui/lib/ext/angular-translate-loader-static-files.min.js"></script>
+  <script src="/ui/lib/ext/angular-translate/angular-translate-beamng.js"></script>
+  <script src="/ui/lib/ext/angular-translate/angular-translate-loader-static-files/angular-translate-loader-static-files.js"></script>
+  <script src="/ui/lib/ext/angular-translate/angular-translate-handler-log/angular-translate-handler-log.js"></script>
+
   <script src="/ui/lib/ext/ocLazyLoad.min.js"></script>
   <script src="/ui/lib/ext/angular-toastr.tpls.min.js"></script>
   <script src="/ui/lib/ext/spine-canvas.js"></script>
@@ -54,7 +56,6 @@
   <script src="/ui/lib/int/utilities.js"></script>
   <script src="/ui/lib/int/beamng-data.js"></script>
   <script src="/ui/lib/ext/mdx.js"></script>
-  <script src="/ui/lib/int/SpatialNavigation.js"></script>
   <script src="/ui/lib/ext/crossfire-chrome.js"></script>
 
   <script src="/ui/lib/int/beamng.controls.js"></script>
@@ -101,9 +102,9 @@
 
   <script src="/ui/modules/busRoute/busRoute.js"></script>
   <script src="/ui/modules/iconView/icons.js"></script>
-  <!-- --------------------------------- BEAMMP --------------------------------- -->
+    <!-- --------------------------------- BEAMMP --------------------------------- -->
   <script src="/ui/modules/multiplayer/multiplayer.js"></script> 
-  
+
   <script src="/ui/modules/fadeScreen/fadeScreen.js"></script>
 
   <link rel="stylesheet" type="text/css" href="/ui/lib/int/ui-components/bng-components.css">
@@ -111,12 +112,13 @@
   <link type="text/css" rel="stylesheet" href="/ui/entrypoints/main/main.css">
   <link type="text/css" rel="stylesheet" href="/ui/lib/ext/keys.css">
   <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu/mainmenu.css">
+  <link type="text/css" rel="stylesheet" href="/ui/modules/menu/menu.css" />
 
 </head>
 
 <body ng-controller="AppCtrl as app" ng-show="app.uiVisible" use-lang-font="1" class="container">
 
-  <md-content ng-if="app.uitest" layout="column" style="border:2px solid #aaa;position:absolute;width:400px;height:160px;top:50%;right:0;z-index:98;padding:2px;font-family:monospace;border-radius:5px;">
+  <md-content ng-cloak ng-if="app.uitest" layout="column" style="border:2px solid #aaa;position:absolute;width:400px;height:200px;top:50%;right:0; z-index:var(--zorder_index_mdcontent); padding:2px;font-family:monospace;border-radius:5px;">
     <div layout="column">
       UI Debug - Press CTRL+U to toggle visibility.
       <div layout="row" style="background-color:rgb(102, 35, 35);">
@@ -126,43 +128,49 @@
         </md-select>
       </div>
       <div layout="row" style="background-color:rgb(102, 35, 35);">
-        <md-button flex md-no-ink style="display:block;z-index:999999" class="md-button" ng-click="app.prevState()">&lt; previous</md-button>
-        <md-button flex md-no-ink style="display:block;z-index:999999" class="md-button" ng-click="app.nextState()">next &gt;</md-button>
+        <md-button flex md-no-ink style="display:block; z-index:var(--zorder_index_prevnext)" class="md-button" ng-click="app.prevState()">&lt; previous</md-button>
+        <md-button flex md-no-ink style="display:block; z-index:var(--zorder_index_prevnext)" class="md-button" ng-click="app.nextState()">next &gt;</md-button>
       </div>
-      <div layout="row" layout-align="start center">
-        <md-checkbox  ng-model="app.showApps">Show apps</md-checkbox>
+      <div layout="row" layout-align="start center" style="background-color:rgb(36, 35, 102);">
+        <md-checkbox ng-model="app.showApps">Show apps</md-checkbox>
         <div>Gamestate: <span style="color:rgb(68, 207, 68)">{{app.gameState}}</span></div>
         <md-button  ng-click="app.reloadUI()">reload</md-button>
       </div>
+      Gamepad Emulation: use the numpad keys 4862
     </div>
   </md-content>
-  <div id="reconnectScreen" ng-if="!$root.ingame && $root.connectionState != 'open'">
+  <div ng-cloak id="reconnectScreen" ng-if="!$root.ingame && $root.connectionState != 'open'">
     <div class="reconnectScreenText">
       <center>
         <div style="font-size:2vh;margin:3vh;">... reconnecting ...</div>
       </center>
     </div>
   </div>
-    <!--  .............. connection failed overlay ..............  -->
-    <div ng-if="app.showConnectionIssues" id="showConnectionIssues" style="position:absolute; top:100px; right: 0; background:transparent; z-index:1000" class="md-padding">
-      <span style="color: white; text-shadow: -3px 3px 15px #DB7B00, 3px -3px 15px #DB7B00;cursor: pointer;"  layout="column" layout-align="center center">
-          <div style="font-weight: 500;font-size: 18px;text-shadow: 0px 0px 15px #000000, 0px 0px 15px #000000, 0px 0px 15px #000000;color: red;" layout="row" layout-align="center center">
-            Connection Error! Please Rejoin the server.
-          </div>
-      </span>
+
+  <!-- UI LOADING - broken UI fallback only -->
+  <div ng-if="!app.uiReady" style="z-index:var(--zorder_index_broken_ui_loading); position: absolute; top:0;left:0;right:0;bottom:0;background: black; color:white; font-family: Roboto Bold;" layout="column" layout-align="end center">
+    <h1 style="">
+      Loading UI...
+    </h1>
+    <div style="">
+      Mods can slow down this process or may have broken the game (<a href="http-external://go.beamng.com/uibroken" style="color:var(--bng-orange)">click here for help</a>)
+      <br>
+      &nbsp;
     </div>
+  </div>
+
   <!--  .............. waiting screen overlay ..............  -->
-  <div ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: 97;" layout="row" layout-align="center center">
-    <ng-md-icon class="material-icons" style="font-size: 20rem; color: white; text-shadow: -1px 1px 8px #DB7B00, 1px -1px 8px #DB7B00; z-index:10;">
+  <div ng-cloak ng-if="app.isWaiting" style="width:100%; height:100%; background: rgba(0, 0, 0, 0.6); position: absolute; z-index: var(--zorder_index_waiting_screen);" layout="row" layout-align="center center">
+    <ng-md-icon class="material-icons" style="font-size: 20rem; color: white; text-shadow: -1px 1px 8px #DB7B00, 1px -1px 8px #DB7B00; z-index:var(--zorder_index_waiting_screen_icon);">
       access_time
     </ng-md-icon>
   </div>
 
   <!-- pause indicator (show only while paused), not to be confused with the pause button (shown only while not paused). see menu.html -->
-  <div ng-if="!app.mainmenu && app.showPauseIcon && app.uiVisible" class="dashBrdButtonEnd dashMenuHeight">
-    <div style="" class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()" bng-sound-class="bng_button_main_ui_default" >
+  <div ng-cloak ng-if="!app.mainmenu && app.showPauseIcon && app.uiVisible" class="dashBrdButtonEnd dashMenuHeight" style="var(--zorder_index_waiting_screen_icon);">
+    <div class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()" bng-sound-class="bng_button_main_ui_default" >
       <span style="padding:0; margin:0" bng-translate="ui.inputActions.general.pause.binding" class="bng-binding dashBrdSvgIcon"></span>
-      <span class="dashBrdText">{{ 'ui.inputActions.general.pause.title' | translate }}</span>
+      <span class="dashBrdText">{{:: 'ui.inputActions.general.pause.title' | translate}}</span>
     </div>
   </div>
 
@@ -174,17 +182,30 @@
 
   <game-context-mini-info></game-context-mini-info>
 
-  <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
-  <app-container ng-show="app.showApps" style="position:absolute !important;top:0;right:0;bottom:0;left:0;">
-    <canvas id="alignment-canvas"  width="1" height="1"></canvas>
-    <bng-app style="display:none"></bng-app>
-  </app-container>
-
   <!-- fullscreen LOADING view, covers the real view -->
-  <div style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:50" ng-class="app.transitionAnimation" ui-view="loader" ng-show="$state.current.loaderVisible"></div>
+  <div ng-cloak style="position:absolute;top:0;left:0;right:0;bottom:0;z-index: var(--zorder_index_fullscreen_loading)" ng-class="app.transitionAnimation" ui-view="loader" ng-show="$state.current.loaderVisible"></div>
   <!-- fullscreen DEFAULT view -->
-  <div style="width: 100%; height: 100%; box-sizing: border-box;z-index:0" ng-class="app.transitionAnimation" ui-view></div>
+  <div ng-cloak class="UI-Flex-Wrapper" style="position: absolute; top:0; left:0; right:0; bottom:0; z-index: var(--zorder_index_fullscreen_default); display: flex; flex-direction: column; align-items: stretch; justify-content: start;">
+    <!-- Menu Dashbar goes here -->
+    <dash-menu ng-controller="MenuController as menuCtrl" bng-blur ng-if="('menu' | includedByState) && (($state.current.name !== 'menu.mainmenu') || !app.mainmenu)">Dash menu goes here</dash-menu>
 
+    <div class="fullscreencontent" style="flex: 1 1 auto; position: relative; pointer-events: none;" ng-class="app.transitionAnimation">
+      <!-- All the useful content goes here to cover up all the apps without window resize -->
+      <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
+      <app-container id="mainContainer" ng-show="app.showApps" style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_apps_default);">
+        <canvas id="alignment-canvas"  width="1" height="1"></canvas>
+        <bng-app style="display:none"></bng-app>
+      </app-container>
+      <menu-content style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_index_menucontent);" ui-view></menu-content>
+    </div>
+
+    <div class="navbar" ng-if="'menu' | includedByState">
+      <!-- menuNavBar contents -->
+      <menu-navbar></menu-navbar>
+    </div>
+  </div>
+
+  <fancy-background class="fancyBackgroundFill" ng-if="app.mainmenu"></fancy-background>
   <!--  .............. confirm dialog overlay ..............  -->
   <bng-dialog></bng-dialog>
 </body>

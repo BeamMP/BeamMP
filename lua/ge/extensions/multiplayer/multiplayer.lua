@@ -1,7 +1,7 @@
 local M = {state={}}
 
 local logTag = 'multiplayer'
-log("I", "Multiplayer Gamemode", "Gamemode Loaded")
+log("I", "", "Gamemode Loaded")
 
 local inputActionFilter = extensions.core_input_actionFilter
 
@@ -59,9 +59,9 @@ local function startMultiplayer(level, startPointName, wasDelayed)
 	-- Loading the new multiplayer causes the current loaded multiplayer to unload which breaks the new multiplayer
 	local delaying = false
 	if scenetree.MissionGroup then
-		log('D', logTag, 'Delaying start of multiplayer until current level is unloaded...')
+		log('D', 'startMultiplayer', 'Delaying start of multiplayer until current level is unloaded...')
 		M.triggerDelayedStart = function()
-			log('D', logTag, 'Triggering a delayed start of multiplayer...')
+			log('D', 'startMultiplayer', 'Triggering a delayed start of multiplayer...')
 			M.triggerDelayedStart = nil
 			startMultiplayer(level, startPointName, true)
 		end

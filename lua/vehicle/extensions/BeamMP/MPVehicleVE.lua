@@ -21,7 +21,7 @@ local keypressTriggers = {}
 -- Keypress handling
 -------------------------------------------------------------------------------
 
-setmetatable(_G,{}) -- temporarily disable global notifications
+setmetatable(_G,{}) -- temporarily disable global write notifications
 
 function onKeyPressed(keyname, f)
 	addKeyEventListener(keyname, f, 'down')

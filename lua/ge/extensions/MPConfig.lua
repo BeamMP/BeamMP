@@ -144,12 +144,25 @@ local function acceptTos()
 	jsonWriteFile(favsfile, config)
 end
 
+local function onSerialize()
+	local data = {
+		Nickname = Nickname,
+		PlayerServerID = PlayerServerID
+	}
+	return data
+end
 
+local function onDeserialized(data)
+	Nickname = data.Nickname
+	PlayerServerID = data.PlayerServerID
+end
 
--- Functions
-
+-- Events
+M.onSerialize = onSerialize
+M.onDeserialized = onDeserialized
 M.onExtensionLoaded = onExtensionLoaded
 
+-- Functions
 M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
 

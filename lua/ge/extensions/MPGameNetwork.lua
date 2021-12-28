@@ -11,6 +11,7 @@ print("Loading MPGameNetwork")
 
 
 -- ============= VARIABLES =============
+local socket = require('socket')
 local TCPSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
 local sysTime = 0
@@ -21,17 +22,18 @@ local keysToPoll = {} -- list of keys we want to poll for state changes
 local keypressTriggers = {}
 -- ============= VARIABLES =============
 
-
+setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
-	print("Connecting to the Launcher for mp session")
+	log('I', 'connectToLauncher', "Connecting to the Launcher for mp session")
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
-		local socket = require('socket')
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
 		launcherConnectionStatus = 1
+	else
+		log('W', 'connectToLauncher', "Already connected, aborting")
 	end
 end
 
@@ -48,7 +50,8 @@ end
 
 local function sendData(s)
 	if TCPSocket then
-		local r = TCPSocket:send(string.len(s)..'>'..s)
+		local r, err = TCPSocket:send(string.len(s)..'>'..s)
+		if err then log('E', 'sendData', err) return end
 		if settings.getValue("showDebugOutput") == true then
 			print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 		end
@@ -83,7 +86,7 @@ local function quitMP(reason)
 
 	UI.showMdDialog({
 		dialogtype="alert", title="You have been kicked from the server", text=text, okText="Return to menu",
-		okLua="MPCoreNetwork.resetSession(true)" -- return to main menu when clicking OK
+		okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
 	})
 
 	--send('QG') -- Quit game
@@ -191,10 +194,16 @@ local function onUpdate(dt)
 		while (true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
+
+			if settings.getValue("showDebugOutput") == true then
+				print('[MPGameNetwork] Receiving Data: '..received)
+			end
+
 			-- break it up into code + data
 			local code = string.sub(received, 1, 1)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)
+
 			if MPDebug then MPDebug.packetReceived(string.len(received)) end
 		end
 	end
@@ -205,6 +214,8 @@ end
 local function connectionStatus()
 	return launcherConnectionStatus
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 
 --events

@@ -12,6 +12,7 @@ print("Loading UI...")
 
 local players = {} -- { 'apple', 'banana', 'meow' }
 local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
+local UIqueue = {}
 
 
 local function updateLoading(data)
@@ -42,10 +43,14 @@ local function updatePlayersList(playersString)
 end
 
 
-local function updateQueue( spawnCount, editCount)
-	local UIqueue = {spawnCount = spawnCount, editCount = editCount}
-	UIqueue.show = spawnCount+editCount > 0
+local function sendQueue() -- sends queue to UI
 	guihooks.trigger("setQueue", UIqueue)
+end
+
+local function updateQueue( spawnCount, editCount)
+	UIqueue = {spawnCount = spawnCount, editCount = editCount}
+	UIqueue.show = spawnCount+editCount > 0
+	sendQueue()
 end
 
 local function setPing(ping)
@@ -165,6 +170,7 @@ M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setPlayerPing = setPlayerPing
 M.updateQueue = updateQueue
+M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
 
 print("UI loaded")

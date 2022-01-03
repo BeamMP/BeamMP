@@ -80,7 +80,7 @@ function playerList(list) {
 	let playersList = document.getElementById("players-table");
 	let parsedList = JSON.parse(list);
 	
-	if(players != null){
+	if(players != null && playersList != null){
 		//get differences between playernames and send them as messages
 		var left = players.filter((item) => { return !parsedList.includes(item) });
 		var joined = parsedList.filter((item) => { return !players.includes(item) });

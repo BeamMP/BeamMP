@@ -88,11 +88,8 @@ angular.module('beamng.stuff')
             <div layout="row" layout-align="start center" ng-cloak >
               <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
-                <span style="padding-left: 5px;">Players: </span>
+                <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
-            </div>
-            <div id="onlineplayers">
-              {{ ::beammpData.players }}
             </div>
           </div>
         </div>

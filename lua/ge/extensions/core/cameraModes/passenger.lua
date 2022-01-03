@@ -86,7 +86,7 @@ function C:update(data)
     return
   end
   local camNodeID, rightHandDrive = core_camera.getDriverData(data.veh)
-
+  if not camNodeID then core_camera.setVehicleCameraByIndexOffset(0, 1) extensions.hook('trackCamMode') end
   local carwidth = data.veh:getInitialWidth()
 
   local passengerOffset = vec3((carwidth*0.4)*(rightHandDrive and 1 or -1),0,0)

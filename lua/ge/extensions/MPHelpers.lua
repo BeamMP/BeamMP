@@ -7,6 +7,8 @@
 
 local M = {}
 
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
 local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
 end
@@ -62,6 +64,8 @@ M.tableLength  = tableSize
 --local
 M.colorMatch   = colorMatch
 M.tableDiff    = tableDiff
+
+detectGlobalWrites() -- reenable global write notifications
 
 
 local function onExtensionLoaded()

@@ -88,17 +88,14 @@ angular.module('beamng.stuff')
             <div layout="row" layout-align="start center" ng-cloak >
               <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
-                <span style="padding-left: 5px;">Players: </span>
+                <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
-            </div>
-            <div id="onlineplayers">
-              {{ ::beammpData.players }}
             </div>
           </div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div style="text-align:right; color:white;margin-left:16px;">
-          <div>BeamMP v4.2.2</div>
+          <div>BeamMP v4.2.3</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">

@@ -15,6 +15,7 @@ app.directive('multiplayersession', [function () {
 app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
+		bngApi.engineLua('UI.sendQueue()'); // asks the lua to send queue data
 	};
 
 	mdDialog = $mdDialog;

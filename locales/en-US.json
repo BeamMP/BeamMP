@@ -2836,7 +2836,7 @@
 
   "scenarios.west_coast_usa.fallOff.title" : "A Leap Of Destruction",
   "scenarios.west_coast_usa.fallOff.description" : "I hope you don't have vertigo. If you do... just don't look down in this mission alright? The goal there is straight forward : Ram as many cars off the building as possible within 60 seconds",
-  "scenarios.west_coast_usa.fallOff.startScreen" : "The goal here is simple : Push as many cars off the building as possible within 60 seconds! <br><br> Use the spinners to your own risks!",
+  "scenarios.west_coast_usa.fallOff.startScreen" : "The goal here is simple : Push as many cars off the building as possible within 60 seconds! <br><br> Use the spinners to your own risks!<br><br>You can get the following medals by pushing cars off the roof:<ul><li><b>Gold</b>: 12 cars</li><li><b>Silver</b>: 9 cars</li><li><b>Bronze</b>: 6 cars</li></ul><br><br>Good Luck!",
   "scenarios.west_coast_usa.fallOff.points" : "Score : {{score}}",
   "scenarios.west_coast_usa.fallOff.time" : "Time left : {{time}}",
   "scenarios.west_coast_usa.fallOff.noMedal" : "You didn't push enough cars off the edge to be on the podium.",
@@ -3261,8 +3261,9 @@
   "missions.delivery.gameplay.distance": "Remaining Distance: {{distStr}}",
   "missions.delivery.outro.cargoCount": "Cargo delivered",
   "missions.delivery.outro.timeRemaining": "Cargo delivered",
+  "missions.delivery.outro.contCargo": "Continue with all cargo",
 
-  "missions.delivery.east_coast_usa.watchtower.title": "Delivey: Watchtower Supplies",
+  "missions.delivery.east_coast_usa.watchtower.title": "Delivery: Watchtower Supplies",
   "missions.delivery.east_coast_usa.watchtower.description": "Deliver some supplies to the watchtower.",
   "missions.delivery.east_coast_usa.watchtower.introMessage": "I've packed some supplies for the crew in the watchtower. Can you bring it to them?<br>Also, the navi in the car is broken... but you know this area very well, don't you?<br>Dont forget to bring the trailer!",
   "missions.delivery.east_coast_usa.watchtower.goldMessage": "Thanks for delivering all those supplies!",
@@ -3322,7 +3323,7 @@
 
   "missions.delivery.small_island.upRocks.title": "Delivery: Mining Equipment",
   "missions.delivery.small_island.upRocks.description": "The research team up on the hill needs their equipment.",
-  "missions.delivery.small_island.upRocks.introMessage": "The Rocks Research Team up on the hill needs their \"mining equipment\" for some \"delicate research\". Be very careful with it, that thing weighs more than 5 tons, and due to its massive size, it is very top-heavy.<br>Make sure to make use of the <b>differentials</b> to get up the hills.",
+  "missions.delivery.small_island.upRocks.introMessage": "The Rocks Research Team up on the hill needs their \"mining equipment\" for some \"delicate research\". Be very careful with it, that thing weighs more than 5 tons, and due to its massive size, it is very top-heavy.<br>Be sure to make use of the <b>differentials</b> to get up the hills.",
   "missions.delivery.small_island.upRocks.goldMessage": "Great! This will allow us to carefully extract rock samples from the local area.",
 
   "missions.delivery.small_island.downRocks.title": "Delivery: Rocks and Boulders",
@@ -3341,65 +3342,93 @@
   "missions.arrive.italy.blancoAuto.startScreenText": "Take this small package and deliver it across the island. <br> <br>It's sensitive so don't get carried away and start playing bumper cars, but we need it there pronto you got it?<br><br> Just show up to the shack and we'll take care of it, don't ask any questions.",
   "missions.arrive.italy.blancoAuto.endScreenText": "You got it here in one piece, good job, now scram!",
 
-   "missions.arrive.italy.escursionismo.title": "Escursionismo",
+  "missions.arrive.italy.escursionismo.title": "Escursionismo",
   "missions.arrive.italy.escursionismo.description": "Treacherous drive along the tops of the Italian mountain ridges!",
   "missions.arrive.italy.escursionismo.startScreenTitle": "Escursionismo",
   "missions.arrive.italy.escursionismo.startScreenText": "Head down the narrow dirt path to the paved road and take it across the top of the mountain range to finish on a dirt road on the other side. Be careful there are a lot of blind corners and there are fatal cliffsides on all sides!",
   "missions.arrive.italy.escursionismo.endScreenText": "You survived, great job!",
 
-   "missions.arrive.italy.freewayA.title": "Freeway Run 'Route A'",
+  "missions.arrive.italy.freewayA.title": "Freeway Run 'Route A'",
   "missions.arrive.italy.freewayA.description": "A fun (possibly highspeed!) run along the freeway from one end to the other! You will be driving whichever car you enter the mission with.",
   "missions.arrive.italy.freewayA.startScreenTitle": "Freeway Run 'Route A'",
   "missions.arrive.italy.freewayA.startScreenText": "Traverse the entire freeway with light traffic. You have three minutes, but take caution: Damage is being tracked and you will fail if you damage your car too much!",
   "missions.arrive.italy.freewayA.endScreenText": "Congratulations, you've proven that you can drive on a freeway without destroying your vehicle!",
 
-   "missions.arrive.italy.freewayB.title": "Freeway Run 'Route B'",
+  "missions.arrive.italy.freewayB.title": "Freeway Run 'Route B'",
   "missions.arrive.italy.freewayB.description": "A fun (possibly highspeed!) run along the freeway from one end to the other! ",
   "missions.arrive.italy.freewayB.startScreenTitle": "Freeway Run 'Route B'",
   "missions.arrive.italy.freewayB.startScreenText": "Traverse the entire freeway with light traffic. You have three minutes, but take caution: Damage is being tracked and you will fail if you damage your car too much!",
   "missions.arrive.italy.freewayB.endScreenText": "Congratulations, you've proven that you can drive on a freeway without destroying your vehicle!",
 
-   "missions.arrive.italy.villaVIP.title": "Villa VIP Delivery",
+  "missions.arrive.italy.villaVIP.title": "Villa VIP Delivery",
   "missions.arrive.italy.villaVIP.description": "Drive a VIP to their Villa!",
   "missions.arrive.italy.villaVIP.startScreenTitle": "Villa VIP Delivery",
   "missions.arrive.italy.villaVIP.startScreenText": "Drive the VIP to their villa, please drive with care and do not speed or you will fail!",
   "missions.arrive.italy.villaVIP.endScreenText": "You did it!",
 
-   "missions.arrive.italy.airport001.title": "Airport Chauffeur - Castle",
+  "missions.arrive.italy.airport001.title": "Airport Chauffeur - Castle",
   "missions.arrive.italy.airport001.description": "Chauffeur your passenger to the castle.",
   "missions.arrive.italy.airport001.startScreenTitle": "Castle Chauffeur ",
   "missions.arrive.italy.airport001.startScreenText": "You've picked up a passenger at the airport, they would like a lift to Castelletto!",
   "missions.arrive.italy.airport001.endScreenText": "It's even more beautiful in person, thanks for the lift!",
 
-   "missions.arrive.italy.airport002.title": "Airport Ambulance",
+  "missions.arrive.italy.airport002.title": "Airport Ambulance",
   "missions.arrive.italy.airport002.description": "Deliver a patient to the hospital.",
   "missions.arrive.italy.airport002.startScreenTitle": "Ambulance",
   "missions.arrive.italy.airport002.startScreenText": "The passenger has been overcome by illness on the flight here. <br><br>Deliver them to the hospital to get them the care they need! ",
   "missions.arrive.italy.airport002.endScreenText": "The patient thanks you and says that they feel better already!",
 
-   "missions.arrive.italy.airport003.title": "Airport Chauffeur - Marina",
+  "missions.arrive.italy.airport003.title": "Airport Chauffeur - Marina",
   "missions.arrive.italy.airport003.description": "Chauffeur your passenger to the marina.",
   "missions.arrive.italy.airport003.startScreenTitle": "My Marina",
   "missions.arrive.italy.airport003.startScreenText": "Your customer has landed and has asked to be delivered to their marina.",
   "missions.arrive.italy.airport003.endScreenText": "Beautiful day to go sailing, thank you!",
 
-   "missions.arrive.italy.airport004.title": "Airport Chauffeur - Car Dealership",
+  "missions.arrive.italy.airport004.title": "Airport Chauffeur - Car Dealership",
   "missions.arrive.italy.airport004.description": "Chauffeur your passenger to their new car dealership.",
   "missions.arrive.italy.airport004.startScreenTitle": "Vehicle Pickup",
   "missions.arrive.italy.airport004.startScreenText": "Your customer has just landed and wants to pickup their new vehicle! <br><br>Deliver them to the dealership.",
   "missions.arrive.italy.airport004.endScreenText": "Thank you for the lift!",
 
-   "missions.arrive.italy.airport005.title": "Airport Chauffeur - Interceptor Delivery",
+  "missions.arrive.italy.airport005.title": "Airport Chauffeur - Interceptor Delivery",
   "missions.arrive.italy.airport005.description": "Deliver the brand new police interceptor to the police station.",
   "missions.arrive.italy.airport005.startScreenTitle": "Polizia Delivery",
   "missions.arrive.italy.airport005.startScreenText": "A brand-new police car has arrived, deliver it to the police station. <br><br>Take extreme caution not to damage it en route or you will fail!",
   "missions.arrive.italy.airport005.endScreenText": "Thank you for the delivery!",
 
-   "missions.arrive.italy.portinoTour.title": "Portino to the Top",
+  "missions.arrive.italy.portinoTour.title": "Portino to the Top",
   "missions.arrive.italy.portinoTour.description": "A nice and long drive out of Portino to the castle with traffic.",
   "missions.arrive.italy.portinoTour.startScreenTitle": "Portino Italy ",
   "missions.arrive.italy.portinoTour.startScreenText": "Follow the ground markers around and up the backside of Italy, you will arrive to the gas station near the castle! <br><br>This drive is longer than usual, the Miramar provides a luxurious though possibly treacherous driving experience on this route! Have fun!",
   "missions.arrive.italy.portinoTour.endScreenText": "You did it!",
+
+  "missions.arrive.wcusa.bastionExperience001.title": "Bastion Experience: Certification",
+  "missions.arrive.wcusa.bastionExperience001.description": "Bring the Bastion out to the shop near the motorsports park.",
+  "missions.arrive.wcusa.bastionExperience001.startScreenTitle": "Certification",
+  "missions.arrive.wcusa.bastionExperience001.startScreenText": "This lightly used Bastion needs to be re-certified! Our guys are too busy fixing all these old Bruckells, so bring it out to the new shop near the track so they can give it a look over! <br><br>Don't forget the motorsports park is right between here and there, so you need to take a route around it.<br><br> GPS road markers are not activated for this mission, you'll have to find your own way to your desitination!",
+  "missions.arrive.wcusa.bastionExperience001.endScreenText": "Let's get this thing certified and up for sale again!",
+
+  "missions.arrive.wcusa.bastionExperience002.title": "Bastion Experience: Drop-off",
+  "missions.arrive.wcusa.bastionExperience002.description": "Drop-off a recently-serviced customer car downtown!",
+  "missions.arrive.wcusa.bastionExperience002.startScreenTitle": "Drop-off",
+  "missions.arrive.wcusa.bastionExperience002.startScreenText": "A customer has requested that we drop off their Bastion once we have finished servicing it. Bring it out to their downtown residence. <br><br> GPS road markers are not activated for this mission, you'll have to find your own way to your desitination!",
+  "missions.arrive.wcusa.bastionExperience002.endScreenText": "Nothing beats Bruckell's customer service!",
+
+  "missions.arrive.wcusa.bastionExperience003.title": "Bastion Experience: Special Drop-off",
+  "missions.arrive.wcusa.bastionExperience003.description": "Take the wild Bruckell Bastion Battlehawk out to the countryside!",
+  "missions.arrive.wcusa.bastionExperience003.startScreenTitle": "Special Drop-off",
+  "missions.arrive.wcusa.bastionExperience003.startScreenText": "One of Bruckell's most powerful vehicles has just been in for service.  The client is away for the weekend and asked us to drop it off to their countryside home in the hills. <br><br>The easiest way to get there is over the highway. You can turn either left or right on the big intersection in front of the dealership and follow that road.<br><br>Drive with care, this car means business! <br><br> GPS road markers are not activated for this mission, you'll have to find your own way to your desitination!",
+  "missions.arrive.wcusa.bastionExperience003.endScreenText": "Keys are in the mailbox, hopefully nobody notices!",
+
+  "missions.arrive.wcusa.bastionExperience004.title": "Bastion Experience: Police Drop-off",
+  "missions.arrive.wcusa.bastionExperience004.description": "Drop-off the new Police variant!",
+  "missions.arrive.wcusa.bastionExperience004.startScreenTitle": "Police Drop-off",
+  "missions.arrive.wcusa.bastionExperience004.startScreenText": "The new Police Variant has been finished, bring it by the police station downtown to let them admire our work! <br><br> GPS road markers are not activated for this mission, you'll have to find your own way to your desitination!",
+  "missions.arrive.wcusa.bastionExperience004.endScreenText": "People will try to get pulled over by this, just to get a closer look at it!",
+
+
+
+
 
   "missions.precisionParking.description": "Park in each marked parking space as quickly as possible. You'll get points based on accuracy and remaining time.<br><ul><li>You can get up to 20 points per parking.</li><li>If you finish before the time runs out, you'll get 1 point per remaining second.</li> <li>When a marker has an arrow, you have to park in the correct orientation. </li></ul>You can get the following medals:<ul><li><b>Bronze</b>: {{bronzePoints}} Points</li><li><b>Silver</b>: {{silverPoints}} Points</li><li><b>Gold</b>: {{goldPoints}} Points</li></ul> Good Luck!",
   "missions.precisionParking.gameplay.points": "Points: {{points}}",
@@ -3411,7 +3440,7 @@
   "missions.precisionParking.gameplay.timePoints": "+{{points}} Points for remaining Time",
   "missions.precisionParking.gameplay.timeUp": "Time Up!",
 
-   "missions.knockAway.intro.description": "<br><ul><li>Knock away as many targets as you can within {{time}} seconds.</li><li>You get {{pointsPerTarget}} points per target.</li><li>If you finish before the time runs out, you'll get 1 point per remaining second, up to {{maxTimePoints}} Points.</li><li>",
+  "missions.knockAway.intro.description": "<br><ul><li>Knock away as many targets as you can within {{time}} seconds.</li><li>You get {{pointsPerTarget}} points per target.</li><li>If you finish before the time runs out, you'll get 1 point per remaining second, up to {{maxTimePoints}} Points.</li><li>",
   "missions.knockAway.intro.moveOnly": "Targets need to be moved from their position to count.",
   "missions.knockAway.intro.tipOnly": "Targets need to be tipped over to count.",
   "missions.knockAway.intro.moveAndTip": "Targets can either be moved from their position or tipped over to count.",
@@ -3460,8 +3489,22 @@
   "bigMap.action.zoomOut.title": "Map zoom out",
   "bigMap.action.zoomOut.description": "Zooms out of the map",
 
-  "missions.dragRace.gameplay.title" : "Drag Race Mission",
-  "missions.dragRace.gameplay.description" : "To compete in the race, you must first go to the start line.\nOnce in the starting position, wait for the traffic light to give the order to start.\nDrive as fast as you can to the finish line.\n\nThe vehicle is in Realistic behaviour so you will have to manage the gearbox.\n\nTo do this, use <span>[action=shiftUp]</span> to shift up, <span>[action=shiftDown]</span> to shift down and <span>[action=clutch]</span> to use the clutch. \n\nGood luck!",
+  "missions.dragRace.wcusa.title" : "West Coast Drag Race",
+  "missions.dragRace.wcusa.description" : "Compete in the West Coast Drag Race! The goal is to complete the quarter mile in the shortest time possible.",
+  "missions.dragRace.wcusa.milesStarted" : "Quarter mile started!",
+
+
+  "missions.dragRace.gridmapv2.title" : "GridmapV2 Drag Race",
+  "missions.dragRace.gridmapv2.description" : "Compete in the GridmapV2 Drag Race! The goal is to complete the quarter mile in the shortest time possible.",
+  "missions.dragRace.gridmapv2.milesStarted" : "Quarter mile started!",
+
+  "missions.dragRace.italy.title" : "Italy Runway Drag Race",
+  "missions.dragRace.italy.description" : "Compete in the Italy Runway Drag Race! The goal is to complete this insane 1.08 Km drag in the shortest time possible.",
+  "missions.dragRace.italy.milesStarted" : "Drag race started!",
+
+
+  "missions.dragRace.gameplay.title" : "Drag Race",
+  "missions.dragRace.gameplay.description" : "To compete in the race, you must first go to the start line.\nOnce in the starting position, wait for the traffic light to give the order to start.\nDrive as fast as you can to the finish line.\n\nThe vehicle is in realistic behaviour so you will have to manage the gearbox.\n\nTo do this, use <span>[action=shiftUp]</span> to shift up, <span>[action=shiftDown]</span> to shift down and <span>[action=clutch]</span> to use the clutch. \n\nGood luck!",
   "missions.dragRace.gameplay.forward" : "Align your front wheels with the starting line. (Move forward)",
   "missions.dragRace.gameplay.backward" : "Align your front wheels with the starting line. (Move backward)",
   "missions.dragRace.gameplay.inLine" : "Stop your vehicle now.",
@@ -3473,7 +3516,7 @@
   "missions.dragRace.gameplay.finalInfo" : "The final statistics are:<ul><li>Your Time: {{yourTime}}</li><li>Your Speed: {{yourSpeed}}</li><li>Opponent Time: {{opponentTime}}</li><li>Opponent Speed: {{opponentSpeed}}</li><ul>",
   "missions.dragRace.gameplay.disqualifiedEnd" : "You have been disqualified from the race!",
   "missions.dragRace.gameplay.outofSide" : "You have gotten out of your lane!",
-  "missions.dragRace.gameplay.move" : "Remember!\nThe gearbox is set to Realistic mode.",
+  "missions.dragRace.gameplay.move" : "Remember!\nThe gearbox is set to realistic mode.",
   "missions.dragRace.gameplay.return" : "Return to the start line",
 
   "campaigns.utah.chapter_1.title":"Senseless Destruction",
@@ -4768,5 +4811,6 @@
 	"ui.multiplayertos.info1": "For more information, be sure to check our ",
 	"ui.multiplayertos.info2": "You can also find more information on our ",
     "ui.common.sync": "Sync",
-  "ui.apps.categories.multiplayer": "Multiplayer"
+  "ui.apps.categories.multiplayer": "Multiplayer",
+  "ui.camera.mode.passenger": "Passenger"
 }

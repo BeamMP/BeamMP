@@ -1,0 +1,30 @@
+{
+"unicycle_snowman": {
+    "information":{
+        "authors":"BeamNG",
+        "name":"Snowman",
+    },
+    "slotType" : "unicycle_meshes",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["snowman_ball", ["unicycle_ball"]],
+        ["snowman_body", ["unicycle_body"]],
+    ],
+    "props": [
+       ["func", "mesh", "idRef:", "idX:", "idY:", "baseRotation", "rotation", "translation", "min", "max", "offset", "multiplier"],
+       //["unicycle_body", "snowman_body", "r1", "b15", "r2",  {"x":0, "y":0, "z":-90}, {"x":0, "y":0, "z":1} , {"x":0, "y":0, "z":0}, -360, 360, 0, 1,],
+    ],
+},
+"unicycle_debug": {
+    "information":{
+        "authors":"BeamNG",
+        "name":"Debug Meshes",
+    },
+    "slotType" : "unicycle_meshes",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["debug_ball", ["unicycle_ball"]],
+        ["debug_body", ["unicycle_body"]],
+    ],
+},
+}

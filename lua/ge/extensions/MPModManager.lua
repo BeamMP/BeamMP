@@ -89,13 +89,16 @@ local function cleanUpSessionMods()
 	if modsDB then
 			backupAllowed = false
 			local modsFound = false
+			local count = 0
 			for modname, mod in pairs(modsDB.mods) do
 					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+							count = count + 1
 							core_modmanager.deleteMod(modname)
 							modsFound = true
 					end
 			end
 			backupAllowed = true
+			log('M', "cleanUpSessionMods", count.." Mods cleaned up")
 			if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
 	end
 end

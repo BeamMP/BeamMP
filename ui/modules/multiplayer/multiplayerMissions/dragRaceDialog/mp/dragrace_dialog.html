@@ -1,0 +1,63 @@
+<style>
+        .button {
+            border-color: #ff7700;
+            border-width: 5px;
+            color: #ff7700;
+            background: rgba(0, 0, 0, 0.7);
+            padding-left: 10px;
+            margin-top: 20px;
+        }
+
+        .tableEntry {
+            width: 100%;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            padding-left: 16px;
+            color: white;
+        }
+
+        .tableEntry:hover {
+            background-color: grey;
+            color: white;
+            width: 100%;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            padding-left: 16px;
+            /*border-width: thin;
+            border-color: white;
+            border-style: solid;*/
+        }
+
+        .selectedTableEntry {
+            background-color: grey;
+            color: white;
+            width: 100%;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            padding-left: 16px;
+            /*border-width: thin;
+            border-color: white;
+            border-style: solid;*/
+        }
+    </style>
+<div style="margin: auto">
+    <md-content style="width: 700px; height:700px;" class="contentNavHelp">
+        <div class="md-padding">
+            <div id="header" style="position:absolute; top:0px; left:16px; height:130px; right:0px;overflow:hidden;">
+                <h1>Multiplayer Drag Race</h1>
+                <h2>Pick your opponent:</h2>
+            </div>
+            <div id="content" style="position:absolute; top:150px; bottom:100px; left:0px; right:0px; overflow-y:auto; overflow-x: hidden;">
+                <div ng-repeat="entry in plist track by $index"
+                     ng-class="{tableEntry: true, selectedTableEntry: selectedPlayer == entry['id']}"
+                     ng-click="selectPlayer(entry)">
+                    <div>{{entry['username']}}</div>
+                    <div>{{entry['vehicle']['name']}}</div>
+                </div>
+            </div>
+            <div id="footer" style="position:absolute; bottom:0px; height:100px; left:0px; right:0px; overflow:hidden;">
+                <md-button class="button" style="padding-right: 10px;" ng-click="invite()">invite</md-button>
+            </div>
+        </div>
+    </md-content>
+</div>

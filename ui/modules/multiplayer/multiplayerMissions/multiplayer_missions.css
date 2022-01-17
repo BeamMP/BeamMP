@@ -1,0 +1,130 @@
+/* (stolen [politely borrowed] from vanilla `mission-popups`) */
+
+.mp-mission-popups {
+  display: block;
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+}
+
+.mp-mission-info {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 500px;
+  max-width: 100%;
+  color: white;
+  font-family: Play;
+  user-select: none;
+}
+
+.mp-mission-ui .start-hint {
+  position: absolute;
+  text-transform: uppercase;
+  top: 100px;
+  font-weight: 600;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 500px;
+  max-width: 100%;
+  font-size: 60px;
+  color: white;
+  text-align: center;
+  font-family: Play;
+  user-select: none;
+  align-items: center;
+}
+
+.mp-mission-info .header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  border-top: solid 4px #ff7700;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.mp-mission-info .header-title {
+  font-size: 1.5em;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.mp-mission-info .header-subtitle {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 10px 0 0 0;
+}
+
+.mp-mission-info .header-icon {
+  width: 50px;
+  height: 50px;
+  fill: white;
+  stroke: none;
+  position: absolute;
+  left: -70px
+}
+
+.mp-mission-info .body {
+  padding: 10px 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.mp-mission-info .row {
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+  line-height: 1.5em;
+}
+
+.mp-mission-info .cell {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.mp-mission-info .cell.entry-label {
+  flex: 1;
+  /*font-size: 1.2em;*/
+  text-transform: uppercase;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.mp-mission-info .cell.entry-val {
+  flex: 1;
+}
+
+.mp-mission-info .buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.mp-mission-info .buttons .button {
+  background: rgba(0, 0, 0, 0.7);
+  border: solid 2px transparent;
+  padding: 5px 10px 0 10px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  z-index:10;
+}
+
+.mp-mission-info .buttons .button:focus,
+.mp-mission-info .buttons .button:hover,
+.mp-mission-info .buttons .button:active {
+  border-color: #ff7700;
+  color: #ff7700;
+  background-color: rgba(0, 0, 0, 0.8);
+  outline: none;
+}

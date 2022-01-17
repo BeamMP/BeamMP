@@ -1,0 +1,37 @@
+<div style="margin: auto">
+    <style>
+        .button {
+            border-color: #ff7700;
+            border-width: 5px;
+            color: #ff7700;
+            background: rgba(0, 0, 0, 0.7);
+            padding-left: 10px;
+            margin-top: 20px;
+        }
+
+        .tableEntry {
+            width: 100%;
+            padding: 20px;
+        }
+
+        .tableEntry:hover {
+            border-color: #ff7700;
+            border-width: 5px;
+            width: 100%;
+            padding: 20px;
+        }
+    </style>
+    <md-content style="width: 700px; height:700px;" class="contentNavHelp">
+        <div class="md-padding">
+            <h1>Singleplayer Drag Race</h1>
+            <h2>Rules:</h2>
+            <ol>
+                <li>Your car is now {{curVehName}}</li>
+                <li>You can modify it anyhow you want</li>
+                <li>You do a race with your car and get your time</li>
+            </ol>
+            <div>Leaderboard soon to come!</div>
+            <md-button class="button" style="padding-right: 10px;" ng-click="start()">start</md-button>
+        </div>
+    </md-content>
+</div>

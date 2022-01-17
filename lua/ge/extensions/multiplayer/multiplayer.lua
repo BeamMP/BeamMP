@@ -103,10 +103,14 @@ end
 
 local function onClientPostStartMission()
 	if MPCoreNetwork.isMPSession() then
-	core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+		local dragRace = require('ge/extensions/mpGameModes/dragRace/dragRace')
+		AddEventHandler('UIMessage', dragRace.uiMessage)
+		AddEventHandler('SyncRaceState', dragRace.syncState)
 
-	--readyCalled = true
-	MPGameNetwork.connectToLauncher()
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+
+		--readyCalled = true
+		MPGameNetwork.connectToLauncher()
 	end
 end
 

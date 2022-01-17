@@ -264,6 +264,20 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'MultiplayerDirectController as multiplayermenu',
       backState: 'BACK_TO_MENU'
     })
+
+    .state('menu.spDragraceDialog', {
+      url: '/spDrag',
+      templateUrl: '/ui/modules/multiplayer/multiplayerMissions/dragRaceDialog/sp/dragrace_dialog.html',
+      controller: 'SPDragRaceController',
+      params: { data: {} }
+    })
+
+    .state('menu.mpDragraceDialog', {
+      url: '/mpDrag',
+      templateUrl: '/ui/modules/multiplayer/multiplayerMissions/dragRaceDialog/mp/dragrace_dialog.html',
+      controller: 'MPDragRaceController',
+      params: { playerList: [] }
+    })
     // -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.options', {

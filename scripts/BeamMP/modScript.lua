@@ -45,6 +45,9 @@ registerCoreModule("MPUpdatesGE")
 load("nodesGE")
 registerCoreModule("nodesGE")
 
+load("mpGameModes/dragRace/dragRace")
+registerCoreModule("mpGameModes/dragRace/dragRace")
+
 -- load this file last so it can reference the others
 load("MPHelpers")
 registerCoreModule("MPHelpers")

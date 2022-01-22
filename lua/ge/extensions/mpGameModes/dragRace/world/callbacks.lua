@@ -3,21 +3,11 @@ require('ge/extensions/mpGameModes/dragRace/models/server_contract')
 local ui = require('ge/extensions/mpGameModes/dragRace/ui/ui')
 
 local raceTimer = 0
-local currentActiveTriggers = {}
 
 local lastUpdatedState
 local timeSinceLastServerUpdate = 0
 
-local function updateCurrentActiveTriggers(triggerData)
-    if triggerData.event == 'enter' then
-        currentActiveTriggers[triggerData.triggerName] = '' --something not nil
-    elseif triggerData.event == 'exit' then
-        currentActiveTriggers[triggerData.triggerName] = nil
-    end
-end
-
 local function raceStartTrigger(data)
-    if lastUpdatedState.raceType ~= RaceType.none then return end
     if data.triggerName ~= 'dragTrigger' then return end
 
     local vid = be:getPlayerVehicle(0):getID()
@@ -51,7 +41,7 @@ local function handleMyRace(playerState, data)
                 maxSpeed = be:getPlayerVehicle(0):getVelocity():len() * 2.2369362920544,
                 vehicleName = curVeh.Brand..' '..curVeh.Name,
             })
-            TriggerServerEvent('RequestCrossedFinishLine', dumps(results):gsub(":","&"))
+            TriggerServerEvent('RequestCrossedFinishLine', results:gsub(":","&"))
         end
     end
 end

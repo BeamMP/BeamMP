@@ -360,12 +360,8 @@ local function onInit()
 	end
 
 	local version = split(beamng_versiond, '.')
-	dump(beamng_versiond)
-	dump(version)
-
 	-- Lets make sure that they are not in the middle of a game. This prevents them being presented the main menu when they reload lua while in game.
 	if not scenetree.missionGroup and getMissionFilename() == "" then 
-		print('Yep not in a game. Lets load the BeamMP version of the UI')
 		-- Check the game version for if we expect it to be BeamMP compatable. This check adds the UI and Multiplayer Options so that they can then play.
 		if version[1] == "0" and version[2] == "24" then
 			print('Redirecting to the BeamMP UI for 0.24')

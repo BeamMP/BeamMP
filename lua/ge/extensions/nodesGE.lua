@@ -76,6 +76,24 @@ M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
 M.applyRot   = applyRot
 
+-- Node Control from here
+
+local function setAllCollision(doCollision)
+	for i = 0, be:getObjectCount()-1 do -- For each vehicle
+		local veh = be:getObject(i) --  Get vehicle
+		if doCollision then veh:queueLuaCommand("nodesVE.enableCollision('true')")
+		else veh:queueLuaCommand("nodesVE.enableCollision('false')") end
+	end
+end
+
+local function enableCollision(doCollision)
+	local veh = be:getObject(0)
+	if doCollision then veh:queueLuaCommand("nodesVE.enableCollision('true')")
+	else veh:queueLuaCommand("nodesVE.enableCollision('false')") end
+end
+
+M.enableCollision = enableCollision
+M.setAllCollision = setAllCollision
 
 
 print("nodesGE loaded")

@@ -256,23 +256,33 @@ local function loginReceived(params)
 	end
 end
 
-
+local cleanUpSessionMods = false
 local function leaveServer(goBack)
 	isMpSession = false
 	isGoingMpSession = false
-	print("Reset Session Called! " .. tostring(goBack))
+	print("Reset Session Called!")
+	if goBack then
+		print("Returning to main menu")
+	end
 	send('QS') -- Tell the launcher that we quit server / session
 	disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
-	connectToLauncher()
 	--UI.readyReset()
 	status = "" -- Reset status
-	if goBack then endActiveGameMode() end
-	-- resets the instability function back to default
-	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
+	--if goBack then endActiveGameMode() end
+	if endActiveGameMode() == nil then
+		print("ActiveGameMode Ended.")
+		returnToMainMenu()
+		print("Returned to Main Menu")
+		connectToLauncher()
+		print("Reconnected to Launcher")
+		-- resets the instability function back to default
+		onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
 
-	MPModManager.cleanUpSessionMods()
+		--cleanUpSessionMods = true
+	  MPModManager.cleanUpSessionMods()
+	end
 end
 
 local function isMPSession()
@@ -339,7 +349,43 @@ local HandleNetwork = {
 
 -- ============= Init =============
 local function onInit()
-	if not core_modmanager.getModList then Lua:requestReload() end
+	function split(s, sep)
+    local fields = {}
+    
+    local sep = sep or " "
+    local pattern = string.format("([^%s]+)", sep)
+    string.gsub(s, pattern, function(c) fields[#fields + 1] = c end)
+    
+    return fields
+	end
+
+	local version = split(beamng_versiond, '.')
+	dump(beamng_versiond)
+	dump(version)
+
+	-- Lets make sure that they are not in the middle of a game. This prevents them being presented the main menu when they reload lua while in game.
+	if not scenetree.missionGroup and getMissionFilename() == "" then 
+		print('Yep not in a game. Lets load the BeamMP version of the UI')
+		-- Check the game version for if we expect it to be BeamMP compatable. This check adds the UI and Multiplayer Options so that they can then play.
+		if version[1] == "0" and version[2] == "24" then
+			print('Redirecting to the BeamMP UI for 0.24')
+			-- Lets now load the BeamMP Specific UI
+			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.24/index.html")) {location.replace("local://local/ui/entrypoints/main_0.24/index.html")}')
+
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		elseif version[1] == "0" and version[2] == "23" then
+			print('Redirecting to the BeamMP UI for 0.23')
+			-- TODO #199 - Add the 0.23 UI here as I did above for 0.24
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		else
+			print('BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)
+			guihooks.trigger('modmanagerError', 'BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)
+		end
+	end
 end
 
 
@@ -385,6 +431,11 @@ end
 
 
 local function onUpdate(dt)
+	if cleanUpSessionMods then
+		cleanUpSessionMods = false
+		MPModManager.cleanUpSessionMods()
+	end
+
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		while (true) do
@@ -452,6 +503,7 @@ end
 
 local function onUiReady()
 	if getMissionFilename() == "" then
+		onInit()
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
 	end
 end

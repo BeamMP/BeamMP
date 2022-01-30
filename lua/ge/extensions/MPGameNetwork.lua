@@ -127,13 +127,6 @@ end
 -------------------------------------------------------------------------------
 -- Keypress handling
 -------------------------------------------------------------------------------
-function onKeyPressed(keyname, f)
-	addKeyEventListener(keyname, f, 'down')
-end
-function onKeyReleased(keyname, f)
-	addKeyEventListener(keyname, f, 'up')
-end
-
 function addKeyEventListener(keyname, f, type)
 	f = f or function() end
 	log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
@@ -141,6 +134,13 @@ function addKeyEventListener(keyname, f, type)
 	table.insert(keysToPoll, keyname)
 
 	be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
+end
+
+function onKeyPressed(keyname, f)
+	addKeyEventListener(keyname, f, 'down')
+end
+function onKeyReleased(keyname, f)
+	addKeyEventListener(keyname, f, 'up')
 end
 
 local function onKeyStateChanged(key, state)

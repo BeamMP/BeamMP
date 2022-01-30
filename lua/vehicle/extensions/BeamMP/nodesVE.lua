@@ -201,6 +201,131 @@ M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes
 
+-- Node Collision work from here on out
+
+local NORMALTYPE = 0
+local NODE_FIXED = 1
+local collisionNodesTable = {}
+local selfCollisionNodesTable = {}
+local staticCollisionNodesTable = {}
+
+
+local function onReset()
+	print("onReset")
+end
+
+
+
+local function onInit()
+	print("onExtensionLoaded")
+	if v.data.nodes == nil then return end
+	for _, node in pairs(v.data.nodes) do
+		if node.collision == nil then
+			collisionNodesTable[node.cid] = true
+		end
+		if node.selfCollision == nil then
+			selfCollisionNodesTable[node.cid] = true
+		end
+		if node.staticCollision == nil then
+			staticCollisionNodesTable[node.cid] = true
+		end
+	end
+end
+
+
+
+local function enableCollision(tempValue)
+	local doCollision = true
+	if tempValue == 'true' then doCollision = true
+	else doCollision = false end
+
+	local vehType = v.mpVehicleType and v.mpVehicleType == "R" or v.mpVehicleType == "remote" or true
+	if not vehType then return end --return if veh is local
+
+	print(tostring(obj:getID()).." collision have been set to "..tostring(doCollision))
+
+	if v.data.nodes == nil then return end
+	for _, node in pairs(v.data.nodes) do -- For each node
+
+		local collision = node.collision or true
+		local selfCollision = node.selfCollision or false
+		local staticCollision = node.staticCollision or true
+
+		if node.wheelID == nil then -- If it's not a wheel
+			local id = node.cid
+			if collisionNodesTable[id] then collision = doCollision end
+			--if selfCollisionNodesTable[id] then selfCollision = not doCollision end
+			--if staticCollisionNodesTable[id] then staticCollision = doCollision end
+		end
+
+		-- --------------------- Self collision ---------------------
+		--local collision = node.collision or true
+	
+		-- --------------------- Self collision ---------------------
+		--local selfCollision = node.selfCollision or false
+		
+		-- --------------------- Static collision ---------------------
+		--local staticCollision = node.staticCollision or true
+
+		-- --------------------- Node type ---------------------
+		local ntype = NORMALTYPE
+		if node.fixed == true then ntype = NODE_FIXED end
+
+		-- --------------------- Randoom stuff ---------------------
+		local frictionCoef = type(node.frictionCoef) == 'number' and node.frictionCoef or 1
+		local slidingFrictionCoef = type(node.slidingFrictionCoef) == 'number' and node.slidingFrictionCoef or frictionCoef
+		local noLoadCoef = type(node.noLoadCoef) == 'number' and node.noLoadCoef or 1
+		local fullLoadCoef = type(node.fullLoadCoef) == 'number' and node.fullLoadCoef or 0
+		local loadSensitivitySlope = type(node.loadSensitivitySlope) == 'number' and node.loadSensitivitySlope or 0
+		local nodeWeight = node.nodeWeight
+		local nodeMaterialTypeID
+		if node.nodeMaterial ~= nil then
+			nodeMaterialTypeID = node.nodeMaterial
+			if type(nodeMaterialTypeID) ~= "number" then nodeMaterialTypeID = 0 end
+		else
+			nodeMaterialTypeID = 0
+		end
+
+		-- We set the node
+		local pos = obj:getNodePosition(node.cid)
+		obj:setNode(
+			node.cid,
+			pos.x,
+			pos.y,
+			pos.z,
+			nodeWeight,
+			ntype,
+			frictionCoef,
+			slidingFrictionCoef,
+			node.stribeckExponent or 1.75,
+			node.stribeckVelMult or 1,
+			noLoadCoef,
+			fullLoadCoef,
+			loadSensitivitySlope,
+			node.softnessCoef or 0.5,
+			node.treadCoef or 0.5,
+			node.tag or '',
+			node.couplerStrength or math.huge,
+			node.firstGroup or -1,
+			selfCollision,
+			collision,
+			staticCollision, 
+			nodeMaterialTypeID
+		)
+
+		-- Pair node for wheels
+		if node.pairedNode then
+			obj:setNodePair2WheelId(node.cid, node.pairedNode, node.pairedNode2 or -1, node.wheelID or -1)
+		end
+	end
+	print(tostring(obj:getID()).." state set successfully")
+	--obj:queueGameEngineLua("be:reloadCollision()")
+end
+
+M.onExtensionLoaded = onInit
+M.onReset = onReset
+M.enableCollision = enableCollision
+
 
 
 return M

@@ -57,8 +57,11 @@ local function applyPos(data, serverVehicleID)
 
 	local decoded = jsonDecode(data)
 
+	if not decoded.pos then log('E', 'applyPos', 'No position data recevied for entity with ID '..serverVehicleID) return end
+
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim
+	decoded.ping = decoded.ping or 0
 	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 
 	vehicle.ping = ping

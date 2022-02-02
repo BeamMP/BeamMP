@@ -156,8 +156,10 @@ function showList() {
 	if (localStorage.getItem('plHorizontal') == "right") { shownText = "&lt;"; hiddenText = "&gt;"; }
 	var plContainer = document.getElementById("plist-container");
 	var btn = document.getElementById("show-button");
-	plContainer.style.display = "block";
-	btn.innerHTML = shownText;
+	if (plContainer && btn) {
+		plContainer.style.display = "block";
+		btn.innerHTML = shownText;
+	}
 }
 
 function hideList() {

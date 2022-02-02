@@ -12,17 +12,20 @@ registerCoreModule("MPDebug")
 load("UI")
 registerCoreModule("UI")
 
+load("MPCoreSystem")
+registerCoreModule("MPCoreSystem")
+
 load("MPModManager")
 registerCoreModule("MPModManager")
 
-load("MPCoreNetwork")
-registerCoreModule("MPCoreNetwork")
+--load("MPCoreNetwork")
+--registerCoreModule("MPCoreNetwork")
 
 load("MPConfig")
 registerCoreModule("MPConfig")
 
-load("MPGameNetwork")
-registerCoreModule("MPGameNetwork")
+--load("MPGameNetwork")
+--registerCoreModule("MPGameNetwork")
 
 load("MPVehicleGE")
 registerCoreModule("MPVehicleGE")

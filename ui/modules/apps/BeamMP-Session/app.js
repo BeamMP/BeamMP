@@ -21,7 +21,7 @@ app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	mdDialog = $mdDialog;
 
 	$scope.mpquit = function() {
-		bngApi.engineLua('MPCoreNetwork.leaveServer(true)');
+		bngApi.engineLua('MPCoreSystem.leaveServer(true)');
 	};
 
 	$scope.applyQueue = function() {

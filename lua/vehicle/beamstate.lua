@@ -310,7 +310,9 @@ end
 
 local function onCouplerAttached(nodeId, obj2id, obj2nodeId)
   disableAutoCoupling()
-  attachedCouplers[nodeId] = {obj2id = obj2id, obj2nodeId = obj2nodeId}
+  attachedCouplers[nodeId] = transmitCouplers[nodeId] or {}
+  attachedCouplers[nodeId].obj2id = obj2id
+  attachedCouplers[nodeId].obj2nodeId = obj2nodeId
 
   -- figure out the electrics state
   local n = v.data.nodes[nodeId]
@@ -373,7 +375,7 @@ local function exportCouplerData(nodeid, dataList)
     log("E", "beamstate.exportCouplerElectrics", "unable to export electrics: known coupled node: " .. tostring(nodeid))
     return
   end
-  transmitCouplers[nodeid] = attachedCouplers[nodeid]
+  transmitCouplers[nodeid] = attachedCouplers[nodeid] or {}
   transmitCouplers[nodeid].exportElectrics = dataList.electrics
   transmitCouplers[nodeid].exportInputs = dataList.inputs
 end
@@ -588,20 +590,22 @@ local function updateGFX(dt)
 
   -- transmit data
   for _, coupler in pairs(transmitCouplers) do
-    local data = {}
-    if coupler.exportElectrics then
-      data.electrics = {}
-      for _, v in pairs(coupler.exportElectrics) do
-        data.electrics[v] = electrics.values[v]
+    if coupler.obj2id then
+      local data = {}
+      if coupler.exportElectrics then
+        data.electrics = {}
+        for _, v in pairs(coupler.exportElectrics) do
+          data.electrics[v] = electrics.values[v]
+        end
       end
-    end
-    if coupler.exportInputs then
-      data.inputs = {}
-      for _, v in pairs(coupler.exportInputs) do
-        data.inputs[v] = electrics.values[v] or input[v]
+      if coupler.exportInputs then
+        data.inputs = {}
+        for _, v in pairs(coupler.exportInputs) do
+          data.inputs[v] = electrics.values[v] or input[v]
+        end
       end
+      obj:queueObjectLuaCommand(coupler.obj2id, string.format("beamstate.importCouplerData(%s, %s)", coupler.obj2nodeId, serialize(data)))
     end
-    obj:queueObjectLuaCommand(coupler.obj2id, string.format("beamstate.importCouplerData(%s, %s)", coupler.obj2nodeId, serialize(data)))
   end
 end
 

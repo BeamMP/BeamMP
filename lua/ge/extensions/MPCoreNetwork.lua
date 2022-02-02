@@ -6,15 +6,19 @@
 
 
 local M = {}
-print("Loading MPCoreNetwork...")
+print("Loading MPCoreSystem...")
 
 
 
 -- ============= VARIABLES =============
-local TCPLauncherSocket -- Launcher socket
 local currentServer = {} -- Store the server we are on
 local Servers -- Store all the servers
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
+-- Status: 0 not connected | 
+-- 1 connecting - Launcher
+-- 2 connected - Launcher
+-- 3 connecting - Session
+-- 4 connected - Session
+local launcherConnectionStatus = 0 
 local launcherConnectionTimer = 0
 local status = ""
 local launcherVersion = ""
@@ -24,7 +28,6 @@ local isMpSession = false
 local isGoingMpSession = false
 local launcherTimeout = 0
 local connectionIssuesShown = false
-local socket = require('socket')
 --[[
 Z  -> The client asks the launcher its version
 B  -> The client asks the launcher for the servers list
@@ -37,36 +40,40 @@ C  -> The client asks for the server's mods
 
 -- ============= LAUNCHER RELATED =============
 local function send(s)
-	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
+	local r = 'IPC'
+	if MP then
+		MP.Core(s)
+	end
+	--local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
 	if not settings.getValue("showDebugOutput") then return end
 
 	if s == 'A' or s == 'Up' then
 		print(s)
 	else
-		print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
+		print('[MPCoreSystem] Sending Data ('..r..'): '..s)
 	end
 end
 
 local function connectToLauncher()
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		log('M', 'connectToLauncher', "Connecting to launcher")
-		TCPLauncherSocket = socket.tcp()
-		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
-		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444));
-		launcherConnectionStatus = 1
+		if MP then
+			launcherConnectionStatus = 1
+		end
 	end
 end
 
 local function disconnectLauncher(reconnect)
 	if launcherConnectionStatus > 0 then -- If player was connected
 		log('M', 'disconnectLauncher', "Disconnecting from launcher")
-		TCPLauncherSocket:close()-- Disconnect from server
+		--TCPLauncherSocket:close()-- Disconnect from server
 		launcherConnectionStatus = 0
 		launcherConnectionTimer = 0
 		isGoingMpSession = false
 	end
-	if reconnect then connectToLauncher() end
+	if reconnect then 
+		connectToLauncher() 
+	end
 end
 
 local function onLauncherConnectionFailed()
@@ -84,8 +91,9 @@ end
 
 -- This is called everytime we receive a heartbeat from the launcher
 local function checkLauncherConnection()
+	print('Connected!')
 	launcherConnectionTimer = 0
-	if launcherConnectionStatus ~= 2 then
+	if launcherConnectionStatus == 1 then
 		launcherConnectionStatus = 2
 		guihooks.trigger('launcherConnected', nil)
 	end
@@ -99,7 +107,8 @@ end
 -- ================ UI ================
 -- Called from multiplayer.js UI
 local function getLauncherVersion()
-	return launcherVersion
+	-- TODO #200 - Reset this back to using the launcher provided version
+	return "2.0"--launcherVersion
 end
 local function isLoggedIn()
 	return loggedIn
@@ -219,8 +228,8 @@ local function loadLevel(map)
 	if getMissionFilename() == '' then
 		multiplayer_multiplayer.startMultiplayer(map)
 	else
-		MPGameNetwork.disconnectLauncher()
-		MPGameNetwork.connectToLauncher()
+		--MPGameNetwork.disconnectLauncher()
+		--MPGameNetwork.connectToLauncher()
 	end
 	isMpSession = true
 
@@ -299,7 +308,7 @@ local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
-	if code == "l" then
+	if code == "l" and launcherConnectionStatus == 2 then
 		--log('W',"handleU", data)
 		if settings.getValue('beammpAlternateModloading') then
 			if data == "start" then-- starting modloading, disable automount
@@ -325,7 +334,7 @@ local function handleU(params)
 			send('Mrequest')
 			status = "LoadingMap"
 		end
-	elseif code == "p" and isMpSession then
+	elseif code == "p" and isMpSession and launcherConnectionStatus > 2 then
 		UI.setPing(data.."")
 		positionGE.setPing(data)
 	end
@@ -334,9 +343,8 @@ end
 
 -- ============= EVENTS =============
 local HandleNetwork = {
-	['A'] = function(params) checkLauncherConnection() end, -- Connection Alive Checking
 	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Serverlist received
-	['U'] = function(params) handleU(params) end, -- UI
+	['U'] = function(params) checkLauncherConnection() handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
@@ -345,7 +353,17 @@ local HandleNetwork = {
 	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
 }
 
-
+function handleCoreMsg(msg)
+	-- break it up into code + data
+	local code = string.sub(msg, 1, 1)
+	local data = string.sub(msg, 2)
+	if code == "B" then
+		log('W','handleCoreMsg','Received: '..code..' -> <Server List Data>')
+	else
+		log('W','handleCoreMsg','Received: '..code..' -> '..data)
+	end
+	HandleNetwork[code](data)
+end
 
 -- ============= Init =============
 local function onInit()
@@ -434,30 +452,13 @@ local function onUpdate(dt)
 
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
-		while (true) do
-			local received, stat, partial = TCPLauncherSocket:receive() -- Receive data
-
-			if not received or received == "" then
-				break
-			end
-
-			if settings.getValue("showDebugOutput") == true then
-				print('[MPCoreNetwork] Receiving Data: '..received)
-			end
-
-			-- break it up into code + data
-			local code = string.sub(received, 1, 1)
-			local data = string.sub(received, 2)
-			HandleNetwork[code](data)
-
-		end
+		
 
 		--================================ SECONDS TIMER ================================
 		launcherConnectionTimer = launcherConnectionTimer + dt -- Time in seconds
-		if launcherConnectionTimer > 0.5 then
-			send('A') -- Launcher heartbeat
-			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
-			else send('Up') end -- Server heartbeat
+		--print(launcherConnectionTimer)
+		if launcherConnectionTimer > 1 then
+			send('U') -- Server heartbeat - New and improved to get ping AND ui message ANDDDD The launcher heartbeat!!!!
 		end
 
 		-- Check the launcher connection
@@ -476,7 +477,8 @@ local function onUpdate(dt)
 
 			if launcherConnectionTimer > 15 then
 				disconnectLauncher(true) -- reconnect to launcher (this breaks the launcher if the connection
-				connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
+				-- TODO #202 Reconnect this back to the active session in case of network loss.
+				--connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
 			end
 		end
 	end
@@ -488,6 +490,16 @@ local function onClientStartMission(mission)
 		--Lua:requestReload()
 	elseif getMissionFilename() == currentServer.map then
 		status = "Playing"
+	end
+end
+
+local function onClientPostStartMission(mission)
+	if status == "Playing" and getMissionFilename() ~= currentServer.map then
+		print("The user has loaded another mission!")
+		--Lua:requestReload()
+	elseif getMissionFilename() == currentServer.map then
+		status = "Playing"
+		send('A')
 	end
 end
 
@@ -534,6 +546,7 @@ M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
+M.onClientPostStartMission  = onClientPostStartMission
 M.login                = login
 M.logout               = logout
 M.modLoaded            = modLoaded
@@ -549,6 +562,6 @@ M.connectionStatus     = launcherConnectionStatus
 M.onSerialize          = onSerialize
 M.onDeserialized       = onDeserialized
 
-print("MPCoreNetwork loaded")
+print("MPCoreSystem loaded")
 
 return M

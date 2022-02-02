@@ -569,7 +569,7 @@ end
 --============================ ON VEHICLE SPAWNED (CLIENT) ============================
 local function onVehicleSpawned(gameVehicleID)
 
-	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+	if not MPCoreSystem.isMPSession() then return end -- do nothing if singleplayer
 
 	local veh = be:getObjectByID(gameVehicleID)
 	local newJbeamName = veh:getJBeamFilename()
@@ -614,7 +614,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 local function onVehicleDestroyed(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus > 0 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
@@ -628,7 +628,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if vehicle.isLocal then
 				if serverVehicleID then
-					MPGameNetwork.send('Od:'..serverVehicleID)
+					MPCoreSystem.send('Od:'..serverVehicleID)
 					vehicles[serverVehicleID]:delete()
 				end
 			end
@@ -643,7 +643,7 @@ end
 
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	if MPCoreNetwork.isMPSession() then -- If TCP connected
+	if MPCoreSystem.isMPSession() then -- If TCP connected
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 
 		if newGameVehicleID and newGameVehicleID > -1 then
@@ -984,7 +984,7 @@ end
 
 local function saveDefaultRequest()
 	local currentVehicle = be:getPlayerVehicle(0)
-	if not MPCoreNetwork.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
+	if not MPCoreSystem.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
 		extensions.core_vehicle_partmgmt.savedefault()
 		log('I', "saveDefaultRequest", "Request to save vehicle accepted")
 	else
@@ -994,7 +994,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreSystem.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -1028,7 +1028,7 @@ local function spawnRequest(model, config, colors)
 end
 
 local function saveConfigRequest(configfilename)
-	if not MPCoreNetwork.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
+	if not MPCoreSystem.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 
@@ -1187,13 +1187,13 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if not scenetree.missionGroup and MPCoreSystem.connectionStatus == 1 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end
 
 local function onPreRender(dt)
-	if MPGameNetwork and MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem and not scenetree.missionGroup and MPCoreSystem.connectionStatus > 0 then -- If UDP connected
 
 		local activeVeh = be:getPlayerVehicle(0)
 		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil

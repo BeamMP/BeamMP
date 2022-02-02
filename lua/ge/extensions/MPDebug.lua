@@ -236,7 +236,7 @@ local function drawMsgConsole()
 			var.refresh_time = var.refresh_time + 1.0 / var.refresh_rate
 		end
 
-
+		-- TODO #204 Add MP only message console here along with custom logging settings for script makers.
 		
 
 	im.End()

@@ -46,12 +46,15 @@ M.send = function(p, s)
 	if MP then
     if p == 'CORE' then
 		  MP.Core(s)
+			if MPDebug then MPDebug.packetSent(string.len(s)) end
     elseif p == 'GAME' then
       MP.Game(s)
+			if MPDebug then MPDebug.packetSent(string.len(s)) end
     else
       log('M', 'send', "Message Protocol not specified: "..p.." "..s)
     end
 	end
+
 	--local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
 	if not settings.getValue("showDebugOutput") then return end
   log('M', 'send', 'Sending Data ('..r..'-'..p..'): '..s)

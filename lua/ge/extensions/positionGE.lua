@@ -32,10 +32,10 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPCoreSystem.send('Zp:'..serverVehicleID..":"..data)
+			MPCoreSystem.send('GAME', 'Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end

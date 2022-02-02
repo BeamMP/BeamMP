@@ -41,6 +41,8 @@ C  -> The client asks for the server's mods
 --
 M.send = function(p, s) 
 	local r = 'IPC'
+	if not p then return end
+	local s = s or ''
 	if MP then
     if p == 'CORE' then
 		  MP.Core(s)

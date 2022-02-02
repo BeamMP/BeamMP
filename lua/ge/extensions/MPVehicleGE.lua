@@ -382,7 +382,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
 
 		local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-		MPCoreSystem.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+		MPCoreSystem.send('GAME', 'Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 
 		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
@@ -413,13 +413,13 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.cpo = {p1.x, p1.y, p1.z, p1.w}
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-	MPCoreSystem.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+	MPCoreSystem.send('GAME', 'Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 	log('I', "sendVehicleEdit", "Vehicle custom data "..gameVehicleID.." was sent")
 	vehiclesToSync[gameVehicleID] = nil
 end
 
 local function sendBeamstate(state, gameVehicleID)
-	MPCoreSystem.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
+	MPCoreSystem.send('GAME', 'Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
 end
 
 
@@ -614,7 +614,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 local function onVehicleDestroyed(gameVehicleID)
-	if MPCoreSystem.connectionStatus > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
@@ -628,7 +628,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if vehicle.isLocal then
 				if serverVehicleID then
-					MPCoreSystem.send('Od:'..serverVehicleID)
+					MPCoreSystem.send('GAME', 'Od:'..serverVehicleID)
 					vehicles[serverVehicleID]:delete()
 				end
 			end
@@ -707,7 +707,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 					local playerID, serverVehicleID = MPConfig.getPlayerServerID(), newServerVehicleID
 					local s = tostring(playerID) .. ':' .. newServerVehicleID
 
-					MPCoreSystem.send('Om:'.. s)
+					MPCoreSystem.send('GAME', 'Om:'.. s)
 				end
 			end
 		end
@@ -716,7 +716,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPCoreSystem.connectionStatus > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
@@ -736,7 +736,7 @@ local function onVehicleResetted(gameVehicleID)
 					w = rot.w
 				}
 			}
-			MPCoreSystem.send('Or:'..vehicle.serverVehicleString..":"..jsonEncode(tempTable).."")
+			MPCoreSystem.send('GAME', 'Or:'..vehicle.serverVehicleString..":"..jsonEncode(tempTable).."")
 		end
 	end
 end
@@ -1187,13 +1187,13 @@ end
 
 
 local function onUpdate(dt)
-	if not scenetree.missionGroup and MPCoreSystem.connectionStatus == 1 then -- If TCP connected
+	if not scenetree.missionGroup and MPCoreSystem.connectionStatus == 4 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end
 
 local function onPreRender(dt)
-	if MPCoreSystem and not scenetree.missionGroup and MPCoreSystem.connectionStatus > 0 then -- If UDP connected
+	if MPCoreSystem and not scenetree.missionGroup and MPCoreSystem.connectionStatus > 3 then -- If UDP connected
 
 		local activeVeh = be:getPlayerVehicle(0)
 		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil

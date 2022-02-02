@@ -35,13 +35,14 @@ function addKeyEventListener(keyname, f, t)
 		for _,v in pairs(keyname) do
 			table.insert(keysToPoll, v)
 		end
-	else
+	elseif keyname ~= nil then
 		f = f or function() end
 		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
 		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
 		table.insert(keysToPoll, v)
 	end
+	log('W','addKeyEventListener','Attempted to addKeyEventListener for nil key for vehicle '..obj:getID()..' ')
 end
 
 local function onKeyStateChanged(key, state)

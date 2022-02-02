@@ -117,7 +117,7 @@ end
 
 local function chatSend(msg)
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
-	MPCoreSystem.send(c)
+	MPCoreSystem.send('GAME', c)
 	TriggerClientEvent("ChatMessageSent", c)
 end
 

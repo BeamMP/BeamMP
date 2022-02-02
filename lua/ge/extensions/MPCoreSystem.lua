@@ -7,7 +7,7 @@
 
 local M = {}
 print("Loading MPCoreSystem.lua...")
-setmetatable(_G,{}) -- temporarily disable global notifications
+--setmetatable(_G,{}) -- temporarily disable global notifications
 
 --======================================================= VARIABLES ========================================================
 local currentServer = {} -- Store the server we are on
@@ -39,7 +39,7 @@ C  -> The client asks for the server's mods
 --====================================================== DATA SENDING ======================================================
 
 --
-local function send(p, s) 
+M.send = function(p, s) 
 	local r = 'IPC'
 	if MP then
     if p == 'CORE' then
@@ -132,7 +132,7 @@ M.leaveServer = function(goBack)
 	if goBack then
 		print("Returning to main menu")
 	end
-	send('CORE', 'QS') -- Tell the launcher that we quit server / session
+	M.send('CORE', 'QS') -- Tell the launcher that we quit server / session
 	M.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	--UI.readyReset()
@@ -179,25 +179,25 @@ end
 
 M.login = function(identifiers)
 	log('M', 'login', 'Attempting login')
-	send('CORE', 'N:'..identifiers)
+	M.send('CORE', 'N:'..identifiers)
 end
 
 M.autoLogin = function()
-	send('CORE', 'Nc')
+	M.send('CORE', 'Nc')
 end
 
 M.logout = function()
 	log('M', 'logout', 'Attempting logout')
-	send('CORE', 'N:LO')
+	M.send('CORE', 'N:LO')
 	loggedIn = false
 end
 
 M.getServers = function()
 	print(launcherVersion)
 	-- Get the launcher version
-	send('CORE', 'Z')
+	M.send('CORE', 'Z')
 	log('M', 'getServers', "Getting the servers list")
-	send('CORE', 'B') -- Ask for the servers list
+	M.send('CORE', 'B') -- Ask for the servers list
 end
 
 -- sends the current player and server count.
@@ -219,7 +219,7 @@ end
 
 M.requestPlayers = function()
 	if not isMpSession then
-		send('CORE', 'B')
+		M.send('CORE', 'B')
 	end
 	sendBeamMPInfo()
 end
@@ -227,7 +227,7 @@ end
 
 --==================================================== SERVER RELATED  =====================================================
 
--- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
+-- Tell the launcher to open the connection to the server so the MPMPCoreSystem can connect to the launcher once ready
 M.connectToServer = function(ip, port, mods, name)
 	--if getMissionFilename() ~= "" then leaveServer(false) end
 	if ip and port then -- Direct connect
@@ -236,7 +236,7 @@ M.connectToServer = function(ip, port, mods, name)
 	end
 
 	local ipString = currentServer.ip..':'..currentServer.port
-	send('CORE', 'C'..ipString..'')
+	M.send('CORE', 'C'..ipString..'')
 
 	print("Connecting to server "..ipString)
 	status = "LoadingResources"
@@ -247,7 +247,7 @@ M.connectSessionNetwork = function()
 	log('M','connectSessionNetwork',"Attempting to start Game network. Current Mission: "..getMissionFilename())
 	if getMissionFilename() ~= "" then
 		launcherConnectionStatus = 4
-		send('CORE', 'A')
+		M.send('CORE', 'A')
 	else
 		launcherConnectionStatus = 2
 		returnToMainMenu()
@@ -342,8 +342,8 @@ local function loadLevel(map)
 		if getMissionFilename() == '' then
 			multiplayer_multiplayer.startMultiplayer(map)
 		else
-			--MPGameNetwork.disconnectLauncher()
-			--MPGameNetwork.connectToLauncher()
+			--MPCoreSystem.disconnectLauncher()
+			--MPCoreSystem.connectToLauncher()
 		end
 		isMpSession = true
 
@@ -360,7 +360,7 @@ end
 
 M.modLoaded = function(modname)
 	if modname ~= "beammp" then -- We don't want to check beammp mod
-		send('CORE', 'R'..modname..'')
+		M.send('CORE', 'R'..modname..'')
 	end
 end
 
@@ -394,7 +394,7 @@ local function handleU(params)
 		
 		if data == "done" and status == "LoadingResources" then
 			log('W',"handleU", "Mod Loading Complete. Lets now load the map...")
-			send('CORE', 'Mrequest')
+			M.send('CORE', 'Mrequest')
 			status = "LoadingMap"
 		end
 	elseif code == "p" and isMpSession and launcherConnectionStatus > 2 then
@@ -543,7 +543,7 @@ end
 --=================================================== MOD INITILISATION ====================================================
 
 M.onInit = function()
-	function split(s, sep)
+	local function split(s, sep)
     local fields = {}
     
     local sep = sep or " "
@@ -614,9 +614,9 @@ M.onExtensionLoaded = function()
 	-- We reload the UI to load our custom layout
 	reloadUI()
 	-- Get the launcher version
-	send('CORE', 'Z')
+	M.send('CORE', 'Z')
 	-- Log-in
-	send('CORE', 'Nc')
+	M.send('CORE', 'Nc')
 
 	local cmdArgs = Engine.getStartingArgs()
 
@@ -641,7 +641,7 @@ M.onUpdate = function(dt)
 		launcherConnectionTimer = launcherConnectionTimer + dt -- Time in seconds
 		--print(launcherConnectionTimer)
 		if launcherConnectionTimer > 1 then
-			send('CORE', 'U') -- Server heartbeat - New and improved to get ping AND ui message ANDDDD The launcher heartbeat!!!!
+			M.send('CORE', 'U') -- Server heartbeat - New and improved to get ping AND ui message ANDDDD The launcher heartbeat!!!!
 		end
 
 		-- Check the launcher connection

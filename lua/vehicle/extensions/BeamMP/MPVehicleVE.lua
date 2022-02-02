@@ -51,7 +51,7 @@ local function onKeyStateChanged(key, state)
 			keypressTriggers[i].func(state)
 		end
 	end
-	obj:queueGameEngineLua("MPGameNetwork.onKeyStateChanged('"..key.."',"..tostring(state)..")")
+	obj:queueGameEngineLua("MPCoreSystem.onKeyStateChanged('"..key.."',"..tostring(state)..")")
 end
 
 function getKeyState(key)

@@ -382,7 +382,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
 
 		local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+		MPCoreSystem.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 
 		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
@@ -413,13 +413,13 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.cpo = {p1.x, p1.y, p1.z, p1.w}
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+	MPCoreSystem.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 	log('I', "sendVehicleEdit", "Vehicle custom data "..gameVehicleID.." was sent")
 	vehiclesToSync[gameVehicleID] = nil
 end
 
 local function sendBeamstate(state, gameVehicleID)
-	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
+	MPCoreSystem.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
 end
 
 
@@ -707,7 +707,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 					local playerID, serverVehicleID = MPConfig.getPlayerServerID(), newServerVehicleID
 					local s = tostring(playerID) .. ':' .. newServerVehicleID
 
-					MPGameNetwork.send('Om:'.. s)
+					MPCoreSystem.send('Om:'.. s)
 				end
 			end
 		end
@@ -716,7 +716,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
@@ -736,7 +736,7 @@ local function onVehicleResetted(gameVehicleID)
 					w = rot.w
 				}
 			}
-			MPGameNetwork.send('Or:'..vehicle.serverVehicleString..":"..jsonEncode(tempTable).."")
+			MPCoreSystem.send('Or:'..vehicle.serverVehicleString..":"..jsonEncode(tempTable).."")
 		end
 	end
 end
@@ -1439,7 +1439,7 @@ local function onVehicleReady(gameVehicleID)
 	if veh.mpVehicleType then
 		veh:queueLuaCommand("MPVehicleVE.setVehicleType('".. veh.mpVehicleType .."')")
 	end
-	MPGameNetwork.onVehicleReady(gameVehicleID)
+	MPCoreSystem.onVehicleReady(gameVehicleID)
 end
 
 

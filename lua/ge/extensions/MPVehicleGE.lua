@@ -716,7 +716,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus > 0 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")

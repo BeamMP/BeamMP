@@ -7,7 +7,7 @@
 
 local M = {}
 print("Loading MPCoreSystem.lua...")
---setmetatable(_G,{}) -- temporarily disable global notifications
+setmetatable(_G,{}) -- temporarily disable global notifications
 
 --======================================================= VARIABLES ========================================================
 local currentServer = {} -- Store the server we are on

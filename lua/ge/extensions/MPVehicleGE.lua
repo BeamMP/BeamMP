@@ -1018,8 +1018,6 @@ local function onPreRender(dt)
 					if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
 						if settings.getValue("nameTagFadeInvert") then
 							nametagAlpha = 1 - nametagAlpha
-						else
-							dist = ""
 						end
 					end
 

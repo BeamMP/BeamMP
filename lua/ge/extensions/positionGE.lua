@@ -13,6 +13,7 @@ print("Loading positionGE...")
 local function tick()
 	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
+		print('Attempting to get Pos Rot for sending ('..i..')')
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
 			veh:queueLuaCommand("positionVE.getVehicleRotation()")
@@ -32,7 +33,7 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPCoreSystem.send('GAME', 'Zp:'..serverVehicleID..":"..data)

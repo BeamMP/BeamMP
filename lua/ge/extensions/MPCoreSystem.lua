@@ -56,7 +56,7 @@ M.send = function(p, s)
 	end
 
 	--local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
-	if not settings.getValue("showDebugOutput") then return end
+	--if not settings.getValue("showDebugOutput") then return end
   log('M', 'send', 'Sending Data ('..r..'-'..p..'): '..s)
 end
 
@@ -489,10 +489,10 @@ end
 
 --====================================================== CORE HANDLE =======================================================
 local HandleCoreNetwork = {
-	['B'] = function(params) checkLauncherConnection(); Servers = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Serverlist received
-	['U'] = function(params) checkLauncherConnection(); handleU(params) end, -- UI
+	['B'] = function(params) Servers = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Serverlist received
+	['U'] = function(params) handleU(params) end, -- UI
 	['M'] = function(params) loadLevel(params) end,
-	['N'] = function(params) checkLauncherConnection(); loginReceived(params) end, -- Login system
+	['N'] = function(params) loginReceived(params) end, -- Login system
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
@@ -511,6 +511,7 @@ function handleCoreMsg(msg)
 		end
 	end
 	HandleCoreNetwork[code](data)
+	checkLauncherConnection()
 	if MPDebug then MPDebug.packetReceived(string.len(msg)) end
 end
 
@@ -541,6 +542,7 @@ function handleGameMsg(msg)
 		log('W','handleGameMsg','Received: '..code..' -> '..data)
 	end
 	HandleGameNetwork[code](data)
+	checkLauncherConnection()
 	if MPDebug then MPDebug.packetReceived(string.len(msg)) end
 end
 
@@ -635,6 +637,23 @@ end
 
 
 M.onUpdate = function(dt)
+	if MP then
+		while (true) do
+			local msg = MP:try_pop()
+			if msg then
+				local code = string.sub(msg, 1, 1)
+				local data = string.sub(msg, 2)
+				if code == 'C' then
+						handleCoreMsg(data)
+				else
+						handleGameMsg(data)
+				end    
+			else
+				break
+			end
+		end
+	end
+
 	if cleanUpSessionMods then
 		cleanUpSessionMods = false
 		MPModManager.cleanUpSessionMods()
@@ -713,7 +732,7 @@ detectGlobalWrites() -- reenable global write notifications
 -- Variable Returns:
 M.isMPSession          = isMPSession
 M.isGoingMPSession     = isGoingMPSession
-M.connectionStatus     = launcherConnectionStatus
+M.connectionStatus     = function() return launcherConnectionStatus end
 
 print("MPCoreSystem loaded")
 

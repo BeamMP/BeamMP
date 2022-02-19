@@ -23,7 +23,7 @@ end
 
 
 local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
-	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPCoreSystem.send('GAME', 'Vi:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2130, serverVehicleID, data))

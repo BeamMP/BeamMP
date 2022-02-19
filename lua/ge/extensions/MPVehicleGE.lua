@@ -614,7 +614,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 local function onVehicleDestroyed(gameVehicleID)
-	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
@@ -716,7 +716,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPCoreSystem.connectionStatus > 3 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
@@ -1187,13 +1187,13 @@ end
 
 
 local function onUpdate(dt)
-	if not scenetree.missionGroup and MPCoreSystem.connectionStatus == 4 then -- If TCP connected
+	if scenetree.missionGroup and MPCoreSystem.connectionStatus() == 4 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end
 
 local function onPreRender(dt)
-	if MPCoreSystem and not scenetree.missionGroup and MPCoreSystem.connectionStatus > 3 then -- If UDP connected
+	if MPCoreSystem and scenetree.missionGroup and MPCoreSystem.connectionStatus() > 3 then -- If UDP connected
 
 		local activeVeh = be:getPlayerVehicle(0)
 		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil

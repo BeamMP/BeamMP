@@ -133,6 +133,8 @@ local function ready(src)
 
 	if MPCoreSystem.isMPSession() then
 
+		MPCoreSystem.connectSessionNetwork()
+		
 		if src == "MP-SESSION" then
 			setPing("-2")
 			local Server = MPCoreSystem.getCurrentServer()

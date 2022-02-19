@@ -42,7 +42,7 @@ end
 
 
 local function onUpdate(dt)
-	if not scenetree.missionGroup and MPCoreSystem.connectionStatus == 4 then -- If TCP connected
+	if scenetree.missionGroup and MPCoreSystem.connectionStatus() == 4 then -- If TCP connected
 		--nodesDelay = nodesDelay + dt
 		--if nodesDelay > getNodesTickrate() then
 		--	nodesDelay = 0 -- Reset the delay

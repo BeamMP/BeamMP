@@ -56,7 +56,7 @@ M.send = function(p, s)
 	end
 
 	--local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
-	--if not settings.getValue("showDebugOutput") then return end
+	if not settings.getValue("showDebugOutput") then return end
   log('M', 'send', 'Sending Data ('..r..'-'..p..'): '..s)
 end
 

@@ -13,7 +13,6 @@ print("Loading positionGE...")
 local function tick()
 	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
 	for i,v in pairs(ownMap) do -- For each own vehicle
-		print('Attempting to get Pos Rot for sending ('..i..')')
 		local veh = be:getObjectByID(i) -- Get vehicle
 		if veh then
 			veh:queueLuaCommand("positionVE.getVehicleRotation()")

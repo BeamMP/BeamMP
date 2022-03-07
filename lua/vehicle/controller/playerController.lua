@@ -406,7 +406,7 @@ local function crouch(value)
     return
   end
 
-  if value < 0 then
+  if tonumber(value) < 0 then
     obj:setGroupPressureRel(v.data.pressureGroups["ball"], ballPressureCrouch)
     isCrouching = true
   elseif value > 0 then

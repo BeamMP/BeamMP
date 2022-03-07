@@ -412,6 +412,8 @@ end
 -- Events System
 -------------------------------------------------------------------------------
 
+local eventTriggers = {};
+
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	local eventName = string.match(p,"%:(%w+)%:")
 	if not eventName then quitMP(p) return end

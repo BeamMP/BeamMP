@@ -909,8 +909,12 @@ local function onServerCameraSwitched(playerID, serverVehicleID)
 		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
 	end
 
-	players[playerID].activeVehicleID = serverVehicleID
-	vehicles[serverVehicleID].spectators[playerID] = true
+	if players and players[playerID] then
+		players[playerID].activeVehicleID = serverVehicleID
+		vehicles[serverVehicleID].spectators[playerID] = true
+	else
+		log('E', 'onServerCameraSwitched', 'Failed to find player for playerID')
+	end
 end
 
 

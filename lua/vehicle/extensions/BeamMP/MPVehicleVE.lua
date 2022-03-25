@@ -33,14 +33,14 @@ end
 function addKeyEventListener(keyname, f, t)
 	if type(keyname) == "table" then -- multiple keys were requested, this probably came from GE
 		for _,v in pairs(keyname) do
-			table.insert(keysToPoll, v)
+			keysToPoll[v] = true
 		end
 	else
 		f = f or function() end
 		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
 		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
-		table.insert(keysToPoll, v)
+		keysToPoll[keyname] = true
 	end
 end
 
@@ -96,7 +96,7 @@ local function updateGFX(dtReal)
 		hydros.onFFBConfigChanged()
 	end
 
-	for _,k in pairs(keysToPoll) do
+	for k in pairs(keysToPoll) do
 		if input.keys[k] ~= keyStates[k] then
 			onKeyStateChanged(k, input.keys[k])
 		end

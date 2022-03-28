@@ -57,7 +57,7 @@ local function applyPos(data, serverVehicleID)
 
 	local decoded = jsonDecode(data)
 
-	local deltaDt = math.max(decoded.tim - (vehicle.lastDt or 0), 0.001)
+	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim
 	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 

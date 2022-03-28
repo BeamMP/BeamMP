@@ -17,13 +17,19 @@ app.controller("Chat", ['$scope', function ($scope) {
 	$scope.init = function() {
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
-		chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		chatinput.addEventListener("mouseout", function(){ chatShown = false; });
-		chatinput.addEventListener('keydown', onKeyDown); //used for 'up arrow' last msg functionality
+		// To ensure that the element exists
+		if (chatinput) {
+			chatinput.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+			chatinput.addEventListener("mouseout", function(){ chatShown = false; });
+			chatinput.addEventListener('keydown', onKeyDown); //used for 'up arrow' last msg functionality
+		}
 
 		var chatlist = document.getElementById("chat-list");
-		chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
-		chatlist.addEventListener("mouseout", function(){ chatShown = false; });
+		// To ensure that the element exists
+		if (chatlist) {
+			chatlist.addEventListener("mouseover", function(){ chatShown = true; showChat(); });
+			chatlist.addEventListener("mouseout", function(){ chatShown = false; });
+		}
 		// Set chat direction
 		setChatDirection(localStorage.getItem('chatHorizontal'));
 		setChatDirection(localStorage.getItem('chatVertical'));

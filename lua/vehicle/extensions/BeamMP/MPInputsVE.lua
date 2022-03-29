@@ -22,7 +22,6 @@ local appliedBefore = false --because v.mpVehicleType isn't working
 local steeringCorrectionThreshold = 0.1
 local steeringStart = 0
 
-local latestGearData
 local localGearMode
 local localCurrentGear = 0
 local geartimer = 0
@@ -41,7 +40,6 @@ local translationTable = {
 }
 
 local function applyGear(data)
-	latestGearData = data
 	if not electrics.values.gearIndex or electrics.values.gear == data then return end
 	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
 	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or "none").type

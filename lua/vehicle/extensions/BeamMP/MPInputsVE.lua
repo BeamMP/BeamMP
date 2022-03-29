@@ -21,7 +21,84 @@ local steeringSlope --I know slopes are kind of archiac, but it really is to jus
 local appliedBefore = false --because v.mpVehicleType isn't working
 local steeringCorrectionThreshold = 0.1
 local steeringStart = 0
+
+local latestGearData
+local localGearMode
+local localCurrentGear = 0
+local geartimer = 0
+local lastgear
 -- ============= VARIABLES =============
+
+local translationTable = {
+	['R'] = -1,
+	['N'] = 0,
+	['P'] = 1,
+	['D'] = 2,
+	['S'] = 3,
+	['2'] = 4,
+	['1'] = 5,
+	['M'] = 6
+}
+
+local function applyGear(data)
+	latestGearData = data
+	if not electrics.values.gearIndex or electrics.values.gear == data then return end
+	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
+	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or "none").type
+	if gearboxType == "manualGearbox" then
+		local index = tonumber(data)
+		if electrics.values.gearIndex ~= index then
+			controller.mainController.shiftToGearIndex(index) -- Simply switch to the gear index
+		end
+	-- Sequential gearbox doesn't work with shiftToGearIndex, for some reason reverse is
+	-- -2 and not -1 so we need to do a loop to down shift. The loop is because the game
+	-- does not allow skipping gears when using shiftToGearIndex on sequential gearboxes
+	elseif gearboxType == "sequentialGearbox" then
+		local index = tonumber(data)
+		if electrics.values.gearIndex < index then
+			controller.mainController.shiftUp()
+		elseif electrics.values.gearIndex > index then
+			controller.mainController.shiftDown()
+		end
+	-- We use the same thing as automatic for all the first gears, and we use
+	-- the same type of shifting as sequential for M gears.
+	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
+		local state = string.sub(data, 1, 1)
+		local localstate = string.sub(electrics.values.gear, 1, 1)
+		local index = tonumber(string.sub(data, 2, 3))
+		local gearIndex = electrics.values.gearIndex
+		if state == 'M' then
+			if localGearMode ~= 'M' or localstate ~= 'M' then
+				if localGearMode == 'S' or localGearMode == 'D' or localstate ~= 'M' then
+					controller.mainController.shiftUp() -- this is so it doesn't go into M1 when switching into M modes at higher speed
+					localGearMode = 'M1'
+				else
+					controller.mainController.shiftToGearIndex(translationTable[state])	--shifts into M1
+					localGearMode = state
+					gearIndex = 1
+				end
+			end
+			if (localGearMode and localstate) == 'M' then
+				if gearIndex < index then
+					controller.mainController.shiftUp()
+				elseif gearIndex > index then
+					controller.mainController.shiftDown()
+				end
+			end
+		else
+			local index = translationTable[state]
+			controller.mainController.shiftToGearIndex(index) -- shifts into gear using translation table
+			localGearMode = state
+		end
+	end
+end
+
+local function applyGearOld(data) -- backwards compatibility
+	if not currentApply.g then
+		applyGear(data)
+	end
+	
+end
 
 local function updateGFX(dt)
 	timeSinceLastApply = timeSinceLastApply + dt
@@ -83,6 +160,16 @@ local function updateGFX(dt)
 		input.event("parkingbrake", currentApply.p, 2)	-- setting the clutch through electrics doesn't work at all
 		input.event("clutch", currentApply.c, 2)		-- changed filters to something more responsive resulting in a better synced experience
 		--lastSteering = steering						-- reverted to using currentApply because lastApply currently has issues with inputs getting stuck when no input is present
+
+		--gears
+		geartimer = geartimer + 1
+		
+		if currentApply.g and currentApply.g ~= lastgear or currentApply.g and geartimer == 2 then
+			applyGear(currentApply.g)
+			geartimer = 0
+		end
+		
+		lastgear = currentApply.g
 	end
 end
 
@@ -93,7 +180,8 @@ local function getInputs()
 		t = electrics.values.throttle,
 		b = electrics.values.brake,
 		p = electrics.values.parkingbrake,
-		c = electrics.values.clutch
+		c = electrics.values.clutch,
+		g = electrics.values.gear
 	}
 
 	-- If inputs didn't change then return
@@ -102,6 +190,7 @@ local function getInputs()
 	and inputsTable.b == lastInputs.b
 	and inputsTable.p == lastInputs.p
 	and inputsTable.c == lastInputs.c
+	and inputsTable.g == lastInputs.g
 	then return end
 
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsTable).."\', "..obj:getID()..")") -- Send it to GE lua
@@ -127,7 +216,8 @@ local function applyInputs(data)
 			t = currentApply.t or decodedData.t,
 			b = currentApply.b or decodedData.b,
 			p = currentApply.p or decodedData.p,
-			c = currentApply.c or decodedData.c
+			c = currentApply.c or decodedData.c,
+			g = currentApply.g or decodedData.g
 		}
 		
 		--update currentApply
@@ -136,7 +226,8 @@ local function applyInputs(data)
 			t = decodedData.t,
 			b = decodedData.b,
 			p = decodedData.p,
-			c = decodedData.c
+			c = decodedData.c,
+			g = decodedData.g
 		}
 
 		--update variables
@@ -164,6 +255,7 @@ end
 M.updateGFX = updateGFX
 M.getInputs   = getInputs
 M.applyInputs = applyInputs
+M.applyGearOld  = applyGearOld -- backwards compatibility
 
 
 

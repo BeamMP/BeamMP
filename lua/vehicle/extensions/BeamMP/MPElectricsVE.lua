@@ -13,95 +13,14 @@ local M = {}
 local lastElectrics = {}
 local latestData
 local electricsChanged = false
-local latestGearData
-local localGearMode
-local localCurrentGear = 0
 local absBehavior = settings.getValue("absBehavior") or "realistic"
 local localSwingwing = 0 -- for DH Super bolide
+local lastgear = 0 -- backwards compatibility
+local geartimer = 0 -- backwards compatibility
+local GearData = 0 -- backwards compatibility
 -- ============= VARIABLES =============
 
 
-
-local translationTable = {
-	['R'] = -1,
-	['N'] = 0,
-	['P'] = 1,
-	['D'] = 2,
-	['S'] = 3,
-	['2'] = 4,
-	['1'] = 5,
-	['M'] = 6
-}
-
-
-
-local function applyGear(data)
-	latestGearData = data
-	if not electrics.values.gearIndex or localCurrentGear == data then return end
-	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
-	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or "none").type
-	if gearboxType == "manualGearbox" then
-		local index = tonumber(data)
-		if not index then return end
-		if electrics.values.gearIndex ~= index then
-			controller.mainController.shiftToGearIndex(index) -- Simply switch to the gear index
-			localCurrentGear = data
-		end
-	-- Sequential gearbox doesn't work with shiftToGearIndex, for some reason reverse is
-	-- -2 and not -1 so we need to do a loop to down shift. The loop is because the game
-	-- does not allow skipping gears when using shiftToGearIndex on sequential gearboxes
-	elseif gearboxType == "sequentialGearbox" then
-		local index = tonumber(data)
-		if not index then return end
-		if electrics.values.gearIndex < index then
-			controller.mainController.shiftUp()
-			localCurrentGear = localCurrentGear + 1
-		elseif electrics.values.gearIndex > index then
-			controller.mainController.shiftDown()
-			localCurrentGear = localCurrentGear - 1
-		end
-	-- We use the same thing as automatic for all the first gears, and we use
-	-- the same type of shifting as sequential for M gears.
-	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
-		local state = string.sub(data, 1, 1)
-		local index = tonumber(string.sub(data, 2, 3))
-		-- if not index then return end -- Removed due to reports it stops Auto Transmissions from working/syncing
-		local gearIndex = electrics.values.gearIndex
-		if state == 'M' then
-			if localGearMode ~= 'M' then
-				if localGearMode == 'S' or localGearMode == 'D' then
-					controller.mainController.shiftUp() -- this is so it doesn't go into M1 when switching into M modes at higher speed
-					localGearMode = 'M'
-				else
-					controller.mainController.shiftToGearIndex(translationTable[state])	--shifts into M1
-					localGearMode = state
-					localCurrentGear = 'M1'
-					gearIndex = 1
-				end
-			end
-			if localGearMode == 'M' then
-				if gearIndex < index then
-					controller.mainController.shiftUp()
-					localCurrentGear = tostring('M'..gearIndex + 1)
-				elseif gearIndex > index then
-					controller.mainController.shiftDown()
-					localCurrentGear = tostring('M'..gearIndex - 1)
-				elseif gearIndex == index then
-					localCurrentGear = tostring('M'..gearIndex)
-				end
-			end
-		else
-			local index = translationTable[state]
-			controller.mainController.shiftToGearIndex(index) -- shifts into gear using translation table
-			localGearMode = state
-			localCurrentGear = data
-		end
-	end
-end
-
-local function setGear(gear)
-	latestGearData = gear
-end
 
 local function getEsc()
 	local driveModesController = controller.getController('driveModes')
@@ -353,12 +272,6 @@ local disallowedKeys = {
 	["steeringBike3"] = 1
 }
 
-local function checkGears()
-	if latestGearData then
-		applyGear(latestGearData)
-	end
-end
-
 local function round2(num, numDecimalPlaces)
   return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
 end
@@ -442,11 +355,6 @@ local function applyElectrics(data)
 			end
 		end
 
-		-- Gear syncing
-		if decodedData.gear then
-			latestGearData = decodedData.gear
-		end
-
 		-- Transbrake syncing
 		if decodedData.transbrake and controller.getController("transbrake") then
 			if electrics.values.transbrake ~= decodedData.transbrake then
@@ -470,6 +378,19 @@ local function applyElectrics(data)
 					controller.mainController.setEngineIgnition(false)
 				end
 			end
+		end
+		
+		-- Gear syncing backwards compatibility
+		if decodedData.gear then
+			GearData = decodedData.gear
+		end
+		
+		geartimer = geartimer + 1
+		
+		if GearData and GearData ~= lastgear or GearData and geartimer == 2 then
+			MPInputsVE.applyGearOld(GearData)
+			geartimer = 0
+			lastgear = GearData
 		end
 
 		-- Unicycle syncing
@@ -564,7 +485,6 @@ end
 local function onReset()
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
-		localCurrentGear = 0
 		localSwingwing = 0
 	end
 end
@@ -588,11 +508,9 @@ end
 M.onExtensionLoaded    = onExtensionLoaded
 M.onReset			   = onReset
 M.check				   = check
-M.checkGears		   = checkGears
-M.setGear			   = setGear
-M.applyGear			   = applyGear
 M.applyElectrics	   = applyElectrics
 M.applyLatestElectrics = applyLatestElectrics
+M.applyGearOld  	   = applyGearOld -- backwards compatibility
 
 
 

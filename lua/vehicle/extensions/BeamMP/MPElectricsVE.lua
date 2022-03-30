@@ -309,6 +309,8 @@ end
 local lastLeftSignal = 0
 local lastRightSignal = 0
 local lastHazards = 0
+local remoteignition = true
+local remoteengineRunning = 1
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
 	if (decodedData) then -- If received data is correct
@@ -370,13 +372,30 @@ local function applyElectrics(data)
 		end
 
 		-- Ignition syncing
-		if decodedData.ignition ~= nil and electrics.values.ignition ~= nil then
-			if electrics.values.ignition ~= (decodedData.ignition and 1 or 0) then -- since received data is true or false and the electric is 1 or 0 it used to run when it shouldn't
-				if decodedData.ignition == true then
-					controller.mainController.setStarter(true)
-				else
-					controller.mainController.setEngineIgnition(false)
+		if decodedData.ignition ~= nil then
+			remoteignition = decodedData.ignition
+		end
+		if decodedData.engineRunning then
+			remoteengineRunning = decodedData.engineRunning
+		end
+		if electrics.values.ignition ~= (remoteignition and 1 or 0) or electrics.values.engineRunning ~= remoteengineRunning then
+			local engine = powertrain.getDevice("mainEngine")
+			if not engine then return end
+			if remoteengineRunning ~= electrics.values.engineRunning then
+				if remoteengineRunning == 1 then
+					if engine.starterEngagedCoef == 0 then
+						engine:activateStarter()
+					end
+				elseif remoteengineRunning == 0 and engine.starterEngagedCoef == 0 then
+					engine:deactivateStarter()
+					engine:cutIgnition(1)
 				end
+			end
+			if electrics.values.ignition ~= (remoteignition and 1 or 0) then
+				controller.mainController.setEngineIgnition(remoteignition)
+			end
+			if not remoteignition and remoteengineRunning == 0 then
+				engine:deactivateStarter()
 			end
 		end
 		
@@ -486,6 +505,8 @@ local function onReset()
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
 		localSwingwing = 0
+		remoteignition = true
+		remoteengineRunning = 1
 	end
 end
 

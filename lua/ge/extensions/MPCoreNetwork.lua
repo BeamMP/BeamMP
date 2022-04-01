@@ -53,7 +53,7 @@ local function connectToLauncher()
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect('127.0.0.1', (settings.getValue("launcherPort") or 4444));
+		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444));
 		launcherConnectionStatus = 1
 	end
 end
@@ -471,13 +471,13 @@ end
 
 -- ================ UI ================
 M.getLauncherVersion   = getLauncherVersion
-M.isLoggedIn 		       = isLoggedIn
+M.isLoggedIn           = isLoggedIn
 M.isLauncherConnected  = isLauncherConnected
 --M.onExtensionLoaded    = onExtensionLoaded
 --M.onUpdate             = onUpdate
 M.disconnectLauncher   = disconnectLauncher
-M.autoLogin			       = autoLogin
---M.onUiChangedState	   = onUiChangedState
+M.autoLogin            = autoLogin
+--M.onUiChangedState     = onUiChangedState
 
 M.onInit               = onInit
 M.onUiReady            = onUiReady

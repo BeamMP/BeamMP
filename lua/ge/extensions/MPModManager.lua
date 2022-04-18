@@ -99,7 +99,8 @@ local function cleanUpSessionMods()
 			end
 			backupAllowed = true
 			log('M', "cleanUpSessionMods", count.." Mods cleaned up")
-			if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
+			--if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
+			Lua:requestReload() -- reloads lua every time so chat doesn't duplicate
 	end
 end
 

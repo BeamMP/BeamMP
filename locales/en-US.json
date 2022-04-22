@@ -4768,8 +4768,24 @@
 	"ui.options.multiplayer.alternateModloading.tooltip": "This method allows you to unfocus the BeamNG window whilst loading mods, but it can not guarantee loading unstable mods.",
 	"ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",
 	"ui.options.multiplayer.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
-    "ui.multiplayer.clear": "Clear Launcher Cache",
 
+
+	"ui.options.multiplayer.enableBlobs": "Enable blobs for unspawned vehicles",
+	"ui.options.multiplayer..tooltip": "",
+	"ui.options.multiplayer.showSpectators": "Show spectators under vehicle nametags",
+	"ui.options.multiplayer..tooltip": "",
+	"ui.options.multiplayer.spectatorUnifiedColors": "Draw all spectators as grey, independent of the user's role",
+	"ui.options.multiplayer..tooltip": "",
+	
+	"ui.options.multiplayer.shortenNametags": "Shorten name and role tags",
+	"ui.options.multiplayer..tooltip": "",
+	"ui.options.multiplayer.": "",
+	"ui.options.multiplayer..tooltip": "",
+	"ui.options.multiplayer.": "",
+	"ui.options.multiplayer..tooltip": "",
+
+
+	"ui.options.multiplayer.blobsTitle": "Blobs",
 	"ui.options.multiplayer.nameTagTitle": "Nametags",
 	"ui.options.multiplayer.others": "Others",
 	"ui.multiplayer.multiplayer": "Multiplayer",

@@ -1,0 +1,13 @@
+input:invalid {
+  color: #ff3b24;
+}
+
+.mp-setting-highlight {
+  color: coral;
+  font-weight: bold;
+}
+
+.mp-setting-border {
+  margin: 0px 16px 16px 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+}

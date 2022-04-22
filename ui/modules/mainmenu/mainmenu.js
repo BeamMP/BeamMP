@@ -424,3 +424,10 @@ angular.module('beamng.stuff')
   }
 
 }])
+
+function updateSettingsColorPreview(textElement) {
+  let previewElement = document.getElementById(textElement.id+"Preview");
+  if (previewElement !== null) {
+    previewElement.style.backgroundColor = textElement.value;
+  }
+}

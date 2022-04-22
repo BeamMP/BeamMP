@@ -13,6 +13,19 @@ local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
 end
 
+local function hex2rgb(hex)
+  if not hex or not hex:find("^#[%x]+$") or #hex ~= 7 then   
+    return { 0,0,0 }
+  end
+  local hex = hex:gsub("#","")
+  if hex:len() == 3 then
+    return { (tonumber("0x"..hex:sub(1,1))*17)/255 or 0, (tonumber("0x"..hex:sub(2,2))*17)/255 or 0, (tonumber("0x"..hex:sub(3,3))*17)/255 or 0 }
+  else
+    return { tonumber("0x"..hex:sub(1,2))/255 or 0, tonumber("0x"..hex:sub(3,4))/255 or 0, tonumber("0x"..hex:sub(5,6))/255 or 0 }
+  end
+end
+
+
 local function tableDiff(old, new)
 	local diff, o, n = {},{},{}
 	
@@ -64,6 +77,7 @@ M.tableLength  = tableSize
 --local
 M.colorMatch   = colorMatch
 M.tableDiff    = tableDiff
+M.hex2rgb      = hex2rgb
 
 detectGlobalWrites() -- reenable global write notifications
 

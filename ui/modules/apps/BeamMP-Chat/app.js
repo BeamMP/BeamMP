@@ -2,6 +2,8 @@ var app = angular.module('beamng.apps');
 
 let lastSentMessage = "";
 
+let lastMsgId = 0;
+
 app.directive('multiplayerchat', [function () {
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-Chat/app.html',
@@ -94,8 +96,11 @@ app.controller("Chat", ['$scope', function ($scope) {
 		else setChatDirection("bottom");
 	}
 
-	$scope.$on('chatMessage', function (event, message) {
-		addMessage(message);
+	$scope.$on('chatMessage', function (event, data) {
+		if (data.id > lastMsgId) {
+			lastMsgId = data.id;
+			addMessage(data.message);
+		}
 	});
 
 	$scope.chatSend = function() {

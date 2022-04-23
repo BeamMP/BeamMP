@@ -148,7 +148,7 @@
       <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagFadeDistance.tooltip' | translate }}</md-tooltip>
       <p flex="30">{{:: 'ui.options.multiplayer.nametagFadeDistance' | translate }}</p>
       <md-slider flex
-        ng-model="options.data.values.nameTagFadeDistance" min="0" max="150" step="1" aria-label="_"
+        ng-model="options.data.values.nameTagFadeDistance" min="0" max="1500" step="1" aria-label="_"
         ng-change="options.applyState()">
       </md-slider>
       <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>

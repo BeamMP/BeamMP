@@ -8,6 +8,7 @@
 local M = {}
 print("Loading positionGE...")
 
+local actualSimSpeed = 1
 
 
 local function tick()
@@ -22,19 +23,21 @@ end
 
 
 
-local function distance(x1, y1, z1, x2, y2, z2)
-	local dx = x1 - x2
-	local dy = y1 - y2
-	local dz = z1 - z2
-	return math.sqrt(dx*dx + dy*dy + dz*dz)
-end
-
-
-
 local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			local decoded = jsonDecode(data)
+			local simspeedReal = bullettime.getReal()
+
+			decoded.isTransitioning = (bullettime.get() ~= simspeedReal) or nil
+
+			simspeedReal = bullettime.getPause() and 0 or simspeedReal -- set velocities to 0 if game is paused
+
+			for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedReal end
+			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
+
+			data = jsonEncode(decoded)
 			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
 		end
 	end
@@ -46,6 +49,19 @@ local function applyPos(data, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 
+
+	local decoded = jsonDecode(data)
+
+	local simspeedFraction = 1/bullettime.getReal()
+
+	for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedFraction end
+	for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedFraction end
+
+	decoded.localSimspeed = simspeedFraction
+
+	data = jsonEncode(decoded)
+
+
 	local veh = be:getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
@@ -54,9 +70,6 @@ local function applyPos(data, serverVehicleID)
 		end
 		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
-
-	local decoded = jsonDecode(data)
-
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim
 	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
@@ -101,6 +114,13 @@ local function setPosition(gameVehicleID, x, y, z)
 end
 
 
+local function setActualSimSpeed(speed)
+	actualSimSpeed = speed*(1/bullettime.getReal())
+end
+
+local function getActualSimSpeed()
+	return actualSimSpeed
+end
 
 M.applyPos          = applyPos
 M.tick              = tick
@@ -108,8 +128,8 @@ M.handle            = handle
 M.sendVehiclePosRot = sendVehiclePosRot
 M.setPosition       = setPosition
 M.setPing           = setPing
-
-
+M.setActualSimSpeed = setActualSimSpeed
+M.getActualSimSpeed = getActualSimSpeed
 
 print("positionGE loaded")
 return M

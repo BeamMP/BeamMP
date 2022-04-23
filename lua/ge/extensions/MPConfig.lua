@@ -12,17 +12,20 @@ print("Loading mpConfig...")
 local Nickname = ""
 local PlayerServerID = -1
 
-local enabledByDefaultSettings = {
-	"autoSyncVehicles", "nameTagShowDistance",
+local defaultSettings = {
+	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
-	"enableSpawnQueue", "enableQueueAuto", "queueSkipUnicycle",
+	enableSpawnQueue = true, enableQueueAuto = true, queueSkipUnicycle = true,
+	-- colors
+	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333", 
+
 	-- show custom vehicles in vehicle selector
-	"showPcs"
+	showPcs = true,
 }
 
 local function onExtensionLoaded()
-	for _,v in pairs(enabledByDefaultSettings) do
-		if settings.getValue(v) == nil then settings.setValue(v, true) end
+	for k,v in pairs(defaultSettings) do
+		if settings.getValue(k) == nil then settings.setValue(k, v) end
 	end
 end
 

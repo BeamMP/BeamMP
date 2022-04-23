@@ -41,7 +41,7 @@ local function checkMod(mod)
 	if not modAllowed and mod.active then -- This mod is not allowed to be running
 		log('W', 'checkMod', "This mod should not be running: "..modname)
 		core_modmanager.deactivateMod(modname)
-		if mods.dirname == '/mods/multiplayer/' then
+		if mod.dirname == '/mods/multiplayer/' then
 			core_modmanager.deleteMod(modname)
 		end
 	elseif modAllowed then

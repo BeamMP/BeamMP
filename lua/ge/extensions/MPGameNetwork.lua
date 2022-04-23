@@ -97,12 +97,11 @@ end
 -------------------------------------------------------------------------------
 
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
-	local eventName = string.match(p,"%:(%w+)%:")
+	local eventName, eventData = string.match(p,"^%:([^%:]+)%:(.*)")
 	if not eventName then quitMP(p) return end
-	local data = p:gsub(":"..eventName..":", "")
 	for i=1,#eventTriggers do
 		if eventTriggers[i].name == eventName then
-			eventTriggers[i].func(data)
+			if type(eventTriggers[i].func) == "function" then eventTriggers[i].func(eventData) end
 		end
 	end
 end

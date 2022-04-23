@@ -212,7 +212,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	};
 	vm.closeLoadingPopup =  function() {
 		document.getElementById('LoadingServer').style.display = 'none';
-		bngApi.engineLua('MPCoreNetwork.resetSession()');
+		bngApi.engineLua('MPCoreNetwork.leaveServer()');
 	};
 
 	vm.showCustomServer = function() {

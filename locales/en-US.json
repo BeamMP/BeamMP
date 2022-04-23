@@ -4768,10 +4768,35 @@
 	"ui.options.multiplayer.alternateModloading.tooltip": "This method allows you to unfocus the BeamNG window whilst loading mods, but it can not guarantee loading unstable mods.",
 	"ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",
 	"ui.options.multiplayer.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
-    "ui.multiplayer.clear": "Clear Launcher Cache",
 
+	"ui.options.multiplayer.enableBlobs": "Enable blobs for unspawned vehicles",
+	"ui.options.multiplayer.enableBlobs.tooltip": "Unspawned vehicles will appear as blobs",
+	"ui.options.multiplayer.showSpectators": "Show spectators under vehicle nametags",
+	"ui.options.multiplayer.showSpectators.tooltip": "Players spectating others' vehicles will be listed under their nametags",
+	"ui.options.multiplayer.spectatorUnifiedColors": "Draw all spectators as grey, independent of the user's role",
+	"ui.options.multiplayer.spectatorUnifiedColors.tooltip": "",
+
+	"ui.options.multiplayer.nametagFade": "Fade nametags in/out",
+	"ui.options.multiplayer.nametagFadeDistance": "Fade distance",
+	"ui.options.multiplayer.nametagFadeDistance.tooltip": "How far nametags will start fading in/stop fading out",
+	"ui.options.multiplayer.nametagInvertFade": "Invert nametag fade direction",
+	"ui.options.multiplayer.nametagDontFullyHide": "Don't fully hide nametags",
+	"ui.options.multiplayer.nametagCharLimit": "Name character limit",
+	"ui.options.multiplayer.nametagCharLimit.tooltip": "Maximum number of characters you want to see in a name",
+
+	"ui.options.multiplayer.shortenNametags": "Shorten name and role tags",
+	"ui.options.multiplayer.shortenNametags.tooltip": "Trim long player names and roles",
+	"ui.options.multiplayer.showAdvancedOptions": "Show advanced options",
+	"ui.options.multiplayer.showAdvancedOptions.tooltip": "Display all BeamMP settings",
+
+	"ui.options.multiplayer.tuneBlobColors": "Tune colors",
+	"ui.options.multiplayer.tuneColorQueued": "Queued vehicle",
+	"ui.options.multiplayer.tuneColorDeleted": "Deleted vehicle",
+
+	"ui.options.multiplayer.blobsTitle": "Blobs",
 	"ui.options.multiplayer.nameTagTitle": "Nametags",
 	"ui.options.multiplayer.others": "Others",
+
 	"ui.multiplayer.multiplayer": "Multiplayer",
 	"ui.multiplayer.connecting": "Connecting",
 	"ui.multiplayer.loading": "Loading...",

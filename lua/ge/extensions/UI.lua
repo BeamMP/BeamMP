@@ -14,6 +14,7 @@ local players = {} -- { 'apple', 'banana', 'meow' }
 local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
 local UIqueue = {}
 
+local chatcounter = 0
 
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
@@ -107,9 +108,10 @@ local function showMdDialog(options)
 end
 
 local function chatMessage(rawMessage)
+	chatcounter = chatcounter+1
 	local message = string.sub(rawMessage, 2)
-	print("Message received: "..message) -- DO NOT REMOVE
-	guihooks.trigger("chatMessage", message)
+	print("Chat message received: "..message) -- DO NOT REMOVE
+	guihooks.trigger("chatMessage", {message = message, id = chatcounter})
 	TriggerClientEvent("ChatMessageReceived", message)
 end
 

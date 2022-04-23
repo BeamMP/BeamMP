@@ -110,7 +110,8 @@ local remoteData = {
 	racc = vec3(0,0,0),
 	timer = 0,
 	timeOffset = 0,
-	recTime = 0
+	recTime = 0,
+	localSimspeed = 1
 }
 
 local smoothVel = vec3(0,0,0)
@@ -179,9 +180,28 @@ local function onReset()
 	remoteData.racc = vec3(0,0,0)
 end
 
+local physcounter = 0
+local physstart = 0
 
+local physmult = 1
 
 local function update(dtSim)
+	if physcounter == 0 then
+		physstart = os.clock()
+	end
+	physcounter = physcounter+1
+	if physcounter == 2000 then
+		physcounter = 0
+		local physend = os.clock()
+		local physdiff = physend - physstart
+		if playerInfo.firstPlayerSeated then
+			physmult = 1/physdiff -- (physdiff == 0) and 0 or 1/physdiff
+			--print(tostring(physmult*100) .."% realtime")
+			obj:queueGameEngineLua("positionGE.setActualSimSpeed("..tostring(physmult)..")")
+		end
+	end
+
+
 	-- Smooth vehicle velocity to prevent vibrating
 	smoothVel = localVelSmoother:get(vec3(obj:getVelocity()), dtSim)
 	smoothRvel = localRvelSmoother:get(vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()), dtSim)
@@ -190,6 +210,7 @@ end
 
 
 local function updateGFX(dt)
+	dt = dt * (remoteData.localSimspeed or 1)
 	timer = timer + dt
 	lastDT = dt
 
@@ -355,6 +376,11 @@ local function getVehicleRotation()
 	local pos = vec3(obj:getPosition()) + cog
 	local vel = smoothVel + cog:cross(rvel)
 	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
+
+	-- disabled because the GE implementation of slowmo sync is instant, but doesn't account for low fps compensation
+	--vel = vel * physmult
+	--rvel = rvel * physmult
+
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
 		vel = {vel.x, vel.y, vel.z},
@@ -377,6 +403,9 @@ local function setVehiclePosRot(data)
 	local rvel = vec3(pr.rvel)
 	local tim  = pr.tim
 	local ping = pr.ping
+	local simspeedfraction = pr.localSimspeed
+
+	if not tim then return end
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
@@ -389,6 +418,7 @@ local function setVehiclePosRot(data)
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
+	remoteData.localSimspeed = math.min(simspeedfraction, 25)
 end
 
 

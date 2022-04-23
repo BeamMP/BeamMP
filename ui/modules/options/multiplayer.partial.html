@@ -5,8 +5,8 @@
   <md-subheader class="md-no-sticky" style="float:left">General</md-subheader>
 
   <md-list-item md-no-ink>
-    <p>Show Advanced options</p>
-    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.multiplayer.showAdvancedOptions' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showAdvancedOptions.tooltip' | translate }}</md-tooltip>
     <md-checkbox ng-model="options.showAdvancedMPOptions" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
@@ -80,13 +80,11 @@
   <div class="mp-setting-border" ng-show="options.data.values.enableBlobs">
     <bng-accordion flex class="vAccordion--default" multiple>
       <bng-accordion-pane is-open="false" style="padding-right: 10px; padding-left: 10px" class="md-list-item">
-        <bng-pane-header style="border-bottom-width: 0px">
-          Tune colors
-        </bng-pane-header>
+        <bng-pane-header style="border-bottom-width: 0px">{{:: 'ui.options.multiplayer.tuneBlobColors' | translate }}</bng-pane-header>
         <bng-pane-body>
           <bng-accordion flex class="vAccordion--default" multiple>
             <div class="md-list-item">
-              <p>Queued vehicle</p>
+              <p>{{:: 'ui.options.multiplayer.tuneColorQueued' | translate }}</p>
               <div>
                 <md-checkbox ng-model="options.data.values.showBlobQueued" ng-change="options.applyState()">Visible</md-checkbox>
                 <md-input-container>
@@ -110,7 +108,7 @@
             </div>
 
             <div class="md-list-item">
-              <p>Deleted vehicle</p>
+              <p>{{:: 'ui.options.multiplayer.tuneColorDeleted' | translate }}</p>
               <div>
                 <md-checkbox ng-model="options.data.values.showBlobDeleted" ng-change="options.applyState()">Visible</md-checkbox>
                 <md-input-container>
@@ -141,14 +139,14 @@
   </md-list-item>
 
   <md-list-item md-no-ink ng-show="options.showAdvancedMPOptions">
-    <p>Fade nametags in/out</p>
+    <p>{{:: 'ui.options.multiplayer.nametagFade' | translate }}</p>
     <md-checkbox ng-model="options.data.values.nameTagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 
   <div class="mp-setting-border" ng-show="options.data.values.nameTagFadeEnabled && options.showAdvancedMPOptions">
     <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
-      <md-tooltip md-direction="right">How far nametags will start fading in/stop fading out</md-tooltip>
-      <p flex="30">Fade distance</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagFadeDistance.tooltip' | translate }}</md-tooltip>
+      <p flex="30">{{:: 'ui.options.multiplayer.nametagFadeDistance' | translate }}</p>
       <md-slider flex
         ng-model="options.data.values.nameTagFadeDistance" min="0" max="150" step="1" aria-label="_"
         ng-change="options.applyState()">
@@ -157,14 +155,14 @@
       <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{ (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
     </md-list-item>
     <md-list-item md-no-ink>
-      <p>Invert nametag fade direction</p>
+      <p>{{:: 'ui.options.multiplayer.nametagInvertFade' | translate }}</p>
       <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
       <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
       <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>
     <md-list-item md-no-ink>
-      <p>Don't fully hide nametags</p>
-      <md-checkbox ng-model="options.data.values.dontFullyHide" ng-change="options.applyState()"></md-checkbox>
+      <p>{{:: 'ui.options.multiplayer.nametagDontFullyHide' | translate }}</p>
+      <md-checkbox ng-model="options.data.values.nameTagDontFullyHide" ng-change="options.applyState()"></md-checkbox>
     </md-list-item>
   </div>
 
@@ -176,8 +174,8 @@
 
   <div class="mp-setting-border" ng-show="options.data.values.shortenNametags">
     <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
-      <md-tooltip md-direction="right">Maximum number of characters you want to see in a name</md-tooltip>
-      <p flex="30">Name character limit</p>
+      <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagCharLimit.tooltip' | translate }}</md-tooltip>
+      <p flex="30">{{:: 'ui.options.multiplayer.nametagCharLimit' | translate }}</p>
       <md-slider flex ng-model="options.data.values.nametagCharLimit" min="0" max="50" step="1" aria-label="_"
         ng-change="options.applyState()">
       </md-slider>
@@ -222,11 +220,11 @@
   <!--<md-list-item md-no-ink>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.clearLauncherCache.tooltip' | translate }}</md-tooltip>
     <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>
-    </md-list-item>
+  </md-list-item>
 
-    <md-list-item layout>
-     <md-button md-no-ink class="md-raised md-warn" flex ng-click="options.clearLauncherCache()">
-       <md-icon class="material-icons">check</md-icon> {{ ::'ui.multiplayer.clear' | translate }}
-     </md-button>
-    </md-list-item>-->
+  <md-list-item layout>
+    <md-button md-no-ink class="md-raised md-warn" flex ng-click="options.clearLauncherCache()">
+      <md-icon class="material-icons">check</md-icon> {{ ::'ui.multiplayer.clear' | translate }}
+    </md-button>
+  </md-list-item>-->
 </md-content>

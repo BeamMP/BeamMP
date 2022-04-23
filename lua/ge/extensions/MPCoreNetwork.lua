@@ -25,8 +25,6 @@ local isGoingMpSession = false
 local launcherTimeout = 0
 local connectionIssuesShown = false
 local socket = require('socket')
-local requestCleanup = false
-local cleanuptimer = 0
 --[[
 Z  -> The client asks the launcher its version
 B  -> The client asks the launcher for the servers list
@@ -273,8 +271,7 @@ local function leaveServer(goBack)
 	if goBack then endActiveGameMode() end
 	-- resets the instability function back to default
 	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
-
-	requestCleanup = true
+	MPModManager.startcleanUpSessionMods()
 end
 
 local function isMPSession()
@@ -433,14 +430,6 @@ local function onUpdate(dt)
 				disconnectLauncher(true) -- reconnect to launcher (this breaks the launcher if the connection
 				connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
 			end
-		end
-	end
-	if requestCleanup and not gameConnection then
-		cleanuptimer = cleanuptimer + dt
-		if cleanuptimer > 0.5 then -- delay to prevent ? ping when rejoining
-			MPModManager.cleanUpSessionMods()
-			requestCleanup = false
-			cleanuptimer = 0
 		end
 	end
 end

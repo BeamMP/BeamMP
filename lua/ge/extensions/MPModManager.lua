@@ -14,6 +14,8 @@ local timer = 0
 local serverMods = {}
 local mods = {"multiplayerbeammp", "beammp"}
 local backupAllowed = true
+local requestCleanup = false
+local cleanuptimer = 0
 
 
 
@@ -210,6 +212,25 @@ end
 
 
 
+local function startcleanUpSessionMods()
+	requestCleanup = true
+end
+
+
+
+local function onUpdate(dt)
+	if requestCleanup and not gameConnection then
+		cleanuptimer = cleanuptimer + dt
+		if cleanuptimer > 0.5 then -- delay to prevent ? ping when rejoining
+			cleanUpSessionMods()
+			requestCleanup = false
+			cleanuptimer = 0
+		end
+	end
+end
+
+
+
 M.modsDatabaseChanged = modsDatabaseChanged
 M.onClientEndMission = onClientEndMission
 M.onClientStartMission = onClientStartMission
@@ -218,11 +239,13 @@ M.onModStateChanged = onModStateChanged
 M.backupLoadedMods = backupLoadedMods
 M.restoreLoadedMods = restoreLoadedMods
 M.cleanUpSessionMods = cleanUpSessionMods
+M.startcleanUpSessionMods = cleanUpSessionMods
 M.showServerMods = showServerMods
 M.setServerMods = setServerMods
 M.checkAllMods = checkAllMods
 M.onExit = onExit
 M.onInit = onInit
+M.onUpdate = onUpdate
 
 
 

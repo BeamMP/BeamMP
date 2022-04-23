@@ -13,7 +13,7 @@ local Nickname = ""
 local PlayerServerID = -1
 
 local defaultSettings = {
-	autoSyncVehicles = true, nameTagShowDistance = true,
+	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
 	enableSpawnQueue = true, enableQueueAuto = true, queueSkipUnicycle = true,
 	-- colors

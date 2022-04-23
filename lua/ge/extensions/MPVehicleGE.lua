@@ -323,8 +323,8 @@ function Vehicle:delete()
 	for playerID, v in pairs(self.spectators) do
 		if players[playerID] then players[playerID].activeVehicleID = nil end
 	end
-	if players[self.ownerID] then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
-	vehicles[self.serverVehicleString] = nil
+	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
+	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 	self = nil
 end
 function Vehicle:onSerialized()
@@ -1342,25 +1342,25 @@ local function onPreRender(dt)
 				if settings.getValue("dontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
 				if settings.getValue("enableBlobs") and not v.isSpawned then
-					local colorTable = { 0, 0.6, 1 }
+					local colors = nil
 
 					if v.spawnQueue then -- in queue
 						if settingsCache.showBlobQueued then
-							colorTable = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
+							colors = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
 						end
 					elseif v.isIllegal then -- illegal (modded)
 						if settingsCache.showBlobIllegal then
-							colorTable = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
+							colors = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
 						end
 					elseif v.isDeleted then
 						if settingsCache.showBlobDeleted then
-							colorTable = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
+							colors = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
 						end
 					else
-						colorTable = { 1, 0, 1 }
+						colors = { 1, 0, 1 }
 					end
 
-					debugDrawer:drawSphere(pos, 1, ColorF(colorTable[1], colorTable[2], colorTable[3], 0.5))
+					if colors then debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5)) end
 				end
 
 

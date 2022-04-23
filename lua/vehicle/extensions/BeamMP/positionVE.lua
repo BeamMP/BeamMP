@@ -405,6 +405,8 @@ local function setVehiclePosRot(data)
 	local ping = pr.ping
 	local simspeedfraction = pr.localSimspeed
 
+	if not tim then return end
+
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 
 	remoteData.pos = pos

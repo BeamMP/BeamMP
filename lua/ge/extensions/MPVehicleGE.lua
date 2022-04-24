@@ -263,15 +263,16 @@ function Player:onSerialized()
 	return t
 end
 function Player:onSettingsChanged()
-	if not settings.getValue("shortenNametags") then
-		self.shortname = self.name
-		return
-	end
+    local charLimit = tonumber(settings.getValue("nametagCharLimit"))
+    if not settings.getValue("shortenNametags") or not charLimit or #self.name < charLimit + 3 then
+        self.shortname = self.name
+        return
+    end
 
-	local short = self.name:sub(1, tonumber(settings.getValue("nametagCharLimit")))
-	if #short ~= #self.name then short = short .. "..." end
+    local short = self.name:sub(1, charLimit)
+    if #short ~= #self.name then short = short .. "..." end
 
-	self.shortname = short
+    self.shortname = short
 end
 
 local Vehicle = {}

@@ -380,22 +380,23 @@ local function applyElectrics(data)
 		end
 		if electrics.values.ignition ~= (remoteignition and 1 or 0) or electrics.values.engineRunning ~= remoteengineRunning then
 			local engine = powertrain.getDevice("mainEngine")
-			if not engine then return end
-			if remoteengineRunning ~= electrics.values.engineRunning then
-				if remoteengineRunning == 1 then
-					if engine.starterEngagedCoef == 0 then
-						engine:activateStarter()
+			if engine then
+				if remoteengineRunning ~= electrics.values.engineRunning then
+					if remoteengineRunning == 1 then
+						if engine.starterEngagedCoef == 0 then
+							engine:activateStarter()
+						end
+					elseif remoteengineRunning == 0 and engine.starterEngagedCoef == 0 then
+						engine:deactivateStarter()
+						engine:cutIgnition(1)
 					end
-				elseif remoteengineRunning == 0 and engine.starterEngagedCoef == 0 then
-					engine:deactivateStarter()
-					engine:cutIgnition(1)
 				end
-			end
-			if electrics.values.ignition ~= (remoteignition and 1 or 0) then
-				controller.mainController.setEngineIgnition(remoteignition)
-			end
-			if not remoteignition and remoteengineRunning == 0 then
-				engine:deactivateStarter()
+				if electrics.values.ignition ~= (remoteignition and 1 or 0) then
+					controller.mainController.setEngineIgnition(remoteignition)
+				end
+				if not remoteignition and remoteengineRunning == 0 then
+					engine:deactivateStarter()
+				end
 			end
 		end
 		

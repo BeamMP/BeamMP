@@ -108,8 +108,16 @@ angular.module('beamng.stuff')
     },
     link: function (scope, $element, attr) {
       // do quick check right in main menu, to ensure *some* of our UI/LUA code can work in languages with certain non-english characters
-      let testString = "If you see this message in logs, the JS>LUA serializer is broken for non-english languages. See jira ticket GE-3042. BEGIN TEST STRING Kl�vesnice END TEST STRIN"
-      bngApi.engineLua(`dumps(${bngApi.serializeToLua(testString)})`)
+      bngApi.serializeToLuaCheck("English: " + "hello")
+      bngApi.serializeToLuaCheck("Spanish: " + "güeñes")
+      bngApi.serializeToLuaCheck("French: " + "bâguéttè, garçon")
+      bngApi.serializeToLuaCheck("Czech: " + "Kl�vesnice")
+      bngApi.serializeToLuaCheck("Korean: " + decodeURIComponent("%0D%EF%BF%BD%EF%BF%BD%0B%EF%BF%BD%EF%BF%BD%0B%EF%BF%BD%EF%BF%BD"))
+      bngApi.serializeToLuaCheck("Chinese Sim: " + "欢迎来到简体中文版的")
+      bngApi.serializeToLuaCheck("Chinese Tr: " + "歡迎來到")
+      bngApi.serializeToLuaCheck("Japanese: " + "』日本語版にようこそ")
+      bngApi.serializeToLuaCheck("Polish: " + "źćłąóę")
+      bngApi.serializeToLuaCheck("Russian: " + "абвгеёьъ")
 
       scope.nav = function(action, val) {
         $rootScope.$broadcast('MenuItemNavigation', action, val)

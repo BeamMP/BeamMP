@@ -597,8 +597,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     .state('menu.modsDetails', {
       url: '/modmanager/details:modFilePath',
       templateUrl: '/ui/modules/modmanager/info.html',
-      controller: 'ModManagerControllerDetails',
-      backState: 'BACK_TO_MENU',
+      controller: 'ModManagerControllerDetails as managerDetailCtrl',
+      backState: 'menu.mods.repository',
     })
 
   .state('menu.gameContext', {
@@ -1234,7 +1234,9 @@ angular.module('beamng.stuff')
       if (useCrossfire) {
         if(action == 'confirm') {
           if (document.activeElement.classList.contains("menu-navigation")) {
-            document.activeElement.click(); // only click with confirm+crossfire if ornage focus border is shown
+            var click = new CustomEvent("click");
+            document.activeElement.dispatchEvent(click);
+            // document.activeElement.click(); // only click with confirm+crossfire if ornage focus border is shown
           }
         } else if(action == 'back') {
           $rootScope.$broadcast('MenuToggle')
@@ -1264,7 +1266,7 @@ angular.module('beamng.stuff')
       // TODO: make this intuitive (omiting the value shouldn't do something unexpected)
       enableCrossfire: (val) => useCrossfire = val,
       enableGamepadNav: (val) => useGamepadNavigation = val,
-      //enableSpatialNav: (val) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); useCrossfire = val },
+      enableSpatialNav: (val) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); useCrossfire = val },
       registerActions: assignNavFunc,
       unregisterActions: unregisterActions,
       provideScope: (scope) => scope = scope,
@@ -1433,11 +1435,11 @@ angular.module('beamng.stuff')
   })
 
   $scope.$on('$stateChangeError', function ( event, toState, toParams, fromState, fromParams, error) {
-    console.error('$stateChangeError', JSON.stringify({toState: toState, toParams: toParams, fromState: fromState, fromParams: fromParams}, null, '  '), error)
+    console.error('$stateChangeError', toState, toParams, fromState, fromParams, error)
   })
 
   $scope.$on('$stateNotFound', function (event, unfoundState, fromState, fromParams) {
-    console.error('$stateNotFound', JSON.stringify({unfoundState : unfoundState, fromState: fromState, fromParams: fromParams}, null, '  '))
+    console.error('$stateNotFound', unfoundState, fromState, fromParams)
   })
 
   $scope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
@@ -1720,6 +1722,7 @@ angular.module('beamng.stuff')
 
   $scope.$on('CloseMenu', () => {
     var newTarget = vm.mainmenu ? 'menu.mainmenu' : 'menu'
+    console.log("target", newTarget)
     $state.go(newTarget)
   })
 
@@ -1954,7 +1957,7 @@ angular.module('beamng.stuff')
       function updateGE() {
         let screenWidth = window.screen.width
         let sideBarWidth = elem[0].getBoundingClientRect().width
-        let percentHidden = (sideBarWidth / screenWidth) * 0.1 // no idea why 1/10 of it :|
+        let percentHidden = (sideBarWidth / screenWidth)
         if(attrs.bngFrustumMover === 'left') {
           percentHidden *= -1
         } else if(attrs.bngFrustumMover === 'right') {
@@ -1962,7 +1965,7 @@ angular.module('beamng.stuff')
         } else {
           console.error("only left/rigth supported right now")
         }
-        if(0.1 - Math.abs(percentHidden) < 0.0001) {
+        if(Math.abs(percentHidden) < 0.0001) {``
           //console.log("complete overlap")
           percentHidden = 0
         }

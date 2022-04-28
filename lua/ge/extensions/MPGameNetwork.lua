@@ -85,7 +85,7 @@ local function quitMP(reason)
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
 	UI.showMdDialog({
-		dialogtype="alert", title="You have been kicked from the server", text=text, okText="Return to menu",
+		dialogtype="alert", title="You have been disconnected from the server", text=text, okText="Return to menu",
 		okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
 	})
 

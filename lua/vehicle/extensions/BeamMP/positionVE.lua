@@ -67,11 +67,11 @@ local tpDelayAdd = 1           -- Additional teleport delay (s)
 local tpDistAdd = 1            -- Additional teleport distance (m)
 local tpDistMul1 = 0.1         -- Multiplier for delayed teleport distance based on velocity (m per m/s)
 local tpDistMul2 = 0.5         -- Multiplier for instant teleport distance based on velocity (m per m/s)
-local tpRotAdd = 0.8           -- Additional teleport rotation (rad)
+local tpRotAdd = 0.5           -- Additional teleport rotation (rad)
 local tpRotMul1 = 0.2          -- Multiplier for delayed teleport rotation based on rotation velocity (rad per rad/s)
 local tpRotMul2 = 0.5          -- Multiplier for instant teleport rotation based on rotation velocity (rad per rad/s)
-local tpVelSmoother = newTemporalSmoothingNonLinear(2,50)  -- Smoother for filtering low velocities during collisions
-local tpRvelSmoother = newTemporalSmoothingNonLinear(2,50) -- Smoother for filtering low rotation velocities during collisions
+local tpVelSmoother = newTemporalSmoothingNonLinear(2,1000)  -- Smoother for filtering low velocities during collisions
+local tpRvelSmoother = newTemporalSmoothingNonLinear(2,1000) -- Smoother for filtering low rotation velocities during collisions
 
 -- Prediction
 local maxPredict = 0.3         -- Maximum prediction limit (s)
@@ -411,10 +411,10 @@ local function setVehiclePosRot(data)
 
 	remoteData.pos = pos
 	remoteData.rot = rot
-	remoteData.vel = vel
-	remoteData.rvel = rvel
 	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
 	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
+	remoteData.vel = vel
+	remoteData.rvel = rvel
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer

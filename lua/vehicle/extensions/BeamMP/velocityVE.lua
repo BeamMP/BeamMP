@@ -7,86 +7,119 @@
 
 local M = {}
 
-local maxBeamLengthRatio = 2 -- If a beam becomes longer than its original length by this factor, it will be treated as broken
+local abs = math.abs
+local min = math.min
+local max = math.max
 
-local connectedBeams = {}
-local isConnectedNode = {}
+local maxBeamLengthRatio = 2 -- If a beam becomes longer than its original length by this factor, it will be treated as broken
+local damageThreshold = 100  -- Recalculate center of gravity if beamstate.damage changes by more than this amount
+local damageDelay = 0.2      -- How long to wait before recalculating connected nodes or COG after the car was damaged
+
+local connectedNodes = {}
 local nodes = {}
 local parentNode = nil
 local beamsChanged = false
+local lastDamage = 0
+local damageTimer = 0
 local physicsFPS = 0
 M.cogRel = vec3(0,0,0)
 
 -- Calculate center of gravity from connected nodes
 local function calcCOG()
-	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
+	
+	--print("Calculating COG "..obj:getId())
 	
 	local totalMass = 0
 	local cog = vec3(0,0,0)
-	for nid, connected in pairs(isConnectedNode) do
-		local nodeWeight = obj:getNodeMass(nid)
-		local nodePos = vec3(obj:getNodePosition(nid))
-		
-		cog = cog + nodePos*nodeWeight
-		
-		totalMass = totalMass + nodeWeight
-	end
-	cog = cog/totalMass
 	
-	M.cogRel = vec3(cog:rotated(rot:inversed()))
+	for i = 1, #nodes do
+		local node = nodes[i]
+		local nid = node[1]
+		local nodeMass = node[2]
+		local nodePos = obj:getNodePosition(nid)
+		
+		cog:setAdd(nodePos*nodeMass)
+		
+		totalMass = totalMass + nodeMass
+	end
+	
+	cog:setScaled(1/totalMass)
+	
+	local rot = quatFromDir(-obj:getDirectionVector(), obj:getDirectionVectorUp())
+	M.cogRel = cog:rotated(rot:inversed())
 end
 
--- Recursively find nodes connected to parent node
-local function findConnectedNodesRecursive(parentID)
-	if isConnectedNode[parentID] then return end
-
-	isConnectedNode[parentID] = true
-	nodes[#nodes+1] = {parentID, obj:getNodeMass(parentID)*physicsFPS}
-
-	-- Apparently normal for loop is twice as fast as ipairs()
-	local beams = connectedBeams[parentID] or {}
-
-	for i=1, #beams do
-		local bid = beams[i]
-		if not obj:beamIsBroken(bid) and (obj:getBeamCurLengthRefRatio(bid) < maxBeamLengthRatio) then
-			local b = v.data.beams[bid]
-
-			if parentID == b.id1 then
-				findConnectedNodesRecursive(b.id2)
-			elseif parentID == b.id2 then
-				findConnectedNodesRecursive(b.id1)
+-- Find all nodes that are connected to the parent node
+local function findConnectedNodes()
+	if not parentNode then return end
+	
+	--print("Find connected nodes "..obj:getId())
+	
+	nodes = {}
+	
+	local nodeStack = {}
+	local visited = {}
+	local stackIdx = 1
+	
+	nodeStack[1] = parentNode
+	visited[parentNode] = true
+	
+	local cog = vec3(0,0,0)
+	local totalMass = 0
+	
+	while stackIdx > 0 do
+		local node = nodeStack[stackIdx]
+		local nodeMass = obj:getNodeMass(node)
+		local nodePos = obj:getNodePosition(node)
+		
+		nodes[#nodes+1] = {node, nodeMass*physicsFPS}
+		
+		cog:setAdd(nodePos*nodeMass)
+		totalMass = totalMass + nodeMass
+		
+		nodeStack[stackIdx] = nil
+		stackIdx = stackIdx - 1
+		
+		local conNodes = connectedNodes[node] or {}
+		
+		for i = 1, #conNodes do
+			local nid = conNodes[i][1]
+			
+			if not visited[nid] then
+				local bid = conNodes[i][2]
+				
+				if not obj:beamIsBroken(bid) and (obj:getBeamCurLengthRefRatio(bid) < maxBeamLengthRatio) then
+					stackIdx = stackIdx + 1
+					nodeStack[stackIdx] = nid
+					
+					visited[nid] = true
+				end
 			end
 		end
 	end
-end
-
--- Trigger finding of connected nodes
-local function findConnectedNodes()
-	isConnectedNode = {}
-	nodes = {}
-	findConnectedNodesRecursive(parentNode)
 	
-	calcCOG()
+	cog:setScaled(1/totalMass)
 	
-	beamsChanged = false
+	local rot = quatFromDir(-obj:getDirectionVector(), obj:getDirectionVectorUp())
+	M.cogRel = cog:rotated(rot:inversed())
 end
 
 local function onInit()
 	physicsFPS = obj:getPhysicsFPS() or 2000
 
-	-- Store connected beams for each node
-	connectedBeams = {}
+	-- For each node, store all other nodes that are directly connected to it
+	connectedNodes = {}
 	for _, b in pairs(v.data.beams) do
 		-- exclude types BEAM_PRESSURED, BEAM_LBEAM, and BEAM_SUPPORT
 		if b.beamType ~= 3 and b.beamType ~= 4 and b.beamType ~= 7 then
-			if connectedBeams[b.id1] == nil then
-				connectedBeams[b.id1] = {}
+			if connectedNodes[b.id1] == nil then
+				connectedNodes[b.id1] = {}
 			end
-			if connectedBeams[b.id2] == nil then
-				connectedBeams[b.id2] = {}
+			if connectedNodes[b.id2] == nil then
+				connectedNodes[b.id2] = {}
 			end
-			table.insert(connectedBeams[b.id1], b.cid)
-			table.insert(connectedBeams[b.id2], b.cid)
+			table.insert(connectedNodes[b.id1], {b.id2, b.cid})
+			table.insert(connectedNodes[b.id2], {b.id1, b.cid})
 		end
 	end
 	
@@ -104,13 +137,13 @@ local function onInit()
 		print("Misaligned refNodes detected in vehicle "..obj:getId().."! This might cause wrong rotations or instability.")
 	end
 	
-	if connectedBeams[refNodes.ref] then
+	if connectedNodes[refNodes.ref] then
 		parentNode = refNodes.ref
-	elseif connectedBeams[refNodes.back] then
+	elseif connectedNodes[refNodes.back] then
 		parentNode = refNodes.back
-	elseif connectedBeams[refNodes.left] then
+	elseif connectedNodes[refNodes.left] then
 		parentNode = refNodes.left
-	elseif connectedBeams[refNodes.up] then
+	elseif connectedNodes[refNodes.up] then
 		parentNode = refNodes.up
 	end
 	
@@ -130,7 +163,6 @@ local function onInit()
 	else
 		print("Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
-	        isConnectedNode[n.cid] = true
 			nodes[#nodes+1] = {n.cid, obj:getNodeMass(n.cid)*physicsFPS}
 	    end
 		calcCOG()
@@ -140,7 +172,7 @@ local function onInit()
 end
 
 local function onReset()
-	if parentNode then findConnectedNodes() end
+	findConnectedNodes()
 end
 
 -- Add velocity to vehicle in m/s
@@ -148,10 +180,6 @@ end
 --               Because all nodes accelerate at the same rate, the vehicle will not get ripped apart
 -- NOTE: - very high values can cause instability
 local function addVelocity(x, y, z)
-	if beamsChanged then
-		findConnectedNodes()
-	end
-
 	for i=1, #nodes do
 		local node = nodes[i]
 		
@@ -172,10 +200,6 @@ end
 --               and apply enough force to reach the calculated speed in 1 physics tick.
 -- NOTE: - very high values can destroy vehicles (above about 20-30 rad/s for most cars) or cause instability
 local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
-	if beamsChanged then
-		findConnectedNodes()
-	end
-	
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local cog = M.cogRel:rotated(rot)
 	
@@ -190,6 +214,7 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 		local posZ = nodePos.z - cog.z
 		
 		-- Calculate linear force from torque axis and node position using vector cross product
+		-- doing this manually is ~3 times faster than vec3:cross(vec3)
 		local forceX = (x + posY * yawAV - posZ * rollAV)*mul
 		local forceY = (y + posZ * pitchAV - posX * yawAV)*mul
 		local forceZ = (z + posX * rollAV - posY * pitchAV)*mul
@@ -214,10 +239,43 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z)
 end
 
+local function updateGFX(dt)
+	if beamsChanged or abs(beamstate.damage - lastDamage) >= damageThreshold then
+		damageTimer = damageTimer + dt
+		
+		if damageTimer >= damageDelay then
+			if beamsChanged then
+				findConnectedNodes()
+				beamsChanged = false
+			else
+				calcCOG()
+			end
+			
+			lastDamage = beamstate.damage
+			damageTimer = 0
+		end
+	else
+		damageTimer = 0
+	end
+	
+	
+	-- Connected nodes and COG debug
+	--[[
+	local vehRot = quatFromDir(-obj:getDirectionVector(), obj:getDirectionVectorUp())
+	
+	for i = 1, #nodes do
+		obj.debugDrawProxy:drawNodeSphere(nodes[i][1], 0.03, color(255, 0, 0, 200))
+	end
+	
+	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.cogRel:rotated(vehRot), color(0, 0, 255, 200))
+	--]]
+end
+
 -- public interface
 M.onInit             = onInit
 M.onExtensionLoaded  = onInit
 M.onReset            = onReset
+M.updateGFX          = updateGFX
 M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity

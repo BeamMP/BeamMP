@@ -7,6 +7,8 @@
 
 local M = {}
 
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
 local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
 end
@@ -63,6 +65,8 @@ M.tableLength  = tableSize
 M.colorMatch   = colorMatch
 M.tableDiff    = tableDiff
 
+detectGlobalWrites() -- reenable global write notifications
+
 
 local function onExtensionLoaded()
 	if not MPVehicleGE then return end -- files weren't loaded in the right order :(
@@ -85,9 +89,9 @@ local function onExtensionLoaded()
 	M.groundmarkerToPlayer     = MPVehicleGE.groundmarkerToPlayer     -- takes: string targetName
 	M.groundmarkerFollowPlayer = MPVehicleGE.groundmarkerFollowPlayer -- takes: string targetName
 
-	--MPGameNetwork
-	--M.addKeyEventListener = MPGameNetwork.addKeyEventListener -- takes: string keyName, function listenerFunction
-	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
+	--MPCoreSystem
+	--M.addKeyEventListener = MPCoreSystem.addKeyEventListener -- takes: string keyName, function listenerFunction
+	--M.getKeyState         = MPCoreSystem.getKeyState         -- takes: string keyName
 end
 
 M.onExtensionLoaded = onExtensionLoaded

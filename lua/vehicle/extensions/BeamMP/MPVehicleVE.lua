@@ -21,7 +21,7 @@ local keypressTriggers = {}
 -- Keypress handling
 -------------------------------------------------------------------------------
 
-setmetatable(_G,{}) -- temporarily disable global notifications
+setmetatable(_G,{}) -- temporarily disable global write notifications
 
 function onKeyPressed(keyname, f)
 	addKeyEventListener(keyname, f, 'down')
@@ -35,13 +35,14 @@ function addKeyEventListener(keyname, f, t)
 		for _,v in pairs(keyname) do
 			table.insert(keysToPoll, v)
 		end
-	else
+	elseif keyname ~= nil then
 		f = f or function() end
 		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
 		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
 		table.insert(keysToPoll, v)
 	end
+	log('W','addKeyEventListener','Attempted to addKeyEventListener for nil key for vehicle '..obj:getID()..' ')
 end
 
 local function onKeyStateChanged(key, state)
@@ -51,7 +52,7 @@ local function onKeyStateChanged(key, state)
 			keypressTriggers[i].func(state)
 		end
 	end
-	obj:queueGameEngineLua("MPGameNetwork.onKeyStateChanged('"..key.."',"..tostring(state)..")")
+	obj:queueGameEngineLua("MPCoreSystem.onKeyStateChanged('"..key.."',"..tostring(state)..")")
 end
 
 function getKeyState(key)

@@ -1,7 +1,7 @@
 local M = {state={}}
 
 local logTag = 'multiplayer'
-log("I", "Multiplayer Gamemode", "Gamemode Loaded")
+log("I", "", "Gamemode Loaded")
 
 local inputActionFilter = extensions.core_input_actionFilter
 
@@ -59,9 +59,9 @@ local function startMultiplayer(level, startPointName, wasDelayed)
 	-- Loading the new multiplayer causes the current loaded multiplayer to unload which breaks the new multiplayer
 	local delaying = false
 	if scenetree.MissionGroup then
-		log('D', logTag, 'Delaying start of multiplayer until current level is unloaded...')
+		log('D', 'startMultiplayer', 'Delaying start of multiplayer until current level is unloaded...')
 		M.triggerDelayedStart = function()
-			log('D', logTag, 'Triggering a delayed start of multiplayer...')
+			log('D', 'startMultiplayer', 'Triggering a delayed start of multiplayer...')
 			M.triggerDelayedStart = nil
 			startMultiplayer(level, startPointName, true)
 		end
@@ -89,7 +89,7 @@ local function startMultiplayerByName(levelName)
 end
 
 local function onClientPreStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
 		local path, file, ext = path.splitWithoutExt(mission)
 		file = path .. 'mainLevel'
 		if not FS:fileExists(file..'.lua') then return end
@@ -102,11 +102,12 @@ local function onClientPreStartMission(mission)
 end
 
 local function onClientPostStartMission()
-	if MPCoreNetwork.isMPSession() then
-	core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+	if MPCoreSystem.isMPSession() then
+		log('M','onClientPostStartMission',"MP Map Session Started. Loading UI and Connecting Game Network")
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
 
-	--readyCalled = true
-	MPGameNetwork.connectToLauncher()
+		--readyCalled = true
+		MPCoreSystem.connectSessionNetwork()
 	end
 end
 

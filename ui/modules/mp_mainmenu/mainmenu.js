@@ -63,12 +63,13 @@ angular.module('beamng.stuff')
 .directive('menuNavbar', ['Utils', '$rootScope', function (Utils, $rootScope, ) {
   return {
     template: `
-      <div class="menuNavbar" layout="row" bng-blur="true" layout-align="center center" >
-        <p bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('confirm')"></p>
-        <p bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('back')"></p>
-        <p bng-translate='ui.mainmenu.navbar.tab_left' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-left')"></p>
-        <p bng-translate='ui.mainmenu.navbar.tab_right' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-right')"></p>
-        <div flex style="max-width: none;"></div>
+      <div class="menuNavbar" layout="row" bng-blur="true" layout-align="center center" layout-wrap="">
+        <div layout="row" layout-align="start stretch" flex="noshrink" flex="75" flex-md="100">
+          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('confirm')"></p>
+          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('back')"></p>
+          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_left' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-left')"></p>
+          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_right' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-right')"></p>
+        </div>
         <div layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
           <div ng-if="steamData && steamData.working && steamData.loggedin" layout="row" layout-align="start center" ng-cloak >
             <img src="/ui/modules/mainmenu/steamicon.png" style="padding: 5px">
@@ -85,36 +86,44 @@ angular.module('beamng.stuff')
         <div style="text-align:right; color:white;margin-left:16px;">
           <div ng-if="beammpData && beammpData.players && beammpData.servers" layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
             <div layout="row" layout-align="start center" ng-cloak >
-              <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
+              <img src="/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
-                <span style="padding-left: 5px;">Players: </span>
+                <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
-            </div>
-            <div id="onlineplayers">
-              {{ ::beammpData.players }}
             </div>
           </div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
-        <div style="text-align:right; color:white;margin-left:16px;">
-          <div>BeamMP v4.2.0</div>
+        <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
+          <div ng-show='!showBuildInfo'>BeamMP v{{ ::beammpGameVer }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP v{{ ::beammpGameVer }}<br/> Launcher Version v{{ ::beammpLauncherVer }}</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
-        <div ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
+        <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }} <br/> {{ ::buildInfoStr }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }}<br/> {{ ::buildInfoStr }}</div>
         </div>
       </div>
     `,
     scope: {
     },
     link: function (scope, $element, attr) {
+      // do quick check right in main menu, to ensure *some* of our UI/LUA code can work in languages with certain non-english characters
+      let testString = "If you see this message in logs, the JS>LUA serializer is broken for non-english languages. See jira ticket GE-3042. BEGIN TEST STRING Kl�vesnice END TEST STRIN"
+      bngApi.engineLua(`dumps(${bngApi.serializeToLua(testString)})`)
+
       scope.nav = function(action, val) {
         $rootScope.$broadcast('MenuItemNavigation', action, val)
+      }
+      scope.radialMenu = function(action, val) {
+        bngApi.engineLua("extensions.core_quickAccess.setEnabled(true)")
       }
       // VERSION INFO
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
+      // TODO #203 Fix this to actually use the real launcher version!
+      scope.beammpGameVer = '5.0.0'
+      scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
       var versionSplit = scope.versionStr.split('.')
@@ -146,7 +155,7 @@ angular.module('beamng.stuff')
           scope.beammpData = data
         })
       })
-      bngApi.engineLua('MPCoreNetwork.requestPlayers()')
+      bngApi.engineLua('MPCoreSystem.requestPlayers()')
     }
   }
 }])
@@ -170,7 +179,7 @@ angular.module('beamng.stuff')
           <div layout="column" layout-align="center center" ng-repeat="message in messageData" >
             <div ng-bind-html="message.msg" class="md-padding"></div>
             <div layout="row" class="md-padding" layout-wrap layout-align="start center">
-              <md-button bng-nav-item ng-click="clicked(btn)" ng-repeat="btn in buttons" class="md-accent md-raised md-padding">{{::btn.label | translate}}</md-button>
+              <md-button bng-nav-item ng-click="clicked(btn)" ng-repeat="btn in buttons" class="md-accent md-raised md-padding">{{btn.label | translate}}</md-button>
             </div>
           </div>
         </md-content>
@@ -309,14 +318,11 @@ angular.module('beamng.stuff')
     // navigation things
     let prevCross = gamepadNav.crossfireEnabled()
     let prevGame = gamepadNav.gamepadNavEnabled()
-    let prevSpatial = gamepadNav.gamepadNavEnabled()
     gamepadNav.enableCrossfire(true)
     gamepadNav.enableGamepadNav(true)
-    gamepadNav.enableSpatialNav(true)
     $scope.$on('$destroy', () => {
       gamepadNav.enableCrossfire(prevCross)
       gamepadNav.enableGamepadNav(prevGame)
-      gamepadNav.enableSpatialNav(prevSpatial)
     })
   }
 
@@ -326,6 +332,9 @@ angular.module('beamng.stuff')
     bngApi.engineLua("TorqueScript.eval('quit();')")
   }
 
+  $scope.radialmenu = function() {
+  }
+
 
   vm.big = {
     translateid: 'ui.playmodes.freeroam',
@@ -333,8 +342,9 @@ angular.module('beamng.stuff')
     targetState: 'menu.levels'
   }
   vm.groups = [
+    // note: if you want buttons to be wrapped to the next line on thin window,
+    //       add `class: "mainmenu-buttons-smwrap",` (button count must be even)
     {
-      class: "mainmenu-buttons-smwrap",
       list: [
         {
           translateid: 'ui.playmodes.campaigns',
@@ -351,19 +361,20 @@ angular.module('beamng.stuff')
           icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
           targetState: 'menu.quickraceOverview'
         },
+      ],
+    },
+    {
+      class: "mainmenu-buttons-smwrap",
+      list: [
+        {
+          translateid: 'ui.playmodes.multiplayer',
+          icon: '/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg',
+          targetState: 'menu.multiplayer.tos'
+        },
         {
           translateid: 'ui.playmodes.bus',
           icon: '/ui/modules/mainmenu/drive/icons/busroutes.svg',
           targetState: 'menu.busRoutes'
-        },
-      ],
-    },
-    {
-      list: [
-        {
-          translateid: 'ui.playmodes.multiplayer',
-          icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
-          targetState: 'menu.multiplayer.tos'
         },
         {
           translateid: 'ui.playmodes.lightRunner',

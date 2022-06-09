@@ -32,10 +32,10 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
+			MPCoreSystem.send('GAME', 'Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end
@@ -57,8 +57,11 @@ local function applyPos(data, serverVehicleID)
 
 	local decoded = jsonDecode(data)
 
-	local deltaDt = math.max(decoded.tim - (vehicle.lastDt or 0), 0.001)
+	if not decoded.pos then log('E', 'applyPos', 'No position data recevied for entity with ID '..serverVehicleID) return end
+
+	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim
+	decoded.ping = decoded.ping or 0
 	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 
 	vehicle.ping = ping

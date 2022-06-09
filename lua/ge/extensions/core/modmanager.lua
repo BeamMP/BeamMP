@@ -107,14 +107,25 @@ local function getModNameFromPath(path)
   return modname
 end
 
-local function getModFromPath(vfsPath, withHashes)
+-- this call is really slow, use carefully
+local function getModFromPathSUPERSLOW(vfsPath, calcFingerprint)
   local realPath = FS:findOverrides(vfsPath) or {}
   for _, p in ipairs(realPath) do
     p = string.lower(p:gsub('\\', '/'))
     local _, filename, ext = path.splitWithoutExt(p)
     local mod = mods[filename]
     if mod then
-      return mod.modID or mod.modname
+      local res = mod.modID or mod.modname
+      local hash
+      if calcFingerprint then
+        local hashData = tostring(mod.fullpath)  .. '_' .. tostring(mod.dateAdded)
+        if mod.modData then
+          hashData = hashData .. '_' .. tostring(mod.modData.current_version_id) .. '_' .. tostring(mod.modData.last_update)
+        end
+        hash = hashStringSHA1(hashData)
+      end
+      --dump{'getModFromPath: ', vfsPath, hashData, hash}
+      return res, hash
     end
   end
 end
@@ -1163,10 +1174,12 @@ local function workOffChangedMod(filename, type)
     if mod and mod.active ~= false then
       log('D', '', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
-	  MPCoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
+	  MPCoreSystem.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
     end
-    FS:triggerFilesChanged(files) -- alert c++ of changed files
-    stateChanged()
+    if files then
+      FS:triggerFilesChanged(files) -- alert c++ of changed files
+      stateChanged()
+    end
   end
 end
 

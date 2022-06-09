@@ -1,8 +1,9 @@
-<md-content id="bng-credits-wrapper" tabindex="0" ng-keypress="credits.exit($event)">
-
-  <audio controls autoplay loop preload>
-    <source src="/ui/modules/credits/lonle.ogg"/>
-  </audio>
+<style>
+html {
+  scroll-behavior: smooth;
+}
+</style>
+<md-content id="bng-credits-wrapper" tabindex="0" ng-keypress="creditsCtrl.exit($event)">
 
   <div class="bng-credits-content">
     <img src="/ui/modules/credits/beammp.png">
@@ -41,20 +42,19 @@
 
     <img src="/ui/modules/credits/beamngdrive.png"" style="margin-top: 150px;">
 
-    <div ng-repeat="category in credits.credits">
-      <creditsCategory>{{ ::category.translateId | translate }}</creditsCategory>
+    <div ng-repeat="category in creditsCtrl.credits">
+      <creditsCategory>{{category.translateId | translate}}</creditsCategory>
       <div ng-repeat="member in category.members">
         <creditsMember>
           {{ ::member.first }}
-            <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
+          <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
           {{ ::member.last }}
-
-          <span ng-if="::member.title" class="title">.{{ ::member.title | translate }}</span>
+          <span ng-if="::member.title" class="title">.{{member.title | translate}}</span>
           &nbsp;<!-- allow to print blank lines using empty fields-->
         </creditsMember>
       </div>
     </div>
-  </div>
 
-  <img src="/ui/modules/credits/beamngdrive.png" class="bng-credits-end">
+    <div style="margin-top:50%">&nbsp;</div>
+  </div>
 </md-content>

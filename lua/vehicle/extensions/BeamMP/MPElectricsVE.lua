@@ -448,14 +448,14 @@ local function applyElectrics(data)
 		end
 
 		-- Transbrake syncing
-		if decodedData.transbrake ~= nil then
+		if decodedData.transbrake and controller.getController("transbrake") then
 			if electrics.values.transbrake ~= decodedData.transbrake then
 				controller.getController("transbrake").setTransbrake(decodedData.transbrake)
 			end
 		end
 
 		-- LineLock syncing
-		if decodedData.linelock ~= nil then
+		if decodedData.linelock and controller.getController("lineLock") then
 			if electrics.values.linelock ~= decodedData.linelock then
 				controller.getController("lineLock").setLineLock(decodedData.linelock)
 			end
@@ -491,9 +491,9 @@ local function applyElectrics(data)
 			if decodedData.unicycle_jump == true then
 				playerController.jump(1)
 			end
-			-- crouch, check if boolean because there are sometimes 0s in the received values
-			if decodedData.unicycle_crouch == true or decodedData.unicycle_crouch == false then
-				playerController.crouch(decodedData.unicycle_crouch and -1 or 1)
+			-- crouch
+			if decodedData.unicycle_crouch ~= nil then
+				playerController.crouch(decodedData.unicycle_crouch)
 			end
 			-- sprint
 			if decodedData.unicycle_speed ~= nil then

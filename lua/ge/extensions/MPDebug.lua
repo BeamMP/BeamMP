@@ -220,19 +220,42 @@ local function drawNetworkPerf()
 	im.End()
 end
 
+local function drawMsgConsole()
+	if not gui.isWindowVisible("MPmsgConsole") then return end
+	gui.setupWindow("MPmsgConsole")
+    --im.SetNextWindowBgAlpha(0.4)
+	im.Begin("Network Messages")
+
+
+		-- Tip: If your float aren't contiguous but part of a structure, you can pass a pointer to your first float and the sizeof() of your structure in the Stride parameter.
+		if refresh_time == 0.0 then var.refresh_time = im.GetTime() end
+
+
+		if var.refresh_time < im.GetTime() then
+			
+			var.refresh_time = var.refresh_time + 1.0 / var.refresh_rate
+		end
+
+		-- TODO #204 Add MP only message console here along with custom logging settings for script makers.
+		
+
+	im.End()
+end
 
 local function showUI()
 	gui.showWindow("MPplayerList")
 	gui.showWindow("MPspawnTeleport")
 	gui.showWindow("MPnetworkPerf")
+	gui.showWindow("MPmsgConsole")
 end
 local function hideUI()
 	gui.hideWindow("MPplayerList")
 	gui.hideWindow("MPspawnTeleport")
 	gui.hideWindow("MPnetworkPerf")
+	gui.hideWindow("MPmsgConsole")
 end
 
-function MP_Console(show)
+M.Console = function(show)
 	if show and show == 1 then
 		showUI()
 	elseif show == 0 then
@@ -244,6 +267,7 @@ local function onUpdate()
 	drawPlayerList()
 	drawSpawnTeleport()
 	drawNetworkPerf()
+	drawMsgConsole()
 end
 
 
@@ -259,8 +283,8 @@ end
 
 M.onExtensionLoaded		= onExtensionLoaded
 M.onUpdate				= onUpdate
---M.showUI				= showUI
---M.hideUI				= hideUI
+M.showUI				= showUI
+M.hideUI				= hideUI
 
 
 M.packetSent = packetSent

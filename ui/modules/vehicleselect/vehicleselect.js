@@ -16,8 +16,7 @@ angular.module('beamng.stuff')
       hide: {},
       selected: (carObj, model, config, color, spawnNew, mp) => {
         Vehicles.addToGame(model, config, color, spawnNew, mp)
-        $state.go('menu')
-        $rootScope.$broadcast('MenuHide')
+        $state.go('play')
       },
       parentState: 'menu',
       name: 'default',
@@ -200,8 +199,8 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = "core_vehicles.replaceVehicle";
-          if (spawnNew) func = "core_vehicles.spawnNewVehicle";
+          var func = "core_vehicles.replaceVehicle"
+          if (spawnNew) func = "core_vehicles.spawnNewVehicle"
           if (mp) func = "MPVehicleGE.spawnRequest";
 
           var luaArgs = {}
@@ -258,7 +257,7 @@ angular.module('beamng.stuff')
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
-  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; vm.isNotMPSession = !str; });
   });
 
@@ -318,7 +317,7 @@ angular.module('beamng.stuff')
   vm.showData = (title, performance) => (vm.selectedConfig[title] !== undefined ? Vehicles.showData(title, true, performance) : false)
 
   vm.launchConfig = function (spawnNew) {
-    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew, vm.isMPSession);
+    vm.mode.selected(vm.selectedConfig, vm.model.key, vm.selectedConfig.key, vm.selectedColor, spawnNew, vm.isMPSession)
   }
 
   // because of bug in non compete iirc
@@ -424,7 +423,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.isMPSession = false;
   vm.isNotMPSession = false;
-  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; vm.isNotMPSession = !str; });
   });
 
@@ -537,7 +536,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
       args.config = model.key
     }
 
-    $state.go(`^.vehicleDetails`, args)
+    $state.go('menu.vehiclesdetails', args)
   }
 
   // order in which the categories should appear
@@ -690,40 +689,35 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
         $rootScope.$broadcast('app:waiting', false)
         // car was spawned clear fallback
         $timeout.cancel(fallback)
-
-        $state.go('menu')
-        $rootScope.$broadcast('MenuHide')
+        $state.go('play')
       })
       bngApi.engineLua('extensions.hook("trackNewVeh")')
     })
   }
   vm.resetAll = function() {
     bngApi.engineLua('resetGameplay(-1)')
-    $state.go('menu')
-    $rootScope.$broadcast('MenuHide')
+    $state.go('play')
   }
   vm.removeCurrentVehicle = function() {
     bngApi.engineLua('core_vehicles.removeCurrent(); extensions.hook("trackNewVeh")')
-    $state.go('menu')
-    $rootScope.$broadcast('MenuHide')
+    $state.go('play')
   }
   vm.removeAllVehicles = function() {
     bngApi.engineLua('core_vehicles.removeAll(); extensions.hook("trackNewVeh")')
   }
   vm.removeAllExceptCurrentVehicle = function() {
     bngApi.engineLua('core_vehicles.removeAllExceptCurrent()')
-    $state.go('menu')
-    $rootScope.$broadcast('MenuHide')
+    $state.go('play')
   }
   vm.loadDefault = function() {
     bngApi.engineLua('MPVehicleGE.spawnDefaultRequest()');
-    $state.go('menu')
-    $rootScope.$broadcast('MenuHide')
+    //bngApi.engineLua('core_vehicles.spawnDefault(); extensions.hook("trackNewVeh")')
+    $state.go('play')
   }
   vm.saveDefault = function() {
     bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.saveDefaultRequest('\"..obj:getID()..\"')\")");
-    $state.go('menu')
-    $rootScope.$broadcast('MenuHide')
+    //bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();')
+    $state.go('play')
   }
 
 

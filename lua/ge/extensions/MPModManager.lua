@@ -67,7 +67,7 @@ local function checkMod(mod)
 		else
 			print("Inactive Mod but Should be Active: "..modname)
 			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-			MPCoreNetwork.modLoaded(modname)
+			MPCoreSystem.modLoaded(modname)
 		end
 	end
 end
@@ -89,13 +89,16 @@ local function cleanUpSessionMods()
 	if modsDB then
 			backupAllowed = false
 			local modsFound = false
+			local count = 0
 			for modname, mod in pairs(modsDB.mods) do
 					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+							count = count + 1
 							core_modmanager.deleteMod(modname)
 							modsFound = true
 					end
 			end
 			backupAllowed = true
+			log('M', "cleanUpSessionMods", count.." Mods cleaned up")
 			if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
 	end
 end
@@ -155,7 +158,7 @@ local function onModStateChanged(mod)
 	-- The function makes two calls, one with a table and one with the mod name
 	-- We only want the table not the mod name call
 	if type(mod) ~= "table" then return end
-	if MPCoreNetwork.isGoingMPSession() or MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isGoingMPSession() or MPCoreSystem.isMPSession() then
 		checkMod(mod)
 	end
 end
@@ -180,7 +183,7 @@ end
 
 
 local function onClientStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
 		checkAllMods() -- Checking all the mods
 	end
 	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
@@ -199,7 +202,7 @@ end
 
 
 local function modsDatabaseChanged()
-	if not MPCoreNetwork.isMPSession() then
+	if not MPCoreSystem.isMPSession() then
 		backupLoadedMods()
 	end
 end

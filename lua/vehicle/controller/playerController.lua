@@ -18,6 +18,8 @@ local min = math.min
 local max = math.max
 local abs = math.abs
 local acos = math.acos
+local deg = math.deg --BeamMP
+local rad = math.rad --BeamMP
 
 local stabilizationMaxForce = 8000
 
@@ -313,18 +315,25 @@ local function updateFixedStep(dt)
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopRearLeft * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
 
+  ----BeamMP----
   local bodyRotation = quat(obj:getRotation()):toEulerYXZ().x
-  
+
   if playerInfo.anyPlayerSeated then
 	  electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
 	  electrics.values.unicycle_walk_x = guardedWalkVector.x
 	  electrics.values.unicycle_walk_y = guardedWalkVector.y
 	  electrics.values.unicycle_jump = jumpCooldown > 0.1
-	  electrics.values.unicycle_crouch = isCrouching
+	  electrics.values.unicycle_crouch = (isCrouching and -1 or 1)
 	  electrics.values.unicycle_speed = movementSpeedCoef
   end
-  
-  electrics.values.unicycle_body = (math.deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360
+
+  if bodyrotationServo and electrics.values.unicycle_camera ~= nil then -- the camera check prevents rotation errors before it recieves rotation data
+    local rotatorError = bodyrotationServo.currentAngle + bodyRotation
+    bodyrotationServo:setTargetAngle(((electrics.values.unicycle_camera or 0) + rotatorError) % rad(360) -rad(180))
+  end
+
+  electrics.values.unicycle_body = (deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360
+
 end
 
 local function updateGFX(dt)
@@ -397,7 +406,7 @@ local function crouch(value)
     return
   end
 
-  if value < 0 then
+  if tonumber(value) < 0 then
     obj:setGroupPressureRel(v.data.pressureGroups["ball"], ballPressureCrouch)
     isCrouching = true
   elseif value > 0 then
@@ -494,6 +503,11 @@ local function init(jbeamData)
 
   mapmgr.enableTracking()
   obj:setSleepingEnabled(false)
+
+  ----beamMP----
+  if powertrain.getDevice("bodyrotationServo") ~= nil then
+    bodyrotationServo = powertrain.getDevice("bodyrotationServo")
+  end
 end
 
 local function initLastStage()
@@ -515,10 +529,16 @@ local function reset()
   yawRightForce = 0
 
   walkVector = vec3(0, 0, 0)
+  ballTorqueAxis = vec3(0, 0, 0)
   stabilizationPIDs.frontRear:reset()
   stabilizationPIDs.leftRight:reset()
   --stabilizationPIDs.upright:reset()
   stabilizationPIDs.yaw:reset()
+
+  ----beamMP----
+  if powertrain.getDevice("bodyrotationServo") ~= nil then
+    bodyrotationServo = powertrain.getDevice("bodyrotationServo")
+  end
 end
 
 local function vehicleActivated()

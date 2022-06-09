@@ -15,12 +15,13 @@ app.directive('multiplayersession', [function () {
 app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	$scope.init = function() {
 		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
+		bngApi.engineLua('UI.sendQueue()'); // asks the lua to send queue data
 	};
 
 	mdDialog = $mdDialog;
 
 	$scope.mpquit = function() {
-		bngApi.engineLua('MPCoreNetwork.resetSession(1)');
+		bngApi.engineLua('MPCoreSystem.leaveServer(true)');
 	};
 
 	$scope.applyQueue = function() {
@@ -54,25 +55,38 @@ app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	});
 
 	$scope.$on('setPing', function (event, ping) {
-		document.getElementById("Session-Ping").innerHTML = ping;
+		var sessionPing = document.getElementById("Session-Ping")
+		// To ensure that the element exists
+		if (sessionPing) {
+			sessionPing.innerHTML = ping;
+		}
 	});
 
 	$scope.$on('setQueue', function (event, queue) {
-		if (queue.show) document.getElementById("queue-block").style.display = "";
-		else { document.getElementById("queue-block").style.display = "none"; return;}
+		var queueBlock = document.getElementById("queue-block");
+		// To ensure that the element exists
+		if (queueBlock) {
+			if (queue.show) queueBlock.style.display = "";
+			else { queueBlock.style.display = "none"; return;}
+		}		
 		
 		var queueCount = queue.editCount + queue.spawnCount;
 		var queueElem = document.getElementById("Session-Queue")
-		queueElem.innerHTML = `${queue.spawnCount}|${queue.editCount}`;
-		queueElem.title = `Edits: ${queue.editCount}\nSpawns: ${queue.spawnCount}`; // titles dont work in game :C
-
+		if (queueElem) {
+			queueElem.innerHTML = `${queue.spawnCount}|${queue.editCount}`;
+			queueElem.title = `Edits: ${queue.editCount}\nSpawns: ${queue.spawnCount}`; // titles dont work in game :C
+		}
 	});
 
 	$scope.$on('setStatus', function (event, status) {
 		console.log('Setting status to: ' + sanitizeString(status))
-		if (status == "") document.getElementById("server-name-block").style.display = "none";
-		else document.getElementById("server-name-block").style.display = "";
-		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
+		var serverNameBlock = document.getElementById("server-name-block")
+		if (serverNameBlock) {
+			if (status == "") serverNameBlock.style.display = "none";
+			else serverNameBlock.style.display = "";
+		}
+		var sessionStatus = document.getElementById("Session-Status")
+		if (sessionStatus) sessionStatus.innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
 	});
 
 	$scope.$on('setPlayerCount', function (event, count) {

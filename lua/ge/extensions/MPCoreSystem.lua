@@ -699,6 +699,15 @@ M.onClientStartMission = function(mission)
 		--Lua:requestReload()
 	elseif getMissionFilename() == currentServer.map then
 		status = "Playing"
+		if settings.getValue('richPresence') then
+			if Steam then
+				Steam.setRichPresence('status', "BeamMP | On "..currentServer.map)
+			end
+			if Discord then
+				local dActivity = {state="Playing BeamMP",details="In-Game on "..currentServer.map,asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+				Discord.setActivity(dActivity)
+			end
+		end
 	end
 end
 
@@ -712,6 +721,15 @@ M.onUiReady = function()
 	if getMissionFilename() == "" then
 		M.onInit()
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
+		if settings.getValue('richPresence') then
+			if Steam then
+				Steam.setRichPresence('status', beamng_windowtitle)
+			end
+			if Discord then
+				local dActivity = {state="Playing BeamMP",details="In the menus",asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+				Discord.setActivity(dActivity)
+			end
+		end
 	end
 end
 -- ============= EVENTS =============

@@ -6,7 +6,7 @@
       bng-v-list bng-v-repeat="model in vehicles.shownData">
       <div class="gridItem VScroll" bng-nav-item nav-item-enter-focus="{{ :: 0 === $index }}"  bng-all-clicks single="vehicles.goToConfigs(model)" double="vehicles.launchVehicle(model)" bng-sound-class="bng_button_main_ui_default">
         <bng-box>
-          <div ng-if="model.preview" style="background-size: cover; background-position: center center;" ng-style="{'background-image': 'url(' + model.preview + ')'}" class="filler"></div>
+          <div ng-if="model.preview" style="background-size: cover; background-position: center center;" ng-style="{'background-image': 'url(\'' + model.preview + '\')'}" class="filler"></div>
 
           <div layout="row" layout-align="start end" class="container">
             <bng-icon style="margin-left: 0.5em; width: 1em; position: absolute; top: 6%;
@@ -88,7 +88,7 @@
       <bng-accordion-pane ng-repeat="key in vehicles.filterKeyList" ng-if="vehicles.showData(key);" bng-sound-class="bng_button_main_ui_arrowsupdown" default-open="key == 'Drivetrain' || key == 'Transmission'">
         <bng-pane-header style="padding: 10px">{{key | translate}}</bng-pane-header>
 
-        <bng-pane-body style="margin-left:10px; column-count: 2" ng-if=":: !vehicles.isRange(key);">
+        <bng-pane-body style="margin-left:10px" class="bngPaneWrap" ng-if=":: !vehicles.isRange(key);">
           <md-checkbox md-no-ink ng-repeat="(option, _) in ::vehicles.data.filters[key] track by $index" ng-model="vehicles.data.filters[key][option]" ng-change="vehicles.applyFilters()" bng-sound-class="bng_button_main_ui_checkbox">{{ :: option }}</md-checkbox>
         </bng-pane-body>
 

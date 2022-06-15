@@ -14,10 +14,10 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     suffix: '.json'
   })
   $translateProvider.useSanitizeValueStrategy('escaped')
-  $translateProvider.preferredLanguage('en-US'); // this is the default language to load
-  $translateProvider.fallbackLanguage('en-US'); // this is the fallback in case individual translations are missing
-  //$translateProvider.useLoaderCache(true); // default is false which means disable
-  //$translateProvider.forceAsyncReload(true);
+  $translateProvider.preferredLanguage('en-US') // this is the default language to load
+  $translateProvider.fallbackLanguage('en-US') // this is the fallback in case individual translations are missing
+  //$translateProvider.useLoaderCache(true) // default is false which means disable
+  //$translateProvider.forceAsyncReload(true)
 
 
   //$translateProvider.use('de-DE')
@@ -86,7 +86,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       views: {
         'loader':{}, // empty the loader view
         '@menu': { // targe the unnamed default view in the menu parent state
-          templateUrl: `/ui/modules/mainmenu/${beamng.product}/mainmenu.html`,
+          templateUrl: `/ui/modules/mainmenu/drive/mainmenu.html`,
           controller: 'MainMenuController as mmCtrl',
         }
       }
@@ -103,7 +103,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/bigmap',
       templateUrl: '/ui/modules/bigmap/bigmap.html',
       controller: 'BigMapController',
-      backState: 'menu',
+      backState: 'BACK_TO_MENU',
     })
 
     .state('menu.levels', {
@@ -134,12 +134,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'menu.busRoutes',
     })
 
-    .state('menu.busRoutesVehicleSelect', {
-      url: '/bus/vehicle/:garage/:mode/:event',
-      templateUrl: '/ui/modules/vehicleselect/vehicleselect.html',
-      controller: 'VehicleSelectController as vehicles',
-      backState: 'menu.busRoutes',
-    })
+    // .state('menu.busRoutesVehicleSelect', {
+    //   url: '/bus/vehicle/:garage/:mode/:event',
+    //   templateUrl: '/ui/modules/vehicleselect/vehicleselect.html',
+    //   controller: 'VehicleSelectController as vehicles',
+    //   backState: 'menu.busRoutes',
+    // })
 
     .state('menu.busRoutesRouteSelect', {
       url: '/bus/route',
@@ -152,7 +152,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/environment',
       templateUrl: '/ui/modules/environment/environment.html',
       controller:  'EnvironmentController as environment',
-      backState: 'menu',
+      backState: 'BACK_TO_MENU',
     })
 
     // Track Builder
@@ -182,7 +182,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/appedit/:mode',
       templateUrl: '/ui/modules/appedit/appedit.html',
       controller: 'AppEditController as ctrl',
-      backState: 'menu',
+      backState: 'BACK_TO_MENU',
       uiAppsShown: true, // defaults to false
     })
 
@@ -197,7 +197,17 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/vehicleselect/:garage/:mode/:event',
       templateUrl: '/ui/modules/vehicleselect/vehicleselect.html',
       controller: 'VehicleSelectController as vehicles',
-      backState: 'BACK_TO_MENU',
+      backState($scope, $state, $stateParams) {
+        if ($scope.gameState === 'garage')
+          return 'garage';
+        if ($stateParams && $stateParams.hasOwnProperty('mode')) {
+          switch ($stateParams.mode) {
+            case 'busRoutes':   return 'menu.busRoutes';
+            case 'lightRunner': return 'menu.lightrunnerOverview';
+          }
+        }
+        return 'BACK_TO_MENU';
+      },
     })
 
     .state('menu.vehiclesdetails', {
@@ -322,35 +332,35 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       .state('menu.options.camera', {
         url: '/camera',
         templateUrl: '/ui/modules/options/camera.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
+        controller: 'SettingsCameraCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
 
       .state('menu.options.userInterface', {
         url: '/userInterface',
         templateUrl: '/ui/modules/options/userinterface.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
+        controller: 'SettingsUserInterfaceCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
 
       .state('menu.options.language', {
         url: '/language',
         templateUrl: '/ui/modules/options/language.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
+        controller: 'SettingsLanguageCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
 
       .state('menu.options.other', {
         url: '/other',
         templateUrl: '/ui/modules/options/other.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
+        controller: 'SettingsOtherCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
 
       .state('menu.options.licenses', {
         url: '/licenses',
         templateUrl: '/ui/modules/options/licenses.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
+        controller: 'SettingsLicensesCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
 
@@ -621,6 +631,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   .state('scenario-end', {
     url: '/scenariocontrol/end',
     params: {
+        missionData: {},
         stats: {},
         rewards: {},
         portrait: {}
@@ -675,7 +686,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     url: '/photo-mode',
     templateUrl: '/ui/modules/photomode/photomode.html',
     controller:  'PhotoModeController as photo',
-    backState: 'menu',
+    backState: 'BACK_TO_MENU',
   })
 
   .state('menu.replay', {
@@ -765,14 +776,14 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/quickrace/level',
       templateUrl: '/ui/modules/quickrace/levelSelect.html',
       controller: 'QuickraceLevelController',
-      backState: 'BACK_TO_MENU',
+      backState: 'menu.quickraceOverview',
     })
 
     .state('menu.quickraceTrackselect', {
       url: '/quickrace/track',
       templateUrl: '/ui/modules/quickrace/trackSelect.html',
       controller: 'QuickraceTrackController',
-      backState: 'BACK_TO_MENU',
+      backState: 'menu.quickraceLevelselect',
     })
 
     .state('campaign', {
@@ -820,6 +831,16 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle',
       backState: 'BACK_TO_MENU',
+    })
+
+    .state('garage', {
+      url: '/garage',
+      templateUrl: '/ui/modules/garage/garage.html',
+      controller: 'GarageController as garageCtrl',
+      // menuActionMapEnabled: false,
+      uiAppsShown: true,
+      // uiLayout: 'garage',
+      backState: "menu.mainmenu",
     })
 
 
@@ -999,6 +1020,7 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
 	});
 
 	// -------------------------------------- BEAMMP -------------------------------------- //
+
   /* --- VUE3 END --- */
   $rootScope.$on('$translateChangeSuccess', (event, data) => {
     i18nLanguageUsed = data.language
@@ -1123,12 +1145,23 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
 angular.module('beamng.stuff')
 
 .service('translateService', ['$translate', function($translate){
-  contextTranslate = function(val) {
+
+  contextTranslate = function(val, translateContext) {
     if(typeof val == "string") {
       return $translate.instant(val)
     } else {
       if (val && val.txt && val.context) {
-        return $translate.instant(val.txt, val.context)
+        let context = val.context
+        if(translateContext) {
+          let newContext = {}
+          for (let key in context) {
+            if (context.hasOwnProperty(key)) {
+              newContext[key] = contextTranslate(context[key], true);
+            }
+          }
+          context = newContext
+        }
+        return $translate.instant(val.txt, context)
       }
     }
     return
@@ -1146,8 +1179,16 @@ angular.module('beamng.stuff')
   }
 }])
 
-.service('gamepadNav', ['$rootScope', '$state',
-  function ($rootScope, $state) {
+.filter('contextTranslate', ['translateService', function($translateService) {
+  function contextTranslateFilter(input){
+    return $translateService.contextTranslate(input, true)
+  }
+
+  contextTranslateFilter.$stateful = true
+  return contextTranslateFilter
+}])
+
+.service('gamepadNav', ['$rootScope', function ($rootScope) {
     'use strict'
 
     // TODO: hook this up to lua settings
@@ -1155,7 +1196,6 @@ angular.module('beamng.stuff')
     // this would have the benefit for example of dropdowns beeing opened, and while open their actions would be used
     // todo: actually test the list approach
     let useCrossfire = true
-    let scope = {}
     let useGamepadNavigation = false
     let noop = () => {}
     let actions = {
@@ -1232,18 +1272,22 @@ angular.module('beamng.stuff')
       }
 
       if (useCrossfire) {
-        if(action == 'confirm') {
-          if (document.activeElement.classList.contains("menu-navigation")) {
-            var click = new CustomEvent("click");
-            document.activeElement.dispatchEvent(click);
-            // document.activeElement.click(); // only click with confirm+crossfire if ornage focus border is shown
+        if (action == 'confirm') {
+          const active = document.activeElement;
+          if (isNavigatable(active)) {
+            if (typeof active.click === "function") {
+              active.click()
+            } else {
+              let click = new CustomEvent("click")
+              active.dispatchEvent(click)
+            }
           }
         } else if(action == 'back') {
           $rootScope.$broadcast('MenuToggle')
         } else if (["left", "right", "up", "down"].indexOf(action) != -1) {
           bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
-          var targets = collectRects()
-          navigate(targets, action)
+          const targets = collectRects(action);
+          navigate(targets, action);
           //console.log(`navigation ${action} handled by Crossfire`)
         } else if (action == 'tab-left') {
             $rootScope.$broadcast('$tabLeft')
@@ -1279,8 +1323,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService',
-  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService) {
+.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService',
+  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService) {
   var vm = this
 
   // hack to fix backspace navigating between different menus.
@@ -1303,6 +1347,7 @@ angular.module('beamng.stuff')
 
   vm.shipping = beamng.shipping
   vm.uitest = false
+  vm.uitestshow = false
 
   // on CEF devtools toggle
   $scope.$on('onCEFDevToolsVisibility', (event, enabled) => {
@@ -1383,7 +1428,7 @@ angular.module('beamng.stuff')
   vm.physicsMaybePaused = false
   vm.showPauseIcon = false
   vm.showCrosshair = false
-  vm.uiLayoutPrevious = false;
+  vm.uiLayoutPrevious = false
   function updatePauseState() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused
       vm.showPauseIcon = vm.physicsPaused || vm.replayPaused
@@ -1410,7 +1455,7 @@ angular.module('beamng.stuff')
       // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
       if (vm.uiLayoutPrevious) {
         $scope.$emit('appContainer:loadLayoutByReqData', vm.uiLayoutPrevious)
-        vm.uiLayoutPrevious = null;
+        vm.uiLayoutPrevious = null
       }
     } else {
       // this state requires a particular ui layout, set
@@ -1419,8 +1464,18 @@ angular.module('beamng.stuff')
     }
 
     // update ui apps visibility
-    let showApps = $state.current.uiAppsShown === true // defaults to false
-    $scope.$emit('ShowApps', showApps)
+    $scope.$emit("ShowApps", !!$state.current.uiAppsShown);
+
+    $state.previous = fromState;
+    $state.previousArgs = fromParams;
+
+    if (
+      fromState.name !== "menu" && fromState.name.indexOf("menu.") !== 0 &&
+      (toState.name === "menu" || toState.name.indexOf("menu.") === 0)
+    ) {
+      $state.gamestate = fromState;
+      $state.gamestateArgs = fromParams;
+    }
 
     transitioningTo = undefined
     updatePauseState()
@@ -1448,7 +1503,7 @@ angular.module('beamng.stuff')
     //console.log('stateChangeStart', toState, toParams, fromState, fromParams)
     //console.trace()
     transitioningTo = toState.name
-    vm.transitionAnimation = toState.transitionAnimation || fromState.transitionAnimation; // prefer the animation of the target state, otherwise use the state we came from
+    vm.transitionAnimation = toState.transitionAnimation || fromState.transitionAnimation // prefer the animation of the target state, otherwise use the state we came from
   })
 
 
@@ -1632,12 +1687,25 @@ angular.module('beamng.stuff')
     }
   })
 
+  $scope.$on('MenuTogglePrevent', (event, func) => {
+    $state.preventStateChange = func;
+  });
+
   $scope.$on('MenuToggle', (event, data) => {
     //console.log('toggleMenu', data, $state.current)
     //console.trace()
+
     // *** navigation back logic here
-    if($state.current.backState) {
-      let targetState = $state.current.backState
+    let backState = $state.current.backState;
+    // this hack allows to catch Esc or (B) gamepad button
+    // currently used in garage mode and bigmap
+    if (typeof $state.preventStateChange === "function" && $state.preventStateChange()) {
+      backState = "BLOCK";
+    } else if (typeof backState === "function")
+      backState = backState(vm, $state, $stateParams);
+    if(backState) {
+      let targetState = backState
+
       if(targetState === 'BLOCK') {
         if(!$state.current.tryCounter) {
           $state.current.tryCounter = 0
@@ -1650,13 +1718,14 @@ angular.module('beamng.stuff')
         targetState = 'BACK_TO_MENU'
       }
 
-      if(targetState === 'BACK_TO_MENU') {
-        targetState = vm.mainmenu ? 'menu.mainmenu' : 'menu'
+      if (targetState === 'BACK_TO_MENU') {
+        targetState = selectTopMenu()
+      } else if (targetState == 'play' && vm.stickyPlayState) {
+        targetState = vm.stickyPlayState
       }
-      $state.go(targetState) // , stateParams)
+
+      $state.go(targetState, getPrevArgs($state, targetState))
       return
-    } else if($state.current.backAction) {
-      $state.current.backAction($state)
     }
 
     //console.log(`received MenuToggle in gamestate: ${vm.gameState}. currently in state: ${$state.current.name}`)
@@ -1666,21 +1735,35 @@ angular.module('beamng.stuff')
       if (typeof(data) == 'boolean') {
         showMenu = data
       } else {
-        showMenu = $state.current.name !== 'menu'
+        showMenu = $state.current.name !== (vm.gameState === 'garage' ? 'menu.mainmenu' : 'menu')
       }
+      let targetState
       if (showMenu) {
-        $state.go(vm.mainmenu ? 'menu.mainmenu' : 'menu')
+        targetState = selectTopMenu()
       } else {
         // figure out where to go 'back' to. Normally the play state, but in scenarios it might be different
-        let targetState = 'play'
-        if(vm.stickyPlayState) {
-          targetState = vm.stickyPlayState
-        }
-        $state.go(targetState)
+        targetState = vm.stickyPlayState || 'play'
       }
+      $state.go(targetState, getPrevArgs($state, targetState))
     })
     bngApi.engineLua(`extensions.hook("onMenuToggled", ${showMenu})`)
   })
+  function getPrevArgs($state, targetState) {
+    // exiting menus
+    if ($state.gamestate && $state.gamestateArgs &&
+      $state.gamestate.name === targetState) {
+      return $state.gamestateArgs;
+    }
+    // generic going back
+    if ($state.previous && $state.previousArgs &&
+      $state.previous.name === targetState) {
+      return $state.previousArgs;
+    }
+    return null;
+  }
+  function selectTopMenu() {
+    return vm.mainmenu || vm.gameState === 'garage' ? 'menu.mainmenu' : 'menu'
+  }
 
 
   $scope.$on('MenuHide', function (event, data) {
@@ -1713,7 +1796,7 @@ angular.module('beamng.stuff')
 
   vm.quit = function () {
     if (vm.mainmenu) {
-      bngApi.engineScript('quit();'); //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
+      bngApi.engineScript('quit();') //It should work but doesn't, `Platform::postQuitMessage` is executed but nothing happens, maybe CEF catch that message
       bngApi.engineLua("TorqueScript.eval('quit();')")
     } else {
       bngApi.engineLua("returnToMainMenu()")
@@ -1748,7 +1831,7 @@ angular.module('beamng.stuff')
     //console.log('received MenuOpenModule w/', data)
     switch (data) {
     case 'help':
-      $state.go('menu.help')
+      $state.go('menu.options.help')
       break
     case 'vehicleselect':
       $state.go('menu.vehicles')
@@ -1757,7 +1840,7 @@ angular.module('beamng.stuff')
       $state.go('menu.vehicleconfig.parts')
       break
     case 'options':
-      $state.go('menu.options.graphics')
+      $state.go('menu.options.display')
       break
     case 'appedit':
       $state.go('menu.appedit')
@@ -1805,13 +1888,8 @@ angular.module('beamng.stuff')
   $scope.$on('requestPhysicsState', function (event) {
     $scope.$broadcast('physicsStateChanged', !vm.physicsPaused)
   })
-  // -------------------------------------- BEAMMP -------------------------------------- //
-  //ingame red connection warning
-  $scope.$on('showConnectionIssues', function(evt, data) {
-    vm.showConnectionIssues = data;
-  });
 
-	// -------------------------------------- BEAMMP -------------------------------------- //
+
 
   vm.isWaiting = false
 
@@ -1841,50 +1919,51 @@ angular.module('beamng.stuff')
 
 .service('BlurGame', [function () {
   // todo: find a solution if i should actually overflow at some point
-  let i = 0
+  let highestId = 0
   let list = {}
-  let disabled = false
 
 
   function updateLua () {
-    // console.log('update blur to lua', list);
-    bngApi.engineLua(`extensions.ui_gameBlur.replaceGroup("uiBlur", ${bngApi.serializeToLua(disabled ? {} : list)})`);
+    //console.log('---------update blur to lua' + JSON.stringify(list))
+    bngApi.engineLua(`extensions.ui_gameBlur.replaceGroup("uiBlur", ${bngApi.serializeToLua(list)})`)
   }
 
   return {
     register: function (coord) {
-      if (coord !== undefined) {
-        i += 1;
-
-        if (list.isEmpty()) {
-          bngApi.engineLua('extensions.load("ui_gameBlur");');
-        }
-
-        list[i] = coord;
-      } else {
-        throw new Error('You need to specify the coordinates to register');
+      if (coord === undefined) {
+        throw new Error('Cannot register bng-blur with coordinates: ' + coord)
       }
-      updateLua();
-
-      return i;
-    },
-    unregister: function (i) {
-      delete list[i];
-      updateLua();
 
       if (list.isEmpty()) {
-        i = 0;
-        bngApi.engineLua('extensions.unload("ui_gameBlur");');
+        bngApi.engineLua('extensions.load("ui_gameBlur")')
+      }
+
+      highestId += 1
+      list[highestId] = coord
+      updateLua()
+      return highestId
+    },
+    unregister: function (i) {
+      if (!(i in list)) {
+        console.error("Trying to unregister bng-blur with an ID that is not registered: " + i + " (of " + Object.keys(list) + ")")
+        throw new Error('Trying to unregister bng-blur with an ID that is not registered: ' + i + " (of " + Object.keys(list) + ")")
+      }
+      delete list[i]
+      updateLua()
+
+      if (list.isEmpty()) {
+        highestId = 0
+        bngApi.engineLua('extensions.unload("ui_gameBlur")')
       }
     },
     update: function (i, coord) {
-      list[i] = coord;
-      updateLua();
+      if (!(i in list)) {
+        console.error("Trying to update bng-blur with an ID that is not registered: " + i + " (of " + Object.keys(list) + ")")
+        throw new Error('Trying to update bng-blur with an ID that is not registered: ' + i + " (of " + Object.keys(list) + ")")
+      }
+      list[i] = coord
+      updateLua()
     },
-    disable: function (bool) {
-      disable = !!bool;
-      updateLua();
-    }
   }
 }])
 
@@ -1896,49 +1975,74 @@ angular.module('beamng.stuff')
       let blurAmount = 1
       let blurUpdateWrapper = RateLimiter.debounce(updateBlur, 50)
 
-      const resizeObserver = new ResizeObserver(entries => {
-        blurUpdateWrapper()
-      })
-      resizeObserver.observe(elem[0])
+      const resizeObserver = new ResizeObserver(blurUpdateWrapper);
+      resizeObserver.observe(elem[0]);
 
-      scope.$watch(attrs.bngBlur, (val) => {
-        if (val !== undefined) {
-          if(val === true) {
-            val = 1
-          } else if(val === false) {
-            val = 0
-          }
-          blurAmount = val;
-          blurUpdateWrapper()
+      scope.$watch(attrs.bngBlur, val => {
+        switch (typeof val) {
+          case "undefined":
+            val = 1;
+            break;
+          case "boolean":
+            val = val ? 1 : 0;
+            break;
+          case "number":
+            if (val < 0 || val > 1) {
+              console.error(`Attempted to use bng-blur with a number out of range 0..1: ${val}\nSee stack:\n${new Error().stack}`);
+              val = 1;
+            }
+            // all fine
+            break;
+          default:
+            console.error(`Attempted to use bng-blur with a non-number, non-boolean value: ${val}\nSee stack:\n${new Error().stack}`)
+            val = 0;
+            break;
         }
+        blurAmount = val;
+        blurUpdateWrapper();
       });
 
       function calcBlur () {
-        let help = elem[0].getBoundingClientRect();
-        return [
-          help.left / screen.width, // x
-          help.top / screen.height, // y
-          help.width / screen.width, // width
-          help.height / screen.height, // height
-          blurAmount
-        ];
+        let rect = elem[0].getBoundingClientRect();
+        if (
+          // valid size (at least 1px)
+          rect.width > 0 && rect.height > 0 &&
+          // on screen (for at least 1px)
+          rect.bottom > 0 && rect.top < screen.height &&
+          rect.right > 0 && rect.left < screen.width
+        ) {
+          return [
+            rect.left   / screen.width,  // x
+            rect.top    / screen.height, // y
+            rect.width  / screen.width,  // width
+            rect.height / screen.height, // height
+            blurAmount
+          ];
+        }
+        return null;
       }
 
       function updateBlur () {
-        if (blurAmount > 0) {
-          if (id === undefined) {
-            id = BlurGame.register(calcBlur())
-          } else {
-            BlurGame.update(id, calcBlur())
-          }
+        if (blurAmount > 0 && isVisibleFast(elem[0])) {
+          const blur = calcBlur();
+          if (!id && blur)
+            id = BlurGame.register(blur);
+          else if (!blur)
+            return BlurGame.unregister(id);
+          else
+            BlurGame.update(id, blur);
         } else {
-          BlurGame.unregister(id)
-          id = undefined
+          if (id) {
+            BlurGame.unregister(id);
+            id = null;
+          }
         }
       }
 
       scope.$on('$destroy', () => {
-        BlurGame.unregister(id)
+        resizeObserver.disconnect();
+        blurAmount = 0
+        blurUpdateWrapper()
       })
 
       scope.$on('windowResize', () => {

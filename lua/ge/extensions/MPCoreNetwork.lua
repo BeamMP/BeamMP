@@ -449,9 +449,9 @@ local function onClientEndMission(mission)
 	end
 end
 
-local function onUiReady()
-	if getMissionFilename() == "" then
-		guihooks.trigger('ChangeState', 'menu.mainmenu')
+local function onUiChangedState (curUIState, prevUIState)
+  if curUIState == 'menu' and getMissionFilename() == "" then
+    guihooks.trigger('ChangeState', 'menu.mainmenu')
 	end
 end
 -- ============= EVENTS =============
@@ -476,10 +476,9 @@ M.isLauncherConnected  = isLauncherConnected
 --M.onUpdate             = onUpdate
 M.disconnectLauncher   = disconnectLauncher
 M.autoLogin            = autoLogin
---M.onUiChangedState     = onUiChangedState
+M.onUiChangedState     = onUiChangedState
 
 M.onInit               = onInit
-M.onUiReady            = onUiReady
 M.requestPlayers       = requestPlayers
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate

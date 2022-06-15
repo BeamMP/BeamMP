@@ -47,7 +47,7 @@ html {
       <div ng-repeat="member in category.members">
         <creditsMember>
           {{ ::member.first }}
-          <span ng-if="::member.aka" style="text-transform: none"> "{{ ::member.aka }}" </span>
+          <span ng-if="::member.aka" style="text-transform: none">"{{ ::member.aka }}"</span>
           {{ ::member.last }}
           <span ng-if="::member.title" class="title">.{{member.title | translate}}</span>
           &nbsp;<!-- allow to print blank lines using empty fields-->
@@ -55,6 +55,6 @@ html {
       </div>
     </div>
 
-    <div style="margin-top:50%">&nbsp;</div>
+    <div style="padding-top:70%"></div>
   </div>
 </md-content>

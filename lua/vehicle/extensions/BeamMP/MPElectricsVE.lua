@@ -324,7 +324,7 @@ local function applyElectrics(data)
 
 		if decodedData.hazard_enabled == 1 then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData.hazard_enabled)
-			electrics.update(0) -- Update electrics values
+			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.hazard_enabled == 0 then -- Apply left signal value
 			if electrics.values.signal_left_input ~= decodedData.signal_left_input then
@@ -332,7 +332,7 @@ local function applyElectrics(data)
 			elseif electrics.values.signal_right_input ~= decodedData.signal_right_input then
 				electrics.toggle_right_signal()
 			end
-			electrics.update(0) -- Update electrics values
+			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.lights_state then
 			electrics.setLightsState(decodedData.lights_state) -- Apply lights values

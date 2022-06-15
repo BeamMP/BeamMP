@@ -264,7 +264,7 @@ function Player:onSerialized()
 end
 function Player:onSettingsChanged()
 	local charLimit = tonumber(settings.getValue("nametagCharLimit"))
-	if not settings.getValue("shortenNametags") or not charLimit or #self.name < charLimit + 3 then
+	if not settings.getValue("shortenNametags") or not charLimit or #self.name <= charLimit + 3 then
 		self.shortname = self.name
 		return
 	end

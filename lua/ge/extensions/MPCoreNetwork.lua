@@ -204,8 +204,10 @@ local function loadLevel(map)
 		if not core_levels.expandMissionFileName(map) then
 			UI.updateLoading("lMap "..map.." not found")
 			status = ""
-			M.leaveServer(false)
+			M.leaveServer(true)
 			return
+		else
+			print('not core_levels.expandMissionFileName')
 		end
 	end
 
@@ -217,6 +219,7 @@ local function loadLevel(map)
 	currentServer.map = map
 
 	if getMissionFilename() == '' then
+		print('LOADING LEVEL/MAP BY USING MPCORENETWORK -> multiplayer_multiplayer.startMultiplayer')
 		multiplayer_multiplayer.startMultiplayer(map)
 	else
 		MPGameNetwork.disconnectLauncher()

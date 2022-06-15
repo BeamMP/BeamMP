@@ -206,6 +206,9 @@ local function onUpdate(dt)
         break
       end
     end
+	-- Workaround for worldReadyState not being set properly if there are no vehicles
+	serverConnection.onCameraHandlerSetInitial()
+	extensions.hook('onCameraHandlerSet')
   end
 end
 

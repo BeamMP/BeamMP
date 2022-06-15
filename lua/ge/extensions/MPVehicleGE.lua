@@ -609,6 +609,7 @@ local function onVehicleSpawned(gameVehicleID)
 
 		if not nextSpawnIsRemote then
 			sendVehicleSpawn(gameVehicleID) -- Send it to the server
+			commands.setGameCamera() -- Force switch from freecam to vehicle camera
 		end
 
 		nextSpawnIsRemote = false

@@ -85,7 +85,7 @@ end
 local function startMultiplayerByName(levelName)
   local level = core_levels.getLevelByName(levelName)
   if level then
-			startMultiplayer(v)
+			startMultiplayer(level)
 			return true
 	end
 	return false
@@ -105,12 +105,13 @@ end
 
 local function onClientPostStartMission()
 	if MPCoreNetwork.isMPSession() then
-	core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
-	MPGameNetwork.connectToLauncher()
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+		MPGameNetwork.connectToLauncher()
 	end
 end
 
 local function onClientStartMission(mission)
+	be:executeJS("document.getElementsByTagName('fancy-background')[0].remove();")
 	if M.state.multiplayerActive then
 		extensions.hook('onMultiplayerLoaded', mission)
 		local ExplorationCheckpoints = scenetree.findObject("ExplorationCheckpointsActionMap")

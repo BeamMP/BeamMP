@@ -19,43 +19,34 @@ angular.module('beamng.stuff')
   }
 })
 
-.directive('fancyBackground', ['TechLicenseState', function (techLicenseState) {
+.directive("fancyBackground", ["TechLicenseState", function (techLicenseState) {
   return {
     template: `
-        <imageslider imageurls="files" delay="10000" class="filler"></imageslider>
+      <img-carousel imageurls="files" delay="10000" slow="true" nav="false" random="true" class="filler"></img-carousel>
     `,
     scope: {
-      videoLoaded: '&'
+      videoLoaded: "&",
     },
-    link: function (scope, $element, attr) {
-      scope.sailingTheHighSeas = false
+    link: function (scope, elem, attr) {
+      scope.files = [
+        "/ui/modules/mainmenu/drive/images/1.jpg",
+        "/ui/modules/mainmenu/drive/images/2.jpg",
+        "/ui/modules/mainmenu/drive/images/3.jpg",
+        "/ui/modules/mainmenu/drive/images/4.jpg",
+        "/ui/modules/mainmenu/drive/images/5.jpg",
+        "/ui/modules/mainmenu/drive/images/6.jpg",
+        "/ui/modules/mainmenu/drive/images/7.jpg",
+        "/ui/modules/mainmenu/drive/images/8.jpg",
+      ];
 
-      bngApi.engineLua('sailingTheHighSeas', (val) => {
-        scope.sailingTheHighSeas = val
-      })
-
-      scope.files = []
-      if (scope.sailingTheHighSeas === true) {
-        scope.files = ['/ui/modules/mainmenu/unofficial_version.jpg']
-      } else {
-        scope.files = [
-          '/ui/modules/mainmenu/drive/images/1.jpg',
-          '/ui/modules/mainmenu/drive/images/2.jpg',
-          '/ui/modules/mainmenu/drive/images/3.jpg',
-          '/ui/modules/mainmenu/drive/images/4.jpg',
-          '/ui/modules/mainmenu/drive/images/5.jpg',
-          '/ui/modules/mainmenu/drive/images/6.jpg',
-          '/ui/modules/mainmenu/drive/images/7.jpg',
-          '/ui/modules/mainmenu/drive/images/8.jpg',
-        ]
-      }
-
-      techLicenseState.state.then((licenseVerified) => {
-        if(licenseVerified) {
-          scope.files = ['/ui/modules/mainmenu/drive/tech_images/1.jpg']
-        }
-      })
-
+      bngApi.engineLua("sailingTheHighSeas", ahoy => {
+        if (ahoy)
+          scope.files = ["/ui/modules/mainmenu/unofficial_version.jpg"];
+      });
+      techLicenseState.state.then(licenseVerified => {
+        if (licenseVerified)
+          scope.files = ["/ui/modules/mainmenu/drive/tech_images/1.jpg"];
+      });
     }
   }
 }])
@@ -65,10 +56,13 @@ angular.module('beamng.stuff')
     template: `
       <div class="menuNavbar" layout="row" bng-blur="true" layout-align="center center" layout-wrap="">
         <div layout="row" layout-align="start stretch" flex="noshrink" flex="75" flex-md="100">
-          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('confirm')"></p>
-          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('back')"></p>
-          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_left' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-left')"></p>
-          <p bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_right' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-right')"></p>
+
+          <span bng-no-nav="true" class="navBtn" layout="row" layout-align="center center" style="pointer-events: none; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px"><span style="margin: 0 10px; font-size: 95%; text-shadow: initial;display: inline-block;" layout="row" layout-align="center center"><div style="height: 1.4em; width: 1.4em; filter: invert(1) brightness(1.5);"><object style="max-height: 100%; max-width: 100%; pointer-events: none;" type="image/svg+xml" data="/ui/modules/options/deviceIcons/xbox/x_dpad_default_filled.svg"></object></div></span> {{ "ui.mainmenu.navbar.navigate" | translate }}</span>
+
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('confirm')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('back')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_left' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-left')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_right' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-right')"></span>
         </div>
         <div layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
           <div ng-if="steamData && steamData.working && steamData.loggedin" layout="row" layout-align="start center" ng-cloak >
@@ -95,7 +89,7 @@ angular.module('beamng.stuff')
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div style="text-align:right; color:white;margin-left:16px;">
-          <div>BeamMP v4.2.3</div>
+          <div>BeamMP v4.4.0</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
@@ -149,6 +143,11 @@ angular.module('beamng.stuff')
         // console.log('OnlineStateChanged', data)
         scope.$apply(function () {
           scope.onlineState = data
+        })
+      })
+      scope.$on('ShowEntertainingBackground', (ev, mainmenu) => {
+        scope.$evalAsync(() => {
+          scope.mainmenu = mainmenu
         })
       })
       bngApi.engineLua('core_online.requestState()')
@@ -249,7 +248,7 @@ angular.module('beamng.stuff')
   }
 }])
 
-.controller('MainMenuController', ['$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', function($scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState) {
+.controller('MainMenuController', ['$rootScope', '$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', function($rootScope, $scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState) {
   let vm = this
 
   vm.product = beamng.product
@@ -340,78 +339,141 @@ angular.module('beamng.stuff')
   }
 
 
-  vm.big = {
-    translateid: 'ui.playmodes.freeroam',
-    icon: '/ui/modules/mainmenu/drive/icons/play.svg',
-    targetState: 'menu.levels'
+  let buttonsDefault = [
+    // big
+    {
+      translateid: 'ui.playmodes.freeroam',
+      icon: '/ui/modules/mainmenu/drive/icons/play.svg',
+      targetState: 'menu.levels'
+    },
+    // rows with 4 elements each
+    {
+      translateid: 'ui.playmodes.campaigns',
+      icon: '/ui/modules/mainmenu/drive/icons/campaigns.svg',
+      targetState: 'menu.campaigns'
+    },
+    {
+      translateid: 'ui.playmodes.scenarios',
+      icon: '/ui/modules/mainmenu/drive/icons/scenarios.svg',
+      targetState: 'menu.scenarios'
+    },
+    {
+      translateid: 'ui.playmodes.quickrace',
+      icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
+      targetState: 'menu.quickraceOverview'
+    },
+    {
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
+    },
+    {
+      translateid: 'ui.mainmenu.garage',
+      icon: '/ui/modules/mainmenu/drive/icons/garage.svg',
+      action: () => {
+        bngApi.engineLua(`gameplay_garageMode.start()`)
+      },
+      get disabled() { return $scope.$parent.app.gameState === "garage" },
+    },
+    {
+      translateid: 'ui.playmodes.bus',
+      icon: '/ui/modules/mainmenu/drive/icons/busroutes.svg',
+      targetState: 'menu.busRoutes'
+    },
+    {
+      translateid: 'ui.playmodes.lightRunner',
+      icon: '/ui/modules/mainmenu/drive/icons/lightrunner.svg',
+      targetState: 'menu.lightrunnerOverview'
+    },
+    // {
+    //   translateid: 'ui.dashboard.trackBuilder',
+    //   icon: '/ui/modules/mainmenu/drive/icons/autobahn.svg',
+    //   action: () => bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()")
+    // },
+    {
+      translateid: 'ui.playmodes.trackBuilder',
+      icon: '/ui/modules/mainmenu/drive/icons/autobahn.svg',
+      action: () => { // TODO: toggle track builder in current level
+        // bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()")
+        bngApi.engineLua(`freeroam_freeroam.startTrackBuilder('glow_city')`)
+      },
+      get disabled() { return $scope.$parent.app.gameState === "garage" },
+    },
+    // {
+    //   translateid: 'ui.quickrace.tracks.procedural',
+    //   icon: '/ui/modules/mainmenu/drive/icons/infinity.svg',
+    //   targetState: 'quickraceTrackSelect'
+    // },
+    {
+      translateid: 'ui.playmodes.career',
+      subtranslateid: 'ui.playmodes.comingSoon',
+      icon: '/ui/modules/mainmenu/drive/icons/career.svg',
+      disabled: true,
+      targetState: 'career'
+    },
+  ];
+
+  vm.buttons = {
+    big: null,
+    groups: []
+  };
+
+  {
+    let buttons = [];
+    vm.addButton = function (button, draw=true) {
+      if (!vm.buttons.big) {
+        vm.buttons.big = button;
+      } else {
+        // add new button
+        buttons.push(button);
+        // rebuild layout
+        if (draw)
+          vm.rebuildButtons();
+      }
+    };
+
+    let max1 = 3, max2 = 4;
+    vm.rebuildButtons = function () {
+      let len = buttons.length;
+      // find out optimal count per row
+      let max = max1;
+      if ((len % max1 || max1) < (len % max2 || max2))
+        max = max2;
+      // calculate new layout
+      let top = len % max || max,
+        groupsmax = Math.ceil(len / max);
+      // clear/add rows
+      let groupslen = vm.buttons.groups.length;
+      for (let i = 0; i < groupsmax; i++) {
+        if (i < groupslen)
+          vm.buttons.groups[i].list = [];
+        else
+          vm.buttons.groups.push({ list: [] });
+      }
+      // rebuild the layout
+      let group = 0;
+      for (let button of buttons) {
+        if (vm.buttons.groups[group].list.length === (group === 0 ? top : max))
+          group++;
+        vm.buttons.groups[group].list.push(button);
+      }
+      // allow/disallow wrapping the buttons on even count
+      for (let grp of vm.buttons.groups) {
+        let len = grp.list.length;
+        grp.class = len > 2 && len / 2 % 1 === 0 ? "mainmenu-buttons-smwrap" : null;
+      }
+      // sync with fancy-background
+      setTimeout(fancySync, 100);
+    };
   }
-  vm.groups = [
-    // note: if you want buttons to be wrapped to the next line on thin window,
-    //       add `class: "mainmenu-buttons-smwrap",` (button count must be even)
-    {
-      list: [
-        {
-          translateid: 'ui.playmodes.campaigns',
-          icon: '/ui/modules/mainmenu/drive/icons/campaigns.svg',
-          targetState: 'menu.campaigns'
-        },
-        {
-          translateid: 'ui.playmodes.scenarios',
-          icon: '/ui/modules/mainmenu/drive/icons/scenarios.svg',
-          targetState: 'menu.scenarios'
-        },
-        {
-          translateid: 'ui.playmodes.quickrace',
-          icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
-          targetState: 'menu.quickraceOverview'
-        },
-      ],
-    },
-    {
-      class: "mainmenu-buttons-smwrap",
-      list: [
-        {
-          translateid: 'ui.playmodes.multiplayer',
-          icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
-          targetState: 'menu.multiplayer.tos'
-        },
-        {
-          translateid: 'ui.playmodes.bus',
-          icon: '/ui/modules/mainmenu/drive/icons/busroutes.svg',
-          targetState: 'menu.busRoutes'
-        },
-        {
-          translateid: 'ui.playmodes.lightRunner',
-          icon: '/ui/modules/mainmenu/drive/icons/lightrunner.svg',
-          targetState: 'menu.lightrunnerOverview'
-        },
-        // {
-        //   translateid: 'ui.dashboard.trackBuilder',
-        //   icon: '/ui/modules/mainmenu/drive/icons/autobahn.svg',
-        //   action: () => bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()")
-        // },
-        {
-          translateid: 'ui.playmodes.trackBuilder',
-          icon: '/ui/modules/mainmenu/drive/icons/autobahn.svg',
-          action: () => { // TODO: toggle track builder in current level
-            // bngApi.engineLua("extensions.trackbuilder_trackBuilder.toggleTrackBuilder()")
-            bngApi.engineLua(`freeroam_freeroam.startTrackBuilder('glow_city')`)
-          }
-        },
-        // {
-        //   translateid: 'ui.quickrace.tracks.procedural',
-        //   icon: '/ui/modules/mainmenu/drive/icons/infinity.svg',
-        //   targetState: 'quickraceTrackSelect'
-        // },
-        {
-          translateid: 'ui.playmodes.career',
-          icon: '/ui/modules/mainmenu/drive/icons/career.svg',
-          disabled: true,
-          targetState: 'career'
-        },
-      ]
-    },
-  ]
+
+  // populate menu with default buttons
+  for (let button of buttonsDefault)
+    vm.addButton(button, false);
+  vm.rebuildButtons();
+
+  // broadcast event for an additional buttons
+  $rootScope.$broadcast('MainMenuButtons', vm.addButton);
 
   vm.openRepo = function () {
     window.location.href = 'http-external://www.beamng.com/resources/?ingame=2'
@@ -431,11 +493,26 @@ angular.module('beamng.stuff')
     }
   }
 
-}])
-
-function updateSettingsColorPreview(textElement) {
-  let previewElement = document.getElementById(textElement.id+"Preview");
-  if (previewElement !== null) {
-    previewElement.style.backgroundColor = textElement.value;
+  $scope.fancyblur = false;
+  function fancySync() {
+    // find fancy bg
+    const fancybg = document.querySelector("fancy-background > .img-carousel");
+    if (!fancybg) {
+      $scope.fancyblur = false;
+      return;
+    }
+    // get all target blur elements
+    const blurs = Array.from(document.querySelectorAll(".fancy-blur > .img-carousel"));
+    // and connect them to master so they will work in sync
+    fancybg.__connect(
+      blurs,
+      // function to modify images list for targets - function (orig_list) { return orig_list }
+      // here, we change images from "image.jpg" to "image_blur.jpg"
+      images => images.map(img => img.replace(/\.(.{3,4})$/, "_blur.$1"))
+      // note: blurred images are 1280x720 with gaussian blur 6.0 (resize, then blur)
+    );
+    $scope.fancyblur = true;
   }
-}
+  fancySync();
+
+}])

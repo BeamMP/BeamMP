@@ -54,7 +54,7 @@ angular.module('beamng.stuff')
 
         for (var key in vehicles.origFilters) {
           if (vehicles.displayInfo.units[key] !== undefined) {
-            if (vehicles.displayInfo.ranges.all.indexOf(key) !== -1) {
+            if (vehicles.displayInfo.ranges.all.includes(key)) {
               res[key] = {
                 min: Utils.roundDec(UiUnits[vehicles.displayInfo.units[key].type](vehicles.origFilters[key].min).val, vehicles.displayInfo.units[key].dec),
                 max: Utils.roundDec(UiUnits[vehicles.displayInfo.units[key].type](vehicles.origFilters[key].max).val, vehicles.displayInfo.units[key].dec)
@@ -68,7 +68,7 @@ angular.module('beamng.stuff')
           } else {
             res[key] = vehicles.origFilters[key]
           }
-          if (vehicles.displayInfo.ranges.all.indexOf(key) === -1) {
+          if (!vehicles.displayInfo.ranges.all.includes(key)) {
             res[key]['...'] = true
           }
         }
@@ -230,8 +230,7 @@ angular.module('beamng.stuff')
             luaArgs.spawnNew = true;
           }
 
-          bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {
-            $rootScope.$broadcast('app:waiting', false)
+          bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {            $rootScope.$broadcast('app:waiting', false)
             // car was spawned clear fallback
             $timeout.cancel(fallback)
           })
@@ -248,8 +247,8 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleDetailsController
  * @description
 **/
-.controller('VehicleDetailsController', ['$scope', '$stateParams', 'Vehicles', 'VehicleOpenTab', '$state', 'VehicleSelectConfig',
-  function ($scope, $stateParams, Vehicles, VehicleOpenTab, $state, VehicleSelectConfig) {
+.controller('VehicleDetailsController', ['$scope', '$stateParams', 'Vehicles', 'VehicleOpenTab', 'VehicleSelectConfig', 'VehicleSelectFilter',
+  function ($scope, $stateParams, Vehicles, VehicleOpenTab, VehicleSelectConfig, VehicleSelectFilter) {
   var vm = this
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
   // console.log($stateParams)
@@ -263,8 +262,44 @@ angular.module('beamng.stuff')
 
   // --------------------------------------- BEAMMP --------------------------------------- //
 
+  let elConfig;
+  // register preventer
+  $scope.$emit("MenuTogglePrevent", () => {
+    if (!elConfig)
+      return false;
+    try {
+      // check if we're inside config details
+      let elm = document.activeElement;
+      while (elm.nodeType === Node.ELEMENT_NODE) {
+        if (elm.id === "vehcfg-details") {
+          elConfig.focus();
+          elConfig = null;
+          return true;
+        }
+        elm = elm.parentNode;
+      }
+    } catch (fire) {}
+    return false;
+  });
+  $scope.$on("$destroy", () => {
+    $scope.$emit("MenuTogglePrevent", null);
+  });
+
+  vm.selectAction = function (configname) {
+    if (vm.selectedConfig && vm.selectedConfig.key === configname) {
+      try {
+        elConfig = document.activeElement;
+        const btn = document.getElementById("vehcfg-default");
+        if (btn)
+          btn.focus();
+      } catch (fire) {}
+    } else {
+      vm.selectConfig(configname, false);
+    }
+  };
 
   vm.selectConfig = function (configname, launch) {
+    elConfig = null;
     vm.selectedConfig = vm.configs[configname]
     vm.detailsKeys = Object.keys(vm.selectedConfig.aggregates)
     // console.warn(vm.selectedConfig)
@@ -323,18 +358,8 @@ angular.module('beamng.stuff')
   // because of bug in non compete iirc
   vm.disableSpwanNew = (state) => state.toLowerCase().indexOf('scenario') !== -1
 
-  bngApi.engineLua('core_vehicles.getModel("' + $stateParams.model + '")', function (response) {
-    if(response === undefined) {
-      console.error("Error in vehicle response: ", response)
-      return
-    }
-    // console.log(vm)
 
-    vm.model          = response.model
-    vm.hasConfigs     = Object.keys(response.configs).length > 1
-    vm.configs        = response.configs
-
-
+  function processData() {
     if (vm.model !== undefined && vm.model.paints !== undefined) {
       $scope.$evalAsync(() => {
         let colors = {}
@@ -354,13 +379,13 @@ angular.module('beamng.stuff')
     }
 
     // Filter out powerglow configs
-    if (vm.mode && vm.mode.name !== "lightRunner") {
-      for (var key in vm.configs) {
-        if (vm.configs[key].key === "powerglow") {
-          delete vm.configs[key]
-        }
-      }
-    }
+    // if (vm.mode && vm.mode.name !== "lightRunner") {
+    //   for (var key in vm.configs) {
+    //     if (vm.configs[key].key === "powerglow") {
+    //       delete vm.configs[key]
+    //     }
+    //   }
+    // }
 
     // Checking if quickrace is being used within career mode.
     // If it is then the available configs are filtered to what the player owns.
@@ -376,20 +401,16 @@ angular.module('beamng.stuff')
       }
       vm.configs = ownedConfigs
     }
-    else if ($stateParams.mode === "busRoutes") {
-      var filteredConfigs = {}
-      for (var key in vm.configs) {
-        var e = vm.configs[key]
-        if (e.aggregates && e.aggregates["Body Style"] && e.aggregates["Body Style"]["Bus"]) {
-          filteredConfigs[key] = e
-        }
-      }
-      vm.configs = filteredConfigs
-    }
 
     // so we can be sure the ranges list exists
     Vehicles.populate().then(() => {
-      if ($stateParams.config == '' && vm.model.default_pc) {
+      VehicleSelectFilter.filterFromConfig(vm, vm.mode);
+      VehicleSelectFilter.forced(vm, vm.mode);
+
+      // convert array to object (temp compat patch)
+      vm.configs = vm.configs.reduce((res, cur) => ({ ...res, [cur.key]: cur }), {});
+
+      if ($stateParams.config == '' && vm.model.default_pc && vm.configs.hasOwnProperty(vm.model.default_pc)) {
         vm.selectConfig(vm.model.default_pc)
       } else if ($stateParams.config != '') {
         vm.selectConfig($stateParams.config)
@@ -397,8 +418,227 @@ angular.module('beamng.stuff')
         vm.selectConfig(Object.keys(vm.configs)[0])
       }
     })
-  })
+  }
 
+  vm.filters = vehiclesData.filters;
+  vm.displayInfo = vehiclesData.displayInfo;
+  vm.model = vehiclesData.models.find(veh => veh.key === $stateParams.model);
+  if (vm.model) {
+    vm.configs = vehiclesData.configs.filter(veh => veh.model_key === $stateParams.model);
+    vm.hasConfigs = vm.configs.length > 1;
+    processData();
+  } else {
+    bngApi.engineLua('core_vehicles.getModel("' + $stateParams.model + '")', function (response) {
+      if(response === undefined) {
+        console.error("Error in vehicle response: ", response)
+        return
+      }
+      // console.log(vm)
+
+      vm.model          = response.model
+      vm.configs        = Object.values(response.configs)
+      vm.hasConfigs     = vm.configs.length > 1
+
+      processData();
+    });
+  }
+
+}])
+
+
+.service("VehicleSelectFilter", ["Vehicles", function (Vehicles) {
+  return {
+    // filter out things from appearing in a shipping version
+    // it expects data.models and data.configs as arrays
+    shipping(data) {
+      // note: for configs, key will also be prefixed with "model_" (e.g. "key" will also check "model_key")
+      const filterShipping = {
+        // key: [array of values]
+        key: ["unicycle"],
+        Type: ["Traffic"],
+      };
+      const filterShippingFunc = {
+        models(e) {
+          for (let key in filterShipping) {
+            if (filterShipping[key].includes(e[key]))
+              return false;
+          }
+          return true;
+        },
+        configs(e) {
+          for (let key in filterShipping) {
+            if (e.aggregates[key]) {
+              for (let name of filterShipping[key]) {
+                if (e.aggregates[key][name])
+                  return false;
+              }
+            }
+            if (e[`model_${key}`] && filterShipping[key].includes(e[`model_${key}`]))
+              return false;
+          }
+          return true;
+        },
+      };
+      if (beamng.shipping) {
+        data.models = data.models.filter(filterShippingFunc.models);
+        data.configs = data.configs.filter(filterShippingFunc.configs);
+        for (let key in filterShipping) {
+          // hide filter option as well
+          if (data.filters[key]) {
+            for (let name of filterShipping[key])
+              delete data.filters[key][name];
+          }
+        }
+      } else {
+        console.log("Will be filtered out in shipping version:", {
+          Models: data.models.filter(e => !filterShippingFunc.models(e)),
+          Configs: data.configs.filter(e => !filterShippingFunc.configs(e))
+        });
+      }
+    }, // /shipping
+    // apply forced filters
+    // it expects data.models, data.configs and data.filters as arrays, and data.userFilters()
+    // it filters by data.configs and then selects models that left
+    forced(data, mode) {
+      if (!data.models)
+        data.models = [];
+      if (!data.configs)
+        data.configs = [];
+      if (mode.forceFilter && typeof mode.forceFilter === "boolean")
+        mode.forceFilter = mode.filter;
+      // process restrictions (effectively it is an inverted forced filter)
+      // in mode.restrict, you can specify non-standard keys and negate their values (see special variable)
+      let special = { key: ["!powerglow"] };
+      if (mode.restrict) {
+        if (!mode.forceFilter)
+          mode.forceFilter = {};
+        for (let key in mode.restrict) {
+          if (!data.filters[key]) {
+            special[key] = mode.restrict[key];
+            continue;
+          }
+          // gather all filters
+          mode.forceFilter[key] = Object.keys(data.filters[key]);
+          // use this if you need to append instead of overwrite
+          // if (!mode.forceFilter[key]) {
+          //   mode.forceFilter[key] = Object.keys(data.filters[key]);
+          // } else {
+          //   mode.forceFilter[key].push(
+          //     ...Object.keys(data.filters[key])
+          //     .filter(itm => !mode.forceFilter[key].includes(itm))
+          //   );
+          // }
+          // apply inversion
+          mode.forceFilter[key] = mode.forceFilter[key].filter(
+            name => !mode.restrict[key].includes(name)
+          );
+        }
+        if (!beamng.shipping)
+          console.log("Restricted filter:", mode.forceFilter);
+      }
+      // filter configs if there was special keys
+      if (special) {
+        if (!beamng.shipping)
+          console.log("Applying non-standard filter:", special);
+        data.configs = data.configs.filter(cfg => {
+          let ok = true;
+          for (let key in special) {
+            ok = special[key].includes(cfg[key]);
+            if (!ok)
+              break;
+          }
+          if (!ok) {
+            for (let key in special) {
+              if (!special[key].find(names => names.indexOf("!") === 0))
+                continue;
+              ok = !special[key].includes("!" + cfg[key]);
+              if (ok)
+                break;
+            }
+          }
+          return ok;
+        });
+      }
+      // force filtering
+      if (mode.forceFilter) {
+        if (!beamng.shipping) {
+          console.log("Forced filtering enabled");
+          console.log(`> Before filtering: ${data.models.length} models, ${data.configs.length} configs`);
+        }
+        // remove unwanted filters
+        for (let key in mode.forceFilter) {
+          if (data.filters[key]) {
+            for (let name of mode.forceFilter[key])
+              delete data.filters[key][name];
+          }
+        }
+        // filter configs
+        data.__strictSource = !!data.filters.Source; // silly temp hack
+        data.configs = data.configs.filter(data.userFilters);
+        delete data.__strictSource;
+        // filter models by configs
+        const models = data.configs.map(cfg => cfg.model_key);
+        const keys = data.configs.map(cfg => cfg.key);
+        data.models = data.models.filter(
+          model => models.includes(model.key)
+        );
+        for (let model of data.models) {
+          if (keys.includes(model.default_pc))
+            continue;
+          const config = data.configs.find(cfg => cfg.model_key === model.key);
+          if (!config)
+            continue;
+          model.preview = config.preview;
+        }
+        if (!beamng.shipping)
+          console.log(`> After filtering: ${data.models.length} models, ${data.configs.length} configs`);
+      }
+    }, // /forced
+    filterFromConfig(data, mode) {
+      for (let catName in mode.filter) {
+        if (!data.displayInfo.ranges.all.includes(catName)) {
+          for (let propName of mode.filter[catName])
+            data.filters[catName][propName] = false;
+        }
+      }
+      data.userFilters = function(model) {
+        let result = true;
+        for (let filterId in data.filters) {
+          if (model.aggregates.hasOwnProperty(filterId)) {
+            const prop = model.aggregates[filterId];
+            let isOk = false;
+            if (data.displayInfo.ranges.all.includes(filterId)) {
+              //ranges:
+              isOk =
+                Vehicles.considerUnit(filterId, prop.min).val <= data.filters[filterId].max &&
+                Vehicles.considerUnit(filterId, prop.max).val >= data.filters[filterId].min;
+            } else if (data.__strictSource && filterId === "Source") {
+              isOk = !!data.filters.Source[model.Source];
+            } else {
+              //everything else:
+              for (let name in prop) {
+                isOk = !!data.filters[filterId][name];
+                if (isOk)
+                  break;
+              }
+            }
+            if (!isOk) {
+              result = false;
+              break;
+            }
+          } else {
+            // treat the special case of vehicles without this property set, represented with the user-facing checkbox '...'
+            if (!data.displayInfo.ranges.all.includes(filterId) &&
+              !data.filters[filterId]["..."]) {
+              result = false;
+              break;
+            }
+          }
+        } // /for
+        return result;
+      };
+    }, // /filterFromConfig
+  };
 }])
 
 
@@ -407,12 +647,12 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleSelectController
  * @description <TODO>
 **/
-.controller('VehicleSelectController', ['$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'Settings', 'VehiclePrefs', 'VehicleSelectConfig', 'Vehicles', '$filter',
-function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehiclePrefs, VehicleSelectConfig, Vehicles, $filter) {
+.controller('VehicleSelectController', ['$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'Settings', 'VehiclePrefs', 'VehicleSelectConfig', 'VehicleSelectFilter', 'Vehicles', '$filter',
+function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehiclePrefs, VehicleSelectConfig, VehicleSelectFilter, Vehicles, $filter) {
   var vm = this
   vm.data = angular.copy(vehiclesData)
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
-  vm.shownData
+  vm.shownData = []
 
   $scope.isBig = function(str) {
     if(str){
@@ -432,56 +672,45 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   Vehicles.populate().then(() => {
     vm.data = angular.copy(vehiclesData)
-    if (vm.mode.name !== "lightRunner") {
-      for (var key in vm.data.configs) {
-        if (vm.data.configs[key].key === "powerglow") {
-          vm.data.configs.splice(key, 1)
-        }
-      }
-      // TODO: Find a better way to reset search query if lightRunner mode is not being used... yay hacks.
-      if (vm.query === "Powerglow") {
-        $scope.$evalAsync(function() {
-          vm.query = ""
-          vm.showConfigurations  = false
-          vm.switchList()
-        })
-      }
-    }
-    if (vm.mode.name === "lightRunner") {
-      $scope.$evalAsync(function() {
-        vm.query = "Powerglow"
-        vm.showConfigurations = true
-        vm.switchList()
-      })
-    }
+
+    VehicleSelectFilter.shipping(vm.data);
+
+    // this will also create vm.data.userFilters function
+    VehicleSelectFilter.filterFromConfig(vm.data, vm.mode);
+
+    // if (vm.mode.name === "lightRunner") {
+    //   $scope.$evalAsync(function () {
+    //     vm.query = "Powerglow"
+    //     vm.showConfigurations = true
+    //     vm.switchList()
+    //   })
+    // } else {
+    //   vm.data.configs = vm.data.configs.filter(e => e.key !== "powerglow");
+    //   // TODO: Find a better way to reset search query if lightRunner mode is not being used... yay hacks.
+    //   if (vm.query === "Powerglow") {
+    //     $scope.$evalAsync(function () {
+    //       vm.query = ""
+    //       vm.showConfigurations = false
+    //       vm.switchList()
+    //     })
+    //   }
+    // }
+    // if (vm.mode.name !== "lightRunner")
+    //   vm.data.configs = vm.data.configs.filter(e => e.key !== "powerglow");
     // used to filter owned vehicles if quickrace is being access from career mode.
     if (VehicleSelectConfig.configs['quickrace'] && VehicleSelectConfig.configs['quickrace'].getVehicles() !== undefined) {
-      var ownedVehicles = VehicleSelectConfig.configs['quickrace'].getVehicles()
-      vm.data.models = vm.data.models.filter((e) => {
-        for (var key in ownedVehicles) {
-          if (ownedVehicles[key].model === e.key) return true
-        }
-        return false
-      })
+      const ownedVehicles = Object.values(
+        VehicleSelectConfig.configs['quickrace'].getVehicles()
+      ).map(e => e.model);
+      vm.data.models = vm.data.models.filter(e => ownedVehicles.includes(e.key));
     }
 
-    if ($stateParams.mode === "busRoutes") {
-      vm.data.models = vm.data.models.filter((e) => {
-        // filtering out every vehicle except for Official Buses
-        if (e["Body Style"] === "Bus")
-          return true
-      })
-      vm.data.configs = vm.data.configs.filter((e) => {
-        // filtering out every vehicle except for Official Buses
-        if (e.aggregates["Body Style"] && e.aggregates["Body Style"]["Bus"] === true)
-          return true
-      })
-    }
+    VehicleSelectFilter.forced(vm.data, vm.mode);
 
-    vm.data.list = (VehiclePrefs.showConfigurations ? vm.data.configs : vm.data.models)
+    vm.data.list = VehiclePrefs.showConfigurations ? vm.data.configs : vm.data.models;
+
     // todo: rethink for this what happens if the filter change? (i mean the html is not ready for it either, but think ot it anyway)
     vm.filterKeyList = vehiclesData.displayInfo.filterData
-    vm.filterFromConfig()
     vm.applyFilters()
     // checkOverflow()
   })
@@ -492,7 +721,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.launchVehicle = function (model) {
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-      vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
+        vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
     }
     else if (vm.showConfigurations && model.model_key !== undefined) {
       vm.mode.selected(model, model.model_key, model.key, null, false, vm.isMPSession)
@@ -584,86 +813,35 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
     return help;
   }
 
-
-  vm.userFilters = function (model, index, array) {
-    let result = true
-    for (var filterId in vm.data.filters) {
-      if (model.aggregates.hasOwnProperty(filterId)) {
-        if (vm.data.displayInfo.ranges.all.indexOf(filterId) !== -1) {
-          //ranges:
-          var inDateRange =
-            Vehicles.considerUnit(filterId, model.aggregates[filterId].min).val <= vm.data.filters[filterId].max &&
-            Vehicles.considerUnit(filterId, model.aggregates[filterId].max).val >= vm.data.filters[filterId].min
-
-          if (!inDateRange) {
-            result = false
-            break
-          }
-        } else {
-          //everything else:
-          var isOk = false
-
-          for (var propertyValue in model.aggregates[filterId]) {
-            isOk = isOk || vm.data.filters[filterId][propertyValue]
-            if (isOk) break
-          }
-
-          if (!isOk) {
-            result = false
-            break
-          }
-        }
-      } else {
-        // treat the special case of vehicles without this property set, represented with the user-facing checkbox '...'
-        if (vm.data.displayInfo.ranges.all.indexOf(filterId) === -1) {
-          if (!vm.data.filters[filterId]['...']) {
-            result = false
-            break
-          }
-        }
-      }
-    }
-
-    return result
-  }
-
   function _assignValueAllFilters(val) {
-    for (var catName in vm.data.filters) {
-      if (vm.data.displayInfo.ranges.all.indexOf(catName) === -1) {
-        var cat = vm.data.filters[catName]
-        for (var prop in cat) {
-          cat[prop] = val
-        }
+    for (let catName in vm.data.filters) {
+      if (!vm.data.displayInfo.ranges.all.includes(catName)) {
+        for (let prop in vm.data.filters[catName])
+          cat[prop] = val;
       }
     }
   }
 
   vm.applyFilters = function () {
     // vehicles.data.list | filter: vehicles.query | filter: vehicles.userFilters | orderBy: vehicles.tilesOrder
-    vm.shownData = $filter("orderBy")($filter("filter")($filter("filter")(vm.data.list, vm.userFilters), vm.query), vm.tilesOrder)
+    vm.shownData = $filter("orderBy")(
+      $filter("filter")(
+        vm.data.list.filter(vm.data.userFilters),
+        vm.query
+      ),
+      vm.tilesOrder
+    );
     // count how many configs per model we have, to display with the small 'folder' icon
-    let configAmount = {}
-    for (let i in vm.data.configs) {
-      let model = vm.data.configs[i]
-      let key = model.model_key
-      if (configAmount[key] === undefined) configAmount[key] = 0
-      configAmount[key]++
+    let configAmount = {};
+    for (let model of vm.data.configs) {
+      let key = model.model_key;
+      if (!configAmount.hasOwnProperty(key))
+        configAmount[key] = 0;
+      configAmount[key]++;
     }
-    for (let i in vm.shownData) {
-      let model = vm.shownData[i]
-      let key = vm.showConfigurations ? model.model_key : model.key
-      model.configsAmount = configAmount[key]
-    }
-  }
-
-  vm.filterFromConfig = function() {
-    for (var catName in vm.mode.filter) {
-      if (vm.data.displayInfo.ranges.all.indexOf(catName) === -1) {
-        for (var i = 0; i < vm.mode.filter[catName].length; i += 1) {
-          var propName = vm.mode.filter[catName][i]
-          vm.data.filters[catName][propName] = false
-        }
-      }
+    for (let model of vm.shownData) {
+      let key = vm.showConfigurations ? model.model_key : model.key;
+      model.configsAmount = configAmount[key];
     }
   }
 

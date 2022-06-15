@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app="BeamNG.ui">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>BeamNG Main UI</title>
@@ -7,12 +7,15 @@
   <!-- for external clients: emulation over websocket -->
   <script src="/ui/entrypoints/main/comms.js"></script>
 
+
   <!-- Vue START -->
   <script src="/ui/lib/ext/vue3/vue.global.prod.js"></script>
   <script src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
   <script src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
   <script src="/ui/lib/int/vueService.js"></script>
   <!-- Vue END -->
+
+  <script src="/ui/entrypoints/main/angularModules.js"></script>
 
   <!-- 3rd party includes -->
   <script src="/ui/lib/ext/angular/angular.js"></script>
@@ -93,6 +96,7 @@
   <script src="/ui/lib/int/colorpicker/color.js"></script>
   <script src="/ui/modules/modmanager/modmanager.js"></script>
   <script src="/ui/modules/play/play.js"></script>
+  <script src="/ui/modules/garage/garage.js"></script>
   <script src="/ui/modules/apps/app-service.js"></script>
   <script src="/ui/modules/apps/app-container.js"></script>
   <script src="/ui/modules/apps/app.js"></script>
@@ -118,8 +122,11 @@
 
 <body ng-controller="AppCtrl as app" ng-show="app.uiVisible" use-lang-font="1" class="container">
 
-  <md-content ng-cloak ng-if="app.uitest" layout="column" style="border:2px solid #aaa;position:absolute;width:400px;height:200px;top:50%;right:0; z-index:var(--zorder_index_mdcontent); padding:2px;font-family:monospace;border-radius:5px;">
-    <div layout="column">
+  <md-content ng-cloak ng-if="app.uitest" layout="row" style="border:2px solid #aaa;position:absolute;width:{{app.uitestshow?'400px':'1.6em'}};height:200px;top:50%;right:0; transform:translateY(-50%); z-index:var(--zorder_index_mdcontent); padding:2px;font-family:monospace;border-radius:5px; overflow:hidden;">
+    <div style="width: 1.2em; padding: 4.5em 0;" ng-click="app.uitestshow = !app.uitestshow">
+      <span style="display: block; white-space: nowrap; transform-origin: 50% 50%; transform: rotate(90deg);">Show/Hide</span>
+    </div>
+    <div layout="column" ng-show="app.uitestshow" style="flex-grow: 1;">
       UI Debug - Press CTRL+U to toggle visibility.
       <div layout="row" style="background-color:rgb(102, 35, 35);">
         <p flex=35>Current UI state:</p>
@@ -187,12 +194,12 @@
   <!-- fullscreen DEFAULT view -->
   <div ng-cloak class="UI-Flex-Wrapper" style="position: absolute; top:0; left:0; right:0; bottom:0; z-index: var(--zorder_index_fullscreen_default); display: flex; flex-direction: column; align-items: stretch; justify-content: start;">
     <!-- Menu Dashbar goes here -->
-    <dash-menu ng-controller="MenuController as menuCtrl" bng-blur ng-if="('menu' | includedByState) && (($state.current.name !== 'menu.mainmenu') || !app.mainmenu)">Dash menu goes here</dash-menu>
+    <dash-menu ng-controller="MenuController as menuCtrl" ng-if="('menu' | includedByState) && (($state.current.name !== 'menu.mainmenu') || !app.mainmenu)">Dash menu goes here</dash-menu>
 
     <div class="fullscreencontent" style="flex: 1 1 auto; position: relative; pointer-events: none;" ng-class="app.transitionAnimation">
       <!-- All the useful content goes here to cover up all the apps without window resize -->
       <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
-      <app-container id="mainContainer" ng-show="app.showApps" style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_apps_default);">
+      <app-container id="mainContainer" ng-class="{ 'uiapps-hidden': !app.showApps }" style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_apps_default);">
         <canvas id="alignment-canvas"  width="1" height="1"></canvas>
         <bng-app style="display:none"></bng-app>
       </app-container>

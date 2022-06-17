@@ -282,18 +282,19 @@ end
 
 -- this is called on keypress (L)
 local function toggleCouplers(_nodetag, forceLocked, forceWelded)
+  local MPcouplers = {} -- ////////////////////////////////////////////////// BEAMMP
   if not _nodetag then
     if autoCouplingActive then
       obj:stopLatching()
       disableAutoCoupling()
-	  if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\'," ..tostring(obj:getID())..")") end -- ////////////////////////////////////////////////// BEAMMP
+      MPcouplers.state = false
     else
       if isCouplerAttached() then
         detachCouplers()
-	    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'false\'," ..tostring(obj:getID())..")") end -- ////////////////////////////////////////////////// BEAMMP
+        MPcouplers.state = false
       else
         activateAutoCoupling()
-	    if v.mpVehicleType == "L" then obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'true\'," ..tostring(obj:getID())..")") end -- ////////////////////////////////////////////////// BEAMMP
+        MPcouplers.state = true
       end
     end
   else
@@ -303,12 +304,20 @@ local function toggleCouplers(_nodetag, forceLocked, forceWelded)
         isAttached = attachedCouplers[cid] ~= nil
       end
     end
-
     if isAttached then
       detachCouplers(_nodetag, forceLocked, forceWelded)
+      MPcouplers.state = false
+      MPcouplers._nodetag = _nodetag
+      MPcouplers.forceLocked = forceLocked
+      MPcouplers.forceWelded = forceWelded
     else
       attachCouplers(_nodetag)
+      MPcouplers.state = true
+      MPcouplers._nodetag = _nodetag
     end
+  end
+  if v.mpVehicleType == "L" then
+    obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplers).."\'," ..tostring(obj:getID())..")")
   end
 end
 

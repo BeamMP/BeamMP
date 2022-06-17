@@ -438,8 +438,8 @@ local function sendVehicleEdit(gameVehicleID)
 	vehiclesToSync[gameVehicleID] = nil
 end
 
-local function sendBeamstate(state, gameVehicleID)
-	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..state)
+local function sendBeamstate(data, gameVehicleID)
+	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..data)
 end
 
 
@@ -923,11 +923,11 @@ local function onServerVehicleResetted(serverVehicleID, data)
 	lastResetTime[serverVehicleID] = localCounter
 end
 
-local function onServerVehicleCoupled(serverVehicleID, state)
+local function onServerVehicleCoupled(serverVehicleID, data)
 	local vehicle = getVehicleByServerID(serverVehicleID) -- Get game ID
 	if not vehicle.isLocal then
 		local veh = be:getObjectByID(vehicle.gameVehicleID)
-		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..state.."')")
+		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..data.."')")
 	end
 end
 
@@ -980,7 +980,7 @@ local HandleNetwork = {
 		onServerVehicleRemoved(rawData)
 	end,
 	['t'] = function(rawData) -- coupler
-		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%w+)") -- '0-0:true'
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
 
 		if serverVehicleID ~= nil then
 			onServerVehicleCoupled(serverVehicleID, data)

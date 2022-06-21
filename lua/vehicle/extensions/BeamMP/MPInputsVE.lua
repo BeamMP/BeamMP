@@ -154,7 +154,7 @@ local function updateGFX(dt)
 		--electrics.values.brake = lastApply.b
 		--electrics.values.parkingbrake = lastApply.p
 		--electrics.values.clutch_input = lastApply.c
-		input.event("steering", steering, 2)			-- reverted back to using input.event because setting through electrics has some of the following issues 
+		input.event("steering", steering, 2, 0)			-- reverted back to using input.event because setting through electrics has some of the following issues 
 		input.event("throttle", currentApply.t, 2)		-- 4 wheel steering doesn't sync when setting through electrics
 		input.event("brake", currentApply.b, 2)			-- brake lights wouldn't activate on some cars
 		input.event("parkingbrake", currentApply.p, 2)	-- setting the clutch through electrics doesn't work at all

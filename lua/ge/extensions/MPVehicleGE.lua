@@ -1269,6 +1269,7 @@ local function onPreRender(dt)
 			local maxTime = 0 --settings.getValue("timeBeforeSync")
 			
 			local canSync = false
+			-- This vehicle speed is currently based of of the camera speed, this is how it was used before.
 			local vehicleSpd = math.abs(vel:length() or 0)
 			-- If below set speed
 			if (vehicleSpd <= maxSyncSpd) then

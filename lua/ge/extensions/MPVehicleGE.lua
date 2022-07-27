@@ -21,6 +21,8 @@ local syncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
 local sentPastVehiclesYet = true
+local variableSyncTimer = 0
+local isAtSyncSpeed = true
 
 local roleToInfo = {
 	['USER']	= { backcolor = ColorI(000, 000, 000, 127), tag = "", shorttag = "" },
@@ -1262,7 +1264,29 @@ local function onPreRender(dt)
 		if activeVeh then
 			local vel = vec3()
 			vel:set(activeVeh:getVelocity())
-			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and math.abs(vel:length() or 0) < 0.5) then applyQueuedEvents() end
+			
+			local maxSyncSpd = 0.5 --settings.getValue("maxSyncSpd") 
+			local maxTime = 0 --settings.getValue("timeBeforeSync")
+			
+			local canSync = false
+			local vehicleSpd = math.abs(vel:length() or 0)
+			-- If below set speed
+			if (vehicleSpd <= maxSyncSpd) then
+				isAtSyncSpd = true
+				variableSyncTimer = variableSyncTimer + dt
+				-- if time at speed more than or equal to max
+				if (variableSyncTimer >= maxTime) then
+					canSync = true
+				end			
+			else -- Reset
+				-- Check if reset is needed
+				if (isAtSyncSpd == true) then
+					isAtSyncSpd = false
+					variableSyncTimer = 0
+				end
+			end
+			
+			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and canSync) then applyQueuedEvents() end
 			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 		else
 			applyQueuedEvents()

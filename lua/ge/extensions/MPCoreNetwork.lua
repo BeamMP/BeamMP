@@ -301,7 +301,7 @@ local function handleU(params)
 			elseif string.match(data, "^Loading Resource") then
 				log('W',"handleU", "mod downloaded, manually check for it")
 				--core_modmanager.enableAutoMount()
-				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(%g+)%.zip")
+				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(.+)%.zip")
 
 				if currentModHasLoaded then
 					modLoaded(modName)

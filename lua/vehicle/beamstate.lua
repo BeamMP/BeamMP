@@ -304,6 +304,7 @@ local function toggleCouplers(_nodetag, forceLocked, forceWelded)
         isAttached = attachedCouplers[cid] ~= nil
       end
     end
+
     if isAttached then
       detachCouplers(_nodetag, forceLocked, forceWelded)
       MPcouplers.state = false
@@ -673,6 +674,13 @@ local function beamBroken(id, energy)
       partDamageData[beam.partOrigin].beamsBroken = partDamageData[beam.partOrigin].beamsBroken + 1
     end
 
+    -- Check for punctured tire
+    if beam.wheelID ~= nil then
+      deflateTire(beam.wheelID)
+    elseif beam.pressureGroupId then
+      obj:deflatePressureGroup(v.data.pressureGroups[beam.pressureGroupId])
+    end
+
     -- Break coll tris
     if beam.collTris and not beam.disableTriangleBreaking then --allow beams to disable triangle breaking
       for _, ctid in ipairs(beam.collTris) do
@@ -692,13 +700,6 @@ local function beamBroken(id, energy)
 
     -- Break rails
     obj:breakRails(id)
-
-    -- Check for punctured tire
-    if beam.wheelID ~= nil then
-      deflateTire(beam.wheelID)
-    elseif beam.pressureGroupId then
-      obj:deflatePressureGroup(v.data.pressureGroups[beam.pressureGroupId])
-    end
 
     -- breakgroup handling
     if beam.breakGroup then

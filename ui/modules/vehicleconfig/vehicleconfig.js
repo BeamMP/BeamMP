@@ -124,9 +124,16 @@ angular.module('beamng.stuff')
 }])
 
 .controller('VehicleconfigCtrl', ['$scope', '$state', function ($scope, $state) {
-  var tabs = ['menu.vehicleconfig.parts', 'menu.vehicleconfig.tuning', 'menu.vehicleconfig.color', 'menu.vehicleconfig.save']
-  var current = tabs.indexOf($state.current.name)
-  $scope.model = {selected: current === -1 ? 0 : current }
+  const tabs = ['menu.vehicleconfig.parts', 'menu.vehicleconfig.tuning', 'menu.vehicleconfig.color', 'menu.vehicleconfig.save', 'menu.vehicleconfig.debug']
+
+  currentTabUpdate()
+
+  function currentTabUpdate() {
+    const current = tabs.indexOf($state.current.name)
+    $scope.model = {selected: current === -1 ? 0 : current }
+  }
+
+  $scope.$watch("$state.current.name", currentTabUpdate);
 }])
 /**
  * @ngdoc controller
@@ -489,10 +496,10 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     vm.searchMode = true
   }
   vm.stopSearch = function() {
-    vm.searchMode = false
     vm.partSearchString = ''
     vm.partSearchQuery = {}
     vm.searchResults = []
+    vm.searchMode = false
   }
 
   vm.onKeyDown = function(event) {
@@ -527,6 +534,8 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   vm.filterChanged = function() {
+    if (!vm.searchMode && vm.partSearchString)
+      vm.startSearch();
     filterTree()
   }
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
@@ -628,6 +637,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     })
   }
 
+  $scope.$on('VehicleFocusChanged', () => bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()'))
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
 }])
 
@@ -636,21 +646,28 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.updateColor = function (index, value) {
     bngApi.engineLua(`core_vehicle_colors.setVehicleColor(${index}, "${value}");`)
   }
+  $scope.selectorIndex = -1
 
   function fetchDefinedColors () {
     vm.color = ['White', 'White', 'White']
+    $scope.selectorIndex = -1
 
-    bngApi.engineLua('getVehicleColor()', (res) => {
+    bngApi.engineLua('getVehicleColor()', res => {
       vm.color[0] = res || vm.color[0]
+      $scope.selectorIndex = 0
     })
 
     for (var i=1; i<vm.color.length; i++) {
       // yes this is needed, since otherwise we crate a function inside the for loop and thanks to clojure i would always be 4
-      bngApi.engineLua(`getVehicleColorPalette(${i-1})`, ((id) =>
-        (res) => {
-          vm.color[id] = res || vm.color[id]
-        }
-      )(i))
+      // bngApi.engineLua(`getVehicleColorPalette(${i-1})`, ((id) =>
+      //   (res) => {
+      //     vm.color[id] = res || vm.color[id]
+      //   }
+      // )(i))
+      const idx = i;
+      bngApi.engineLua(`getVehicleColorPalette(${i-1})`,
+        res => vm.color[idx] = res || vm.color[idx]
+      )
     }
   }
 
@@ -676,6 +693,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   fetchDefinedColors()
 
   $scope.$on('VehicleChange', getVehicleColors)
+  $scope.$on('VehicleFocusChanged', getVehicleColors)
   $scope.$on('VehicleChangeColor', fetchDefinedColors)
 }])
 
@@ -691,23 +709,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`)
 
     if (vm.saveThumbnail == true) {
-      bngApi.engineLua("extensions.ui_visibility.set(false)")
-      // This function starts a chain to hide the UI, set up the camera and take a screenshot.
-      // See lua/ge/extensions/core/vehicles/partmgmt.lua
-      setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100)
-
-      // Stage 1
-      $scope.$on('saveLocalScreenshot_stage1', function () {
-        // Stage 2 (Screenshot - LUA)
-        bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot_stage2("${configName}")`)
-      })
-
-      // Stage 3 (Reset)
-      $scope.$on('saveLocalScreenshot_stage3', function () {
-        bngApi.engineLua(`setCameraFov(60)`)
-        bngApi.engineLua(`commands.setGameCamera()`)
-        bngApi.engineLua("extensions.ui_visibility.set(true)")
-      })
+      bngApi.engineLua(`extensions.load('util_createThumbnails'); util_createThumbnails.startWork("${configName}")`)
     }
   }
 
@@ -773,6 +775,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   $scope.$on('VehicleChange', getConfigList)
+  $scope.$on('VehicleFocusChanged', getConfigList)
   $scope.$on('VehicleconfigSaved', getConfigList)
   getConfigList()
 
@@ -815,7 +818,7 @@ function ($scope) {
   })
 
   vm.setCameraFov = () => {
-    bngApi.engineLua(`setCameraFov(${vm.state.fov});`)
+    bngApi.engineLua(`setCameraFovDeg(${vm.state.fov});`)
   },
 
   vm.controls = {

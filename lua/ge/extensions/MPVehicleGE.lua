@@ -932,6 +932,7 @@ local function onServerVehicleCoupled(serverVehicleID, data)
 end
 
 local function onServerCameraSwitched(playerID, serverVehicleID)
+	if not players[playerID] then return end -- TODO: better fix?
 	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
 		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
 	end

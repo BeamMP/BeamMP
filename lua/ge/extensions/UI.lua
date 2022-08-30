@@ -110,7 +110,7 @@ end
 local function chatMessage(rawMessage)
 	chatcounter = chatcounter+1
 	local message = string.sub(rawMessage, 2)
-	print("Chat message received: "..message) -- DO NOT REMOVE
+	log('M', 'chatMessage', 'Chat message received: '..message) -- DO NOT REMOVE
 	guihooks.trigger("chatMessage", {message = message, id = chatcounter})
 	TriggerClientEvent("ChatMessageReceived", message)
 end
@@ -131,26 +131,26 @@ end
 
 
 local function ready(src)
-	print("UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
+	--log('M',"UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
 
 	if MPCoreNetwork.isMPSession() then
 
 		if src == "MP-SESSION" then
 			setPing("-2")
 			local Server = MPCoreNetwork.getCurrentServer()
-			print("---------------------------------------------------------------")
+			--print("---------------------------------------------------------------")
 			--dump(Server)
 			if Server then
 				if Server.name then
-					print('Server name: '..Server.name)
+					--print('Server name: '..Server.name)
 					setStatus("Server: "..Server.name)
 				else
-					print('Server.name = nil')
+					--print('Server.name = nil')
 				end
 			else
-				print('Server = nil')
+				--print('Server = nil')
 			end
-			print("---------------------------------------------------------------")
+			--print("---------------------------------------------------------------")
 		end
 	end
 end

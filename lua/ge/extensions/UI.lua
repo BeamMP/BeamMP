@@ -38,9 +38,8 @@ local function updatePlayersList(playersString)
 	--print(playersString)
 	local players = split(playersString, ",")
 	--print(dump(players))
-	be:executeJS('playerList(\''..jsonEncode(players)..'\');')
-
-	be:executeJS('playerPings(\''..jsonEncode(pings)..'\');')
+	guihooks.trigger("playerList", jsonEncode(players))
+	guihooks.trigger("playerPings", jsonEncode(pings))
 end
 
 
@@ -71,20 +70,18 @@ end
 
 local function setNickname(name)
   --print("My Nickname: "..name)
-	be:executeJS('setNickname("'..name..'")')
+	guihooks.trigger("setNickname", name)
 end
 
 
 
 local function setStatus(status)
-	--be:executeJS('setStatus("'..status..'")')
 	guihooks.trigger("setStatus", status)
 end
 
 
 
 local function setPlayerCount(playerCount)
-	--be:executeJS('setPlayerCount("'..playerCount..'")')
 	guihooks.trigger("setPlayerCount", playerCount)
 end
 

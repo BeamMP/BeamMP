@@ -78,7 +78,7 @@ app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	});
 
 	$scope.$on('setStatus', function (event, status) {
-		console.log('Setting status to: ' + sanitizeString(status))
+		//console.log('Setting status to: ' + sanitizeString(status))
 		if (status == "") document.getElementById("server-name-block").style.display = "none";
 		else document.getElementById("server-name-block").style.display = "";
 		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING

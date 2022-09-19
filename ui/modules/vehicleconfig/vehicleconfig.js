@@ -12,11 +12,13 @@ angular.module('beamng.stuff')
     var res = []
     if(depth>200) return
 
-    for (var slotType in part.slots) {
-      var slot = part.slots[slotType]
+    for (var slotId in part.slots) {
+      var slot = part.slots[slotId]
+      var slotType = slot.type
       var element = {
+        type: slotType,
         name: slot.description,
-        slot: slotType,
+        slot: slotId,
         val: '',
         options: [],
         highlight: true
@@ -32,11 +34,11 @@ angular.module('beamng.stuff')
           } else {
             elOptions[elOptions.length] = {
               name: slotPart.description,
-              val: slotPartName,
-              value: slotPart.value
+              isAuxiliary: slotPart.isAuxiliary,
+              val: slotPartName
             }
             optionCount++
-            if (data.chosenParts[slotType] == slotPartName) {
+            if (data.chosenParts[slotId] == slotPartName || data.chosenParts[slotType] == slotPartName) {
               element.val = slotPartName
               if (slotPart.slots)
                 element.parts = _generateTreeBranch(data, slotPart, simple, depth + 1)
@@ -47,7 +49,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: '', value:'0'});
+        element.options.unshift({name: 'Empty', val: ''})
       } else {
         element.open = true
       }
@@ -124,9 +126,16 @@ angular.module('beamng.stuff')
 }])
 
 .controller('VehicleconfigCtrl', ['$scope', '$state', function ($scope, $state) {
-  var tabs = ['menu.vehicleconfig.parts', 'menu.vehicleconfig.tuning', 'menu.vehicleconfig.color', 'menu.vehicleconfig.save']
-  var current = tabs.indexOf($state.current.name)
-  $scope.model = {selected: current === -1 ? 0 : current }
+  const tabs = ['menu.vehicleconfig.parts', 'menu.vehicleconfig.tuning', 'menu.vehicleconfig.color', 'menu.vehicleconfig.save', 'menu.vehicleconfig.debug']
+
+  currentTabUpdate()
+
+  function currentTabUpdate() {
+    const current = tabs.indexOf($state.current.name)
+    $scope.model = {selected: current === -1 ? 0 : current }
+  }
+
+  $scope.$watch("$state.current.name", currentTabUpdate);
 }])
 /**
  * @ngdoc controller
@@ -177,29 +186,34 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // LICENSE PLATE STUFF
   vm.licensePlate = ''
 
-  bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
-    $scope.$evalAsync(() => { vm.licensePlate = str; })
-  })
+  let getLicensePlate = function () {
+    bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
+      $scope.$evalAsync(() => { vm.licensePlate = str; })
+    })
+  }
+  getLicensePlate()
 
+  vm.applyLicensePlateDebounced  = RateLimiter.debounce(() => {
+    if(vm.applyPartChangesAutomatically) {
+      vm.applyLicensePlate()
+    }
+  }, 500)
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
-  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; });
   });
 
   // --------------------------------------- BEAMMP --------------------------------------- //
 
-  vm.updateLicensePlate = function () {
+  vm.applyLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText("${vm.licensePlate}")`)
   }
 
-  vm.genLicensePlate = function () {
+  vm.applyRandomLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText(core_vehicles.regenerateVehicleLicenseText(be:getPlayerVehicle(0)),nil,nil,nil)`)
-
-    bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
-      $scope.$evalAsync(() => { vm.licensePlate = str; })
-    })
+    getLicensePlate()
   }
   // --------------
 
@@ -213,6 +227,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.selectSubParts = true
   vm.applyPartChangesAutomatically = true
   vm.simple = false
+  vm.showAuxiliary = !beamng.shipping
   vm.partSearchString = ''
   vm.partSearchQuery = {}
   vm.searchMode = false
@@ -489,10 +504,10 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     vm.searchMode = true
   }
   vm.stopSearch = function() {
-    vm.searchMode = false
     vm.partSearchString = ''
     vm.partSearchQuery = {}
     vm.searchResults = []
+    vm.searchMode = false
   }
 
   vm.onKeyDown = function(event) {
@@ -527,6 +542,8 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   vm.filterChanged = function() {
+    if (!vm.searchMode && vm.partSearchString)
+      vm.startSearch();
     filterTree()
   }
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
@@ -564,7 +581,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
   
   vm.isMPSession = false;
-  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; });
   });
 
@@ -628,6 +645,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     })
   }
 
+  $scope.$on('VehicleFocusChanged', () => bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()'))
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
 }])
 
@@ -636,21 +654,28 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.updateColor = function (index, value) {
     bngApi.engineLua(`core_vehicle_colors.setVehicleColor(${index}, "${value}");`)
   }
+  $scope.selectorIndex = -1
 
   function fetchDefinedColors () {
     vm.color = ['White', 'White', 'White']
+    $scope.selectorIndex = -1
 
-    bngApi.engineLua('getVehicleColor()', (res) => {
+    bngApi.engineLua('getVehicleColor()', res => {
       vm.color[0] = res || vm.color[0]
+      $scope.selectorIndex = 0
     })
 
     for (var i=1; i<vm.color.length; i++) {
       // yes this is needed, since otherwise we crate a function inside the for loop and thanks to clojure i would always be 4
-      bngApi.engineLua(`getVehicleColorPalette(${i-1})`, ((id) =>
-        (res) => {
-          vm.color[id] = res || vm.color[id]
-        }
-      )(i))
+      // bngApi.engineLua(`getVehicleColorPalette(${i-1})`, ((id) =>
+      //   (res) => {
+      //     vm.color[id] = res || vm.color[id]
+      //   }
+      // )(i))
+      const idx = i;
+      bngApi.engineLua(`getVehicleColorPalette(${i-1})`,
+        res => vm.color[idx] = res || vm.color[idx]
+      )
     }
   }
 
@@ -676,6 +701,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   fetchDefinedColors()
 
   $scope.$on('VehicleChange', getVehicleColors)
+  $scope.$on('VehicleFocusChanged', getVehicleColors)
   $scope.$on('VehicleChangeColor', fetchDefinedColors)
 }])
 
@@ -691,23 +717,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`)
 
     if (vm.saveThumbnail == true) {
-      bngApi.engineLua("extensions.ui_visibility.set(false)")
-      // This function starts a chain to hide the UI, set up the camera and take a screenshot.
-      // See lua/ge/extensions/core/vehicles/partmgmt.lua
-      setTimeout(function() { bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot("${configName}.pc")`); }, 100)
-
-      // Stage 1
-      $scope.$on('saveLocalScreenshot_stage1', function () {
-        // Stage 2 (Screenshot - LUA)
-        bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocalScreenshot_stage2("${configName}")`)
-      })
-
-      // Stage 3 (Reset)
-      $scope.$on('saveLocalScreenshot_stage3', function () {
-        bngApi.engineLua(`setCameraFov(60)`)
-        bngApi.engineLua(`commands.setGameCamera()`)
-        bngApi.engineLua("extensions.ui_visibility.set(true)")
-      })
+      bngApi.engineLua(`extensions.load('util_createThumbnails'); util_createThumbnails.startWork("${configName}")`)
     }
   }
 
@@ -773,6 +783,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   $scope.$on('VehicleChange', getConfigList)
+  $scope.$on('VehicleFocusChanged', getConfigList)
   $scope.$on('VehicleconfigSaved', getConfigList)
   getConfigList()
 
@@ -785,6 +796,7 @@ function ($scope) {
 
   vm.state = {}
   vm.cameraSpeed = 0
+  vm.canApplyState = true
 
   vm.update = () => {
     bngApi.engineScript('$Camera::movementSpeed', (speed) => {
@@ -798,15 +810,31 @@ function ($scope) {
   },
 
   vm.applyState = () => {
-    bngApi.activeObjectLua(`bdebug.setState( ${bngApi.serializeToLua(vm.state)} )`)
+    if (vm.canApplyState) {
+      bngApi.activeObjectLua(`bdebug.setState( ${bngApi.serializeToLua(vm.state)} )`)
+    }
   }
 
-  vm.applyMeshVisibility = () => {
-    bngApi.engineLua(`if be:getPlayerVehicle(0) then be:getPlayerVehicle(0):setMeshAlpha(${bngApi.serializeToLua(vm.state.vehicle.meshVisibility / 100)}, "", false) end`)
+  vm.setMeshVisibility = (vis) => {
+    bngApi.engineLua(`if be:getPlayerVehicle(0) then be:getPlayerVehicle(0):setMeshAlpha(${bngApi.serializeToLua(vis)}, "", false) end`)
   }
 
   $scope.$on('BdebugUpdate', (_, debugState) => {
+    // All this to workaround a bug with slider not updating
+    if (vm.state.vehicle) {
+      var mode = vm.state.vehicle.beamVisMode - 1
+      vm.state.vehicle.beamVisModes[mode]['rangeMin'] = -Number.MAX_VALUE
+      vm.state.vehicle.beamVisModes[mode]['rangeMax'] = Number.MAX_VALUE
+      
+      vm.canApplyState = false
+      
+      $scope.$digest()
+    }
+    
+    vm.canApplyState = true
+    
     vm.state = debugState
+    $scope.$digest()
   })
   bngApi.activeObjectLua(`bdebug.requestState()`)
 
@@ -815,7 +843,7 @@ function ($scope) {
   })
 
   vm.setCameraFov = () => {
-    bngApi.engineLua(`setCameraFov(${vm.state.fov});`)
+    bngApi.engineLua(`setCameraFovDeg(${vm.state.fov});`)
   },
 
   vm.controls = {
@@ -834,6 +862,20 @@ function ($scope) {
       toggleGroup_1: [
         { label: 'ui.debug.activatePhysics', key: 'physicsEnabled', onChange: () => { bngApi.engineLua(`bullettime.togglePause()`) } }
       ],
+    },
+
+    jbeamvis: {
+      buttonGroup_1: [
+        { label: 'ui.debug.vehicle.toggleVis', action: () => { bngApi.activeObjectLua('bdebug.toggleEnabled()');} },
+        { label: 'ui.debug.vehicle.clearSettings', action: () => { bngApi.activeObjectLua('bdebug.resetModes()');} }
+      ],
+      meshVisButtonGroup: [
+        { label: '0%', action: () => { vm.setMeshVisibility(0) } },
+        { label: '25%', action: () => { vm.setMeshVisibility(0.25) } },
+        { label: '50%', action: () => { vm.setMeshVisibility(0.5) } },
+        { label: '75%', action: () => { vm.setMeshVisibility(0.75) } },
+        { label: '100%', action: () => { vm.setMeshVisibility(1.0) } },
+      ]
     },
 
     effects: {

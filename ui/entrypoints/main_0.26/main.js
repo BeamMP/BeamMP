@@ -228,55 +228,48 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-
-    .state('menu.multiplayer.tos', {
-      url: '/mptos',
-      templateUrl: '/ui/modules/multiplayer/tos.partial.html',
-      controller: 'MultiplayerTOSController as multiplayertos',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.launcher', {
-      url: '/mplauncher',
-      templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
-      controller: 'MultiplayerLauncherController as multiplayerlauncher',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.login', {
-      url: '/mplogin',
-      templateUrl: '/ui/modules/multiplayer/login.partial.html',
-      controller: 'MultiplayerLoginController as multiplayerlogin',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.servers', {
-      url: '/mpservers',
-      templateUrl: '/ui/modules/multiplayer/servers.partial.html',
-      controller: 'MultiplayerServersController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.recent', {
-      url: '/mprecent',
-      templateUrl: '/ui/modules/multiplayer/recent.partial.html',
-      controller: 'MultiplayerRecentController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.favorites', {
-      url: '/mpfavorites',
-      templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
-      controller: 'MultiplayerFavoritesController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.direct', {
-      url: '/mpdirect',
-      templateUrl: '/ui/modules/multiplayer/direct.partial.html',
-      controller: 'MultiplayerDirectController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
+      .state('menu.multiplayer.tos', {
+        url: '/mptos',
+        templateUrl: '/ui/modules/multiplayer/tos.partial.html',
+        controller: 'MultiplayerTOSController as multiplayertos',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.launcher', {
+        url: '/mplauncher',
+        templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
+        controller: 'MultiplayerLauncherController as multiplayerlauncher',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.login', {
+        url: '/mplogin',
+        templateUrl: '/ui/modules/multiplayer/login.partial.html',
+        controller: 'MultiplayerLoginController as multiplayerlogin',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.servers', {
+        url: '/mpservers',
+        templateUrl: '/ui/modules/multiplayer/servers.partial.html',
+        controller: 'MultiplayerServersController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.recent', {
+        url: '/mprecent',
+        templateUrl: '/ui/modules/multiplayer/recent.partial.html',
+        controller: 'MultiplayerRecentController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.favorites', {
+        url: '/mpfavorites',
+        templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
+        controller: 'MultiplayerFavoritesController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.direct', {
+        url: '/mpdirect',
+        templateUrl: '/ui/modules/multiplayer/direct.partial.html',
+        controller: 'MultiplayerDirectController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
     // -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.options', {

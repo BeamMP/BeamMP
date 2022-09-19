@@ -203,7 +203,7 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = spawnNew?"spawnNewVehicle":"replaceVehicle"
+          var func = "core_vehicles." + (spawnNew?"spawnNewVehicle":"replaceVehicle")
           if (mp) func = "MPVehicleGE.spawnRequest";
 
           var luaArgs = {}

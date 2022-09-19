@@ -423,6 +423,7 @@ end
 
 M.onReset            = onReset
 M.onInit             = onInit
+M.onExtensionLoaded  = onInit
 M.onPhysicsStep      = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation

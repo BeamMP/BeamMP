@@ -284,12 +284,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-    .state('menu.options.multiplayer', {
-      url: '/multiplayer',
-      templateUrl: '/ui/modules/options/multiplayer.partial.html',
-      controller: 'SettingsGameplayCtrl as opt',
-      backState: 'BACK_TO_MENU',
-    })
+      .state('menu.options.multiplayer', {
+        url: '/multiplayer',
+        templateUrl: '/ui/modules/options/multiplayer.partial.html',
+        controller: 'SettingsGameplayCtrl as opt',
+        backState: 'BACK_TO_MENU',
+      })
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',

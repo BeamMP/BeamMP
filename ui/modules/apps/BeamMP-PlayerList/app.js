@@ -74,55 +74,59 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 		if (plVertical != "bottom") setPLDirection("bottom");
 		else setPLDirection("top");
 	}
-}]);
 
-function playerList(list) {
-	let playersList = document.getElementById("players-table");
-	let parsedList = JSON.parse(list);
-	
-	if(players != null && playersList != null){
-		//get differences between playernames and send them as messages
-		var left = players.filter((item) => { return !parsedList.includes(item) });
-		var joined = parsedList.filter((item) => { return !players.includes(item) });
-
-		// Clear the player list
-		clearPlayerList();
-
-		// And fill it with the updated players
-		for (let i = 0; i < parsedList.length; i++) {
-			// Insert a row at the end of the players list
-			var row = playersList.insertRow(playersList.rows.length);
-
-			// Insert a cell containing the player name
-			var nameCell = row.insertCell(0);
-			nameCell.textContent = parsedList[i];
-			nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
-
-			// Insert a cell containing the player ping
-			var pingCell = row.insertCell(1);
-			pingCell.setAttribute("class", "tp-button");
-
-			// Insert the button inside the cell
-			var btn = document.createElement("BUTTON");
-			var pingText = pingList[parsedList[i]] || "?";
-			btn.appendChild(document.createTextNode(pingText));
-			btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
-			btn.setAttribute("class", "tp-button buttons");
-			pingCell.appendChild(btn);
+	$scope.$on('playerPings', function(event, data) {
+		pingList = JSON.parse(data);
+		for(let i = 0; i < pingList.length; i++) {
+			pingList[i] = pingList[i]-16;
+			if (pingList[i] > 999) pingList[i] = 999;
 		}
-		if(document.getElementById("plist-container").style.display == "block")
-			document.getElementById("show-button").style.height = playersList.offsetHeight + "px"; 
-	}
-	players = parsedList; //store player list as an array for the next update
-}
+	})
 
-function playerPings(list) {
-	pingList = JSON.parse(list);
-	for(let i = 0; i < pingList.length; i++) {
-		pingList[i] = pingList[i]-16;
-		if (pingList[i] > 999) pingList[i] = 999;
-	}
-}
+	$scope.$on('playerList', function(event, data) {
+		let playersList = document.getElementById("players-table");
+		let parsedList = JSON.parse(data);
+		
+		if(players != null && playersList != null){
+			//get differences between playernames and send them as messages
+			var left = players.filter((item) => { return !parsedList.includes(item) });
+			var joined = parsedList.filter((item) => { return !players.includes(item) });
+	
+			// Clear the player list
+			clearPlayerList();
+	
+			// And fill it with the updated players
+			for (let i = 0; i < parsedList.length; i++) {
+				// Insert a row at the end of the players list
+				var row = playersList.insertRow(playersList.rows.length);
+	
+				// Insert a cell containing the player name
+				var nameCell = row.insertCell(0);
+				nameCell.textContent = parsedList[i];
+				nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
+	
+				// Insert a cell containing the player ping
+				var pingCell = row.insertCell(1);
+				pingCell.setAttribute("class", "tp-button");
+	
+				// Insert the button inside the cell
+				var btn = document.createElement("BUTTON");
+				var pingText = pingList[parsedList[i]] || "?";
+				btn.appendChild(document.createTextNode(pingText));
+				btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
+				btn.setAttribute("class", "tp-button buttons");
+				pingCell.appendChild(btn);
+			}
+			if(document.getElementById("plist-container").style.display == "block")
+				document.getElementById("show-button").style.height = playersList.offsetHeight + "px"; 
+		}
+		players = parsedList; //store player list as an array for the next update
+	})
+
+	$scope.$on('setNickname', function(event, data) {
+		nickname = data
+	})
+}]);
 
 
 function clearPlayerList() {
@@ -141,9 +145,6 @@ function showPlayerInfo(targetPlayerName) {
 	bngApi.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
 
-function setNickname(n) {
-	nickname = n
-}
 
 function setOfflineInPlayerList() {
 	let playersList = document.getElementById("players");

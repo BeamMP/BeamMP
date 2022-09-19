@@ -6,7 +6,7 @@
 
 
 local M = {}
-print("Loading mpConfig...")
+print("Loading MPConfig...")
 
 -- MP VARIABLES
 local Nickname = ""
@@ -31,7 +31,7 @@ end
 
 
 local function setNickname(x)
-	print("Nickname Set To: "..x)
+	log('M', 'setNickname', 'Nickname Set To: '..x)
 	Nickname = x
 end
 
@@ -91,7 +91,7 @@ local function getFavorites()
 	if FS:fileExists(favsfile) then
 		favs = jsonReadFile(favsfile)
 	else
-		print("favs file doesnt exist")
+		log('M', 'getFavorites', "Favs file doesn't exist")
 	end
 	return favs
 end
@@ -121,7 +121,7 @@ local function getConfig()
 	if FS:fileExists(file) then
 		return jsonReadFile(file)
 	else
-		print("config file doesnt exist")
+		log('M', 'getConfig', "Config file doesn't exist")
 		return nil
 	end
 end
@@ -179,5 +179,5 @@ M.setConfig = setConfig
 
 M.acceptTos = acceptTos
 
-print("mpConfig loaded")
+print("MPConfig loaded")
 return M

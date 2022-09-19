@@ -69,7 +69,7 @@ local function checkMod(mod)
 		else
 			print("Inactive Mod but Should be Active: "..modname)
 			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-			MPCoreSystem.modLoaded(modname)
+			MPCoreNetwork.modLoaded(modname)
 		end
 	end
 end
@@ -161,7 +161,7 @@ local function onModStateChanged(mod)
 	-- The function makes two calls, one with a table and one with the mod name
 	-- We only want the table not the mod name call
 	if type(mod) ~= "table" then return end
-	if MPCoreSystem.isGoingMPSession() or MPCoreSystem.isMPSession() then
+	if MPCoreNetwork.isGoingMPSession() or MPCoreNetwork.isMPSession() then
 		checkMod(mod)
 	end
 end
@@ -186,7 +186,7 @@ end
 
 
 local function onClientStartMission(mission)
-	if MPCoreSystem.isMPSession() then
+	if MPCoreNetwork.isMPSession() then
 		checkAllMods() -- Checking all the mods
 	end
 	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
@@ -205,14 +205,14 @@ end
 
 
 local function modsDatabaseChanged()
-	if not MPCoreSystem.isMPSession() then
+	if not MPCoreNetwork.isMPSession() then
 		backupLoadedMods()
 	end
 end
 
 
 
-local function startCleanUpSessionMods()
+local function startcleanUpSessionMods()
 	requestCleanup = true
 end
 
@@ -239,7 +239,7 @@ M.onModStateChanged = onModStateChanged
 M.backupLoadedMods = backupLoadedMods
 M.restoreLoadedMods = restoreLoadedMods
 M.cleanUpSessionMods = cleanUpSessionMods
-M.startCleanUpSessionMods = startCleanUpSessionMods
+M.startcleanUpSessionMods = startcleanUpSessionMods
 M.showServerMods = showServerMods
 M.setServerMods = setServerMods
 M.checkAllMods = checkAllMods

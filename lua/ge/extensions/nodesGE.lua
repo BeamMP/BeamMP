@@ -26,10 +26,10 @@ local function tick()
 end
 
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPCoreSystem.sendSplit('Xn:', serverVehicleID..":", data)
+			MPGameNetwork.sendSplit('Xn:', serverVehicleID..":", data)
 		end
 	end
 end
@@ -76,24 +76,6 @@ M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
 M.applyRot   = applyRot
 
--- Node Control from here
-
-local function setAllCollision(doCollision)
-	for i = 0, be:getObjectCount()-1 do -- For each vehicle
-		local veh = be:getObject(i) --  Get vehicle
-		if doCollision then veh:queueLuaCommand("nodesVE.enableCollision('true')")
-		else veh:queueLuaCommand("nodesVE.enableCollision('false')") end
-	end
-end
-
-local function enableCollision(doCollision)
-	local veh = be:getObject(0)
-	if doCollision then veh:queueLuaCommand("nodesVE.enableCollision('true')")
-	else veh:queueLuaCommand("nodesVE.enableCollision('false')") end
-end
-
-M.enableCollision = enableCollision
-M.setAllCollision = setAllCollision
 
 
 print("nodesGE loaded")

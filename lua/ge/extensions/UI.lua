@@ -119,7 +119,7 @@ end
 
 local function chatSend(msg)
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
-	MPCoreSystem.send('GAME', c)
+	MPGameNetwork.send(c)
 	TriggerClientEvent("ChatMessageSent", c)
 end
 
@@ -131,15 +131,13 @@ end
 
 
 local function ready(src)
-	print("UI Has now loaded ("..src..") & MP = "..tostring(MPCoreSystem.isMPSession()))
+	print("UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
 
-	if MPCoreSystem.isMPSession() then
-
-		MPCoreSystem.connectSessionNetwork()
+	if MPCoreNetwork.isMPSession() then
 
 		if src == "MP-SESSION" then
 			setPing("-2")
-			local Server = MPCoreSystem.getCurrentServer()
+			local Server = MPCoreNetwork.getCurrentServer()
 			print("---------------------------------------------------------------")
 			--dump(Server)
 			if Server then

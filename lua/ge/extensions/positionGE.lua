@@ -24,7 +24,7 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPCoreSystem.connectionStatus() > 3 then -- If TCP connected
+	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			local decoded = jsonDecode(data)
@@ -38,7 +38,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
 
 			data = jsonEncode(decoded)
-			MPCoreSystem.send('GAME', 'Zp:'..serverVehicleID..":"..data)
+			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end
@@ -51,11 +51,6 @@ local function applyPos(data, serverVehicleID)
 
 
 	local decoded = jsonDecode(data)
-
-	if not decoded then
-		log('E', 'applyPos', 'decoded data is invalid for '..serverVehicleID)
-		dump(decoded)
-	end
 
 	local simspeedFraction = 1/bullettime.getReal()
 

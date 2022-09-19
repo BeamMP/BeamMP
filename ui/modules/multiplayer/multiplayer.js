@@ -50,7 +50,7 @@ function($scope, $state, $timeout, $document) {
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.connect = function () {
-		bngApi.engineLua('MPCoreSystem.disconnectLauncher(true)');
+		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
 	};
 	
 	$scope.$on('launcherConnected', function (event, data) {
@@ -79,7 +79,7 @@ function($scope, $state, $timeout, $document) {
 		}	
 		document.getElementById('loginPassword').value = '';
 		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
-		bngApi.engineLua("MPCoreSystem.login('" + JSON.stringify({ username: u, password: p }) + "')");
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ username: u, password: p }) + "')");
 	}
 
 	$scope.switchConnection = function() {
@@ -100,7 +100,7 @@ function($scope, $state, $timeout, $document) {
 		var u = document.getElementById('guestUsername').value;
 		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
 		document.getElementById('guestUsername').value = '';
-		bngApi.engineLua("MPCoreSystem.login('" + JSON.stringify({ guest: u }) + "')");
+		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ guest: u }) + "')");
 	}
 	
 	$scope.$on('LoggedIn', function (event, data) {
@@ -112,7 +112,7 @@ function($scope, $state, $timeout, $document) {
 	});
 	
 	// Try to auto login
-	bngApi.engineLua('MPCoreSystem.autoLogin()');
+	bngApi.engineLua('MPCoreNetwork.autoLogin()');
 }])
 
 
@@ -180,7 +180,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	});
 
 	$scope.logout = function() {
-		bngApi.engineLua(`MPCoreSystem.logout()`);
+		bngApi.engineLua(`MPCoreNetwork.logout()`);
 		$state.go('menu.multiplayer.login');
 	}
 
@@ -191,7 +191,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	vm.refreshList = function() {
 		console.log("Attempting to refresh server list.")
-		bngApi.engineLua('MPCoreSystem.getServers()');
+		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
 	
 	vm.clearRecents = function() {
@@ -204,7 +204,7 @@ function($scope, $state, $timeout, $mdDialog) {
 		var ip = document.getElementById('directip').value.trim();
 		var port = document.getElementById('directport').value.trim();
 		document.getElementById('LoadingServer').style.display = 'block';
-		bngApi.engineLua(`MPCoreSystem.connectToServer("${ip}","${port}")`);
+		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
 	vm.closePopup =  function() {
@@ -212,7 +212,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	};
 	vm.closeLoadingPopup =  function() {
 		document.getElementById('LoadingServer').style.display = 'none';
-		bngApi.engineLua('MPCoreSystem.resetSession()');
+		bngApi.engineLua('MPCoreNetwork.resetSession()');
 	};
 
 	vm.showCustomServer = function() {
@@ -300,7 +300,7 @@ function($scope, $state, $timeout) {
 	vm.searchText = "";
 
 	// Request for the servers
-	bngApi.engineLua('MPCoreSystem.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	// Go back to the main menu on exit
 	vm.exit = function ($event) {
@@ -356,7 +356,7 @@ function($scope, $state, $timeout) {
 	
 	vm.searchText = "";
 
-	bngApi.engineLua('MPCoreSystem.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	// Called when getServers() answered
 	$scope.$on('onServersReceived', async function (event, data) {
@@ -419,7 +419,7 @@ function($scope, $state, $timeout) {
 	vm.sliderMaxModSize = 500; //should be almost a terabyte
 	vm.selectMap = "Any";
 	vm.searchText = "";
-	bngApi.engineLua('MPCoreSystem.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 
 	vm.exit = function ($event) {
 		if ($event)
@@ -806,7 +806,7 @@ function addFav(server, isUpdate) {
 	server.addTime = Date.now();
 	favorites.push(server);
 	saveFav();
-	if (!isUpdate) bngApi.engineLua('MPCoreSystem.getServers()');
+	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.getServers()');
 }
 
 function removeFav(server) {
@@ -817,7 +817,7 @@ function removeFav(server) {
 		}
 	}
 	saveFav();
-	bngApi.engineLua('MPCoreSystem.getServers()');
+	bngApi.engineLua('MPCoreNetwork.getServers()');
 }
 
 function saveFav() {
@@ -1004,7 +1004,7 @@ function connect(ip, port, mods, name) {
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreSystem.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
 }
 
 // Used to select a row (when it's clicked)
@@ -1078,7 +1078,7 @@ function deselect(row) {
 
 async function getLauncherVersion() {
 	return new Promise(function(resolve, reject) {
-		bngApi.engineLua("MPCoreSystem.getLauncherVersion()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.getLauncherVersion()", (data) => {
 			resolve(data);
 		});
 	});
@@ -1086,7 +1086,7 @@ async function getLauncherVersion() {
 
 async function isLoggedIn() {
 	return new Promise(function(resolve, reject) {
-		bngApi.engineLua("MPCoreSystem.isLoggedIn()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.isLoggedIn()", (data) => {
 			resolve(data);
 		});
 	});
@@ -1094,7 +1094,7 @@ async function isLoggedIn() {
 
 async function isLauncherConnected() {
 	return new Promise(function(resolve, reject) {
-		bngApi.engineLua("MPCoreSystem.isLauncherConnected()", (data) => {
+		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
 			resolve(data);
 		});
 	});

@@ -1891,6 +1891,7 @@ angular.module('beamng.stuff')
 
 
 
+
   vm.isWaiting = false
 
   $scope.$on('app:waiting', function (event, value, callback) {

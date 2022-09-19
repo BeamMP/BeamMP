@@ -92,7 +92,7 @@ local function startMultiplayerByName(levelName)
 end
 
 local function onClientPreStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
 		local path, file, ext = path.splitWithoutExt(mission)
 		file = path .. 'mainLevel'
 		if not FS:fileExists(file..'.lua') then return end
@@ -104,9 +104,12 @@ local function onClientPreStartMission(mission)
 end
 
 local function onClientPostStartMission()
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
+		log('M','onClientPostStartMission',"MP Map Session Started. Loading UI and Connecting Game Network")
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
-		MPGameNetwork.connectToLauncher()
+
+		--readyCalled = true
+		MPCoreSystem.connectSessionNetwork()
 	end
 end
 
@@ -209,6 +212,7 @@ local function onUpdate(dt)
 	-- Workaround for worldReadyState not being set properly if there are no vehicles
 	serverConnection.onCameraHandlerSetInitial()
 	extensions.hook('onCameraHandlerSet')
+	core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
   end
 end
 

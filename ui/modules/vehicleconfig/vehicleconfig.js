@@ -201,7 +201,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
-  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; });
   });
 
@@ -581,7 +581,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
   
   vm.isMPSession = false;
-  bngApi.engineLua('MPCoreSystem.isMPSession()', function (str) {
+  bngApi.engineLua('MPCoreNetwork.isMPSession()', function (str) {
     $scope.$evalAsync(() => { vm.isMPSession = str; });
   });
 

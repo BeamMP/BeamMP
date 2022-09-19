@@ -162,7 +162,7 @@ angular.module('beamng.stuff')
           scope.beammpData = data
         })
       })
-      bngApi.engineLua('MPCoreSystem.requestPlayers()')
+      bngApi.engineLua('MPCoreNetwork.requestPlayers()')
     }
   }
 }])

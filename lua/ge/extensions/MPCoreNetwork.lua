@@ -341,7 +341,7 @@ local HandleNetwork = {
 
 --=================================================== MOD INITILISATION ====================================================
 
-M.onInit = function()
+local function onInit()
 	local function split(s, sep)
     local fields = {}
     
@@ -356,6 +356,7 @@ M.onInit = function()
 	-- Lets make sure that they are not in the middle of a game. This prevents them being presented the main menu when they reload lua while in game.
 	if not scenetree.missionGroup and getMissionFilename() == "" then 
 		-- Check the game version for if we expect it to be BeamMP compatable. This check adds the UI and Multiplayer Options so that they can then play.
+		dump(version)
 		if version[1] == "0" and version[2] == "26" then
 			print('Redirecting to the BeamMP UI for 0.26')
 			-- Lets now load the BeamMP Specific UI
@@ -425,6 +426,8 @@ local function onExtensionLoaded()
 	send('Z')
 	-- Log-in
 	send('Nc')
+	-- Load UI
+	onInit()
 end
 -- ====================================== ENTRY POINT ======================================
 
@@ -475,6 +478,22 @@ local function onUpdate(dt)
 			if launcherConnectionTimer > 15 then
 				disconnectLauncher(true) -- reconnect to launcher (this breaks the launcher if the connection
 				connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
+			end
+		end
+	end
+end
+
+M.onUiReady = function()
+	if getMissionFilename() == "" then
+		M.onInit()
+		guihooks.trigger('ChangeState', 'menu.mainmenu')
+		if settings.getValue('richPresence') then
+			if Steam then
+				Steam.setRichPresence('status', beamng_windowtitle)
+			end
+			if Discord then
+				local dActivity = {state="Playing BeamMP",details="In the menus",asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+				Discord.setActivity(dActivity)
 			end
 		end
 	end

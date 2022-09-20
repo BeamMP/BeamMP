@@ -113,51 +113,55 @@
 
     </div>
 
-    <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; border-top: solid 2px var(--bng-orange); padding-top:0;">
-      <form novalidate ng-submit="vehConf_parts.updateLicensePlate()" layout="row" layout-align="start center" style="flex: 1 1 auto;">
-        <md-input-container>
-          <label>{{:: 'ui.vehicleconfig.licensePlate' | translate}}</label>
-          <input ng-model="vehConf_parts.licensePlate" style="width:100px;">
-        </md-input-container>
-        <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.genLicensePlate()" type='button' aria-label="_"
-          style="min-width: 20px;">
-          <md-icon class="material-icons">cached</md-icon>
-          <md-tooltip md-direction="top">{{:: 'ui.vehicleconfig.licensePlateGen' | translate}}</md-tooltip>
-        </md-button>
-        <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.updateLicensePlate()" type='button'
-          aria-label="_" style="min-width: 20px;">
-          <md-icon class="material-icons">check</md-icon>
-          <md-tooltip md-direction="top">{{:: 'ui.vehicleconfig.updateLicensePlate' | translate}}</md-tooltip>
-        </md-button>
-      </form>
-
-      <div style="position: relative; flex: 0 0 auto;">
+    <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; border-top: solid 2px var(--bng-orange); padding-top:0; padding-bottom:0;">
+      <div style="flex: 1 1 auto;">
         <!--
         <md-checkbox ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
           {{:: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>
         -->
-        <md-checkbox ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.showAuxiliary" md-no-ink flex>
+          <md-icon class="material-icons">report</md-icon> {{:: "ui.showAuxiliary" | translate}}
+        </md-checkbox>
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{:: 'ui.vehicleconfig.simpleTree' | translate}}
         </md-checkbox>
       </div>
+
+      <form novalidate ng-submit="vehConf_parts.applyLicensePlate()" layout="row" layout-align="start center" style="position: relative; flex: 0 0 auto;">
+        <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.applyRandomLicensePlate()" type='button' aria-label="_"
+          style="min-width: 20px;">
+          <md-icon class="material-icons">shuffle</md-icon>
+          <md-tooltip md-direction="top">{{:: 'ui.vehicleconfig.licensePlateGen' | translate}}</md-tooltip>
+        </md-button>
+        <md-input-container>
+          <label>{{:: 'ui.vehicleconfig.licensePlate' | translate}}</label>
+          <input ng-model="vehConf_parts.licensePlate" ng-change="vehConf_parts.applyLicensePlateDebounced()" style="width:100px;">
+        </md-input-container>
+        <md-button ng-if="!vehConf_parts.applyPartChangesAutomatically" class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.applyLicensePlate()" type='button'
+          aria-label="_" style="min-width: 20px;">
+          <md-icon class="material-icons">check</md-icon>
+          <md-tooltip md-direction="top">{{:: 'ui.vehicleconfig.applyLicensePlate' | translate}}</md-tooltip>
+        </md-button>
+      </form>
+
     </div>
     <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; padding-top:0;">
       <div flex>
-        <md-checkbox ng-show="!vehConf_parts.partsChanged" ng-model="vehConf_parts.applyPartChangesAutomatically"
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-show="!vehConf_parts.partsChanged" ng-model="vehConf_parts.applyPartChangesAutomatically"
           ng-change="vehConf_parts.applySettingChanged()" md-no-ink flex>
           {{:: 'ui.vehicleconfig.applyPartChangesAutomatically' | translate}}
         </md-checkbox>
       </div>
-      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-show="!vehConf_parts.applyPartChangesAutomatically"
+      <!--<md-button ng-click="vehConf_parts.write()" md-no-ink ng-show="!vehConf_parts.applyPartChangesAutomatically"
         class="md-raised md-primary">
         {{:: 'ui.common.apply' | translate}}
+      </md-button>-->
+      <md-button ng-hide="!vehConf_parts.isMPSession" ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-primary">
+        {{ :: 'ui.common.sync' | translate}}
       </md-button>
       <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-raised md-warn">
         {{:: 'ui.common.reset' | translate}}
-      </md-button>
-      <md-button ng-hide="!vehConf_parts.isMPSession" ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-primary">
-        {{:: 'ui.common.sync' | translate}}
       </md-button>
     </div>
 

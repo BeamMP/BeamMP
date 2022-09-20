@@ -155,7 +155,7 @@ end
 local function onResetGameplay(playerID)
   if scenario_scenarios and scenario_scenarios.getScenario() then return end
   if campaign_campaigns and campaign_campaigns.getCampaign() then return end
-  if career_career      and career_career.isEnabled()        then return end
+  if career_career      and career_career.isCareerActive() then return end
   for _, mgr in ipairs(core_flowgraphManager.getAllManagers()) do
     if mgr:blocksOnResetGameplay() then return end
   end
@@ -207,9 +207,10 @@ local function onUpdate(dt)
         break
       end
     end
-	-- Workaround for worldReadyState not being set properly if there are no vehicles
-	serverConnection.onCameraHandlerSetInitial()
-	extensions.hook('onCameraHandlerSet')
+		-- Workaround for worldReadyState not being set properly if there are no vehicles
+		serverConnection.onCameraHandlerSetInitial()
+		extensions.hook('onCameraHandlerSet')
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
   end
 end
 

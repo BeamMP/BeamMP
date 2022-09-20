@@ -104,6 +104,9 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/bigmap/bigmap.html',
       controller: 'BigMapController',
       backState: 'BACK_TO_MENU',
+      params: {
+        missionId: null
+      },
     })
 
     .state('menu.levels', {
@@ -211,7 +214,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     })
 
     .state('menu.vehiclesdetails', {
-      url: '/vehicle-details/:model/:config/:mode/:event',
+      url: '/vehicle-details/:model/:config/:mode/:event/{showAuxiliary:bool}',
       templateUrl: '/ui/modules/vehicleselect/vehicleselect-details.html',
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
@@ -225,55 +228,48 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-
-    .state('menu.multiplayer.tos', {
-      url: '/mptos',
-      templateUrl: '/ui/modules/multiplayer/tos.partial.html',
-      controller: 'MultiplayerTOSController as multiplayertos',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.launcher', {
-      url: '/mplauncher',
-      templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
-      controller: 'MultiplayerLauncherController as multiplayerlauncher',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.login', {
-      url: '/mplogin',
-      templateUrl: '/ui/modules/multiplayer/login.partial.html',
-      controller: 'MultiplayerLoginController as multiplayerlogin',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.servers', {
-      url: '/mpservers',
-      templateUrl: '/ui/modules/multiplayer/servers.partial.html',
-      controller: 'MultiplayerServersController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.recent', {
-      url: '/mprecent',
-      templateUrl: '/ui/modules/multiplayer/recent.partial.html',
-      controller: 'MultiplayerRecentController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.favorites', {
-      url: '/mpfavorites',
-      templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
-      controller: 'MultiplayerFavoritesController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
-
-    .state('menu.multiplayer.direct', {
-      url: '/mpdirect',
-      templateUrl: '/ui/modules/multiplayer/direct.partial.html',
-      controller: 'MultiplayerDirectController as multiplayermenu',
-      backState: 'BACK_TO_MENU'
-    })
+      .state('menu.multiplayer.tos', {
+        url: '/mptos',
+        templateUrl: '/ui/modules/multiplayer/tos.partial.html',
+        controller: 'MultiplayerTOSController as multiplayertos',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.launcher', {
+        url: '/mplauncher',
+        templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
+        controller: 'MultiplayerLauncherController as multiplayerlauncher',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.login', {
+        url: '/mplogin',
+        templateUrl: '/ui/modules/multiplayer/login.partial.html',
+        controller: 'MultiplayerLoginController as multiplayerlogin',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.servers', {
+        url: '/mpservers',
+        templateUrl: '/ui/modules/multiplayer/servers.partial.html',
+        controller: 'MultiplayerServersController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.recent', {
+        url: '/mprecent',
+        templateUrl: '/ui/modules/multiplayer/recent.partial.html',
+        controller: 'MultiplayerRecentController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.favorites', {
+        url: '/mpfavorites',
+        templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
+        controller: 'MultiplayerFavoritesController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
+      .state('menu.multiplayer.direct', {
+        url: '/mpdirect',
+        templateUrl: '/ui/modules/multiplayer/direct.partial.html',
+        controller: 'MultiplayerDirectController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
     // -------------------------------------- BEAMMP -------------------------------------- //
 
     .state('menu.options', {
@@ -284,12 +280,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-    .state('menu.options.multiplayer', {
-      url: '/multiplayer',
-      templateUrl: '/ui/modules/options/multiplayer.partial.html',
-      controller: 'SettingsGameplayCtrl as opt',
-      backState: 'BACK_TO_MENU',
-    })
+      .state('menu.options.multiplayer', {
+        url: '/multiplayer',
+        templateUrl: '/ui/modules/options/multiplayer.partial.html',
+        controller: 'SettingsGameplayCtrl as opt',
+        backState: 'BACK_TO_MENU',
+      })
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',
@@ -442,39 +438,39 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/vehicleconfig/vehicleconfig.html',
       controller: 'VehicleconfigCtrl',
       redirectTo: 'menu.vehicleconfig.parts',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
     })
     .state('menu.vehicleconfig.parts', {
       url: '/vehicle-config/parts',
       templateUrl: '/ui/modules/vehicleconfig/partial.parts.html',
       controller: 'Vehicleconfig_parts as vehConf_parts',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
       uiAppsShown: true, // defaults to false
     })
     .state('menu.vehicleconfig.tuning', {
       url: '/vehicle-config/tuning',
       templateUrl: '/ui/modules/vehicleconfig/partial.tuning.html',
       controller: 'Vehicleconfig_tuning as vehConf_tuning',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
       uiAppsShown: true, // defaults to false
     })
     .state('menu.vehicleconfig.color', {
       url: '/vehicle-config/color',
       templateUrl: '/ui/modules/vehicleconfig/partial.color.html',
       controller: 'Vehicleconfig_color as vehConf_color',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
     })
     .state('menu.vehicleconfig.save', {
       url: '/vehicle-config/save',
       templateUrl: '/ui/modules/vehicleconfig/partial.save.html',
       controller: 'Vehicleconfig_save as vehConf_save',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
     })
     .state('menu.vehicleconfig.debug', {
       url: '/vehicle-config/debug',
       templateUrl: '/ui/modules/vehicleconfig/debug.partial.html',
       controller: 'Vehicleconfig_debug as vehConf_debug',
-      backState: 'play',
+      backState: 'BACK_TO_MENU',
       uiAppsShown: true, // defaults to false
     })
 
@@ -843,6 +839,30 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: "menu.mainmenu",
     })
 
+    .state('menu.career', {
+      url: '/career',
+      templateUrl: '/ui/modules/career/career.html',
+      controller: 'CareerController',
+      backState: 'BACK_TO_MENU',
+    })
+
+    .state('menu.careermission', {
+      url: '/career-mission',
+      templateUrl: '/ui/modules/careermission/mission.html',
+      controller: 'GameContextController',
+      params: {
+        isCareer: true
+      },
+      backState: 'BACK_TO_MENU',
+    })
+
+    .state('menu.careerPause', {
+      url: '/careerPause',
+      templateUrl: '/ui/modules/careerPause/careerPause.html',
+      controller: 'CareerPauseController',
+      backState: 'BACK_TO_MENU',
+    });
+
 
   // default entry that is loaded on startup:
   $urlRouterProvider.otherwise('menu.start')
@@ -1087,12 +1107,18 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
   //   $rootScope.Settings = data
   // })
 
+  // use this to imitate settings lag
+  // let lag = false;
   $rootScope.$on('SettingsChanged', function (event, data) {
-    Settings.options = data.options
-    Settings.values = data.values
+    // if (lag)
+    //   Settings.loaded = true;
+    // lag = true;
+    Settings.loaded = true; // flag Settings as loaded
+    Settings.options = data.options;
+    Settings.values = data.values;
   })
 
-  bngApi.engineLua('settings.requestState()')
+  bngApi.engineLua('settings.notifyUI()')
   bngApi.engineLua('core_gamestate.requestMainMenuState()')
   bngApi.engineLua('core_gamestate.requestGameState()')
   // bngApi.engineLua('print("requesting gamestate here and now")')
@@ -1100,7 +1126,7 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
   // settings storage end
 
   // navigate to start pages
-  if (beamng.shipping && beamng.buildtype === 'RELEASE') {
+  if (beamng.shipping && beamng.ingame && beamng.buildtype === 'RELEASE') {
     $state.go('menu.start')
   } else {
     $state.go('menu.mainmenu')
@@ -1164,9 +1190,12 @@ angular.module('beamng.stuff')
         return $translate.instant(val.txt, context)
       }
     }
-    return
+    return val
   }
   multiContextTranslate = function(val) {
+    if(val.txt) {
+      return contextTranslate(val)
+    }
     let description = ""
     for (var i = 0; i < val.length; i++) {
       description = description + contextTranslate(val[i])
@@ -1256,8 +1285,9 @@ angular.module('beamng.stuff')
     }
 
     $rootScope.$on('MenuItemNavigation', function (event, action, val) {
-      //console.log('Got action: ' + action)
+      //console.log('MenuItemNavigation - Got action: ' + action)
       //console.log('Enabled Librarys', useCrossfire, useGamepadNavigation)
+      if(!beamng.ingame) return
 
       if (action == 'toggleMenues') {
         $rootScope.$broadcast('MenuToggle', val)
@@ -1323,8 +1353,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService',
-  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService) {
+.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService', 'MessageToasterService', 'InputCapturer',
+  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService,messageToasterService, InputCapturer) {
   var vm = this
 
   // hack to fix backspace navigating between different menus.
@@ -1334,6 +1364,11 @@ angular.module('beamng.stuff')
       e.preventDefault()
     }
   })
+
+  // Handle "Messages" of the category 'career' with MessageToasterService
+  messageToasterService.handledCategories = ['career']
+  messageToasterService.active = true
+
 
   setTimeout(() => {
     gamepadNav.provideScope($scope)
@@ -1440,15 +1475,34 @@ angular.module('beamng.stuff')
   // TODO change this to use the $state.transition promise
   var transitioningTo
 
+  const captureInput = InputCapturer();
   $scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
     //console.log(`switching stage from ${fromState.name} to ${toState.name}`)
     //console.trace()
     vm.currentStateName = toState.name
 
+
+
+
     // update activated action maps for UI bindings
-    let menuActionMapEnabled = $state.current.menuActionMapEnabled === undefined? true : $state.current.menuActionMapEnabled // true by default
-    bngApi.engineLua(`extensions.core_input_bindings.setMenuActionMapEnabled(${menuActionMapEnabled})`)
+    let menuActionMapEnabled = typeof $state.current.menuActionMapEnabled === "boolean" ? $state.current.menuActionMapEnabled : true; // true by default
+    // bngApi.engineLua(`extensions.core_input_bindings.setMenuActionMapEnabled(${menuActionMapEnabled})`)
+    captureInput(menuActionMapEnabled);
     bngApi.engineLua(`extensions.hook("onUiChangedState", "${toState.name}", "${fromState.name}")`)
+
+    // bngApi.engineLua("career_career.isCareerActive()", data => {
+    //   if (data) {
+    //     console.log(toState)
+    //     if (toState.name == 'play') {
+    //       console.log(menuActionMapEnabled)
+    //       bngApi.engineLua(`bullettime.pause(${menuActionMapEnabled})`);
+    //     }
+    //     if (fromState.name == 'play') {
+    //       console.log(menuActionMapEnabled)
+    //       bngApi.engineLua(`bullettime.pause(${menuActionMapEnabled})`);
+    //     }
+    //   }
+    // });
 
     // update ui apps layout
     if ($state.current.uiLayout === undefined) {
@@ -1498,6 +1552,11 @@ angular.module('beamng.stuff')
   })
 
   $scope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+    if(toState.name == 'loading' && !beamng.ingame) {
+      // in external UI: do not ever allow transitioning into the loading state
+      event.preventDefault()
+      return
+    }
     newPageSilenceEventCounter = 2
     newPageTimestamp = Date.now()
     //console.log('stateChangeStart', toState, toParams, fromState, fromParams)
@@ -1531,6 +1590,7 @@ angular.module('beamng.stuff')
   vm.uiVisible = true
   vm.mainmenu = true
   vm.gameState = null
+  vm.ingame = beamng.ingame
   vm.settings = Settings
   vm.uiReady = false
 
@@ -1597,12 +1657,41 @@ angular.module('beamng.stuff')
   // downloader end
 
   // let Lua know the UI is up and running
-  angular.element(document).ready(function() {
-    bngApi.engineLua("uiReady()")
-    vm.uiReady = true
-  })
-  $scope.$on('isUIReady', function (event) {
-    if(vm.uiReady) bngApi.engineLua("uiReady()")
+  let ngLoaded = false, made2ndSettingsRequest = false;
+  function checkReadiness(canForce=false) {
+    if (vm.uiReady) // may happen when SettingsChanged event fired twice at once and this function not yet evaluated
+      return;
+    if (Settings.loaded) {
+      lsnSettingsChange();
+      if (ngLoaded) { // if this is false - either UI is still loading or broken due to mods
+        bngApi.engineLua("uiReady()");
+        vm.uiReady = true;
+      }
+    } else if (!made2ndSettingsRequest) {
+      // just to make sure, we'll send another request for settings but only once - we have a listener here anyway
+      // to imitate lag, find line above with $rootScope.$on('SettingsChanged'
+      // console.log("Settings are lagging behind...");
+      bngApi.engineLua("settings.notifyUI()");
+      made2ndSettingsRequest = true;
+    } else if (ngLoaded && canForce) {
+      console.warn("Settings not being loaded after subsequent requests. This error should never happen. Forcing UI to show.");
+      bngApi.engineLua("uiReady()");
+      vm.uiReady = true;
+    }
+  }
+  let lsnSettingsChange = $scope.$on("SettingsChanged", () => {
+    setTimeout(() => checkReadiness(true), 50);
+  });
+  angular.element(document).ready(() => {
+    ngLoaded = true;
+    checkReadiness(true);
+  });
+  $scope.$on("isUIReady", function (event) { // is this ever firing?
+    if (vm.uiReady) {
+      bngApi.engineLua("uiReady()");
+    } else { // not necessary, just for additional safety
+      checkReadiness();
+    }
   })
 
   $scope.$on('modmanagerError', function (event, data) {
@@ -1687,13 +1776,10 @@ angular.module('beamng.stuff')
     }
   })
 
-  $scope.$on('MenuTogglePrevent', (event, func) => {
-    $state.preventStateChange = func;
-  });
-
   $scope.$on('MenuToggle', (event, data) => {
     //console.log('toggleMenu', data, $state.current)
     //console.trace()
+    if(!beamng.ingame) return
 
     // *** navigation back logic here
     let backState = $state.current.backState;
@@ -1767,8 +1853,9 @@ angular.module('beamng.stuff')
 
 
   $scope.$on('MenuHide', function (event, data) {
+    if(!beamng.ingame) return
     // TODO FIXME
-    //console.log(">>>> MENUHIDE")
+    //console.log(">>>> MENUHIDE", data)
     //console.trace()
     // TODO: FIXME
     let showMenu = false
@@ -1899,6 +1986,7 @@ angular.module('beamng.stuff')
       if (callback !== undefined && typeof callback === 'function') {
         callback(vm.isWaiting)
       }
+      bngApi.engineLua('extensions.hook("onUiWaitingState", ' + String(value) + ')')
     })
   })
 
@@ -1924,6 +2012,7 @@ angular.module('beamng.stuff')
 
 
   function updateLua () {
+    if(!beamng.ingame) return
     //console.log('---------update blur to lua' + JSON.stringify(list))
     bngApi.engineLua(`extensions.ui_gameBlur.replaceGroup("uiBlur", ${bngApi.serializeToLua(list)})`)
   }
@@ -1944,12 +2033,10 @@ angular.module('beamng.stuff')
       return highestId
     },
     unregister: function (i) {
-      if (!(i in list)) {
-        console.error("Trying to unregister bng-blur with an ID that is not registered: " + i + " (of " + Object.keys(list) + ")")
-        throw new Error('Trying to unregister bng-blur with an ID that is not registered: ' + i + " (of " + Object.keys(list) + ")")
+      if (i in list) {
+        delete list[i]
+        updateLua()
       }
-      delete list[i]
-      updateLua()
 
       if (list.isEmpty()) {
         highestId = 0
@@ -2098,4 +2185,54 @@ angular.module('beamng.stuff')
       })
     }
   }
+}])
+
+.service("InputCapturer", ["$state", function ($state) {
+  // captures input on UI
+  // usage:
+  //   const captureInput = InputCapturer(); // create an instance
+  //   captureInput(true|false); // change the value for that instance
+  // options can be specified:
+  //   const captureInput = InputCapturer({
+  //     // do something on Esc/B press
+  //     backAction() {
+  //       if (something) return true; // return true to prevent default action (e.g. BACK_TO_MENU)
+  //       else return false;          // if returned false or nothing - default action is allowed
+  //     }
+  //   });
+  let isEnabled = false, counter = 0;
+  function enabler(enable) {
+    counter += enable ? 1 : -1;
+    if (counter < 0)
+      counter = 0;
+    // console.log(counter);
+    if ((isEnabled && enable) || (!isEnabled && !enable) || (isEnabled && !enable && counter > 0))
+      return;
+    isEnabled = enable;
+    bngApi.engineLua(`extensions.core_input_bindings.setMenuActionMapEnabled(${enable})`);
+  }
+  const backActions = [];
+  $state.preventStateChange = () => {
+    if (backActions.length > 0)
+      return backActions[0]();
+    return false;
+  };
+  return opts => {
+    if (typeof opts !== "object")
+      opts = {};
+    // return a function that tracks previous state and passes it further only when change happened
+    let current;
+    return enable => {
+      if (typeof current !== "undefined" && current === enable)
+        return;
+      current = enable;
+      enabler(enable);
+      if (typeof opts.backAction === "function") {
+        if (enable)
+          backActions.unshift(opts.backAction);
+        else
+          backActions.shift();
+      }
+    };
+  };
 }])

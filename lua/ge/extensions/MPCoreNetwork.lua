@@ -340,10 +340,54 @@ local HandleNetwork = {
 
 
 
--- ============= Init =============
+--=================================================== MOD INITILISATION ====================================================
+
 local function onInit()
-	if not core_modmanager.getModList then Lua:requestReload() end
+	local function split(s, sep)
+    local fields = {}
+    
+    local sep = sep or " "
+    local pattern = string.format("([^%s]+)", sep)
+    string.gsub(s, pattern, function(c) fields[#fields + 1] = c end)
+    
+    return fields
+	end
+
+	local version = split(beamng_versiond, '.')
+	-- Lets make sure that they are not in the middle of a game. This prevents them being presented the main menu when they reload lua while in game.
+	if not scenetree.missionGroup and getMissionFilename() == "" then 
+		-- Check the game version for if we expect it to be BeamMP compatable. This check adds the UI and Multiplayer Options so that they can then play.
+		dump(version)
+		if version[1] == "0" and version[2] == "26" then
+			print('Redirecting to the BeamMP UI for 0.26')
+			-- Lets now load the BeamMP Specific UI
+			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.26/index.html")) {location.replace("local://local/ui/entrypoints/main_0.26/index.html")}')
+
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		elseif version[1] == "0" and version[2] == "25" then
+			print('Redirecting to the BeamMP UI for 0.25')
+			-- Lets now load the BeamMP Specific UI
+			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.25/index.html")) {location.replace("local://local/ui/entrypoints/main_0.25/index.html")}')
+
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		elseif version[1] == "0" and version[2] == "23" then
+			print('Redirecting to the BeamMP UI for 0.23')
+			-- TODO #199 - Add the 0.23 UI here as I did above for 0.24
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		else
+			print('BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)
+			guihooks.trigger('modmanagerError', 'BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)
+		end
+	end
 end
+
+--=================================================== MOD INITILISATION ====================================================
 
 
 -- ====================================== ENTRY POINT ======================================
@@ -383,6 +427,8 @@ local function onExtensionLoaded()
 	send('Z')
 	-- Log-in
 	send('Nc')
+	-- Load UI
+	onInit()
 end
 -- ====================================== ENTRY POINT ======================================
 
@@ -438,16 +484,50 @@ local function onUpdate(dt)
 	end
 end
 
+M.onUiReady = function()
+	if getMissionFilename() == "" then
+		M.onInit()
+		guihooks.trigger('ChangeState', 'menu.mainmenu')
+		if settings.getValue('richPresence') then
+			if Steam then
+				Steam.setRichPresence('status', beamng_windowtitle)
+			end
+			if Discord then
+				local dActivity = {state="Playing BeamMP",details="In the menus",asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+				Discord.setActivity(dActivity)
+			end
+		end
+	end
+end
+
 local function onClientStartMission(mission)
 	if status == "Playing" and getMissionFilename() ~= currentServer.map then
 		print("The user has loaded another mission!")
 		--Lua:requestReload()
 	elseif getMissionFilename() == currentServer.map then
 		status = "Playing"
+		if settings.getValue('richPresence') then
+			if Steam then
+				Steam.setRichPresence('status', "BeamMP | On "..currentServer.map)
+			end
+			if Discord then
+				local dActivity = {state="Playing BeamMP",details="In-Game on "..currentServer.map,asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+				Discord.setActivity(dActivity)
+			end
+		end
 	end
 end
 
 local function onClientEndMission(mission)
+	if settings.getValue('richPresence') then
+		if Steam then
+			Steam.setRichPresence('status', beamng_windowtitle)
+		end
+		if Discord then
+			local dActivity = {state="Playing BeamMP",details="In the menus",asset_largeimg="",asset_largetxt="",asset_smallimg="",asset_smalltxt=""}
+			Discord.setActivity(dActivity)
+		end
+	end
 	if isMPSession() then
 		leaveServer(true)
 	end

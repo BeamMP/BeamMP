@@ -10,6 +10,10 @@ angular.module('beamng.stuff')
   nr: 0
 })
 
+.value('VehicleSelectOptions', {
+  showAuxiliary: !beamng.shipping
+})
+
 .service('VehicleSelectConfig', ['Vehicles', '$state', '$rootScope', function (Vehicles, $state, $rootScope) {
   var configs = {
     default: {
@@ -199,8 +203,7 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = "core_vehicles.replaceVehicle"
-          if (spawnNew) func = "core_vehicles.spawnNewVehicle"
+          var func = "core_vehicles." + (spawnNew?"spawnNewVehicle":"replaceVehicle")
           if (mp) func = "MPVehicleGE.spawnRequest";
 
           var luaArgs = {}
@@ -226,11 +229,8 @@ angular.module('beamng.stuff')
             model = model.key
           }
 
-          if (spawnNew) {
-            luaArgs.spawnNew = true;
-          }
-
-          bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {            $rootScope.$broadcast('app:waiting', false)
+          bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {
+            $rootScope.$broadcast('app:waiting', false)
             // car was spawned clear fallback
             $timeout.cancel(fallback)
           })
@@ -247,12 +247,12 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleDetailsController
  * @description
 **/
-.controller('VehicleDetailsController', ['$scope', '$stateParams', 'Vehicles', 'VehicleOpenTab', 'VehicleSelectConfig', 'VehicleSelectFilter',
-  function ($scope, $stateParams, Vehicles, VehicleOpenTab, VehicleSelectConfig, VehicleSelectFilter) {
+.controller('VehicleDetailsController', ['$scope', '$stateParams', 'Vehicles', 'VehicleOpenTab', 'VehicleSelectConfig', 'VehicleSelectFilter', 'InputCapturer',
+  function ($scope, $stateParams, Vehicles, VehicleOpenTab, VehicleSelectConfig, VehicleSelectFilter, InputCapturer) {
   var vm = this
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
-  // console.log($stateParams)
-
+  vm.showAuxiliary = $stateParams.showAuxiliary
+  vm.shownData = []
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -264,26 +264,27 @@ angular.module('beamng.stuff')
 
   let elConfig;
   // register preventer
-  $scope.$emit("MenuTogglePrevent", () => {
-    if (!elConfig)
-      return false;
-    try {
-      // check if we're inside config details
-      let elm = document.activeElement;
-      while (elm.nodeType === Node.ELEMENT_NODE) {
-        if (elm.id === "vehcfg-details") {
-          elConfig.focus();
-          elConfig = null;
-          return true;
+  const captureInput = InputCapturer({
+    backAction() { // action on Esc/B
+      if (!elConfig)
+        return false;
+      try {
+        // check if we're inside config details
+        let elm = document.activeElement;
+        while (elm.nodeType === Node.ELEMENT_NODE) {
+          if (elm.id === "vehcfg-details") {
+            elConfig.focus();
+            elConfig = null;
+            return true;
+          }
+          elm = elm.parentNode;
         }
-        elm = elm.parentNode;
-      }
-    } catch (fire) {}
-    return false;
+      } catch (fire) {}
+      return false;
+    }
   });
-  $scope.$on("$destroy", () => {
-    $scope.$emit("MenuTogglePrevent", null);
-  });
+  captureInput(true);
+  $scope.$on("$destroy", () => captureInput(false));
 
   vm.selectAction = function (configname) {
     if (vm.selectedConfig && vm.selectedConfig.key === configname) {
@@ -356,7 +357,7 @@ angular.module('beamng.stuff')
   }
 
   // because of bug in non compete iirc
-  vm.disableSpwanNew = (state) => state.toLowerCase().indexOf('scenario') !== -1
+  vm.disableSpawnNew = (state) => state.toLowerCase().indexOf('scenario') !== -1
 
 
   function processData() {
@@ -378,15 +379,6 @@ angular.module('beamng.stuff')
       config.orderKey = ((config.Value || '') + "").padStart(16, '0') + '|' + (config.Configuration || '')
     }
 
-    // Filter out powerglow configs
-    // if (vm.mode && vm.mode.name !== "lightRunner") {
-    //   for (var key in vm.configs) {
-    //     if (vm.configs[key].key === "powerglow") {
-    //       delete vm.configs[key]
-    //     }
-    //   }
-    // }
-
     // Checking if quickrace is being used within career mode.
     // If it is then the available configs are filtered to what the player owns.
     if (VehicleSelectConfig.configs['quickrace'] && VehicleSelectConfig.configs['quickrace'].getVehicles() !== undefined) {
@@ -404,8 +396,21 @@ angular.module('beamng.stuff')
 
     // so we can be sure the ranges list exists
     Vehicles.populate().then(() => {
+      // this will also create vm.data.userFilters function
+      const tmp = [vm.mode.filter, vm.mode.filterInv];
+      vm.mode.filter = {};
+      vm.mode.filterInv = {};
       VehicleSelectFilter.filterFromConfig(vm, vm.mode);
+      vm.mode.filter = tmp[0];
+      vm.mode.filterInv = tmp[1];
+
       VehicleSelectFilter.forced(vm, vm.mode);
+
+      // this will also create vm.userFilters function
+      VehicleSelectFilter.filterFromConfig(vm, vm.mode);
+
+      // filter aux
+      vm.configs = vm.configs.filter(itm => !itm.isAuxiliary || vm.showAuxiliary);
 
       // convert array to object (temp compat patch)
       vm.configs = vm.configs.reduce((res, cur) => ({ ...res, [cur.key]: cur }), {});
@@ -417,6 +422,8 @@ angular.module('beamng.stuff')
       } else if (Object.keys(vm.configs)[0] !== undefined) {
         vm.selectConfig(Object.keys(vm.configs)[0])
       }
+
+      vm.shownData = vm.configs;
     })
   }
 
@@ -448,54 +455,7 @@ angular.module('beamng.stuff')
 
 .service("VehicleSelectFilter", ["Vehicles", function (Vehicles) {
   return {
-    // filter out things from appearing in a shipping version
-    // it expects data.models and data.configs as arrays
-    shipping(data) {
-      // note: for configs, key will also be prefixed with "model_" (e.g. "key" will also check "model_key")
-      const filterShipping = {
-        // key: [array of values]
-        key: ["unicycle"],
-        Type: ["Traffic"],
-      };
-      const filterShippingFunc = {
-        models(e) {
-          for (let key in filterShipping) {
-            if (filterShipping[key].includes(e[key]))
-              return false;
-          }
-          return true;
-        },
-        configs(e) {
-          for (let key in filterShipping) {
-            if (e.aggregates[key]) {
-              for (let name of filterShipping[key]) {
-                if (e.aggregates[key][name])
-                  return false;
-              }
-            }
-            if (e[`model_${key}`] && filterShipping[key].includes(e[`model_${key}`]))
-              return false;
-          }
-          return true;
-        },
-      };
-      if (beamng.shipping) {
-        data.models = data.models.filter(filterShippingFunc.models);
-        data.configs = data.configs.filter(filterShippingFunc.configs);
-        for (let key in filterShipping) {
-          // hide filter option as well
-          if (data.filters[key]) {
-            for (let name of filterShipping[key])
-              delete data.filters[key][name];
-          }
-        }
-      } else {
-        console.log("Will be filtered out in shipping version:", {
-          Models: data.models.filter(e => !filterShippingFunc.models(e)),
-          Configs: data.configs.filter(e => !filterShippingFunc.configs(e))
-        });
-      }
-    }, // /shipping
+
     // apply forced filters
     // it expects data.models, data.configs and data.filters as arrays, and data.userFilters()
     // it filters by data.configs and then selects models that left
@@ -506,10 +466,27 @@ angular.module('beamng.stuff')
         data.configs = [];
       if (mode.forceFilter && typeof mode.forceFilter === "boolean")
         mode.forceFilter = mode.filter;
+      // in career mode, we have virtual vehicle configurations with Source=Career
+      // that does not inherited by models and, therefore, filters. we fix this in here.
+      // note: inCareer must be set in vehselector configuration. if it's not possible,
+      //       we must scan all configs to find Source=Career
+      if (mode.inCareer && data.filters.Source) {
+        data.filters.Source.Career = true;
+        for (let cfg of data.configs) {
+          if (cfg.Source !== "Career")
+            continue;
+          const model = data.models.find(model => model.key === cfg.model_key);
+          if (!model)
+            continue;
+          if (!model.aggregates.Source)
+            model.aggregates.Source = {};
+          model.aggregates.Source.Career = true;
+        }
+      }
       // process restrictions (effectively it is an inverted forced filter)
       // in mode.restrict, you can specify non-standard keys and negate their values (see special variable)
       let special = { key: ["!powerglow"] };
-      if (mode.restrict) {
+      if (mode.restrict && Object.keys(mode.restrict).length > 0) {
         if (!mode.forceFilter)
           mode.forceFilter = {};
         for (let key in mode.restrict) {
@@ -573,7 +550,7 @@ angular.module('beamng.stuff')
           }
         }
         // filter configs
-        data.__strictSource = !!data.filters.Source; // silly temp hack
+        data.__strictSource = !!data.filters.Source; // silly temp fix
         data.configs = data.configs.filter(data.userFilters);
         delete data.__strictSource;
         // filter models by configs
@@ -595,10 +572,19 @@ angular.module('beamng.stuff')
       }
     }, // /forced
     filterFromConfig(data, mode) {
-      for (let catName in mode.filter) {
-        if (!data.displayInfo.ranges.all.includes(catName)) {
-          for (let propName of mode.filter[catName])
-            data.filters[catName][propName] = false;
+      if (mode.filterInv) {
+        for (let catName in mode.filterInv) {
+          if (!data.displayInfo.ranges.all.includes(catName)) {
+            for (let propName in data.filters[catName])
+              data.filters[catName][propName] = mode.filterInv[catName].includes(propName);
+          }
+        }
+      } else {
+        for (let catName in mode.filter) {
+          if (!data.displayInfo.ranges.all.includes(catName)) {
+            for (let propName of mode.filter[catName])
+              data.filters[catName][propName] = false;
+          }
         }
       }
       data.userFilters = function(model) {
@@ -612,8 +598,14 @@ angular.module('beamng.stuff')
               isOk =
                 Vehicles.considerUnit(filterId, prop.min).val <= data.filters[filterId].max &&
                 Vehicles.considerUnit(filterId, prop.max).val >= data.filters[filterId].min;
-            } else if (data.__strictSource && filterId === "Source") {
+            } else if (data.__strictSource && filterId === "Source" && model.Source) {
               isOk = !!data.filters.Source[model.Source];
+              // isOk = true;
+              // for (let name in prop) {
+              //   isOk = !!data.filters[filterId][name];
+              //   if (!isOk)
+              //     break;
+              // }
             } else {
               //everything else:
               for (let name in prop) {
@@ -647,18 +639,14 @@ angular.module('beamng.stuff')
  * @name  beamng.stuff:VehicleSelectController
  * @description <TODO>
 **/
-.controller('VehicleSelectController', ['$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'Settings', 'VehiclePrefs', 'VehicleSelectConfig', 'VehicleSelectFilter', 'Vehicles', '$filter',
-function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehiclePrefs, VehicleSelectConfig, VehicleSelectFilter, Vehicles, $filter) {
+.controller('VehicleSelectController', ['$scope', '$state', '$timeout', '$stateParams', '$rootScope', 'Settings', 'VehiclePrefs', 'VehicleSelectConfig', 'VehicleSelectFilter', 'VehicleSelectOptions', 'Vehicles', '$filter',
+function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehiclePrefs, VehicleSelectConfig, VehicleSelectFilter, VehicleSelectOptions, Vehicles, $filter) {
   var vm = this
   vm.data = angular.copy(vehiclesData)
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
   vm.shownData = []
 
-  $scope.isBig = function(str) {
-    if(str){
-      return str.length > 28
-    }
-  }
+  function loadList() {
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -668,52 +656,51 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
   });
 
   // --------------------------------------- BEAMMP --------------------------------------- //
+    Vehicles.populate().then(() => {
+      vm.data = angular.copy(vehiclesData)
 
+      // this will also create vm.data.userFilters function
+      const tmp = [vm.mode.filter, vm.mode.filterInv];
+      vm.mode.filter = {};
+      vm.mode.filterInv = {};
+      VehicleSelectFilter.filterFromConfig(vm.data, vm.mode);
+      vm.mode.filter = tmp[0];
+      vm.mode.filterInv = tmp[1];
 
-  Vehicles.populate().then(() => {
-    vm.data = angular.copy(vehiclesData)
+      VehicleSelectFilter.forced(vm.data, vm.mode);
 
-    VehicleSelectFilter.shipping(vm.data);
+      // used to filter owned vehicles if quickrace is being access from career mode.
+      // TODO: transfer logic to VehicleSelectConfig
+      if (VehicleSelectConfig.configs['quickrace'] && VehicleSelectConfig.configs['quickrace'].getVehicles() !== undefined) {
+        const ownedVehicles = Object.values(
+          VehicleSelectConfig.configs['quickrace'].getVehicles()
+        ).map(e => e.model);
+        vm.data.models = vm.data.models.filter(e => ownedVehicles.includes(e.key));
+      }
 
-    // this will also create vm.data.userFilters function
-    VehicleSelectFilter.filterFromConfig(vm.data, vm.mode);
+      // this will also create vm.data.userFilters function
+      VehicleSelectFilter.filterFromConfig(vm.data, vm.mode);
 
-    // if (vm.mode.name === "lightRunner") {
-    //   $scope.$evalAsync(function () {
-    //     vm.query = "Powerglow"
-    //     vm.showConfigurations = true
-    //     vm.switchList()
-    //   })
-    // } else {
-    //   vm.data.configs = vm.data.configs.filter(e => e.key !== "powerglow");
-    //   // TODO: Find a better way to reset search query if lightRunner mode is not being used... yay hacks.
-    //   if (vm.query === "Powerglow") {
-    //     $scope.$evalAsync(function () {
-    //       vm.query = ""
-    //       vm.showConfigurations = false
-    //       vm.switchList()
-    //     })
-    //   }
-    // }
-    // if (vm.mode.name !== "lightRunner")
-    //   vm.data.configs = vm.data.configs.filter(e => e.key !== "powerglow");
-    // used to filter owned vehicles if quickrace is being access from career mode.
-    if (VehicleSelectConfig.configs['quickrace'] && VehicleSelectConfig.configs['quickrace'].getVehicles() !== undefined) {
-      const ownedVehicles = Object.values(
-        VehicleSelectConfig.configs['quickrace'].getVehicles()
-      ).map(e => e.model);
-      vm.data.models = vm.data.models.filter(e => ownedVehicles.includes(e.key));
-    }
+      // calculate big names for tooltips
+      function isBig(itm) {
+        let str = itm.Brand + " " + (itm.Name || "Unknown");
+        return str.length >= 28;
+      }
+      for (let itm of vm.data.models)
+        itm._bigName = isBig(itm);
+      for (let itm of vm.data.configs)
+        itm._bigName = isBig(itm);
 
-    VehicleSelectFilter.forced(vm.data, vm.mode);
+      vm.data.list = vm.showConfigurations ? vm.data.configs : vm.data.models;
 
-    vm.data.list = VehiclePrefs.showConfigurations ? vm.data.configs : vm.data.models;
+      // todo: rethink for this what happens if the filter change? (i mean the html is not ready for it either, but think ot it anyway)
+      vm.filterKeyList = vehiclesData.displayInfo.filterData
+      vm.applyFilters()
+      // checkOverflow()
 
-    // todo: rethink for this what happens if the filter change? (i mean the html is not ready for it either, but think ot it anyway)
-    vm.filterKeyList = vehiclesData.displayInfo.filterData
-    vm.applyFilters()
-    // checkOverflow()
-  })
+      setTimeout(() => bngApi.engineLua('core_vehicles.requestListEnd()'), 10);
+    })
+  }
 
   vm.openRepo = function () {
     window.location.href = 'http-external://www.beamng.com/resources/categories/vehicles.2/?ingame=2'
@@ -721,12 +708,11 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.launchVehicle = function (model) {
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-        vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
-    }
-    else if (vm.showConfigurations && model.model_key !== undefined) {
-      vm.mode.selected(model, model.model_key, model.key, null, false, vm.isMPSession)
+        vm.mode.selected(model, model.key, model.default_pc, model.default_color, vm.isMPSession)
+    } else if (vm.showConfigurations && model.model_key !== undefined) {
+      vm.mode.selected(model, model.model_key, model.key, vm.isMPSession)
     } else {
-      vm.mode.selected(model, model.key, null, null, false, vm.isMPSession)
+      vm.mode.selected(model, model.key, vm.isMPSession)
     }
   }
 
@@ -757,7 +743,8 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
     var args = {
       model: model.key,
       mode: $stateParams.mode || 'default',
-      event: $stateParams.event || ''
+      event: $stateParams.event || '',
+      showAuxiliary: vm.showAuxiliary
     }
 
     if (model.model_key !== undefined) {
@@ -782,8 +769,11 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.selected = null
 
-  vm.showConfigurations = VehiclePrefs.showConfigurations
+  vm.showConfigurations = !!vm.mode.showConfigurations;
   vm.query = VehiclePrefs.query
+  vm.showAuxiliary = VehicleSelectOptions.showAuxiliary
+
+  $scope.$watch(() => vm.showAuxiliary, () => { VehicleSelectOptions.showAuxiliary= vm.showAuxiliary } )
 
   vm.switchList = function () {
     if (vm.showConfigurations) {
@@ -793,6 +783,32 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
     }
     vm.applyFilters()
   }
+
+  vm.showStandalonePcsOverriden = false;
+  vm.showStandalonePcsChanged = function () {
+    var changeObj = { showStandalonePcs: !!vm.showStandalonePcs };
+    bngApi.engineLua(`settings.setState( ${bngApi.serializeToLua(changeObj)} )`);
+  }
+  let gotSettings = false;
+  $scope.$on('SettingsChanged', function (event, data) {
+    let reload = true;
+    vm.showStandalonePcs = data.values.showStandalonePcs;
+    if (!gotSettings) {
+      gotSettings = true;
+      if (vm.mode.hasOwnProperty("showStandalonePcs")) {
+        vm.showStandalonePcsOverriden = true;
+        vm.showStandalonePcsOverridenFrom = data.values.showStandalonePcs;
+        if (vm.showStandalonePcs !== !!vm.mode.showStandalonePcs) {
+          vm.showStandalonePcs = !!vm.mode.showStandalonePcs;
+          vm.showStandalonePcsChanged();
+          reload = false;
+        }
+      }
+    }
+    if (reload)
+      loadList();
+  })
+  bngApi.engineLua('settings.notifyUI()')
 
   vm.isRange = function (title) {
     return vm.data.displayInfo.ranges.all.indexOf(title) !== -1
@@ -817,7 +833,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
     for (let catName in vm.data.filters) {
       if (!vm.data.displayInfo.ranges.all.includes(catName)) {
         for (let prop in vm.data.filters[catName])
-          cat[prop] = val;
+          vm.data.filters[catName][prop] = val;
       }
     }
   }
@@ -831,6 +847,8 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
       ),
       vm.tilesOrder
     );
+    // filter aux
+    vm.shownData = vm.shownData.filter(itm => !itm.isAuxiliary || vm.showAuxiliary);
     // count how many configs per model we have, to display with the small 'folder' icon
     let configAmount = {};
     for (let model of vm.data.configs) {
@@ -849,10 +867,12 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
   vm.checkAll = function () {
     _assignValueAllFilters(true)
     vm.query = ''
+    vm.applyFilters()
   }
 
   vm.uncheckAll = function () {
     _assignValueAllFilters(false)
+    vm.applyFilters()
   }
 
   vm.cloneCurrentVehicle = function() {
@@ -893,16 +913,23 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
     $state.go('play')
   }
   vm.saveDefault = function() {
-    bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.saveDefaultRequest('\"..obj:getID()..\"')\")");
-    //bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();')
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();')
     $state.go('play')
   }
 
+  // if specified, loadList will be called on setting change
+  if (!vm.mode.hasOwnProperty("showStandalonePcs")) {
+    loadList();
+  }
 
   $scope.$on('$destroy', function () {
     VehiclePrefs.filters = vm.data.filters
-    VehiclePrefs.showConfigurations = vm.showConfigurations
+    // VehiclePrefs.showConfigurations = vm.showConfigurations
     VehiclePrefs.query = vm.query
+    if (vm.showStandalonePcsOverriden && vm.hasOwnProperty("showStandalonePcsOverridenFrom")) {
+      vm.showStandalonePcs = vm.showStandalonePcsOverridenFrom;
+      vm.showStandalonePcsChanged();
+    }
   })
 
 }])

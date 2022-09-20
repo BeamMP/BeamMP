@@ -34,6 +34,7 @@ local couplerBreakGroupCache = {}
 local couplerBreakGroupCacheOrig = {}
 local couplerCache = {}
 local couplerTags = {}
+local externalCouplerVisibilityTags
 
 local autoCouplingActive = false
 local autoCouplingNodeTag = nil
@@ -50,11 +51,11 @@ local beamBodyPartLookup = nil
 local partBeams = nil
 local invBodyPartBeamCount = nil
 local bodyPartDamageTracker = nil
-local nonApplyableIntegrityValues = {}
 
 local planets = {}
 local planetTimers = {}
 
+M.nodeNameMap = {}
 M.tagBeamMap = {}
 M.linkTagBeamMap = {}
 
@@ -62,10 +63,7 @@ local function setPartCondition(partName, partTypeData, odometer, integrity, vis
   if type(integrity) == "number" then
     local integrityValue = integrity
     integrity = {
-      jbeam = {
-        brokenBreakGroups = {},
-        nonApplyableIntegrityValue = 0
-      }
+      jbeam = {}
     }
     local partBreakGroups = {}
     for _, partType in ipairs(partTypeData) do
@@ -83,50 +81,75 @@ local function setPartCondition(partName, partTypeData, odometer, integrity, vis
     for i = 1, wholeNumberOfBrokenBreakGroups do
       table.insert(integrity.jbeam.brokenBreakGroups, shuffledBreakGroups[i])
     end
-    if breakGroupCount > 0 then
-      integrity.jbeam.nonApplyableIntegrityValue = (numberOfBrokenBreakGroups / breakGroupCount) - (wholeNumberOfBrokenBreakGroups / breakGroupCount)
-    end
   end
 
-  for _, brokenBreakGroup in ipairs(integrity.jbeam.brokenBreakGroups or {}) do
-    M.breakBreakGroup(brokenBreakGroup)
+  if type(visual) == "number" then
+    local visualValue = visual
+    visual = {
+      jbeam = {}
+    }
   end
 
-  nonApplyableIntegrityValues[partName] = integrity.jbeam.nonApplyableIntegrityValue
+  if visual.jbeam.needsReplacement then
+    partCondition.setPartMeshColor(partName, 170, 160, 160, 255, 255, 255, 255, 255, 255, 255, 255, 255) -- make the part look primered
+  end
 end
 
 local function getPartCondition(partName, partTypeData)
   local canProvideCondition = false
-  local omitSpawn = false
-  local partCondition = { integrityValue = 1, integrityState = { brokenBreakGroups = {}, nonApplyableIntegrityValue = nonApplyableIntegrityValues[partName] }, visualValue = 1, visualState = {} }
+  local partCondition = {integrityValue = 1, integrityState = {}, visualValue = 1, visualState = {}}
 
   if partTypeData then
     local breakGroupCount = 0
     local brokenBreakGroupCount = 0
+    local hasFlexbodies = false
+    local hasDamageableBeams = false
+    local damageableBeams = {}
     for _, partType in ipairs(partTypeData) do
       local split = split(partType, ":")
-      if split[1] == "jbeam" and split[2] == "breakGroup" then
-        local breakGroupName = split[3]
-        breakGroupCount = breakGroupCount + 1
-        if brokenBreakGroups[breakGroupName] then
-          table.insert(partCondition.integrityState.brokenBreakGroups, breakGroupName)
-          brokenBreakGroupCount = brokenBreakGroupCount + 1
+      if split[1] == "jbeam" then
+        if split[2] == "breakGroup" then
+          local breakGroupName = split[3]
+          breakGroupCount = breakGroupCount + 1
+          if brokenBreakGroups[breakGroupName] then
+            brokenBreakGroupCount = brokenBreakGroupCount + 1
+          end
+        end
+        if split[2] == "flexbody" then
+          hasFlexbodies = true
+        end
+        if split[2] == "beamDamage" then
+          table.insert(damageableBeams, tonumber(split[3]))
+          hasDamageableBeams = true
         end
       end
     end
-    if breakGroupCount > 0 then
-      partCondition.integrityValue = 1 - (brokenBreakGroupCount / breakGroupCount)
+    if hasFlexbodies and (breakGroupCount > 0 or hasDamageableBeams) then
+      local brokenBeamCount = 0
+      local deformedBeamCount = 0
+      for _, beamCid in ipairs(damageableBeams) do
+        local beamDamage = beamDamageTracker[beamCid] or 0
+        if beamDamage >= 0.01 then
+          deformedBeamCount = deformedBeamCount + 1
+        end
+        if beamDamage >= 0.9 then
+          brokenBeamCount = brokenBeamCount + 1
+        end
+      end
+      --thresholds for when a part is considered too broken and needs replacements
+      local tooMuchBeamDamage = deformedBeamCount > (#damageableBeams * 0.01)
+      local tooManyBrokenBeams = brokenBeamCount > 2
+      local tooManyBreakGroupsBroken = breakGroupCount > 0 and (brokenBreakGroupCount > 1 or (brokenBreakGroupCount == breakGroupCount))
+      --print(string.format("%q: Breakgroups: %s, broken beams: %s/%s, deformed beams: %s/%s", partName, brokenBreakGroupCount, brokenBeamCount, #damageableBeams, deformedBeamCount, #damageableBeams))
+      if tooManyBreakGroupsBroken or tooMuchBeamDamage or tooManyBrokenBeams then
+        partCondition.visualState.needsReplacement = true
+      end
     end
 
     canProvideCondition = true
-    if brokenBreakGroupCount == breakGroupCount and breakGroupCount > 1 then
-      omitSpawn = true
-    end
   end
 
-  partCondition.integrityValue = max(partCondition.integrityValue - (nonApplyableIntegrityValues[partName] or 0), 0)
-
-  return partCondition, omitSpawn, canProvideCondition
+  return partCondition, canProvideCondition
 end
 
 local function luaBreakBeam(id)
@@ -159,7 +182,7 @@ local function breakBreakGroup(g)
   if bg then
     couplerBreakGroupCache[g] = nil
     for _, ccid in ipairs(bg) do
-      obj:detachCoupler(ccid)
+      obj:detachCoupler(ccid, math.huge)
     end
   end
 
@@ -178,36 +201,24 @@ local function breakMaterial(beam)
   material.switchBrokenMaterial(beam)
 end
 
-local function broadcastCouplerVisibility(visible)
-  BeamEngine:queueAllObjectLua("beamstate.setCouplerVisiblityExternal(" .. tostring(obj:getId()) .. "," .. tostring(visible) .. ")")
+local function broadcastCouplerVisibility(visibleTags)
+  BeamEngine:queueAllObjectLua("beamstate.setCouplerVisiblityExternal(" .. tostring(obj:getId()) .. "," .. serialize(visibleTags) .. ")")
 end
 
 M.debugDraw = nop
 local function debugDraw(focusPos)
-  local hasManualCoupler = false
-  for nid, c in pairs(couplerCache) do
-    if not c.couplerWeld and not c.couplerLock and c.couplerTag then
-      hasManualCoupler = true
-      break
-    end
-  end
-
   -- highlight all coupling nodes
-  if hasManualCoupler then
-    for _, coupler in pairs(couplerCache) do
-      if coupler.couplerLock == nil and coupler.couplerTag then
-        obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
-      end
-    end
-  else
-    for _, coupler in pairs(couplerCache) do
+  for _, coupler in pairs(couplerCache) do
+    if not coupler.couplerLock and not coupler.couplerWeld and ((coupler.couplerTag and externalCouplerVisibilityTags[coupler.couplerTag]) or (coupler.tag and externalCouplerVisibilityTags[coupler.tag])) then
       obj.debugDrawProxy:drawNodeSphere(coupler.cid, 0.15, getContrastColor(stringHash(coupler.couplerTag or coupler.tag), 150))
     end
   end
 end
 
-local function setCouplerVisiblityExternal(sourceObjectID, visible)
-  if visible then
+local function setCouplerVisiblityExternal(sourceObjectID, visibleTags)
+  externalCouplerVisibilityTags = nil
+  if visibleTags then
+    externalCouplerVisibilityTags = visibleTags
     M.debugDraw = debugDraw
   else
     M.debugDraw = nop
@@ -223,7 +234,20 @@ local function activateAutoCoupling(_nodetag)
   autoCouplingActive = true
   autoCouplingTimeoutTimer = 0
   autoCouplingTimer = 0
-  broadcastCouplerVisibility(true)
+
+  local visibleTags
+  if not _nodetag then
+    visibleTags = {}
+    for _, c in pairs(couplerCache) do
+      if not c.couplerWeld and not c.couplerLock and c.couplerTag then
+        visibleTags[c.couplerTag] = true
+        break
+      end
+    end
+  else
+    visibleTags = {_nodetag}
+  end
+  broadcastCouplerVisibility(visibleTags)
 end
 
 local function disableAutoCoupling()
@@ -242,8 +266,7 @@ local function attachCouplers(_nodetag)
   local nodetag = _nodetag or ""
   for _, val in pairs(couplerCache) do
     if (val.couplerWeld ~= true and val.couplerTag and (_nodetag == nil or val.couplerTag == nodetag)) and val.cid then
-      obj:attachCoupler(val.cid, val.couplerTag or "", val.couplerStrength or 1000000,
-        val.couplerRadius or 0.2, val.couplerLockRadius or 0.025, val.couplerLatchSpeed or 0.3, val.couplerTargets or 0)
+      obj:attachCoupler(val.cid, val.couplerTag or "", val.couplerStrength or 1000000, val.couplerRadius or 0.2, val.couplerLockRadius or 0.025, val.couplerLatchSpeed or 0.3, val.couplerTargets or 0)
     end
   end
 end
@@ -256,7 +279,7 @@ local function detachCouplers(_nodetag, forceLocked, forceWelded)
   local nodetag = _nodetag or ""
   for _, val in pairs(couplerCache) do
     if ((val.couplerLock ~= true or forceLocked) and (val.couplerWeld ~= true or forceWelded) and val.couplerTag and (_nodetag == nil or val.couplerTag == nodetag)) and val.cid then
-      obj:detachCoupler(val.cid)
+      obj:detachCoupler(val.cid, 0)
       obj:queueGameEngineLua(string.format("onCouplerDetach(%s,%s)", obj:getId(), val.cid))
     end
   end
@@ -334,7 +357,7 @@ local function updateRemoteElectrics()
   recievedElectrics = {}
 end
 
-local function onCouplerAttached(nodeId, obj2id, obj2nodeId)
+local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attachEnergy)
   disableAutoCoupling()
   attachedCouplers[nodeId] = transmitCouplers[nodeId] or {}
   attachedCouplers[nodeId].obj2id = obj2id
@@ -343,13 +366,13 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId)
   -- figure out the electrics state
   local n = v.data.nodes[nodeId]
   if n and (n.importElectrics or n.importInputs) then
-    local data = { electrics = n.importElectrics, inputs = n.importInputs }
+    local data = {electrics = n.importElectrics, inputs = n.importInputs}
     --print("couplerAttached -> beamstate.exportCouplerData("..tostring(obj2nodeId)..", "..serialize(data)..")")
     obj:queueObjectLuaCommand(obj2id, "beamstate.exportCouplerData(" .. tostring(obj2nodeId) .. ", " .. serialize(data) .. ")")
     M.updateRemoteElectrics = updateRemoteElectrics
   end
 
-  local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or { n.breakGroup }
+  local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or {n.breakGroup}
   for _, g in pairs(breakGroups) do
     couplerBreakGroupCache[g] = couplerBreakGroupCacheOrig[g]
   end
@@ -370,7 +393,7 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
     if type(n.breakGroup) ~= "table" and couplerBreakGroupCache[n.breakGroup] == nil then
       -- shortcircuit in case of broken single breakGroup
     else
-      local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or { n.breakGroup }
+      local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or {n.breakGroup}
       for _, g in pairs(breakGroups) do
         breakBreakGroup(g)
       end
@@ -388,7 +411,7 @@ local function getCouplerOffset(couplerTag)
   for _, c in pairs(couplerCache) do
     if c.couplerTag == couplerTag or c.tag == couplerTag or couplerTag == "" or not couplerTag then
       local pos = v.data.nodes[c.cid].pos
-      couplerOffset[c.cid] = { x = pos.x - refPos.x, y = pos.y - refPos.y, z = pos.z - refPos.z }
+      couplerOffset[c.cid] = {x = pos.x - refPos.x, y = pos.y - refPos.y, z = pos.z - refPos.z}
     end
   end
   return couplerOffset
@@ -445,11 +468,11 @@ local function deflateTire(wheelid)
     if wheels.wheels[wheelid] then
       wheels.wheels[wheelid].isTireDeflated = true
     end
-    guihooks.message({ txt = "vehicle.beamstate.tireDeflated", context = { wheelName = wheel.name } }, 5, "vehicle.damage.deflated." .. wheel.name)
+    guihooks.message({txt = "vehicle.beamstate.tireDeflated", context = {wheelName = wheel.name}}, 5, "vehicle.damage.deflated." .. wheel.name)
     damageTracker.setDamage("wheels", "tire" .. wheel.name, true)
 
     local tireBurstVolume = linearScale(pressureGroupPressure, 0, 1000000, 0, 1)
-    local tireBurstColor = linearScale(wheels.wheels[wheelid].tireVolume, 0, 1, 0, 5)
+    local tireBurstColor = wheels.wheels[wheelid] and linearScale(wheels.wheels[wheelid].tireVolume, 0, 1, 0, 5) or 0
     obj:playSFXOnceCT("event:>Vehicle>Failures>tire_burst", wheel.node1, tireBurstVolume, 1, tireBurstColor, 0)
 
     M.damageExt = M.damageExt + 1000
@@ -541,7 +564,7 @@ local function addPlanet(center, radius, mass, dt)
     if dt == 0 then
       return
     end
-    table.insert(planetTimers, { #planets + 1, dt })
+    table.insert(planetTimers, {#planets + 1, dt})
   end
   table.insert(planets, center.x)
   table.insert(planets, center.y)
@@ -654,9 +677,14 @@ local function update(dtSim)
   end
 end
 
+local function registerExternalCouplerBreakGroup(breakGroup, cid)
+  couplerBreakGroupCache[breakGroup] = couplerBreakGroupCache[breakGroup] or {}
+  table.insert(couplerBreakGroupCache[breakGroup], cid)
+end
+
 local function beamBroken(id, energy)
-  beamDamageTracker[id] = 0
-  beamDamageTrackerDirty = true
+  --beamDamageTracker[id] = 0
+  --beamDamageTrackerDirty = true
 
   local bodyPart = beamBodyPartLookup[id]
   if bodyPart then
@@ -706,7 +734,7 @@ local function beamBroken(id, energy)
       if type(beam.breakGroup) ~= "table" and breakGroupCache[beam.breakGroup] == nil then
         -- shortcircuit in case of broken single breakGroup
       else
-        local breakGroups = type(beam.breakGroup) == "table" and beam.breakGroup or { beam.breakGroup }
+        local breakGroups = type(beam.breakGroup) == "table" and beam.breakGroup or {beam.breakGroup}
         for _, g in ipairs(breakGroups) do
           if breakGroupCache[g] then
             props.hidePropsInBreakGroup(g)
@@ -830,7 +858,7 @@ local function init()
         collTriState[t.cid] = t.beamCount
         --handle triangle breakgroups
         if t.breakGroup then
-          local breakGroups = type(t.breakGroup) == "table" and t.breakGroup or { t.breakGroup }
+          local breakGroups = type(t.breakGroup) == "table" and t.breakGroup or {t.breakGroup}
           for _, g in pairs(breakGroups) do
             triangleBreakGroupCache[g] = triangleBreakGroupCache[g] or {}
             table.insert(triangleBreakGroupCache[g], t.cid)
@@ -866,9 +894,14 @@ local function init()
   couplerTags = {}
   hasActiveCoupler = false
 
+  table.clear(M.nodeNameMap)
+
   local xMin, xMax, yMin, yMax = math.huge, -math.huge, math.huge, -math.huge
 
   for _, n in pairs(v.data.nodes or {}) do
+    if n.name then
+      M.nodeNameMap[n.name] = n.cid
+    end
     local posx, posy = n.pos.x, n.pos.y
     xMin = min(posx, xMin)
     xMax = max(posx, xMax)
@@ -884,7 +917,7 @@ local function init()
         hasActiveCoupler = n.couplerTag ~= nil or hasActiveCoupler
 
         if n.breakGroup then
-          local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or { n.breakGroup }
+          local breakGroups = type(n.breakGroup) == "table" and n.breakGroup or {n.breakGroup}
           for _, g in pairs(breakGroups) do
             couplerBreakGroupCache[g] = couplerBreakGroupCache[g] or {}
             table.insert(couplerBreakGroupCache[g], n.cid)
@@ -898,8 +931,7 @@ local function init()
 
   for _, c in pairs(couplerCache) do
     if c.couplerStartRadius and c.cid then
-      obj:attachCoupler(c.cid, c.couplerTag or "", c.couplerStrength or 1000000, c.couplerStartRadius, c.couplerLockRadius or 0.025,
-        c.couplerLatchSpeed or 0.3, c.couplerTargets or 0)
+      obj:attachCoupler(c.cid, c.couplerTag or "", c.couplerStrength or 1000000, c.couplerStartRadius, c.couplerLockRadius or 0.025, c.couplerLatchSpeed or 0.3, c.couplerTargets or 0)
     end
   end
 
@@ -916,7 +948,7 @@ local function init()
 
   local partValueSum = 0
 
-  for partName, part in pairs(v.data.activeParts) do
+  for partName, part in pairs(v.data.activeParts or {}) do
     if part then
       local beamCount = tableSize(part.beams)
       local partValue = 0
@@ -943,8 +975,8 @@ local function init()
 
   partBeams = {}
   beamBodyPartLookup = {}
-  bodyPartDamageTracker = { FL = 0, FR = 0, ML = 0, MR = 0, RL = 0, RR = 0 }
-  invBodyPartBeamCount = { FL = 0, FR = 0, ML = 0, MR = 0, RL = 0, RR = 0 }
+  bodyPartDamageTracker = {FL = 0, FR = 0, ML = 0, MR = 0, RL = 0, RR = 0}
+  invBodyPartBeamCount = {FL = 0, FR = 0, ML = 0, MR = 0, RL = 0, RR = 0}
   table.clear(M.tagBeamMap)
   table.clear(M.linkTagBeamMap)
 
@@ -989,7 +1021,7 @@ local function init()
       end
 
       if b.breakGroup then
-        local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or { b.breakGroup }
+        local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or {b.breakGroup}
         for _, g in pairs(breakGroups) do
           if not breakGroupCache[g] then
             breakGroupCache[g] = table.new(2, 0)
@@ -999,9 +1031,9 @@ local function init()
       end
 
       if b.deformGroup then
-        local deformGroups = type(b.deformGroup) == "table" and b.deformGroup or { b.deformGroup }
+        local deformGroups = type(b.deformGroup) == "table" and b.deformGroup or {b.deformGroup}
         for _, g in pairs(deformGroups) do
-          local group = M.deformGroupDamage[g] or { eventCount = 0, damage = 0, maxEvents = 0, invMaxEvents = 0 }
+          local group = M.deformGroupDamage[g] or {eventCount = 0, damage = 0, maxEvents = 0, invMaxEvents = 0}
           group.maxEvents = group.maxEvents + 1 / max(b.deformationTriggerRatio or 1, 0.01)
           group.invMaxEvents = 1 / group.maxEvents
           M.deformGroupDamage[g] = group
@@ -1100,7 +1132,7 @@ end
 local function breakHinges()
   for _, b in pairs(v.data.beams) do
     if b.breakGroup ~= nil then
-      local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or { b.breakGroup }
+      local breakGroups = type(b.breakGroup) == "table" and b.breakGroup or {b.breakGroup}
       -- multiple break groups
       for _, g in pairs(breakGroups) do
         if type(g) == "string" and (string.find(g, "hinge") ~= nil or string.find(g, "latch") ~= nil) then
@@ -1144,7 +1176,7 @@ local function triggerDeformGroup(group)
   end
   for _, b in pairs(v.data.beams) do
     if b.deformSwitches ~= nil then
-      local deformSwitchesT = type(b.deformSwitches) == "table" and b.deformSwitches or { b.deformSwitches }
+      local deformSwitchesT = type(b.deformSwitches) == "table" and b.deformSwitches or {b.deformSwitches}
       for _, g in pairs(deformSwitchesT) do
         if g.deformGroup == group then
           breakMaterial(b)
@@ -1166,7 +1198,7 @@ local function sendUISkeleton()
     local n2 = v.data.nodes[beam.id2]
     -- only beams with deformationTriggerRatio will actually change ...
     --if beam.deformationTriggerRatio then
-    data[beam.cid + 1] = { n1.pos, n2.pos }
+    data[beam.cid + 1] = {n1.pos, n2.pos}
     --end
   end
   if not playerInfo.firstPlayerSeated then
@@ -1281,7 +1313,7 @@ local function getVehicleState(...)
   local pos = obj:getPosition()
   local front = obj:getDirectionVector()
   local up = obj:getDirectionVectorUp()
-  local vehicleState = { objId = obj:getId(), partsCondition = partCondition.getConditions(), itemId = v.config.itemId, pos = pos, front = front, up = up }
+  local vehicleState = {objId = obj:getId(), partsCondition = partCondition.getConditions(), itemId = v.config.itemId, pos = pos, front = front, up = up}
   return vehicleState, ...
 end
 
@@ -1292,7 +1324,7 @@ local function getPartDamageData()
     local deformedCoef = (clamp(partData.beamsDeformed / partData.deformedBeamsThreshold, 0, 1))
     local damageScore = max(brokenCoef, deformedCoef)
     if damageScore > 0 then
-      damageData[partName] = { name = partData.name, damage = damageScore }
+      damageData[partName] = {name = partData.name, damage = damageScore}
     end
   end
   return damageData
@@ -1331,6 +1363,7 @@ M.setCouplerVisiblityExternal = setCouplerVisiblityExternal
 M.exportCouplerData = exportCouplerData
 M.importCouplerData = importCouplerData
 M.hasCouplers = hasCouplers
+M.registerExternalCouplerBreakGroup = registerExternalCouplerBreakGroup
 
 M.load = load
 M.save = save

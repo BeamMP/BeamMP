@@ -107,14 +107,25 @@ local function getModNameFromPath(path)
   return modname
 end
 
-local function getModFromPath(vfsPath, withHashes)
+-- this call is really slow, use carefully
+local function getModFromPathSUPERSLOW(vfsPath, calcFingerprint)
   local realPath = FS:findOverrides(vfsPath) or {}
   for _, p in ipairs(realPath) do
     p = string.lower(p:gsub('\\', '/'))
     local _, filename, ext = path.splitWithoutExt(p)
     local mod = mods[filename]
     if mod then
-      return mod.modID or mod.modname
+      local res = mod.modID or mod.modname
+      local hash
+      if calcFingerprint then
+        local hashData = tostring(mod.fullpath)  .. '_' .. tostring(mod.dateAdded)
+        if mod.modData then
+          hashData = hashData .. '_' .. tostring(mod.modData.current_version_id) .. '_' .. tostring(mod.modData.last_update)
+        end
+        hash = hashStringSHA1(hashData)
+      end
+      --dump{'getModFromPath: ', vfsPath, hashData, hash}
+      return res, hash
     end
   end
 end
@@ -265,11 +276,13 @@ local function updateZIPEntry(filename)
     -- new entry
     local d = {}
     --log('D', 'updateZIPEntry', "new DB entry: " .. filename )
+    --[[
     local hash = 'wip' -- FS:hashFile(filename)
     if hash then
       d.hash = string.lower(hash)
       --log('D', 'updateZIPEntry', " * " .. tostring(filename) .. " = " .. tostring(hash))
     end
+    ]]
 
     d.mountPoint = nil -- normally mounts in the game main directory
     d.dateAdded = os.time(os.date('*t'))
@@ -552,9 +565,8 @@ local initDB = extensions.core_jobsystem.wrap(function(job)
       if FS:directoryExists(filename) then filename=filename.."/" end
 
       local mod, modFiles = updateZIPEntry(filename)
-      if mod and isSafeMode() then mod.active = false end
 
-      if mod and mod.active ~= false then
+      if mod and not isSafeMode() and mod.active ~= false then
         log('D', 'initDB', 'mountEntry -- ' .. tostring(filename) .. ': ' .. (mod.modID or '') .. ' : ' .. (mod.modname or ''))
         addMountEntryToList(mountList, filename, mod.mountPoint)
         if modFiles and #modFiles>0 then
@@ -636,7 +648,7 @@ end)
 
 local function deactivateAllMods()
   for modname, v in pairs(mods) do
-    M.deactivateMod(modname)
+    M.deactivateMod(modname, true)
   end
   stateChanged()
 end
@@ -822,7 +834,7 @@ local function _getModScriptFiles(modname)
   return modScripts
 end
 
-local function deactivateMod(modname)
+local function deactivateMod(modname, preventStateChange)
   if not mods[modname] then
     log('I', 'deactivateMod', 'mod not existing ' .. tostring(modname))
     return
@@ -845,8 +857,10 @@ local function deactivateMod(modname)
   if mountedFilesChange then
     _G.onFileChanged(mountedFilesChange) --main.lua
   end
-  stateChanged()
-  
+
+  if not preventStateChange then --
+    stateChanged()
+  end
   MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
 end
 
@@ -902,6 +916,8 @@ local function activateMod(modname)
     _G.onFileChanged(mountedFilesChange) --main.lua
   end
 
+  loadCoreExtensions()
+
   stateChanged()
   
   MPModManager.onModStateChanged(modname) -- ///////////////////////////////////////////////////////////// BEAMMP
@@ -956,6 +972,8 @@ local function activateAllMods()
     end
   end
   _G.onFileChanged(mountedFilesChange) --main.lua
+
+  loadCoreExtensions()
 
   stateChanged()
 end
@@ -1445,7 +1463,7 @@ M.getConflict = getConflict
 M.getModDB = getModDB
 M.modIsUnpacked = modIsUnpacked
 M.check4Update = check4Update
-M.getModFromPath = getModFromPath
+M.getModFromPathSUPERSLOW = getModFromPathSUPERSLOW
 
 M.getModForFilename = getModForFilename
 

@@ -12,11 +12,13 @@ angular.module('beamng.stuff')
     var res = []
     if(depth>200) return
 
-    for (var slotType in part.slots) {
-      var slot = part.slots[slotType]
+    for (var slotId in part.slots) {
+      var slot = part.slots[slotId]
+      var slotType = slot.type
       var element = {
+        type: slotType,
         name: slot.description,
-        slot: slotType,
+        slot: slotId,
         val: '',
         options: [],
         highlight: true
@@ -32,11 +34,11 @@ angular.module('beamng.stuff')
           } else {
             elOptions[elOptions.length] = {
               name: slotPart.description,
-              val: slotPartName,
-              value: slotPart.value
+              isAuxiliary: slotPart.isAuxiliary,
+              val: slotPartName
             }
             optionCount++
-            if (data.chosenParts[slotType] == slotPartName) {
+            if (data.chosenParts[slotId] == slotPartName || data.chosenParts[slotType] == slotPartName) {
               element.val = slotPartName
               if (slotPart.slots)
                 element.parts = _generateTreeBranch(data, slotPart, simple, depth + 1)
@@ -47,7 +49,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: '', value:'0'});
+        element.options.unshift({name: 'Empty', val: ''})
       } else {
         element.open = true
       }
@@ -184,10 +186,18 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // LICENSE PLATE STUFF
   vm.licensePlate = ''
 
-  bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
-    $scope.$evalAsync(() => { vm.licensePlate = str; })
-  })
+  let getLicensePlate = function () {
+    bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
+      $scope.$evalAsync(() => { vm.licensePlate = str; })
+    })
+  }
+  getLicensePlate()
 
+  vm.applyLicensePlateDebounced  = RateLimiter.debounce(() => {
+    if(vm.applyPartChangesAutomatically) {
+      vm.applyLicensePlate()
+    }
+  }, 500)
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -197,16 +207,13 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
   // --------------------------------------- BEAMMP --------------------------------------- //
 
-  vm.updateLicensePlate = function () {
+  vm.applyLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText("${vm.licensePlate}")`)
   }
 
-  vm.genLicensePlate = function () {
+  vm.applyRandomLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText(core_vehicles.regenerateVehicleLicenseText(be:getPlayerVehicle(0)),nil,nil,nil)`)
-
-    bngApi.engineLua('core_vehicles.getVehicleLicenseText(be:getPlayerVehicle(0))', function (str) {
-      $scope.$evalAsync(() => { vm.licensePlate = str; })
-    })
+    getLicensePlate()
   }
   // --------------
 
@@ -220,6 +227,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.selectSubParts = true
   vm.applyPartChangesAutomatically = true
   vm.simple = false
+  vm.showAuxiliary = !beamng.shipping
   vm.partSearchString = ''
   vm.partSearchQuery = {}
   vm.searchMode = false
@@ -303,6 +311,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.mpapply = function () {
+    vm.write()
     console.log("[BeamMP] Attempting to send vehicle edits to all clients")
     bngApi.engineLua("MPVehicleGE.sendVehicleEdit(be:getPlayerVehicle(0):getID())");
   }
@@ -788,6 +797,7 @@ function ($scope) {
 
   vm.state = {}
   vm.cameraSpeed = 0
+  vm.canApplyState = true
 
   vm.update = () => {
     bngApi.engineScript('$Camera::movementSpeed', (speed) => {
@@ -801,15 +811,31 @@ function ($scope) {
   },
 
   vm.applyState = () => {
-    bngApi.activeObjectLua(`bdebug.setState( ${bngApi.serializeToLua(vm.state)} )`)
+    if (vm.canApplyState) {
+      bngApi.activeObjectLua(`bdebug.setState( ${bngApi.serializeToLua(vm.state)} )`)
+    }
   }
 
-  vm.applyMeshVisibility = () => {
-    bngApi.engineLua(`if be:getPlayerVehicle(0) then be:getPlayerVehicle(0):setMeshAlpha(${bngApi.serializeToLua(vm.state.vehicle.meshVisibility / 100)}, "", false) end`)
+  vm.setMeshVisibility = (vis) => {
+    bngApi.engineLua(`if be:getPlayerVehicle(0) then be:getPlayerVehicle(0):setMeshAlpha(${bngApi.serializeToLua(vis)}, "", false) end`)
   }
 
   $scope.$on('BdebugUpdate', (_, debugState) => {
+    // All this to workaround a bug with slider not updating
+    if (vm.state.vehicle) {
+      var mode = vm.state.vehicle.beamVisMode - 1
+      vm.state.vehicle.beamVisModes[mode]['rangeMin'] = -Number.MAX_VALUE
+      vm.state.vehicle.beamVisModes[mode]['rangeMax'] = Number.MAX_VALUE
+      
+      vm.canApplyState = false
+      
+      $scope.$digest()
+    }
+    
+    vm.canApplyState = true
+    
     vm.state = debugState
+    $scope.$digest()
   })
   bngApi.activeObjectLua(`bdebug.requestState()`)
 
@@ -837,6 +863,20 @@ function ($scope) {
       toggleGroup_1: [
         { label: 'ui.debug.activatePhysics', key: 'physicsEnabled', onChange: () => { bngApi.engineLua(`bullettime.togglePause()`) } }
       ],
+    },
+
+    jbeamvis: {
+      buttonGroup_1: [
+        { label: 'ui.debug.vehicle.toggleVis', action: () => { bngApi.activeObjectLua('bdebug.toggleEnabled()');} },
+        { label: 'ui.debug.vehicle.clearSettings', action: () => { bngApi.activeObjectLua('bdebug.resetModes()');} }
+      ],
+      meshVisButtonGroup: [
+        { label: '0%', action: () => { vm.setMeshVisibility(0) } },
+        { label: '25%', action: () => { vm.setMeshVisibility(0.25) } },
+        { label: '50%', action: () => { vm.setMeshVisibility(0.5) } },
+        { label: '75%', action: () => { vm.setMeshVisibility(0.75) } },
+        { label: '100%', action: () => { vm.setMeshVisibility(1.0) } },
+      ]
     },
 
     effects: {

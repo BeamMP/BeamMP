@@ -80,7 +80,7 @@ angular.module('beamng.stuff')
         <div style="text-align:right; color:white;margin-left:16px;">
           <div ng-if="beammpData && beammpData.players && beammpData.servers" layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
             <div layout="row" layout-align="start center" ng-cloak >
-              <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
+              <img src="/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
                 <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
@@ -88,13 +88,14 @@ angular.module('beamng.stuff')
           </div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
-        <div style="text-align:right; color:white;margin-left:16px;">
-          <div>BeamMP v4.4.0</div>
+        <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
+          <div ng-show='!showBuildInfo'>BeamMP v{{ ::beammpGameVer }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP v{{ ::beammpGameVer }}<br/> Launcher Version v{{ ::beammpLauncherVer }}</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }} <br/> {{ ::buildInfoStr }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }}<br/> {{ ::buildInfoStr }}</div>
         </div>
       </div>
     `,
@@ -122,6 +123,9 @@ angular.module('beamng.stuff')
       // VERSION INFO
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
+      // TODO #203 Fix this to actually use the real launcher version!
+      scope.beammpGameVer = '5.0.0'
+      scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
       var versionSplit = scope.versionStr.split('.')
@@ -248,8 +252,14 @@ angular.module('beamng.stuff')
   }
 }])
 
-.controller('MainMenuController', ['$rootScope', '$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', function($rootScope, $scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState) {
+.controller('MainMenuController', ['$rootScope', '$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', 'ConfirmationDialog', function($rootScope, $scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState, ConfirmationDialog) {
   let vm = this
+
+  bngApi.engineLua('(function() local cmdArgs = Engine.getStartingArgs(); return cmdArgs and tableFindKey(cmdArgs, "--startupTS") ~= nil end)()',function(startingUsingTS){
+    $scope.$evalAsync(function () {
+      vm.startingUsingTS = startingUsingTS;
+    })
+  })
 
   vm.product = beamng.product
   vm.techLicense = false
@@ -364,7 +374,7 @@ angular.module('beamng.stuff')
     },
     {
       translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
+      icon: '/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg',
       targetState: 'menu.multiplayer.tos'
     },
     {
@@ -409,9 +419,54 @@ angular.module('beamng.stuff')
       subtranslateid: 'ui.playmodes.comingSoon',
       icon: '/ui/modules/mainmenu/drive/icons/career.svg',
       disabled: true,
-      targetState: 'career'
+      class: "semi-disabled", // semi-disabled will make the button clickable, not changing the style if it was disabled
+      // targetState: 'menu.career'
+      action: () => {
+        if (!$scope.inCareer) {
+          if (!clicky(6)) // how many clicks should it take to enter
+            return;
+          ConfirmationDialog.open(
+            "ui.playmodes.career", "ui.career.experimentalPrompt",
+            [
+              { label: "ui.common.no", key: false, isCancel: true },
+              // { label: "Enter and don't show this again", key: true },
+              { label: "ui.career.experimentalAgree", key: true, default: true },
+            ],
+            { class: "experimental" }
+          ).then(res => {
+            if (!res)
+              return;
+            $state.go("menu.career");
+          });
+        } else {
+          $state.go("menu.career");
+        }
+      },
     },
   ];
+
+  let clickytmr, clickycnt = 0;
+  function clicky(cnt=6, timeout=300) {
+    clickytmr = clearInterval(clickytmr);
+    clickycnt++;
+    if (clickycnt === cnt) {
+      clickycnt = 0;
+      return true;
+    }
+    clickytmr = setInterval(() => {
+      clickycnt--;
+      if (clickycnt <= 0) {
+        clickycnt = 0;
+        clickytmr = clearInterval(clickytmr);
+      }
+    }, timeout);
+    return false;
+  }
+
+  $scope.inCareer = false;
+  bngApi.engineLua("career_career.isCareerActive()", data => {
+    $scope.inCareer = !!data;
+  });
 
   vm.buttons = {
     big: null,
@@ -480,9 +535,6 @@ angular.module('beamng.stuff')
   }
 
   vm.handleClick = function(card) {
-    if(card.disabled) {
-      return
-    }
     if(card.action) {
       card.action()
       return
@@ -501,17 +553,19 @@ angular.module('beamng.stuff')
       $scope.fancyblur = false;
       return;
     }
-    // get all target blur elements
-    const blurs = Array.from(document.querySelectorAll(".fancy-blur > .img-carousel"));
-    // and connect them to master so they will work in sync
-    fancybg.__connect(
-      blurs,
-      // function to modify images list for targets - function (orig_list) { return orig_list }
-      // here, we change images from "image.jpg" to "image_blur.jpg"
-      images => images.map(img => img.replace(/\.(.{3,4})$/, "_blur.$1"))
-      // note: blurred images are 1280x720 with gaussian blur 6.0 (resize, then blur)
-    );
     $scope.fancyblur = true;
+    $scope.$evalAsync(() => {
+      // get all target blur elements
+      const blurs = Array.from(document.querySelectorAll(".fancy-blur > .img-carousel"));
+      // and connect them to master so they will work in sync
+      fancybg.__connect(
+        blurs,
+        // function to modify images list for targets - function (orig_list) { return orig_list }
+        // here, we change images from "image.jpg" to "image_blur.jpg"
+        images => images.map(img => img.replace(/\.(.{3,4})$/, "_blur.$1"))
+        // note: blurred images are 1280x720 with gaussian blur 6.0 (resize, then blur)
+      );
+    });
   }
   fancySync();
 

@@ -215,12 +215,6 @@ local function updateGFX(dt)
 	timer = timer + dt
 	lastDT = dt
 
-	-- Add physics update handler
-	if not physHandlerAdded and MPVehicleVE then
-        MPVehicleVE.AddPhysUpdateHandler('positionVE', M.update) --register to get phys updates
-        physHandlerAdded = true
-    end
-
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
 	
@@ -423,10 +417,16 @@ local function setVehiclePosRot(data)
 	remoteData.localSimspeed = math.min(simspeedfraction, 25)
 end
 
+local function onInit()
+	enablePhysicsStepHook()
+end
+
 
 
 M.onReset            = onReset
-M.update             = update
+M.onInit             = onInit
+M.onExtensionLoaded  = onInit
+M.onPhysicsStep      = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot

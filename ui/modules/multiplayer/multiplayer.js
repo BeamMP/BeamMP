@@ -15,7 +15,7 @@ function($scope, $state, $timeout, $document) {
 
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
 
-		// Check if the user as aknowledged tos
+		// Check if the user as acknowledged tos
 		const tosAccepted = localStorage.getItem("tosAccepted");
 		if (tosAccepted == "true") {
 			$state.go('menu.multiplayer.servers');
@@ -918,7 +918,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
-		<td style="background-color:${bgcolor}; font-size: initial;">${formatHealth(server.pps)}${server.pps}</td>
+		<td style="background-color:${bgcolor}; font-size: initial; min-width: 60px;">${formatHealth(server.pps)}${server.pps}</td>
 	`;
 	newRow.onclick = function() { select(this, bngApi); };
 }

@@ -230,6 +230,10 @@ local disallowedKeys = {
 	["steeringUnassisted"] = 1,
 	["boost"] = 1,
 	["superchargerBoost"] = 1,
+	["trip"] = 1,
+	["accXSmooth"] = 1,
+	["accYSmooth"] = 1,
+	["accZSmooth"] = 1,
 	---modded vehicles --
 	-- me262 plane ------
 	["inst_pitch"] = 1,

@@ -35,12 +35,12 @@ end
 
 local function processSlotsDestructiveBackwardCompatibility(slots, newSlots)
   local addedSlots = 0
-  for k, slotSectionRow in pairs(slots) do
+  for k, slotSectionRow in ipairs(slots) do
     if slotSectionRow[1] == "type" then goto continue end -- ignore the header
 
     local slot = {}
 
-    slot.type = slotSectionRow[1]
+    slot.type = slotSectionRow[1] 
     slot.default = slotSectionRow[2]
     slot.description = slot.type
 
@@ -80,10 +80,11 @@ local function processSlotsDestructive(part, sourceFilename)
   end
   part.slots = newSlots
 
-  local res = {}
-  for _, slot in pairs(part.slots) do
-    res[slot.type] = {
+  local res = table.new(0, #part.slots)
+  for _, slot in ipairs(part.slots) do
+    res[slot.name or slot.type] = {
       --default = slot.default,
+      type = slot.type,
       description = slot.description,
       coreSlot = slot.coreSlot,
     }
@@ -118,6 +119,7 @@ local function loadJBeamFile(dir, filename, addToCache)
       local partDesc = {
         description = part.information.name or "",
         authors = part.information.authors or "",
+        isAuxiliary = part.information.isAuxiliary,
         ---------- BEAMMP ----------
         value = part.information.value or "",
         ---------- BEAMMP ----------
@@ -155,11 +157,11 @@ local function startLoading(directories)
 
   --log('D', "jbeam.startLoading", "*** loading jbeam files: " .. dumps(directories))
 
-  for _, dir in pairs(directories) do
+  for _, dir in ipairs(directories) do
     if not partFileMap[dir] then
       local partCountTotal = 0
       local filenames = FS:findFiles(dir, "*.jbeam", -1, false, false)
-      for _, filename in pairs(filenames) do
+      for _, filename in ipairs(filenames) do
         local partCount = loadJBeamFile(dir, filename, true) or 0
         partCountTotal = partCountTotal + partCount
       end
@@ -181,7 +183,7 @@ local function getPart(ioCtx, partName)
         log('D', 'jbeam.getPart', "Loaded " .. tostring(partCount) .. " part(s) from file " .. tostring(jbeamFilename))
       end
       if jbeamCache[jbeamFilename] then
-        return jbeamCache[jbeamFilename][partName]
+        return deepcopy(jbeamCache[jbeamFilename][partName]), jbeamFilename
       end
     end
   end

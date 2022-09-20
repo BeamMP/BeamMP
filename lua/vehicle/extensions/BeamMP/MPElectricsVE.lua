@@ -225,6 +225,11 @@ local disallowedKeys = {
 	["FFR"] = 1,
 	["RRL"] = 1,
 	["RRR"] = 1,
+	["smoothShiftLogicAV"] = 1,
+	["odometer"] = 1,
+	["steeringUnassisted"] = 1,
+	["boost"] = 1,
+	["superchargerBoost"] = 1,
 	---modded vehicles --
 	-- me262 plane ------
 	["inst_pitch"] = 1,

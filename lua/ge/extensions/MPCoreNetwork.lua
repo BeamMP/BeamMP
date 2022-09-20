@@ -301,7 +301,7 @@ local function handleU(params)
 			elseif string.match(data, "^Loading Resource") then
 				log('W',"handleU", "mod downloaded, manually check for it")
 				--core_modmanager.enableAutoMount()
-				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(%g+)%.zip")
+				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(.+)%.zip")
 
 				if currentModHasLoaded then
 					modLoaded(modName)
@@ -310,6 +310,7 @@ local function handleU(params)
 					core_modmanager.initDB() -- manually check for new mod
 					currentModHasLoaded = true
 				end
+				send('Ul') -- update the UI
 			end
 		end
 
@@ -334,7 +335,7 @@ local HandleNetwork = {
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
 	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
-	['Z'] = function(params) launcherVersion = params; be:executeJS('setClientVersion('..params..')') end -- Tell the UI what the launcher version is
+	['Z'] = function(params) launcherVersion = params; end
 }
 
 
@@ -455,7 +456,7 @@ local function onUpdate(dt)
 
 		--================================ SECONDS TIMER ================================
 		launcherConnectionTimer = launcherConnectionTimer + dt -- Time in seconds
-		if launcherConnectionTimer > 0.5 then
+		if launcherConnectionTimer > 0.1 then
 			send('A') -- Launcher heartbeat
 			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
 			else send('Up') end -- Server heartbeat

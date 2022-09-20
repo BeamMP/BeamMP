@@ -178,6 +178,7 @@ local function onReset()
 	smoothRvel = vec3(0,0,0)
 	remoteData.acc = vec3(0,0,0)
 	remoteData.racc = vec3(0,0,0)
+	remoteData.timer = 0
 end
 
 local physcounter = 0
@@ -400,6 +401,7 @@ local function setVehiclePosRot(data)
 	local simspeedfraction = pr.localSimspeed
 
 	if not tim then return end
+	if remoteData.timer > tim then return end
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)
 

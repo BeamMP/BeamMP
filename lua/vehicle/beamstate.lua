@@ -327,6 +327,7 @@ local function toggleCouplers(_nodetag, forceLocked, forceWelded)
         isAttached = attachedCouplers[cid] ~= nil
       end
     end
+
     if isAttached then
       detachCouplers(_nodetag, forceLocked, forceWelded)
       MPcouplers.state = false

@@ -106,6 +106,7 @@ end
 local function onClientPostStartMission()
 	if MPCoreNetwork.isMPSession() then
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+		log('M', 'onClientPostStartMission', 'Setting game state to multiplayer.')
 		MPGameNetwork.connectToLauncher()
 	end
 end

@@ -203,7 +203,8 @@ angular.module('beamng.stuff')
 
 
         $rootScope.$broadcast('app:waiting', true, function () {
-          var func = "core_vehicles." + (spawnNew?"spawnNewVehicle":"replaceVehicle")
+          var func = "core_vehicles.replaceVehicle"
+          if (spawnNew) func = "core_vehicles.spawnNewVehicle"
           if (mp) func = "MPVehicleGE.spawnRequest";
 
           var luaArgs = {}
@@ -227,6 +228,10 @@ angular.module('beamng.stuff')
 
           if (typeof model === 'object') {
             model = model.key
+          }
+
+          if (spawnNew) {
+            luaArgs.spawnNew = true;
           }
 
           bngApi.engineLua(func + '("' + model + '", ' + bngApi.serializeToLua(luaArgs) + ')', function () {
@@ -253,6 +258,7 @@ angular.module('beamng.stuff')
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
   vm.showAuxiliary = $stateParams.showAuxiliary
   vm.shownData = []
+
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -455,7 +461,6 @@ angular.module('beamng.stuff')
 
 .service("VehicleSelectFilter", ["Vehicles", function (Vehicles) {
   return {
-
     // apply forced filters
     // it expects data.models, data.configs and data.filters as arrays, and data.userFilters()
     // it filters by data.configs and then selects models that left
@@ -646,7 +651,6 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
   vm.mode = VehicleSelectConfig.configs[$stateParams.mode || 'default']
   vm.shownData = []
 
-  function loadList() {
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -656,6 +660,9 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
   });
 
   // --------------------------------------- BEAMMP --------------------------------------- //
+
+  function loadList() {
+
     Vehicles.populate().then(() => {
       vm.data = angular.copy(vehiclesData)
 
@@ -708,11 +715,11 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
 
   vm.launchVehicle = function (model) {
     if ((model.key !== undefined) && (model.default_pc !== undefined)){
-        vm.mode.selected(model, model.key, model.default_pc, model.default_color, vm.isMPSession)
+        vm.mode.selected(model, model.key, model.default_pc, model.default_color, false, vm.isMPSession)
     } else if (vm.showConfigurations && model.model_key !== undefined) {
-      vm.mode.selected(model, model.model_key, model.key, vm.isMPSession)
+      vm.mode.selected(model, model.model_key, model.key, null, false, vm.isMPSession)
     } else {
-      vm.mode.selected(model, model.key, vm.isMPSession)
+      vm.mode.selected(model, model.key, null, null, false, vm.isMPSession)
     }
   }
 
@@ -914,6 +921,7 @@ function ($scope, $state, $timeout, $stateParams, $rootScope, Settings, VehicleP
   }
   vm.saveDefault = function() {
     bngApi.engineLua('extensions.core_vehicle_partmgmt.savedefault();')
+    //bngApi.activeObjectLua("obj:queueGameEngineLua(\"MPVehicleGE.saveDefaultRequest('\"..obj:getID()..\"')\")");
     $state.go('play')
   }
 

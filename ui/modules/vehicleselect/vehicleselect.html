@@ -29,6 +29,7 @@
   </div>
 </md-content>
 
+
 <md-content flex="35" layout="column" style="max-width: 450px; height: 100%; width: 300px; box-sizing: border-box" class="transparency" bng-blur="true">
   <div layout="row" layout-wrap layout-align="center center" style="min-height: fit-content; border-bottom: 1px solid rgba(0, 0, 0, .2); padding-bottom: 10px;">
     <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-primary" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.saveDefault()">
@@ -51,7 +52,7 @@
       <md-icon class="material-icons"  style="color:white;;">delete</md-icon>
       {{:: 'ui.options.gameplay.removeCurrentVehicle' | translate}}
     </md-button>
-    <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns" ng-click="vehicles.removeAllExceptCurrentVehicle()" bng-sound-class="bng_click_hover_generic">
+    <md-button style="min-width: fit-content; font-size: 70%;" class="md-raised md-warn" ng-if="!vehicles.mode.hide.removeBtns && !vehicles.isMPSession" ng-click="vehicles.removeAllExceptCurrentVehicle()" bng-sound-class="bng_click_hover_generic">
       <md-icon class="material-icons"  style="color:white;;">delete_sweep</md-icon>
       {{:: 'ui.options.gameplay.removeOtherVehicles' | translate}}
     </md-button>

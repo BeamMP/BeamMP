@@ -35,7 +35,8 @@ angular.module('beamng.stuff')
             elOptions[elOptions.length] = {
               name: slotPart.description,
               isAuxiliary: slotPart.isAuxiliary,
-              val: slotPartName
+              val: slotPartName,
+              value: slotPart.value
             }
             optionCount++
             if (data.chosenParts[slotId] == slotPartName || data.chosenParts[slotType] == slotPartName) {
@@ -49,7 +50,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: ''})
+        element.options.unshift({name: 'Empty', val: '', value:'0'})
       } else {
         element.open = true
       }
@@ -191,13 +192,6 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       $scope.$evalAsync(() => { vm.licensePlate = str; })
     })
   }
-  getLicensePlate()
-
-  vm.applyLicensePlateDebounced  = RateLimiter.debounce(() => {
-    if(vm.applyPartChangesAutomatically) {
-      vm.applyLicensePlate()
-    }
-  }, 500)
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.isMPSession = false;
@@ -206,6 +200,13 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   });
 
   // --------------------------------------- BEAMMP --------------------------------------- //
+  getLicensePlate()
+
+  vm.applyLicensePlateDebounced  = RateLimiter.debounce(() => {
+    if(vm.applyPartChangesAutomatically) {
+      vm.applyLicensePlate()
+    }
+  }, 500)
 
   vm.applyLicensePlate = function () {
     bngApi.engineLua(`core_vehicles.setPlateText("${vm.licensePlate}")`)
@@ -306,13 +307,10 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
         bngApi.engineLua(`extensions.core_vehicle_partmgmt.setPartsConfig(${bngApi.serializeToLua(newConfig)})`)
       })
     }
-  };
-
+  }
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   vm.mpapply = function () {
-    vm.write()
-    console.log("[BeamMP] Attempting to send vehicle edits to all clients")
     bngApi.engineLua("MPVehicleGE.sendVehicleEdit(be:getPlayerVehicle(0):getID())");
   }
   // --------------------------------------- BEAMMP --------------------------------------- //

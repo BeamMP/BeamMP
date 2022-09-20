@@ -5,7 +5,6 @@
 local M = {}
 --Mandatory controller parameters
 M.type = "main"
-M.relevantDevice = nil
 M.defaultOrder = 500
 
 M.fireEngineTemperature = 0
@@ -18,13 +17,12 @@ local min = math.min
 local max = math.max
 local abs = math.abs
 local acos = math.acos
-local deg = math.deg --BeamMP
-local rad = math.rad --BeamMP
+local atan2 = math.atan2
+local pi = math.pi
+local twoPi = pi * 2
 
 local stabilizationMaxForce = 8000
-
---local stabilizationMaxTorque = 1500
-local yawMaxForce = 100
+local yawMaxForce = 200
 
 local movementSpeedNormal = 1.8
 local movementSpeedSprint = 5
@@ -119,13 +117,8 @@ local unCrouchingPressureRatio = 0
 local stabilizationPIDs = {
   frontRear = newPIDParallel(2, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
   leftRight = newPIDParallel(2, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
-  --upright = newPIDParallel(0.5, 0.1, 0.3, -1, 1, 100, 50, -1, 1),
-  yaw = newPIDParallel(1, 0.5, 0.0, -1, 1)
+  yawPosition = newPIDParallel(2, 0.0, 0.5, -1, 1)
 }
-
---local stabilizationTorqueNodes = {}
---local stabilizationTorqueAxis = vec3(0, 0, 0)
---local stabilizationDesiredTorque = 0
 
 local ballTorqueNodes = {}
 local ballTorqueAxis = vec3(0, 0, 0)
@@ -160,10 +153,6 @@ local function applyTorque(axis, node1, node2, node3, torque)
   obj:apply3nodeTorque(axis, torque, node1, node2, node3)
 end
 
-local function applyTorque2Nodes(axis, node1, node2, torque)
-  obj:apply2nodeTorque(axis, torque, node1, node2)
-end
-
 local function applyForceVector(node, forceVec)
   obj:applyForceVector(node, forceVec)
 end
@@ -174,8 +163,6 @@ end
 
 local function update(dt)
   --stabilization
-  --applyTorque2Nodes(stabilizationTorqueAxis, stabilizationTorqueNodes[0], stabilizationTorqueNodes[1], -stabilizationDesiredTorque)
-
   applyForceVector(stabilizationNodes.topCenter, forceVectorFront)
   applyForceVector(stabilizationNodes.bottomCenter, -forceVectorFront)
 
@@ -194,8 +181,6 @@ local function update(dt)
   --jumping
   if jumpForceTimer > 0 then
     jumpForceTimer = jumpForceTimer - dt
-
-    --local isSprinting = movementSpeedCoef > 0 and walkVector:length() > 0
 
     local vectorUp = obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, stabilizationNodes.bottomCenter):normalized()
     obj:applyForceVector(stabilizationNodes.topCenter, (vectorUp * jumpForce))
@@ -228,16 +213,6 @@ local function updateFixedStep(dt)
 
   --actual up vector of the unicycle
   local vectorUp = obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, stabilizationNodes.bottomCenter):normalized()
-
-  -- local accVector = -vec3(obj:getNodeForceVectorNonInertialXYZ(stabilizationNodes.bottomCenter)):normalized()
-  -- local forceBias = 0.0
-  -- --desired up vector of the unicycle
-  -- local targetVector = (vec3(0, 0, 1) * (1 - forceBias) + forceBias * accVector)
-
-  -- stabilizationTorqueAxis = targetVector:cross(vectorUp)
-  -- local stabilizationError = (targetVector - vectorUp):length()
-  -- local uprightStabilizationTorqueCoef = stabilizationPIDs.upright:get(-stabilizationError, 0, dt)
-  -- stabilizationDesiredTorque = uprightStabilizationTorqueCoef * stabilizationMaxTorque
 
   local vectorTopLeft = obj:getBeamVectorFromNode(stabilizationBeams.centerLeft, stabilizationNodes.topCenter):normalized()
   local normalLeft = vectorTopLeft:cross(-vectorUp):normalized()
@@ -274,7 +249,6 @@ local function updateFixedStep(dt)
 
   local desiredMovementVector = cameraRotation * guardedWalkVector * desiredMovementSpeed
 
-  --local actualMovementVector = obj:getVelocity():z0() --used to very ball based velocity
   local actualMovementVector = ballBasedPlayerVelocity:z0()
   local movementVectorDifference = desiredMovementVector - actualMovementVector
   local actualSpeed = actualMovementVector:length()
@@ -302,8 +276,20 @@ local function updateFixedStep(dt)
   local ballAVTorqueCoef = linearScale(abs(ballAV), maxAllowedBallAV, maxAllowedBallAV + 1, 1, 0)
   ballDesiredTorque = ballDesiredTorque * ballAVTorqueCoef
 
-  local yaw = obj:getYawAngularVelocity()
-  local yawForceCoef = stabilizationPIDs.yaw:get(yaw, 0, dt)
+  --yaw
+  local cameraDirection = (cameraRotation * cameraRotationStandardVector):z0():normalized()
+
+  local meshDirection = obj:getBeamVectorFromNode(stabilizationBeams.centerFront, stabilizationNodes.topCenter):z0():normalized()
+	--calculate angle between the two vectors
+  local angleError = atan2(cameraDirection.y, cameraDirection.x) - atan2(meshDirection.y, meshDirection.x)
+  --fix up the range to be [-pi, +pi]
+  if angleError > pi then
+    angleError = angleError - twoPi
+  elseif angleError <= -pi then
+    angleError = angleError + twoPi
+  end
+
+  local yawForceCoef = stabilizationPIDs.yawPosition:get(angleError, 0, dt)
   local yawLeftForceCoef = abs(min(yawForceCoef, 0))
   local yawRightForceCoef = abs(max(yawForceCoef, 0))
   local yawForceMultiplier = yawMaxForce * enableStabilizationCoef
@@ -314,10 +300,8 @@ local function updateFixedStep(dt)
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopRearRight * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopRearLeft * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
-
+  
   ----BeamMP----
-  local bodyRotation = quat(obj:getRotation()):toEulerYXZ().x
-
   if playerInfo.anyPlayerSeated then
 	  electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
 	  electrics.values.unicycle_walk_x = guardedWalkVector.x
@@ -327,13 +311,6 @@ local function updateFixedStep(dt)
 	  electrics.values.unicycle_speed = movementSpeedCoef
   end
 
-  if bodyrotationServo and electrics.values.unicycle_camera ~= nil then -- the camera check prevents rotation errors before it recieves rotation data
-    local rotatorError = bodyrotationServo.currentAngle + bodyRotation
-    bodyrotationServo:setTargetAngle(((electrics.values.unicycle_camera or 0) + rotatorError) % rad(360) -rad(180))
-  end
-
-  electrics.values.unicycle_body = (deg((electrics.values.unicycle_camera or 0) + bodyRotation)+180) % 360
-
 end
 
 local function updateGFX(dt)
@@ -342,7 +319,7 @@ local function updateGFX(dt)
 
   if isUnCrouching then
     unCrouchingPressureRatio = min(unCrouchingPressureRatio + dt * 2, ballPressureNormal)
-    obj:setGroupPressureRel(v.data.pressureGroups["ball"], unCrouchingPressureRatio)
+    obj:setGroupPressureRel(v.data.pressureGroups.ball, unCrouchingPressureRatio)
     if unCrouchingPressureRatio >= 1 then
       isUnCrouching = false
       isCrouching = false
@@ -395,7 +372,7 @@ local function jump(value)
     return
   end
 
-  if #ballGroundContactNodesPast > 0 then
+  if #ballGroundContactNodesPast > 0 or isTouchingGround then
     jumpForceTimer = jumpForceTime
     jumpCooldown = 0.5
   end
@@ -428,7 +405,7 @@ local function setFreeze(mode)
   isFrozen = mode == 1
 end
 
-local function settingsChanged(noRefresh)
+local function settingsChanged()
 end
 
 local function init(jbeamData)
@@ -489,25 +466,10 @@ local function init(jbeamData)
     if node.name == "ib8" then
       ballTorqueNodes[2] = node.cid
     end
-
-    -- if node.name == "r2" then
-    --   stabilizationTorqueNodes[0] = node.cid
-    -- end
-    -- if node.name == "r1" then
-    --   stabilizationTorqueNodes[1] = node.cid
-    -- end
-    -- if node.name == "bc8" then
-    --   stabilizationTorqueNodes[2] = node.cid
-    -- end
   end
 
   mapmgr.enableTracking()
   obj:setSleepingEnabled(false)
-
-  ----beamMP----
-  if powertrain.getDevice("bodyrotationServo") ~= nil then
-    bodyrotationServo = powertrain.getDevice("bodyrotationServo")
-  end
 end
 
 local function initLastStage()
@@ -532,13 +494,7 @@ local function reset()
   ballTorqueAxis = vec3(0, 0, 0)
   stabilizationPIDs.frontRear:reset()
   stabilizationPIDs.leftRight:reset()
-  --stabilizationPIDs.upright:reset()
-  stabilizationPIDs.yaw:reset()
-
-  ----beamMP----
-  if powertrain.getDevice("bodyrotationServo") ~= nil then
-    bodyrotationServo = powertrain.getDevice("bodyrotationServo")
-  end
+  stabilizationPIDs.yawPosition:reset()
 end
 
 local function vehicleActivated()

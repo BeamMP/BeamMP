@@ -17,7 +17,7 @@ local distanceMap = {}
 local nicknamesAllowed = true
 local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
-local syncTimer = 0
+local editSyncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
 local sentPastVehiclesYet = true
@@ -632,7 +632,7 @@ local function onVehicleSpawned(gameVehicleID)
 
 		else
 			log("I", "onVehicleSpawned", "Vehicle " .. gameVehicleID .. " edited")
-			syncTimer = 0
+			editSyncTimer = 0
 			vehiclesToSync[gameVehicleID] = 1.
 		end
 	end
@@ -1299,10 +1299,10 @@ local function onPreRender(dt)
 
 		--if not activeVeh and be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		-- Vehicles syncing timer
-		syncTimer = syncTimer + dt
-		if syncTimer > 15 then
+		editSyncTimer = editSyncTimer + dt
+		if editSyncTimer > 15 then
 			if settings.getValue("autoSyncVehicles") then sendPendingVehicleEdits() end
-			syncTimer = 0
+			editSyncTimer = 0
 		end
 
 		for serverVehicleID, v in pairs(vehicles) do

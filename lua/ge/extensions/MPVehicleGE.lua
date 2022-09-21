@@ -1264,10 +1264,10 @@ local function onPreRender(dt)
 		if activeVeh then
 			local vel = vec3()
 			vel:set(activeVeh:getVelocity())
-			
-			local maxSyncSpd = 0.5 --settings.getValue("maxSyncSpd") 
+
+			local maxSyncSpd = 0.5 --settings.getValue("maxSyncSpd")
 			local maxTime = 0 --settings.getValue("timeBeforeSync")
-			
+
 			local canSync = false
 			-- This vehicle speed is currently based of of the camera speed, this is how it was used before.
 			local vehicleSpd = math.abs(vel:length() or 0)
@@ -1278,7 +1278,7 @@ local function onPreRender(dt)
 				-- if time at speed more than or equal to max
 				if (variableSyncTimer >= maxTime) then
 					canSync = true
-				end			
+				end
 			else -- Reset
 				-- Check if reset is needed
 				if (isAtSyncSpd == true) then
@@ -1286,7 +1286,7 @@ local function onPreRender(dt)
 					variableSyncTimer = 0
 				end
 			end
-			
+
 			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and canSync) then applyQueuedEvents() end
 			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 		else

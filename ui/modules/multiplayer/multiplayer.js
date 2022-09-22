@@ -97,10 +97,7 @@ function($scope, $state, $timeout, $document) {
 	}
 
 	$scope.guestLogin = function() {
-		var u = document.getElementById('guestUsername').value;
-		u = u.replace(/[^\x20-\x7A]|[\x21-\x2F]|[\x3A-\x40]|[\x5B-\x60]/g, "").substring(0, 20).trim();
-		document.getElementById('guestUsername').value = '';
-		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ guest: u }) + "')");
+		bngApi.engineLua("MPCoreNetwork.login('')");
 	}
 	
 	$scope.$on('LoggedIn', function (event, data) {

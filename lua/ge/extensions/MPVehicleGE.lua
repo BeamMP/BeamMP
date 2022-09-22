@@ -981,7 +981,7 @@ local HandleNetwork = {
 		onServerVehicleRemoved(rawData)
 	end,
 	['t'] = function(rawData) -- coupler
-		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%[.+%])") -- '0-0:[jsonstring]'
 
 		if serverVehicleID ~= nil then
 			onServerVehicleCoupled(serverVehicleID, data)

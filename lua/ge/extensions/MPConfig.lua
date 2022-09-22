@@ -15,9 +15,9 @@ local PlayerServerID = -1
 local defaultSettings = {
 	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
-	enableSpawnQueue = true, enableQueueAuto = true, queueSkipUnicycle = true,
+	enableSpawnQueue = true, enableQueueAuto = true, queueSkipUnicycle = true, queueApplySpeed = 2, queueApplyTimeout = 3,
 	-- colors
-	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333", 
+	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333",
 
 	-- show custom vehicles in vehicle selector
 	showPcs = true,

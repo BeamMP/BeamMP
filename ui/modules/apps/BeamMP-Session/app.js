@@ -66,15 +66,24 @@ app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 		var queueBlock = document.getElementById("queue-block");
 		// To ensure that the element exists
 		if (queueBlock) {
-			if (queue.show) queueBlock.style.display = "";
-			else { queueBlock.style.display = "none"; return;}
-		}		
-		
+			if (queue.show) {
+				queueBlock.style["background-position"] = "0%";
+				queueBlock.style.display = "";
+			} else {
+				queueBlock.style.display = "none";
+				return;
+			}
+		}
+
 		var queueCount = queue.editCount + queue.spawnCount;
 		var queueElem = document.getElementById("Session-Queue")
 		queueElem.innerHTML = `${queue.spawnCount}|${queue.editCount}`;
 		queueElem.title = `Edits: ${queue.editCount}\nSpawns: ${queue.spawnCount}`; // titles dont work in game :C
 
+	});
+
+	$scope.$on('setAutoQueueProgress', function (event, progress) {
+		document.getElementById('queue-block').style["background-position"] = progress + "%";
 	});
 
 	$scope.$on('setStatus', function (event, status) {

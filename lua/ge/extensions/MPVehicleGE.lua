@@ -21,7 +21,7 @@ local editSyncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
 local sentPastVehiclesYet = true
-local variableSyncTimer = 0
+local queueApplyTimer = 0
 local isAtSyncSpeed = true
 
 local roleToInfo = {
@@ -1262,34 +1262,35 @@ local function onPreRender(dt)
 		-- get camera position, apply queue
 		local cameraPos = vec3(getCameraPosition())
 		if activeVeh then
-			local vel = vec3()
-			vel:set(activeVeh:getVelocity())
+			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 
-			local maxSyncSpd = 0.5 --settings.getValue("maxSyncSpd")
-			local maxTime = 0 --settings.getValue("timeBeforeSync")
+			if settings.getValue("queueAutoSkipRemote") and not isOwn(activeVehID) then applyQueuedEvents() end
 
-			local canSync = false
-			-- This vehicle speed is currently based of of the camera speed, this is how it was used before.
-			local vehicleSpd = math.abs(vel:length() or 0)
-			-- If below set speed
-			if (vehicleSpd <= maxSyncSpd) then
-				isAtSyncSpd = true
-				variableSyncTimer = variableSyncTimer + dt
-				-- if time at speed more than or equal to max
-				if (variableSyncTimer >= maxTime) then
-					canSync = true
-				end
-			else -- Reset
-				-- Check if reset is needed
-				if (isAtSyncSpd == true) then
-					isAtSyncSpd = false
-					variableSyncTimer = 0
+			if settings.getValue("enableQueueAuto") then
+				local vehicleSpd = math.abs(activeVeh:getVelocity():length() or 0)
+
+				local maxSyncSpd = settings.getValue("queueApplySpeed")
+				local maxTime = settings.getValue("queueApplyTimeout")
+
+
+				-- If below set speed
+				if (vehicleSpd <= maxSyncSpd) then
+					queueApplyTimer = queueApplyTimer + dt
+					guihooks.trigger("setAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
+					-- if time under speed more than or equal to max
+					if (queueApplyTimer >= maxTime) then
+						applyQueuedEvents()
+						queueApplyTimer = 0
+					end
+				else -- Reset timer and UI
+					if queueApplyTimer > 0 then
+						guihooks.trigger("setAutoQueueProgress", "0")
+					end
+					queueApplyTimer = 0
 				end
 			end
-
-			if (not isOwn(activeVehID) and settings.getValue("queueAutoSkipRemote")) or (settings.getValue("enableQueueAuto") and canSync) then applyQueuedEvents() end
-			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 		else
+			queueApplyTimer = 0
 			applyQueuedEvents()
 			if not commands.isFreeCamera() then
 				commands.setFreeCamera()		-- Fix camera

@@ -13,6 +13,14 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
   <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' |
     translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
@@ -96,8 +104,8 @@
 </md-list-item>
 
 
-
-<md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.blobsTitle' | translate }}</md-subheader>
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.blobsTitle' | translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink>
   <p>{{:: 'ui.options.multiplayer.enableBlobs' | translate }}</p>
@@ -163,8 +171,8 @@
 </div>
 
 
-
-<md-subheader class="md-no-sticky">{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</md-subheader>
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink>
   <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
@@ -239,9 +247,8 @@
 </div>
 
 
-
-<md-subheader class="md-no-sticky" ng-show="options.data.values.showAdvancedMPOptions">{{:: 'ui.options.multiplayer.others' |
-  translate }}</md-subheader>
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start" ng-show="options.data.values.showAdvancedMPOptions"><p><h3>{{:: 'ui.options.multiplayer.others' |  translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
   <p>{{:: 'ui.options.multiplayer.debugOutput' | translate }}</p>

@@ -653,7 +653,7 @@ end
 
 M.onUpdate = function(dt)
 	if MP then
-		--while (true) do
+		while (true) do
 			local msg = MP:try_pop()
 			if msg then
 				local code = string.sub(msg, 1, 1)
@@ -664,9 +664,9 @@ M.onUpdate = function(dt)
 						handleGameMsg(data)
 				end    
 			else
-				--break
+				break
 			end
-		--end
+		end
 	end
 
 	if cleanUpSessionMods then

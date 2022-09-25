@@ -567,7 +567,15 @@ M.onInit = function()
 	-- Lets make sure that they are not in the middle of a game. This prevents them being presented the main menu when they reload lua while in game.
 	if not scenetree.missionGroup and getMissionFilename() == "" then 
 		-- Check the game version for if we expect it to be BeamMP compatable. This check adds the UI and Multiplayer Options so that they can then play.
-		if version[1] == "0" and version[2] == "25" then
+		if version[1] == "0" and version[2] == "26" then
+			print('Redirecting to the BeamMP UI for 0.26')
+			-- Lets now load the BeamMP Specific UI
+			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.26/index.html")) {location.replace("local://local/ui/entrypoints/main_0.26/index.html")}')
+
+			if not core_modmanager.getModList then
+				Lua:requestReload() 
+			end
+		elseif version[1] == "0" and version[2] == "25" then
 			print('Redirecting to the BeamMP UI for 0.25')
 			-- Lets now load the BeamMP Specific UI
 			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.25/index.html")) {location.replace("local://local/ui/entrypoints/main_0.25/index.html")}')

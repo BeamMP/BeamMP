@@ -642,7 +642,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 local function onVehicleDestroyed(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
@@ -745,7 +745,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
@@ -1217,13 +1217,13 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() == 1 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end
 
 local function onPreRender(dt)
-	if MPGameNetwork and MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem and MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 
 		-- get current vehicle ID and position
 		local activeVeh = be:getPlayerVehicle(0)
@@ -1525,7 +1525,7 @@ local function onVehicleReady(gameVehicleID)
 	if veh.mpVehicleType then
 		veh:queueLuaCommand("MPVehicleVE.setVehicleType('".. veh.mpVehicleType .."')")
 	end
-	MPGameNetwork.onVehicleReady(gameVehicleID)
+	MPCoreSystem.onVehicleReady(gameVehicleID)
 end
 
 

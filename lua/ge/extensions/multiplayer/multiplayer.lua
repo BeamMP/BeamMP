@@ -92,7 +92,7 @@ local function startMultiplayerByName(levelName)
 end
 
 local function onClientPreStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
 		local path, file, ext = path.splitWithoutExt(mission)
 		file = path .. 'mainLevel'
 		if not FS:fileExists(file..'.lua') then return end
@@ -104,10 +104,10 @@ local function onClientPreStartMission(mission)
 end
 
 local function onClientPostStartMission()
-	if MPCoreNetwork.isMPSession() then
+	if MPCoreSystem.isMPSession() then
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
 		log('M', 'onClientPostStartMission', 'Setting game state to multiplayer.')
-		MPGameNetwork.connectToLauncher()
+		MPCoreSystem.connectToLauncher()
 	end
 end
 

@@ -50,7 +50,7 @@ function($scope, $state, $timeout, $document) {
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.connect = function () {
-		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
+		bngApi.engineLua('MPCoreSystem.disconnectLauncher(true)');
 	};
 	
 	$scope.$on('launcherConnected', function (event, data) {

@@ -38,7 +38,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
 
 			data = jsonEncode(decoded)
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
+			MPCoreSystem.send('GAME','Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end

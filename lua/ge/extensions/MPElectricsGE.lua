@@ -31,7 +31,7 @@ local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
 	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('We:'..serverVehicleID..":"..data)
+			MPCoreSystem.send('GAME','We:'..serverVehicleID..":"..data)
 			lastElectrics = data
 		end
 	end

@@ -311,8 +311,8 @@ local function onInit()
 	end
 	disableCollisions()
 end
-
-M.onInit     = onInit
+onInit()
+--M.onInit     = onInit
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes

@@ -1217,7 +1217,7 @@ end
 
 
 local function onUpdate(dt)
-	if MPCoreSystem.connectionStatus() == 1 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() >= 1 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end

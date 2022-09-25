@@ -447,12 +447,16 @@ end
 -- Keypress handling
 -------------------------------------------------------------------------------
 addKeyEventListener = function(keyname, f, type)
-	f = f or function() end
-	log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
-	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
-	table.insert(keysToPoll, keyname)
+	if keyname then 
+		f = f or function() end
+		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
+		table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
+		table.insert(keysToPoll, keyname)
 
-	be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
+		be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
+	else
+		log('E','AddKeyEventListener', "function called but keyname was nil")
+	end
 end
 
 onKeyPressed = function(keyname, f)

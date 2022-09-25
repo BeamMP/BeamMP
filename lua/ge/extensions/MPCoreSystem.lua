@@ -373,9 +373,9 @@ end
 --==================================================== MESSAGE RELATED  ====================================================
 
 local function handleU(params)
-	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
+	UI.updateLoading(data)
 	if code == "l" and launcherConnectionStatus >= 2 then
 		--log('W',"handleU", data)
 		if settings.getValue('beammpAlternateModloading') then

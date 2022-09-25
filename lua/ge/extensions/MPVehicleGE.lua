@@ -37,6 +37,17 @@ local roleToInfo = {
 	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" }
 }
 
+local simplified_vehicles = {
+    etk800 = "simple_traffic_etk800",
+    etkc = "simple_traffic_etkc",
+    etki = "simple_traffic_etki",
+    legran = "simple_traffic_legran",
+    midsize = "simple_traffic_midsize",
+    pessima = "simple_traffic_pessima_parked",
+    sunburst = "simple_traffic_sunburst",
+    vivace = "simple_vivace_slothub"
+}
+
 local settingsCache = {
 }
 -- ============= VARIABLES =============
@@ -487,6 +498,10 @@ local function applyVehSpawn(event)
 
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
+	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
+		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	end
+
 	--fresh spawns dont contain paint data?
 	if not vehicleConfig.paints then
 		vehicleConfig.paints = {}
@@ -540,6 +555,10 @@ local function applyVehEdit(serverID, data)
 	local playerName = players[decodedData.pid] and players[decodedData.pid].name or 'Unknown'
 
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
+
+	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
+		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	end
 
 	if vehicleName == veh:getJBeamFilename() then
 		log('I','applyVehEdit',"Updating vehicle "..gameVehicleID.." config")

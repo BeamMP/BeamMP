@@ -13,6 +13,14 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
   <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' |
     translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>

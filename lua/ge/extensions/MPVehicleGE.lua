@@ -596,7 +596,7 @@ end
 --============================ ON VEHICLE SPAWNED (CLIENT) ============================
 local function onVehicleSpawned(gameVehicleID)
 
-	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+	if not MPCoreSystem.isMPSession() then return end -- do nothing if singleplayer
 
 	local veh = be:getObjectByID(gameVehicleID)
 	local newJbeamName = veh:getJBeamFilename()
@@ -672,7 +672,7 @@ end
 
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	if MPCoreNetwork.isMPSession() then -- If TCP connected
+	if MPCoreSystem.isMPSession() then -- If TCP connected
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 
 		if newGameVehicleID and newGameVehicleID > -1 then
@@ -1014,7 +1014,7 @@ end
 
 local function saveDefaultRequest()
 	local currentVehicle = be:getPlayerVehicle(0)
-	if not MPCoreNetwork.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
+	if not MPCoreSystem.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
 		extensions.core_vehicle_partmgmt.savedefault()
 		log('I', "saveDefaultRequest", "Request to save vehicle accepted")
 	else
@@ -1024,7 +1024,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreSystem.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -1058,7 +1058,7 @@ local function spawnRequest(model, config, colors)
 end
 
 local function saveConfigRequest(configfilename)
-	if not MPCoreNetwork.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
+	if not MPCoreSystem.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 

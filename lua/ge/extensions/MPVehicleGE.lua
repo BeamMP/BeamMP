@@ -38,14 +38,16 @@ local roleToInfo = {
 }
 
 local simplified_vehicles = {
-    etk800 = "simple_traffic_etk800",
-    etkc = "simple_traffic_etkc",
-    etki = "simple_traffic_etki",
-    legran = "simple_traffic_legran",
-    midsize = "simple_traffic_midsize",
-    pessima = "simple_traffic_pessima_parked",
-    sunburst = "simple_traffic_sunburst",
-    vivace = "simple_vivace_slothub"
+	coupe = "simple_traffic_coupe",
+	covet = "simple_covet",
+	etk800 = "simple_traffic_etk800",
+	etkc = "simple_traffic_etkc",
+	etki = "simple_traffic_etki",
+	legran = "simple_traffic_legran",
+	midsize = "simple_traffic_midsize",
+	pessima = "simple_traffic_pessima",
+	sunburst = "simple_traffic_sunburst",
+	vivace = "simple_vivace_slothub"
 }
 
 local settingsCache = {

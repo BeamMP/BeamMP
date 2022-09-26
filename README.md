@@ -1,4 +1,7 @@
 # BeamMP
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5be8335e939e4a14a2afe32eaef8a457)](https://app.codacy.com/gh/BeamMP/BeamMP?utm_source=github.com&utm_medium=referral&utm_content=BeamMP/BeamMP&utm_campaign=Badge_Grade_Settings)
+
 A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
 # Important Links

@@ -7,8 +7,12 @@
 
 local M = {}
 
-local timer = 0.5 -- timer to prevent doors from opening on spawn and reset
+local timer = 0.1 -- timer to prevent doors from opening on spawn and reset
 local MPcouplercache = {}
+local lastNodeIDcoupled
+local lastNodeID2coupled
+local lastNodeIDdecoupled
+local lastNodeID2decoupled
 
 local function toggleCouplerState(data)
 	local decodedData = jsonDecode(data)
@@ -38,14 +42,17 @@ local function toggleCouplerState(data)
 end
 
 local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attachEnergy)
-	if v.mpVehicleType == "L" then
+	if nodeId == lastNodeID2coupled and obj2nodeId == lastNodeIDcoupled then return end -- stops it from sending a double packet
+	if timer <= 0 and v.mpVehicleType == "L" then
 		local ID = obj:getID()
+		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
 		if timer <= 0 and ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then
+					Advanced = true
 					local couplerstates = {}
 					couplerstates.name = v.name
 					couplerstates.state = state
@@ -56,30 +63,38 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 		end
 
 		-- basic couplers
-		local MPcouplers = {}
-		MPcouplers.state = true
-		MPcouplers._nodetag = nodeId
-		if ID == obj2id then -- checking if coupler is connecting to another vehicle
-			MPcouplers.trailer = false
-		else
-			MPcouplers.trailer = true
+		if not Advanced then
+			local MPcouplers = {}
+			MPcouplers.state = true
+			MPcouplers._nodetag = nodeId
+			if ID == obj2id then -- checking if coupler is connecting to another vehicle
+				MPcouplers.trailer = false
+			else
+				MPcouplers.trailer = true
+			end
+			MPcouplers.obj2id = obj2id
+			table.insert(MPcouplerdata,MPcouplers)
 		end
 
-		MPcouplers.obj2id = obj2id
-		table.insert(MPcouplerdata,MPcouplers)
 		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
 	end
+	
+	lastNodeIDcoupled = nodeId
+	lastNodeID2coupled = obj2nodeId
 end
 
 local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
-	if v.mpVehicleType == "L" then
+	if nodeId == lastNodeID2decoupled and obj2nodeId == lastNodeIDdecoupled then return end -- stops it from sending a double packet
+	if timer <= 0 and v.mpVehicleType == "L" then
 		local ID = obj:getID()
+		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
 		if timer <= 0 and ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then
+					Advanced = true
 					local couplerstates = {}
 					couplerstates.name = v.name
 					couplerstates.state = state
@@ -90,19 +105,24 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 		end
 
 		-- basic couplers
-		local MPcouplers = {}
-		MPcouplers.state = false
-		MPcouplers._nodetag = nodeId
-		if ID == obj2id then -- checking if coupler is connecting to another vehicle
-			MPcouplers.trailer = false
-		else
-			MPcouplers.trailer = true
+		if not Advanced then
+			local MPcouplers = {}
+			MPcouplers.state = false
+			MPcouplers._nodetag = nodeId
+			if ID == obj2id then -- checking if coupler is connecting to another vehicle
+				MPcouplers.trailer = false
+			else
+				MPcouplers.trailer = true
+			end
+			MPcouplers.obj2id = obj2id
+			table.insert(MPcouplerdata,MPcouplers)
 		end
 
-		MPcouplers.obj2id = obj2id
-		table.insert(MPcouplerdata,MPcouplers)
 		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
 	end
+	
+	lastNodeIDdecoupled = nodeId
+	lastNodeID2decoupled = obj2nodeId
 end
 
 local function updateGFX(dt)
@@ -112,7 +132,7 @@ local function updateGFX(dt)
 end
 
 local function onReset()
-	timer = 0.5
+	timer = 0.1
 	MPcouplercache = {}
 	local AdvCouplers = controller.getControllersByType("advancedCouplerControl")
 	if AdvCouplers == nil then return end
@@ -122,6 +142,11 @@ local function onReset()
 		couplerstates.state = "attached"
 		table.insert(MPcouplercache,couplerstates)
 	end
+	
+	lastNodeIDcoupled = nil
+	lastNodeID2coupled = nil
+	lastNodeIDdecoupled = nil
+	lastNodeID2decoupled = nil
 end
 
 M.onReset            = onReset

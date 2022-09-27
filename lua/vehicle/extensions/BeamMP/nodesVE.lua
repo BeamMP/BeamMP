@@ -198,15 +198,45 @@ end
 
 --------- start of disableCollision modification
 
+local abs = math.abs
 local NORMALTYPE = 0
 local NODE_FIXED = 1
-local collisionNodesTable = {}
-local selfCollisionNodesTable = {}
-local staticCollisionNodesTable = {}
+local wheelNodes = {}
+
+local function nodeCheck(nodeID)
+	local connectedNodes = {}
+	for _, beam in pairs(v.data.beams) do
+		if beam.id1 == nodeID then
+			connectedNodes[beam.id2] = 1
+		else 
+			if beam.id2 == nodeID then
+				connectedNodes[beam.id1] = 1
+			end
+		end
+	end
+	
+	local shellNode = {true, true, true}
+	for id, num in  pairs(connectedNodes) do
+		if abs(v.data.nodes[nodeID].pos.x) < abs(v.data.nodes[id].pos.x) then
+			shellNode[0] = false
+		end	
+		
+		if abs(v.data.nodes[nodeID].pos.y) < abs(v.data.nodes[id].pos.y) then
+			shellNode[1] = false
+		end	
+		
+		if abs(v.data.nodes[nodeID].pos.z) < abs(v.data.nodes[id].pos.z) then
+			shellNode[2] = false
+		end	
+	end
+	
+	return shellNode[0] or shellNode[1] or shellNode[2]
+end
 
 local function disableCollisions()
-	local doCollision = false ---controls the feature
-	
+	local doCollision = true
+	if tempValue == 'true' then doCollision = true
+	else doCollision = false end
 
 	local vehType = v.mpVehicleType and v.mpVehicleType == "R" or v.mpVehicleType == "remote" or true
 	if not vehType then return end --return if veh is local
@@ -214,33 +244,43 @@ local function disableCollisions()
 	print(tostring(obj:getID()).." collision have been set to "..tostring(doCollision))
 
 	if v.data.nodes == nil then return end
+	
 	for _, node in pairs(v.data.nodes) do -- For each node
 
-		local collision = node.collision or true
+		local collision = false
 		local selfCollision = node.selfCollision or false
 		local staticCollision = node.staticCollision or true
-
-		if node.wheelID == nil then -- If it's not a wheel
-			local id = node.cid
-			if collisionNodesTable[id] then collision = doCollision end
-			--if selfCollisionNodesTable[id] then selfCollision = not doCollision end
-			--if staticCollisionNodesTable[id] then staticCollision = doCollision end
-		end
-
-		-- --------------------- Self collision ---------------------
-		--local collision = node.collision or true
-	
-		-- --------------------- Self collision ---------------------
-		--local selfCollision = node.selfCollision or false
 		
-		-- --------------------- Static collision ---------------------
-		--local staticCollision = node.staticCollision or true
+		local skip = false
+		
+		if node.wheelID ~= nil then
+			dump(node)
+		end	
+		
+		if node.wheelID ~= nil or nodeCheck(node.cid) == true then -- If it's a wheel
+			if node.wheelID ~= nil then
+				if wheelNodes[node.wheelID] == nil then
+					wheelNodes[node.wheelID] = 0
+				end
+				
+				if wheelNodes[node.wheelID] < 2 then
+					wheelNodes[node.wheelID] = wheelNodes[node.wheelID] + 1
+					goto continue
+				else 
+					wheelNodes[node.wheelID] = 0
+				end
+				
+			else
+				goto continue
+			end
+		end
+		
 
 		-- --------------------- Node type ---------------------
 		local ntype = NORMALTYPE
 		if node.fixed == true then ntype = NODE_FIXED end
 
-		-- --------------------- Randoom stuff ---------------------
+		-- --------------------- Random stuff ---------------------
 		local frictionCoef = type(node.frictionCoef) == 'number' and node.frictionCoef or 1
 		local slidingFrictionCoef = type(node.slidingFrictionCoef) == 'number' and node.slidingFrictionCoef or frictionCoef
 		local noLoadCoef = type(node.noLoadCoef) == 'number' and node.noLoadCoef or 1
@@ -257,6 +297,7 @@ local function disableCollisions()
 
 		-- We set the node
 		local pos = obj:getNodePosition(node.cid)
+		
 		obj:setNode(
 			node.cid,
 			pos.x,
@@ -281,38 +322,21 @@ local function disableCollisions()
 			staticCollision, 
 			nodeMaterialTypeID
 		)
-
-		-- Pair node for wheels
-		if node.pairedNode then
-			obj:setNodePair2WheelId(node.cid, node.pairedNode, node.pairedNode2 or -1, node.wheelID or -1)
-		end
+		
+		::continue::
 	end
+	
 	print(tostring(obj:getID()).." state set successfully")
 	
-	---TODO reset the vehicle to ensure game stability
-	
-	--obj:queueGameEngineLua("be:reloadCollision()")
-
+	obj:requestReset(RESET_PHYSICS)
 end
 
 local function onInit()
 	print("disableCollision has been called")
-	if v.data.nodes == nil then return end
-	for _, node in pairs(v.data.nodes) do
-		if node.collision == nil then
-			collisionNodesTable[node.cid] = true
-		end
-		if node.selfCollision == nil then
-			selfCollisionNodesTable[node.cid] = true
-		end
-		if node.staticCollision == nil then
-			staticCollisionNodesTable[node.cid] = true
-		end
-	end
 	disableCollisions()
 end
-onInit()
---M.onInit     = onInit
+
+M.onExtensionLoaded = onInit
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes

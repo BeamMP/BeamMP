@@ -253,10 +253,6 @@ local function disableCollisions()
 		
 		local skip = false
 		
-		if node.wheelID ~= nil then
-			dump(node)
-		end	
-		
 		if node.wheelID ~= nil or nodeCheck(node.cid) == true then -- If it's a wheel
 			if node.wheelID ~= nil then
 				if wheelNodes[node.wheelID] == nil then

@@ -234,14 +234,9 @@ local function nodeCheck(nodeID)
 end
 
 local function disableCollisions()
-	local doCollision = true
-	if tempValue == 'true' then doCollision = true
-	else doCollision = false end
-
-	local vehType = v.mpVehicleType and v.mpVehicleType == "R" or v.mpVehicleType == "remote" or true
-	if not vehType then return end --return if veh is local
-
-	print(tostring(obj:getID()).." collision have been set to "..tostring(doCollision))
+	print("disableCollision has been called")
+	
+	print(tostring(obj:getID()).." collision have been set to false")
 
 	if v.data.nodes == nil then return end
 	
@@ -327,12 +322,7 @@ local function disableCollisions()
 	obj:requestReset(RESET_PHYSICS)
 end
 
-local function onInit()
-	print("disableCollision has been called")
-	disableCollisions()
-end
-
-M.onExtensionLoaded = onInit
+M.disableCollisions = disableCollisions
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes

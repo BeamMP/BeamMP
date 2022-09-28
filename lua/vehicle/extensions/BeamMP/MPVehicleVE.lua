@@ -32,12 +32,14 @@ function addKeyEventListener(keyname, f, t)
 		for _,v in pairs(keyname) do
 			keysToPoll[v] = true
 		end
-	else
+	elseif keyname then
 		f = f or function() end
 		log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	
 		table.insert(keypressTriggers, {key = keyname, func = f, type = t or 'both'})
 		keysToPoll[keyname] = true
+	else
+		log('E','AddKeyEventListener', "function called but keyname was nil")
 	end
 end
 
@@ -48,7 +50,7 @@ local function onKeyStateChanged(key, state)
 			keypressTriggers[i].func(state)
 		end
 	end
-	obj:queueGameEngineLua("MPGameNetwork.onKeyStateChanged('"..key.."',"..tostring(state)..")")
+	obj:queueGameEngineLua("MPCoreSystem.onKeyStateChanged('"..key.."',"..tostring(state)..")")
 end
 
 function getKeyState(key)

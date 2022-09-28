@@ -103,9 +103,9 @@ local function onExtensionLoaded()
 	M.groundmarkerToPlayer     = MPVehicleGE.groundmarkerToPlayer     -- takes: string targetName
 	M.groundmarkerFollowPlayer = MPVehicleGE.groundmarkerFollowPlayer -- takes: string targetName
 
-	--MPGameNetwork
-	--M.addKeyEventListener = MPGameNetwork.addKeyEventListener -- takes: string keyName, function listenerFunction
-	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
+	--MPCoreSystem
+	--M.addKeyEventListener = MPCoreSystem.addKeyEventListener -- takes: string keyName, function listenerFunction
+	--M.getKeyState         = MPCoreSystem.getKeyState         -- takes: string keyName
 end
 
 M.onExtensionLoaded = onExtensionLoaded

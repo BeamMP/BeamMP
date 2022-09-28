@@ -23,10 +23,10 @@ end
 
 
 local function sendLivePowertrain(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('Yl:'..serverVehicleID..":"..data) -- Send powertrain to server
+			MPCoreSystem.send('GAME','Yl:'..serverVehicleID..":"..data) -- Send powertrain to server
 		end
 	end
 end

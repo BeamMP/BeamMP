@@ -24,7 +24,7 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			local decoded = jsonDecode(data)
@@ -38,7 +38,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
 
 			data = jsonEncode(decoded)
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
+			MPCoreSystem.send('GAME','Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end

@@ -1181,7 +1181,7 @@ local function workOffChangedMod(filename, type)
     if mod and mod.active ~= false then
       log('D', '', 'activateMod -- ' .. tostring(filename))
       activateMod(mod.modname)
-	  MPCoreNetwork.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
+	  MPCoreSystem.modLoaded(mod.modname) -- //////////////////////////////////////////////////////////////																								 
     end
     FS:triggerFilesChanged(files) -- alert c++ of changed files
     stateChanged()

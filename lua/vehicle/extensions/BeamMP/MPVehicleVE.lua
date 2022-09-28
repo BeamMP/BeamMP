@@ -57,7 +57,10 @@ end
 
 
 local function setVehicleType(x)
-  v.mpVehicleType = x
+	v.mpVehicleType = x
+	if v.mpVehicleType ~= "L" then --TODO check here if you want to add the option
+		nodesVE.disableCollisions()
+	end
 end
 
 local function updateGFX(dtReal)

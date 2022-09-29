@@ -108,8 +108,8 @@ local function isLauncherConnected()
 	return launcherConnectionStatus == 2
 end
 local function login(identifiers)
-	log('M', 'login', 'Attempting login')
-	send('N:'..identifiers)
+	log('M', 'login', 'Attempting login...')
+	send('N:'..jsonEncode(identifiers))
 end
 local function autoLogin()
 	send('Nc')
@@ -249,11 +249,11 @@ local function loginReceived(params)
 	log('M', 'loginReceived', 'Logging result received')
 	local result = jsonDecode(params)
 	if (result.success == true or result.Auth == 1) then
-		log('M', 'loginReceived', 'Login successful')
+		log('M', 'loginReceived', 'Login successful.')
 		loggedIn = true
 		guihooks.trigger('LoggedIn', result.message or '')
 	else
-		log('M', 'loginReceived', 'Login credentials incorrect')
+		log('M', 'loginReceived', 'Login failed.')
 		loggedIn = false
 		guihooks.trigger('LoginError', result.message or '')
 	end

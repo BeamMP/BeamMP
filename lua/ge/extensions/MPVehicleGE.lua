@@ -950,7 +950,9 @@ local function onServerVehicleCoupled(serverVehicleID, data)
 	local vehicle = getVehicleByServerID(serverVehicleID) -- Get game ID
 	if not vehicle.isLocal then
 		local veh = be:getObjectByID(vehicle.gameVehicleID)
-		veh:queueLuaCommand("couplerVE.toggleCouplerState('"..data.."')")
+		if veh then
+			veh:queueLuaCommand("couplerVE.toggleCouplerState('"..data.."')")
+		end
 	end
 end
 

@@ -366,20 +366,6 @@ local function onInit()
 			if not core_modmanager.getModList then
 				Lua:requestReload() 
 			end
-		elseif version[1] == "0" and version[2] == "25" then
-			print('Redirecting to the BeamMP UI for 0.25')
-			-- Lets now load the BeamMP Specific UI
-			be:executeJS('if (!location.href.includes("local://local/ui/entrypoints/main_0.25/index.html")) {location.replace("local://local/ui/entrypoints/main_0.25/index.html")}')
-
-			if not core_modmanager.getModList then
-				Lua:requestReload() 
-			end
-		elseif version[1] == "0" and version[2] == "23" then
-			print('Redirecting to the BeamMP UI for 0.23')
-			-- TODO #199 - Add the 0.23 UI here as I did above for 0.24
-			if not core_modmanager.getModList then
-				Lua:requestReload() 
-			end
 		else
 			print('BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)
 			guihooks.trigger('modmanagerError', 'BeamMP is not compatible with BeamNG.drive v'..beamng_versiond)

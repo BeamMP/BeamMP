@@ -40,10 +40,10 @@ angular.module('beamng.stuff')
       template: `
       <div class="mpMenuNavbar">
         <div layout="row" layout-align="stretch" flex="noshrink">
-          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://beammp.com')">BeamMP.com</span>
-          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://forum.beammp.com/')">FORUM</span>
-          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://www.patreon.com/BeamMP')">PATREON</span>
-          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://discord.gg/beammp')">DISCORD</span>
+          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://beammp.com')" tabindex="false">BeamMP.com</span>
+          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://forum.beammp.com/')" tabindex="false">FORUM</span>
+          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://www.patreon.com/BeamMP')" tabindex="false">PATREON</span>
+          <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://discord.gg/beammp')" tabindex="false">DISCORD</span>
         </div>
 
         <div class="nav-item">
@@ -60,14 +60,14 @@ angular.module('beamng.stuff')
         <div bng-no-nav="true" class="nav-item">
           <div>BeamMP v{{ ::beammpGameVer }}</div>
         </div>
-        <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" class="nav-item clickable">
+        <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" class="nav-item clickable" tabindex="false">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
           <div ng-show='showBuildInfo' style="font-size:0.8em;">Alpha v{{ ::versionStr }}<br/> {{ ::buildInfoStr }}</div>
         </div>
-        <div class="nav-item clickable" ng-click="nav('settings')" ui-sref="menu.options.graphics">
+        <div class="nav-item clickable" ng-click="nav('settings')" ui-sref="menu.options.graphics" tabindex="false">
           <img src="/ui/modules/mp_mainmenu/drive/icons/settings.svg" style="width: 16px; height: 16px; filter: invert(1);">
         </div>
-        <div class="nav-item clickable" ng-click="::quit()">
+        <div class="nav-item clickable" ng-click="::quit()" tabindex="false">
           <img src="/ui/modules/mp_mainmenu/drive/icons/exit2.svg" style="width: 16px; height: 16px; filter: invert(1);">
         </div>
       </div>

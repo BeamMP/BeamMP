@@ -31,6 +31,7 @@
 #primary-div {
   background-color: var(--bg-secondary);
   border-radius: 5px;
+  padding: 1em;
 }
 
 #serversTableBody {
@@ -72,6 +73,7 @@ table#serversTable {
   margin-left: auto;
   margin-right: auto;
   background-color: var(--bg-secondary);
+  padding: 0.5em;
 }
 
 #serversTable th {

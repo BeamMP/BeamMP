@@ -31,11 +31,6 @@
 #primary-div {
   background-color: rgba(0, 0, 0, 0.55);
 }
-
-#serversTableBody {
-  /* border-radius: 5px; */
-}
-
 /* CUSTOM END */
 
 .offset-div {
@@ -86,7 +81,7 @@ table#serversTable {
   background-color: var(--clean-red);
 }
 
-#serversTable tbody tr:hover {
+#serversTable tr:not(#ServerInfoRow):hover {
   background-color: rgba(0, 0, 0, 0.25);
 }
 
@@ -113,11 +108,6 @@ table#serversTable {
   width: 200px;
   margin: 0 0 0 10px;
   height: 40px;
-}
-
-.button:hover {
-  background-color: white;
-  border: 1px solid var(--clean-red);
 }
 
 .close-button {
@@ -216,7 +206,7 @@ input {
 }
 
 tr#ServerInfoRow {
-  background-color: #3535357a;
+  background-color: var(--bg-secondary);
 }
 
 ul.serverItemDetails {

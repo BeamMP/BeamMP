@@ -29,7 +29,6 @@
 }
 
 #primary-div {
-  background-color: var(--bg-secondary);
   border-radius: 5px;
   padding: 1em;
 }

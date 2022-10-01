@@ -71,15 +71,16 @@ function($scope, $state, $timeout, $document) {
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	var vm = this;
 	$scope.login = function() {
-		var u = document.getElementById('loginUsername').value.trim();
-		var p = document.getElementById('loginPassword').value.trim();
-		if (u == "" || p == ""){
+		let credentials = {}
+		credentials.username = document.getElementById('loginUsername').value.trim();
+		credentials.password = document.getElementById('loginPassword').value.trim();
+		if (credentials.username == "" || credentials.password == ""){
 			document.getElementById('loginHeader').textContent = 'Missing credentials';
 			return;
 		}	
 		document.getElementById('loginPassword').value = '';
 		document.getElementById('loginHeader').textContent = 'Attempting to log in...';
-		bngApi.engineLua("MPCoreNetwork.login('" + JSON.stringify({ username: u, password: p }) + "')");
+		bngApi.engineLua('MPCoreNetwork.login(' + bngApi.serializeToLua(credentials) + ')');
 	}
 
 	$scope.switchConnection = function() {

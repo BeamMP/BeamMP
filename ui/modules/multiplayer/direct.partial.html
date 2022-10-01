@@ -1,14 +1,13 @@
-<div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center">
-	<md-content>
-		<div style="background: var(--bg-secondary); padding: 10px; border-radius: 5px; color: white; text-align: center">
-			<div layout="row">
-				<input type="text" id="directip" name="ip" placeholder="Server IP" value="127.0.0.1" tabindex="1"/>
-				<md-button class="button servers-button" ng-class="" ng-click="multiplayer.pasteClipboardToDirectIP()">Paste from Clipboard</md-button>
-			</div>
-			<input type="text" id="directport" name="port" placeholder="Server Port" value="30814" tabindex="2"/>
-			<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
-			<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()" tabindex="3">Connect</md-button>
+<mp-menu-navbar></mp-menu-navbar>
+<div style="display: flex; justify-content: center; align-items: center; height: 80%">
+	<div style="background: var(--bg-secondary); padding: 10px; border-radius: 5px; color: white; text-align: center">
+		<div layout="row">
+			<input type="text" id="directip" name="ip" placeholder="Server IP" value="127.0.0.1" tabindex="1"/>
+			<md-button class="button servers-button" ng-class="" ng-click="multiplayer.pasteClipboardToDirectIP()">Paste from Clipboard</md-button>
 		</div>
-		<div id="footer"></div>
-	</md-content>
+		<input type="text" id="directport" name="port" placeholder="Server Port" value="30814" tabindex="2"/>
+		<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
+		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()" tabindex="3">Connect</md-button>
+	</div>
+	<div id="footer"></div>
 </div>

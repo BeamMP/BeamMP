@@ -39,7 +39,7 @@ angular.module('beamng.stuff')
     return {
       template: `
       <div class="mpMenuNavbar">
-        <div layout="row" layout-align="start stretch" flex="noshrink">
+        <div layout="row" layout-align="stretch" flex="noshrink">
           <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://beammp.com')">BeamMP.com</span>
           <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://forum.beammp.com/')">FORUM</span>
           <span bng-no-nav="true" class="nav-item clickable" style="text-transform: uppercase" ng-click="openBrowser('https://www.patreon.com/BeamMP')">PATREON</span>

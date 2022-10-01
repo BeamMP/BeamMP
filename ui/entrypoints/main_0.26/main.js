@@ -86,6 +86,18 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       views: {
         'loader':{}, // empty the loader view
         '@menu': { // targe the unnamed default view in the menu parent state
+          url: '/mainmenu',
+          templateUrl: `/ui/modules/mp_mainmenu/drive/mainmenu.html`,
+          controller: 'MPMainMenuController as mmCtrl',
+        }
+      }
+    })
+
+    .state('menu.bngmainmenu', {
+      views: {
+        'loader':{}, // empty the loader view
+        '@menu': { // targe the unnamed default view in the menu parent state
+          url: '/bngmainmenu',
           templateUrl: `/ui/modules/mainmenu/drive/mainmenu.html`,
           controller: 'MainMenuController as mmCtrl',
         }
@@ -96,7 +108,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/onlineFeatures',
       templateUrl: `/ui/modules/onlineFeatures/online.html`,
       controller: 'OnlineFeaturesController',
-      backState: 'menu.mainmenu',
+      backState: 'menu.bngmainmenu',
     })
 
     .state('menu.bigmap', {
@@ -113,7 +125,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/levels',
       templateUrl: '/ui/modules/levelselect/levelselect.html',
       controller:  'LevelSelectController as lsCtrl',
-      backState: 'menu.mainmenu',
+      backState: 'menu.bngmainmenu',
     })
 
     .state('menu.levelDetails', {
@@ -127,7 +139,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/bus',
       templateUrl: '/ui/modules/busRoute/busRoute.html',
       controller: 'BusRoutesController as busCtrl',
-      backState: 'menu.mainmenu',
+      backState: 'menu.bngmainmenu',
     })
 
     .state('menu.busRoutesLevelSelect', {
@@ -169,17 +181,15 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       url: '/scenarios',
       templateUrl: '/ui/modules/scenarioselect/scenarioselect.html',
       controller: 'ScenarioSelectController',
-      backState: 'menu.mainmenu',
+      backState: 'menu.bngmainmenu',
     })
 
     .state('menu.campaigns', {
       url: '/campaigns',
       templateUrl: '/ui/modules/campaignselect/campaignselect.html',
       controller: 'CampaignSelectController as campaignSelect',
-      backState: 'menu.mainmenu',
+      backState: 'menu.bngmainmenu',
     })
-
-
 
     .state('menu.appedit', {
       url: '/appedit/:mode',
@@ -1569,7 +1579,6 @@ angular.module('beamng.stuff')
   $scope.$on('ChangeState', function (event, data, ifCurrent) {
     //console.log('received ForceStateChange w/', data, ifCurrent, $state.current.name, transitioningTo)
     params = data.params || {}
-
 
     state = (typeof data === 'string' ? data : data.state)
     help = (transitioningTo !== undefined && transitioningTo !== $state.current.name ? transitioningTo : $state.current.name)

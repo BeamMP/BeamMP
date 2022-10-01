@@ -1,0 +1,99 @@
+<div ng-if="!app.shipping"
+    style="font-weight:bold;width:420px;height:auto;position:fixed;padding-left:5px;top:5px;left:5px;font-size:60px;font-family:Roboto;margin:0;background-color:rgba(0,0,0,0.6);color:white;border-radius:0px 0px 10px 0px;">
+    <md-icon class="material-icons">bug_report</md-icon>DEV RELEASE
+</div>
+
+<div>
+    <div class="mainmenu">
+        <div class="navbar" ng-if="app.ingame && 'menu' | includedByState">
+            <mp-menu-navbar></mp-menu-navbar>
+        </div>
+
+        <div class="flex-container" ng-if="app.ingame && 'menu' | includedByState">
+            <div class="flex-items">
+                <div class="flex-main">
+                    <div class="flex-buttons">
+                        <div class="clickable flex-button" ui-sref="menu.multiplayer.tos">
+                            <div class="menu-card-title">
+                                <h1>Server Browser</h1>
+                            </div>
+                            <div class="menu-card-content" ng-controller="MPMainMenuController">
+                                <h3>Welcome back, <b>{{::steamData.playerName}}</b>!</h3>
+                            </div>
+                        </div>
+
+                        <div class="clickable flex-button" ui-sref="menu.bngmainmenu">
+                            <span class="menu-button-text">
+                                <div class="menu-card-title">
+                                    <h1>Singleplayer</h1>
+                                </div>
+                                <div class="menu-card-content">
+                                    <h3>Play the game in singleplayer</h3>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex-server-buttons">
+                        <div class="clickable server-button" ui-sref="menu.multiplayer.recent">
+                            <h1>Recent</h1>
+                            <h3>View your recent servers</h3>
+                        </div>
+
+                        <div class="clickable server-button" ui-sref="menu.multiplayer.favorites">
+                            <h1>Favorites</h1>
+                            <h3>View your favorite servers</h3>
+                        </div>
+
+                        <div class="clickable server-button" ui-sref="menu.multiplayer.direct">
+                            <h1>Direct Connect</h1>
+                            <h3>Connect to a server by IP</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-items">
+                <div class="menu-cards">
+                    <!-- Server Hosting Card -->
+                    <div class="clickable menu-card" ng-click="openBrowser('https://wiki.beammp.com/en/home/server-installation')">
+                        <div class="menu-card-title">
+                            <h1>Server Hosting</h1>
+                        </div>
+                        <div class="menu-card-content">
+                            <h4>Hosting a server is easy and free! Click here to find out how</h4>
+                        </div>
+                    </div>
+
+                    <!-- Server Resource Card -->
+                    <div class="clickable menu-card" ng-click="openBrowser('https://wiki.beammp.com/en/Scripting/new-lua-scripting')">
+                        <div class="menu-card-title">
+                            <h1>Server Scripting</h1>
+                        </div>
+                        <div class="menu-card-content">
+                            <h4>Learn how to create resources for your server and share them with the community</h4>
+                        </div>
+                    </div>
+
+                    <!-- Server Resource Card -->
+                    <div class="clickable menu-card" ng-click="openBrowser('https://wiki.beammp.com/en/Scripting/client_scripting')">
+                        <div class="menu-card-title">
+                            <h1>Client Scripting</h1>
+                        </div>
+                        <div class="menu-card-content">
+                            <h4>Client scripts are used to modify the game's behavior. Learn how to create them</h4>
+                        </div>
+                    </div>
+
+                    <!-- Donation Card -->
+                    <div class="clickable menu-card" ng-click="openBrowser('https://www.patreon.com/BeamMP')">
+                        <div class="menu-card-title">
+                            <h1>Support us</h1>
+                        </div>
+                        <div class="menu-card-content">
+                            <h4>Help us keep the servers running by donating</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -848,7 +848,7 @@ function getServerInfoHTML(d) {
 		var favButton;
 		//console.log(d);
 		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
-		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
+		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: var(--bg-main);">Add Favorite</md-button>`;
 		return `
 				<td colspan="5">
 					<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
@@ -917,7 +917,14 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 		<td style="background-color:${bgcolor}; font-size: initial; min-width: 60px;">${formatHealth(server.pps)}${server.pps}</td>
 	`;
-	newRow.onclick = function() { select(this, bngApi); };
+	newRow.onclick = function() {
+		if (highlightedServer == server) {
+			deselect(newRow);
+			highlightedServer = null;
+		} else {
+			select(this, bngApi)
+		}
+	};
 }
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents

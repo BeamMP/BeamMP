@@ -88,6 +88,7 @@
   <script src="/ui/modules/bigmap/bigmap.js"></script>
 
   <script src="/ui/modules/mp_mainmenu/mainmenu.js"></script>
+  <script src="/ui/modules/mainmenu/mainmenu.js"></script>
   <script src="/ui/modules/menu/menu.js"></script>
   <script src="/ui/modules/onlineFeatures/online.js"></script>
   <script src="/ui/modules/career/career.js"></script>
@@ -120,6 +121,7 @@
 
   <link type="text/css" rel="stylesheet" href="/ui/entrypoints/main/main.css">
   <link type="text/css" rel="stylesheet" href="/ui/lib/ext/keys.css">
+  <link type="text/css" rel="stylesheet" href="/ui/modules/mp_mainmenu/mainmenu.css">
   <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu/mainmenu.css">
   <link type="text/css" rel="stylesheet" href="/ui/modules/menu/menu.css" />
   <link rel="stylesheet" type="text/css" href="/ui/modules/introPopup/intro.css" />
@@ -127,7 +129,6 @@
 </head>
 
 <body ng-controller="AppCtrl as app" ng-show="app.uiVisible" use-lang-font="1" class="container">
-
   <md-content ng-cloak ng-if="app.uitest" layout="row" style="border:2px solid #aaa;position:absolute;width:{{app.uitestshow?'400px':'1.6em'}};height:200px;top:50%;right:0; transform:translateY(-50%); z-index:var(--zorder_index_mdcontent); padding:2px;font-family:monospace;border-radius:5px; overflow:hidden;">
     <div style="width: 1.2em; padding: 2.5em 0;" ng-click="app.uitestshow = !app.uitestshow">
       <span style="display: block; white-space: nowrap; transform-origin: 50% 50%; transform: rotate(90deg);">UI Debug Show/Hide</span>
@@ -217,13 +218,13 @@
       <menu-content style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_index_menucontent);" ui-view></menu-content>
     </div>
 
-    <div class="navbar" ng-if="app.ingame && 'menu' | includedByState">
+    <div class="navbar" ng-if="(app.ingame && 'menu' | includedByState) && $state.current.name !== 'menu.mainmenu'">
       <!-- menuNavBar contents -->
       <menu-navbar></menu-navbar>
     </div>
   </div>
 
-  <fancy-background class="fancyBackgroundFill" ng-if="app.mainmenu"></fancy-background>
+  <main-background class="fancyBackgroundFill" ng-if="app.mainmenu"></main-background>
   <!--  .............. popups overlay ..............  -->
   <bng-intro-popup></bng-intro-popup>
   <bng-dialog></bng-dialog>

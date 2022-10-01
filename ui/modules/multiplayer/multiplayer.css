@@ -1,3 +1,43 @@
+/* CUSTOM START */
+:root {
+  --clean-red: #d4574ebd;
+  --bg-main: rgba(26, 23, 23, 1);
+  --bg-secondary: rgba(41, 38, 38, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.flex-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: center;
+    width: 100%;
+}
+
+.main-container {
+  display: flex;
+  flex-flow: column;
+  width: 95%;
+  height: 95%;
+  margin: 2em;
+}
+
+#primary-div {
+  background-color: var(--bg-secondary);
+  border-radius: 5px;
+}
+
+#serversTableBody {
+  border-radius: 5px;
+}
+/* CUSTOM END */
+
 .offset-div {
   position: absolute;
   width: 100%;
@@ -7,7 +47,7 @@
 }
 
 #top-bar {
-  background: #404040b8;
+  background-color: #404040b8;
 }
 
 #left-menu {
@@ -27,21 +67,23 @@
 }
 
 table#serversTable {
-  width: 100%;
+  width: 99%;
   color: white;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--bg-secondary);
 }
 
 #serversTable th {
-  background-color: rgba(0, 0, 0, 0);
   color: white;
   transition: 0.2s;
 }
 
 #serversTable th:hover {
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: var(--clean-red);
 }
 
-#serversTable tr:hover {
+#serversTable tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.25);
 }
 
@@ -56,7 +98,7 @@ table#serversTable {
 .button {
   color: white;
   text-align: center;
-  background-color: rgb(212, 100, 26);
+  background-color: var(--bg-main);
   text-decoration: none;
   font-size: 15px;
   width: 100%;
@@ -72,6 +114,7 @@ table#serversTable {
 
 .button:hover {
   background-color: white;
+  border: 1px solid var(--clean-red);
 }
 
 .close-button {

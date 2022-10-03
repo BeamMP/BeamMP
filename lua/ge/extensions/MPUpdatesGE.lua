@@ -9,18 +9,18 @@ local M = {}
 print("Loading MPUpdatesGE...")
 
 
-
+-- Tickrate - how often data is being sent from the client, in seconds
 local nodesDelay = 0
-local nodesTickrate = 1.0 -- in seconds
+local nodesTickrate = 1.0
 
 local positionDelay = 0
 local positionTickrate = 0.020
 
 local inputsDelay = 0
-local inputsTickrate = 1/32 -- 32 times / second
+local inputsTickrate = 1/30
 
 local electricsDelay = 0
-local electricsTickrate = 1/16 -- 16 times / second
+local electricsTickrate = 1/15
 
 local powertrainDelay = 0
 local powertrainTickrate = 1/10
@@ -39,7 +39,7 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork and MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		--nodesDelay = nodesDelay + dt
 		--if nodesDelay > getNodesTickrate() then
 		--	nodesDelay = 0 -- Reset the delay
@@ -67,7 +67,7 @@ local function onUpdate(dt)
 		powertrainDelay = powertrainDelay + dt
 		if powertrainDelay > powertrainTickrate then
 			powertrainDelay = 0 -- Reset the delay
-			MPPowertrainGE.tick() -- Comment this line to disable electrics synchronization
+			MPPowertrainGE.tick() -- Comment this line to disable powertrain synchronization
 		end
 	end
 end

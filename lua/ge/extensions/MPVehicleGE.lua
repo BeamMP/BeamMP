@@ -1211,7 +1211,7 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork and MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
 		localCounter = localCounter + dt
 	end
 end

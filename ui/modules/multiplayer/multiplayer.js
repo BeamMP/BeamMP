@@ -188,7 +188,7 @@ function($scope, $state, $timeout, $mdDialog) {
 	}
 
 	vm.refreshList = function() {
-		console.log("Attempting to refresh server list.")
+		//console.log("Attempting to refresh server list.")
 		bngApi.engineLua('MPCoreNetwork.getServers()');
 	}
 	
@@ -276,7 +276,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerController] destroyed.');
+		//console.log('[MultiplayerController] destroyed.');
 	});
 }])
 
@@ -316,7 +316,7 @@ function($scope, $state, $timeout) {
 	// Called when the page is left
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerServersController] destroyed.');
+		//console.log('[MultiplayerServersController] destroyed.');
 	});
 	
 	$scope.$on('onServersReceived', async function (event, data) {
@@ -397,7 +397,7 @@ function($scope, $state, $timeout) {
 	// When page is unloaded
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerRecentController] destroyed.');
+		//console.log('[MultiplayerRecentController] destroyed.');
 	});
 }])
 
@@ -457,7 +457,7 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerServersController] destroyed.');
+		//console.log('[MultiplayerServersController] destroyed.');
 	});
 
 	function setColor(row) {
@@ -490,7 +490,7 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerDirectController] destroyed.');
+		//console.log('[MultiplayerDirectController] destroyed.');
 	});
 }])
 

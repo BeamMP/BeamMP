@@ -20,7 +20,7 @@ local cleanuptimer = 0
 
 
 --this should be every extension that might possibly be running, EXCEPT for the extensions loaded by mods on the server.
---putting them in this table to be used by extensions.unloadExcept() effectively means ONLY extensions loaded by mods on a server will have onExtensionUnloaded 
+--putting them in this table to be used by extensions.unloadExcept() effectively means ONLY extensions loaded by mods on a server will have onExtensionUnloaded() called
 local extensionExceptions = {
 	'MPConfig', 'MPCoreNetwork', 'MPDebug', 'MPElectricsGE', 'MPGameNetwork', 'MPHelpers', 'MPInputsGE', 'MPModManager', 'MPPowertrainGE', 'MPUpdatesGE', 'MPVehicleGE', 'multiplayer_multiplayer', 'nodesGE', 'positionGE', 'UI',
 	'campaign_campaignsLoader',

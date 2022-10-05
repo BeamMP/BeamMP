@@ -14,8 +14,9 @@ app.directive('multiplayersession', [function () {
 
 app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 	$scope.init = function() {
-		bngApi.engineLua('UI.ready("MP-SESSION")'); // needed to get the server name
-		bngApi.engineLua('UI.sendQueue()'); // asks the lua to send queue data
+		bngApi.engineLua('UI.setServerName()'); // request server name
+		bngApi.engineLua('UI.sendQueue()'); // request queue data
+		//TODO: ping request to instantly populate the player count
 	};
 
 	mdDialog = $mdDialog;
@@ -86,11 +87,13 @@ app.controller("Session", ['$scope', '$mdDialog', function ($scope, $mdDialog) {
 		document.getElementById('queue-block').style["background-position"] = progress + "%";
 	});
 
-	$scope.$on('setStatus', function (event, status) {
+	$scope.$on('setServerName', function (event, data) {
 		//console.log('Setting status to: ' + sanitizeString(status))
-		if (status == "") document.getElementById("server-name-block").style.display = "none";
-		else document.getElementById("server-name-block").style.display = "";
-		document.getElementById("Session-Status").innerHTML = sanitizeString(status); // DISPLAY SERVER NAME FORMATTING
+		if (!data) document.getElementById("server-name-block").style.display = "none";
+		else {
+			document.getElementById("server-name-block").style.display = "";
+			document.getElementById("Session-Status").innerHTML = sanitizeString(data); // DISPLAY SERVER NAME FORMATTING
+		}
 	});
 
 	$scope.$on('setPlayerCount', function (event, count) {

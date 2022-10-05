@@ -16,7 +16,6 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.warnVis = false;
 	$scope.timer = null;
 	$scope.init = function() {
-		bngApi.engineLua('UI.ready("MP-PlayerList")');
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
 		setPLDirection(localStorage.getItem('plVertical'));

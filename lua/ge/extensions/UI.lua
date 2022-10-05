@@ -69,14 +69,14 @@ end
 
 
 local function setNickname(name)
-  --print("My Nickname: "..name)
 	guihooks.trigger("setNickname", name)
 end
 
 
 
-local function setStatus(status)
-	guihooks.trigger("setStatus", status)
+local function setServerName(serverName)
+	serverName = serverName or MPCoreNetwork.getCurrentServer().name
+	guihooks.trigger("setServerName", serverName)
 end
 
 
@@ -122,47 +122,15 @@ end
 
 
 
-
-
-
-
-
-local function ready(src)
-	--log('M',"UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
-
-	if MPCoreNetwork.isMPSession() then
-
-		if src == "MP-SESSION" then
-			setPing("-2")
-			local Server = MPCoreNetwork.getCurrentServer()
-			--print("---------------------------------------------------------------")
-			--dump(Server)
-			if Server then
-				if Server.name then
-					--print('Server name: '..Server.name)
-					setStatus("Server: "..Server.name)
-				else
-					--print('Server.name = nil')
-				end
-			else
-				--print('Server = nil')
-			end
-			--print("---------------------------------------------------------------")
-		end
-	end
-end
-
-
 local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
-M.ready = ready
 M.setPing = setPing
 M.setNickname = setNickname
-M.setStatus = setStatus
+M.setServerName = setServerName
 M.chatMessage = chatMessage
 M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount

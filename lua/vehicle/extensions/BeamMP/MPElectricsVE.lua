@@ -351,17 +351,13 @@ local function applyElectrics(data)
 		end
 
 		-- Transbrake syncing
-		if decodedData.transbrake and controller.getController("transbrake") then
-			if electrics.values.transbrake ~= decodedData.transbrake then
-				controller.getController("transbrake").setTransbrake(decodedData.transbrake)
-			end
+		if decodedData.transbrake and electrics.values.transbrake ~= decodedData.transbrake then
+			controller.getControllerSafe("transbrake").setTransbrake(decodedData.transbrake)
 		end
 
 		-- LineLock syncing
-		if decodedData.linelock and controller.getController("lineLock") then
-			if electrics.values.linelock ~= decodedData.linelock then
-				controller.getController("lineLock").setLineLock(decodedData.linelock)
-			end
+		if decodedData.linelock and electrics.values.linelock ~= decodedData.linelock then
+			controller.getControllerSafe("lineLock").setLineLock(decodedData.linelock)
 		end
 
 		-- Ignition syncing
@@ -423,31 +419,19 @@ local function applyElectrics(data)
 		end
 		-- Bus door syncing
 		if decodedData.dooropen then
-			local doorsController = controller.getControllerSafe('doors')
-			if doorsController then
-				if decodedData.dooropen == 1 then
-					doorsController.setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
-				else
-					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
-				end
+			if decodedData.dooropen == 1 then
+				controller.getControllerSafe('doors').setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
+			else
+				controller.getControllerSafe('doors').setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
 			end
 		end
 		-- Bus suspension height syncing
 		if decodedData.kneel == 1 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
-			end
+			controller.getControllerSafe('airbags').setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
 		elseif decodedData.rideheight == 1 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
-			end
+			controller.getControllerSafe('airbags').setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
 		elseif decodedData.rideheight == 0 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
-			end
+			controller.getControllerSafe('airbags').setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
 		end
 		-- ESC Mode syncing
 		if decodedData.escMode then
@@ -459,7 +443,7 @@ local function applyElectrics(data)
 		end
 		-- ME262 missile sync
 		if decodedData.missile4_motor == 1 or decodedData.missile3_motor == 1 or decodedData.missile2_motor == 1 or decodedData.missile1_motor == 1 then
-			if controller.getController('missiles') ~= nil then
+			if controller.getController('missiles') then
 				controller.mainController.deployWeaponDown()
 				controller.mainController.deployWeaponUp()
 			end

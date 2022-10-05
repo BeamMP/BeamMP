@@ -20,34 +20,21 @@ local localSwingwing = 0 -- for DH Super bolide
 
 
 local function getEsc()
-	local driveModesController = controller.getController('driveModes')
-	local escController = controller.getController('esc')
-	if driveModesController ~= nil then
-		return driveModesController.serialize().activeDriveModeKey
-	elseif escController ~= nil then
-		return escController.serialize().escConfigKey
+	if controller.getController('driveModes') then
+		return controller.getController('driveModes').serialize().activeDriveModeKey
+	elseif controller.getController('esc') then
+		return controller.getController('esc').serialize().escConfigKey
 	end
 end
 
 local function setEsc(key)
-	local driveModesController = controller.getController('driveModes')
-	local escController = controller.getController('esc')
-	if driveModesController ~= nil then
-		driveModesController.setDriveMode(key)
-	elseif escController ~= nil then
-		escController.setESCMode(key)
+	if controller.getController('driveModes') then
+		controller.getController('driveModes').setDriveMode(key)
+	elseif controller.getController('esc') then
+		controller.getController('esc').setESCMode(key)
 	end
 end
 
-local function getAbsBehavior()
-	return absBehavior
-end
-
-local function setAbsBehavior(absMode)
-	if wheels then
-		wheels.setABSBehavior(absMode)
-	end
-end
 
 local disallowedKeys = {
 	["wheelThermals"] = 1,
@@ -286,7 +273,7 @@ local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
 	electrics.values.escMode = getEsc()
-	electrics.values.absMode = getAbsBehavior()
+	electrics.values.absMode = absBehavior
 	local e = electrics.values
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
@@ -435,7 +422,7 @@ local function applyElectrics(data)
 			end
 		end
 		-- Bus door syncing
-		if decodedData.dooropen ~= nil then
+		if decodedData.dooropen then
 			local doorsController = controller.getControllerSafe('doors')
 			if doorsController then
 				if decodedData.dooropen == 1 then
@@ -467,8 +454,8 @@ local function applyElectrics(data)
 			setEsc(decodedData.escMode)
 		end
 		-- ABS Behavior syncing
-		if decodedData.absMode then
-			setAbsBehavior(decodedData.absMode)
+		if decodedData.absMode and wheels then
+			wheels.setABSBehavior(decodedData.absMode)
 		end
 		-- ME262 missile sync
 		if decodedData.missile4_motor == 1 or decodedData.missile3_motor == 1 or decodedData.missile2_motor == 1 or decodedData.missile1_motor == 1 then

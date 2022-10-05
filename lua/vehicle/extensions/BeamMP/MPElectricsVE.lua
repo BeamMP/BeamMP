@@ -15,9 +15,6 @@ local latestData
 local electricsChanged = false
 local absBehavior = settings.getValue("absBehavior") or "realistic"
 local localSwingwing = 0 -- for DH Super bolide
-local lastgear = 0 -- backwards compatibility
-local geartimer = 0 -- backwards compatibility
-local GearData = 0 -- backwards compatibility
 -- ============= VARIABLES =============
 
 
@@ -408,19 +405,6 @@ local function applyElectrics(data)
 				end
 			end
 		end
-		
-		-- Gear syncing backwards compatibility
-		if decodedData.gear then
-			GearData = decodedData.gear
-		end
-		
-		geartimer = geartimer + 1
-		
-		if GearData and GearData ~= lastgear or GearData and geartimer == 2 then
-			MPInputsVE.applyGearOld(GearData)
-			geartimer = 0
-			lastgear = GearData
-		end
 
 		-- Unicycle syncing
 		local playerController = controller.getController('playerController')
@@ -541,8 +525,6 @@ M.onReset			   = onReset
 M.check				   = check
 M.applyElectrics	   = applyElectrics
 M.applyLatestElectrics = applyLatestElectrics
-M.applyGearOld  	   = applyGearOld -- backwards compatibility
-
 
 
 return M

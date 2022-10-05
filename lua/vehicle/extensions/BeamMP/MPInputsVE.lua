@@ -93,13 +93,6 @@ local function applyGear(data)
 	end
 end
 
-local function applyGearOld(data) -- backwards compatibility
-	if not currentApply.g then
-		applyGear(data)
-	end
-	
-end
-
 local function updateGFX(dt)
 	timeSinceLastApply = timeSinceLastApply + dt
 
@@ -255,8 +248,6 @@ end
 M.updateGFX = updateGFX
 M.getInputs   = getInputs
 M.applyInputs = applyInputs
-M.applyGearOld  = applyGearOld -- backwards compatibility
-
 
 
 return M

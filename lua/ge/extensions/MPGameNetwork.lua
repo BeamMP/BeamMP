@@ -14,7 +14,6 @@ print("Loading MPGameNetwork")
 local socket = require('socket')
 local TCPSocket
 local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
-local sysTime = 0
 local eventTriggers = {}
 --keypress handling
 local keyStates = {} -- table of keys and their states, used as a reference
@@ -60,13 +59,6 @@ local function sendData(s)
 end
 
 
-
-local function onPlayerConnect() -- Function called when a player connect to the server
-	MPUpdatesGE.onPlayerConnect()
-end
-
-
-
 local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
@@ -88,8 +80,6 @@ local function quitMP(reason)
 		dialogtype="alert", title="You have been disconnected from the server", text=text, okText="Return to menu",
 		okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
 	})
-
-	--send('QG') -- Quit game
 end
 
 -------------------------------------------------------------------------------
@@ -106,12 +96,12 @@ local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	end
 end
 
-function TriggerServerEvent(n, d)
-	sendData('E:'..n..':'..d)
+function TriggerServerEvent(name, data)
+	sendData('E:'..name..':'..data)
 end
 
-function TriggerClientEvent(n, d)
-	handleEvents(':'..n..':'..d)
+function TriggerClientEvent(name, data)
+	handleEvents(':'..name..':'..data)
 end
 
 function AddEventHandler(n, f)
@@ -176,7 +166,7 @@ local HandleNetwork = {
 	['Z'] = function(params) positionGE.handle(params) end,
 	['O'] = function(params) MPVehicleGE.handle(params) end,
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
-	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player joined
+	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params) end, -- A player joined
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource

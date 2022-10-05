@@ -104,6 +104,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				var nameCell = row.insertCell(0);
 				nameCell.textContent = parsedList[i];
 				nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
+				nameCell.setAttribute("class", "player-button player-button");
 	
 				// Insert a cell containing the player ping
 				var pingCell = row.insertCell(1);
@@ -136,12 +137,12 @@ function clearPlayerList() {
 }
 
 function teleportToPlayer(targetPlayerName) {
-	console.log("teleportEvent: " + targetPlayerName);
+	//console.log("teleportEvent: " + targetPlayerName);
 	//bngApi.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
 }
 
 function showPlayerInfo(targetPlayerName) {
-	console.log("showPlayerInfoEvent: " + targetPlayerName);
+	//console.log("showPlayerInfoEvent: " + targetPlayerName);
 	bngApi.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
 

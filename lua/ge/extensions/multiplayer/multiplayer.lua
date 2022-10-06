@@ -34,7 +34,7 @@ end
 
 local function onUpdate(dt)
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
-		log('W', 'onUpdate', 'Running modified beammp code!')
+		--log('W', 'onUpdate', 'Running modified beammp code!')
 		if core_camera.getDriverData ~= modifiedGetDriverData then
 			originalGetDriverData = core_camera.getDriverData
 			core_camera.getDriverData = modifiedGetDriverData

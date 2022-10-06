@@ -105,9 +105,9 @@ local function setFavorites(favstr)
 		FS:directoryCreate("settings/BeamMP")
 	end
 
-	local favs = json.decode(favstr)
+	local favs = jsonDecode(favstr)
 	local favsfile = '/settings/BeamMP/favorites.json'
-	jsonWriteFile(favsfile, favs)
+	writeFile(favsfile, jsonEncodePretty(favs))
 end
 
 

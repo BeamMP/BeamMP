@@ -109,7 +109,8 @@ local function isLauncherConnected()
 end
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
-	send('N:'..jsonEncode(identifiers))
+	if not identifiers then identifiers = "" else identifiers = jsonEncode(identifiers) end
+	send('N:'..identifiers)
 end
 local function autoLogin()
 	send('Nc')

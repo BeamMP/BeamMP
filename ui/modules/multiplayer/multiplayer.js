@@ -98,7 +98,7 @@ function($scope, $state, $timeout, $document) {
 	}
 
 	$scope.guestLogin = function() {
-		bngApi.engineLua("MPCoreNetwork.login('')");
+		bngApi.engineLua('MPCoreNetwork.login()');
 	}
 	
 	$scope.$on('LoggedIn', function (event, data) {

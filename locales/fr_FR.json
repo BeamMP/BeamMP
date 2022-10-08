@@ -4842,7 +4842,7 @@
   "ui.multiplayertos.rules.description2": "Pour jouer à BeamMP, vous devrez accepter toutes les règles du jeu ",
   "ui.multiplayertos.info1": "Pour plus d’informations, n’oubliez pas de consulter notre ",
   "ui.multiplayertos.info2": "Vous pouvez également trouver plus d’informations sur notre ",
-  "ui.common.sync": "Sync",
+  "ui.common.multiplayer.sync": "Sync",
   "ui.apps.categories.multiplayer": "Multijoueur",
   "ui.camera.mode.passenger": "Passager"
 

@@ -6342,7 +6342,7 @@
     "ui.multiplayer.modSlider": "Mod size limiter",
     "ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
     
-    "ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the launcher and press the connect button or restart your game using the launcher. If nothing happen after you clicked the button, please check the launcher console.",
+    "ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the launcher and press the connect button or restart your game using the launcher. If nothing happens after you clicked the button, please check the launcher console.",
     "ui.multiplayerlauncher.connect": "Connect",
     
     "ui.multiplayertos.title": "Rules and terms of service",
@@ -6354,7 +6354,7 @@
     "ui.multiplayertos.rules.description2": "In order to play BeamMP you will have to accept all the game only rules.",
     "ui.multiplayertos.info1": "For more information, be sure to check our ",
     "ui.multiplayertos.info2": "You can also find more information on our ",
-    "ui.common.sync": "Sync",
+    "ui.common.multiplayer.sync": "Sync",
     "ui.apps.categories.multiplayer": "Multiplayer",
     "ui.camera.mode.passenger": "Passenger"
 }

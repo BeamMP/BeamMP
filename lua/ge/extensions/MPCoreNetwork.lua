@@ -50,7 +50,7 @@ local function send(s)
 	print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
 end
 
-local function connectToLauncher()
+local function connectToLauncher() -- TODO: proper reconnecting system
 	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnectionStatus))
 	if launcherConnectionStatus == false then
 		log('M', 'connectToLauncher', "MPCoreNetwork connecting to launcher...")
@@ -79,8 +79,6 @@ local function receiveLauncherHeartbeat()
 	if launcherConnectionStatus ~= true then
 		guihooks.trigger('launcherConnected')
 	end
-	--guihooks.trigger('showConnectionIssues', false)
-	--connectionIssuesShown = false
 end
 -- ============= LAUNCHER RELATED =============
 
@@ -111,6 +109,7 @@ local function logout()
 	loggedIn = false
 end
 local function getServers()
+	if isMpSession then log('W', 'getServers', 'Currently in MP Session! Aborting.') return end --TODO: Disable launcher side session reset when requesting server list
 	send('B') -- Request server list
 end
 
@@ -131,7 +130,9 @@ local function sendBeamMPInfo()
 end
 
 local function requestPlayers()
+	log('M', 'requestPlayers', 'Requesting players!')
 	if not isMpSession then -- launcher breaks connection if the server list is requested
+		log('M', 'requestPlayers', 'getServers! MPsession: '.. tostring(MPCoreNetwork.isMPSession()))
 		getServers()
 	end
 	sendBeamMPInfo()
@@ -142,6 +143,7 @@ end
 
 -- ============= SERVER RELATED =============
 local function setMods(modsString)
+	isGoingMpSession = true
 	if modsString == "" then return log('M', 'setMods', 'Received no mods.') end
 	local mods = {}
 	if (modsString) then
@@ -150,7 +152,6 @@ local function setMods(modsString)
 			table.insert(mods, modFileName)
 		end
 	end
-	isGoingMpSession = true
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
 end
 
@@ -169,12 +170,12 @@ end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port, mods, name)
-	if MPCoreNetwork.isMPSession() then MPCoreNetwork.leaveServer() end
+	if MPCoreNetwork.isMPSession() then log('W', 'connectToServer', 'Already in an MP Session! Leaving server!') MPCoreNetwork.leaveServer() end
 	--if getMissionFilename() ~= "" then leaveServer(false) end
 	if ip and port then -- Direct connect
 		currentServer = nil
 		setCurrentServer(ip, port, mods, name)
-	end
+	else log('E', 'connectToServer', 'IP and PORT must be supplied!') return end
 
 	local ipString = currentServer.ip..':'..currentServer.port
 	send('C'..ipString..'')
@@ -258,7 +259,6 @@ end
 
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! ' .. tostring(goBack))
-	print("Reset Session Called! " .. tostring(goBack))
 	isMpSession = false
 	isGoingMpSession = false
 	send('QS') -- Tell the launcher that we quit server / session
@@ -343,8 +343,8 @@ local function onUpdate(dt)
 			if not received or received == "" then
 				break
 			end
-			if settings.getValue("showDebugOutput") == true then
-				if received ~= 'A' and received ~= 'Up-1' then print('[MPCoreNetwork] Receiving Data ('..string.len(received)..'): '..received) end
+			if settings.getValue("showDebugOutput") == true then -- TODO: add option to filter out heartbeat packets
+				print('[MPCoreNetwork] Receiving Data ('..string.len(received)..'): '..received)
 			end
 
 			-- break it up into code + data
@@ -354,27 +354,13 @@ local function onUpdate(dt)
 		end
 		--================================ SECONDS TIMER ================================
 		launcherConnectionTimer = launcherConnectionTimer + dt -- Time in seconds
-		if launcherConnectionTimer > 1 then
+		if launcherConnectionTimer > 5 then -- TODO: put this back to 0.1
 			send('A') -- Launcher heartbeat?
 			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
 			else send('Up') end -- Server heartbeat?
 			launcherConnectionTimer = 0
 		end
-		-- Check the launcher connection
 		--[[
-		if launcherConnectionTimer > 2 then
-			--log('M', 'onUpdate', "it's been >2 seconds since the last ping so lua was probably frozen for a while")
-
-			if not connectionIssuesShown then
-				if scenetree.missionGroup then
-					guihooks.trigger('showConnectionIssues', true)
-				else
-					guihooks.trigger('LauncherConnectionLost')
-				end
-			end
-
-			connectionIssuesShown = true
-
 			if launcherConnectionTimer > 15 then
 				disconnectLauncher(true) -- reconnect to launcher (this breaks the launcher if the connection
 				connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
@@ -405,17 +391,19 @@ local function onClientStartMission(mission)
 end
 
 local function onClientPostStartMission()
+	log('W', 'onClientPostStartMission', '')
 	if MPCoreNetwork.isMPSession() then
-		log('M', 'onClientPostStartMission', 'Setting game state to multiplayer.')
-		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- Set UI elements
+		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
+		isGoingMpSession = false
 	end
 end
 
 local function onClientEndMission(mission)
-	log('W', 'onClientEndMission', mission)
+	log('W', 'onClientEndMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
+	log('W', 'onClientEndMission', 'isMpSession: '..tostring(isMpSession))
 	if not isGoingMpSession then
-		--leaveServer(false)
+		leaveServer(false)
 	end
 end
 

@@ -37,14 +37,10 @@ C  -> The client asks for the server's mods
 -- ============= LAUNCHER RELATED =============
 local function send(s)
 	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
-	if r and not launcherConnectionStatus then
-		launcherConnectionStatus = true
-		log('W', 'send', 'Launcher connected!')
-	elseif not launcherConnectionStatus then
-		log('W', 'send', 'Lost launcher connection!')
-		launcherConnectionStatus = false
-		return
-	end
+
+	if not r and not launcherConnectionStatus then log('E', 'send', 'Launcher not connected!') return end --TODO: Improve this mess
+	if not r and launcherConnectionStatus then launcherConnectionStatus = false log('W', 'send', 'Lost launcher connection!') return end
+	if not launcherConnectionStatus then launcherConnectionStatus = true log('W', 'send', 'Launcher connected!') guihooks.trigger('launcherConnected') end
 
 	if not settings.getValue("showDebugOutput") then return end
 	print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
@@ -53,12 +49,11 @@ end
 local function connectToLauncher() -- TODO: proper reconnecting system
 	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnectionStatus))
 	if launcherConnectionStatus == false then
-		log('M', 'connectToLauncher', "MPCoreNetwork connecting to launcher...")
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444))
-		send("Up") -- immediately heartbeat to check if connection was established
+		send('A') -- immediately heartbeat to check if connection was established
 	end
 end
 
@@ -75,10 +70,8 @@ end
 
 
 -- This is called everytime we receive a heartbeat from the launcher
-local function receiveLauncherHeartbeat()
-	if launcherConnectionStatus ~= true then
-		guihooks.trigger('launcherConnected')
-	end
+local function receiveLauncherHeartbeat() -- TODO: add some purpose to this function or remove it
+
 end
 -- ============= LAUNCHER RELATED =============
 
@@ -108,8 +101,8 @@ local function logout()
 	send('N:LO')
 	loggedIn = false
 end
-local function getServers()
-	if isMpSession then log('W', 'getServers', 'Currently in MP Session! Aborting.') return end --TODO: Disable launcher side session reset when requesting server list
+local function requestServerList()
+	if isMpSession then log('W', 'requestServerList', 'Currently in MP Session! Aborting.') return end --TODO: Disable launcher side session reset when requesting server list
 	send('B') -- Request server list
 end
 
@@ -130,10 +123,9 @@ local function sendBeamMPInfo()
 end
 
 local function requestPlayers()
-	log('M', 'requestPlayers', 'Requesting players!')
+	log('M', 'requestPlayers', 'Requesting players! isMPSession: '..tostring(isMpSession))
 	if not isMpSession then -- launcher breaks connection if the server list is requested
-		log('M', 'requestPlayers', 'getServers! MPsession: '.. tostring(MPCoreNetwork.isMPSession()))
-		getServers()
+		requestServerList()
 	end
 	sendBeamMPInfo()
 end
@@ -184,7 +176,7 @@ local function connectToServer(ip, port, mods, name)
 	status = "LoadingResources"
 end
 
-local function loadLevel(map)
+local function loadLevel(map) --TODO: all this
 	log("W","loadLevel", "loading map " ..map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
@@ -311,7 +303,7 @@ local function handleU(params)
 		end
 
 		if data == "done" and status == "LoadingResources" then
-			send('Mrequest')
+			send('M') -- request map string from launcher
 			status = "LoadingMap"
 		end
 	elseif code == "p" and isMpSession then
@@ -333,8 +325,9 @@ local HandleNetwork = {
 	['Z'] = function(params) launcherVersion = params; end
 }
 
-
+local onUpdateTimer = 0
 local function onUpdate(dt)
+	onUpdateTimer = onUpdateTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus then
 		while(true) do
@@ -353,12 +346,11 @@ local function onUpdate(dt)
 			HandleNetwork[code](data)
 		end
 		--================================ SECONDS TIMER ================================
-		launcherConnectionTimer = launcherConnectionTimer + dt -- Time in seconds
-		if launcherConnectionTimer > 5 then -- TODO: put this back to 0.1
-			send('A') -- Launcher heartbeat?
-			if status == "LoadingResources" then send('Ul') -- Ask the launcher for a loading screen update
-			else send('Up') end -- Server heartbeat?
-			launcherConnectionTimer = 0
+		if onUpdateTimer > 5 then -- TODO: put this back to 0.1
+			send('A') -- Launcher heartbeat
+			if status == "LoadingResources" then send('Ul') end -- Ask the launcher for a loading screen update
+			--else send('Up') end -- TODO: only send this when loaded in
+			onUpdateTimer = 0
 		end
 		--[[
 			if launcherConnectionTimer > 15 then
@@ -368,7 +360,10 @@ local function onUpdate(dt)
 		end
 		]]--
 	else
-		--connectToLauncher()
+		if onUpdateTimer > 1 then -- if connection is lost re-attempt connecting every second
+			onUpdateTimer = 0
+			connectToLauncher()
+		end
 	end
 end
 
@@ -381,7 +376,7 @@ local function onExtensionLoaded()
 	autoLogin()
 end
 
-local function onClientStartMission(mission)
+local function onClientStartMission(mission) --TODO: 
 	if status == "Playing" and getMissionFilename() ~= currentServer.map then
 		log('W', 'onClientStartMission', 'The user has loaded another mission!')
 		--Lua:requestReload()
@@ -390,7 +385,7 @@ local function onClientStartMission(mission)
 	end
 end
 
-local function onClientPostStartMission()
+local function onClientPostStartMission() --TODO: move to onWorldReadyState
 	log('W', 'onClientPostStartMission', '')
 	if MPCoreNetwork.isMPSession() then
 		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
@@ -402,7 +397,7 @@ end
 local function onClientEndMission(mission)
 	log('W', 'onClientEndMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'onClientEndMission', 'isMpSession: '..tostring(isMpSession))
-	if not isGoingMpSession then
+	if not isGoingMpSession then -- leaves server when loading into another freeroam map from an MP sesison
 		leaveServer(false)
 	end
 end
@@ -441,7 +436,7 @@ M.onClientPostStartMission = onClientPostStartMission
 M.login                = login
 M.logout               = logout
 M.modLoaded            = modLoaded
-M.getServers           = getServers
+M.requestServerList    = requestServerList
 M.isMPSession          = isMPSession
 M.leaveServer          = leaveServer
 M.connectToServer      = connectToServer

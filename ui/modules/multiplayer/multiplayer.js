@@ -50,7 +50,7 @@ function($scope, $state, $timeout, $document) {
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.connect = function () {
-		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
+		bngApi.engineLua('MPCoreNetwork.connectToLauncher()');
 	};
 	
 	$scope.$on('launcherConnected', function (event, data) {
@@ -189,7 +189,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	vm.refreshList = function() {
 		//console.log("Attempting to refresh server list.")
-		bngApi.engineLua('MPCoreNetwork.getServers()');
+		bngApi.engineLua('MPCoreNetwork.requestServerList()');
 	}
 	
 	vm.clearRecents = function() {
@@ -298,7 +298,7 @@ function($scope, $state, $timeout) {
 	vm.searchText = "";
 
 	// Request for the servers
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
 	// Go back to the main menu on exit
 	vm.exit = function ($event) {
@@ -354,9 +354,9 @@ function($scope, $state, $timeout) {
 	
 	vm.searchText = "";
 
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
-	// Called when getServers() answered
+	// Called when requestServerList() answered
 	$scope.$on('onServersReceived', async function (event, data) {
 		servers = await receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
@@ -417,7 +417,7 @@ function($scope, $state, $timeout) {
 	vm.sliderMaxModSize = 500; //should be almost a terabyte
 	vm.selectMap = "Any";
 	vm.searchText = "";
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
 	vm.exit = function ($event) {
 		if ($event)
@@ -425,7 +425,7 @@ function($scope, $state, $timeout) {
 		$state.go('menu.mainmenu');
 	};
 	
-	// Called when getServers() answered
+	// Called when requestServerList() answered
 	$scope.$on('onServersReceived', async function (event, data) {
 		servers = await receiveServers(JSON.parse(data));
 		favorites = await getFavorites();
@@ -804,7 +804,7 @@ function addFav(server, isUpdate) {
 	server.addTime = Date.now();
 	favorites.push(server);
 	saveFav();
-	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.getServers()');
+	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.requestServerList()');
 }
 
 function removeFav(server) {
@@ -815,7 +815,7 @@ function removeFav(server) {
 		}
 	}
 	saveFav();
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 }
 
 function saveFav() {

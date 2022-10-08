@@ -1051,22 +1051,6 @@ local function spawnRequest(model, config, colors)
 	extensions.hook("trackNewVeh")
 end
 
-local function saveConfigRequest(configfilename)
-	if not MPCoreNetwork.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
-
-	local currentVehicle = be:getPlayerVehicle(0)
-
-	if currentVehicle and isOwn(currentVehicle:getID()) then
-		extensions.core_vehicle_partmgmt.saveLocal(configfilename)
-		log('I', "saveConfigRequest", "Saved config")
-	else
-		guihooks.trigger("saveLocalScreenshot_stage3", {})
-		guihooks.trigger('Message', {ttl = 10, msg = "Saving another player's vehicle is disabled on this server", icon = 'error'})
-		log('W', "saveConfigRequest", "Saving configs is not allowed on this server")
-		print("didnt save config")
-	end
-end
-
 
 local function sendPendingVehicleEdits()
 	for gameVehicleID,_ in pairs(vehiclesToSync) do
@@ -1586,7 +1570,6 @@ M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetNam
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
-M.saveConfigRequest        = saveConfigRequest        -- takes: string configFilename
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
 M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: -
 M.spawnRequest             = spawnRequest             -- takes: jbeamName, options table containing 'spawnNew' key

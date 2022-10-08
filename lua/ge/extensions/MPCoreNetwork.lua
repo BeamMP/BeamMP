@@ -109,7 +109,7 @@ local function isLauncherConnected()
 end
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
-	if not identifiers then identifiers = "" else identifiers = jsonEncode(identifiers) end
+	if not identifiers then identifiers = "" else identifiers = jsonEncode(identifiers) end -- guest login fix
 	send('N:'..identifiers)
 end
 local function autoLogin()

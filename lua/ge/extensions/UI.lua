@@ -54,16 +54,9 @@ local function updateQueue( spawnCount, editCount)
 end
 
 local function setPing(ping)
-	if tonumber(ping) == -1 then -- not connected
-		--print("ping is -1")
-		--guihooks.trigger("app:showConnectionIssues", false)
-	elseif tonumber(ping) == -2 then -- ping too high, display warning
-		guihooks.trigger("app:showConnectionIssues", true)
-	else
-		guihooks.trigger("setPing", ""..ping.." ms")
-		guihooks.trigger("app:showConnectionIssues", false)
-		pings[MPConfig.getNickname()] = ping
-	end
+	if tonumber(ping) < 0 then return end -- not connected
+	guihooks.trigger("setPing", ""..ping.." ms")
+	pings[MPConfig.getNickname()] = ping
 end
 
 

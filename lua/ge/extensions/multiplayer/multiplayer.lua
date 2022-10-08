@@ -55,13 +55,11 @@ end
 
 local function onWorldReadyState(state)
 	if state == 2 then
-		log('W', 'onWorldReadyState', state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
-			log('M', 'onClientPostStartMission', 'Setting game state to multiplayer.')
+			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
-			freeroam_bigMapMode.canBeActivated = function() return true end -- replace the game function to enable the big map mode in 'multiplayer' state
+			freeroam_bigMapMode.canBeActivated = function() return true end -- replace the game function to enable the big map mode in 'multiplayer' state --TODO: set back the original function
 			spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle
-			--stock function --freeroam_bigMapMode.canBeActivated = function() if (core_gamestate.state and core_gamestate.state.state ~= "freeroam") or (editor and editor.isEditorActive()) then return false end return true end
 		end
 	end
 end

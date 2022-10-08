@@ -24,7 +24,7 @@ local keypressTriggers = {}
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
-	log('I', 'connectToLauncher', "Connecting to the Launcher for mp session")
+	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
 	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
 		TCPSocket = socket.tcp() -- Set socket to TCP
 		TCPSocket:setoption("keepalive", true)
@@ -73,7 +73,7 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
-	text = reason~="" and ("Reason: ".. reason) or ""
+	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
 	UI.showMdDialog({
@@ -216,9 +216,8 @@ M.connectionStatus    = connectionStatus
 M.connectToLauncher   = connectToLauncher
 M.disconnectLauncher  = disconnectLauncher
 M.send                = sendData
---M.sendSplit           = sendDataSplit -- doesn't exist
 M.CallEvent           = handleEvents
-M.quitMP               = quitMP
+M.quitMP              = quitMP
 
 M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
 M.getKeyState         = getKeyState         -- takes: string keyName

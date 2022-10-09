@@ -126,6 +126,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.$on('setNickname', function(event, data) {
 		nickname = data
 	})
+	bngApi.engineLua('UI.updatePlayersList()'); // insantly populate the playerlist
 }]);
 
 

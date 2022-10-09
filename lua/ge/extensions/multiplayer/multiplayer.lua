@@ -36,10 +36,12 @@ local function onUpdate(dt)
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 		--log('W', 'onUpdate', 'Running modified beammp code!')
 		if core_camera.getDriverData ~= modifiedGetDriverData then
+			log('W', 'onUpdate', 'Setting modifiedGetDriverData')
 			originalGetDriverData = core_camera.getDriverData
 			core_camera.getDriverData = modifiedGetDriverData
 		end
 		if gameplay_walk and gameplay_walk.toggleWalkingMode ~= modifiedToggleWalkingMode then
+			log('W', 'onUpdate', 'Setting modifiedToggleWalkingMode')
 			originalToggleWalkingMode = gameplay_walk.toggleWalkingMode
 			gameplay_walk.toggleWalkingMode = modifiedToggleWalkingMode
 		end
@@ -58,7 +60,7 @@ local function onWorldReadyState(state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
-			freeroam_bigMapMode.canBeActivated = function() return true end -- replace the game function to enable the big map mode in 'multiplayer' state --TODO: set back the original function
+			freeroam_bigMapMode.canBeActivated = function() return true end -- replace the game function to enable the big map mode in 'multiplayer' state --TODO: set back the original function, disable pausing when opening the map
 			spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle
 		end
 	end

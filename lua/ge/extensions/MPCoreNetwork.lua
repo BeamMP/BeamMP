@@ -111,14 +111,14 @@ end
 local function sendBeamMPInfo()
 	local servers = jsonDecode(serverList)
 	if not servers or tableIsEmpty(servers) then return log('E', 'Failed to retrieve server list.') end
-	guihooks.trigger('onServersReceived', servers)
+	guihooks.trigger('onServersReceived', servers) -- server list
 	local p, s = 0, 0
 	for _,server in pairs(servers) do
 		p = p + server.players
 		s = s + 1
 	end
 	-- send player and server values to front end.
-	guihooks.trigger('BeamMPInfo', {
+	guihooks.trigger('BeamMPInfo', { -- <players> count on the bottom of the screen
 		players = ''..p,
 		servers = ''..s
 	})
@@ -249,11 +249,11 @@ end
 
 
 local function leaveServer(goBack)
-	log('W', 'leaveServer', 'Reset Session Called! ' .. tostring(goBack))
+	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	isMpSession = false
 	isGoingMpSession = false
 	send('QS') -- Tell the launcher that we quit server / session
-	disconnectLauncher()
+	--disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
@@ -261,7 +261,7 @@ local function leaveServer(goBack)
 	-- resets the instability function back to default
 	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
 	MPModManager.cleanUpSessionMods()
-	connectToLauncher()
+	--connectToLauncher()
 end
 
 local function isMPSession()

@@ -6274,7 +6274,7 @@
     "ui.options.multiplayer.nameTags": "Hide player nametags",
     "ui.options.multiplayer.nameTagAlternate": "Use alternate nametag colors",
     "ui.options.multiplayer.nameTagShowDistance": "Show distance from other players",
-    "ui.options.multiplayer.debugOutput": "Show debug messages in the console",
+    "ui.options.multiplayer.debugOutput": "Show network activity in the console",
     "ui.options.multiplayer.launcherPort": "Launcher port:[br]Don't change unless you have to",
     "ui.options.multiplayer.launcherPortWarn": "Don't change unless you have to",
     "ui.options.multiplayer.launcherPort.tooltip": "Set this to the custom port that the launcher was set to use.",

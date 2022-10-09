@@ -102,10 +102,7 @@ local function logout()
 	send('N:LO')
 	loggedIn = false
 end
-local function requestServerList() -- TODO: reduce how often the server list is requested by the UI
-	if isMpSession then log('W', 'requestServerList', 'Currently in MP Session! Aborting.') return end --TODO: Disable launcher side session reset when requesting server list
-	send('B') -- Request server list
-end
+
 
 -- sends the current player and server count.
 local function sendBeamMPInfo()
@@ -122,6 +119,15 @@ local function sendBeamMPInfo()
 		players = ''..p,
 		servers = ''..s
 	})
+end
+
+local function requestServerList() -- TODO: reduce how often the server list is requested by the UI
+	if isMpSession then
+		log('W', 'requestServerList', 'Currently in MP Session! Using cached server list.') --TODO: add UI warning when cached server list is being displayed
+		sendBeamMPInfo()
+		return
+	end --TODO: Disable launcher side session reset when requesting server list
+	send('B') -- Request server list
 end
 
 local function requestPlayers()
@@ -166,7 +172,7 @@ local function connectToServer(ip, port, mods, name)
 	if ip and port then -- Direct connect
 		currentServer = nil
 		setCurrentServer(ip, port, mods, name)
-	else log('E', 'connectToServer', 'IP and PORT must be supplied!') return end
+	else log('E', 'connectToServer', 'IP and PORT are required for connecting to a server.') return end
 
 	local ipString = currentServer.ip..':'..currentServer.port
 	send('C'..ipString..'')
@@ -259,7 +265,7 @@ local function leaveServer(goBack)
 	status = "" -- Reset status
 	if goBack then returnToMainMenu() end -- return to main menu
 	-- resets the instability function back to default
-	onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
+	--onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end -- TODO: handle this differently
 	MPModManager.cleanUpSessionMods()
 	--connectToLauncher()
 end
@@ -304,6 +310,8 @@ local function handleU(params)
 		if data == "done" and status == "LoadingResources" then
 			send('M') -- request map string from launcher
 			status = "LoadingMap"
+		elseif string.sub(data, 1, 12) == "Disconnected" then
+			leaveServer(false) -- reset session variables
 		end
 	elseif code == "p" and isMpSession then
 		UI.setPing(data.."")

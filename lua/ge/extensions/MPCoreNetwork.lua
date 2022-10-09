@@ -373,7 +373,7 @@ local function onExtensionLoaded()
 	connectToLauncher()
 end
 
-local function onLauncherConnected()
+onLauncherConnected = function()
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	log('W', 'send', 'Launcher connected!')
 	send('Z') -- request launcher version

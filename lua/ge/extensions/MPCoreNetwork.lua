@@ -14,7 +14,7 @@ print("Loading MPCoreNetwork...")
 local TCPLauncherSocket -- Launcher socket
 local currentServer = {} -- Table containing server IP, port and name
 local serverList -- server list JSON
-local launcherConnectionStatus = false -- status 0: not connected, 1: connected
+local launcherConnected = false
 local launcherConnectionTimer = 0
 local status = "" -- "", "LoadingResources", "LoadingMap", "LoadingMapNow", "Playing"
 local launcherVersion = "" -- used only for the server list
@@ -23,6 +23,7 @@ local currentModHasLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
 local connectionIssuesShown = false
+local onLauncherConnected = nop
 local socket = require('socket')
 --[[
 Z  -> The client asks the launcher its version
@@ -38,17 +39,17 @@ C  -> The client asks for the server's mods
 local function send(s)
 	local r = TCPLauncherSocket:send(string.len(s)..'>'..s)
 
-	if not r and not launcherConnectionStatus then log('E', 'send', 'Launcher not connected!') return end --TODO: Improve this mess
-	if not r and launcherConnectionStatus then launcherConnectionStatus = false log('W', 'send', 'Lost launcher connection!') return end
-	if not launcherConnectionStatus then launcherConnectionStatus = true log('W', 'send', 'Launcher connected!') guihooks.trigger('launcherConnected') end
+	if not r and not launcherConnected then log('E', 'send', 'Launcher not connected!') return end --TODO: Improve this mess
+	if not r and launcherConnected then launcherConnected = false log('W', 'send', 'Lost launcher connection!') return end
+	if not launcherConnected then launcherConnected = true onLauncherConnected() end
 
 	if not settings.getValue("showDebugOutput") then return end
 	print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
 end
 
 local function connectToLauncher() -- TODO: proper reconnecting system
-	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnectionStatus))
-	if launcherConnectionStatus == false then
+	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected))
+	if not launcherConnected then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
@@ -59,10 +60,10 @@ end
 
 local function disconnectLauncher(reconnect)
 	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: '..tostring(reconnect))
-	if launcherConnectionStatus == true then
+	if launcherConnected then
 		log('W', 'disconnectLauncher', "Disconnecting from launcher")
 		TCPLauncherSocket:close()
-		launcherConnectionStatus = false
+		launcherConnected = false
 		isGoingMpSession = false
 	end
 	if reconnect then connectToLauncher() end
@@ -86,7 +87,7 @@ local function isLoggedIn()
 	return loggedIn
 end
 local function isLauncherConnected()
-	return launcherConnectionStatus
+	return launcherConnected
 end
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
@@ -101,7 +102,7 @@ local function logout()
 	send('N:LO')
 	loggedIn = false
 end
-local function requestServerList()
+local function requestServerList() -- TODO: reduce how often the server list is requested by the UI
 	if isMpSession then log('W', 'requestServerList', 'Currently in MP Session! Aborting.') return end --TODO: Disable launcher side session reset when requesting server list
 	send('B') -- Request server list
 end
@@ -110,6 +111,7 @@ end
 local function sendBeamMPInfo()
 	local servers = jsonDecode(serverList)
 	if not servers or tableIsEmpty(servers) then return log('E', 'Failed to retrieve server list.') end
+	guihooks.trigger('onServersReceived', servers)
 	local p, s = 0, 0
 	for _,server in pairs(servers) do
 		p = p + server.players
@@ -123,10 +125,7 @@ local function sendBeamMPInfo()
 end
 
 local function requestPlayers()
-	log('M', 'requestPlayers', 'Requesting players! isMPSession: '..tostring(isMpSession))
-	if not isMpSession then -- launcher breaks connection if the server list is requested
-		requestServerList()
-	end
+	log('M', 'requestPlayers', 'Requesting players.')
 	sendBeamMPInfo()
 end
 -- ================ UI ================
@@ -315,8 +314,8 @@ end
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
-	['B'] = function(params) serverList = params; guihooks.trigger('onServersReceived', params); sendBeamMPInfo() end, -- Server list received
-	['U'] = function(params) handleU(params) end, -- UI
+	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
+	['U'] = function(params) handleU(params) end, -- Loading into server UI
 	['M'] = function(params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
@@ -329,7 +328,7 @@ local onUpdateTimer = 0
 local function onUpdate(dt)
 	onUpdateTimer = onUpdateTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
-	if launcherConnectionStatus then
+	if launcherConnected then
 		while(true) do
 			local received, stat, partial = TCPLauncherSocket:receive()
 			--print(stat) -- nil when receiving data, timeout when not
@@ -370,10 +369,17 @@ end
 
 -- EVENTS
 local function onExtensionLoaded()
-	connectToLauncher()
 	reloadUI() -- required to show modified mainmenu
+	connectToLauncher()
+end
+
+local function onLauncherConnected()
+	log('W', 'onLauncherConnected', 'onLauncherConnected')
+	log('W', 'send', 'Launcher connected!')
 	send('Z') -- request launcher version
 	autoLogin()
+	requestServerList()
+	extensions.hook('onLauncherConnected')
 end
 
 local function onClientStartMission(mission) --TODO: 
@@ -420,7 +426,7 @@ end
 
 
 -- ================ UI ================
-M.getLauncherVersion   = getLauncherVersion
+M.getLauncherVersion   = getLauncherVersion -- TODO: remove functions that shouldnt be public
 M.isLoggedIn           = isLoggedIn
 M.isLauncherConnected  = isLauncherConnected
 M.disconnectLauncher   = disconnectLauncher
@@ -443,7 +449,7 @@ M.connectToServer      = connectToServer
 M.getCurrentServer     = getCurrentServer
 M.setCurrentServer     = setCurrentServer
 M.isGoingMPSession     = isGoingMPSession
-M.connectionStatus     = launcherConnectionStatus
+M.launcherConnected    = launcherConnected
 M.connectToLauncher    = connectToLauncher
 M.send = send
 

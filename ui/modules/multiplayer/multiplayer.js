@@ -320,7 +320,7 @@ function($scope, $state, $timeout) {
 	});
 	
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
@@ -358,7 +358,7 @@ function($scope, $state, $timeout) {
 
 	// Called when requestServerList() answered
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
@@ -427,7 +427,7 @@ function($scope, $state, $timeout) {
 	
 	// Called when requestServerList() answered
 	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();

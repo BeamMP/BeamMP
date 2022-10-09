@@ -393,33 +393,66 @@ end
 
 -- ====================================== ENTRY POINT ======================================
 local function onExtensionLoaded()
-	-- removing the radial menu from the Multiplayer UI layout if it's present
 	local currentMpLayout = jsonReadFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
-	local ui_info = jsonReadFile("settings/BeamMP/ui_info.json")
-	local info = {}
-	local wasUiReset = false
-	local foundRadialMenu = false
-	if ui_info then wasUiReset = ui_info.wasUiReset end
-
-	if not wasUiReset then
-		
-		-- checking if the radial menu is found in the Multiplayer UI layout
-		if currentMpLayout then
-			for k,v in pairs(currentMpLayout.apps) do
-				if v.appName == "radialmenu" then
-					--print("Found radial menu present in Multiplayer UI Layout!")
-					foundRadialMenu = true
-					break
-				end
+	local foundMultiplayerChat = false
+	local foundMultiplayerPlayerList = false
+	local foundMultiplayerSession = false
+	
+	--checking if the BeamMP UI apps are found in the Multiplayer UI layout
+	if currentMpLayout then
+		for k,v in pairs(currentMpLayout.apps) do
+			if v.appName == "multiplayerchat" then
+				foundMultiplayerChat = true
+			end
+			if v.appName == "multiplayerplayerlist" then
+				foundMultiplayerPlayerList = true
+			end
+			if v.appName == "multiplayersession" then
+				foundMultiplayerSession = true
 			end
 		end
-		if foundRadialMenu == true then
-			--print("Multiplayer UI has been reset to default!")
-			os.remove("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
-		end
-		info.wasUiReset = true
-		jsonWriteFile("settings/BeamMP/ui_info.json",info)
 	end
+	
+	--if the BeamMP UI apps are NOT found in the Multiplayer UI layout, insert them
+	if not foundMultiplayerChat then
+		local insertApp = {}
+		insertApp.appName = "multiplayerchat"
+		insertApp.placement = {}
+		insertApp.placement.width = "550px"
+		insertApp.placement.bottom = "0px"
+		insertApp.placement.height = "170px"
+		insertApp.placement.left = "180px"
+		table.insert(currentMpLayout.apps, insertApp)
+	end
+	if not foundMultiplayerPlayerList then
+		local insertApp = {}
+		insertApp.appName = "multiplayerplayerlist"
+		insertApp.placement = {}
+		insertApp.placement.height = "527px"
+		insertApp.placement["min-width"] = "240px"
+		insertApp.placement.right = "0px"
+		insertApp.placement.top = "90px"
+		insertApp.placement.width = "auto"
+		table.insert(currentMpLayout.apps, insertApp)
+	end
+	if not foundMultiplayerSession then
+		local insertApp = {}
+		insertApp.appName = "multiplayersession"
+		insertApp.placement = {}
+		insertApp.placement.bottom = ""
+		insertApp.placement.height = "40px"
+		insertApp.placement.left = 0
+		insertApp.placement.margin = "auto"
+		insertApp.placement.position = "absolute"
+		insertApp.placement.right = 0
+		insertApp.placement.top = "0px"
+		insertApp.placement.width = "700px"
+		table.insert(currentMpLayout.apps, insertApp)
+	end
+	if not foundMultiplayerChat or not foundMultiplayerPlayerList or not foundMultiplayerSession then
+		jsonWriteFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json", currentMpLayout, 1)
+	end
+
 	-- First we connect to the launcher
 	connectToLauncher()
 	-- We reload the UI to load our custom layout
@@ -557,8 +590,6 @@ end
 M.getLauncherVersion   = getLauncherVersion
 M.isLoggedIn           = isLoggedIn
 M.isLauncherConnected  = isLauncherConnected
---M.onExtensionLoaded    = onExtensionLoaded
---M.onUpdate             = onUpdate
 M.disconnectLauncher   = disconnectLauncher
 M.autoLogin            = autoLogin
 M.onUiChangedState     = onUiChangedState

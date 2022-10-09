@@ -47,7 +47,7 @@ local function send(s)
 	print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
 end
 
-local function connectToLauncher() -- TODO: proper reconnecting system
+local function connectToLauncher(silent) -- TODO: proper reconnecting system
 	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected))
 	if not launcherConnected then
 		TCPLauncherSocket = socket.tcp()
@@ -64,6 +64,7 @@ local function disconnectLauncher(reconnect)
 		log('W', 'disconnectLauncher', "Disconnecting from launcher")
 		TCPLauncherSocket:close()
 		launcherConnected = false
+		log('W', 'disconnectLauncher', 'isGoingMpSession = false')
 		isGoingMpSession = false
 	end
 	if reconnect then connectToLauncher() end
@@ -140,6 +141,7 @@ end
 
 -- ============= SERVER RELATED =============
 local function setMods(modsString)
+	log('W', 'setMods', 'isGoingMpSession = true')
 	isGoingMpSession = true
 	if modsString == "" then return log('M', 'setMods', 'Received no mods.') end
 	local mods = {}
@@ -258,11 +260,13 @@ local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	isMpSession = false
 	isGoingMpSession = false
+	currentServer = {}
 	send('QS') -- Tell the launcher that we quit server / session
 	--disconnectLauncher()
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
+	extensions.hook('onServerLeave')
 	if goBack then returnToMainMenu() end -- return to main menu
 	-- resets the instability function back to default
 	--onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end -- TODO: handle this differently
@@ -393,6 +397,9 @@ onLauncherConnected = function()
 	autoLogin()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
+	if isMpSession then --TODO: WIP, verify and test / finish
+		connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
+	end
 end
 
 local function onClientStartMission(mission) --TODO: 
@@ -405,10 +412,11 @@ local function onClientStartMission(mission) --TODO:
 end
 
 local function onClientPostStartMission() --TODO: move to onWorldReadyState
-	log('W', 'onClientPostStartMission', '')
+	log('W', 'onClientPostStartMission', 'onClientPostStartMission')
 	if MPCoreNetwork.isMPSession() then
 		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
+		log('W', 'onClientPostStartMission', 'isGoingMpSession = false')
 		isGoingMpSession = false
 	end
 end

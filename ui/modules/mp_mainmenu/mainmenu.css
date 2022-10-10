@@ -49,11 +49,11 @@ a {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    align-content: normal;
-    width: 100%;
+    align-content: center;
     height: 100%;
+    width: 100%;
 }
 
 .flex-items {
@@ -62,35 +62,7 @@ a {
 }
 
 .flex-items:nth-child(1) {
-    margin-bottom: 0.5em;
     width: 100%;
-    display: block;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: auto;
-    align-self: flex-start;
-    order: 0;
-}
-
-.flex-items:nth-child(2) {
-    width: 100%;
-    display: block;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: auto;
-    align-self: flex-start;
-    order: 0;
-}
-
-.flex-items:nth-child(3) {
-    background-color: var(--bg-main);
-    margin: 0.5em 0.5em 0 0.5em;
-    height: 92%;
-    width: 19.5%;
-    order: 0;
-    align-self: flex-start;
-    flex: 0 0 auto;
-    padding: 0.5em;
 }
 
 .flex-main {
@@ -105,7 +77,6 @@ a {
 
 .flex-main > .flex-buttons {
     width: 60%;
-    height: 100%;
 }
 
 .flex-main > .flex-server-buttons {

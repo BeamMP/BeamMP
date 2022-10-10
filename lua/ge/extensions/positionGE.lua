@@ -110,7 +110,6 @@ end
 local function setPosition(gameVehicleID, x, y, z)
 	local veh = be:getObjectByID(gameVehicleID)
 	veh:setPositionNoPhysicsReset(Point3F(x, y, z))
-	veh:queueLuaCommand("MPElectricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
 
 

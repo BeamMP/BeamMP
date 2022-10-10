@@ -170,9 +170,9 @@ a {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
 }
 
 @media (max-width: 1245px) {

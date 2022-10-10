@@ -87,8 +87,11 @@ angular.module('beamng.stuff')
         bngApi.serializeToLuaCheck("Polish: " + "źćłąóę")
         bngApi.serializeToLuaCheck("Russian: " + "абвгеёьъ")
 
-        scope.nav = function (action, val) {
+        scope.nav = function(action, val) {
           $rootScope.$broadcast('MenuItemNavigation', action, val)
+        }
+        scope.radialMenu = function(action, val) {
+          bngApi.engineLua("extensions.core_quickAccess.setEnabled(true)")
         }
 
         scope.radialMenu = function (action, val) {
@@ -98,17 +101,15 @@ angular.module('beamng.stuff')
         scope.showBuildInfo = false
         scope.versionStr = beamng.version
         // TODO #203 Fix this to actually use the real launcher version!
-        scope.beammpGameVer = '4.6.0'
+        scope.beammpGameVer = '4.6.1'
         scope.beammpLauncherVer = '3.0.0'
 
         // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
         var versionSplit = scope.versionStr.split('.')
-        if (versionSplit.length == 5) versionSplit.pop() // remove build number (5th)
-        for (var i = 0; i < 3; i++) {
-          if (versionSplit[versionSplit.length - 1] == '0') versionSplit.pop(); // remove any '0' for simplicity reasons
+        if(versionSplit.length == 5) versionSplit.pop() // remove build number (5th)
+        for(var i = 0; i < 3; i++) {
+            if(versionSplit[versionSplit.length - 1] == '0') versionSplit.pop(); // remove any '0' for simplicity reasons
         }
-        scope.versionSimpleStr = versionSplit.join('.')
-        scope.buildInfoStr = beamng.buildinfo
 
         scope.quit = function () {
           bngApi.engineScript('quit();');

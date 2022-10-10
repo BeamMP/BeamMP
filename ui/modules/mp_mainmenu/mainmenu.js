@@ -100,6 +100,7 @@ angular.module('beamng.stuff')
         // VERSION INFO
         scope.showBuildInfo = false
         scope.versionStr = beamng.version
+        console.log("versionStr", scope.versionStr)
         // TODO #203 Fix this to actually use the real launcher version!
         scope.beammpGameVer = '4.6.1'
         scope.beammpLauncherVer = '3.0.0'
@@ -110,6 +111,9 @@ angular.module('beamng.stuff')
         for(var i = 0; i < 3; i++) {
             if(versionSplit[versionSplit.length - 1] == '0') versionSplit.pop(); // remove any '0' for simplicity reasons
         }
+
+        scope.versionSimpleStr = versionSplit.join('.')
+        scope.buildInfoStr = beamng.buildinfo
 
         scope.quit = function () {
           bngApi.engineScript('quit();');

@@ -36,32 +36,9 @@ local function checkMod(mod)
 			core_modmanager.deleteMod(modname)
 		end
 	elseif modAllowed then
-		if mod.active then -- this mod just got enabled for MP, run modscript
-			--dump(mod)
-			local dir, basefilename, ext = path.splitWithoutExt(mod.fullpath)
-			--dump(path.splitWithoutExt(mod.fullpath))
-
-			local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
-			--print(mod.filename)
-			log('I', 'checkMod', "Loaded  " .. basefilename)
-			
-			
-			local f = io.open(modscriptpath, "r")
-			if f == nil or not io.close(f) then print(modscriptpath.." cant be opened") return end -- modscript file not found
-			
-			local status, ret = pcall(dofile, modscriptpath)
-			if not status then
-				log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
-				log('E', 'initDB.modScript', dumps(ret))
-			else
-				log('I', 'checkMod', "Ran modscript ("..modscriptpath..")")
-				loadCoreExtensions()
-			end
-		else
-			print("Inactive Mod but Should be Active: "..modname)
-			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-			MPCoreNetwork.modLoaded(modname)
-		end
+		print("Inactive Mod but Should be Active: "..modname)
+		core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
+		MPCoreNetwork.modLoaded(modname)
 	end
 end
 
@@ -80,7 +57,7 @@ end
 
 
 
-local function cleanUpSessionMods()
+local function cleanUpSessionMods() --TODO: find a way to unload GE Core extensions without reloading Lua
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
 	local modsDB = jsonReadFile("mods/db.json")
 	if modsDB then
@@ -89,6 +66,7 @@ local function cleanUpSessionMods()
 			for modname, mod in pairs(modsDB.mods) do
 					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
 							count = count + 1
+							core_modmanager.deactivateMod(modname)
 							core_modmanager.deleteMod(modname)
 							modsFound = true
 					end

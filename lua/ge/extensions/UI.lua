@@ -38,7 +38,7 @@ end
 local function updatePlayersList(data)
 	playersString = data or playersString
 	local players = split(playersString, ",")
-	--print(dump(players))
+	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
 	guihooks.trigger("playerList", jsonEncode(players))
 	guihooks.trigger("playerPings", jsonEncode(pings))
 end

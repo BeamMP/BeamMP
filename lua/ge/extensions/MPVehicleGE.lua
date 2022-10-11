@@ -400,19 +400,13 @@ local function sendVehicleSpawn(gameVehicleID)
 		local vehicleTable = {}
 		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 		local veh          = be:getObjectByID(gameVehicleID)
-		local c            = veh.color
-		local p0           = veh.colorPalette0
-		local p1           = veh.colorPalette1
 		local pos          = veh:getPosition()
 		local rot          = quat(veh:getRotation())
 
 		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = gameVehicleID -- Game Vehicle ID
 		vehicleTable.jbm = veh:getJBeamFilename() -- JBeam
-		vehicleTable.vcf = vehicleData.config -- Vehicle Config
-		vehicleTable.col = {c.x, c.y, c.z, c.w} -- Color Palette
-		vehicleTable.cpz = {p0.x, p0.y, p0.z, p0.w} -- Color Palette 0
-		vehicleTable.cpo = {p1.x, p1.y, p1.z, p1.w} -- Color Palette 1
+		vehicleTable.vcf = vehicleData.config -- Vehicle Config, contains paint data
 		vehicleTable.pos = {pos.x, pos.y, pos.z} -- Position
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
 
@@ -443,9 +437,6 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
-	vehicleTable.col = {c.x, c.y, c.z, c.w}
-	vehicleTable.cpz = {p0.x, p0.y, p0.z, p0.w}
-	vehicleTable.cpo = {p1.x, p1.y, p1.z, p1.w}
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
@@ -461,7 +452,7 @@ end
 
 -- applying section
 
-local function checkIfVehiclenameInvalid(vehicleName, playerName, v)
+local function checkIfVehiclenameInvalid(vehicleName, playerName, v) -- TODO: find a different way of doing this because it thinks saved configs of modded vehicles are valid
 	local vehiclesList = extensions.core_vehicles.getModelList()
 
 	if vehiclesList.models[vehicleName] ~= nil then return false end
@@ -486,10 +477,7 @@ local function applyVehSpawn(event)
 	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
 	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
 	local vehicleName     = decodedData.jbm -- Vehicle name
-	local vehicleConfig   = decodedData.vcf -- Vehicle config
-	local c               = decodedData.col -- Vehicle color
-	local cP0             = decodedData.cpz -- Vehicle colorPalette0
-	local cP1             = decodedData.cpo -- Vehicle colorPalette1
+	local vehicleConfig   = decodedData.vcf -- Vehicle config, contains paint data
 	local pos             = vec3(decodedData.pos)
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 
@@ -504,23 +492,15 @@ local function applyVehSpawn(event)
 		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
 	end
 
-	--fresh spawns dont contain paint data?
-	if not vehicleConfig.paints then
-		vehicleConfig.paints = {}
-		if c   then vehicleConfig.paints[1] = {baseColor=c} end
-		if cP0 then vehicleConfig.paints[2] = {baseColor=cP0} end
-		if cP1 then vehicleConfig.paints[3] = {baseColor=cP1} end
-	end
-
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
 	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
 
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
-		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
+		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
-		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, paint=vehicleConfig.paints[1], paint2=vehicleConfig.paints[2], paint3=vehicleConfig.paints[3]})
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true})
 		spawnedVehID = spawnedVeh:getID()
 		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
 
@@ -590,19 +570,10 @@ local function applyVehEdit(serverID, data)
 	else
 		log('W','applyVehEdit', "The received data for '"..vehicleName.."' does not correspond with the vehicle '"..veh:getJBeamFilename().."'")
 
-		--fresh spawns dont contain paint data?
-		if not vehicleConfig.paints then
-			vehicleConfig.paints = {}
-			if decodedData.col then vehicleConfig.paints[1] = {baseColor=decodedData.col} end
-			if decodedData.cpz then vehicleConfig.paints[2] = {baseColor=decodedData.cpz} end
-			if decodedData.cpo then vehicleConfig.paints[3] = {baseColor=decodedData.cpo} end
-		end
-
 		local options = {
 			model = vehicleName,
 			config = serialize(vehicleConfig),
 			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
-			paint = vehicleConfig.paints[1], paint2 = vehicleConfig.paints[2], paint3 = vehicleConfig.paints[3]
 		}
 
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)

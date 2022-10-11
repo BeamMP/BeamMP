@@ -13,35 +13,36 @@ print("Loading MPGameNetwork")
 -- ============= VARIABLES =============
 local socket = require('socket')
 local TCPSocket
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
+local launcherConnected = false
 local eventTriggers = {}
 --keypress handling
 local keyStates = {} -- table of keys and their states, used as a reference
 local keysToPoll = {} -- list of keys we want to poll for state changes
 local keypressTriggers = {}
+local isConnecting = false
 -- ============= VARIABLES =============
 
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
 	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
-	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
-		TCPSocket = socket.tcp() -- Set socket to TCP
+	if not launcherConnected then
+		TCPSocket = socket.tcp()
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
-		launcherConnectionStatus = 1
+		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
+		MPGameNetwork.send('A')
 	else
-		log('W', 'connectToLauncher', "Already connected, aborting")
+		log('W', 'connectToLauncher', 'Launcher already connected!')
 	end
 end
 
 
 
 local function disconnectLauncher()
-	if launcherConnectionStatus > 0 then -- If player were connected
-		TCPSocket:close()-- Disconnect from server
-		launcherConnectionStatus = 0
+	if launcherConnected then
+		TCPSocket:close()
+		launcherConnected = false
 	end
 end
 
@@ -50,7 +51,12 @@ end
 local function sendData(s)
 	if TCPSocket then
 		local r, err = TCPSocket:send(string.len(s)..'>'..s)
-		if err then log('E', 'sendData', err) return end
+
+		if not r and not launcherConnected then log('E', 'sendData', 'Launcher not connected!') return end --TODO: Improve this mess
+		if not r and launcherConnected then launcherConnected = false log('W', 'sendData', 'Lost launcher connection!') return end
+		if not launcherConnected then launcherConnected = true end
+
+
 		if settings.getValue("showDebugOutput") == true then
 			print('[MPGameNetwork] Sending Data ('..r..'): '..s)
 		end
@@ -176,10 +182,10 @@ local HandleNetwork = {
 }
 
 
-
+local heartbeatTimer = 0
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
-	if launcherConnectionStatus > 0 then -- If player is connecting or connected
+	if launcherConnected then
 		while (true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
@@ -196,12 +202,16 @@ local function onUpdate(dt)
 			if MPDebug then MPDebug.packetReceived(string.len(received)) end
 		end
 	end
+	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() then --TODO: something
+		heartbeatTimer = 0
+		sendData('A')
+	end
 end
 
 
 
-local function connectionStatus()
-	return launcherConnectionStatus
+local function isLauncherConnected()
+	return launcherConnected
 end
 
 detectGlobalWrites() -- reenable global write notifications
@@ -212,7 +222,7 @@ M.onUpdate = onUpdate
 M.onKeyStateChanged = onKeyStateChanged
 
 --functions
-M.connectionStatus    = connectionStatus
+M.launcherConnected   = isLauncherConnected
 M.connectToLauncher   = connectToLauncher
 M.disconnectLauncher  = disconnectLauncher
 M.send                = sendData

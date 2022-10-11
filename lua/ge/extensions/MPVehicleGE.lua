@@ -664,7 +664,7 @@ end
 
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	if MPCoreNetwork.isMPSession() then -- If TCP connected
+	if MPCoreNetwork.isMPSession() then
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 
 		if newGameVehicleID and newGameVehicleID > -1 then
@@ -1437,6 +1437,7 @@ local function onSerialize()
 end
 
 local function onDeserialized(data)
+	if true then return end -- TODO: check if server has been switched instead
 	if (getMissionFilename() or "") == "" then return end
 
 	for k,v in pairs(data.vehicles) do

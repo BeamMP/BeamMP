@@ -3,6 +3,7 @@
   --clean-red: #d4574ebd;
   --bg-main: rgba(26, 23, 23, 1);
   --bg-secondary: rgba(41, 38, 38, 0.7);
+  --c-pink: #c02c64;
 }
 
 .main-container {
@@ -31,6 +32,167 @@
 #primary-div {
   background-color: rgba(0, 0, 0, 0.55);
 }
+
+.server-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+/* Server Navbar */
+.server-navbar {
+  background-color: var(--bg-secondary);
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.server-navbar__left {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.server-navbar__right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.server-filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.server-container input {
+  background-color: var(--bg-secondary);
+  color: #fff;
+  border-width: 0.1em;
+  border-style: solid;
+  border-color: rgba(34, 33, 33, 0);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out;
+  width: 400px;
+  padding: 8px 12px 10px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+}
+
+.server-container input:focus {
+  border-color: var(--clean-red);
+}
+
+.server-container input:hover {
+  border-color: var(--clean-red);
+}
+
+/* MD Checkbox */
+.server-container md-checkbox .md-container {
+  -webkit-transform: translateY(-50%) !important;
+  transform: translateY(-50%) !important;
+  padding: 0.5em !important;
+}
+
+.server-container md-checkbox.md-checked .md-icon {
+  background-color: var(--clean-red);
+}
+
+/* MD Tooltip */
+.server-container md-tooltip .md-content {
+  background-color: var(--bg-secondary);
+  color: #fff;
+}
+
+/* *:focus::before {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+} */
+
+/* MD Slider */
+.server-container md-slider:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.server-container md-slider .md-track.md-track-fill {
+  background-color: var(--clean-red);
+}
+
+.server-container md-slider .md-thumb:after {
+  background-color: var(--clean-red);
+}
+
+.server-container md-slider .md-thumb:after {
+  background-color: var(--clean-red);
+  border-color: var(--clean-red);
+}
+
+/* MD Select Menu */
+.server-container md-select-menu md-content {
+  background-color: var(--bg-secondary);
+  color: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--clean-red);
+}
+
+/* Server List Table */
+#serversTable {
+  width: 100%;
+}
+
+#serversTable thead,  #serversTable tbody {
+  background-color: var(--bg-secondary);
+  color: #fff;
+  width: 100%;
+}
+
+#serversTable tr {
+  background-color: #161923;
+}
+
+#serversTable tr th {
+  padding: 0.4em;
+}
+
+#serversTable tbody tr td {
+  padding: 0.4em;
+}
+
+table#serversTable {
+  border-spacing: 0 2px;
+}
+
+#serversTable th:hover {
+  box-sizing: border-box;
+  border-bottom: 2px solid var(--clean-red);
+}
+
+tbody#serversTable tr:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+/* 
+#serversTable th:hover {
+  box-sizing: border-box;
+  border-bottom: 2px solid var(--clean-red);
+}
+
+#serversTable tr:not(#ServerInfoRow):hover {
+  background-color: rgba(0, 0, 0, 0.25);
+} */
 /* CUSTOM END */
 
 .offset-div {
@@ -61,7 +223,7 @@
   height: 100%;
 }
 
-table#serversTable {
+/* table#serversTable {
   width: 100%;
   color: white;
   margin-left: auto;
@@ -76,14 +238,7 @@ table#serversTable {
   transition: 0.2s;
   padding: 0.5em;
 }
-
-#serversTable th:hover {
-  background-color: var(--clean-red);
-}
-
-#serversTable tr:not(#ServerInfoRow):hover {
-  background-color: rgba(0, 0, 0, 0.25);
-}
+*/
 
 .highlight {
   background-color: #99aab5 !important;
@@ -185,7 +340,7 @@ div#addCustomFav {
   border-radius: 5px;
 }
 
-input {
+/* input {
   display: block;
   width: 400px;
   margin: 0 0 20px;
@@ -193,7 +348,7 @@ input {
   border: 1px solid rgba(0, 0, 0, 0.5);
   background: rgba(0, 0, 0, 0.25);
   color: white;
-}
+} */
 
 .row {
   width: 100%;
@@ -205,15 +360,15 @@ input {
   width: 50%;
 }
 
-tr#ServerInfoRow {
+/* tr#ServerInfoRow {
   background-color: var(--bg-secondary);
 }
 
 ul.serverItemDetails {
   list-style: none;
-}
+} */
 
-md-checkbox .md-container {
+/* md-checkbox .md-container {
   position: absolute;
   top: 50%;
   -webkit-transform: translateY(-100%);
@@ -223,9 +378,9 @@ md-checkbox .md-container {
   height: 18px;
   left: 0;
   right: auto;
-}
+} */
 
-md-checkbox {
+/* md-checkbox {
   box-sizing: border-box;
   display: block;
   margin: 8px;
@@ -243,7 +398,7 @@ md-checkbox {
   min-width: 18px;
   color: white;
   min-height: 18px;
-}
+} */
 
 md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   padding-top: 0px;
@@ -803,6 +958,21 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   align-items: center;
   display: flex;
   flex-flow: row;
+  border-width: 0.1em;
+  border-style: solid;
+  border-color: rgba(34, 33, 33, 0);
+  transition: border-color 0.2s ease-in-out;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.mpMenuNavbar .nav-item:hover {
+  background-color: rgba(26, 23, 23, 0.736);
+  border-color: var(--clean-red);
+}
+
+.mpMenuNavbar .nav-item:active {
+  background-color: rgba(26, 23, 23, 0.836);
 }
 
 button {
@@ -823,21 +993,3 @@ button:hover {
 button:active {
   background-color: var(--clean-red);
 }
-
-/* .clickable {
-  border-width: 0.1em;
-  border-style: solid;
-  border-color: rgba(34, 33, 33, 0);
-  transition: border-color 0.2s ease-in-out;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
-.clickable:hover {
-  background-color: rgba(26, 23, 23, 0.736);
-  border-color: var(--clean-red);
-}
-
-.clickable:active {
-  background-color: rgba(26, 23, 23, 0.836);
-} */

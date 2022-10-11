@@ -1,71 +1,69 @@
-<!-- DataTables CSS --
-<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-
-<!-- DataTables Responsive CSS --
-<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
-
-<!-- DataTables JavaScript -->
-<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
-<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
+<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayer/multiplayer.css">
 
 <mp-menu-navbar></mp-menu-navbar>
-<div id="primary-div">
-	<div layout="row" layout-padding="">
-		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search"
-			name="search" placeholder="Search" />
-		<button id="refresh-button" class="servers-button" ng-class="" ng-click="multiplayer.refreshList()">
-			{{:: 'ui.multiplayer.refresh' | translate}}</button>
+<div class="server-container">
+	<!-- Navigation Bar -->
+	<section class="server-navbar">
+		<section class="server-navbar__left">
+			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text"
+				id="search" name="search" placeholder="Search" ng-class="" ng-style="" tabindex="false" />
 
-		<md-checkbox ng-model="multiplayermenu.checkIsEmpty" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-				{{:: 'ui.multiplayer.emptyOnlyTooltip' | translate}}
-			</md-tooltip md-no-ink>
-			{{:: 'ui.multiplayer.emptyOnly' | translate}}
-		</md-checkbox>
+			<button id="refresh-button" class="servers-button" ng-class="" ng-click="multiplayer.refreshList()">
+				{{:: 'ui.multiplayer.refresh' | translate}}
+			</button>
+		</section>
 
-		<md-checkbox ng-model="multiplayermenu.checkIsNotEmpty" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-				{{:: 'ui.multiplayer.notEmptyTooltip' | translate}}
-			</md-tooltip md-no-ink>
-			{{:: 'ui.multiplayer.notEmpty' | translate}}
-		</md-checkbox>
+		<section class="server-navbar__right">
+			<!-- Mod Size -->
+			<div class="filter__mod_size">
+				<md-checkbox ng-model="multiplayermenu.checkModSlider" ng-change="multiplayermenu.repopulate();"
+					md-class="" md-style="" tabindex="false">
+					<md-tooltip md-direction="right">
+						{{:: 'ui.multiplayer.modSliderTooltip' | translate}}
+					</md-tooltip md-no-ink>
+					{{:: 'ui.multiplayer.modSlider' | translate}}({{multiplayermenu.sliderMaxModSize}} MB)
+				</md-checkbox>
 
-		<md-checkbox ng-model="multiplayermenu.checkIsNotFull" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-				{{:: 'ui.multiplayer.notFullTooltip' | translate}}
-			</md-tooltip md-no-ink>
-			{{:: 'ui.multiplayer.notFull' | translate}}
-		</md-checkbox>
+				<md-slider ng-if="multiplayermenu.checkModSlider" ng-model="multiplayermenu.sliderMaxModSize" min="0"
+					max="5000" step="50" aria-label="_" ng-change="multiplayermenu.repopulate();" ng-class=""
+					ng-style="" tabindex="false">
+				</md-slider>
+			</div>
 
+			<!-- Map Selector -->
+			<div class="server-filters">
+				<md-select id="map-select" ng-model="multiplayermenu.selectMap" placeholder="All"
+					class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
+					<md-tooltip md-direction="right">
+						{{:: 'ui.multiplayer.mapFilterTooltip' | translate}}
+					</md-tooltip>
 
-		<md-select id="map-select" ng-model="multiplayermenu.selectMap" placeholder="All"
-			class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-				{{:: 'ui.multiplayer.mapFilterTooltip' | translate}}
-			</md-tooltip>
+					<md-option ng-repeat="map in multiplayermenu.availableMaps"
+						ng-value="multiplayermenu.availableMaps[$index]" style="height: 40px;">
+						{{ map }}
+					</md-option>
+				</md-select>
 
-			<md-option ng-repeat="map in multiplayermenu.availableMaps" ng-value="multiplayermenu.availableMaps[$index]"
-				style="height: 40px;">
-				{{ map }}
-			</md-option>
-		</md-select>
+				<!-- Not Empty Filter -->
+				<md-checkbox type="checkbox" ng-model="multiplayermenu.checkIsEmpty"
+					ng-change="multiplayermenu.repopulate();" ng-class="" ng-style="" tabindex="false">
+					{{:: 'ui.multiplayer.emptyOnly' | translate}}
+					<md-tooltip md-direction="right" md-class="" md-style="">
+						{{:: 'ui.multiplayer.emptyOnlyTooltip' | translate}}
+					</md-tooltip md-no-ink>
+				</md-checkbox>
 
-
-		<md-checkbox ng-model="multiplayermenu.checkModSlider" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-				{{:: 'ui.multiplayer.modSliderTooltip' | translate}}
-			</md-tooltip md-no-ink>
-			{{:: 'ui.multiplayer.modSlider' | translate}}
-		</md-checkbox>
-
-		<md-slider flex ng-if="multiplayermenu.checkModSlider" ng-model="multiplayermenu.sliderMaxModSize" min="0"
-			max="5000" step="50" aria-label="_" ng-change="multiplayermenu.repopulate();">
-		</md-slider>
-		<span ng-if="multiplayermenu.checkModSlider" style="margin: 0px 15px; padding-top: 13px; color: white;">{{
-			multiplayermenu.sliderMaxModSize }} MB</span>
-
-		<md-divider></md-divider>
-	</div>
+				<!-- Not Full Filter -->
+				<md-checkbox ng-model="multiplayermenu.checkIsNotFull" ng-change="multiplayermenu.repopulate();"
+					ng-class="" ng-style="" tabindex="false">
+					<md-tooltip md-direction="right" md-class="" md-style="">
+						{{:: 'ui.multiplayer.notFullTooltip' | translate}}
+					</md-tooltip md-no-ink>
+					{{:: 'ui.multiplayer.notFull' | translate}}
+				</md-checkbox>
+			</div>
+		</section>
+	</section>
 
 	<table id="serversTable">
 		<thead>
@@ -87,7 +85,3 @@
 		<span id="TEMPNODE" style="display:none;"></span>
 	</div>
 </div>
-
-<script>
-
-</script>

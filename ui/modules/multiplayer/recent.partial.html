@@ -1,24 +1,16 @@
-<!-- DataTables CSS --
-<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-
-<!-- DataTables Responsive CSS -->
-<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
-
-<!-- DataTables JavaScript -->
-<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
-<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
+<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayer/multiplayer.css">
 
 <mp-menu-navbar></mp-menu-navbar>
-<div id="primary-div">
-	<div layout="row" layout-padding="">
+<div class="server-container">
+	<div class="server-navbar">
+		<section class="server-navbar__left">
 		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search"
 			name="search" placeholder="Search" />
 		<button id="refresh-button" class="servers-button" ng-click="multiplayer.refreshList()" tabindex="false" ng-class="" ng-style="">
 			{{:: 'ui.multiplayer.refresh' | translate}}</button>
 		<button id="clear-button" class="servers-button" ng-click="multiplayer.clearRecents()">
 			Clear recents</button>
-
-		<md-divider></md-divider>
+		</section>
 	</div>
 
 	<table id="serversTable">

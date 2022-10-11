@@ -26,7 +26,7 @@ local function tick()
 end
 
 local function sendNodes(data, gameVehicleID) -- Update electrics values of all vehicles - The server check if the player own the vehicle itself
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.sendSplit('Xn:', serverVehicleID..":", data)

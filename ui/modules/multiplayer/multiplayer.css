@@ -184,15 +184,9 @@ tbody#serversTable tr:hover {
   background-color: rgba(0, 0, 0, 0.25);
 }
 
-/* 
-#serversTable th:hover {
-  box-sizing: border-box;
-  border-bottom: 2px solid var(--clean-red);
-}
-
-#serversTable tr:not(#ServerInfoRow):hover {
+#serversTable tr:hover {
   background-color: rgba(0, 0, 0, 0.25);
-} */
+}
 /* CUSTOM END */
 
 .offset-div {

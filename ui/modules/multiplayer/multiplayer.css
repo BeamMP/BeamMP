@@ -805,7 +805,26 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   flex-flow: row;
 }
 
-.clickable {
+button {
+  color: white;
+  text-align: center;
+  background-color: var(--bg-main);
+  text-decoration: none;
+  font-size: 15px;
+  transition-duration: 0.15s;
+  cursor: pointer;
+  border: none;
+}
+
+button:hover {
+  border: 1px solid var(--clean-red);
+}
+
+button:active {
+  background-color: var(--clean-red);
+}
+
+/* .clickable {
   border-width: 0.1em;
   border-style: solid;
   border-color: rgba(34, 33, 33, 0);
@@ -821,4 +840,4 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 
 .clickable:active {
   background-color: rgba(26, 23, 23, 0.836);
-}
+} */

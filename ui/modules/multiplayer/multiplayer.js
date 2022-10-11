@@ -872,7 +872,7 @@ function getServerInfoHTML(d) {
 						</div>
 					</div>
 					<div class="row" style="padding-left: 10px;">
-						<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect(` + d.ip + `, ` + d.port + `)" style="margin-left: 10px;">Connect</md-button>
+						<button id="serverconnect-button" class="servers-button" ng-class="" ng-style="" tabindex="false" ng-click="multiplayer.connect(` + d.ip + `, ` + d.port + `)" style="margin-left: 10px;">Connect</button>
 						` + favButton + `
 					</div>
 					<div class="row">

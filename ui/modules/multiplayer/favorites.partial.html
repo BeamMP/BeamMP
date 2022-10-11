@@ -13,8 +13,8 @@
 <div id="primary-div">
 	<div layout="row" layout-padding="">
 			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
-			<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
-			<md-button id="addserver-button" class="button servers-button" ng-class="" ng-click="multiplayer.showCustomServer()">{{:: 'ui.multiplayer.addCustomServer' | translate}}</md-button>
+			<button id="refresh-button" class="servers-button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</button>
+			<button id="addserver-button" class="servers-button" ng-class="" ng-click="multiplayer.showCustomServer()">{{:: 'ui.multiplayer.addCustomServer' | translate}}</button>
 
 			<md-checkbox ng-model="multiplayermenu.checkIsEmpty" ng-change="multiplayermenu.repopulate();">
 			<md-tooltip md-direction="right">

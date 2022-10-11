@@ -13,8 +13,8 @@
 	<div layout="row" layout-padding="">
 		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search"
 			name="search" placeholder="Search" />
-		<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">
-			{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
+		<button id="refresh-button" class="servers-button" ng-class="" ng-click="multiplayer.refreshList()">
+			{{:: 'ui.multiplayer.refresh' | translate}}</button>
 
 		<md-checkbox ng-model="multiplayermenu.checkIsEmpty" ng-change="multiplayermenu.repopulate();">
 			<md-tooltip md-direction="right">

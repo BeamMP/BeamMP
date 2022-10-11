@@ -13,10 +13,10 @@
 	<div layout="row" layout-padding="">
 		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search"
 			name="search" placeholder="Search" />
-		<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">
-			{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
-		<md-button id="clear-button" class="button servers-button" ng-class="" ng-click="multiplayer.clearRecents()">
-			Clear recents</md-button>
+		<button id="refresh-button" class="servers-button" ng-click="multiplayer.refreshList()" tabindex="false" ng-class="" ng-style="">
+			{{:: 'ui.multiplayer.refresh' | translate}}</button>
+		<button id="clear-button" class="servers-button" ng-click="multiplayer.clearRecents()">
+			Clear recents</button>
 
 		<md-divider></md-divider>
 	</div>

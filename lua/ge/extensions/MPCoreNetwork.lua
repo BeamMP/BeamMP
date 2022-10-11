@@ -24,6 +24,7 @@ local isMpSession = false
 local isGoingMpSession = false
 local connectionIssuesShown = false
 local onLauncherConnected = nop
+local loadLevel = nop
 local socket = require('socket')
 --[[
 Z  -> The client asks the launcher its version
@@ -145,7 +146,7 @@ end
 local function setMods(modsString)
 	--log('W', 'setMods', 'isGoingMpSession = true') --TODO: look into why this is called after being loaded into a map >:(
 	--isGoingMpSession = true
-	if modsString == "" then return log('M', 'setMods', 'Received no mods.') end
+	if modsString == "" then loadLevel() log('M', 'setMods', 'Received no mods.') return end
 	local mods = {}
 	if (modsString) then
 		for mod in string.gmatch(modsString, "([^;]+)") do
@@ -154,6 +155,7 @@ local function setMods(modsString)
 		end
 	end
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
+	loadLevel()
 end
 
 local function getCurrentServer()
@@ -185,18 +187,17 @@ local function connectToServer(ip, port, mods, name)
 	status = "LoadingResources"
 end
 
-local function loadLevel(map) --TODO: all this
+loadLevel = function() --TODO: all this
 	isMpSession = true
 	isGoingMpSession = true
-	log("W","loadLevel", "loading map " ..map)
+	log("W","loadLevel", "loading map " ..currentServer.map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
 	spawn.preventPlayerSpawning = true -- don't spawn default vehicle when joining server
 
-	freeroam_freeroam.startFreeroam(map)
+	freeroam_freeroam.startFreeroam(currentServer.map)
 	status = "LoadingMapNow"
 
-	currentServer.map = map
 
 	--[[
 	if getMissionFilename() == map then
@@ -332,7 +333,7 @@ local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
 	['U'] = function(params) handleU(params) end, -- Loading into server UI
-	['M'] = function(params) loadLevel(params) end,
+	['M'] = function(params) currentServer.map = params end,
 	['N'] = function(params) loginReceived(params) end,
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,

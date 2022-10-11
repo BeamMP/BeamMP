@@ -55,6 +55,8 @@ local function connectToLauncher(silent) -- TODO: proper reconnecting system
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444))
 		send('A') -- immediately heartbeat to check if connection was established
+	else
+		log('W', 'connectToLauncher', 'Launcher already connected!')
 	end
 end
 
@@ -132,7 +134,7 @@ local function requestServerList() -- TODO: reduce how often the server list is 
 end
 
 local function requestPlayers()
-	log('M', 'requestPlayers', 'Requesting players.')
+	--log('M', 'requestPlayers', 'Requesting players.')
 	sendBeamMPInfo()
 end
 -- ================ UI ================
@@ -141,8 +143,8 @@ end
 
 -- ============= SERVER RELATED =============
 local function setMods(modsString)
-	log('W', 'setMods', 'isGoingMpSession = true')
-	isGoingMpSession = true
+	--log('W', 'setMods', 'isGoingMpSession = true') --TODO: look into why this is called after being loaded into a map >:(
+	--isGoingMpSession = true
 	if modsString == "" then return log('M', 'setMods', 'Received no mods.') end
 	local mods = {}
 	if (modsString) then
@@ -184,6 +186,8 @@ local function connectToServer(ip, port, mods, name)
 end
 
 local function loadLevel(map) --TODO: all this
+	isMpSession = true
+	isGoingMpSession = true
 	log("W","loadLevel", "loading map " ..map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
@@ -222,7 +226,6 @@ local function loadLevel(map) --TODO: all this
 		MPGameNetwork.connectToLauncher()
 	end
 	]]--
-	isMpSession = true
 
 	-- replaces the instability detected function with one that doesn't pause physics or sends messages to the UI
 	-- but left logging in so you can still see what car it is -- credit to deerboi for showing me that this is possible
@@ -258,20 +261,20 @@ end
 
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
+	print(debug.traceback())
 	isMpSession = false
 	isGoingMpSession = false
 	currentServer = {}
-	send('QS') -- Tell the launcher that we quit server / session
-	--disconnectLauncher()
+	send('QS') -- Quit session, disconnecting MPCoreNetwork is not necessary
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
 	extensions.hook('onServerLeave')
-	if goBack then returnToMainMenu() end -- return to main menu
-	-- resets the instability function back to default
-	--onInstabilityDetected = function (jbeamFilename)  bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))  ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end -- TODO: handle this differently
 	MPModManager.cleanUpSessionMods()
-	--connectToLauncher()
+	if goBack then returnToMainMenu() end
+end
+
+local function runPostJoin() -- TODO: put all the functions that should run after joining server, then call this function from events
 end
 
 local function isMPSession()
@@ -290,7 +293,7 @@ local function handleU(params)
 	local data = string.sub(params, 2)
 	if code == "l" then
 		--log('W',"handleU", data)
-		if settings.getValue('beammpAlternateModloading') then
+		if settings.getValue('beammpAlternateModloading') then --TODO: move to MPModManager
 			if data == "start" then-- starting modloading, disable automount
 				log('W',"handleU", "starting mod dl process, disabling automount")
 				core_modmanager.disableAutoMount()
@@ -315,7 +318,8 @@ local function handleU(params)
 			send('M') -- request map string from launcher
 			status = "LoadingMap"
 		elseif string.sub(data, 1, 12) == "Disconnected" then
-			leaveServer(false) -- reset session variables
+			--log('W', 'handleU', 'leaveServer by launcher!') --commented out because a disconnected message is received while joining a server for whatever reason
+			--leaveServer(false) -- reset session variables
 		end
 	elseif code == "p" and isMpSession then
 		UI.setPing(data.."")
@@ -338,9 +342,13 @@ local HandleNetwork = {
 
 local onUpdateTimer = 0
 local pingTimer = 0
+local updateUITimer = 0
+local heartbeatTimer = 0
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt -- TODO: clean this up a bit
 	onUpdateTimer = onUpdateTimer + dt
+	updateUITimer = updateUITimer + dt
+	heartbeatTimer = heartbeatTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
 		while(true) do
@@ -359,13 +367,15 @@ local function onUpdate(dt)
 			HandleNetwork[code](data)
 		end
 		--================================ SECONDS TIMER ================================
-		if onUpdateTimer > 5 then -- TODO: put this back to 0.1
+		if heartbeatTimer >= 1 then
+			heartbeatTimer = 0
 			send('A') -- Launcher heartbeat
-			if status == "LoadingResources" then send('Ul') end -- Ask the launcher for a loading screen update
-			--else send('Up') end -- TODO: only send this when loaded in
-			onUpdateTimer = 0
 		end
-		if pingTimer > 0.5 then --TODO: only ask for ping if in session and loaded in a map
+		if updateUITimer >= 0.1 and status == "LoadingResources" then
+			updateUITimer = 0
+			send('Ul') -- Ask the launcher for a loading screen update
+		end
+		if pingTimer >= 0.5 then --TODO: only ask for ping if in session and loaded in a map
 			pingTimer = 0
 			send('Up') -- request ping packet
 		end
@@ -377,7 +387,7 @@ local function onUpdate(dt)
 		end
 		]]--
 	else
-		if onUpdateTimer > 1 then -- if connection is lost re-attempt connecting every second
+		if onUpdateTimer >= 1 then -- if connection is lost re-attempt connecting every second
 			onUpdateTimer = 0
 			connectToLauncher()
 		end
@@ -412,7 +422,8 @@ local function onClientStartMission(mission) --TODO:
 end
 
 local function onClientPostStartMission() --TODO: move to onWorldReadyState
-	log('W', 'onClientPostStartMission', 'onClientPostStartMission')
+	log('W', 'onClientPostStartMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
+	log('W', 'onClientPostStartMission', 'isMpSession: '..tostring(isMpSession))
 	if MPCoreNetwork.isMPSession() then
 		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
@@ -470,7 +481,6 @@ M.connectToServer      = connectToServer
 M.getCurrentServer     = getCurrentServer
 M.setCurrentServer     = setCurrentServer
 M.isGoingMPSession     = isGoingMPSession
-M.launcherConnected    = launcherConnected
 M.connectToLauncher    = connectToLauncher
 M.send = send
 

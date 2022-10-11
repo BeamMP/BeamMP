@@ -9,18 +9,17 @@
   </div>
 </div>
 
-<div id="addCustomFav" style="display: none;">
+<div id="addCustomFav"style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50%; height: 50%; background-color: var(--bg-main); border-radius: 10px; display: none;">
   <md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class=""
     ng-click="multiplayer.closePopup()"> X </md-button>
-  <md-list-item layout class="md-padding">
+
+  <div style="position: abolsute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; height: 100%;">
     <h1>Add custom server :</h1>
-  </md-list-item>
-  <center>
-    <input type="text" id="customFavName" name="customFavName" placeholder="Custom server" />
-    <input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP" />
-    <input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814" />
-    <md-button class="button" ng-click="multiplayer.addCustomServer()">Save</md-button>
-  </center>
+    <input type="text" id="customFavName" name="customFavName" placeholder="Server Name" style="width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: 1px solid var(--bg-main); background-color: var(--bg-secondary); color: var(--text-main);"/>
+    <input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP" style="width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: 1px solid var(--bg-main); background-color: var(--bg-secondary); color: var(--text-main);"/>
+    <input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814" style="width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: 1px solid var(--bg-main); background-color: var(--bg-secondary); color: var(--text-main);"/>
+    <button class="servers-button" ng-click="multiplayer.addCustomServer()" style="margin: 10px 0; background-color: #242121;">Add Server</button>
+  </div>
 </div>
 
 <div id="back" layout="column" class="main-container">

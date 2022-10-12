@@ -69,7 +69,7 @@ end
 
 
 local function setServerName(serverName)
-	serverName = serverName or MPCoreNetwork.getCurrentServer().name
+	serverName = serverName or (MPCoreNetwork.getCurrentServer() and MPCoreNetwork.getCurrentServer().name)
 	guihooks.trigger("setServerName", serverName)
 end
 

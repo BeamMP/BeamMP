@@ -22,8 +22,8 @@ local loggedIn = false
 local currentModHasLoaded = false
 local isMpSession = false
 local isGoingMpSession = false
-local connectionIssuesShown = false
 local onLauncherConnected = nop
+local runPostJoin = nop
 local socket = require('socket')
 --[[
 Z  -> The client asks the launcher its version
@@ -48,7 +48,7 @@ local function send(s)
 end
 
 local function connectToLauncher(silent) -- TODO: proper reconnecting system
-	log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected))
+	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
 	if not launcherConnected then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
@@ -124,12 +124,12 @@ local function sendBeamMPInfo()
 	})
 end
 
-local function requestServerList() -- TODO: reduce how often the server list is requested by the UI
+local function requestServerList()
 	if isMpSession then
 		log('W', 'requestServerList', 'Currently in MP Session! Using cached server list.') --TODO: add UI warning when cached server list is being displayed
 		sendBeamMPInfo()
 		return
-	end --TODO: Disable launcher side session reset when requesting server list
+	end
 	send('B') -- Request server list
 end
 
@@ -146,14 +146,17 @@ local function setMods(modsString)
 	--log('W', 'setMods', 'isGoingMpSession = true') --TODO: look into why this is called after being loaded into a map >:(
 	--isGoingMpSession = true
 	if modsString == "" then log('M', 'setMods', 'Received no mods.') return end
+	log('W', 'setMods', modsString)
 	local mods = {}
-	if (modsString) then
+	if (modsString) then -- takes: mod1.zip;mod2.zip;mod3.zip, returns a table of mod1,mod2,mod3
 		for mod in string.gmatch(modsString, "([^;]+)") do
-			local modFileName = mod:gsub("Resources/Client/",""):gsub(".zip",""):gsub(";","")
+			local modFileName = mod:gsub(".zip",""):gsub(";","")
 			table.insert(mods, modFileName)
 		end
 	end
+
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
+	log('W', 'setMods', dumps(mods))
 end
 
 local function getCurrentServer()
@@ -185,13 +188,19 @@ local function connectToServer(ip, port, mods, name)
 	status = "LoadingResources"
 end
 
-local function loadLevel(map) --TODO: all this
+local function loadLevel(map) --TODO: all this, ensure this is only being run after all the mods have successfully loaded
+	--if true then return end
+	if getMissionFilename() ~= "" then core_vehicles.removeAll() end
 	isMpSession = true
 	isGoingMpSession = true
 	log("W","loadLevel", "loading map " ..map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
 	spawn.preventPlayerSpawning = true -- don't spawn default vehicle when joining server
+
+	if getMissionFilename() == map then
+		runPostJoin() return
+	end
 
 	freeroam_freeroam.startFreeroam(map)
 	status = "LoadingMapNow"
@@ -226,11 +235,6 @@ local function loadLevel(map) --TODO: all this
 	end
 	]]--
 
-	-- replaces the instability detected function with one that doesn't pause physics or sends messages to the UI
-	-- but left logging in so you can still see what car it is -- credit to deerboi for showing me that this is possible
-	-- it resets to default on leaving the server
-	-- we should probably consider a system to detect if a vehicle is in a instability loop and then delete it or respawn it (rapid instabilities causes VE to break on reload so it would need to be respawned)
-	--onInstabilityDetected = function(jbeamFilename) if not settings.getValue("disableInstabilityPausing") then bullettime.pause(true) ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning") end log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename)) end
 end
 -- ============= SERVER RELATED =============
 
@@ -270,11 +274,10 @@ local function leaveServer(goBack)
 	status = "" -- Reset status
 	extensions.hook('onServerLeave')
 	MPModManager.cleanUpSessionMods()
+	core_modmanager.enableAutoMount() -- re-enable auto-mount
 	if goBack then returnToMainMenu() end
 end
 
-local function runPostJoin() -- TODO: put all the functions that should run after joining server, then call this function from events
-end
 
 local function isMPSession()
 	return isMpSession
@@ -285,21 +288,22 @@ local function isGoingMPSession()
 end
 
 -- ============= OTHERS =============
-
+local autoMountDisabled = false
 local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
 	if code == "l" then
 		--log('W',"handleU", data)
-		if settings.getValue('beammpAlternateModloading') then --TODO: move to MPModManager
-			if data == "start" then-- starting modloading, disable automount
+		if settings.getValue('beammpAlternateModloading') then --TODO: take a look at mod loading stuff
+			if data == "start" and not autoMountDisabled then-- starting modloading, disable automount
 				log('W',"handleU", "starting mod dl process, disabling automount")
 				core_modmanager.disableAutoMount()
+				autoMountDisabled = true
 
 			elseif string.match(data, "^Loading Resource") then
 				log('W',"handleU", "mod downloaded, manually check for it")
-				--core_modmanager.enableAutoMount()
+
 				local modName = string.match(data, "^Loading Resource %d+/%d+: %/(.+)%.zip")
 
 				if currentModHasLoaded then
@@ -332,12 +336,11 @@ local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
 	['U'] = function(params) handleU(params) end, -- Loading into server UI
-	['M'] = function(params) loadLevel(params) log('W', 'HandleNetwork', 'Received Map! '..params) end,
+	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
-	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
-	['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- Player Kicked Event
-	['Z'] = function(params) launcherVersion = params; end
+	['Z'] = function(params) launcherVersion = params; end,
+	--['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- pre-join kick is currently handled launcher-side
 }
 
 local onUpdateTimer = 0
@@ -389,7 +392,7 @@ local function onUpdate(dt)
 	else
 		if onUpdateTimer >= 1 then -- if connection is lost re-attempt connecting every second
 			onUpdateTimer = 0
-			connectToLauncher()
+			connectToLauncher(true)
 		end
 	end
 end
@@ -407,7 +410,7 @@ onLauncherConnected = function()
 	autoLogin()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
-	if isMpSession then --TODO: WIP, verify and test / finish
+	if isMpSession then --TODO: WIP, verify and test / finish -- if the launcher closed while in a session, this reconnects back to the session once reopened
 		connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
 	end
 end
@@ -421,15 +424,21 @@ local function onClientStartMission(mission) --TODO:
 	end
 end
 
-local function onClientPostStartMission() --TODO: move to onWorldReadyState
+runPostJoin = function() -- TODO: put all the functions that should run after joining server, then call this function from events
 	log('W', 'onClientPostStartMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'onClientPostStartMission', 'isMpSession: '..tostring(isMpSession))
-	if MPCoreNetwork.isMPSession() then
+	if isMpSession and isGoingMpSession then
 		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
 		log('W', 'onClientPostStartMission', 'isGoingMpSession = false')
 		isGoingMpSession = false
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- TODO: clean this up, dont call this twice
+		guihooks.trigger('ChangeState', 'play')
 	end
+end
+
+local function onClientPostStartMission() --TODO: move to onWorldReadyState
+	runPostJoin()
 end
 
 local function onClientEndMission(mission)
@@ -447,12 +456,19 @@ local function onUiChangedState (curUIState, prevUIState)
 end
 
 local function onSerialize() --TODO: reimplement server rejoin on lua reload
-	return currentServer
+	return {currentServer = currentServer,
+			isMpSession = isMpSession}
 end
-local function onDeserialized(serverInfo)
-	if getMissionFilename() == serverInfo.map then
-		log('I', 'onDeserialized', 'Previous map matches current, reconnecting')
-		connectToServer(serverInfo.ip, serverInfo.port, serverInfo.modsString, serverInfo.name)
+local function onDeserialized(data)
+	log('M', 'onDeserialized', dumps(data))
+
+	currentServer = data and data.currentServer or nil
+	isMpSession = data and data.isMpSession
+
+	if not currentServer then return end
+	if isMpSession then
+		log('I', 'onDeserialized', 'reconnecting')
+		connectToServer(currentServer.ip, currentServer.port, currentServer.modsString, currentServer.name)
 	end
 end
 
@@ -484,8 +500,8 @@ M.isGoingMPSession     = isGoingMPSession
 M.connectToLauncher    = connectToLauncher
 M.send = send
 
---M.onSerialize          = onSerialize
---M.onDeserialized       = onDeserialized
+M.onSerialize          = onSerialize
+M.onDeserialized       = onDeserialized
 
 print("MPCoreNetwork loaded")
 

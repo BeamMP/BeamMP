@@ -107,7 +107,7 @@ local function setFavorites(favstr)
 
 	local favs = jsonDecode(favstr)
 	local favsfile = '/settings/BeamMP/favorites.json'
-	writeFile(favsfile, jsonEncodePretty(favs))
+	jsonWriteFile(favsfile, favs, true)
 end
 
 
@@ -136,7 +136,7 @@ local function setConfig(settingName, settingVal)
 	config[settingName] = settingVal
 
 	local favsfile = '/settings/BeamMP/config.json'
-	jsonWriteFile(favsfile, config)
+	jsonWriteFile(favsfile, config, true)
 end
 
 
@@ -147,7 +147,7 @@ local function acceptTos()
 	config.tos = true
 
 	local favsfile = '/settings/BeamMP/config.json'
-	jsonWriteFile(favsfile, config)
+	jsonWriteFile(favsfile, config, true)
 end
 
 local function onSerialize()

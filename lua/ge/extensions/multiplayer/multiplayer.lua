@@ -6,6 +6,7 @@ log("M", "multiplayer", "Gamemode Loaded")
 
 local originalGetDriverData = nop
 local originalToggleWalkingMode = nop
+local original_onInstabilityDetected = nop
 
 
 local function modifiedGetDriverData(veh)
@@ -30,6 +31,10 @@ local function modifiedToggleWalkingMode()
 	if unicycle ~= nil then
 		unicycle:delete()
 	end
+end
+
+local function modified_onInstabilityDetected(jbeamFilename)
+	log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))
 end
 
 local function onUpdate(dt)
@@ -65,6 +70,20 @@ local function onWorldReadyState(state)
 			spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle, TODO: put this and instability pause disable into their own function
 		end
 	end
+end
+
+local function replaceGameFunctions()
+	--save the original functions so they can be restored once we're not in a session anymore
+	original_onInstabilityDetected = onInstabilityDetected
+
+	--replace the functions
+	if settings.getValue("disableInstabilityPausing") then
+		onInstabilityDetected = modified_onInstabilityDetected
+	end
+end
+
+local function restoreGameFunctions()
+	onInstabilityDetected = original_onInstabilityDetected
 end
 
 -- public interface

@@ -9,7 +9,7 @@ local M = {}
 print("Loading MPModManager...")
 
 local serverMods = {}
-local whitelist = {"multiplayerbeammp", "beammp"}
+local whitelist = {"multiplayerbeammp", "beammp", "translations"}
 
 
 local function IsModAllowed(n)
@@ -43,9 +43,13 @@ local function checkMod(mod)
 end
 
 local function getModList()
-	for k,v in pairs(FS:findFiles( "/mods/", "*.zip", -1)) do
-		core_modmanager.getModForFilename(v)
+	local modList = {}
+	for key, modName in pairs(FS:findFiles( "/mods/", "*.zip", -1)) do --key = index, modName = "/mods/mod.zip"
+		local name, modInfo = core_modmanager.getModForFilename(modName)
+		if not name or not modInfo then log('E', 'getModList', 'Files changed but InitDB did not run.') return end
+		modList[name] = modInfo
 	end
+	return modList
 end
 
 local function checkAllMods()
@@ -61,29 +65,28 @@ local function cleanUpSessionMods() --TODO: find a way to unload GE Core extensi
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
 	local modsDB = jsonReadFile("mods/db.json")
 	if modsDB then
-			local modsFound = false
-			local count = 0
-			for modname, mod in pairs(modsDB.mods) do
-					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
-							count = count + 1
-							core_modmanager.deactivateMod(modname)
-							core_modmanager.deleteMod(modname)
-							modsFound = true
-					end
+		local modsFound = false
+		local count = 0
+		for modname, mod in pairs(modsDB.mods) do
+			if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+				count = count + 1
+				core_modmanager.deactivateMod(modname)
+				core_modmanager.deleteMod(modname)
+				modsFound = true
 			end
-			log('M', "cleanUpSessionMods", count.." Mods cleaned up")
-			--if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
-			--Lua:requestReload() -- reloads lua every time so chat doesn't duplicate
+		end
+		log('M', "cleanUpSessionMods", count.." Mods cleaned up")
+		--if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
 	end
 end
 
 
 local function setServerMods(receivedMods)
 	log('M', 'setServerMods', 'Server Mods set to: ' .. dumps(receivedMods))
-	serverMods = receivedMods
-	for k,v in pairs(serverMods) do
-		serverMods[k] = 'multiplayer'..v
+	for key, modName in pairs(receivedMods) do -- mods in a directory deeper than /mods/ have "<directory name> + modname" as their mod name
+		receivedMods[key] = 'multiplayer'..modName
 	end
+	serverMods = receivedMods
 end
 
 

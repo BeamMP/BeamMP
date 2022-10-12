@@ -24,7 +24,6 @@ local isMpSession = false
 local isGoingMpSession = false
 local connectionIssuesShown = false
 local onLauncherConnected = nop
-local loadLevel = nop
 local socket = require('socket')
 --[[
 Z  -> The client asks the launcher its version
@@ -146,7 +145,7 @@ end
 local function setMods(modsString)
 	--log('W', 'setMods', 'isGoingMpSession = true') --TODO: look into why this is called after being loaded into a map >:(
 	--isGoingMpSession = true
-	if modsString == "" then loadLevel() log('M', 'setMods', 'Received no mods.') return end
+	if modsString == "" then log('M', 'setMods', 'Received no mods.') return end
 	local mods = {}
 	if (modsString) then
 		for mod in string.gmatch(modsString, "([^;]+)") do
@@ -155,7 +154,6 @@ local function setMods(modsString)
 		end
 	end
 	MPModManager.setServerMods(mods) -- Setting the mods from the server
-	loadLevel()
 end
 
 local function getCurrentServer()
@@ -187,18 +185,18 @@ local function connectToServer(ip, port, mods, name)
 	status = "LoadingResources"
 end
 
-loadLevel = function() --TODO: all this
+local function loadLevel(map) --TODO: all this
 	isMpSession = true
 	isGoingMpSession = true
-	log("W","loadLevel", "loading map " ..currentServer.map)
+	log("W","loadLevel", "loading map " ..map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
 	spawn.preventPlayerSpawning = true -- don't spawn default vehicle when joining server
 
-	freeroam_freeroam.startFreeroam(currentServer.map)
+	freeroam_freeroam.startFreeroam(map)
 	status = "LoadingMapNow"
 
-
+	currentServer.map = map
 	--[[
 	if getMissionFilename() == map then
 		log('W', 'loadLevel', 'Requested map matches current map, rejoining')
@@ -315,8 +313,9 @@ local function handleU(params)
 			end
 		end
 
-		if data == "done" and status == "LoadingResources" then
+		if data == "done" and status == "LoadingResources" then --TODO: check if all the resources have actually been loaded before requesting map
 			send('M') -- request map string from launcher
+			log('W', 'handleU', 'Requested map!')
 			status = "LoadingMap"
 		elseif string.sub(data, 1, 12) == "Disconnected" then
 			--log('W', 'handleU', 'leaveServer by launcher!') --commented out because a disconnected message is received while joining a server for whatever reason
@@ -333,7 +332,7 @@ local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
 	['U'] = function(params) handleU(params) end, -- Loading into server UI
-	['M'] = function(params) currentServer.map = params end,
+	['M'] = function(params) loadLevel(params) log('W', 'HandleNetwork', 'Received Map! '..params) end,
 	['N'] = function(params) loginReceived(params) end,
 	['V'] = function(params) MPVehicleGE.handle(params) end, -- Vehicle spawn/edit/reset/remove/coupler related event
 	['L'] = function(params) setMods(params) end,
@@ -368,7 +367,7 @@ local function onUpdate(dt)
 			HandleNetwork[code](data)
 		end
 		--================================ SECONDS TIMER ================================
-		if heartbeatTimer >= 1 then
+		if heartbeatTimer >= 5 then
 			heartbeatTimer = 0
 			send('A') -- Launcher heartbeat
 		end
@@ -376,7 +375,7 @@ local function onUpdate(dt)
 			updateUITimer = 0
 			send('Ul') -- Ask the launcher for a loading screen update
 		end
-		if pingTimer >= 0.5 then --TODO: only ask for ping if in session and loaded in a map
+		if pingTimer >= 5 then --TODO: only ask for ping if in session and loaded in a map
 			pingTimer = 0
 			send('Up') -- request ping packet
 		end

@@ -219,8 +219,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-    // -------------------------------------- BEAMMP -------------------------------------- //
 
+    // -------------------------------------- BEAMMP -------------------------------------- //
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',
@@ -280,11 +280,13 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
+    // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
         url: '/multiplayer',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
         backState: 'BACK_TO_MENU',
       })
+    // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',
@@ -1028,8 +1030,8 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       })
     }
   })
+  
 	// -------------------------------------- BEAMMP -------------------------------------- //
-
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
 		if (data != null) {
 			if (!localStorage.getItem("tosAccepted")) {
@@ -1037,7 +1039,6 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
 			}
 		}
 	});
-
 	// -------------------------------------- BEAMMP -------------------------------------- //
 
   /* --- VUE3 END --- */

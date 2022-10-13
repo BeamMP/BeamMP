@@ -80,7 +80,7 @@ angular.module('beamng.stuff')
         <div style="text-align:right; color:white;margin-left:16px;">
           <div ng-if="beammpData && beammpData.players && beammpData.servers" layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
             <div layout="row" layout-align="start center" ng-cloak >
-              <img src="/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
+              <img src="/ui/modules/mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
                 <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
@@ -374,7 +374,7 @@ angular.module('beamng.stuff')
     },
     {
       translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg',
+      icon: '/ui/modules/mainmenu/drive/icons/account-multiple.svg',
       targetState: 'menu.multiplayer.tos'
     },
     {

@@ -130,7 +130,7 @@
                 <label>HEX color value (ex: #FF6400)</label>
                 <input id="queuedColor" flex type="text" ng-model="options.data.values.blobColorQueued"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}">
-                <div id="queuedColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="queuedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -145,7 +145,7 @@
                 <input id="illegalColor" flex type="text" ng-model="options.data.values.blobColorIllegal"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="illegalColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="illegalColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -160,7 +160,7 @@
                 <input id="deletedColor" flex type="text" ng-model="options.data.values.blobColorDeleted"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="deletedColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="deletedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -260,7 +260,7 @@
   <p flex="70" bng-translate="ui.options.multiplayer.launcherPort"></p>
   <md-input-container style="padding-top:25px">
     <input mdInput type="number" ng-model="options.data.values.launcherPort" min="4444" max="9999" step="1"
-      aria-label="_" />
+      aria-label="_" ng-change="options.applyState()"/>
   </md-input-container>
   <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">Default is 4444</span>
   <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">(Default)</span>

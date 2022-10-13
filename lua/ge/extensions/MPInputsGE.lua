@@ -47,6 +47,8 @@ local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == 'i' then
 		applyInputs(data, serverVehicleID)
+	else
+		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
 	end
 end
 

@@ -57,6 +57,8 @@ local function handle(rawData)
 
 	if code == "e" then -- Electrics (indicators, lights etc...)
 		applyElectrics(data, serverVehicleID)
+	else
+		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
 	end
 end
 

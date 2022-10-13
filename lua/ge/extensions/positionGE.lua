@@ -89,7 +89,7 @@ local function handle(rawData)
 	if code == 'p' then
 		applyPos(data, serverVehicleID)
 	else
-		print("unknown positionGE code arrived: "..rawData)
+		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
 	end
 end
 

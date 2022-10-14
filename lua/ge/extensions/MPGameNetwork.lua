@@ -58,7 +58,7 @@ local function sendData(s)
 
 
 		if settings.getValue("showDebugOutput") == true then
-			print('[MPGameNetwork] Sending Data ('..r..'): '..s)
+			log('M', 'sendData', 'Sending Data ('..r..'): '..s)
 		end
 		if MPDebug then MPDebug.packetSent(r) end
 	end
@@ -165,12 +165,12 @@ end
 -------------------------------------------------------------------------------
 
 local HandleNetwork = {
-	['V'] = function(params) MPInputsGE.handle(params) end,
+	['V'] = function(params) MPInputsGE.handle(params) end, -- inputs and gears
 	['W'] = function(params) MPElectricsGE.handle(params) end,
-	['X'] = function(params) nodesGE.handle(params) end,
-	['Y'] = function(params) MPPowertrainGE.handle(params) end,
-	['Z'] = function(params) positionGE.handle(params) end,
-	['O'] = function(params) MPVehicleGE.handle(params) end,
+	['X'] = function(params) nodesGE.handle(params) end, -- currently disabled
+	['Y'] = function(params) MPPowertrainGE.handle(params) end, -- powertrain related things like diff locks and transfercases
+	['Z'] = function(params) positionGE.handle(params) end, -- position and velocity
+	['O'] = function(params) MPVehicleGE.handle(params) end, -- all vehicle spawn, modification and delete events, couplers
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
 	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params) end, -- A player joined
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
@@ -191,7 +191,7 @@ local function onUpdate(dt)
 			if received == nil or received == "" then break end
 
 			if settings.getValue("showDebugOutput") == true then
-				print('[MPGameNetwork] Receiving Data: '..received)
+				log('M', 'onUpdate', 'Receiving Data ('..string.len(received)..'): '..received)
 			end
 
 			-- break it up into code + data

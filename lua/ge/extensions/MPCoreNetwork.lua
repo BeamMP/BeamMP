@@ -44,7 +44,7 @@ local function send(s)
 	if not launcherConnected then launcherConnected = true onLauncherConnected() end
 
 	if not settings.getValue("showDebugOutput") then return end
-	print('[MPCoreNetwork] Sending Data ('..r..'): '..s)
+	log('M', 'send', 'Sending Data ('..r..'): '..s)
 end
 
 local function connectToLauncher(silent) -- TODO: proper reconnecting system
@@ -335,10 +335,10 @@ end
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
-	['U'] = function(params) handleU(params) end, -- Loading into server UI
+	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
-	['L'] = function(params) setMods(params) end,
+	['L'] = function(params) setMods(params) end, --received after sending 'C' packet
 	['Z'] = function(params) launcherVersion = params; end,
 	--['K'] = function(params) log('E','HandleNetwork','K packet - UNUSED') end, -- pre-join kick is currently handled launcher-side
 }
@@ -361,7 +361,7 @@ local function onUpdate(dt)
 				break
 			end
 			if settings.getValue("showDebugOutput") == true then -- TODO: add option to filter out heartbeat packets
-				print('[MPCoreNetwork] Receiving Data ('..string.len(received)..'): '..received)
+				log('M', 'onUpdate', 'Receiving Data ('..string.len(received)..'): '..received)
 			end
 
 			-- break it up into code + data
@@ -400,6 +400,10 @@ end
 
 -- EVENTS
 local function onExtensionLoaded()
+	if not isMpSession then -- don't clean up if lua was reloaded in a session
+		log('W', 'onExtensionLoaded', 'cleanUpSessionMods')
+		MPModManager.cleanUpSessionMods() -- clean up mods from the previous session if the game crashed or was improperly closed
+	end
 	reloadUI() -- required to show modified mainmenu
 	connectToLauncher()
 end

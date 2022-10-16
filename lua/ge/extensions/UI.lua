@@ -56,6 +56,7 @@ M.defaultSettings = {
     window = {
         inactiveFade = true,
         fadeTime = 1,
+        fadeWhenCollapsed = false,
     }
 }
 
@@ -207,9 +208,9 @@ local function renderWindow()
 
         -- check to fade out if inactive, check if hovered
         if M.settings.window.inactiveFade then
-            if imgui.IsWindowFocused(imgui.HoveredFlags_ChildWindows) and imgui.IsWindowHovered(imgui.HoveredFlags_ChildWindows)
-                or not imgui.IsWindowFocused(imgui.HoveredFlags_ChildWindows) and imgui.IsWindowHovered(imgui.HoveredFlags_None) or
-                imgui.IsAnyItemHovered() or imgui.IsAnyItemActive() or imgui.IsAnyItemFocused() then
+            if imgui.IsWindowFocused(imgui.HoveredFlags_ChildWindows) or imgui.IsWindowHovered(imgui.HoveredFlags_ChildWindows)
+                or imgui.IsAnyItemHovered() or imgui.IsAnyItemActive() or imgui.IsAnyItemFocused()
+                or (collapsed and not M.settings.window.fadeWhenCollapsed) then
                 windowOpacity = 0.9
                 fadeTimer = 0
             else

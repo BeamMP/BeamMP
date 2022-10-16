@@ -85,6 +85,16 @@ local function renderGeneral()
         if imgui.InputFloat("##Fade time", pFadeTime, 0.1, 1, "%.1f") then
             UI.settings.window.fadeTime = pFadeTime[0]
         end
+
+        -- Fade when collapsed
+        imgui.Text("Fade when collapsed")
+        imgui.SameLine()
+        imgui.SetCursorPosX(longestSettingName * 8 + 10)
+        local pFadeWhenCollapsed = imgui.BoolPtr(UI.settings.window.fadeWhenCollapsed)
+        if imgui.Checkbox("##Fade when collapsed", pFadeWhenCollapsed) then
+            UI.settings.window.fadeWhenCollapsed = pFadeWhenCollapsed[0]
+        end
+
         imgui.EndChild()
 
         imgui.SetCursorPosY(imgui.GetWindowHeight() - 32)

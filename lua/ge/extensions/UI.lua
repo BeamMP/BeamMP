@@ -333,6 +333,19 @@ local function chatSend(msg) -- sends chat message to server (angular)
 	TriggerClientEvent("ChatMessageSent", c)
 end
 
+local function bringToFront()
+    windowOpacity = 0.9
+    fadeTimer = 0
+end
+
+local function toggleChat()
+    if not M.canRender then
+        M.canRender = true
+        windowOpacity = 0.9
+    else
+        M.canRender = false
+    end
+end
 ---------------------------------------------------------------
 
 
@@ -369,13 +382,8 @@ local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
-local function onBigMapActivated()
-    M.canRender = false
-end
-
 local function onMissionLoaded(id)
     chatWindow.chatMessages = {}
-    M.canRender = true
 end
 
 local function onExtensionLoaded()
@@ -401,7 +409,7 @@ local function onExtensionLoaded()
 end
 
 local function onUpdate()
-    if not settings.getValue("enableNewChatMenu") or not initialized or MPCoreNetwork and not MPCoreNetwork.isMPSession() then return end
+    if not settings.getValue("enableNewChatMenu") or not initialized or not M.canRender or MPCoreNetwork and not MPCoreNetwork.isMPSession() then return end
     renderWindow()
 end
 
@@ -420,7 +428,9 @@ M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
 
-M.onBigMapActivated = onBigMapActivated
+M.bringToFront = bringToFront
+M.toggleChat = toggleChat
+
 M.onMissionLoaded = onMissionLoaded
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate

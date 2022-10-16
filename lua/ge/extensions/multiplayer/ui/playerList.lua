@@ -26,7 +26,7 @@ local function render()
 
     imgui.Separator()
 
-    if imgui.BeginChild1("PlayerList", imgui.ImVec2(0, 0), true) then
+    if imgui.BeginChild1("PlayerList", imgui.ImVec2(0, 0), false) then
         for _, player in pairs(players) do
             imgui.SetCursorPosX((imgui.GetWindowWidth() - imgui.CalcTextSize(player.name).x) / 4)
             imgui.Text(player.name)

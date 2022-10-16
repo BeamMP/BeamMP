@@ -4800,6 +4800,8 @@
   "ui.options.multiplayer.alternateModloading.tooltip": "Cette méthode vous permet de débloquer la fenêtre BeamNG lors du chargement des mods, mais ne garantit pas le chargement des mods instables.",
   "ui.options.multiplayer.disableInstabilityPausing": "Désactiver la pause causée par les instabilités",
   "ui.options.multiplayer.disableInstabilityPausing.tooltip": "Cela rendra le gameplay plus lisse, mais peut causer des problèmes de synchronisation après plusieurs instabilités",
+  "ui.options.multiplayer.enableNewChatMenu": "Activer le nouveau menu de chat",
+  "ui.options.multiplayer.enableNewChatMenu.tooltip": "Cela activera le nouveau menu de chat, qui est toujours en développement et peut avoir des bugs.",
   "ui.multiplayer.clear": "Effacer le cache du lanceur",
 
   "ui.options.multiplayer.nameTagTitle": "Porte-nom",

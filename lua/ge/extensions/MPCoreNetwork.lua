@@ -407,7 +407,7 @@ local function onExtensionLoaded()
 		if currentMpLayout then
 			for k,v in pairs(currentMpLayout.apps) do
 				if v.appName == "radialmenu" then
-					--print("Found radial menu present in Multiplayer UI Layout!")
+					-- print("Found radial menu present in Multiplayer UI Layout!")
 					foundRadialMenu = true
 					break
 				end

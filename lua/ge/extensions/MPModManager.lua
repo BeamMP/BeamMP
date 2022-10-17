@@ -44,10 +44,8 @@ local function checkMod(mod) --TODO: might have a flaw with repo mods as their n
 	elseif modAllowed and not mod.active then
 		log('W', 'checkMod', 'Inactive Mod but Should be Active: '..modname)
 		core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-		MPCoreNetwork.modLoaded(modname)
 	elseif modAllowed and mod.active then
 		log('M', 'checkMod', modname..' is already active. Not doing anything.')
-		MPCoreNetwork.modLoaded(modname)
 	else
 		--log('M', 'checkMod', modname..' is none of the above.')
 	end

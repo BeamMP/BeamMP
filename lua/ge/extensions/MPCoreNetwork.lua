@@ -272,7 +272,21 @@ local function isGoingMPSession()
 end
 
 -- ============= OTHERS =============
-local waitForFS = false
+local waitForFilesChanged = false
+M.onFilesChanged = function(stuff)--TODO: actually check that the right files loaded
+	--log('W', 'onFilesChanged', dumps(stuff))
+	if waitForFilesChanged then
+		print("waitForFilesChanged = true")
+		waitForFilesChanged = false
+		log('W', 'onUpdate', 'waitForFS = true, checking all mods!')
+		MPModManager.checkAllMods()--TODO: check if all the resources have actually been loaded before requesting map
+		send('M') -- request map string from launcher 
+		log('W', 'onUpdate', 'Requested map!')
+		status = "LoadingMap"
+	end
+end
+
+
 local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
@@ -282,9 +296,10 @@ local function handleU(params)
 		if data == "start" then-- starting modloading, disable automount
 			MPModManager.startModLoading()
 		end
-		if data == "done" and status == "LoadingResources" and not waitForFS then
+		if data == "done" and status == "LoadingResources" and not waitForFilesChanged then
 			log('W', 'handleU', 'Waiting for FS')
-			waitForFS = true -- waiting a second for filesytem stuff to finish before running initDB
+			core_modmanager.initDB()
+			waitForFilesChanged = true -- waiting a second for filesytem stuff to finish before running initDB
 		end
 		if string.sub(data, 1, 12) == "Disconnected" then
 			--log('W', 'handleU', 'leaveServer by launcher!') --commented out because a disconnected message is received while joining a server for whatever reason
@@ -319,7 +334,6 @@ local function onUpdate(dt)
 	reconnectTimer = reconnectTimer + dt
 	updateUITimer = updateUITimer + dt
 	heartbeatTimer = heartbeatTimer + dt
-	if waitForFS then timerFS = timerFS + dt end
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
 		while(true) do
@@ -351,14 +365,6 @@ local function onUpdate(dt)
 			pingTimer = 0
 			send('Up')
 		end
-		if waitForFS and timerFS >= 5 then
-			waitForFS = false
-			log('W', 'onUpdate', 'waitForFS = true, checking all mods!')
-			MPModManager.checkAllMods()--TODO: check if all the resources have actually been loaded before requesting map
-			send('M') -- request map string from launcher 
-			log('W', 'onUpdate', 'Requested map!')
-			status = "LoadingMap"
-		end
 	else
 		if reconnectTimer >= 2 then -- if connection is lost re-attempt connecting every 2 seconds to give the launcher time to start up fully
 			reconnectTimer = 0
@@ -376,6 +382,7 @@ onLauncherConnected = function()
 	autoLogin()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
+	guihooks.trigger('launcherConnected')
 	if isMpSession then --TODO: WIP, verify and test / finish -- if the launcher closed while in a session, this reconnects back to the session once reopened
 		connectToServer(currentServer.ip, currentServer.port, currentServer.name)
 	end

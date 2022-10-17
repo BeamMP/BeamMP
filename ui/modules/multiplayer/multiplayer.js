@@ -978,7 +978,7 @@ function connect(ip, port, mods, name) {
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '")');
 }
 
 // Used to select a row (when it's clicked)
@@ -1005,7 +1005,7 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.modlist, row.server.strippedName) };
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName) };
 	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');

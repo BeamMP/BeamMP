@@ -971,7 +971,7 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 }
 
 // Used to connect to the backend with ids
-function connect(ip, port, mods, name) {
+function connect(ip, port, name) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);

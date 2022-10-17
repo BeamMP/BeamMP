@@ -351,7 +351,7 @@ local function onUpdate(dt)
 			pingTimer = 0
 			send('Up')
 		end
-		if waitForFS and timerFS >= 1 then
+		if waitForFS and timerFS >= 5 then
 			waitForFS = false
 			log('W', 'onUpdate', 'waitForFS = true, checking all mods!')
 			MPModManager.checkAllMods()--TODO: check if all the resources have actually been loaded before requesting map

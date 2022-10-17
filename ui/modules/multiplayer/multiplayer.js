@@ -53,7 +53,7 @@ function($scope, $state, $timeout, $document) {
 		bngApi.engineLua('MPCoreNetwork.connectToLauncher()');
 	};
 	
-	$scope.$on('launcherConnected', function (event, data) {
+	$scope.$on('onLauncherConnected', function (event, data) {
 		$state.go('menu.multiplayer.servers');
 	});
 	

@@ -226,14 +226,6 @@ M.onServerLeave = function() --TODO: cleaning up after a session
 	core_modmanager.enableAutoMount() -- re-enable auto-mount
 end
 
-M.onSerialize = function()
-	return serverMods
-end
-
-M.onDeserialized = function(data)
-	log('W', 'onDeserialized', dumps(data))
-	serverMods = data
-end
 
 M.cleanUpSessionMods = cleanUpSessionMods
 M.setServerMods = setServerMods

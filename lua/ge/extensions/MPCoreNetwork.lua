@@ -400,10 +400,12 @@ local function onClientStartMission(mission) --TODO:
 	end
 end
 
-runPostJoin = function() -- TODO: put all the functions that should run after joining server, then call this function from events
+runPostJoin = function()
 	log('W', 'runPostJoin', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'runPostJoin', 'isMpSession: '..tostring(isMpSession))
 	if isMpSession and isGoingMpSession then
+		extensions.hook('runPostJoin')
+		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam
 		log('W', 'runPostJoin', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')

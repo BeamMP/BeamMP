@@ -116,11 +116,11 @@ end
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)
 	if not decodedData then return end
-	if decodedData.s then input.event("steering", decodedData.s, 3) end -- using gamepad filter for better smoothing
-	if decodedData.t then input.event("throttle", decodedData.t, 2) end
-	if decodedData.b then input.event("brake", decodedData.b, 2) end
-	if decodedData.p then input.event("parkingbrake", decodedData.p, 2) end
-	if decodedData.c then input.event("clutch", decodedData.c, 2) end
+	if decodedData.s then input.event("steering", decodedData.s, FILTER_PAD) end -- using gamepad filter for better smoothing
+	if decodedData.t then input.event("throttle", decodedData.t, FILTER_DIRECT) end
+	if decodedData.b then input.event("brake", decodedData.b, FILTER_DIRECT) end
+	if decodedData.p then input.event("parkingbrake", decodedData.p, FILTER_DIRECT) end
+	if decodedData.c then input.event("clutch", decodedData.c, FILTER_DIRECT) end
 	if decodedData.g then remoteGear = decodedData.g end
 end
 

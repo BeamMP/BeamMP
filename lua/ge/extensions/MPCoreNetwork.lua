@@ -247,10 +247,11 @@ local function loginReceived(params)
 	end
 end
 
-
+local requestLuaReload = false
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	--print(debug.traceback())
+	extensions.hook('onServerLeave')
 	isMpSession = false
 	isGoingMpSession = false
 	currentServer = {}
@@ -258,8 +259,10 @@ local function leaveServer(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
-	extensions.hook('onServerLeave')
 	if goBack then returnToMainMenu() end
+	if requestLuaReload then
+		Lua:requestReload()
+	end
 end
 
 
@@ -297,7 +300,7 @@ local function handleU(params)
 			MPModManager.startModLoading()
 		end
 		if data == "done" and status == "LoadingResources" and not waitForFilesChanged then
-			log('W', 'handleU', 'Waiting for FS')
+			log('W', 'handleU', 'Waiting for onFilesChanged')
 			core_modmanager.initDB()
 			waitForFilesChanged = true -- waiting a second for filesytem stuff to finish before running initDB
 		end
@@ -327,7 +330,6 @@ local onUpdateTimer = 0
 local pingTimer = 0
 local updateUITimer = 0
 local heartbeatTimer = 0
-local timerFS = 0
 local reconnectTimer = 0
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt -- TODO: clean this up a bit
@@ -389,6 +391,7 @@ onLauncherConnected = function()
 end
 
 local function onClientStartMission(mission) --TODO: 
+	if not isMpSession or not isGoingMPSession then log('W', 'onClientStartMission', 'not session or not going to session') return end
 	if status == "Playing" and getMissionFilename() ~= currentServer.map then
 		log('W', 'onClientStartMission', 'The user has loaded another mission!')
 		--lua reload?
@@ -398,15 +401,15 @@ local function onClientStartMission(mission) --TODO:
 end
 
 runPostJoin = function() -- TODO: put all the functions that should run after joining server, then call this function from events
-	log('W', 'onClientPostStartMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
-	log('W', 'onClientPostStartMission', 'isMpSession: '..tostring(isMpSession))
+	log('W', 'runPostJoin', 'isGoingMpSession: '..tostring(isGoingMpSession))
+	log('W', 'runPostJoin', 'isMpSession: '..tostring(isMpSession))
 	if isMpSession and isGoingMpSession then
-		log('W', 'onClientPostStartMission', 'Connecting MPGameNetwork!')
+		log('W', 'runPostJoin', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
-		log('W', 'onClientPostStartMission', 'isGoingMpSession = false')
+		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- TODO: clean this up, dont call this twice
-		guihooks.trigger('ChangeState', 'play')
+		--guihooks.trigger('ChangeState', 'play') -- causes a bug causing the camera to never initialize
 	end
 end
 
@@ -440,7 +443,6 @@ local function onDeserialized(data)
 
 	if isMpSession and currentServer then
 		log('I', 'onDeserialized', 'reconnecting')
-		--connectToServer(currentServer.ip, currentServer.port, currentServer.name)
 	end
 end
 

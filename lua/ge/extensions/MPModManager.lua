@@ -186,7 +186,7 @@ end
 
 local original_Unsubscribe = nop --TODO: finish this
 
-M.replaceStuff = function()
+M.replaceStuff = function() --TODO: if this function is called onExtensionLoaded core_repository is not loaded yet at that time
 	if not core_repository and not core_repository.modUnsubscribe then log('W', 'replaceStuff', 'Function does not exist!') return end
 	original_Unsubscribe = core_repository.modUnsubscribe
 	core_repository.modUnsubscribe = function(mod_id)
@@ -208,8 +208,8 @@ M.replaceStuff = function()
 	end
 end
 
-M.onExtensionLoaded = function() --TODO: core_repository doensnt seem to be loaded at the time that these functions run after a lua reload
-	--replaceFunction()
+M.onExtensionLoaded = function()
+	replaceFunction()
 	--M.replaceStuff()
 end
 
@@ -218,12 +218,15 @@ M.onExtensionUnloaded = function() -- restore functions back to their default va
 	--registerCoreModule = original_registerCoreModule
 end
 
-M.onServerLeave = function() --TODO: cleaning up after a session
-	log('W', 'onServerLeave', 'MPModManager')
-	serverMods = {}
-	checkAllMods() -- removes any leftover session mods
-	unloadGameModules() --unload extensions
-	core_modmanager.enableAutoMount() -- re-enable auto-mount
+M.onServerLeave = function()
+	if MPCoreNetwork.isMPSession() or MPCoreNetwork.isGoingMPSession() then
+		log('W', 'onServerLeave', 'MPModManager')
+		serverMods = {}
+		checkAllMods() -- removes any leftover session mods
+		unloadGameModules() --unload extensions
+		core_modmanager.enableAutoMount() -- re-enable auto-mount
+		autoMountDisabled = false
+	end
 end
 
 

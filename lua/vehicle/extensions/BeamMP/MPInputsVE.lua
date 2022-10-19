@@ -11,9 +11,6 @@ local M = {}
 local currentInputs = {}
 local lastInputs = {}
 local inputsToSend = {}
-local localGearMode
-local geartimer = 0
-local lastgear
 local remoteGear
 -- ============= VARIABLES =============
 
@@ -28,67 +25,32 @@ local translationTable = {
 	['M'] = 6
 }
 
-local function applyGear(data) --TODO: revisit this
+local function applyGear(data) --TODO: add handling for mismatched gearbox types between local and remote vehicle
+	if electrics.values.isShifting then return end
 	if not electrics.values.gearIndex or electrics.values.gear == data then return end
-	-- Detect the type of gearbox, frontMotor and rearMotor are for electrics car
 	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor") or "none").type
-	if gearboxType == "manualGearbox" then
+	if gearboxType == "manualGearbox" or gearboxType == "sequentialGearbox" then
 		local index = tonumber(data)
 		if not index then return end
-		if electrics.values.gearIndex ~= index then
-			controller.mainController.shiftToGearIndex(index) -- Simply switch to the gear index
-		end
-	-- Sequential gearbox doesn't work with shiftToGearIndex. The loop is because the game
-	-- does not allow skipping gears when using shiftToGearIndex on sequential gearboxes
-	elseif gearboxType == "sequentialGearbox" then
-		local index = tonumber(data)
-		if not index then return end
-		if electrics.values.gearIndex < index then
-			controller.mainController.shiftUp()
-		elseif electrics.values.gearIndex > index then
-			controller.mainController.shiftDown()
-		end
-	-- We use the same thing as automatic for all the first gears, and we use
-	-- the same type of shifting as sequential for M gears.
+		controller.mainController.shiftToGearIndex(index)
 	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
-		local state = string.sub(data, 1, 1)
-		local localstate = string.sub(electrics.values.gear, 1, 1)
-		local index = tonumber(string.sub(data, 2, 3))
-		local gearIndex = electrics.values.gearIndex
-		if state == 'M' then
-			if localGearMode ~= 'M' or localstate ~= 'M' then
-				if localGearMode == 'S' or localGearMode == 'D' or localstate ~= 'M' then
-					controller.mainController.shiftUp() -- this is so it doesn't go into M1 when switching into M modes at higher speed
-					localGearMode = 'M1'
-				else
-					controller.mainController.shiftToGearIndex(translationTable[state])	--shifts into M1
-					localGearMode = state
-					gearIndex = 1
-				end
-			end
-			if (localGearMode and localstate) == 'M' then
-				if gearIndex < index then
-					controller.mainController.shiftUp()
-				elseif gearIndex > index then
-					controller.mainController.shiftDown()
-				end
+		local remoteGearMode = string.sub(data, 1, 1)
+		local localGearMode = string.sub(electrics.values.gear, 1, 1)
+		local remoteIndex = tonumber(string.sub(data, 2))
+		if remoteGearMode == 'M' and localGearMode == 'M' then
+			if electrics.values.gearIndex < remoteIndex then
+				controller.mainController.shiftUp()
+			elseif electrics.values.gearIndex > remoteIndex then
+				controller.mainController.shiftDown()
 			end
 		else
-			local index = translationTable[state]
-			controller.mainController.shiftToGearIndex(index) -- shifts into gear using translation table
-			localGearMode = state
+			controller.mainController.shiftToGearIndex(translationTable[remoteGearMode])
 		end
 	end
 end
 
-local function updateGFX(dt) -- TODO: a better fix to ghost controlling than just setting inputs on every frame
-	if not v.mpVehicleType == 'R' then return end
-	geartimer = geartimer + 1
-	if remoteGear and remoteGear ~= lastgear or remoteGear and geartimer == 2 then
-		applyGear(remoteGear)
-		geartimer = 0
-	end
-	lastgear = remoteGear
+local function updateGFX()
+	if v.mpVehicleType == 'R' and remoteGear then applyGear(remoteGear) end
 end
 
 

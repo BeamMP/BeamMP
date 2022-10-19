@@ -24,6 +24,11 @@ local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
 
+local original_removeAllExceptCurrent
+local original_spawnNewVehicle
+local original_replaceVehicle
+local original_spawnDefault
+
 local roleToInfo = {
 	['USER']	= { backcolor = ColorI(000, 000, 000, 127), tag = "", shorttag = "" },
 	['EA']		= { backcolor = ColorI(069, 000, 150, 127), tag = " [Early Access]", shorttag = " [EA]" },
@@ -426,7 +431,7 @@ end
 
 --called by autosync and the ui (sync button)
 --============================ SEND MODIFIED VEHICLE DATA ============================
-local function sendVehicleEdit(gameVehicleID)
+local function sendVehicleEdit(gameVehicleID) -- TODO: add check if vehicle isnt yours
 	local vehicleTable = {} -- Vehicle table
 	local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 	local veh          = be:getObjectByID(gameVehicleID)
@@ -1018,7 +1023,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("trackNewVeh"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -1027,12 +1032,12 @@ local function spawnDefaultRequest()
 		local gameVehicleID = currentVehicle:getID()
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle.isLocal then
-			core_vehicles.replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			original_replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		else
-			core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		end
 	else
-		core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+		original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 	end
 	extensions.hook("trackNewVeh")
 end
@@ -1042,15 +1047,43 @@ local function spawnRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle and vehicle.isLocal and not config.spawnNew then
-		vehicle.jbeam = '-'
-		return core_vehicles.replaceVehicle(model, config or {})
-	else
-		return core_vehicles.spawnNewVehicle(model, config or {})
+	if currentVehicle then
+		return original_spawnNewVehicle(model, config or {})
 	end
 	extensions.hook("trackNewVeh")
 end
 
+local function replaceRequest(model, config, colors)
+	local currentVehicle = be:getPlayerVehicle(0)
+	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
+	local vehicle = getVehicleByGameID(gameVehicleID)
+
+	if currentVehicle and vehicle.isLocal then
+		vehicle.jbeam = '-'
+		return original_replaceVehicle(model, config or {})
+	else
+		return original_spawnNewVehicle(model, config or {})
+	end
+	extensions.hook("trackNewVeh")
+end
+
+M.runPostJoin = function()
+	original_removeAllExceptCurrent = core_vehicles.removeAllExceptCurrent
+	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
+	original_replaceVehicle = core_vehicles.replaceVehicle
+	original_spawnDefault = core_vehicles.spawnDefault
+	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') return end
+	core_vehicles.spawnNewVehicle = MPVehicleGE.spawnRequest
+	core_vehicles.replaceVehicle = MPVehicleGE.replaceRequest
+	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest
+end
+
+M.onServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
+	if original_removeAllExceptCurrent then core_vehicles.removeAllExceptCurrent = original_removeAllExceptCurrent end
+	if original_spawnNewVehicle then core_vehicles.spawnNewVehicle = original_spawnNewVehicle end
+	if original_replaceVehicle then core_vehicles.replaceVehicle = original_replaceVehicle end
+	if original_spawnDefault then core_vehicles.spawnDefault = original_spawnDefault end
+end
 
 local function sendPendingVehicleEdits()
 	for gameVehicleID,_ in pairs(vehiclesToSync) do
@@ -1573,7 +1606,8 @@ M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: 
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
 M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: -
-M.spawnRequest             = spawnRequest             -- takes: jbeamName, options table containing 'spawnNew' key
+M.spawnRequest             = spawnRequest             -- takes: jbeamName, config, colors
+M.replaceRequest           = replaceRequest           -- takes: jbeamName, config, colors
 M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName

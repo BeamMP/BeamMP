@@ -4,10 +4,11 @@ log("M", "multiplayer", "Gamemode Loaded")
 
 --TODO: Move this file where the rest of the extensions are, or get rid of it completely
 
-local originalGetDriverData = nop
-local originalToggleWalkingMode = nop
-local original_onInstabilityDetected = nop
-
+local originalGetDriverData
+local originalToggleWalkingMode
+local original_onInstabilityDetected
+local original_bigMapMode
+local original_bullettime
 
 local function modifiedGetDriverData(veh)
 	if not veh then return nil end
@@ -37,6 +38,17 @@ local function modified_onInstabilityDetected(jbeamFilename)
 	log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))
 end
 
+local function modified_bigMapMode()
+	bullettime.pause = nop
+	return true --TODO: maybe add a check to stop map opening if no vehicle is present
+end
+
+original_bullettime = bullettime.pause
+
+M.onBigMapActivated = function()
+	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
+end
+
 local function onUpdate(dt)
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 		--log('W', 'onUpdate', 'Running modified beammp code!')
@@ -55,8 +67,34 @@ local function onUpdate(dt)
 			-- Workaround for worldReadyState not being set properly if there are no vehicles
 			serverConnection.onCameraHandlerSetInitial()
 			extensions.hook('onCameraHandlerSet')
+			--commands.setGameCamera()
 		end
 	end
+end
+
+
+
+
+
+M.onPostJoin = function()
+	--save the original functions so they can be restored after leaving an mp session
+	original_onInstabilityDetected = onInstabilityDetected
+	original_bigMapMode = freeroam_bigMapMode.canBeActivated
+
+	--replace the functions
+	if settings.getValue("disableInstabilityPausing") then
+		onInstabilityDetected = modified_onInstabilityDetected
+	end
+	onInstabilityDetected = modified_onInstabilityDetected
+	freeroam_bigMapMode.canBeActivated = modified_bigMapMode
+end
+
+
+M.onServerLeave = function()
+	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
+	if original_bigMapMode then freeroam_bigMapMode.canBeActivated = original_bigMapMode end
+	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
+	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
 end
 
 
@@ -66,24 +104,8 @@ local function onWorldReadyState(state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
-			freeroam_bigMapMode.canBeActivated = function() return true end -- replace the game function to enable the big map mode in 'multiplayer' state --TODO: set back the original function, disable pausing when opening the map
-			spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle, TODO: put this and instability pause disable into their own function
 		end
 	end
-end
-
-local function replaceGameFunctions()
-	--save the original functions so they can be restored once we're not in a session anymore
-	original_onInstabilityDetected = onInstabilityDetected
-
-	--replace the functions
-	if settings.getValue("disableInstabilityPausing") then
-		onInstabilityDetected = modified_onInstabilityDetected
-	end
-end
-
-local function restoreGameFunctions()
-	onInstabilityDetected = original_onInstabilityDetected
 end
 
 -- public interface

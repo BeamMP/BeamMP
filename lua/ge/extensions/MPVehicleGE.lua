@@ -934,6 +934,7 @@ end
 
 local function onServerCameraSwitched(playerID, serverVehicleID)
 	if not players[playerID] then return end -- TODO: better fix?
+	if not vehicles[serverVehicleID] then return end
 	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
 		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
 	end
@@ -1047,9 +1048,7 @@ local function spawnRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle then
-		return original_spawnNewVehicle(model, config or {})
-	end
+	original_spawnNewVehicle(model, config or {})
 	extensions.hook("trackNewVeh")
 end
 
@@ -1060,9 +1059,9 @@ local function replaceRequest(model, config, colors)
 
 	if currentVehicle and vehicle.isLocal then
 		vehicle.jbeam = '-'
-		return original_replaceVehicle(model, config or {})
+		original_replaceVehicle(model, config or {})
 	else
-		return original_spawnNewVehicle(model, config or {})
+		original_spawnNewVehicle(model, config or {})
 	end
 	extensions.hook("trackNewVeh")
 end

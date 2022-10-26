@@ -25,9 +25,9 @@ local defaultSettings = {
 
 local function onExtensionLoaded()
 	for k,v in pairs(defaultSettings) do
-		--if settings.getValue(k) == nil then settings.setValue(k, v) end
-		settings.impl.defaults[k] = { 'local', v }
-		settings.impl.defaultValues[k] = v
+		if settings.getValue(k) == nil then settings.setValue(k, v) end
+		--settings.impl.defaults[k] = { 'local', v }
+		--settings.impl.defaultValues[k] = v
 	end
 	settings.impl.invalidateCache()
 end

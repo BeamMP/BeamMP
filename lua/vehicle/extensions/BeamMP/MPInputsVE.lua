@@ -10,7 +10,6 @@ local M = {}
 -- ============= VARIABLES =============
 local currentInputs = {}
 local lastInputs = {}
-local inputsToSend = {}
 local remoteGear
 -- ============= VARIABLES =============
 
@@ -26,14 +25,15 @@ local translationTable = {
 }
 
 local function applyGear(data) --TODO: add handling for mismatched gearbox types between local and remote vehicle
-	if electrics.values.isShifting then return end
 	if not electrics.values.gearIndex or electrics.values.gear == data then return end
-	local gearboxType = (powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor") or "none").type
+	local powertrainDevice = powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor") or "none"
+	local gearboxType = powertrainDevice.type
 	if gearboxType == "manualGearbox" or gearboxType == "sequentialGearbox" then
 		local index = tonumber(data)
 		if not index then return end
-		controller.mainController.shiftToGearIndex(index)
+		powertrainDevice:setGearIndex(index)
 	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
+		if electrics.values.isShifting then return end
 		local remoteGearMode = string.sub(data, 1, 1)
 		local localGearMode = string.sub(electrics.values.gear, 1, 1)
 		local remoteIndex = tonumber(string.sub(data, 2))
@@ -55,6 +55,7 @@ end
 
 
 local function getInputs() --TODO: uncomment the difference checking for final release, currently commented because the current release will not apply inputs if all the inputs are not present in the data
+	local inputsToSend = {}
 	currentInputs = {
 		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
 		t = electrics.values.throttle and math.floor(electrics.values.throttle * 1000) / 1000,
@@ -69,6 +70,7 @@ local function getInputs() --TODO: uncomment the difference checking for final r
 	--	end
 	--end
 	--lastInputs = currentInputs
+	--if tableIsEmpty(inputsToSend) then return end
 
 	--obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(currentInputs).."\', "..obj:getID()..")") -- Send it to GE lua

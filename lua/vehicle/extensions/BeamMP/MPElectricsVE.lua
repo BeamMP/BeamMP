@@ -13,7 +13,6 @@ local M = {}
 local lastElectrics = {}
 local latestData
 local electricsChanged = false
-local absBehavior = settings.getValue("absBehavior") or "realistic"
 local localSwingwing = 0 -- for DH Super bolide
 -- ============= VARIABLES =============
 
@@ -273,7 +272,6 @@ local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
 	electrics.values.escMode = getEsc()
-	electrics.values.absMode = absBehavior
 	local e = electrics.values
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
@@ -317,7 +315,6 @@ local function applyElectrics(data)
 
 		if decodedData.hazard_enabled == 1 then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData.hazard_enabled)
-			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.hazard_enabled == 0 then -- Apply left signal value
 			if electrics.values.signal_left_input ~= decodedData.signal_left_input then
@@ -325,7 +322,6 @@ local function applyElectrics(data)
 			elseif electrics.values.signal_right_input ~= decodedData.signal_right_input then
 				electrics.toggle_right_signal()
 			end
-			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.lights_state then
 			electrics.setLightsState(decodedData.lights_state) -- Apply lights values
@@ -334,7 +330,7 @@ local function applyElectrics(data)
 			electrics.set_lightbar_signal(decodedData.lightbar) -- Apply lightbar values
 		end
 		if decodedData.horn then
-			if decodedData.horn > 0.99 then electrics.horn(true)
+			if decodedData.horn == 1 then electrics.horn(true)
 			else electrics.horn(false) end
 		end
 		if decodedData.fog then
@@ -467,19 +463,15 @@ end
 
 
 local function onReset()
+	if v.mpVehicleType == 'L' then
+		electrics.values.absMode = settings.getValue("absBehavior") or "realistic"
+	end
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
+		if wheels then wheels.setABSBehavior(electrics.values.absMode or "realistic") end
 		localSwingwing = 0
 		remoteignition = true
 		remoteengineRunning = 1
-	end
-end
-
-
-
-local function onExtensionLoaded()
-	if v.mpVehicleType == "R" then
-		controller.mainController.setGearboxMode("realistic")
 	end
 end
 
@@ -491,7 +483,7 @@ end
 
 
 
-M.onExtensionLoaded    = onExtensionLoaded
+M.onExtensionLoaded    = onReset
 M.onReset			   = onReset
 M.check				   = check
 M.applyElectrics	   = applyElectrics

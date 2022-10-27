@@ -56,7 +56,6 @@ end
 
 M.tick                   = tick
 M.handle                 = handle
-M.sendPowertrain         = sendPowertrain
 M.sendLivePowertrain     = sendLivePowertrain
 
 

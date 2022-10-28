@@ -27,6 +27,7 @@ local isMpSession = false
 local isGoingMpSession = false
 local launcherTimeout = 0
 local connectionIssuesShown = false
+local isLeaving = false
 --[[
 Z  -> The client asks the launcher its version
 B  -> The client asks the launcher for the servers list
@@ -129,8 +130,8 @@ local function loginReceived(params)
 	end
 end
 
-local cleanUpSessionMods = false
 M.leaveServer = function(goBack)
+	isLeaving = true
 	isMpSession = false
 	isGoingMpSession = false
 	print("Reset Session Called!")
@@ -138,23 +139,12 @@ M.leaveServer = function(goBack)
 		print("Returning to main menu")
 	end
 	M.send('CORE', 'QS') -- Tell the launcher that we quit server / session
-	M.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
-	--UI.readyReset()
-	status = "" -- Reset status
-	--if goBack then endActiveGameMode() end
-	if endActiveGameMode() == nil then
-		print("ActiveGameMode Ended.")
-		returnToMainMenu()
-		print("Returned to Main Menu")
-		M.connectToLauncher()
-		print("Reconnected to Launcher")
-		-- resets the instability function back to default
-		onInstabilityDetected = function (jbeamFilename) bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename)) ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
-
-		--cleanUpSessionMods = true
-	  MPModManager.startCleanUpSessionMods()
-	end
+	M.resetSession()
+	if goBack then endActiveGameMode() end
+	-- resets the instability function back to default
+	onInstabilityDetected = function (jbeamFilename) bullettime.pause(true)  log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename)) ui_message({txt="vehicle.main.instability", context={vehicle=tostring(jbeamFilename)}}, 10, 'instability', "warning")end
+	MPModManager.startcleanUpSessionMods()
 end
 
 local function isMPSession()
@@ -375,7 +365,7 @@ end
 local function handleU(params)
 	local code = string.sub(params, 1, 1)
 	local data = string.sub(params, 2)
-	UI.updateLoading(data)
+	UI.updateLoading(params)
 	if code == "l" and launcherConnectionStatus >= 2 then
 		--log('W',"handleU", data)
 		if settings.getValue('beammpAlternateModloading') then
@@ -535,7 +525,7 @@ local HandleGameNetwork = {
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
-	['T'] = function(params) quitMP(params) end, -- Player Kicked Event (old, doesn't contain reason)
+	['T'] = function(params) if not isLeaving and launcherConnectionStatus ~= 3 then quitMP(params) else M.resetSession() end end, -- Player Kicked Event (old, doesn't contain reason)
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 }
@@ -668,12 +658,6 @@ M.onUpdate = function(dt)
 			end
 		end
 	end
-
-	if cleanUpSessionMods then
-		cleanUpSessionMods = false
-		MPModManager.cleanUpSessionMods()
-	end
-
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnectionStatus > 0 then -- If player is connecting or connected
 		--================================ SECONDS TIMER ================================

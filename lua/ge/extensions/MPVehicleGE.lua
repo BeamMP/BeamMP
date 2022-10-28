@@ -1244,7 +1244,7 @@ local function onUpdate(dt)
 end
 
 local function onPreRender(dt)
-	if MPCoreSystem and MPCoreSystem.connectionStatus() > 0 then -- If TCP connected
+	if MPCoreSystem and MPCoreSystem.connectionStatus() == 4 then -- If TCP connected
 
 		-- get current vehicle ID and position
 		local activeVeh = be:getPlayerVehicle(0)

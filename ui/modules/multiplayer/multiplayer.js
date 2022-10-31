@@ -293,11 +293,10 @@ function($scope, $state, $timeout) {
 	vm.checkIsNotEmpty = false;
 	vm.checkIsNotFull = false;
 	vm.checkModSlider = false;
-	vm.sliderMaxModSize = 500; //should be almost a terabyte
+	vm.sliderMaxModSize = 500; // in MB
 	vm.selectMap = "Any"
 	vm.searchText = "";
 
-	// Request for the servers
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
 	// Go back to the main menu on exit
@@ -319,7 +318,7 @@ function($scope, $state, $timeout) {
 		//console.log('[MultiplayerServersController] destroyed.');
 	});
 	
-	$scope.$on('onServersReceived', async function (event, data) {
+	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
@@ -354,10 +353,8 @@ function($scope, $state, $timeout) {
 	
 	vm.searchText = "";
 
-	bngApi.engineLua('MPCoreNetwork.requestServerList()');
-
-	// Called when requestServerList() answered
-	$scope.$on('onServersReceived', async function (event, data) {
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
+	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
@@ -414,25 +411,24 @@ function($scope, $state, $timeout) {
 	vm.checkIsNotEmpty = false;
 	vm.checkIsNotFull = false;
 	vm.checkModSlider = false;
-	vm.sliderMaxModSize = 500; //should be almost a terabyte
+	vm.sliderMaxModSize = 500; // in MB
 	vm.selectMap = "Any";
 	vm.searchText = "";
-	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
 
 	vm.exit = function ($event) {
 		if ($event)
 		console.log('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
-	
-	// Called when requestServerList() answered
-	$scope.$on('onServersReceived', async function (event, data) {
+
+	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
-	
+
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -815,7 +811,7 @@ function removeFav(server) {
 		}
 	}
 	saveFav();
-	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
 }
 
 function saveFav() {

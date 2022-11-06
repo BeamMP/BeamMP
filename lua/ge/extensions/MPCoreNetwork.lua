@@ -311,9 +311,9 @@ local function handleU(params)
 			loadMods = true
 			MPModManager.loadServerMods()
 		end
-		if string.sub(data, 1, 17) == "Connection Failed" then
-			leaveServer(false) -- reset session variables
-		end
+		--if string.sub(data, 1, 17) == "Connection Failed" then
+		--	leaveServer(false) -- reset session variables
+		--end
 	elseif code == "p" and isMpSession then
 		UI.setPing(data.."")
 		positionGE.setPing(data)
@@ -388,7 +388,7 @@ onLauncherConnected = function()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
-	if isMpSession then
+	if isMpSession and currentServer then
 		connectToServer(currentServer.ip, currentServer.port, currentServer.name)
 	end
 end

@@ -21,6 +21,8 @@ local defaultSettings = {
 
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
+
+	launcherPort = 4444
 }
 
 local function onExtensionLoaded()

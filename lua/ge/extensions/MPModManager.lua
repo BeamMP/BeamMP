@@ -13,6 +13,37 @@ local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods 
 
 --TODO: build handler for repo mod downloads
 
+local function loadLocales()
+	local mp_locales = FS:findFiles('/mp_locales/', '*.json', 0)
+	local game_locales = FS:findFiles('/locales/', '*.json', 0)
+
+	for _, mp_locale in pairs(mp_locales) do
+		for _, game_locale in pairs(game_locales) do
+			if game_locale:gsub('/locales/', '') == mp_locale:gsub('/mp_locales/', '') then
+				local merged_locale = tableMergeRecursive(jsonReadFile(game_locale), jsonReadFile(mp_locale))
+				log('M', 'loadLocales', 'Writing '..game_locale)
+				jsonWriteFile('/temp/beammp/'.. game_locale, merged_locale, true)
+			end
+		end
+	end
+	if FS:directoryExists('/temp/beammp/locales/') then
+		local zip = ZipArchive()
+		local fileList = FS:findFiles('/temp/beammp/locales/', '*.json', 0)
+		zip:openArchiveName('temp/beammp/beammp_locales.zip', 'w')
+		for _, file in pairs(fileList) do
+			zip:addFile(file, 'locales/'..file:gsub('/temp/beammp/locales/', ''))
+		end
+		zip:close()
+	end
+	FS:mount('/temp/beammp/beammp_locales.zip')
+	FS:directoryRemove('/temp/beammp/locales')
+end
+
+local function unloadLocales()
+	FS:unmount('/temp/beammp/beammp_locales.zip')
+	FS:directoryRemove('/temp/beammp')
+end
+
 local function isModAllowed(modName)
 	for _,v in pairs(serverMods) do -- checking for server mods
 		if string.lower(v) == string.lower(modName) then --[[ log('M', 'isModAllowed', modName .. ' is allowed.') ]] return true end
@@ -184,12 +215,14 @@ M.replaceStuff = function() --TODO: if this function is called onExtensionLoaded
 end
 
 M.onExtensionLoaded = function()
+	loadLocales()
 	cleanUpSessionMods()
 	extensionLoader()
 	--M.replaceStuff()
 end
 
 M.onExtensionUnloaded = function() -- restore functions back to their default values
+	unloadLocales()
 	--core_repository.modUnsubscribe = original_Unsubscribe
 	if original_registerCoreModule then registerCoreModule = original_registerCoreModule end
 end

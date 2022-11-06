@@ -98,8 +98,8 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p>Fade out vehicles as they get closer</p>
-  <md-tooltip md-direction="right">Good when paired with disabled collisions</md-tooltip>
+  <p>{{:: 'ui.options.multiplayer.fadeVehicles' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.fadeVehicles.tooltip' | translate }}</md-tooltip>
   <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 

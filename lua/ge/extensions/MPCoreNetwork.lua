@@ -444,6 +444,9 @@ local function onDeserialized(data)
 end
 
 local function onExtensionLoaded()
+	if FS:fileExists('settings/BeamMP/ui_info.json') then --TODO: remove this after a while
+		FS:removeFile('settings/BeamMP/ui_info.json')
+	end
 	reloadUI() -- required to show modified mainmenu
 end
 

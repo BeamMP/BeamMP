@@ -48,7 +48,7 @@ local function handle(rawData)
 	if code == "l" then
 		applyLivePowertrain(data, serverVehicleID)
 	else
-		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 

@@ -1008,7 +1008,7 @@ local function handle(rawData)
 	if HandleNetwork[code] then
 		HandleNetwork[code](rawData)
 	else
-		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 

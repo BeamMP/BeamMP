@@ -76,7 +76,7 @@ end
 
 
 
-M.onPostJoin = function()
+M.runPostJoin = function()
 	--save the original functions so they can be restored after leaving an mp session
 	original_onInstabilityDetected = onInstabilityDetected
 	original_bigMapMode = freeroam_bigMapMode.canBeActivated

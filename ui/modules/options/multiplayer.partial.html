@@ -259,10 +259,10 @@
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
   <p flex="70" bng-translate="ui.options.multiplayer.launcherPort"></p>
   <md-input-container style="padding-top:25px">
-    <input mdInput type="number" ng-model="options.data.values.launcherPort" min="4444" max="9999" step="1"
+    <input mdInput type="number" ng-model="options.data.values.launcherPort" min="1024" max="65535" step="1"
       aria-label="_" ng-change="options.applyState()"/>
   </md-input-container>
-  <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">Default is 4444</span>
+  <span ng-if="options.data.values.launcherPort != 4444" style="margin-left:15px">Default is 4444</span>
   <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">(Default)</span>
 </md-list-item>
 

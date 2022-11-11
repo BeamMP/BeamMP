@@ -60,6 +60,7 @@
     "ui.options.multiplayer.others": "Others",
     "ui.multiplayer.multiplayer": "Multiplayer",
     "ui.multiplayer.connecting": "Connecting",
+    "ui.multiplayer.connectingToServer": "Connecting to server...",
     "ui.multiplayer.loading": "Loading...",
     "ui.multiplayer.servers": "Servers",
     "ui.multiplayer.recent": "Recent",

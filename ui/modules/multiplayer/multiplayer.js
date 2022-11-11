@@ -54,7 +54,7 @@ function($scope, $state, $timeout, $document) {
 	};
 	
 	$scope.$on('onLauncherConnected', function (event, data) {
-		$state.go('menu.multiplayer.servers');
+		$state.go('menu.multiplayer.login');
 	});
 	
 	// The game's lua has an auto launcher reconnect in case
@@ -110,7 +110,8 @@ function($scope, $state, $timeout, $document) {
 	});
 	
 	// Try to auto login
-	bngApi.engineLua('MPCoreNetwork.autoLogin()');
+	// bngApi.engineLua('MPCoreNetwork.autoLogin()');
+	// autologin is called from lua
 }])
 
 

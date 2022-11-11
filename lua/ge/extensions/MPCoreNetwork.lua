@@ -11,20 +11,25 @@ print("Loading MPCoreNetwork...")
 
 
 -- ============= VARIABLES =============
+-- launcher
 local TCPLauncherSocket -- Launcher socket
-local currentServer = nil -- Table containing the current server IP, port and name
-local serverList -- server list JSON
+local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
-local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap", "LoadingMapNow", "Playing"
 local launcherVersion = "" -- used only for the server list
-local loggedIn = false
+-- server
+local serverList -- server list JSON
+local currentServer = nil -- Table containing the current server IP, port and name
 local isMpSession = false
 local isGoingMpSession = false
+local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap", "LoadingMapNow", "Playing"
+-- auth
+local loggedIn = false
+-- event functions
 local onLauncherConnected = nop
 local runPostJoin = nop
-local socket = require('socket')
-local loadMods = false
+
+local loadMods = false -- gets set to true when mods should get loaded
 --[[
 Z  -> The client asks the launcher its version
 B  -> The client asks the launcher for the servers list
@@ -337,7 +342,7 @@ local updateUITimer = 0
 local heartbeatTimer = 0
 local reconnectTimer = 0
 local function onUpdate(dt)
-	pingTimer = pingTimer + dt -- TODO: clean this up a bit
+	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
 	updateUITimer = updateUITimer + dt
 	heartbeatTimer = heartbeatTimer + dt
@@ -404,13 +409,13 @@ runPostJoin = function() -- gets called once loaded into a map
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
-		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- TODO: clean this up, dont call this twice
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
-		--guihooks.trigger('ChangeState', 'play') -- causes a bug causing the camera to never initialize
+		--guihooks.trigger('ChangeState', 'play') -- causes a bug causing the camera to never initialize, TODO: find a different way of closing the UI after joining server
 	end
 end
 
-local function onClientPostStartMission() --TODO: move to onWorldReadyState
+local function onClientPostStartMission()
 	if isMpSession and isGoingMpSession then runPostJoin() end
 end
 

@@ -27,16 +27,22 @@ function($scope, $state, $timeout, $document) {
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.validate = function () {
 		localStorage.setItem("tosAccepted", "true");
-		$state.go('menu.multiplayer.servers');
+		bngApi.engineLua(`MPConfig.acceptTos()`);
+		$state.go('menu.multiplayer');
 	};
 
 	$scope.openExternalLink = function(url) {
 		bngApi.engineLua(`openWebBrowser("`+url+`")`);
 	}
-	
 
-
-	
+	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
+		if (data != null) {
+			if (!localStorage.getItem("tosAccepted")) {
+				localStorage.setItem("tosAccepted", data.tos);
+				$state.go('menu.multiplayer.servers');
+			}
+		}
+	});
 }])
 
 

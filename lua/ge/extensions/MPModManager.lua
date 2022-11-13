@@ -13,7 +13,13 @@ local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods 
 
 --TODO: build handler for repo mod downloads
 
-local function loadLocales()
+local function unloadLocales()
+	FS:unmount('/temp/beammp/beammp_locales.zip')
+	FS:directoryRemove('/temp/beammp')
+end
+
+local function loadLocales() -- loads beammp locales without having to directly replace the game locales
+	unloadLocales()
 	local mp_locales = FS:findFiles('/mp_locales/', '*.json', 0)
 	local game_locales = FS:findFiles('/locales/', '*.json', 0)
 
@@ -39,10 +45,6 @@ local function loadLocales()
 	FS:directoryRemove('/temp/beammp/locales')
 end
 
-local function unloadLocales()
-	FS:unmount('/temp/beammp/beammp_locales.zip')
-	FS:directoryRemove('/temp/beammp')
-end
 
 local function isModAllowed(modName)
 	for _,v in pairs(serverMods) do -- checking for server mods

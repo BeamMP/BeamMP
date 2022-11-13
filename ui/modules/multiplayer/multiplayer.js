@@ -225,7 +225,7 @@ function($scope, $state, $timeout, $mdDialog) {
 		if (!valid) return;
 		var server = {
 			cversion: await getLauncherVersion(), ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
-			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
+			owner: "", playersList: "", sdesc: "", sname: name.value, strippedName: name.value,
 			custom: true, port: port.value
 		};
 		addFav(server);
@@ -864,7 +864,6 @@ function getServerInfoHTML(d) {
 						</div>
 						<div class="col">
 							<ul class="serverItemDetails">
-								<li>PPS: ${d.pps|| ""}</li>
 								<li>Mods: ${modCount(d.modlist|| "")}</li>
 								<li>Mod Names: ${modList(d.modlist|| "")}</li>
 								<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
@@ -882,28 +881,6 @@ function getServerInfoHTML(d) {
 			</td>`;
 };
 
-function formatHealth(pps) {
-	let signel = '';
-	if (pps > 40) {
-		signel = 'signal-4'
-	} else if (pps > 20) {
-		signel = 'signal-3'
-	} else if (pps > 10) {
-		signel = 'signal-2'
-	} else if (pps > 5) {
-		signel = 'signal-1'
-	} else {
-		signel = 'signal-0'
-	}
-	return `
-	<i class="icon__signal-strength ${signel}">
-		<span class="bar-1"></span>
-		<span class="bar-2"></span>
-		<span class="bar-3"></span>
-		<span class="bar-4"></span>
-	</i>
-	`
-}
 
 function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) {
 	let newRow = table.insertRow(table.length);
@@ -916,7 +893,6 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
-		<td style="background-color:${bgcolor}; font-size: initial; min-width: 60px;">${formatHealth(server.pps)}${server.pps}</td>
 	`;
 	newRow.onclick = function() { select(this, bngApi); };
 }

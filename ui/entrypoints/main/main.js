@@ -1030,16 +1030,6 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       })
     }
   })
-  
-	// -------------------------------------- BEAMMP -------------------------------------- //
-	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
-		if (data != null) {
-			if (!localStorage.getItem("tosAccepted")) {
-				localStorage.setItem("tosAccepted", data.tos);
-			}
-		}
-	});
-	// -------------------------------------- BEAMMP -------------------------------------- //
 
   /* --- VUE3 END --- */
   $rootScope.$on('$translateChangeSuccess', (event, data) => {

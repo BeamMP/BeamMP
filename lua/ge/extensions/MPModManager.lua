@@ -106,7 +106,7 @@ local function checkAllMods() --add counters?
 	end
 end
 
-M.loadServerMods = function()
+local function loadServerMods()
 	log('W', 'loadServerMods', 'loadServerMods')
 	
 	local modsDir = FS:findFiles("/mods/multiplayer", "*.zip", -1, false, false)
@@ -117,13 +117,13 @@ M.loadServerMods = function()
 	MPCoreNetwork.requestMap()
 end
 
-M.verifyMods = function() -- verify that all server mods have actually been modLoaded
+local function verifyMods() --TODO: improve and actually implement this
 	local verifyTable = {}
 	for _,v in pairs(serverMods) do
-		verifyTable[v] = false -- set all values to false
+		verifyTable[v] = false
 	end
-	for _,v in pairs(getModList()) do --go through the mod list
-		for _,n in pairs(serverMods) do --check against the mods that are supposed to be loaded
+	for _,v in pairs(getModList()) do
+		for _,n in pairs(serverMods) do
 			if v.modname == n then verifyTable[n] = true end
 		end
 	end
@@ -172,7 +172,7 @@ end
 
 local original_registerCoreModule
 
-local function extensionLoader()
+local function extensionLoader() -- prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload
 	original_registerCoreModule = registerCoreModule
 	registerCoreModule = function(modulePath)
 		--log('M', 'extensionLoader', modulePath)
@@ -186,50 +186,48 @@ local function extensionLoader()
 			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to queueExtensionToLoad " .. debug)
 			queueExtensionToLoad(modulePath)
 		else
-			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! ".. debug)
+			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! " .. debug)
 			original_registerCoreModule(modulePath)
 		end
 	end
 end
 
-local original_Unsubscribe = nop --TODO: finish this
+local original_Unsubscribe
 
-M.replaceStuff = function() --TODO: if this function is called onExtensionLoaded core_repository is not loaded yet at that time
-	if not core_repository and not core_repository.modUnsubscribe then log('W', 'replaceStuff', 'core_repository not loaded yet') return end
+M.repositoryReplacer = function() --TODO: if this function is called onExtensionLoaded core_repository is not loaded yet at that time
+	if not core_repository and not core_repository.modUnsubscribe then log('W', 'repositoryReplacer', 'core_repository not loaded yet') return end
 	original_Unsubscribe = core_repository.modUnsubscribe
 	core_repository.modUnsubscribe = function(mod_id)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('W', 'replaceStuff', 'mod_id: ' .. mod_id)
 			for k,modName in pairs(serverMods) do
 				if modName == mod_id then
-					log('W', 'replaceStuff', 'You cannot remove session mods! Exit the session to remove mods.')
+					log('W', 'repositoryReplacer', 'You cannot remove session mods! Quit the multiplayer session to remove mods.')
 					return
 				else
-					log('M', 'replaceStuff', 'Not a session mod, running original function.')
 					original_Unsubscribe(mod_id)
 				end
 			end
 		else
-			log('M', 'replaceStuff', 'Not in an MP session, running original function.')
 			original_Unsubscribe(mod_id)
 		end
 	end
 end
 
-M.onExtensionLoaded = function()
+local function onExtensionLoaded()
 	loadLocales()
 	cleanUpSessionMods()
 	extensionLoader()
 	--M.replaceStuff()
 end
 
-M.onExtensionUnloaded = function() -- restore functions back to their default values
+local function onExtensionUnloaded() -- restore functions back to their default values
 	unloadLocales()
-	--core_repository.modUnsubscribe = original_Unsubscribe
-	if original_registerCoreModule then registerCoreModule = original_registerCoreModule end
+	registerCoreModule = original_registerCoreModule and original_registerCoreModule
+	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
 end
 
-M.onServerLeave = function()
+local function onServerLeave()
 	if MPCoreNetwork.isMPSession() or MPCoreNetwork.isGoingMPSession() then
 		log('W', 'onServerLeave', 'MPModManager')
 		serverMods = {}
@@ -239,13 +237,18 @@ end
 
 
 M.cleanUpSessionMods = cleanUpSessionMods
+M.isModWhitelisted = isModWhitelisted
+M.loadServerMods = loadServerMods
 M.setServerMods = setServerMods
 M.checkAllMods = checkAllMods
-M.isModWhitelisted = isModWhitelisted
 M.isModAllowed = isModAllowed
 M.getModList = getModList
+M.verifyMods = verifyMods
 --events
+M.onExtensionLoaded = onExtensionLoaded
+M.onExtensionUnloaded = onExtensionUnloaded
 M.onModActivated = onModActivated
+M.onServerLeave = onServerLeave
 
 print("MPModManager loaded")
 return M

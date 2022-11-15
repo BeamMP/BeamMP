@@ -80,7 +80,7 @@ local function connectToLauncher(silent)
 	end
 end
 
-local function disconnectLauncher(reconnect) --TODO: unused
+local function disconnectLauncher(reconnect) --unused, for debug purposes
 	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: '..tostring(reconnect))
 	if launcherConnected then
 		log('W', 'disconnectLauncher', "Disconnecting from launcher")
@@ -282,7 +282,7 @@ local function leaveServer(goBack, requestLuaReload)
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
 	--if goBack then clientPostStartMission() end
-	local callback
+	local callback = nop
 	if requestLuaReload then callback = function() Lua:requestReload() end end
 	if goBack then endActiveGameMode(callback) end
 end
@@ -297,7 +297,7 @@ local function isGoingMPSession()
 end
 
 -- ============= OTHERS =============
-M.requestMap = function()
+local function requestMap()
 	log('M', 'requestMap', 'Requesting map!')
 	send('M') -- request map string from launcher 
 	status = "LoadingMap"
@@ -336,15 +336,15 @@ local HandleNetwork = {
 	['Z'] = function(params) launcherVersion = params; end,
 }
 
-local onUpdateTimer = 0
 local pingTimer = 0
-local updateUITimer = 0
+local onUpdateTimer = 0
+local updateUiTimer = 0
 local heartbeatTimer = 0
 local reconnectTimer = 0
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
-	updateUITimer = updateUITimer + dt
+	updateUiTimer = updateUiTimer + dt
 	heartbeatTimer = heartbeatTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
@@ -367,8 +367,8 @@ local function onUpdate(dt)
 			heartbeatTimer = 0
 			send('A') -- Launcher heartbeat
 		end
-		if updateUITimer >= 0.1 and status == "LoadingResources" then
-			updateUITimer = 0
+		if updateUiTimer >= 0.1 and status == "LoadingResources" then
+			updateUiTimer = 0
 			send('Ul') -- Ask the launcher for a loading screen update
 		end
 		if MPGameNetwork and MPGameNetwork.launcherConnected() and pingTimer >= 1 then
@@ -376,13 +376,12 @@ local function onUpdate(dt)
 			send('Up')
 		end
 	else
-		if reconnectTimer >= 2 and not isConnecting then -- if connection is lost re-attempt connecting every 2 seconds to give the launcher time to start up fully
+		if reconnectTimer >= 5 and not isConnecting then -- if connection is lost re-attempt connecting every 5 seconds to give the launcher time to start up fully
 			reconnectTimer = 0
-			connectToLauncher(true)
+			connectToLauncher(true) --TODO: add counter and stop attempting after enough failed attempts
 		end
 	end
 end
-
 
 -- EVENTS
 
@@ -415,7 +414,7 @@ runPostJoin = function() -- gets called once loaded into a map
 	end
 end
 
-local function onClientPostStartMission()
+local function onClientStartMission()
 	if isMpSession and isGoingMpSession then runPostJoin() end
 end
 
@@ -471,7 +470,7 @@ M.onUiChangedState     = onUiChangedState
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
-M.onClientPostStartMission = onClientPostStartMission
+M.onClientStartMission = onClientStartMission
 -- UI
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
@@ -486,6 +485,7 @@ M.isGoingMPSession     = isGoingMPSession
 M.onSerialize          = onSerialize
 M.onDeserialized       = onDeserialized
 
+M.requestMap           = requestMap
 M.send = send
 
 print("MPCoreNetwork loaded")

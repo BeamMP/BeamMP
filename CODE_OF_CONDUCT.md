@@ -124,3 +124,6 @@ enforcement ladder](https://github.com/mozilla/diversity).
 [homepage]: https://www.contributor-covenant.org
 
 For answers to common questions about this code of conduct, contact us directly via [Forum](https://forum.beammp.com/) or [Discord](https://discord.gg/beammp).
+
+
+- Brisky was here

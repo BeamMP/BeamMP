@@ -62,3 +62,6 @@ If none of these fix your issue, we have a dedicated support team on our [Discor
 # Support
 The BeamMP project is supported by community donations via our [Patreon](https://www.patreon.com/BeamMP) This brings perks such as Patreon-only channels on our Discord, Early access to new updates, and more server keys. 
 
+
+
+-Brisky was here

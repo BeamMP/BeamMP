@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPConfig...")
 
 -- MP VARIABLES
 local Nickname = ""
@@ -184,5 +183,4 @@ M.setConfig = setConfig
 
 M.acceptTos = acceptTos
 
-print("MPConfig loaded")
 return M

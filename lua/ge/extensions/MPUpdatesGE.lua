@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPUpdatesGE...")
 
 
 -- Tickrate - how often data is being sent from the client, in seconds
@@ -78,5 +77,4 @@ M.onUpdate        = onUpdate
 
 
 
-print("MPUpdatesGE loaded")
 return M

@@ -6,7 +6,6 @@
 --====================================================================================
 
 local M = {}
-print("Loading MPDebug...")
 
 
 local function tpPlayerToPos(targetPos)
@@ -267,5 +266,4 @@ M.packetSent = packetSent
 M.packetReceived = packetReceived
 
 
-print("MPDebug loaded")
 return M

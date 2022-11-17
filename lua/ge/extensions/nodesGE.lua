@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading nodesGE...")
 
 
 local function tick()
@@ -53,5 +52,4 @@ M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
 
 
-print("nodesGE loaded")
 return M

@@ -1,6 +1,5 @@
 local M = {state={}}
 
-log("M", "multiplayer", "Gamemode Loaded")
 
 --TODO: Move this file where the rest of the extensions are, or get rid of it completely
 

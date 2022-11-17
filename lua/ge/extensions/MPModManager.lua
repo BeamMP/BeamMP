@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPModManager...")
 
 local serverMods = {} -- multiplayerModName1, multiplayerModName2
 local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods won't be activated or deactivated
@@ -250,5 +249,4 @@ M.onExtensionUnloaded = onExtensionUnloaded
 M.onModActivated = onModActivated
 M.onServerLeave = onServerLeave
 
-print("MPModManager loaded")
 return M

@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading UI...")
 
 
 
@@ -143,5 +142,4 @@ M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
 
-print("UI loaded")
 return M

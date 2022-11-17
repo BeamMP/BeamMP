@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPGameNetwork")
 
 
 
@@ -14,12 +13,12 @@ print("Loading MPGameNetwork")
 local socket = require('socket')
 local TCPSocket
 local launcherConnected = false
+local isConnecting = false
 local eventTriggers = {}
 --keypress handling
 local keyStates = {} -- table of keys and their states, used as a reference
 local keysToPoll = {} -- list of keys we want to poll for state changes
 local keypressTriggers = {}
-local isConnecting = false
 -- ============= VARIABLES =============
 
 setmetatable(_G,{}) -- temporarily disable global notifications
@@ -246,5 +245,4 @@ M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function l
 M.getKeyState         = getKeyState         -- takes: string keyName
 M.onVehicleReady      = onVehicleReady
 
-print("MPGameNetwork loaded")
 return M

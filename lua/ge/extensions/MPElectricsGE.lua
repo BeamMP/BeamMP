@@ -6,11 +6,10 @@
 
 
 local M = {}
-print("Loading MPElectricsGE...")
 
 
 
-local lastElectrics = ""
+local lastElectrics
 
 
 
@@ -69,5 +68,4 @@ M.handle     	 = handle
 M.sendElectrics  = sendElectrics
 
 
-print("MPElectricsGE loaded")
 return M

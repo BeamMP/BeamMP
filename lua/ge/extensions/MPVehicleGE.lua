@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPVehicleGE...")
 
 
 -- ============= VARIABLES =============
@@ -1619,5 +1618,4 @@ M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 M.onSettingsChanged        = onSettingsChanged
 
-print("MPVehicleGE loaded")
 return M

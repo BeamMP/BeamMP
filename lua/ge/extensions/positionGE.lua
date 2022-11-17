@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading positionGE...")
 
 local actualSimSpeed = 1
 
@@ -130,5 +129,4 @@ M.setPing           = setPing
 M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
 
-print("positionGE loaded")
 return M

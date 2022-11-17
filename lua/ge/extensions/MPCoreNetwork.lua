@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPCoreNetwork...")
 
 
 
@@ -486,7 +485,6 @@ M.onDeserialized       = onDeserialized
 M.requestMap           = requestMap
 M.send = send
 
-print("MPCoreNetwork loaded")
 
 -- TODO: finish all this
 

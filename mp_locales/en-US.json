@@ -73,6 +73,8 @@
     "ui.multiplayer.description": "Title",
     "ui.multiplayer.map": "Map",
     "ui.multiplayer.forum": "FORUM",
+    "ui.multiplayer.wiki": "WIKI",
+    "ui.multiplayer.discord": "Discord",
     "ui.multiplayer.players": "Players",
     "ui.multiplayer.emptyOnly": "Empty only",
     "ui.multiplayer.emptyOnlyTooltip": "Only show empty servers",

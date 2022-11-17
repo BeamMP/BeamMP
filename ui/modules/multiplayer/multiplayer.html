@@ -53,11 +53,22 @@
 				  {{:: 'ui.multiplayer.direct_connect' | translate}}
         </md-button>
 
+        <md-divider></md-divider>
+
+        <md-button id="forum-btn" onclick="openExternalLink(`https://wiki.beammp.com`)" ng-class="" style="text-align:left;">
+          <md-icon class="material-icons">link</md-icon>
+          {{:: 'ui.multiplayer.wiki' | translate}}
+        </md-button>
+
         <md-button id="forum-btn" onclick="openForumLink()" ng-class="" style="text-align:left;">
           <md-icon class="material-icons">web</md-icon>
 				  {{:: 'ui.multiplayer.forum' | translate}}
         </md-button>
 
+        <md-button id="forum-btn" onclick="openExternalLink(`https://discord.gg/BeamMP`)" ng-class="" style="text-align:left;">
+          <md-icon md-svg-src="local://local/ui/modules/multiplayer/icons/icon_clyde_white_RGB.svg"></md-icon>
+          {{:: 'ui.multiplayer.discord' | translate}}
+        </md-button>
 
 	    <md-divider></md-divider>
 	    

@@ -80,7 +80,7 @@ local function getServerVehicleID(gameVehicleID)
 
 	if not vehiclesMap[gameVehicleID] or not vehicles[vehiclesMap[gameVehicleID]] then
 		log('E', 'getServerVehicleID', "can't get server id from " .. tostring(gameVehicleID))
-		print(debug.traceback())
+		log('M', 'getServerVehicleID', debug.traceback())
 		return
 	end
 
@@ -959,7 +959,7 @@ local HandleNetwork = {
 			onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 		else
 			log('E', "HandleNetwork", "Spawn pattern match failed")
-			print(rawData)
+			log('M', 'HandleNetwork', rawData)
 		end
 	end,
 	['r'] = function(rawData) -- reset
@@ -1257,7 +1257,7 @@ local function onPreRender(dt)
 						if data.best and data.best ~= lastGmFocus then
 							if (activeVehPos - data.position):squaredLength() > 200 then
 								core_groundMarkers.setFocus(data.best)
-								print("setting focus to") print(data.best)
+								log('M', 'onPreRender', 'setting focus to '..data.best)
 								lastGmFocus = data.best
 							else
 								core_groundMarkers.setFocus(nil)

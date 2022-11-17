@@ -20,7 +20,7 @@ local function tpPlayerToPos(targetPos)
 		spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
 		return
 	else
-		print("no active vehicle")
+		log('M', 'tpPlayerToPos', 'no active vehicle')
 	end
 end
 
@@ -52,7 +52,7 @@ local function getTranslations(_, content)
 		local selectedLang = Lua:getSelectedLanguage()
 
 		ui_strings = data[2] and data[2][selectedLang] and data[2][selectedLang]['translations'] or {}
-		print("language data received, cached "..languageMap.resolve(selectedLang) or "unknown language")
+		log('M', 'getTranslations', "language data received, cached "..languageMap.resolve(selectedLang) or "unknown language")
 	end
 end
 

@@ -21,10 +21,10 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' |
+<p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.disableLuaReload' |
     translate }}</p>
-  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
-  <md-checkbox ng-model="options.data.values.beammpAlternateModloading" ng-change="options.applyState()"></md-checkbox>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableLuaReload.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.disableLuaReload" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">

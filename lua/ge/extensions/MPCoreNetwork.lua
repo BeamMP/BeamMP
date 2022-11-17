@@ -268,8 +268,7 @@ local function loginReceived(params)
 	end
 end
 
-local function leaveServer(goBack, requestLuaReload)
-	requestLuaReload = false -- TODO: just for testing
+local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
 	extensions.hook('onServerLeave')
@@ -283,7 +282,7 @@ local function leaveServer(goBack, requestLuaReload)
 	status = "" -- Reset status
 	--if goBack then clientPostStartMission() end
 	local callback = nop
-	if requestLuaReload then callback = function() Lua:requestReload() end end
+	if not settings.getValue("disableLuaReload") then callback = function() Lua:requestReload() end end
 	if goBack then endActiveGameMode(callback) end
 end
 
@@ -404,7 +403,6 @@ runPostJoin = function() -- gets called once loaded into a map
 	if isMpSession and isGoingMpSession then
 		extensions.hook('runPostJoin')
 		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam
-		log('W', 'runPostJoin', 'Connecting MPGameNetwork!')
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false

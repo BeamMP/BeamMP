@@ -45,7 +45,7 @@ end
 
 original_bullettime = bullettime.pause
 
-M.onBigMapActivated = function()
+local function onBigMapActivated()
 	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
 end
 
@@ -76,7 +76,7 @@ end
 
 
 
-M.runPostJoin = function()
+local function runPostJoin()
 	--save the original functions so they can be restored after leaving an mp session
 	original_onInstabilityDetected = onInstabilityDetected
 	original_bigMapMode = freeroam_bigMapMode.canBeActivated
@@ -90,7 +90,7 @@ M.runPostJoin = function()
 end
 
 
-M.onServerLeave = function()
+local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
 	if original_bigMapMode then freeroam_bigMapMode.canBeActivated = original_bigMapMode end
 	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
@@ -111,4 +111,8 @@ end
 -- public interface
 M.onUpdate          = onUpdate
 M.onWorldReadyState = onWorldReadyState
+M.onBigMapActivated = onBigMapActivated
+
+M.runPostJoin = runPostJoin
+M.onServerLeave = onServerLeave
 return M

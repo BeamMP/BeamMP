@@ -58,10 +58,10 @@ local function getInputs() --TODO: uncomment the difference checking for final r
 	local inputsToSend = {}
 	currentInputs = {
 		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
-		t = electrics.values.throttle and math.floor(electrics.values.throttle * 1000) / 1000,
-		b = electrics.values.brake and math.floor(electrics.values.brake * 1000) / 1000,
-		p = electrics.values.parkingbrake and math.floor(electrics.values.parkingbrake * 1000) / 1000,
-		c = electrics.values.clutch and math.floor(electrics.values.clutch * 1000) / 1000,
+		t = electrics.values.throttle and math.floor(electrics.values.throttle * 100) / 100,
+		b = electrics.values.brake and math.floor(electrics.values.brake * 100) / 100,
+		p = electrics.values.parkingbrake and math.floor(electrics.values.parkingbrake * 100) / 100,
+		c = electrics.values.clutch and math.floor(electrics.values.clutch * 100) / 100,
 		g = electrics.values.gear
 	}
 	--for k,v in pairs(currentInputs) do
@@ -71,7 +71,7 @@ local function getInputs() --TODO: uncomment the difference checking for final r
 	--end
 	--lastInputs = currentInputs
 	--if tableIsEmpty(inputsToSend) then return end
-
+	--dump(inputsToSend)
 	--obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(currentInputs).."\', "..obj:getID()..")") -- Send it to GE lua
 end

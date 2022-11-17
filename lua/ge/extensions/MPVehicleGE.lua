@@ -430,13 +430,15 @@ end
 
 --called by autosync and the ui (sync button)
 --============================ SEND MODIFIED VEHICLE DATA ============================
-local function sendVehicleEdit(gameVehicleID) -- TODO: add check if vehicle isnt yours
+local function sendVehicleEdit(gameVehicleID)
 	local vehicleTable = {} -- Vehicle table
 	local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 	local veh          = be:getObjectByID(gameVehicleID)
 	local c            = veh.color
 	local p0           = veh.colorPalette0
 	local p1           = veh.colorPalette1
+
+	if not isOwn(veh:getID()) then return end
 
 	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
@@ -1086,7 +1088,7 @@ end
 local function sendPendingVehicleEdits()
 	for gameVehicleID,_ in pairs(vehiclesToSync) do
 		local veh = be:getObjectByID(gameVehicleID)
-		if veh then
+		if veh and isOwn(veh:getID()) then
 			log('I', "syncVehicles", "Autosyncing vehicle "..gameVehicleID)
 			sendVehicleEdit(gameVehicleID)
 		end

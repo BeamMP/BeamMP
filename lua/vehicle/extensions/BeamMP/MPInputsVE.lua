@@ -9,7 +9,13 @@ local M = {}
 
 -- ============= VARIABLES =============
 local currentInputs = {}
-local lastInputs = {}
+local lastInputs = {
+	s = 0,
+	t = 0,
+	b = 0,
+	p = 0,
+	c = 0,
+}
 local remoteGear
 -- ============= VARIABLES =============
 
@@ -64,8 +70,9 @@ local function getInputs() --TODO: uncomment the difference checking for final r
 		c = electrics.values.clutch and math.floor(electrics.values.clutch * 100) / 100,
 		g = electrics.values.gear
 	}
+	--if math.abs(math.abs(lastInputs.s) - math.abs(currentInputs.s)) > 0.005 then inputsToSend.s = currentInputs.s end
 	--for k,v in pairs(currentInputs) do
-	--	if currentInputs[k] ~= lastInputs[k] then
+	--	if currentInputs[k] ~= lastInputs[k] and k ~= "s" then
 	--		inputsToSend[k] = currentInputs[k]
 	--	end
 	--end

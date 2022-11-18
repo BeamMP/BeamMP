@@ -296,13 +296,25 @@ function($scope, $state, $timeout, $mdDialog) {
 function($scope, $state, $timeout) {
 
 	var vm = this;
-	vm.checkIsEmpty = false;
-	vm.checkIsNotEmpty = false;
-	vm.checkIsNotFull = false;
-	vm.checkModSlider = false;
-	vm.sliderMaxModSize = 500; // in MB
-	vm.selectMap = "Any"
-	vm.searchText = "";
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
 
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
@@ -346,6 +358,15 @@ function($scope, $state, $timeout) {
 			vm.selectMap,
 			bngApi
 		);
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
 }])
 

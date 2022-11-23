@@ -13,14 +13,6 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
-    translate }}</p>
-  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
-  </md-tooltip>
-  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
-</md-list-item>
-
-<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
 <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.disableLuaReload' |
     translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableLuaReload.tooltip' | translate }}</md-tooltip>
@@ -33,6 +25,15 @@
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableInstabilityPausing.tooltip' | translate }}
   </md-tooltip>
   <md-checkbox ng-model="options.data.values.disableInstabilityPausing" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+<md-divider></md-divider>
+
+<md-list-item md-no-ink>
+  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink>

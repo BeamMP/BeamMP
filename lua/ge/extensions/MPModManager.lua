@@ -248,5 +248,6 @@ M.onExtensionLoaded = onExtensionLoaded
 M.onExtensionUnloaded = onExtensionUnloaded
 M.onModActivated = onModActivated
 M.onServerLeave = onServerLeave
+M.onExit = cleanUpSessionMods
 
 return M

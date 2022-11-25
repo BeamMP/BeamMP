@@ -339,6 +339,7 @@ local onUpdateTimer = 0
 local updateUiTimer = 0
 local heartbeatTimer = 0
 local reconnectTimer = 0
+local reconnectAttempt = 0
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
@@ -374,7 +375,8 @@ local function onUpdate(dt)
 			send('Up')
 		end
 	else
-		if reconnectTimer >= 5 and not isConnecting then -- if connection is lost re-attempt connecting every 5 seconds to give the launcher time to start up fully
+		if reconnectAttempt < 10 and reconnectTimer >= 5 and not isConnecting then
+			reconnectAttempt = reconnectAttempt + 1
 			reconnectTimer = 0
 			connectToLauncher(true) --TODO: add counter and stop attempting after enough failed attempts
 		end
@@ -384,12 +386,13 @@ end
 -- EVENTS
 
 onLauncherConnected = function()
+	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version
-	autoLogin()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
+	autoLogin()
 	if isMpSession and currentServer then
 		connectToServer(currentServer.ip, currentServer.port, currentServer.name)
 	end

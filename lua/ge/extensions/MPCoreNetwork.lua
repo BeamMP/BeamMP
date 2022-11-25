@@ -407,7 +407,7 @@ runPostJoin = function() -- gets called once loaded into a map
 		isGoingMpSession = false
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
-		--guihooks.trigger('ChangeState', 'play') -- causes a bug causing the camera to never initialize, TODO: find a different way of closing the UI after joining server
+		guihooks.trigger('onServerJoined')
 	end
 end
 

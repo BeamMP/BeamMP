@@ -184,6 +184,10 @@ function($scope, $state, $timeout, $mdDialog) {
 		}
 	});
 
+	$scope.$on('onServerJoined', function (event, data) {
+		$state.go('play');
+	});
+
 	$scope.logout = function() {
 		bngApi.engineLua(`MPCoreNetwork.logout()`);
 		$state.go('menu.multiplayer.login');

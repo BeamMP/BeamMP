@@ -1034,14 +1034,14 @@ local function spawnDefaultRequest()
 		local gameVehicleID = currentVehicle:getID()
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle.isLocal then
-			original_replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			return original_replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		else
-			original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			return original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		end
 	else
-		original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+		return original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 	end
-	extensions.hook("trackNewVeh")
+	--extensions.hook("trackNewVeh")
 end
 
 local function spawnRequest(model, config, colors)
@@ -1049,8 +1049,8 @@ local function spawnRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	original_spawnNewVehicle(model, config or {})
-	extensions.hook("trackNewVeh")
+	return original_spawnNewVehicle(model, config or {})
+	--extensions.hook("trackNewVeh")
 end
 
 local function replaceRequest(model, config, colors)
@@ -1060,11 +1060,11 @@ local function replaceRequest(model, config, colors)
 
 	if currentVehicle and vehicle.isLocal then
 		vehicle.jbeam = '-'
-		original_replaceVehicle(model, config or {})
+		return original_replaceVehicle(model, config or {})
 	else
-		original_spawnNewVehicle(model, config or {})
+		return original_spawnNewVehicle(model, config or {})
 	end
-	extensions.hook("trackNewVeh")
+	--extensions.hook("trackNewVeh")
 end
 
 M.runPostJoin = function()

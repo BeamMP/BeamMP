@@ -1,7 +1,6 @@
 local M = {state={}}
 
 
---TODO: Move this file where the rest of the extensions are, or get rid of it completely
 
 local originalGetDriverData
 local originalToggleWalkingMode

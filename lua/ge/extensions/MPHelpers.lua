@@ -6,7 +6,6 @@
 --====================================================================================
 
 local M = {}
-log('M', 'MPHelpers', 'Loading MPHelpers...')
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
@@ -111,5 +110,4 @@ end
 
 M.onExtensionLoaded = onExtensionLoaded
 
-log('M', 'MPHelpers', 'MPHelpers loaded.')
 return M

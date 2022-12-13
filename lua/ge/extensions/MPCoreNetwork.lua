@@ -162,8 +162,6 @@ end
 
 -- ============= SERVER RELATED =============
 local function setMods(receivedMods) -- receiving mods means that the client authenticated with the server successfully
-	log('W', 'setMods', 'isGoingMpSession = true')
-	log('W', 'setMods', 'isMpSession = true')
 	isMpSession = true
 	isGoingMpSession = true
 	MPModManager.setServerMods(receivedMods)

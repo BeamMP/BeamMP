@@ -266,7 +266,7 @@ local function loginReceived(params)
 		guihooks.trigger('LoginError', result.message or '')
 	end
 end
-
+local returnToMenu = true
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
@@ -280,9 +280,17 @@ local function leaveServer(goBack)
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
 	--if goBack then clientPostStartMission() end
-	local callback = nop
-	if not settings.getValue("disableLuaReload") then callback = function() Lua:requestReload() end end
-	if goBack then endActiveGameMode(callback) end
+	--local callback = nop
+	--if not settings.getValue("disableLuaReload") then callback = function() Lua:requestReload() end end
+	--if goBack then endActiveGameMode(callback) end
+	if goBack then
+		if not settings.getValue("disableLuaReload") then
+			returnToMenu = true
+			Lua:requestReload()
+		else
+			endActiveGameMode()
+		end
+	end
 end
 
 
@@ -375,7 +383,7 @@ local function onUpdate(dt)
 			send('Up')
 		end
 	else
-		if reconnectAttempt < 10 and reconnectTimer >= 5 and not isConnecting then
+		if reconnectAttempt < 10 and reconnectTimer >= 2 and not isConnecting then
 			reconnectAttempt = reconnectAttempt + 1
 			reconnectTimer = 0
 			connectToLauncher(true) --TODO: add counter and stop attempting after enough failed attempts
@@ -434,11 +442,17 @@ end
 
 local function onSerialize()
 	return {currentServer = currentServer,
-			isMpSession = isMpSession}
+			isMpSession = isMpSession,
+			returnToMenu = returnToMenu}
 end
 local function onDeserialized(data)
 	log('M', 'onDeserialized', dumps(data))
 
+	if data and data.returnToMenu then
+		endActiveGameMode()
+		returnToMenu = false
+		return
+	end
 	currentServer = data and data.currentServer or nil
 	isMpSession = data and data.isMpSession
 

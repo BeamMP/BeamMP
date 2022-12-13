@@ -134,7 +134,7 @@ local function onInit()
 	local cosAng = leftPos:cosAngle(backPos:cross(upPos))
 	
 	if cosAng < 0 then
-		print("Misaligned refNodes detected in vehicle "..obj:getId().."! This might cause wrong rotations or instability.")
+		log('M', 'onInit', "Misaligned refNodes detected in vehicle "..obj:getId().."! This might cause wrong rotations or instability.")
 	end
 	
 	if connectedNodes[refNodes.ref] then
@@ -161,14 +161,14 @@ local function onInit()
 		
 		findConnectedNodes()
 	else
-		print("Vehicle has no connections to ref nodes! Using all nodes.")
+		log('M', 'onInit', "Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
 			nodes[#nodes+1] = {n.cid, obj:getNodeMass(n.cid)*physicsFPS}
 	    end
 		calcCOG()
 	end
 
-	print("velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..parentNode)
+	log('M', 'onInit', "velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..parentNode)
 end
 
 local function onReset()

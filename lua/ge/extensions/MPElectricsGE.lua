@@ -6,11 +6,10 @@
 
 
 local M = {}
-print("Loading MPElectricsGE...")
 
 
 
-local lastElectrics = ""
+local lastElectrics
 
 
 
@@ -28,7 +27,7 @@ end
 
 
 local function sendElectrics(data, gameVehicleID) -- Called by vehicle lua
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('We:'..serverVehicleID..":"..data)
@@ -57,6 +56,8 @@ local function handle(rawData)
 
 	if code == "e" then -- Electrics (indicators, lights etc...)
 		applyElectrics(data, serverVehicleID)
+	else
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 
@@ -67,5 +68,4 @@ M.handle     	 = handle
 M.sendElectrics  = sendElectrics
 
 
-print("MPElectricsGE loaded")
 return M

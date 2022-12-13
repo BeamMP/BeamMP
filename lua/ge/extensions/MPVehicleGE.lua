@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPVehicleGE...")
 
 
 -- ============= VARIABLES =============
@@ -23,6 +22,11 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
+
+local original_removeAllExceptCurrent
+local original_spawnNewVehicle
+local original_replaceVehicle
+local original_spawnDefault
 
 local roleToInfo = {
 	['USER']	= { backcolor = ColorI(000, 000, 000, 127), tag = "", shorttag = "" },
@@ -76,7 +80,7 @@ local function getServerVehicleID(gameVehicleID)
 
 	if not vehiclesMap[gameVehicleID] or not vehicles[vehiclesMap[gameVehicleID]] then
 		log('E', 'getServerVehicleID', "can't get server id from " .. tostring(gameVehicleID))
-		print(debug.traceback())
+		log('M', 'getServerVehicleID', debug.traceback())
 		return
 	end
 
@@ -434,6 +438,8 @@ local function sendVehicleEdit(gameVehicleID)
 	local p0           = veh.colorPalette0
 	local p1           = veh.colorPalette1
 
+	if not isOwn(veh:getID()) then return end
+
 	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
@@ -634,7 +640,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 local function onVehicleDestroyed(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
@@ -664,7 +670,7 @@ end
 
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
-	if MPCoreNetwork.isMPSession() then -- If TCP connected
+	if MPCoreNetwork.isMPSession() then
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 
 		if newGameVehicleID and newGameVehicleID > -1 then
@@ -737,7 +743,7 @@ end
 
 --============================ ON VEHICLE RESETTED (CLIENT) ============================
 local function onVehicleResetted(gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
@@ -929,6 +935,7 @@ end
 
 local function onServerCameraSwitched(playerID, serverVehicleID)
 	if not players[playerID] then return end -- TODO: better fix?
+	if not vehicles[serverVehicleID] then return end
 	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
 		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
 	end
@@ -952,7 +959,7 @@ local HandleNetwork = {
 			onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
 		else
 			log('E', "HandleNetwork", "Spawn pattern match failed")
-			print(rawData)
+			log('M', 'HandleNetwork', rawData)
 		end
 	end,
 	['r'] = function(rawData) -- reset
@@ -1002,7 +1009,7 @@ local function handle(rawData)
 	if HandleNetwork[code] then
 		HandleNetwork[code](rawData)
 	else
-		log('W', 'handle', "Received unknown packet '"..code.."'! ".. rawData)
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 
@@ -1018,7 +1025,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then core_vehicles.spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("trackNewVeh"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -1027,14 +1034,14 @@ local function spawnDefaultRequest()
 		local gameVehicleID = currentVehicle:getID()
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle.isLocal then
-			core_vehicles.replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			return original_replaceVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		else
-			core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+			return original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 		end
 	else
-		core_vehicles.spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
+		return original_spawnNewVehicle(defaultConfig and defaultConfig.model or core_vehicles.defaultVehicleModel, defaultConfig and {config = 'settings/default.pc', licenseText = defaultConfig.licenseName} or {})
 	end
-	extensions.hook("trackNewVeh")
+	--extensions.hook("trackNewVeh")
 end
 
 local function spawnRequest(model, config, colors)
@@ -1042,36 +1049,46 @@ local function spawnRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle and vehicle.isLocal and not config.spawnNew then
-		vehicle.jbeam = '-'
-		return core_vehicles.replaceVehicle(model, config or {})
-	else
-		return core_vehicles.spawnNewVehicle(model, config or {})
-	end
-	extensions.hook("trackNewVeh")
+	return original_spawnNewVehicle(model, config or {})
+	--extensions.hook("trackNewVeh")
 end
 
-local function saveConfigRequest(configfilename)
-	if not MPCoreNetwork.isMPSession() then extensions.core_vehicle_partmgmt.saveLocal(configfilename); return; end
-
+local function replaceRequest(model, config, colors)
 	local currentVehicle = be:getPlayerVehicle(0)
+	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
+	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle and isOwn(currentVehicle:getID()) then
-		extensions.core_vehicle_partmgmt.saveLocal(configfilename)
-		log('I', "saveConfigRequest", "Saved config")
+	if currentVehicle and vehicle.isLocal then
+		vehicle.jbeam = '-'
+		return original_replaceVehicle(model, config or {})
 	else
-		guihooks.trigger("saveLocalScreenshot_stage3", {})
-		guihooks.trigger('Message', {ttl = 10, msg = "Saving another player's vehicle is disabled on this server", icon = 'error'})
-		log('W', "saveConfigRequest", "Saving configs is not allowed on this server")
-		print("didnt save config")
+		return original_spawnNewVehicle(model, config or {})
 	end
+	--extensions.hook("trackNewVeh")
 end
 
+M.runPostJoin = function()
+	original_removeAllExceptCurrent = core_vehicles.removeAllExceptCurrent
+	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
+	original_replaceVehicle = core_vehicles.replaceVehicle
+	original_spawnDefault = core_vehicles.spawnDefault
+	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') return end
+	core_vehicles.spawnNewVehicle = MPVehicleGE.spawnRequest
+	core_vehicles.replaceVehicle = MPVehicleGE.replaceRequest
+	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest
+end
+
+M.onServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
+	if original_removeAllExceptCurrent then core_vehicles.removeAllExceptCurrent = original_removeAllExceptCurrent end
+	if original_spawnNewVehicle then core_vehicles.spawnNewVehicle = original_spawnNewVehicle end
+	if original_replaceVehicle then core_vehicles.replaceVehicle = original_replaceVehicle end
+	if original_spawnDefault then core_vehicles.spawnDefault = original_spawnDefault end
+end
 
 local function sendPendingVehicleEdits()
 	for gameVehicleID,_ in pairs(vehiclesToSync) do
 		local veh = be:getObjectByID(gameVehicleID)
-		if veh then
+		if veh and isOwn(veh:getID()) then
 			log('I', "syncVehicles", "Autosyncing vehicle "..gameVehicleID)
 			sendVehicleEdit(gameVehicleID)
 		end
@@ -1211,13 +1228,13 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
+	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		localCounter = localCounter + dt
 	end
 end
 
 local function onPreRender(dt)
-	if MPGameNetwork and MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 
 		-- get current vehicle ID and position
 		local activeVeh = be:getPlayerVehicle(0)
@@ -1240,7 +1257,7 @@ local function onPreRender(dt)
 						if data.best and data.best ~= lastGmFocus then
 							if (activeVehPos - data.position):squaredLength() > 200 then
 								core_groundMarkers.setFocus(data.best)
-								print("setting focus to") print(data.best)
+								log('M', 'onPreRender', 'setting focus to '..data.best)
 								lastGmFocus = data.best
 							else
 								core_groundMarkers.setFocus(nil)
@@ -1453,6 +1470,7 @@ local function onSerialize()
 end
 
 local function onDeserialized(data)
+	if true then return end -- TODO: check if server has been switched instead
 	if (getMissionFilename() or "") == "" then return end
 
 	for k,v in pairs(data.vehicles) do
@@ -1586,10 +1604,10 @@ M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetNam
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
-M.saveConfigRequest        = saveConfigRequest        -- takes: string configFilename
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
 M.spawnDefaultRequest      = spawnDefaultRequest      -- takes: -
-M.spawnRequest             = spawnRequest             -- takes: jbeamName, options table containing 'spawnNew' key
+M.spawnRequest             = spawnRequest             -- takes: jbeamName, config, colors
+M.replaceRequest           = replaceRequest           -- takes: jbeamName, config, colors
 M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
@@ -1602,5 +1620,4 @@ M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 M.onSettingsChanged        = onSettingsChanged
 
-print("MPVehicleGE loaded")
 return M

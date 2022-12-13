@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading positionGE...")
 
 local actualSimSpeed = 1
 
@@ -24,7 +23,7 @@ end
 
 
 local function sendVehiclePosRot(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			local decoded = jsonDecode(data)
@@ -89,7 +88,7 @@ local function handle(rawData)
 	if code == 'p' then
 		applyPos(data, serverVehicleID)
 	else
-		print("unknown positionGE code arrived: "..rawData)
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 
@@ -110,7 +109,6 @@ end
 local function setPosition(gameVehicleID, x, y, z)
 	local veh = be:getObjectByID(gameVehicleID)
 	veh:setPositionNoPhysicsReset(Point3F(x, y, z))
-	veh:queueLuaCommand("MPElectricsVE.applyLatestElectrics()") -- Redefine electrics values
 end
 
 
@@ -131,5 +129,4 @@ M.setPing           = setPing
 M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
 
-print("positionGE loaded")
 return M

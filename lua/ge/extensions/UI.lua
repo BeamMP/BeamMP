@@ -6,13 +6,13 @@
 
 
 local M = {}
-print("Loading UI...")
 
 
 
 local players = {} -- { 'apple', 'banana', 'meow' }
 local pings = {}   -- { 'apple' = 12, 'banana' = 54, 'meow' = 69 }
-local UIqueue = {}
+local UIqueue = {} -- { editCount = x, show = bool, spawnCount = x }
+local playersString = "" -- "player1,player2,player3"
 
 local chatcounter = 0
 
@@ -34,10 +34,10 @@ local function split(s, sep)
     return fields
 end
 
-local function updatePlayersList(playersString)
-	--print(playersString)
+local function updatePlayersList(data)
+	playersString = data or playersString
 	local players = split(playersString, ",")
-	--print(dump(players))
+	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
 	guihooks.trigger("playerList", jsonEncode(players))
 	guihooks.trigger("playerPings", jsonEncode(pings))
 end
@@ -54,29 +54,22 @@ local function updateQueue( spawnCount, editCount)
 end
 
 local function setPing(ping)
-	if tonumber(ping) == -1 then -- not connected
-		--print("ping is -1")
-		--guihooks.trigger("app:showConnectionIssues", false)
-	elseif tonumber(ping) == -2 then -- ping too high, display warning
-		guihooks.trigger("app:showConnectionIssues", true)
-	else
-		guihooks.trigger("setPing", ""..ping.." ms")
-		guihooks.trigger("app:showConnectionIssues", false)
-		pings[MPConfig.getNickname()] = ping
-	end
+	if tonumber(ping) < 0 then return end -- not connected
+	guihooks.trigger("setPing", ""..ping.." ms")
+	pings[MPConfig.getNickname()] = ping
 end
 
 
 
 local function setNickname(name)
-  --print("My Nickname: "..name)
 	guihooks.trigger("setNickname", name)
 end
 
 
 
-local function setStatus(status)
-	guihooks.trigger("setStatus", status)
+local function setServerName(serverName)
+	serverName = serverName or (MPCoreNetwork.getCurrentServer() and MPCoreNetwork.getCurrentServer().name)
+	guihooks.trigger("setServerName", serverName)
 end
 
 
@@ -122,47 +115,24 @@ end
 
 
 
-
-
-
-
-
-local function ready(src)
-	--log('M',"UI Has now loaded ("..src..") & MP = "..tostring(MPCoreNetwork.isMPSession()))
-
-	if MPCoreNetwork.isMPSession() then
-
-		if src == "MP-SESSION" then
-			setPing("-2")
-			local Server = MPCoreNetwork.getCurrentServer()
-			--print("---------------------------------------------------------------")
-			--dump(Server)
-			if Server then
-				if Server.name then
-					--print('Server name: '..Server.name)
-					setStatus("Server: "..Server.name)
-				else
-					--print('Server.name = nil')
-				end
-			else
-				--print('Server = nil')
-			end
-			--print("---------------------------------------------------------------")
-		end
-	end
-end
-
-
 local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
+local function clearSessionInfo()
+	log('W', 'clearSessionInfo', 'Clearing session info!')
+	players = {}
+	pings = {}
+	UIqueue = {}
+	playersString = "" 
+end
+
+M.onServerLeave = clearSessionInfo
 M.updateLoading = updateLoading
 M.updatePlayersList = updatePlayersList
-M.ready = ready
 M.setPing = setPing
 M.setNickname = setNickname
-M.setStatus = setStatus
+M.setServerName = setServerName
 M.chatMessage = chatMessage
 M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
@@ -172,5 +142,4 @@ M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
 
-print("UI loaded")
 return M

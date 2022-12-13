@@ -6,248 +6,248 @@
 
 
 local M = {}
-print("Loading MPModManager...")
 
+local serverMods = {} -- multiplayerModName1, multiplayerModName2
+local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods won't be activated or deactivated
 
+--TODO: build handler for repo mod downloads
 
-local timer = 0
-local serverMods = {}
-local mods = {"multiplayerbeammp", "beammp"}
-local backupAllowed = true
-local requestCleanup = false
-local cleanuptimer = 0
+local function unloadLocales()
+	FS:unmount('/temp/beammp/beammp_locales.zip')
+	FS:directoryRemove('/temp/beammp')
+end
 
+local function loadLocales() -- loads beammp locales without having to directly replace the game locales
+	unloadLocales()
+	local mp_locales = FS:findFiles('/mp_locales/', '*.json', 0)
+	local game_locales = FS:findFiles('/locales/', '*.json', 0)
 
-
-local function IsModAllowed(n)
-	for k,v in pairs(mods) do
-		if string.lower(v) == string.lower(n) then
-			return true
+	for _, mp_locale in pairs(mp_locales) do
+		for _, game_locale in pairs(game_locales) do
+			if game_locale:gsub('/locales/', '') == mp_locale:gsub('/mp_locales/', '') then
+				local merged_locale = tableMergeRecursive(jsonReadFile(game_locale), jsonReadFile(mp_locale))
+				log('M', 'loadLocales', 'Writing '..game_locale)
+				jsonWriteFile('/temp/beammp/'.. game_locale, merged_locale, true)
+			end
 		end
 	end
-	for k,v in pairs(serverMods) do
-		if string.lower(v) == string.lower(n) then
-			return true
+	if FS:directoryExists('/temp/beammp/locales/') then
+		local zip = ZipArchive()
+		local fileList = FS:findFiles('/temp/beammp/locales/', '*.json', 0)
+		zip:openArchiveName('temp/beammp/beammp_locales.zip', 'w')
+		for _, file in pairs(fileList) do
+			zip:addFile(file, 'locales/'..file:gsub('/temp/beammp/locales/', ''))
 		end
+		zip:close()
 	end
-	return false
+	FS:mount('/temp/beammp/beammp_locales.zip')
+	FS:directoryRemove('/temp/beammp/locales')
 end
 
 
-
-local function checkMod(mod)
+local function isModAllowed(modName)
+	for _,v in pairs(serverMods) do -- checking for server mods
+		if string.lower(v) == string.lower(modName) then --[[ log('M', 'isModAllowed', modName .. ' is allowed.') ]] return true end
+	end
+	--log('W', 'isModAllowed', modName .. ' is not allowed.')
+	return false
+end
+local function isModWhitelisted(modName)
+	for _,v in pairs(whitelist) do
+		if string.lower(v) == string.lower(modName) then --[[log('M', 'isModWhitelisted', modName .. ' is whitelisted.')]] return true end
+	end
+	return false
+end
+local function checkMod(mod) --TODO: might have a flaw with repo mods as their name is the repo ID and not the zip name
+	--log('M', 'checkMod', 'Checking mod.modname: '..mod.modname)
 	local modname = mod.modname
-	local modAllowed = IsModAllowed(modname)
-	if not modAllowed and mod.active then -- This mod is not allowed to be running
+	local modAllowed = isModAllowed(modname)
+	local modWhitelisted = isModWhitelisted(modname)
+
+	if modWhitelisted then return end -- don't do anything with whitelisted mods
+
+	if not modAllowed and mod.active then
 		log('W', 'checkMod', "This mod should not be running: "..modname)
 		core_modmanager.deactivateMod(modname)
 		if mod.dirname == '/mods/multiplayer/' then
 			core_modmanager.deleteMod(modname)
 		end
-	elseif modAllowed then
-		if mod.active then -- this mod just got enabled for MP, run modscript
-			--dump(mod)
-			local dir, basefilename, ext = path.splitWithoutExt(mod.fullpath)
-			--dump(path.splitWithoutExt(mod.fullpath))
-
-			local modscriptpath = "/scripts/"..basefilename.."/modScript.lua"
-			--print(mod.filename)
-			log('I', 'checkMod', "Loaded  " .. basefilename)
-			
-			
-			local f = io.open(modscriptpath, "r")
-			if f == nil or not io.close(f) then print(modscriptpath.." cant be opened") return end -- modscript file not found
-			
-			local status, ret = pcall(dofile, modscriptpath)
-			if not status then
-				log('E', 'initDB.modScript', 'Failed to execute ' .. modscriptpath)
-				log('E', 'initDB.modScript', dumps(ret))
-			else
-				log('I', 'checkMod', "Ran modscript ("..modscriptpath..")")
-				loadCoreExtensions()
-			end
-		else
-			print("Inactive Mod but Should be Active: "..modname)
-			core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
-			MPCoreNetwork.modLoaded(modname)
-		end
+	elseif modAllowed and not mod.active then
+		log('W', 'checkMod', 'Inactive Mod but Should be Active: '..modname)
+		core_modmanager.activateMod(modname)--'/mods/'..string.lower(v)..'.zip')
+	elseif modAllowed and mod.active then
+		log('M', 'checkMod', modname..' is already active. Not doing anything.')
+	else
+		--log('M', 'checkMod', modname..' is none of the above.')
 	end
 end
 
+local function getModNameFromPath(path) --BeamNG function from extensions/core/modmanager.lua
+	local modname = string.lower(path)
+	modname = modname:gsub('/mods/', '')
+	modname = modname:gsub('repo/', '')
+	modname = modname:gsub('unpacked/', '')
+	modname = modname:gsub('/', '')
+	modname = modname:gsub('.zip$', '')
+	return modname
+end
 
+local function getModList()
+	local modsDB = jsonReadFile("mods/db.json")
+	return modsDB.mods
+end
 
-local function checkAllMods()
-	for modname, mod in pairs(core_modmanager.getModList()) do
-		print("Checking mod "..mod.modname)
+local waitForFilesChanged = false
+local function checkAllMods() --add counters?
+	log('M', 'checkAllMods', 'Checking all mods...')
+	for modname, mod in pairs(getModList()) do
 		checkMod(mod)
 	end
 end
 
+local function loadServerMods()
+	log('W', 'loadServerMods', 'loadServerMods')
+	
+	local modsDir = FS:findFiles("/mods/multiplayer", "*.zip", -1, false, false)
+	for _, modPath in pairs(modsDir) do
+		core_modmanager.workOffChangedMod(modPath, 'added')
+	end
+	checkAllMods()
+	MPCoreNetwork.requestMap()
+end
+
+local function verifyMods() --TODO: improve and actually implement this
+	local verifyTable = {}
+	for _,v in pairs(serverMods) do
+		verifyTable[v] = false
+	end
+	for _,v in pairs(getModList()) do
+		for _,n in pairs(serverMods) do
+			if v.modname == n then verifyTable[n] = true end
+		end
+	end
+end
 
 
 local function cleanUpSessionMods()
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
-	local modsDB = jsonReadFile("mods/db.json")
-	if modsDB then
-			backupAllowed = false
-			local modsFound = false
-			local count = 0
-			for modname, mod in pairs(modsDB.mods) do
-					if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
-							count = count + 1
-							core_modmanager.deleteMod(modname)
-							modsFound = true
-					end
-			end
-			backupAllowed = true
-			log('M', "cleanUpSessionMods", count.." Mods cleaned up")
-			--if modsFound then Lua:requestReload() end -- reload Lua to make sure we don't have any leftover GE files
-			Lua:requestReload() -- reloads lua every time so chat doesn't duplicate
+	local count = 0
+	for modname, mod in pairs(getModList()) do
+		if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+			count = count + 1
+			core_modmanager.deleteMod(modname)
+		end
 	end
+	log('M', "cleanUpSessionMods", count.." Mods cleaned up")
+	log('M', "cleanUpSessionMods", "Unloading extensions...")
+	unloadGameModules()
 end
 
 
-
-local function setServerMods(receivedMods)
-	print("Server Mods Set:")
-	dump(mods)
-	serverMods = receivedMods
-	for k,v in pairs(serverMods) do
-		serverMods[k] = 'multiplayer'..v
+local function setServerMods(modsString) -- called from MPCoreNetwork
+	if modsString == "" then log('M', 'setServerMods', 'Received no mods.') return end
+	log('W', 'setMods', modsString)
+	local mods = {}
+	if (modsString) then -- takes: mod1.zip;mod2.zip;mod3.zip, returns a table of mod1,mod2,mod3
+		for mod in string.gmatch(modsString, "([^;]+)") do
+			local modFileName = mod:gsub(".zip",""):gsub(";","")
+			table.insert(mods, modFileName)
+		end
 	end
-end
-
-
-
-local function showServerMods()
-	print(serverMods)
-	dump(serverMods)
-end
-
-
-
-local function backupLoadedMods()
-	-- Backup the current mods before joining the server
-	local modsDB = jsonReadFile("mods/db.json")
-	if modsDB then
-		os.remove("settings/db-backup.json")
-		jsonWriteFile("settings/db-backup.json", modsDB, true)
-		print("Backed up db.json file")
-	else
-		print("No db.json file found")
+	log('M', 'setServerMods', 'Server Mods set to: ' .. dumps(mods))
+	for key, modName in pairs(mods) do -- mods in a directory deeper than /mods/ have "<directory name> + modname" as their mod name
+		mods[key] = string.lower('multiplayer'..modName)
 	end
+	serverMods = mods
 end
 
-
-
-local function restoreLoadedMods()
-	-- Backup the current mods before joining the server
-	local modsDBBackup = jsonReadFile("settings/db-backup.json")
-	if modsDBBackup then
-		os.remove("mods/db.json")
-		jsonWriteFile("mods/db.json", modsDBBackup, true)
-		-- And delete the backup file because we don't need it anymore
-		os.remove("settings/db-backup.json")
-		print("Restored db.json backup")
-	else
-		print("No db.json backup found")
-	end
-end
-
-
-
--- Called from beammp\lua\ge\extensions\core
-local function onModStateChanged(mod)
-	-- The function makes two calls, one with a table and one with the mod name
-	-- We only want the table not the mod name call
-	if type(mod) ~= "table" then return end
-	if MPCoreNetwork.isGoingMPSession() or MPCoreNetwork.isMPSession() then
+local function onModActivated(mod)
+	log('M', 'onModActivated', mod.modname)
+	if MPCoreNetwork.isMPSession() then
 		checkMod(mod)
 	end
 end
 
 
+local original_registerCoreModule
 
-local function onInit()
-	-- When the game inits we restore the db.json which deletes it and then back it up.
-	-- If the game was closed correctly, there should be no db-backup.json file which mean
-	-- that restoreLoadedMods won't do anything. Therefor not restoring a wrong backup
-	restoreLoadedMods()
-	backupLoadedMods()
-end
-
-
-
-local function onExit() -- Called when the user exits the game
-	restoreLoadedMods() -- Restore the mods and delete db-backup.json when we quit the game
-	-- Don't add isMPSession checking because onClientEndMission is called before!
-end
-
-
-
-local function onClientStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
-		checkAllMods() -- Checking all the mods
-	end
-	-- Checking all the mods again because BeamNG.drive have a bug with mods not deactivating
-end
-
-
-
-local function onClientEndMission(mission)
-	-- We restore the db.json before lua reloads because on reload the db.json get backup up
-	-- if we were connected to a server this would cause a backup of the db.json with all mods disabled
-	-- By doing this, lua activate itself the mods after the reload so we don't even need
-	-- to enable the mods ourself.
-	restoreLoadedMods()
-end
-
-
-
-local function modsDatabaseChanged()
-	if not MPCoreNetwork.isMPSession() then
-		backupLoadedMods()
-	end
-end
-
-
-
-local function startcleanUpSessionMods()
-	requestCleanup = true
-end
-
-
-
-local function onUpdate(dt)
-	if requestCleanup and not gameConnection then
-		cleanuptimer = cleanuptimer + dt
-		if cleanuptimer > 0.5 then -- delay to prevent ? ping when rejoining
-			cleanUpSessionMods()
-			requestCleanup = false
-			cleanuptimer = 0
+local function extensionLoader() -- prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload
+	original_registerCoreModule = registerCoreModule
+	registerCoreModule = function(modulePath)
+		--log('M', 'extensionLoader', modulePath)
+		local debug = debug.getinfo(2)
+		--dump(debug)
+		debug = string.lower(debug.source)
+		if string.match(debug, "beammp") then
+			--log('W', 'extensionLoader', "Source is BeamMP! ".. debug)
+		original_registerCoreModule(modulePath)
+		elseif string.match(debug, "modscript") then
+			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to queueExtensionToLoad " .. debug)
+			queueExtensionToLoad(modulePath)
+		else
+			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! " .. debug)
+			original_registerCoreModule(modulePath)
 		end
 	end
 end
 
+local original_Unsubscribe
+
+M.repositoryReplacer = function() --TODO: if this function is called onExtensionLoaded core_repository is not loaded yet at that time
+	if not core_repository and not core_repository.modUnsubscribe then log('W', 'repositoryReplacer', 'core_repository not loaded yet') return end
+	original_Unsubscribe = core_repository.modUnsubscribe
+	core_repository.modUnsubscribe = function(mod_id)
+		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
+			log('W', 'replaceStuff', 'mod_id: ' .. mod_id)
+			for k,modName in pairs(serverMods) do
+				if modName == mod_id then
+					log('W', 'repositoryReplacer', 'You cannot remove session mods! Quit the multiplayer session to remove mods.')
+					return
+				else
+					original_Unsubscribe(mod_id)
+				end
+			end
+		else
+			original_Unsubscribe(mod_id)
+		end
+	end
+end
+
+local function onExtensionLoaded()
+	loadLocales()
+	cleanUpSessionMods()
+	extensionLoader()
+	--M.replaceStuff()
+end
+
+local function onExtensionUnloaded() -- restore functions back to their default values
+	unloadLocales()
+	registerCoreModule = original_registerCoreModule and original_registerCoreModule
+	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
+end
+
+local function onServerLeave()
+	if MPCoreNetwork.isMPSession() or MPCoreNetwork.isGoingMPSession() then
+		log('W', 'onServerLeave', 'MPModManager')
+		serverMods = {}
+		cleanUpSessionMods() -- removes any leftover session mods
+	end
+end
 
 
-M.modsDatabaseChanged = modsDatabaseChanged
-M.onClientEndMission = onClientEndMission
-M.onClientStartMission = onClientStartMission
-M.modsDatabaseChanged = modsDatabaseChanged
-M.onModStateChanged = onModStateChanged
-M.backupLoadedMods = backupLoadedMods
-M.restoreLoadedMods = restoreLoadedMods
 M.cleanUpSessionMods = cleanUpSessionMods
-M.startcleanUpSessionMods = startcleanUpSessionMods
-M.showServerMods = showServerMods
+M.isModWhitelisted = isModWhitelisted
+M.loadServerMods = loadServerMods
 M.setServerMods = setServerMods
 M.checkAllMods = checkAllMods
-M.onExit = onExit
-M.onInit = onInit
-M.onUpdate = onUpdate
+M.isModAllowed = isModAllowed
+M.getModList = getModList
+M.verifyMods = verifyMods
+--events
+M.onExtensionLoaded = onExtensionLoaded
+M.onExtensionUnloaded = onExtensionUnloaded
+M.onModActivated = onModActivated
+M.onServerLeave = onServerLeave
+M.onExit = cleanUpSessionMods
 
-
-
-print("MPModManager loaded")
 return M

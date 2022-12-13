@@ -7,15 +7,16 @@
   <!-- for external clients: emulation over websocket -->
   <script src="/ui/entrypoints/main/comms.js"></script>
 
-
   <!-- Vue START -->
-  <script src="/ui/lib/ext/vue3/vue.global.prod.js"></script>
-  <script src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
-  <script src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
-  <script src="/ui/lib/int/vueService.js"></script>
+  <script type="module" crossorigin src="/ui/ui-vue/dist/index.js"></script>
+  <link rel="stylesheet" href="/ui/ui-vue/dist/index.css" />
+
+  <script defer src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
+  <script defer src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
+  <script defer src="/ui/lib/int/vueService.js"></script>
   <!-- Vue END -->
 
-  <script src="/ui/entrypoints/main/angularModules.js"></script>
+  <script defer src="/ui/entrypoints/main/angularModules.js"></script>
 
   <!-- 3rd party includes -->
   <script src="/ui/lib/ext/angular/angular.js"></script>
@@ -53,7 +54,7 @@
   <link type="text/css" rel="stylesheet" href="/ui/lib/ext/chartist.min.css">
 
   <!-- BeamNG UI -->
-  <script src="/ui/entrypoints/main_0.25/main.js"></script>
+  <script src="/ui/entrypoints/main/main.js"></script>
 
   <script src="/ui/lib/int/beamng-core.js"></script>
   <script src="/ui/lib/int/utilities.js"></script>
@@ -73,7 +74,6 @@
   <script src="/ui/modules/comic/comic.js"></script>
   <script src="/ui/modules/vehicleselect/vehicleselect.js"></script>
   <script src="/ui/modules/options/options.js"></script>
-  <script src="/ui/modules/credits/credits.js"></script>
   <script src="/ui/modules/startScreen/startScreen.js"></script>
   <script src="/ui/modules/vehicleconfig/vehicleconfig.js"></script>
   <script src="/ui/modules/loading/loading.js"></script>
@@ -87,9 +87,12 @@
   <script src="/ui/modules/gameContext/gameContext.js"></script>
   <script src="/ui/modules/bigmap/bigmap.js"></script>
 
-  <script src="/ui/modules/mp_mainmenu/mainmenu.js"></script>
+  <script src="/ui/modules/mainmenu/mainmenu.js"></script>
   <script src="/ui/modules/menu/menu.js"></script>
   <script src="/ui/modules/onlineFeatures/online.js"></script>
+  <script src="/ui/modules/career/career.js"></script>
+  <script src="/ui/modules/careerPause/careerPause.js"></script>
+  <script src="/ui/modules/introPopup/intro.js"></script>
 
   <script src="/ui/modules/appselect/appselect.js"></script>
   <script src="/ui/modules/appedit/appedit.js"></script>
@@ -106,10 +109,12 @@
 
   <script src="/ui/modules/busRoute/busRoute.js"></script>
   <script src="/ui/modules/iconView/icons.js"></script>
-    <!-- --------------------------------- BEAMMP --------------------------------- -->
-  <script src="/ui/modules/multiplayer/multiplayer.js"></script> 
 
   <script src="/ui/modules/fadeScreen/fadeScreen.js"></script>
+  <script src="/ui/modules/atom/title/title.js"></script>
+  <script src="/ui/modules/atom/card/card.js"></script>
+  <!-- --------------------------------- BEAMMP --------------------------------- -->
+  <script src="/ui/modules/multiplayer/multiplayer.js"></script>
 
   <link rel="stylesheet" type="text/css" href="/ui/lib/int/ui-components/bng-components.css">
 
@@ -117,17 +122,17 @@
   <link type="text/css" rel="stylesheet" href="/ui/lib/ext/keys.css">
   <link type="text/css" rel="stylesheet" href="/ui/modules/mainmenu/mainmenu.css">
   <link type="text/css" rel="stylesheet" href="/ui/modules/menu/menu.css" />
+  <link rel="stylesheet" type="text/css" href="/ui/modules/introPopup/intro.css" />
 
 </head>
 
 <body ng-controller="AppCtrl as app" ng-show="app.uiVisible" use-lang-font="1" class="container">
 
   <md-content ng-cloak ng-if="app.uitest" layout="row" style="border:2px solid #aaa;position:absolute;width:{{app.uitestshow?'400px':'1.6em'}};height:200px;top:50%;right:0; transform:translateY(-50%); z-index:var(--zorder_index_mdcontent); padding:2px;font-family:monospace;border-radius:5px; overflow:hidden;">
-    <div style="width: 1.2em; padding: 4.5em 0;" ng-click="app.uitestshow = !app.uitestshow">
-      <span style="display: block; white-space: nowrap; transform-origin: 50% 50%; transform: rotate(90deg);">Show/Hide</span>
+    <div style="width: 1.2em; padding: 2.5em 0;" ng-click="app.uitestshow = !app.uitestshow">
+      <span style="display: block; white-space: nowrap; transform-origin: 50% 50%; transform: rotate(90deg);">UI Debug Show/Hide</span>
     </div>
     <div layout="column" ng-show="app.uitestshow" style="flex-grow: 1;">
-      UI Debug - Press CTRL+U to toggle visibility.
       <div layout="row" style="background-color:rgb(102, 35, 35);">
         <p flex=35>Current UI state:</p>
         <md-select ng-model="app.currentStateName" ng-change="app.switchState(app.currentStateName)" flex>
@@ -142,6 +147,11 @@
         <md-checkbox ng-model="app.showApps">Show apps</md-checkbox>
         <div>Gamestate: <span style="color:rgb(68, 207, 68)">{{app.gameState}}</span></div>
         <md-button  ng-click="app.reloadUI()">reload</md-button>
+      </div>
+      <div layout="row" layout-align="start center" style="background-color:rgb(102, 102, 35);">
+        UI sound:
+        <input id="bng-test-sound" type="text" value="event:>UI>Generic>Select" style="font-size: 0.8em; width: 18em;"/>
+        <md-button bng-test-sound="bng-test-sound" style="min-width: unset;">test</md-button>
       </div>
       Gamepad Emulation: use the numpad keys 4862
     </div>
@@ -175,7 +185,7 @@
 
   <!-- pause indicator (show only while paused), not to be confused with the pause button (shown only while not paused). see menu.html -->
   <div ng-cloak ng-if="!app.mainmenu && app.showPauseIcon && app.uiVisible" class="dashBrdButtonEnd dashMenuHeight" style="var(--zorder_index_waiting_screen_icon);">
-    <div class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()" bng-sound-class="bng_button_main_ui_default" >
+    <div class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()">
       <span style="padding:0; margin:0" bng-translate="ui.inputActions.general.pause.binding" class="bng-binding dashBrdSvgIcon"></span>
       <span class="dashBrdText">{{:: 'ui.inputActions.general.pause.title' | translate}}</span>
     </div>
@@ -197,6 +207,7 @@
     <dash-menu ng-controller="MenuController as menuCtrl" ng-if="('menu' | includedByState) && (($state.current.name !== 'menu.mainmenu') || !app.mainmenu)">Dash menu goes here</dash-menu>
 
     <div class="fullscreencontent" style="flex: 1 1 auto; position: relative; pointer-events: none;" ng-class="app.transitionAnimation">
+      <bng-career-banner></bng-career-banner>
       <!-- All the useful content goes here to cover up all the apps without window resize -->
       <!-- in theory this line: '!app.mainmenu &&' should be added to the ng-show, but apparently that breaks displaying of some apps (old nav, radial1,2) -->
       <app-container id="mainContainer" ng-class="{ 'uiapps-hidden': !app.showApps }" style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_apps_default);">
@@ -206,14 +217,18 @@
       <menu-content style="position:absolute !important;top:0;right:0;bottom:0;left:0; z-index: var(--zorder_index_menucontent);" ui-view></menu-content>
     </div>
 
-    <div class="navbar" ng-if="'menu' | includedByState">
+    <div class="navbar" ng-if="app.ingame && 'menu' | includedByState">
       <!-- menuNavBar contents -->
       <menu-navbar></menu-navbar>
     </div>
   </div>
 
   <fancy-background class="fancyBackgroundFill" ng-if="app.mainmenu"></fancy-background>
-  <!--  .............. confirm dialog overlay ..............  -->
+  <!--  .............. popups overlay ..............  -->
+  <bng-intro-popup></bng-intro-popup>
   <bng-dialog></bng-dialog>
+  <div class="ui-sheet" ng-if="app.uiSheetActive" bng-blur="true"></div>
+  <div id="vue-app"></div>
+
 </body>
 </html>

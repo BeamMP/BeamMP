@@ -80,7 +80,7 @@ angular.module('beamng.stuff')
         <div style="text-align:right; color:white;margin-left:16px;">
           <div ng-if="beammpData && beammpData.players && beammpData.servers" layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
             <div layout="row" layout-align="start center" ng-cloak >
-              <img src="/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg" style="padding: 5px" height="22px">
+              <img src="/ui/modules/multiplayer/icons/account-multiple.svg" style="padding: 5px" height="22px">
               <div layout="row" style="padding: 5px">
                 <span style="padding-left: 5px;">Players: <strong>{{ ::beammpData.players }}</strong> </span>
               </div>
@@ -95,7 +95,7 @@ angular.module('beamng.stuff')
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }}<br/> {{ ::buildInfoStr }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }} <br/> {{ ::buildInfoStr }}</div>
         </div>
       </div>
     `,
@@ -124,7 +124,7 @@ angular.module('beamng.stuff')
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
       // TODO #203 Fix this to actually use the real launcher version!
-      scope.beammpGameVer = '4.6.4'
+      scope.beammpGameVer = '4.7.0'
       scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
@@ -255,12 +255,6 @@ angular.module('beamng.stuff')
 .controller('MainMenuController', ['$rootScope', '$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', 'ConfirmationDialog', function($rootScope, $scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState, ConfirmationDialog) {
   let vm = this
 
-  bngApi.engineLua('(function() local cmdArgs = Engine.getStartingArgs(); return cmdArgs and tableFindKey(cmdArgs, "--startupTS") ~= nil end)()',function(startingUsingTS){
-    $scope.$evalAsync(function () {
-      vm.startingUsingTS = startingUsingTS;
-    })
-  })
-
   vm.product = beamng.product
   vm.techLicense = false
   techLicenseState.state.then((licenseVerified) => {
@@ -374,7 +368,7 @@ angular.module('beamng.stuff')
     },
     {
       translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/mp_mainmenu/drive/icons/account-multiple.svg',
+      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
       targetState: 'menu.multiplayer.tos'
     },
     {
@@ -426,7 +420,7 @@ angular.module('beamng.stuff')
           if (!clicky(6)) // how many clicks should it take to enter
             return;
           ConfirmationDialog.open(
-            "ui.playmodes.career", "ui.career.experimentalPrompt",
+            "ui.career.experimentalTitle", "ui.career.experimentalPrompt",
             [
               { label: "ui.common.no", key: false, isCancel: true },
               // { label: "Enter and don't show this again", key: true },

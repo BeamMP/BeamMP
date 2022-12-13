@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPInputsGE...")
 
 
 
@@ -23,7 +22,7 @@ end
 
 
 local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Vi:'..serverVehicleID..":"..data)--Network.buildPacket(0, 2130, serverVehicleID, data))
@@ -47,6 +46,8 @@ local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == 'i' then
 		applyInputs(data, serverVehicleID)
+	else
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 
@@ -58,5 +59,4 @@ M.sendInputs  = sendInputs
 M.applyInputs = applyInputs
 
 
-print("MPInputsGE loaded")
 return M

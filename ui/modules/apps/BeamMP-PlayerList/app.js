@@ -16,7 +16,6 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.warnVis = false;
 	$scope.timer = null;
 	$scope.init = function() {
-		bngApi.engineLua('UI.ready("MP-PlayerList")');
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
 		setPLDirection(localStorage.getItem('plVertical'));
@@ -104,6 +103,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				var nameCell = row.insertCell(0);
 				nameCell.textContent = parsedList[i];
 				nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
+				nameCell.setAttribute("class", "player-button player-button");
 	
 				// Insert a cell containing the player ping
 				var pingCell = row.insertCell(1);
@@ -126,6 +126,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.$on('setNickname', function(event, data) {
 		nickname = data
 	})
+	bngApi.engineLua('UI.updatePlayersList()'); // insantly populate the playerlist
 }]);
 
 
@@ -136,12 +137,12 @@ function clearPlayerList() {
 }
 
 function teleportToPlayer(targetPlayerName) {
-	console.log("teleportEvent: " + targetPlayerName);
+	//console.log("teleportEvent: " + targetPlayerName);
 	//bngApi.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
 }
 
 function showPlayerInfo(targetPlayerName) {
-	console.log("showPlayerInfoEvent: " + targetPlayerName);
+	//console.log("showPlayerInfoEvent: " + targetPlayerName);
 	bngApi.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
 }
 

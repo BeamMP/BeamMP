@@ -16,11 +16,9 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   $translateProvider.useSanitizeValueStrategy('escaped')
   $translateProvider.preferredLanguage('en-US') // this is the default language to load
   $translateProvider.fallbackLanguage('en-US') // this is the fallback in case individual translations are missing
-  //$translateProvider.useLoaderCache(true) // default is false which means disable
-  //$translateProvider.forceAsyncReload(true)
-
-
   //$translateProvider.use('de-DE')
+  
+  //DISABLE_TRANSLATIONS = true
 
   $logProvider.debugEnabled(false)
 
@@ -219,8 +217,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-    // -------------------------------------- BEAMMP -------------------------------------- //
 
+    // -------------------------------------- BEAMMP -------------------------------------- //
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',
@@ -280,12 +278,13 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
+    // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
         url: '/multiplayer',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
-        controller: 'SettingsGameplayCtrl as opt',
         backState: 'BACK_TO_MENU',
       })
+    // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.help', {
         url: '/help',
         templateUrl: '/ui/modules/options/help.partial.html',
@@ -692,11 +691,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     backState: 'BACK_TO_MENU',
   })
 
-  .state('credits', {
-    url: '/credits',
-    templateUrl: '/ui/modules/credits/credits.html',
-    controller: 'CreditsController as creditsCtrl',
-    backState: 'BACK_TO_MENU',
+  .state('blank', {
+
   })
 
   .state('iconViewer', {
@@ -1007,16 +1003,15 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
     angular.element(document.head).append(iconsSprite)
   })
 
-
-  $http.get('/ui/modules/options/settingsPresets.json')
-  .success(presets => {
-    SettingsAuxData.graphicPresets = presets
-  })
-
   registerWindowHooks($rootScope, $window)
 
   /* --- VUE3 START --- */
   // i18n vue3 basics
+
+  window.bngVue && window.bngVue.start({
+    i18n: vueI18n,
+    bngApi: bngApi
+  })
 
   // apply language settings
   $rootScope.$on('SettingsChanged', function(evt, data) {
@@ -1029,17 +1024,6 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       })
     }
   })
-	// -------------------------------------- BEAMMP -------------------------------------- //
-
-	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
-		if (data != null) {
-			if (!localStorage.getItem("tosAccepted")) {
-				localStorage.setItem("tosAccepted", data.tos);
-			}
-		}
-	});
-
-	// -------------------------------------- BEAMMP -------------------------------------- //
 
   /* --- VUE3 END --- */
   $rootScope.$on('$translateChangeSuccess', (event, data) => {
@@ -1356,14 +1340,25 @@ angular.module('beamng.stuff')
 .controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService', 'MessageToasterService', 'InputCapturer',
   function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService,messageToasterService, InputCapturer) {
   var vm = this
+  vm.uiSheetActive = false
 
   // hack to fix backspace navigating between different menus.
   // https://stackoverflow.com/questions/29006000/prevent-backspace-from-navigating-back-in-angularjs
   $document.on('keydown', function(e){
-    if(e.which === 8 && ( e.target.nodeName !== "INPUT" && e.target.nodeName !== "SELECT" ) ){ // you can add others here inside brackets.
+    if(e.which === 8 && ( e.target.nodeName !== "INPUT" && e.target.nodeName !== "TEXTAREA" && e.target.nodeName !== "SELECT" ) ){ // you can add others here inside brackets.
       e.preventDefault()
     }
   })
+
+  // // Attempted fix to prevent keyboard events getting through to game when a textbox is being edited
+  // // Unfortunately causes other issues, but this may be on the right lines. Commented for now as it causes
+  // // more issues, and probably doesn't address some instances where the problem occurs. Related ticket is GE-4138
+
+  // $document.on('mouseup', function(e){
+  //   $timeout(() => {
+  //     vm.uiSheetActive = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ? true : false;
+  //   }, 10);
+  // })
 
   // Handle "Messages" of the category 'career' with MessageToasterService
   messageToasterService.handledCategories = ['career']
@@ -1388,6 +1383,7 @@ angular.module('beamng.stuff')
   $scope.$on('onCEFDevToolsVisibility', (event, enabled) => {
     $scope.$applyAsync(function () {
       vm.uitest = enabled
+      bngVue.debug(enabled)
     })
   })
 
@@ -1395,12 +1391,13 @@ angular.module('beamng.stuff')
   bngApi.engineLua("getCefDevConsoleOpen()", (enabled)=> {
     $scope.$applyAsync(function () {
       vm.uitest = enabled
+      bngVue.debug(enabled)
     })
   })
 
   // *** DEBUG START
-  vm.currentStateName = ''
-  vm.stickyPlayState = null
+  vm.currentStateName = '';
+  vm.stickyPlayState = null;
 
   $scope.$state = $state
   vm.states = $state.get().filter(state => !state.abstract) // filter abstract states
@@ -1477,11 +1474,13 @@ angular.module('beamng.stuff')
 
   const captureInput = InputCapturer();
   $scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+
     //console.log(`switching stage from ${fromState.name} to ${toState.name}`)
     //console.trace()
     vm.currentStateName = toState.name
 
-
+    // make sure Vue sees all state changes that affect location hash
+    if (toState.url && location.hash!=toState.url) location.hash = toState.url
 
 
     // update activated action maps for UI bindings
@@ -1507,11 +1506,15 @@ angular.module('beamng.stuff')
     // update ui apps layout
     if ($state.current.uiLayout === undefined) {
       // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
+      // console.log(`No layout defined - using previous (${vm.uiLayoutPrevious})`)
+      // console.log(vm.uiLayoutPrevious)
       if (vm.uiLayoutPrevious) {
         $scope.$emit('appContainer:loadLayoutByReqData', vm.uiLayoutPrevious)
         vm.uiLayoutPrevious = null
       }
     } else {
+      // console.log(`Layout defined (${$state.current.uiLayout})`)
+
       // this state requires a particular ui layout, set
       vm.uiLayoutPrevious = UiAppsService.getLayout()
       $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
@@ -1547,8 +1550,14 @@ angular.module('beamng.stuff')
     console.error('$stateChangeError', toState, toParams, fromState, fromParams, error)
   })
 
+
+  vm.changeAngularStateFromVue = function(state) {
+    vm.switchState(state)
+  }
   $scope.$on('$stateNotFound', function (event, unfoundState, fromState, fromParams) {
-    console.error('$stateNotFound', unfoundState, fromState, fromParams)
+    // angular doesn't recognise the state, so try Vue (making sure it doesn't pingpong back to here)
+    bngVue.gotoGameState(unfoundState.to, {tryAngularJS: false})
+    unfoundState.to = 'blank'
   })
 
   $scope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
@@ -1954,6 +1963,11 @@ angular.module('beamng.stuff')
 
   $scope.$on('physicsStateChanged', function (event, state) {
     $scope.$evalAsync(function () {
+      // Clicking Options in menu will trigger pause even if game is already paused
+      // Need to check if previous state is already paused
+      if (vm.physicsMaybePaused === false && state === false) {
+        bngApi.engineLua(`Engine.Audio.playOnce('AudioGui', 'event:>UI>Generic>Pause')`)
+      }
       vm.physicsMaybePaused = !state
       updatePauseState()
     })

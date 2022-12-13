@@ -60,7 +60,7 @@ local function updateGFX()
 end
 
 
-local function getInputs() --TODO: uncomment the difference checking for final release, currently commented because the current release will not apply inputs if all the inputs are not present in the data
+local function getInputs()
 	local inputsToSend = {}
 	currentInputs = {
 		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
@@ -70,17 +70,15 @@ local function getInputs() --TODO: uncomment the difference checking for final r
 		c = electrics.values.clutch and math.floor(electrics.values.clutch * 100) / 100,
 		g = electrics.values.gear
 	}
-	--if math.abs(math.abs(lastInputs.s) - math.abs(currentInputs.s)) > 0.005 then inputsToSend.s = currentInputs.s end
-	--for k,v in pairs(currentInputs) do
-	--	if currentInputs[k] ~= lastInputs[k] and k ~= "s" then
-	--		inputsToSend[k] = currentInputs[k]
-	--	end
-	--end
-	--lastInputs = currentInputs
-	--if tableIsEmpty(inputsToSend) then return end
-	--dump(inputsToSend)
-	--obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
-	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(currentInputs).."\', "..obj:getID()..")") -- Send it to GE lua
+	if lastInputs.s and currentInputs.s and math.abs(math.abs(lastInputs.s) - math.abs(currentInputs.s)) > 0.005 then inputsToSend.s = currentInputs.s end
+	for k,v in pairs(currentInputs) do
+		if currentInputs[k] ~= lastInputs[k] and k ~= "s" then
+			inputsToSend[k] = currentInputs[k]
+		end
+	end
+	lastInputs = currentInputs
+	if tableIsEmpty(inputsToSend) then return end
+	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
 

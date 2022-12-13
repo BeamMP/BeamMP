@@ -28,7 +28,7 @@ function($scope, $state, $timeout, $document) {
 	$scope.validate = function () {
 		localStorage.setItem("tosAccepted", "true");
 		bngApi.engineLua(`MPConfig.acceptTos()`);
-		$state.go('menu.multiplayer');
+		$state.go('menu.multiplayer.servers');
 	};
 
 	$scope.openExternalLink = function(url) {

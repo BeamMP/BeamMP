@@ -95,7 +95,7 @@ angular.module('beamng.stuff')
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>Alpha v{{ ::versionSimpleStr }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }}<br/> {{ ::buildInfoStr }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">Alpha v{{ ::versionStr }} <br/> {{ ::buildInfoStr }}</div>
         </div>
       </div>
     `,
@@ -254,12 +254,6 @@ angular.module('beamng.stuff')
 
 .controller('MainMenuController', ['$rootScope', '$scope', 'toastr', '$state', 'Settings', '$http', '$filter', 'Utils', 'gamepadNav', 'TechLicenseState', 'ConfirmationDialog', function($rootScope, $scope, toastr, $state, Settings, $http, $filter, Utils, gamepadNav, techLicenseState, ConfirmationDialog) {
   let vm = this
-
-  bngApi.engineLua('(function() local cmdArgs = Engine.getStartingArgs(); return cmdArgs and tableFindKey(cmdArgs, "--startupTS") ~= nil end)()',function(startingUsingTS){
-    $scope.$evalAsync(function () {
-      vm.startingUsingTS = startingUsingTS;
-    })
-  })
 
   vm.product = beamng.product
   vm.techLicense = false
@@ -426,7 +420,7 @@ angular.module('beamng.stuff')
           if (!clicky(6)) // how many clicks should it take to enter
             return;
           ConfirmationDialog.open(
-            "ui.playmodes.career", "ui.career.experimentalPrompt",
+            "ui.career.experimentalTitle", "ui.career.experimentalPrompt",
             [
               { label: "ui.common.no", key: false, isCancel: true },
               // { label: "Enter and don't show this again", key: true },

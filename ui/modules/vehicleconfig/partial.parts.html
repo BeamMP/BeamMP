@@ -153,12 +153,14 @@
           {{:: 'ui.vehicleconfig.applyPartChangesAutomatically' | translate}}
         </md-checkbox>
       </div>
-      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-show="!vehConf_parts.applyPartChangesAutomatically"
-        class="md-raised md-primary">
-        {{:: 'ui.common.apply' | translate}}
-      </md-button>
-      <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-raised md-warn">
+      <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-warn" ng-disabled="!vehConf_parts.d.data">
+        <md-icon class="material-icons">undo</md-icon>
         {{:: 'ui.common.reset' | translate}}
+      </md-button>
+      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-disabled="vehConf_parts.applyPartChangesAutomatically"
+        class="md-raised md-primary">
+        <md-icon class="material-icons">check</md-icon>
+        {{:: 'ui.common.apply' | translate}}
       </md-button>
       <md-button ng-hide="!vehConf_parts.isMPSession" ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-primary">
         {{:: 'ui.common.multiplayer.sync' | translate}}

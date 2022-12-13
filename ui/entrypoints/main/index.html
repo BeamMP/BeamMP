@@ -7,15 +7,16 @@
   <!-- for external clients: emulation over websocket -->
   <script src="/ui/entrypoints/main/comms.js"></script>
 
-
   <!-- Vue START -->
-  <script src="/ui/lib/ext/vue3/vue.global.prod.js"></script>
-  <script src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
-  <script src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
-  <script src="/ui/lib/int/vueService.js"></script>
+  <script type="module" crossorigin src="/ui/ui-vue/dist/index.js"></script>
+  <link rel="stylesheet" href="/ui/ui-vue/dist/index.css" />
+
+  <script defer src="/ui/lib/ext/vue-i18n-next/vue-i18n.global.prod.js"></script>
+  <script defer src="/ui/lib/ext/tiny-emitter/tinyemitter.js"></script>
+  <script defer src="/ui/lib/int/vueService.js"></script>
   <!-- Vue END -->
 
-  <script src="/ui/entrypoints/main/angularModules.js"></script>
+  <script defer src="/ui/entrypoints/main/angularModules.js"></script>
 
   <!-- 3rd party includes -->
   <script src="/ui/lib/ext/angular/angular.js"></script>
@@ -73,7 +74,6 @@
   <script src="/ui/modules/comic/comic.js"></script>
   <script src="/ui/modules/vehicleselect/vehicleselect.js"></script>
   <script src="/ui/modules/options/options.js"></script>
-  <script src="/ui/modules/credits/credits.js"></script>
   <script src="/ui/modules/startScreen/startScreen.js"></script>
   <script src="/ui/modules/vehicleconfig/vehicleconfig.js"></script>
   <script src="/ui/modules/loading/loading.js"></script>
@@ -185,7 +185,7 @@
 
   <!-- pause indicator (show only while paused), not to be confused with the pause button (shown only while not paused). see menu.html -->
   <div ng-cloak ng-if="!app.mainmenu && app.showPauseIcon && app.uiVisible" class="dashBrdButtonEnd dashMenuHeight" style="var(--zorder_index_waiting_screen_icon);">
-    <div class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()" bng-sound-class="bng_click_hover_generic" >
+    <div class="dashBrdButton dashBrdButtonPaused" ng-click="app.unpause()">
       <span style="padding:0; margin:0" bng-translate="ui.inputActions.general.pause.binding" class="bng-binding dashBrdSvgIcon"></span>
       <span class="dashBrdText">{{:: 'ui.inputActions.general.pause.title' | translate}}</span>
     </div>
@@ -227,5 +227,8 @@
   <!--  .............. popups overlay ..............  -->
   <bng-intro-popup></bng-intro-popup>
   <bng-dialog></bng-dialog>
+  <div class="ui-sheet" ng-if="app.uiSheetActive" bng-blur="true"></div>
+  <div id="vue-app"></div>
+
 </body>
 </html>

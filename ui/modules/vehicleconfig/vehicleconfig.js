@@ -268,7 +268,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       }
       // console.debug(`Reset part selection`)
       // bngApi.engineLua('extensions.core_vehicle_partmgmt.selectReset()')
-      bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`)
+      bngApi.engineLua(`extensions.core_vehicle_partmgmt.selectReset()`)
     }
   }
 
@@ -565,7 +565,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     if (!search) {
       return $sce.trustAsHtml(text)
     }
-    return $sce.trustAsHtml(unescape(escape(text).replace(new RegExp(escape(search), 'gi'), ' <span class="highlightResults">$&</span>')))
+    return $sce.trustAsHtml(unescape(escape(text).replace(new RegExp(escape(search), 'gi'), '<span class="highlightResults">$&</span>')))
   }
 })
 .controller('Vehicleconfig_tuning', ["RateLimiter", "VehicleConfig", "$scope", "$filter", function (RateLimiter, VehicleConfig, $scope, $filter) {
@@ -815,25 +815,25 @@ function ($scope) {
   }
 
   vm.setMeshVisibility = (vis) => {
-    bngApi.engineLua(`if be:getPlayerVehicle(0) then be:getPlayerVehicle(0):setMeshAlpha(${bngApi.serializeToLua(vis)}, "", false) end`)
+    bngApi.engineLua(`core_vehicles.setMeshVisibility(${bngApi.serializeToLua(vis)})`)
   }
 
   $scope.$on('BdebugUpdate', (_, debugState) => {
     // All this to workaround a bug with slider not updating
     if (vm.state.vehicle) {
-      var mode = vm.state.vehicle.beamVisMode - 1
-      vm.state.vehicle.beamVisModes[mode]['rangeMin'] = -Number.MAX_VALUE
-      vm.state.vehicle.beamVisModes[mode]['rangeMax'] = Number.MAX_VALUE
-      
       vm.canApplyState = false
-      
+    
+      var mode = debugState.vehicle.beamVisMode - 1
+      vm.state.vehicle.beamVisModes[mode].rangeMin = -Number.MAX_VALUE
+      vm.state.vehicle.beamVisModes[mode].rangeMax = Number.MAX_VALUE
+
       $scope.$digest()
     }
-    
-    vm.canApplyState = true
-    
+
     vm.state = debugState
     $scope.$digest()
+    
+    vm.canApplyState = true
   })
   bngApi.activeObjectLua(`bdebug.requestState()`)
 

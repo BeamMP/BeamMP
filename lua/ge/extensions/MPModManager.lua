@@ -9,6 +9,7 @@ local M = {}
 
 local serverMods = {} -- multiplayerModName1, multiplayerModName2
 local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods won't be activated or deactivated
+local hasMods = false
 
 --TODO: build handler for repo mod downloads
 
@@ -134,6 +135,7 @@ local function cleanUpSessionMods()
 	local count = 0
 	for modname, mod in pairs(getModList()) do
 		if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
+			hasMods = true
 			count = count + 1
 			core_modmanager.deleteMod(modname)
 		end
@@ -234,7 +236,21 @@ local function onServerLeave()
 	end
 end
 
+local requestLuaReload = false
+local function reloadLuaReloadWithDelay()
+	if hasMods then -- don't reload if server doesn't contain mods
+		requestLuaReload = true
+	end
+end
+local reloadTimer = 0
+local function onUpdate(dt)
+	if requestLuaReload then
+		reloadTimer = reloadTimer + dt
+		if reloadTimer >= 0.5 then Lua:requestReload() end
+	end
+end
 
+M.reloadLuaReloadWithDelay = reloadLuaReloadWithDelay
 M.cleanUpSessionMods = cleanUpSessionMods
 M.isModWhitelisted = isModWhitelisted
 M.loadServerMods = loadServerMods
@@ -249,5 +265,6 @@ M.onExtensionUnloaded = onExtensionUnloaded
 M.onModActivated = onModActivated
 M.onServerLeave = onServerLeave
 M.onExit = cleanUpSessionMods
+M.onUpdate = onUpdate
 
 return M

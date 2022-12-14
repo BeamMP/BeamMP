@@ -277,18 +277,9 @@ local function leaveServer(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	status = "" -- Reset status
-	--if goBack then clientPostStartMission() end
-	--local callback = nop
-	--if not settings.getValue("disableLuaReload") then callback = function() Lua:requestReload() end end
-	--if goBack then endActiveGameMode(callback) end
-	if goBack then
-		if not settings.getValue("disableLuaReload") then
-			returnToMenu = true
-			Lua:requestReload()
-		else
-			endActiveGameMode()
-		end
-	end
+	local callback = nop
+	if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
+	if goBack then endActiveGameMode(callback) end
 end
 
 
@@ -440,17 +431,11 @@ end
 
 local function onSerialize()
 	return {currentServer = currentServer,
-			isMpSession = isMpSession,
-			returnToMenu = returnToMenu}
+			isMpSession = isMpSession}
 end
 local function onDeserialized(data)
 	log('M', 'onDeserialized', dumps(data))
 
-	if data and data.returnToMenu then
-		endActiveGameMode()
-		returnToMenu = false
-		return
-	end
 	currentServer = data and data.currentServer or nil
 	isMpSession = data and data.isMpSession
 

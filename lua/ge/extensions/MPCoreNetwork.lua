@@ -27,6 +27,7 @@ local loggedIn = false
 -- event functions
 local onLauncherConnected = nop
 local runPostJoin = nop
+local originalFreeroamOnPlayerCameraReady
 
 local loadMods = false -- gets set to true when mods should get loaded
 --[[
@@ -230,6 +231,11 @@ local function loadLevel(map)
 
 	--local parsedMapName = parseMapName(map)
 
+	if freeroam_freeroam.onPlayerCameraReady ~= nop then -- temp fix for traffic spawning in MP
+		originalFreeroamOnPlayerCameraReady = freeroam_freeroam.onPlayerCameraReady
+		freeroam_freeroam.onPlayerCameraReady = nop
+	end
+
 	if getMissionFilename() == map then --or string.match(getMissionFilename(), parsedMapName) then
 		log('W', 'loadLevel', 'Requested map matches current map, rejoining')
 		runPostJoin()
@@ -399,6 +405,9 @@ end
 runPostJoin = function() -- gets called once loaded into a map
 	log('W', 'runPostJoin', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'runPostJoin', 'isMpSession: '..tostring(isMpSession))
+	if freeroam_freeroam.onPlayerCameraReady == nop and originalFreeroamOnPlayerCameraReady then -- restore function to original once already loaded in so it works if user switches to freeroam
+		freeroam_freeroam.onPlayerCameraReady = originalFreeroamOnPlayerCameraReady
+	end
 	if isMpSession and isGoingMpSession then
 		extensions.hook('runPostJoin')
 		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam

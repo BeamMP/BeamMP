@@ -34,7 +34,7 @@
     "ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",
     "ui.options.multiplayer.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
     "ui.options.multiplayer.simplifyRemoteVehicles": "Use simplified vehicles when available",
-    "ui.options.multiplayer.simplifyRemoteVehicles.tooltip": "This setting will replace remote vehicles with the BeamNG provided 'traffic' versions. Reduces accuracy of collisions, but improves performance",
+    "ui.options.multiplayer.simplifyRemoteVehicles.tooltip": "This setting will replace remote vehicles with the BeamNG provided 'traffic' versions. Reduces accuracy of collisions and visuals, but improves performance",
     "ui.options.multiplayer.enableBlobs": "Enable blobs for unspawned vehicles",
     "ui.options.multiplayer.enableBlobs.tooltip": "Unspawned vehicles will appear as blobs",
     "ui.options.multiplayer.showSpectators": "Show spectators under vehicle nametags",

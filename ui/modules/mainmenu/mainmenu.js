@@ -102,7 +102,7 @@ angular.module('beamng.stuff')
     scope: {
     },
     link: function (scope, $element, attr) {
-      // do quick check right in main menu, to ensure *some* of our UI/LUA code can work in languages with certain non-english characters
+      // do quick check right in main menu, to ensure *some* of our UI/Lua code can work in languages with certain non-english characters
       bngApi.serializeToLuaCheck("English: " + "hello")
       bngApi.serializeToLuaCheck("Spanish: " + "güeñes")
       bngApi.serializeToLuaCheck("French: " + "bâguéttè, garçon")

@@ -14,6 +14,8 @@ local lastPos = vec3(0,0,0)
 -- ============= VARIABLES =============
 
 
+local propsfunction = nil
+local justBrokenBreakGroups = {}
 
 local function distance( x1, y1, z1, x2, y2, z2 )
 	local dx = x1 - x2
@@ -195,12 +197,55 @@ local function round(num, numDecimalPlaces)
   return math.floor(num * mult + 0.5) / mult
 end
 
+local function applyBreakGroups(data)
+	local justBrokenRemote = jsonDecode(data)
+
+	if type(justBrokenRemote) ~= 'table' then
+		log('W', 'applyBreakGroups', 'Received invalid data: ' .. tostring(data))
+		return
+	end
+
+	for _, g in pairs(justBrokenRemote) do
+		beamstate.breakBreakGroup(g)
+	end
+end
+
+local function getBreakGroups()
+	local breakGroupArray = {}
+
+	for g in pairs(justBrokenBreakGroups) do
+		table.insert(breakGroupArray, g)
+	end
+	justBrokenBreakGroups = {}
+
+	if #breakGroupArray == 0 then
+		return
+	end
+
+	obj:queueGameEngineLua("nodesGE.sendBreakGroups(\'"..jsonEncode(breakGroupArray).."\', "..obj:getID()..")") -- Send it to GE lua
+end
+
+local function onBreakGroupBroken(g)
+	justBrokenBreakGroups[g] = true
+	propsfunction(g)
+end
+
+local function onReset()
+	if props.hidePropsInBreakGroup ~= onBreakGroupBroken then
+		propsfunction = props.hidePropsInBreakGroup
+		props.hidePropsInBreakGroup = onBreakGroupBroken
+	end
+end
 
 
 M.distance   = distance
 M.applyNodes = applyNodes
 M.getNodes   = getNodes
 
+M.applyBreakGroups = applyBreakGroups
+M.getBreakGroups   = getBreakGroups
 
+M.onExtensionLoaded = onReset
+M.onReset           = onReset
 
 return M

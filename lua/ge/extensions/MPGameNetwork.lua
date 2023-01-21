@@ -13,6 +13,7 @@ local M = {}
 local socket = require('socket')
 local TCPSocket
 local launcherConnected = false
+local useSocket = true -- Use V2 Networking by default. Set to false for V3
 local isConnecting = false
 local eventTriggers = {}
 --keypress handling
@@ -23,15 +24,18 @@ local keypressTriggers = {}
 
 setmetatable(_G,{}) -- temporarily disable global notifications
 
-local function connectToLauncher()
+local function connectToLauncher(useSocket)
 	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
-	if not launcherConnected then
+
+	if not useSocket then launcherConnected = true end
+	if not launcherConnected and useSocket then
 		isConnecting = true
 		TCPSocket = socket.tcp()
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
 		M.send('A')
+	
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
 	end
@@ -40,7 +44,7 @@ end
 
 
 local function disconnectLauncher()
-	if launcherConnected then
+	if launcherConnected and useSocket then
 		TCPSocket:close()
 		launcherConnected = false
 	end
@@ -49,6 +53,18 @@ end
 
 
 local function sendData(s)
+	-- First check if we are V3 Networking or not
+	if MP and not useSocket then
+		MP.Game(s)
+		if not launcherConnected then launcherConnected = true isConnecting = false end
+		if settings.getValue("showDebugOutput") then
+			log('M', 'sendData', 'Sending Data ('..#s..'): '..s)
+		end
+		if MPDebug then MPDebug.packetSent(#s) end
+		return
+	end
+
+	-- Else we now will use the V2 Networking
 	if not TCPSocket then return end
 	local bytes, error, index = TCPSocket:send(#s..'>'..s)
 	if error then
@@ -192,7 +208,7 @@ local HandleNetwork = {
 local heartbeatTimer = 0
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
-	if launcherConnected then
+	if launcherConnected and useSocket then
 		while(true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
@@ -215,14 +231,26 @@ local function onUpdate(dt)
 	end
 end
 
-
+local function onExtensionLoaded()
+	if MP then
+		useSocket = false
+	end
+end
 
 local function isLauncherConnected()
-	return launcherConnected
+	if useSocket then
+		return launcherConnected
+	else
+		return true
+	end
 end
 
 local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
+end
+
+M.receiveIPCGameData = function(code, data)
+	HandleNetwork[code](data)
 end
 
 detectGlobalWrites() -- reenable global write notifications
@@ -233,6 +261,7 @@ M.onUpdate = onUpdate
 M.onKeyStateChanged = onKeyStateChanged
 
 --functions
+M.onExtensionLoaded    = onExtensionLoaded
 M.launcherConnected   = isLauncherConnected
 M.connectionStatus    = connectionStatus --legacy
 M.connectToLauncher   = connectToLauncher

@@ -16,6 +16,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
+local useSocket = true -- Use V2 Networking by default. Set to false for V3
 -- server
 local serverList -- server list JSON
 local currentServer = nil -- Table containing the current server IP, port and name
@@ -42,7 +43,18 @@ C  -> The client asks for the server's mods
 
 -- ============= LAUNCHER RELATED =============
 local function send(s)
-	if not TCPLauncherSocket then return end
+	-- First check if we are V3 Networking or not
+	if MP and not useSocket then
+		MP.Core(s)
+		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
+
+		if not settings.getValue("showDebugOutput") then return end
+		log('M', 'send', 'Sending Data ('..#s..'): '..s)
+		return
+	end
+
+	-- Else we now will use the V2 Networking
+	if not TCPLauncherSocket and useSocket then return end
 	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
 	if error then
 		isConnecting = false
@@ -68,7 +80,7 @@ local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
-	if not launcherConnected then
+	if not launcherConnected and useSocket and not MP then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
@@ -82,12 +94,12 @@ end
 
 local function disconnectLauncher(reconnect) --unused, for debug purposes
 	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: '..tostring(reconnect))
-	if launcherConnected then
-		log('W', 'disconnectLauncher', "Disconnecting from launcher")
+	log('W', 'disconnectLauncher', "Disconnecting from launcher")
+	if launcherConnected and useSocket then
 		TCPLauncherSocket:close()
 		launcherConnected = false
-		isGoingMpSession = false
 	end
+	isGoingMpSession = false
 	if reconnect then connectToLauncher() end
 end
 
@@ -105,12 +117,19 @@ end
 local function getLauncherVersion()
 	return launcherVersion
 end
+
 local function isLoggedIn()
 	return loggedIn
 end
+
 local function isLauncherConnected()
-	return launcherConnected
+	if useSocket then
+		return launcherConnected
+	else
+		return true
+	end
 end
+
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
 	identifiers = identifiers and jsonEncode(identifiers) or ""
@@ -343,6 +362,7 @@ local updateUiTimer = 0
 local heartbeatTimer = 0
 local reconnectTimer = 0
 local reconnectAttempt = 0
+
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
@@ -350,24 +370,58 @@ local function onUpdate(dt)
 	heartbeatTimer = heartbeatTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		while(true) do
-			local received, stat, partial = TCPLauncherSocket:receive()
-			if not received or received == "" then
-				break
-			end
-			if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
-				log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+
+		if useSocket then
+			while(true) do
+				local received, stat, partial = TCPLauncherSocket:receive()
+				if not received or received == "" then
+					break
+				end
+				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
+					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+				end
+
+				-- break it up into code + data
+				local code = string.sub(received, 1, 1)
+				local data = string.sub(received, 2)
+				HandleNetwork[code](data)
 			end
 
-			-- break it up into code + data
-			local code = string.sub(received, 1, 1)
-			local data = string.sub(received, 2)
-			HandleNetwork[code](data)
+		elseif MP and not useSocket then
+			while (true) do
+				local msg = MP:try_pop()
+				if msg then
+					local code = string.sub(msg, 1, 1)
+					local received = string.sub(msg, 2)
+					if settings.getValue("showDebugOutput") == true then
+						log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+					end
+			
+
+					-- break it up into code + data
+					local c = string.sub(received, 1, 1)
+					local d = string.sub(received, 2)
+					if code == 'C' then
+						HandleNetwork[c](d)
+					elseif code == 'G' then
+						MPGameNetwork.receiveIPCGameData(c, d)
+					end
+			
+					if MPDebug then MPDebug.packetReceived(#received) end
+				else
+					break
+				end
+			end
+
 		end
+
+
 		--================================ SECONDS TIMER ================================
 		if heartbeatTimer >= 1 then
 			heartbeatTimer = 0
-			send('A') -- Launcher heartbeat
+			if useSocket then
+				send('A') -- Launcher heartbeat
+			end
 		end
 		if updateUiTimer >= 0.1 and status == "LoadingResources" then
 			updateUiTimer = 0
@@ -378,10 +432,13 @@ local function onUpdate(dt)
 			send('Up')
 		end
 	else
-		if reconnectAttempt < 10 and reconnectTimer >= 2 and not isConnecting then
+		if reconnectAttempt < 10 and reconnectTimer >= 2 and not isConnecting and useSocket then
 			reconnectAttempt = reconnectAttempt + 1
 			reconnectTimer = 0
 			connectToLauncher(true) --TODO: add counter and stop attempting after enough failed attempts
+		else
+			reconnectAttempt = 0
+			reconnectTimer = 0
 		end
 	end
 end
@@ -411,7 +468,8 @@ runPostJoin = function() -- gets called once loaded into a map
 	if isMpSession and isGoingMpSession then
 		extensions.hook('runPostJoin')
 		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam
-		MPGameNetwork.connectToLauncher()
+		MPGameNetwork.connectToLauncher(not useSocket)
+		send('A')
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
@@ -439,8 +497,10 @@ local function onUiChangedState (curUIState, prevUIState)
 end
 
 local function onSerialize()
-	return {currentServer = currentServer,
-			isMpSession = isMpSession}
+	return {
+		currentServer = currentServer,
+		isMpSession = isMpSession,
+	}
 end
 local function onDeserialized(data)
 	log('M', 'onDeserialized', dumps(data))
@@ -454,6 +514,13 @@ local function onDeserialized(data)
 end
 
 local function onExtensionLoaded()
+	if MP then
+		useSocket = false
+		onLauncherConnected()
+	end
+	if not MP then
+		connectToLauncher(true)
+	end
 	if FS:fileExists('settings/BeamMP/ui_info.json') then --TODO: remove this after a while
 		FS:removeFile('settings/BeamMP/ui_info.json')
 	end

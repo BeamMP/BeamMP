@@ -1331,7 +1331,7 @@ local function onPreRender(dt)
 			local pos = Point3F(v.position.x, v.position.y, v.position.z)
 
 			local nametagAlpha = 1
-			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
+			local nametagFadeoutDistance = settings.getValue("nametagFadeDistance") or 40
 
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
@@ -1340,7 +1340,7 @@ local function onPreRender(dt)
 			if not settings.getValue("hideNameTags") and nicknamesAllowed then
 
 				local dist = ""
-				if distfloat > 10 and settings.getValue("nameTagShowDistance") then
+				if distfloat > 10 and settings.getValue("nametagShowDistance") then
 					local unit
 					local mapEntry = distfloat
 					if settings.getValue("uiUnitLength") == "imperial" then
@@ -1370,13 +1370,13 @@ local function onPreRender(dt)
 					else veh:setMeshAlpha(1-nametagAlpha, "", false) end
 				end
 
-				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
-					if settings.getValue("nameTagFadeInvert") then
+				if settings.getValue("nametagFadeEnabled") and not commands.isFreeCamera() then
+					if settings.getValue("nametagFadeInvert") then
 						nametagAlpha = 1 - nametagAlpha
 					end
 				end
 
-				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
+				if not settings.getValue("nametagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("dontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
 				if settings.getValue("enableBlobs") and not v.isSpawned then

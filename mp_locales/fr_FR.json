@@ -17,9 +17,9 @@
   "ui.options.multiplayer.queueSkipUnicycle.tooltip": "Si activé, vous spawnerez immédiatement les modèles de joueur",
   "ui.options.multiplayer.luaOptimisations": "Activer les optimisations",
   "ui.options.multiplayer.luaOptimisations.tooltip": "Si activé, d'autres véhicules effectueront des calculs limités",
-  "ui.options.multiplayer.nameTags": "Masquer les étiquettes de nom de joueur"
-  "ui.options.multiplayer.nameTagAlternate": "Utiliser des couleurs d'étiquettes de nom alternatives",
-  "ui.options.multiplayer.nameTagShowDistance": "Afficher la distance par rapport aux autres joueurs",
+  "ui.options.multiplayer.nametags": "Masquer les étiquettes de nom de joueur"
+  "ui.options.multiplayer.nametagAlternate": "Utiliser des couleurs d'étiquettes de nom alternatives",
+  "ui.options.multiplayer.nametagShowDistance": "Afficher la distance par rapport aux autres joueurs",
   "ui.options.multiplayer.debugOutput": "Afficher l'activité réseau dans la console",
   "ui.options.multiplayer.launcherPort": "Port du lanceur :[br]Ne pas changer à moins d'y être obligé",
   "ui.options.multiplayer.launcherPortWarn": "Ne pas changer à moins d'y être obligé",
@@ -56,7 +56,7 @@
   "ui.options.multiplayer.tuneColorQueued": "Véhicule en attente",
   "ui.options.multiplayer.tuneColorDeleted": "Véhicule supprimé",
   "ui.options.multiplayer.blobsTitle": "Boules",
-  "ui.options.multiplayer.nameTagTitle": "Étiquettes de nom",
+  "ui.options.multiplayer.nametagTitle": "Étiquettes de nom",
   "ui.options.multiplayer.others": "Autres",
   "ui.multiplayer.multiplayer": "Multijoueur",
   "ui.multiplayer.connecting": "Connexion en cours",

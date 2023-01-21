@@ -173,45 +173,45 @@
 
 
 <md-divider></md-divider>
-<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</h3></p></md-list-item>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.nametagTitle' | translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink>
-  <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
+  <p>{{:: 'ui.options.multiplayer.nametags' | translate }}</p>
   <md-checkbox ng-model="options.data.values.hideNameTags" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink>
-  <p>{{:: 'ui.options.multiplayer.nameTagShowDistance' | translate }}</p>
-  <md-checkbox ng-model="options.data.values.nameTagShowDistance" ng-change="options.applyState()"></md-checkbox>
+  <p>{{:: 'ui.options.multiplayer.nametagShowDistance' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.nametagShowDistance" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
   <p>{{:: 'ui.options.multiplayer.nametagFade' | translate }}</p>
-  <md-checkbox ng-model="options.data.values.nameTagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
+  <md-checkbox ng-model="options.data.values.nametagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
-<div class="mp-setting-border" ng-show="options.data.values.nameTagFadeEnabled && options.data.values.showAdvancedMPOptions">
+<div class="mp-setting-border" ng-show="options.data.values.nametagFadeEnabled && options.data.values.showAdvancedMPOptions">
   <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagFadeDistance.tooltip' | translate }}
     </md-tooltip>
     <p flex="30">{{:: 'ui.options.multiplayer.nametagFadeDistance' | translate }}</p>
-    <md-slider flex ng-model="options.data.values.nameTagFadeDistance" min="0" max="1500" step="1" aria-label="_"
+    <md-slider flex ng-model="options.data.values.nametagFadeDistance" min="0" max="1500" step="1" aria-label="_"
       ng-change="options.applyState()">
     </md-slider>
     <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{
-      (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
+      (options.data.values.nametagFadeDistance*3.281).toFixed(0) }} feet</span>
     <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{
-      (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
+      (options.data.values.nametagFadeDistance).toFixed(0) }} meters</span>
   </md-list-item>
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.nametagInvertFade' | translate }}</p>
-    <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
-    <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
-    <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
+    <span flex ng-if="options.data.values.nametagFadeInvert" style="text-align:right">Fade in</span>
+    <span flex ng-if="!options.data.values.nametagFadeInvert" style="text-align:right">Fade out</span>
+    <md-checkbox ng-model="options.data.values.nametagFadeInvert" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.nametagDontFullyHide' | translate }}</p>
-    <md-checkbox ng-model="options.data.values.nameTagDontFullyHide" ng-change="options.applyState()"></md-checkbox>
+    <md-checkbox ng-model="options.data.values.nametagDontFullyHide" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
 </div>
 

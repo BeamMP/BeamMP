@@ -1,0 +1,30 @@
+// format of this table: name: [ type, default ]
+//
+// where type can be:
+//   - discard: won't be stored in permanent storage, it's a memory-only setting. Should be avoided, it's abusing the settings system as globals.
+//   - cloud: will be synchronized with steam cloud. Use only for settings that are NOT computer-dependent
+//   - local: will not be synchronized with steam cloud. Use only for settings that are computer-dependent (such as graphics detail)
+
+{
+  "autoSyncVehicles"                             : [ "cloud", true ],
+  "blobColorDeleted"                             : [ "cloud", "#333333" ],
+  "blobColorIllegal"                             : [ "cloud", "#000000" ],
+  "blobColorQueued"                              : [ "cloud", "#FF6400" ],
+  "disableInstabilityPausing"                    : [ "cloud", true ],
+  "enableBlobs"                                  : [ "cloud", true ],
+  "enableQueueAuto"                              : [ "cloud", true ],
+  "enableSpawnQueue"                             : [ "cloud", true ],
+  "launcherPort"                                 : [ "local", 4444 ],
+  "nametagShowDistance"                          : [ "cloud", true ],
+  "nametagCharLimit"                             : [ "cloud", 32 ],
+  "queueApplySpeed"                              : [ "cloud", 2 ],
+  "queueApplyTimeout"                            : [ "cloud", 3 ],
+  "queueSkipUnicycle"                            : [ "cloud", true ],
+  "showAdvancedMPOptions"                        : [ "cloud", true ],
+  "showBlobDeleted"                              : [ "cloud", true ],
+  "showBlobIllegal"                              : [ "cloud", true ],
+  "showBlobQueued"                               : [ "cloud", true ],
+  "showDebugOutput"                              : [ "cloud", false ],
+  "showSpectators"                               : [ "cloud", true ]
+
+}

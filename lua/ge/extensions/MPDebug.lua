@@ -5,25 +5,47 @@
 -- Debug menus for monitoring BeamMP performance and more
 --====================================================================================
 
+--- @class MPDebug: table
 local M = {}
 
-
-local function tpPlayerToPos(targetPos)
-	local activeVehicle = be:getPlayerVehicle(0)
-
-	if activeVehicle then
-
-		local targetVehRot = quatFromDir(vec3(activeVehicle:getDirectionVector()), vec3(activeVehicle:getDirectionVectorUp()))
-
-		local vec3Pos = vec3(targetPos[1], targetPos[2], targetPos[3])
-
-		spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
-		return
-	else
-		log('M', 'tpPlayerToPos', 'no active vehicle')
+local function assert(condition, message)
+	if not condition then
+		log('E', 'MPDebug', message)
 	end
+	return condition
 end
 
+--- @param position Point3F
+--- @return boolean
+local function isPoint3F(position)
+	return select(2, pcall(function()
+		return type(position.xyz) == 'function'
+	end)) == true
+end
+
+local function parsePoint3F(...)
+	local x, y, z = ...
+	if type(x) == 'table' then
+		return
+			x.x or x[1] or 0,
+			x.y or x[2] or 0,
+			x.z or x[3] or 0
+	end
+	return
+		type(x) == 'number' and x or 0,
+		type(y) == 'number' and y or 0,
+		type(z) == 'number' and z or 0
+end
+
+--- Teleport the local user's vehicle to the specified position.
+--- @vararg Point3F | number
+local function tpPlayerToPos(...)
+	local activeVehicle = assert(be:getPlayerVehicle(0), 'The current user has no active vehicle.')
+	local targetVehRot = quatFromDir(vec3(activeVehicle:getDirectionVector()), vec3(activeVehicle:getDirectionVectorUp()))
+	local position = vec3(parsePoint3F(...))
+	assert(isPoint3F(position), 'Invalid position.')
+	spawn.safeTeleport(activeVehicle, position, targetVehRot, false)
+end
 
 local function getPlayerNames() --returns a table where the key is username, value is an owned vehid (can be ignored)
 	if not MPVehicleGE then return {} end
@@ -169,7 +191,7 @@ local receivedPacketSize = 0
 
 local function avgData(data)
 	local sum, max = 0, 0
-	
+
 	for i=0, im.GetLengthArrayFloat(data) do
 		sum = sum + data[i]
 		if data[i] > max then max = data[i] end
@@ -245,25 +267,27 @@ local function onUpdate()
 	drawNetworkPerf()
 end
 
-
+--- Fired when a packet is sent
+--- @param bytes number
 local function packetSent(bytes)
-	sentPacketCount = sentPacketCount+1
-	sentPacketSize = sentPacketSize + (bytes or 0)
+	sentPacketCount = sentPacketCount + 1
+	if type(bytes) == 'number' then
+		sentPacketSize = sentPacketSize + bytes
+	end
 end
+
+--- Fired when a packet is received
+--- @param bytes number
 local function packetReceived(bytes)
-	receivedPacketCount = receivedPacketCount+1
-	receivedPacketSize = receivedPacketSize + (bytes or 0)
+	receivedPacketCount = receivedPacketCount + 1
+	if type(bytes) == 'number' then
+		receivedPacketSize = receivedPacketSize + bytes
+	end
 end
 
-
-M.onExtensionLoaded		= onExtensionLoaded
-M.onUpdate				= onUpdate
---M.showUI				= showUI
---M.hideUI				= hideUI
-
-
+M.onExtensionLoaded = onExtensionLoaded
+M.onUpdate = onUpdate
 M.packetSent = packetSent
 M.packetReceived = packetReceived
-
 
 return M

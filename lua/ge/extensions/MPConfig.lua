@@ -2,32 +2,41 @@
 -- All work by Titch2000.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
-
-
-
+--- @meta
+--- @module "MPConfig"
+--- @class MPConfig
 local M = {}
 
--- MP VARIABLES
+--- @type string
 local Nickname = ""
+--- @type integer
 local PlayerServerID = -1
 
+--- @type table
 local defaultSettings = {
-	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
-	-- queue system
-	enableSpawnQueue = true, enableQueueAuto = true, queueSkipUnicycle = true, queueApplySpeed = 2, queueApplyTimeout = 3,
-	-- colors
-	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333",
-
-	-- show custom vehicles in vehicle selector
+	autoSyncVehicles = true,
+	nameTagShowDistance = true,
+	enableBlobs = true,
+	showSpectators = true,
+	nametagCharLimit = 32,
+	enableSpawnQueue = true,
+	enableQueueAuto = true,
+	queueSkipUnicycle = true,
+	queueApplySpeed = 2,
+	queueApplyTimeout = 3,
+	showBlobQueued = true,
+	blobColorQueued = "#FF6400",
+	showBlobIllegal = true,
+	blobColorIllegal = "#000000",
+	showBlobDeleted = true,
+	blobColorDeleted = "#333333",
 	showPcs = true,
-
 	disableInstabilityPausing = true,
-
 	launcherPort = 4444
 }
 
 local function onExtensionLoaded()
-	for k,v in pairs(defaultSettings) do
+	for k, v in pairs(defaultSettings) do
 		if settings.getValue(k) == nil then settings.setValue(k, v) end
 		--settings.impl.defaults[k] = { 'local', v }
 		--settings.impl.defaultValues[k] = v
@@ -37,10 +46,12 @@ end
 
 
 local function setNickname(x)
-	log('M', 'setNickname', 'Nickname Set To: '..x)
+	log('M', 'setNickname', 'Nickname Set To: ' .. x)
 	Nickname = x
 end
 
+--- Returns the nickname of the player.
+--- @return string nickname
 local function getNickname()
 	return Nickname
 end
@@ -71,7 +82,6 @@ local function checkForOldConfig()
 		FS:removeFile(oldfav)
 		movedfiles = true
 	end
-
 	local oldconf = '/BeamMP/config.json'
 	local newconf = '/settings/BeamMP/config.json'
 	if FS:fileExists(oldconf) then
@@ -166,23 +176,17 @@ local function onDeserialized(data)
 	PlayerServerID = data.PlayerServerID
 end
 
--- Events
-M.onSerialize = onSerialize
+M.acceptTos = acceptTos
+M.getConfig = getConfig
+M.getFavorites = getFavorites
+M.getNickname = getNickname
+M.getPlayerServerID = getPlayerServerID
 M.onDeserialized = onDeserialized
 M.onExtensionLoaded = onExtensionLoaded
-
--- Functions
-M.getPlayerServerID = getPlayerServerID
-M.setPlayerServerID = setPlayerServerID
-
-M.getNickname = getNickname
-M.setNickname = setNickname
-
-M.getFavorites = getFavorites
-M.setFavorites = setFavorites
-M.getConfig = getConfig
+M.onSerialize = onSerialize
 M.setConfig = setConfig
-
-M.acceptTos = acceptTos
+M.setFavorites = setFavorites
+M.setNickname = setNickname
+M.setPlayerServerID = setPlayerServerID
 
 return M

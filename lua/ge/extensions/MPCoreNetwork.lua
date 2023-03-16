@@ -11,14 +11,15 @@ local M = {}
 
 -- ============= VARIABLES =============
 -- launcher
+--- @type socket.tcp
 local TCPLauncherSocket -- Launcher socket
 local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
 -- server
-local serverList -- server list JSON
-local currentServer = nil -- Table containing the current server IP, port and name
+local serverList           -- server list JSON
+local currentServer = nil  -- Table containing the current server IP, port and name
 local isMpSession = false
 local isGoingMpSession = false
 local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap", "LoadingMapNow", "Playing"
@@ -38,41 +39,87 @@ C  -> The client asks for the server's mods
 --]]
 -- ============= VARIABLES =============
 
+--- @alias MPPacketType
+--- | '"Z"' # Launcher version
+--- | '"B"' # Server list
+--- | '"QG"' # Leave server
+--- | '"C"' # Server mods
 
+local function assert(condition, message)
+	if not condition then
+		log('E', 'MPCoreNetwork', message)
+		error(message, 2)
+	end
+	return condition
+end
 
--- ============= LAUNCHER RELATED =============
-local function send(s)
-	if not TCPLauncherSocket then return end
-	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
-	if error then
+local function canSendTCP()
+	return select(2, pcall(function()
+			return type(TCPLauncherSocket.send) == 'function'
+		end)) == true
+end
+
+--- Sends a packet to the launcher.
+--- @param packet string
+--- @param size number
+local function sendTCP(packet, size)
+	local bytes, error, index = TCPLauncherSocket:send(size .. '>' .. packet)
+	if type(error) == 'string' then
 		isConnecting = false
-		log('E', 'send', 'Socket error: '..error)
-		if error == "closed" and launcherConnected then
+		log('E', 'send', 'Socket error: ' .. error)
+		if error == 'closed' and launcherConnected then
 			log('W', 'send', 'Lost launcher connection!')
-			if launcherConnected then guihooks.trigger('LauncherConnectionLost') end
+			if launcherConnected then
+				guihooks.trigger('LauncherConnectionLost')
+			end
 			launcherConnected = false
-		elseif error == "Socket is not connected" then
+		elseif error == 'Socket is not connected' then
 
 		else
-			log('E', 'send', 'Stopped at index: '..index..' while trying to send '..#s..' bytes of data.')
+			log('E', 'send', 'Stopped at index: ' .. index .. ' while trying to send ' .. size .. ' bytes of data.')
 		end
 	else
-		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
+		if not launcherConnected then
+			launcherConnected = true
+			isConnecting = false
+			onLauncherConnected()
+		end
+		if settings.getValue("showDebugOutput") then
+			log('M', 'send', 'Sending Data (' .. bytes .. '): ' .. size)
+		end
+	end
+end
 
-		if not settings.getValue("showDebugOutput") then return end
-		log('M', 'send', 'Sending Data ('..bytes..'): '..s)
+local sendQueue = {}
+
+--- Attempts to send a packet to the launcher.
+--- @param s string | MPPacketType
+local function send(s)
+	if canSendTCP() then
+		local size = #s
+		local packet = s
+		if sendQueue[packet] then
+			log('W', 'send', 'BeamMP made an attempt to send a duplicate packet. It was rejected.')
+			return
+		end
+		sendQueue[packet] = true
+		pcall(sendTCP, packet, size)
+		sendQueue[packet] = nil
 	end
 end
 
 local function connectToLauncher(silent)
-	--log('M', 'connectToLauncher', debug.traceback())
 	isConnecting = true
-	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
+	if not silent then
+		log('W', 'connectToLauncher',
+			"connectToLauncher called! Current connection status: " .. tostring(launcherConnected))
+	end
 	if not launcherConnected then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
-		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444))
+		TCPLauncherSocket:settimeout(0)          -- Set timeout to 0 to avoid freezing
+		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'),
+			(settings.getValue("launcherPort") or 4444))
 		send('A') -- immediately heartbeat to check if connection was established
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -81,7 +128,7 @@ local function connectToLauncher(silent)
 end
 
 local function disconnectLauncher(reconnect) --unused, for debug purposes
-	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: '..tostring(reconnect))
+	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: ' .. tostring(reconnect))
 	if launcherConnected then
 		log('W', 'disconnectLauncher', "Disconnecting from launcher")
 		TCPLauncherSocket:close()
@@ -114,7 +161,7 @@ end
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
 	identifiers = identifiers and jsonEncode(identifiers) or ""
-	send('N:'..identifiers)
+	send('N:' .. identifiers)
 end
 local function autoLogin()
 	send('Nc')
@@ -132,14 +179,15 @@ local function sendBeamMPInfo()
 	if not servers or tableIsEmpty(servers) then return log('M', 'No server list.') end
 	guihooks.trigger('onServerListReceived', servers) -- server list
 	local p, s = 0, 0
-	for _,server in pairs(servers) do
+	for _, server in pairs(servers) do
 		p = p + server.players
 		s = s + 1
 	end
 	-- send player and server values to front end.
-	guihooks.trigger('BeamMPInfo', { -- <players> count on the bottom of the screen
-		players = ''..p,
-		servers = ''..s
+	guihooks.trigger('BeamMPInfo', {
+		-- <players> count on the bottom of the screen
+		players = '' .. p,
+		servers = '' .. s
 	})
 end
 
@@ -170,20 +218,23 @@ end
 
 local function getCurrentServer()
 	--dump(currentServer)
-  return currentServer
+	return currentServer
 end
 
 local function setCurrentServer(ip, port, name)
 	currentServer = {
-		ip		   = ip,
-		port	   = port,
-		name	   = name
+		ip   = ip,
+		port = port,
+		name = name
 	}
 end
 
 -- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
 local function connectToServer(ip, port, name)
-	if isMpSession then log('W', 'connectToServer', 'Already in an MP Session! Leaving server!') M.leaveServer() end
+	if isMpSession then
+		log('W', 'connectToServer', 'Already in an MP Session! Leaving server!')
+		M.leaveServer()
+	end
 
 	if ip and port then -- Direct connect
 		currentServer = nil
@@ -193,10 +244,10 @@ local function connectToServer(ip, port, name)
 		return
 	end
 
-	local ipString = currentServer.ip..':'..currentServer.port
-	send('C'..ipString..'')
+	local ipString = currentServer.ip .. ':' .. currentServer.port
+	send('C' .. ipString .. '')
 
-	log('M', 'connectToServer', "Connecting to server "..ipString)
+	log('M', 'connectToServer', "Connecting to server " .. ipString)
 	status = "waitingForResources"
 end
 
@@ -210,19 +261,22 @@ local function parseMapName(map) -- TODO: finish
 	mapName = mapName:gsub('info.json', '')
 	mapName = mapName:gsub('.mis', '')
 	mapName = mapName:gsub('/', '')
-	for _,v in pairs(core_levels.getList()) do
+	for _, v in pairs(core_levels.getList()) do
 		if string.match(string.lower(v.misFilePath), map) or string.match(string.lower(v.misFilePath), mapName) then
 			log('M', 'loadLevel', 'Found match!')
-			log('M', 'loadLevel', mapName..' matches '..v.misFilePath)
+			log('M', 'loadLevel', mapName .. ' matches ' .. v.misFilePath)
 			return v.misFilePath
 		end
 	end
 end
 
 local function loadLevel(map)
-	if getMissionFilename() ~= "" then log("W","loadLevel", "REMOVING ALL VEHICLES") core_vehicles.removeAll() end -- remove old vehicles if joining a server with the same map
+	if getMissionFilename() ~= "" then
+		log("W", "loadLevel", "REMOVING ALL VEHICLES")
+		core_vehicles.removeAll()
+	end -- remove old vehicles if joining a server with the same map
 
-	log("W","loadLevel", "loading map " ..map)
+	log("W", "loadLevel", "loading map " .. map)
 	log('W', 'loadLevel', 'Loading level from MPCoreNetwork -> freeroam_freeroam.startFreeroam')
 
 	spawn.preventPlayerSpawning = true -- don't spawn default vehicle when joining server
@@ -242,7 +296,7 @@ local function loadLevel(map)
 		return
 	end
 	if not core_levels.expandMissionFileName(map) then --and not parsedMapName then
-		UI.updateLoading("lMap "..map.." not found. Check your server config.")
+		UI.updateLoading("lMap " .. map .. " not found. Check your server config.")
 		status = ""
 		M.leaveServer()
 		return
@@ -300,7 +354,7 @@ end
 -- ============= OTHERS =============
 local function requestMap()
 	log('M', 'requestMap', 'Requesting map!')
-	send('M') -- request map string from launcher 
+	send('M') -- request map string from launcher
 	status = "LoadingMap"
 	loadMods = false
 end
@@ -312,7 +366,7 @@ local function handleU(params)
 	if code == "l" then
 		if data == "start" then
 		end
-		if string.match(data, 'Loading') then send('R'..math.random()) end --get the launcher to copy all the mods without loading them one by one
+		if string.match(data, 'Loading') then send('R' .. math.random()) end --get the launcher to copy all the mods without loading them one by one
 		if data == "done" and status == "LoadingResources" and not loadMods then --load all the mods once they have been copied over
 			loadMods = true
 			MPModManager.loadServerMods()
@@ -321,7 +375,7 @@ local function handleU(params)
 		--	leaveServer(false) -- reset session variables
 		--end
 	elseif code == "p" and isMpSession then
-		UI.setPing(data.."")
+		UI.setPing(data .. "")
 		positionGE.setPing(data)
 	end
 end
@@ -329,11 +383,20 @@ end
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
-	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
+	['B'] = function(params)
+		serverList = params;
+		sendBeamMPInfo()
+	end,                                       -- Server list received
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
-	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
+	['M'] = function(params)
+		log('W', 'HandleNetwork', 'Received Map! ' .. params)
+		loadLevel(params)
+	end,
 	['N'] = function(params) loginReceived(params) end,
-	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
+	['L'] = function(params)
+		setMods(params)
+		status = "LoadingResources"
+	end, --received after sending 'C' packet
 	['Z'] = function(params) launcherVersion = params; end,
 }
 
@@ -350,13 +413,13 @@ local function onUpdate(dt)
 	heartbeatTimer = heartbeatTimer + dt
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		while(true) do
+		while (true) do
 			local received, stat, partial = TCPLauncherSocket:receive()
 			if not received or received == "" then
 				break
 			end
 			if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
-				log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+				log('M', 'onUpdate', 'Receiving Data (' .. #received .. '): ' .. received)
 			end
 
 			-- break it up into code + data
@@ -403,8 +466,8 @@ end
 
 
 runPostJoin = function() -- gets called once loaded into a map
-	log('W', 'runPostJoin', 'isGoingMpSession: '..tostring(isGoingMpSession))
-	log('W', 'runPostJoin', 'isMpSession: '..tostring(isMpSession))
+	log('W', 'runPostJoin', 'isGoingMpSession: ' .. tostring(isGoingMpSession))
+	log('W', 'runPostJoin', 'isMpSession: ' .. tostring(isMpSession))
 	if freeroam_freeroam.onPlayerCameraReady == nop and originalFreeroamOnPlayerCameraReady then -- restore function to original once already loaded in so it works if user switches to freeroam
 		freeroam_freeroam.onPlayerCameraReady = originalFreeroamOnPlayerCameraReady
 	end
@@ -425,22 +488,24 @@ local function onClientStartMission()
 end
 
 local function onClientEndMission(mission)
-	log('W', 'onClientEndMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
-	log('W', 'onClientEndMission', 'isMpSession: '..tostring(isMpSession))
+	log('W', 'onClientEndMission', 'isGoingMpSession: ' .. tostring(isGoingMpSession))
+	log('W', 'onClientEndMission', 'isMpSession: ' .. tostring(isMpSession))
 	if not isGoingMpSession then -- leaves server when loading into another freeroam map from an MP sesison
 		leaveServer(false)
 	end
 end
 
-local function onUiChangedState (curUIState, prevUIState)
+local function onUiChangedState(curUIState, prevUIState)
 	if curUIState == 'menu' and getMissionFilename() == "" then -- required due to game bug that happens if UI is reloaded on the main menu
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
 	end
 end
 
 local function onSerialize()
-	return {currentServer = currentServer,
-			isMpSession = isMpSession}
+	return {
+		currentServer = currentServer,
+		isMpSession = isMpSession
+	}
 end
 local function onDeserialized(data)
 	log('M', 'onDeserialized', dumps(data))
@@ -492,7 +557,7 @@ M.onSerialize          = onSerialize
 M.onDeserialized       = onDeserialized
 
 M.requestMap           = requestMap
-M.send = send
+M.send                 = send
 
 
 -- TODO: finish all this

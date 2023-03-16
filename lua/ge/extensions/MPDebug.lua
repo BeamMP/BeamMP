@@ -8,9 +8,12 @@
 --- @class MPDebug: table
 local M = {}
 
+--- Assertion function that logs to the output along with the error.
+--- @return boolean
 local function assert(condition, message)
 	if not condition then
 		log('E', 'MPDebug', message)
+		error(message, 2)
 	end
 	return condition
 end
@@ -47,50 +50,20 @@ local function tpPlayerToPos(...)
 	spawn.safeTeleport(activeVehicle, position, targetVehRot, false)
 end
 
-local function getPlayerNames() --returns a table where the key is username, value is an owned vehid (can be ignored)
-	if not MPVehicleGE then return {} end
-
-	local names = {}
-
-	for k,v in pairs(MPVehicleGE.getNicknameMap() or {}) do
-		names[v] = k
-	end
-	return names
-end
-
-
-M.dependencies = {"ui_imgui"}
+--- The dependancies of this extension.
+M.dependencies = { 'ui_imgui' }
 
 local gui_module = require("ge/extensions/editor/api/gui")
 local gui = {setupEditorGuiTheme = nop}
 local im = ui_imgui
-
 local ui_strings = {}
-
-local function getTranslations(_, content)
-	local data = jsonDecode(content)
-	if data and data[1] and data[1] == "translationFileUpdate" then
-		local languageMap = require('utils/languageMap')
-		local selectedLang = Lua:getSelectedLanguage()
-
-		ui_strings = data[2] and data[2][selectedLang] and data[2][selectedLang]['translations'] or {}
-		log('M', 'getTranslations', "language data received, cached "..languageMap.resolve(selectedLang) or "unknown language")
-	end
-end
 
 local function onExtensionLoaded()
 	gui_module.initialize(gui)
 	gui.registerWindow("MPplayerList", im.ImVec2(256, 256))
 	gui.registerWindow("MPspawnTeleport", im.ImVec2(256, 256))
 	gui.registerWindow("MPnetworkPerf", im.ImVec2(256, 256))
-
-
-
-	--guihooks.updateListener("beammpui", getTranslations)
-	--core_modmanager.requestTranslations()
 end
-
-
 
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
@@ -102,12 +75,17 @@ local function drawPlayerList()
 
 	im.Columns(5, "Bar") -- gimme ein táblázat
 
-	im.Text("Name") im.NextColumn()
-	--im.Text("Ping") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
+	im.Text("Name")
+	im.NextColumn()
+
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
 
 	local listIndex = 1
 	for playerID, player in pairs(players) do

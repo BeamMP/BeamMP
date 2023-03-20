@@ -106,15 +106,9 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
-	local text = reason ~= "" and ("Reason: " .. reason) or ""
+	local text = type(reason) == 'string' and reason or 'No reason has been provided for this disconnection.'
 	log('M', 'quitMP', "Quit MP Called! reason: " .. tostring(reason))
-	UI.showMdDialog({
-		dialogtype = "alert",
-		title = "You have been disconnected from the server",
-		text = text,
-		okText = "Return to menu",
-		okLua = "MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
-	})
+	if messageBox("Disconnected", "You\'ve been disconnected from the server.\n\n" .. text .. "\n\nWould you like to return to the main menu?", 3, 0) == 1 then MPCoreNetwork.leaveServer(true) end
 end
 
 -------------------------------------------------------------------------------

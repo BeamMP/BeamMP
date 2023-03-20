@@ -45,14 +45,7 @@ end
 
 local dataMap = {}
 
-local function sendDataAsync(s)
-	if not TCPSocket then
-		return log('E', 'sendData', 'Socket not connected!')
-	elseif type(s) ~= 'string' then
-		return log('E', 'sendData', 'Data must be a string!')
-	elseif not dataMap[s] and s:sub(1, 1) ~= 'A' then
-		return log('E', 'sendData', 'Data already queued!') --  ...(' .. tostring(s)  .. ')')
-	end
+local function parseAndSend(s)
 	local bytes, error, index = TCPSocket:send(#s .. '>' .. s)
 	if type(error) == 'string' then
 		log('E', 'sendData', 'Socket error: ' .. error)
@@ -72,12 +65,22 @@ local function sendDataAsync(s)
 			log('M', 'sendData', 'Sending data... (' .. #s .. ' bytes)')
 		end
 		if MPDebug then
-			coroutine.resume(coroutine.create(function(x)
-				MPDebug.packetSent(bytes)
-				dataMap[x] = nil
-			end), s)
+			MPDebug.packetSent(bytes)
 		end
 	end
+end
+
+local function sendDataAsync(s)
+	if not TCPSocket then
+		return log('E', 'sendData', 'Socket not connected!')
+	elseif type(s) ~= 'string' then
+		return log('E', 'sendData', 'Data must be a string!')
+	elseif dataMap[s] then
+		return log('E', 'sendData', 'Data already queued!')
+	end
+	dataMap[s] = true
+	pcall(parseAndSend, s)
+	dataMap[s] = nil
 end
 
 local function sendData(s)

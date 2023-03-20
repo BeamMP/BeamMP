@@ -5,7 +5,6 @@
 -- All work by Titch2000, jojos38 & 20dka.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 ==================================================================================]==]
-
 --- @class MPGameNetwork
 local M = {}
 
@@ -27,7 +26,7 @@ local function connectToLauncher()
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444) +
-		1)
+			1)
 		M.send('A')
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -106,7 +105,7 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
-	if messageBox("Disconnected", "You\'ve been disconnected from the server.\n\n" .. type(reason) == 'string' and reason or 'No reason has been provided for this disconnection.' .. "\n\nWould you like to return to the main menu?", 3, 0) == 1 then
+	if messageBox("Disconnected", "You\'ve been disconnected from the server.\n\n" .. (type(reason) == 'string' and reason or 'No reason has been provided for this disconnection.') .. "\n\nWould you like to return to the main menu?", 3, 0) == 1 then
 		MPCoreNetwork.leaveServer(true)
 	end
 end
@@ -204,23 +203,23 @@ end
 -------------------------------------------------------------------------------
 
 local HandleNetwork = {
-	['V'] = function(params) MPInputsGE.handle(params) end,                              -- inputs and gears
+	['V'] = function(params) MPInputsGE.handle(params) end,  -- inputs and gears
 	['W'] = function(params) MPElectricsGE.handle(params) end,
-	['X'] = function(params) nodesGE.handle(params) end,                                 -- currently disabled
-	['Y'] = function(params) MPPowertrainGE.handle(params) end,                          -- powertrain related things like diff locks and transfercases
-	['Z'] = function(params) positionGE.handle(params) end,                              -- position and velocity
-	['O'] = function(params) MPVehicleGE.handle(params) end,                             -- all vehicle spawn, modification and delete events, couplers
+	['X'] = function(params) nodesGE.handle(params) end,     -- currently disabled
+	['Y'] = function(params) MPPowertrainGE.handle(params) end, -- powertrain related things like diff locks and transfercases
+	['Z'] = function(params) positionGE.handle(params) end,  -- position and velocity
+	['O'] = function(params) MPVehicleGE.handle(params) end, -- all vehicle spawn, modification and delete events, couplers
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
 	['J'] = function(params)
 		MPUpdatesGE.onPlayerConnect()
 		UI.showNotification(params)
-	end,                                                                                 -- A player joined
-	['L'] = function(params) UI.showNotification(params) end,                            -- Display custom notification
-	['S'] = function(params) sessionData(params) end,                                    -- Update Session Data
-	['E'] = function(params) handleEvents(params) end,                                   -- Event For another Resource
-	['T'] = function(params) quitMP(params) end,                                         -- Player Kicked Event (old, doesn't contain reason)
-	['K'] = function(params) quitMP(params) end,                                         -- Player Kicked Event (new, contains reason)
-	['C'] = function(params) UI.chatMessage(params) end,                                 -- Chat Message Event
+	end,                                                   -- A player joined
+	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
+	['S'] = function(params) sessionData(params) end,      -- Update Session Data
+	['E'] = function(params) handleEvents(params) end,     -- Event For another Resource
+	['T'] = function(params) quitMP(params) end,           -- Player Kicked Event (old, doesn't contain reason)
+	['K'] = function(params) quitMP(params) end,           -- Player Kicked Event (new, contains reason)
+	['C'] = function(params) UI.chatMessage(params) end,   -- Chat Message Event
 }
 
 

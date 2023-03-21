@@ -250,6 +250,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
         controller: 'MultiplayerServersController as multiplayermenu',
         backState: 'BACK_TO_MENU'
       })
+      .state('menu.multiplayer.featured', {
+        url: '/mpfeatured',
+        templateUrl: '/ui/modules/multiplayer/featured.partial.html',
+        controller: 'MultiplayerFeaturedController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
       .state('menu.multiplayer.recent', {
         url: '/mprecent',
         templateUrl: '/ui/modules/multiplayer/recent.partial.html',

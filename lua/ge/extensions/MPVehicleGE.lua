@@ -209,11 +209,11 @@ end
     Name ..........: setVehicleRole
     Description ...: Sets custom roles and names to player vehicles
     Parameters ....: playerIDVehicleID          - (String) X-Y. Where X is the PlayerID and Y the Players Vehicle ID
-                   : roleName                   - (String) The name of the Custom Role. Settings this to "BLANK" will make the player tag invinsible
+                   : roleName                   - (String) The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
                    : displayName                - (Optional) (String) sets a Custom player name
     Return values .: 
         if success : 1
-		if error   : 0                          - playerIDVehicleID is invalid. Vehicle or Player might not exists
+        if error   : 0                          - playerIDVehicleID is invalid. Vehicle or Player might not exists
                    : -1                         - roleName does not exist
     Remarks .......: Give 0 in a parameter to not use a Optional. Already existing vehicle roles will be overwritten.
     Example .......: setVehicleRole("0-0", "MYROLE", "Unknown")
@@ -244,8 +244,8 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: removeVehicleRole
     Description ...: Removes a custom Role and Name from a Vehicle
-    Parameters ....: playerIDVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players Vehicle ID
-    Return values .: nil                               - if success and error
+    Parameters ....: playerIDVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
+    Return values .: nil                               - if success or error
     Remarks .......: 
     Example .......: removeVehicleRole("0-0")
     Author         : Neverless
@@ -256,19 +256,19 @@ end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: createRole
-    Description ...: Creates a custom role to be used with X
+    Description ...: Creates a custom role to be used with setVehicleRole
     Parameters ....: roleName                  - (String) Name of the Role
                    : tag                       - (Optional) (String) Sets a optional tag: Playername [Long tag]
                    : shortag                   - (Optional) (String) Sets a optional shorttag: Playername [Short Tag]
-				   : red                       - (Optional) (Integer) 0 to 255
-				   : green                     - (Optional) (Integer) 0 to 255
-				   : blue                      - (Optional) (Integer) 0 to 255
+                   : red                       - (Optional) (Integer) 0 to 255
+                   : green                     - (Optional) (Integer) 0 to 255
+                   : blue                      - (Optional) (Integer) 0 to 255
     Return values .: 
         if success : true
-		if error   : false                     - When a color value is below 0 or when the roleName == "BLANK"
+        if error   : false                     - When a color value is below 0 or when the roleName == "BLANK"
     Remarks .......: Give 0 in a parameter to not use a Optional. Already existing Roles with that name will be overwritten.
     Example .......: createRole("MYROLE", "Custom", 252, 107, 003)
-                   : a player with that role would have a Orange background Playertag: PlayerName [*Custom]
+                   : a player with that role would have a Orange background and custom tag: PlayerName [*Custom]
     Author         : Neverless
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function createRole(roleName, tag, shorttag, red, green, blue)
@@ -301,7 +301,7 @@ end
     Parameters ....: roleName                   - (String) Name of the Role
     Return values .: 
         if success : true
-		if error   : false                      - When the Role doesnt exist
+        if error   : false                      - When the Role doesnt exist
     Remarks .......: 
     Example .......: removeRole("MYROLE")
     Author         : Neverless

@@ -41,14 +41,11 @@ local roleToInfo = {
 	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" }
 }
 
---[[
-	Format - same as roleToInfo
-	Just contains the Custom roles created with createRole()
---]]
+--[[Format - same as roleToInfo
+	Just contains the Custom roles created with createRole() --]]
 local custom_roleToInfo = {}
 
---[[
-	Format
+--[[ Format
 	
 	{"X1-Y1":
 		{"Role":"ROLENAME",
@@ -58,8 +55,8 @@ local custom_roleToInfo = {}
 	}
 	
 	This Format allows for custom Playerroles and Displaynames for each Multiplayer Vehicle.	
-	A defaultrole is "BLANK", which disables the name tag drawing for individual cars
---]]
+	A defaultrole is "BLANK", which disables the name tag drawing for individual cars --]]
+
 local custom_vehicleRoles = {}
 
 local simplified_vehicles = {
@@ -208,7 +205,7 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setVehicleRole
     Description ...: Sets custom roles and names to player vehicles
-    Parameters ....: playerIDVehicleID          - (String) X-Y. Where X is the PlayerID and Y the Players Vehicle ID
+    Parameters ....: playerIDVehicleID          - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
                    : roleName                   - (String) The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
                    : displayName                - (Optional) (String) sets a Custom player name
     Return values .: 

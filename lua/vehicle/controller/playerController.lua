@@ -300,7 +300,7 @@ local function updateFixedStep(dt)
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopRearRight * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopRearLeft * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
-  
+
   ----BeamMP----
   if playerInfo.anyPlayerSeated then
 	  electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x

@@ -5,70 +5,65 @@
 -- Debug menus for monitoring BeamMP performance and more
 --====================================================================================
 
+--- @class MPDebug: table
 local M = {}
 
+--- Assertion function that logs to the output along with the error.
+--- @return boolean
+local function assert(condition, message)
+	if not condition then
+		log('E', 'MPDebug', message)
+		error(message, 2)
+	end
+	return condition
+end
 
-local function tpPlayerToPos(targetPos)
-	local activeVehicle = be:getPlayerVehicle(0)
+--- @param position Point3F
+--- @return boolean
+local function isPoint3F(position)
+	return select(2, pcall(function()
+		return type(position.xyz) == 'function'
+	end)) == true
+end
 
-	if activeVehicle then
-
-		local targetVehRot = quatFromDir(vec3(activeVehicle:getDirectionVector()), vec3(activeVehicle:getDirectionVectorUp()))
-
-		local vec3Pos = vec3(targetPos[1], targetPos[2], targetPos[3])
-
-		spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
+local function parsePoint3F(...)
+	local x, y, z = ...
+	if type(x) == 'table' then
 		return
-	else
-		log('M', 'tpPlayerToPos', 'no active vehicle')
+			x.x or x[1] or 0,
+			x.y or x[2] or 0,
+			x.z or x[3] or 0
 	end
+	return
+		type(x) == 'number' and x or 0,
+		type(y) == 'number' and y or 0,
+		type(z) == 'number' and z or 0
 end
 
-
-local function getPlayerNames() --returns a table where the key is username, value is an owned vehid (can be ignored)
-	if not MPVehicleGE then return {} end
-
-	local names = {}
-
-	for k,v in pairs(MPVehicleGE.getNicknameMap() or {}) do
-		names[v] = k
-	end
-	return names
+--- Teleport the local user's vehicle to the specified position.
+--- @vararg Point3F | number
+local function tpPlayerToPos(...)
+	local activeVehicle = assert(be:getPlayerVehicle(0), 'The current user has no active vehicle.')
+	local targetVehRot = quatFromDir(vec3(activeVehicle:getDirectionVector()), vec3(activeVehicle:getDirectionVectorUp()))
+	local position = vec3(parsePoint3F(...))
+	assert(isPoint3F(position), 'Invalid position.')
+	spawn.safeTeleport(activeVehicle, position, targetVehRot, false)
 end
 
-
-M.dependencies = {"ui_imgui"}
+--- The dependancies of this extension.
+M.dependencies = { 'ui_imgui' }
 
 local gui_module = require("ge/extensions/editor/api/gui")
 local gui = {setupEditorGuiTheme = nop}
 local im = ui_imgui
-
 local ui_strings = {}
-
-local function getTranslations(_, content)
-	local data = jsonDecode(content)
-	if data and data[1] and data[1] == "translationFileUpdate" then
-		local languageMap = require('utils/languageMap')
-		local selectedLang = Lua:getSelectedLanguage()
-
-		ui_strings = data[2] and data[2][selectedLang] and data[2][selectedLang]['translations'] or {}
-		log('M', 'getTranslations', "language data received, cached "..languageMap.resolve(selectedLang) or "unknown language")
-	end
-end
 
 local function onExtensionLoaded()
 	gui_module.initialize(gui)
 	gui.registerWindow("MPplayerList", im.ImVec2(256, 256))
 	gui.registerWindow("MPspawnTeleport", im.ImVec2(256, 256))
 	gui.registerWindow("MPnetworkPerf", im.ImVec2(256, 256))
-
-
-
-	--guihooks.updateListener("beammpui", getTranslations)
-	--core_modmanager.requestTranslations()
 end
-
-
 
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
@@ -80,12 +75,17 @@ local function drawPlayerList()
 
 	im.Columns(5, "Bar") -- gimme ein táblázat
 
-	im.Text("Name") im.NextColumn()
-	--im.Text("Ping") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
-	im.Text("") im.NextColumn()
+	im.Text("Name")
+	im.NextColumn()
+
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
+	im.Text("")
+	im.NextColumn()
 
 	local listIndex = 1
 	for playerID, player in pairs(players) do
@@ -169,7 +169,7 @@ local receivedPacketSize = 0
 
 local function avgData(data)
 	local sum, max = 0, 0
-	
+
 	for i=0, im.GetLengthArrayFloat(data) do
 		sum = sum + data[i]
 		if data[i] > max then max = data[i] end
@@ -245,25 +245,27 @@ local function onUpdate()
 	drawNetworkPerf()
 end
 
-
+--- Fired when a packet is sent
+--- @param bytes number
 local function packetSent(bytes)
-	sentPacketCount = sentPacketCount+1
-	sentPacketSize = sentPacketSize + (bytes or 0)
+	sentPacketCount = sentPacketCount + 1
+	if type(bytes) == 'number' then
+		sentPacketSize = sentPacketSize + bytes
+	end
 end
+
+--- Fired when a packet is received
+--- @param bytes number
 local function packetReceived(bytes)
-	receivedPacketCount = receivedPacketCount+1
-	receivedPacketSize = receivedPacketSize + (bytes or 0)
+	receivedPacketCount = receivedPacketCount + 1
+	if type(bytes) == 'number' then
+		receivedPacketSize = receivedPacketSize + bytes
+	end
 end
 
-
-M.onExtensionLoaded		= onExtensionLoaded
-M.onUpdate				= onUpdate
---M.showUI				= showUI
---M.hideUI				= hideUI
-
-
+M.onExtensionLoaded = onExtensionLoaded
+M.onUpdate = onUpdate
 M.packetSent = packetSent
 M.packetReceived = packetReceived
-
 
 return M

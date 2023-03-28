@@ -6,3 +6,6 @@ New-Launcher-Server/node_modules/
 beamng-mp.rar
 old/*
 BeamMP.zip
+.editorconfig
+.vscode/
+doc/

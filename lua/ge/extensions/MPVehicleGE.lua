@@ -39,24 +39,6 @@ local roleToInfo = {
 	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" }
 }
 
---[[Format - same as roleToInfo
-	Just contains the Custom roles created with createRole() --]]
-local custom_roleToInfo = {}
-
---[[ Format
-	
-	{"X1-Y1":
-		{"Role":"ROLENAME",
-		"DisplayName":"PlayerName"},
-	"X2-Y2":
-		..
-	}
-	
-	This Format allows for custom Playerroles and Displaynames for each Multiplayer Vehicle.	
-	A defaultrole is "BLANK", which disables the name tag drawing for individual cars --]]
-
-local custom_vehicleRoles = {}
-
 local simplified_vehicles = {
 	coupe = "simple_traffic_coupe",
 	covet = "simple_covet",
@@ -74,28 +56,73 @@ local settingsCache = {
 }
 -- ============= VARIABLES =============
 
---[[
-	Players Format - correct me if im wrong
-	
+local custom_roleToInfo = {}
+--[[ Custom_roleToInfo Format - same as roleToInfo
+	Just contains the Custom roles created with createRole() --]]
+
+local custom_vehicleRoles = {}
+--[[ Custom_vehicleRoles Format
 	{
-	PlayerID:                                                - (Integer)
+	serverVehicleID_1: (table)                             - eg. 0-0
 		{
-		name: PlayerName,                                    - (String)
-		
-		}	
+		Role: (String)                                     - Contains the RoleName eg. BLANK
+		DisplayName: (String)                              - Contains the Name to display for this vehicle
+		},
+	serverVehicleID_N	
 	}
+	
+	This Format allows for custom Playerroles and Displaynames for each Multiplayer Vehicle.	
+	A defaultrole is "BLANK", which disables the name tag drawing for individual cars --]]
 
---]]
 local players = {}
-
---[[
-	Vehicles Format - correct me if im wrong
+--[[ Players Format
 	
 	{
-	serverVehicleID: (Table)                               - eg. 0-0
+	PlayerID_1: (Integer)                                  - eg. 0
+		{
+		name: (String),                                    - Holds the PlayerName linked to this PlayerID
+		activeVehicleID: (Integer)                         - Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be his own or another players.
+		shortname: (String),                               - Shortend name for the Short names Option
+		playerID: (Integer),                               - Server side PlayerID
+		isLocal = (Bool),                                  - If this is our Player
+		ping: (Integer),                                   - Ping
+		nickPrefixes = (Table)                             - Contains all Prefixes
+			{
+			tagSource_1: (String),                         - The data is the added text
+			tagSource_N: (String)
+			},
+		nickSuffixes = (Table)                             - Contains all Suffixes
+			{
+			tagSource_1: (String),                         - The data is the added text
+			tagSource_N: (String)
+			},
+		role: (Table)
+			{
+			name: (String),                                - Name of the Role
+			backcolor: (ColorI or nil),                    - Color, tag and shorttag are taken from roleToInfo if available. Otherwise nil
+			tag: (String or nil),
+			shortag: (String or nil)
+			},
+		vehicles: (table)                                  - %#% Unsure about this tables contents
+			{
+			gameVehicleID: (Integer),
+			isSpawned: (Bool),
+			jbeam: (String),                               - jbm name of the Vehicle
+			IDs: (%#%)                                     - Looks like a table containing id = id.
+			}
+		},
+	PlayerID_N: ..
+	}
+--]]
+
+local vehicles = {}
+--[[ Vehicles Format
+	
+	{
+	serverVehicleID_1: (Table)                             - eg. 0-0
 		{
 		name: (String),                                    - Holds the OwnerName of that Vehicle
-		gameVehicleID: (Integer),
+		gameVehicleID: (Integer),                          - The ID that the Game gives this Vehicle on Spawn
 		jbeam: (String),                                   - jbm name of the Vehicle
 		remoteVehID: (Integer),                            - gameVehicleID of the Client who owns this Vehicle
 		serverVehicleString: (Integer),                    - serverVehicleID as eg. 0 not 0-0
@@ -108,7 +135,8 @@ local players = {}
 		rotation: (nil),                                   - Appears to be Unused
 		spectators: (Table)                                - Holds PlayerID's that are spectating this Vehicle at the moment
 			{
-			PlayerID: (Bool)                               - Always True
+			PlayerID_1: (Bool),                            - Always True
+			PlayerID_N: ..
 			},
 		spawnQueue: (Table or nil)                         - Holds the data required for when the Spawn is triggered.
 			{
@@ -117,25 +145,28 @@ local players = {}
 			data: (String)                                 - ROLE:PlayerName:serverVehicleID:{vehicleJson}
 			},
 		editQueue: (String or nil)                         - Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}
-		}
+		},
+	serverVehicleID_N: ..
 	}
-
 --]]
-local vehicles = {}
 
---[[
-	VehiclesMap Format -- correct me if im wrong
+local vehiclesMap = {}
+--[[ VehiclesMap Format
 	
 	{
-	gameVehicleID: (Integer)                               - serverVehicleID as eg. 0 not 0-0
+	gameVehicleID_1: (Integer),                             - serverVehicleID as eg. 0 not 0-0
+	gameVehicleID_N: ..
 	}
 --]]
-local vehiclesMap = {}
 
---[[
-	DistanceMap Format -- correct me if im wrong
---]]
 local distanceMap = {}
+--[[ DistanceMap Format
+	
+	{
+	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle
+	gameVehicleID_N: ..
+	}
+--]]
 
 -- VV============== FUNCTIONS USEABLE BY SCRIPTERS ==============VV
 
@@ -188,9 +219,9 @@ end
     Description ...: Returns this Vehicles table
     Parameters ....: serverVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
     Return values .: 
-        if success : %#%
+        if success : (Table)
         if error   : nil                             - If the serverVehicleID is invalid
-    Remarks .......: 
+    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
     Example .......: getVehicleByServerID("0-0")
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByServerID(serverVehicleID)
@@ -202,9 +233,9 @@ end
     Description ...: Returns this Vehicles table
     Parameters ....: gameVehicleID                   - (Integer)
     Return values .: 
-        if success : %#%
+        if success : (Table)
         if error   : nil                             - If either the getGameVehicleID is unknown or invalid
-    Remarks .......: 
+    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
     Example .......: getVehicleByGameID(11171)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByGameID(gameVehicleID)
@@ -213,12 +244,12 @@ end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: getPlayerByName
-    Description ...: Returns the Players %#% and ID
+    Description ...: Returns this Players table and ID
     Parameters ....: name                            - (String) The Players Name
     Return values .: 
-        if success : (%#%) player, (Integer) playerID
+        if success : (Table) player, (Integer) playerID
         if error   : nil                             - If the Playername is either unknown or invalid
-    Remarks .......: 
+    Remarks .......: Search for "Players Format" to see the Structure of this table
     Example .......: getPlayerByName("Neverless")
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getPlayerByName(name)
@@ -268,8 +299,8 @@ end
     Description ...: Returns a table of all Client owned Vehicles
     Parameters ....: none
     Return values .: 
-        if success : (table) {gameVehicleID = {vehicletable} %#%
-    Remarks .......: 
+        if success : (Table) {gameVehicleID = {vehicletable}}
+    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
     Example .......: getOwnMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getOwnMap()
@@ -288,7 +319,7 @@ end
     Description ...: Returns a table of all known multiplayer vehicles
     Parameters ....: none
     Return values .: 
-        if success : (table) {serverVehicleID = gameVehicleID}
+        if success : (Table) {serverVehicleID = gameVehicleID}
     Remarks .......: 
     Example .......: getVehicleMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
@@ -307,8 +338,8 @@ end
     Description ...: Returns a table containing the distances from each Multiplayer Vehicle to the Clients Point of View % currently selected Vehicle %#%
     Parameters ....: none
     Return values .: 
-        if success : (table) %#%
-    Remarks .......: 
+        if success : (Table)
+    Remarks .......: Search for "DistanceMap Format" to see the Structure of this table
     Example .......: getDistanceMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
@@ -318,7 +349,7 @@ end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: getNicknameMap
-    Description ...: Returns a table containing all Multiplayer Vehicles with their Ownernames
+    Description ...: Returns a table containing all Multiplayer gameVehicleID's with their Ownernames
     Parameters ....: none
     Return values .: 
         if success : (table) {gameVehicleID = OwnerName of the Vehicle}
@@ -339,12 +370,13 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setPlayerNickPrefix
     Description ...: Adds a Prefix to a given PlayerTag
-    Parameters ....: targetName                         - %#%
-                   : tagSource                          - %#%
-                   : text                               - %#%
+    Parameters ....: targetName                         - PlayerName
+                   : tagSource                          - Name of the Prefix
+                   : text                               - Text to add
     Return values .: nil
     Remarks .......: 
-    Example .......: No
+    Example .......: setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
+                   : Will change the playertag like this: 1st. Neverless
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function setPlayerNickPrefix(targetName, tagSource, text)
 	if targetName == nil then return end
@@ -359,12 +391,13 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setPlayerNickSuffix
     Description ...: Adds a Suffic to a given PlayerTag
-    Parameters ....: targetName                        - %#%
-                   : tagsource                         - %#%
-                   : text                              - %#%
+    Parameters ....: targetName                        - PlayerName
+                   : tagsource                         - Name of the Prefix
+                   : text                              - Text to add
     Return values .: nil
     Remarks .......: 
-    Example .......: No
+    Example .......: setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")
+                   : Will change the playertag like this: Neverless [In Mission]
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function setPlayerNickSuffix(targetName, tagSource, text)
 	if targetName == nil then return end
@@ -393,8 +426,8 @@ end
     Description ...: Returns the whole Players table
     Parameters ....: none
     Return values .: 
-        if success : (table) %#%
-    Remarks .......: 
+        if success : (table)
+    Remarks .......: Search for "Players Format" to see the Structure of this table
     Example .......: getPlayers()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getPlayers() return players end
@@ -405,7 +438,7 @@ local function getPlayers() return players end
     Parameters ....: none
     Return values .: 
         if success : (table) %#%
-    Remarks .......: 
+    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
     Example .......: getVehicles()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicles() return vehicles end

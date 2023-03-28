@@ -76,11 +76,30 @@ local settingsCache = {
 }
 -- ============= VARIABLES =============
 
+--[[
+	Format
+--]]
 local players = {}
+
+--[[
+	Format
+--]]
 local vehicles = {}
 
 -- ============== MAP HELPERS ==============
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function getGameVehicleID(serverVehicleID)
 	if vehicles[serverVehicleID] and vehicles[serverVehicleID].gameVehicleID then
 		return vehicles[serverVehicleID].gameVehicleID
@@ -90,6 +109,18 @@ local function getGameVehicleID(serverVehicleID)
 	end
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function getServerVehicleID(gameVehicleID)
 	if type(gameVehicleID) == "string" then
 		log('W', "getServerVehicleID", "received string ID, please use numbers")
@@ -105,14 +136,50 @@ local function getServerVehicleID(gameVehicleID)
 	return vehiclesMap[gameVehicleID]
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByServerID(serverVehicleID)
 	return vehicles[serverVehicleID]
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByGameID(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]]
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function getPlayerByName(name)
 	for playerID, player in pairs(players) do
 		if player.name == name then
@@ -128,6 +195,18 @@ local function localVehiclesExist()
 	return false
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function isOwn(gameVehicleID)
 	if type(gameVehicleID) == "string" then
 		log('W', "isOwn", "received string ID, please use numbers")
@@ -136,11 +215,35 @@ local function isOwn(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]] and vehicles[vehiclesMap[gameVehicleID]].isLocal == true or false
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 -- SET IF A USER OWNS A VEHICLE
 local function setOwn(serverVehicleID, own)
 	vehicles[serverVehicleID].isLocal = own
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
 	local own = {}
@@ -153,6 +256,18 @@ local function getOwnMap()
 	return own
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL VEHICLES IDS
 local function getVehicleMap()
 	local t = {}
@@ -163,11 +278,35 @@ local function getVehicleMap()
 	return t
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
 local function getDistanceMap()
 	return distanceMap
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a [localID] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
@@ -179,6 +318,18 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 	return nicknameSimple
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function setPlayerNickPrefix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do
@@ -188,6 +339,19 @@ local function setPlayerNickPrefix(targetName, tagSource, text)
 		end
 	end
 end
+
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function setPlayerNickSuffix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do
@@ -198,6 +362,18 @@ local function setPlayerNickSuffix(targetName, tagSource, text)
 	end
 end
 
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: 
+    Description ...: 
+    Parameters ....: 
+                   : 
+                   : 
+    Return values .: 
+        if success : 
+        if error   : 
+    Remarks .......: 
+    Example .......: No
+-----------------------------------------------------------------------------------------------------------------------------------]]
 local function hideNicknames(hide)
 	nicknamesAllowed = not hide
 end

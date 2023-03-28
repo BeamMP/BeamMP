@@ -323,7 +323,6 @@ end
     Remarks .......: 
     Example .......: getVehicleMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
--- RETURN THE MAP OF ALL VEHICLES IDS
 local function getVehicleMap()
 	local t = {}
 
@@ -342,7 +341,6 @@ end
     Remarks .......: Search for "DistanceMap Format" to see the Structure of this table
     Example .......: getDistanceMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
--- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
 local function getDistanceMap()
 	return distanceMap
 end
@@ -356,7 +354,6 @@ end
     Remarks .......: 
     Example .......: getNicknameMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
--- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a [localID] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
 

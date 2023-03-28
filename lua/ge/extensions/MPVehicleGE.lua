@@ -89,16 +89,14 @@ local vehicles = {}
 -- ============== MAP HELPERS ==============
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getGameVehicleID
+    Description ...: Resolves the serverVehicleID (X-Y) into the gameVehicleID
+    Parameters ....: serverVehicleID                - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (Integer) GameVehicleID (eg. 11171)
+        if error   : -1                             - If either the Vehicle is unknown or the Vehicle is not Spawned on the Client
     Remarks .......: 
-    Example .......: No
+    Example .......: getGameVehicleID("0-0")
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getGameVehicleID(serverVehicleID)
 	if vehicles[serverVehicleID] and vehicles[serverVehicleID].gameVehicleID then
@@ -110,16 +108,14 @@ local function getGameVehicleID(serverVehicleID)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getServerVehicleID
+    Description ...: Resolves the gameVehicleID into the serverVehicleID
+    Parameters ....: gameVehicleID                  - (Integer)
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (String) serverVehicleID (eg. 0-0)
+        if error   : nil                            - If either the gameVehicleID is unknown or Invalid
     Remarks .......: 
-    Example .......: No
+    Example .......: getServerVehicleID(11171)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getServerVehicleID(gameVehicleID)
 	if type(gameVehicleID) == "string" then
@@ -137,48 +133,42 @@ local function getServerVehicleID(gameVehicleID)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getVehicleByServerID
+    Description ...: Returns this Vehicles table
+    Parameters ....: serverVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
     Return values .: 
-        if success : 
-        if error   : 
+        if success : %#%
+        if error   : nil                             - If the serverVehicleID is invalid
     Remarks .......: 
-    Example .......: No
+    Example .......: getVehicleByServerID("0-0")
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByServerID(serverVehicleID)
 	return vehicles[serverVehicleID]
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getVehicleByGameID
+    Description ...: Returns this Vehicles table
+    Parameters ....: gameVehicleID                   - (Integer)
     Return values .: 
-        if success : 
-        if error   : 
+        if success : %#%
+        if error   : nil                             - If either the getGameVehicleID is unknown or invalid
     Remarks .......: 
-    Example .......: No
+    Example .......: getVehicleByGameID(11171)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getVehicleByGameID(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]]
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getPlayerByName
+    Description ...: Returns the Players %#% and ID
+    Parameters ....: name                            - (String) The Players Name
     Return values .: 
-        if success : 
-        if error   : 
+        if success : player, playerID
+        if error   : nil                             - If the Playername is either unknown or invalid
     Remarks .......: 
-    Example .......: No
+    Example .......: getPlayerByName("Neverless")
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function getPlayerByName(name)
 	for playerID, player in pairs(players) do
@@ -188,24 +178,14 @@ local function getPlayerByName(name)
 	end
 end
 
-local function localVehiclesExist()
-	for k, v in pairs(vehicles) do
-		if v.isLocal then return true end
-	end
-	return false
-end
-
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: isOwn
+    Description ...: Tells if the given gameVehicleID belongs to a clients own car
+    Parameters ....: gameVehicleID                   - (Integer)
     Return values .: 
-        if success : 
-        if error   : 
-    Remarks .......: 
-    Example .......: No
+        if success : (Bool)
+    Remarks .......: Returns false when the Vehicle is not owned by the Client and when the Vehicle does not exist
+    Example .......: isOwn(11171)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function isOwn(gameVehicleID)
 	if type(gameVehicleID) == "string" then
@@ -216,15 +196,15 @@ local function isOwn(gameVehicleID)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
-    Return values .: 
-        if success : 
-        if error   : 
-    Remarks .......: 
+    Name ..........: setOwn
+    Description ...: #
+    Parameters ....: #
+                   : #
+                   : #
+    Return values .: # IS THIS FUNCTION ACTUALLY MENT TO BE USED BY SCRIPTERS?
+        if success : #
+        if error   : #
+    Remarks .......: #
     Example .......: No
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- SET IF A USER OWNS A VEHICLE
@@ -233,16 +213,13 @@ local function setOwn(serverVehicleID, own)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getOwnMap
+    Description ...: Returns a table of all Client owned Vehicles
+    Parameters ....: none
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (table) {gameVehicleID = {vehicletable} %#%
     Remarks .......: 
-    Example .......: No
+    Example .......: getOwnMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
@@ -257,16 +234,13 @@ local function getOwnMap()
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getVehicleMap
+    Description ...: Returns a table of all known multiplayer vehicles
+    Parameters ....: none
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (table) {serverVehicleID = gameVehicleID}
     Remarks .......: 
-    Example .......: No
+    Example .......: getVehicleMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL VEHICLES IDS
 local function getVehicleMap()
@@ -279,16 +253,13 @@ local function getVehicleMap()
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getDistanceMap
+    Description ...: Returns a table containing the distances from each Multiplayer Vehicle to the Clients Point of View % currently selected Vehicle %#%
+    Parameters ....: none
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (table) %#%
     Remarks .......: 
-    Example .......: No
+    Example .......: getDistanceMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL VEHICLES DISTANCES FROM THE CURRENT ONE
 local function getDistanceMap()
@@ -296,16 +267,13 @@ local function getDistanceMap()
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
+    Name ..........: getNicknameMap
+    Description ...: Returns a table containing all Multiplayer Vehicles with their Ownernames
+    Parameters ....: none
     Return values .: 
-        if success : 
-        if error   : 
+        if success : (table) {gameVehicleID = OwnerName of the Vehicle}
     Remarks .......: 
-    Example .......: No
+    Example .......: getNicknameMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- RETURN THE MAP OF ALL NICKNAMES
 local function getNicknameMap() -- Returns a [localID] = "username" table of all vehicles, including own ones
@@ -319,14 +287,12 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
-    Return values .: 
-        if success : 
-        if error   : 
+    Name ..........: setPlayerNickPrefix
+    Description ...: Adds a Prefix to a given PlayerTag
+    Parameters ....: targetName                         - %#%
+                   : tagSource                          - %#%
+                   : text                               - %#%
+    Return values .: nil
     Remarks .......: 
     Example .......: No
 -----------------------------------------------------------------------------------------------------------------------------------]]
@@ -341,14 +307,12 @@ local function setPlayerNickPrefix(targetName, tagSource, text)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
-    Return values .: 
-        if success : 
-        if error   : 
+    Name ..........: setPlayerNickSuffix
+    Description ...: Adds a Suffic to a given PlayerTag
+    Parameters ....: targetName                        - %#%
+                   : tagsource                         - %#%
+                   : text                              - %#%
+    Return values .: nil
     Remarks .......: 
     Example .......: No
 -----------------------------------------------------------------------------------------------------------------------------------]]
@@ -363,16 +327,12 @@ local function setPlayerNickSuffix(targetName, tagSource, text)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: 
-    Description ...: 
-    Parameters ....: 
-                   : 
-                   : 
-    Return values .: 
-        if success : 
-        if error   : 
-    Remarks .......: 
-    Example .......: No
+    Name ..........: hideNicknames
+    Description ...: Hides the PlayerTag drawing all together from BeamMP
+    Parameters ....: hide                              - (Bool)
+    Return values .: nil
+    Remarks .......: Usefull when you want to hide all Playertags or when you want to custom draw Player Tags
+    Example .......: hideNicknames(true)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 local function hideNicknames(hide)
 	nicknamesAllowed = not hide
@@ -440,7 +400,7 @@ end
         if success : true
         if error   : false                     - When a color value is below 0 or when the roleName == "BLANK"
     Remarks .......: Give 0 in a parameter to not use a Optional. Already existing Roles with that name will be overwritten.
-    Example .......: createRole("MYROLE", "Custom", 252, 107, 003)
+    Example .......: createRole("MYROLE", "Custom", "Ctm", 252, 107, 003)
                    : a player with that role would have a Orange background and custom tag: PlayerName [*Custom]
     Author         : Neverless
 -----------------------------------------------------------------------------------------------------------------------------------]]
@@ -491,6 +451,14 @@ local function removeRole(roleName)
 	
 	custom_roleToInfo[roleName] = nil
 	return true
+end
+
+-- this is not a function that is callable from outside of this .lua
+local function localVehiclesExist()
+	for k, v in pairs(vehicles) do
+		if v.isLocal then return true end
+	end
+	return false
 end
 
 -- ============= OBJECTS =============

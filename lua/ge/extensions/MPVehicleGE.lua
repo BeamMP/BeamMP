@@ -96,28 +96,27 @@ local players = {}
 		{
 		name: (String),                                    - Holds the OwnerName of that Vehicle
 		gameVehicleID: (Integer),
-		jbeam: %#%,
+		jbeam: (String),                                   - jbm name of the Vehicle
 		remoteVehID: (Integer),                            - gameVehicleID of the Client who owns this Vehicle
-		serverVehicleString: %#%,                          - json?
+		serverVehicleString: (Integer),                    - serverVehicleID as eg. 0 not 0-0
 		ownerID: (Integer),                                - The PlayerID of the Player that owns this Vehicle
 		ownerName: (String),                               - Holds the OwnerName of that Vehicle (Duplicate?)
 		isLocal: (Bool),                                   - True when this Vehicle is owned by this Client
-		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World
-		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client manually (becomes a black blob) - is my assumption right? %#%
-		positions: %#%,
-		rotation: %#%,
-		spectators: (Table)
+		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World. Is False when isDeleted
+		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client manually (becomes a black blob)
+		position: (nil),                                   - Appears to be Unused
+		rotation: (nil),                                   - Appears to be Unused
+		spectators: (Table)                                - Holds PlayerID's that are spectating this Vehicle at the moment
 			{
-			%#%
+			PlayerID: (Bool)                               - Always True
 			},
-		spawnQueue: (Table)
+		spawnQueue: (Table or nil)                         - Holds the data required for when the Spawn is triggered.
 			{
-			%#%
+			playerNickname: (String),                      - OwnerName of the Vehicle to be Spawned
+			serverVehicleID: (String),                     - serverVehicleID as eg. 0-0
+			data: (String)                                 - ROLE:PlayerName:serverVehicleID:{vehicleJson}
 			},
-		editQueue: (Table)
-			{
-			%#%
-			},
+		editQueue: (String or nil)                         - Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}
 		}
 	}
 
@@ -126,6 +125,10 @@ local vehicles = {}
 
 --[[
 	VehiclesMap Format -- correct me if im wrong
+	
+	{
+	gameVehicleID: (Integer)                               - serverVehicleID as eg. 0 not 0-0
+	}
 --]]
 local vehiclesMap = {}
 

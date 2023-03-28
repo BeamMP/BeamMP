@@ -11,8 +11,6 @@ local M = {}
 -- ============= VARIABLES =============
 local lastResetTime = {}
 local oneSecCounter = 0
-local vehiclesMap = {}
-local distanceMap = {}
 local nicknamesAllowed = true
 local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
@@ -77,20 +75,70 @@ local settingsCache = {
 -- ============= VARIABLES =============
 
 --[[
-	Format
+	Players Format - correct me if im wrong
+	
+	{
+	PlayerID:                                                - (Integer)
+		{
+		name: PlayerName,                                    - (String)
+		
+		}	
+	}
+
 --]]
 local players = {}
 
 --[[
-	Format
+	Vehicles Format - correct me if im wrong
+	
+	{
+	serverVehicleID: (Table)                               - eg. 0-0
+		{
+		name: (String),                                    - Holds the OwnerName of that Vehicle
+		gameVehicleID: (Integer),
+		jbeam: %#%,
+		remoteVehID: (Integer),                            - gameVehicleID of the Client who owns this Vehicle
+		serverVehicleString: %#%,                          - json?
+		ownerID: (Integer),                                - The PlayerID of the Player that owns this Vehicle
+		ownerName: (String),                               - Holds the OwnerName of that Vehicle (Duplicate?)
+		isLocal: (Bool),                                   - True when this Vehicle is owned by this Client
+		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World
+		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client manually (becomes a black blob) - is my assumption right? %#%
+		positions: %#%,
+		rotation: %#%,
+		spectators: (Table)
+			{
+			%#%
+			},
+		spawnQueue: (Table)
+			{
+			%#%
+			},
+		editQueue: (Table)
+			{
+			%#%
+			},
+		}
+	}
+
 --]]
 local vehicles = {}
 
--- ============== MAP HELPERS ==============
+--[[
+	VehiclesMap Format -- correct me if im wrong
+--]]
+local vehiclesMap = {}
+
+--[[
+	DistanceMap Format -- correct me if im wrong
+--]]
+local distanceMap = {}
+
+-- VV============== FUNCTIONS USEABLE BY SCRIPTERS ==============VV
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: getGameVehicleID
-    Description ...: Resolves the serverVehicleID (X-Y) into the gameVehicleID
+    Description ...: Resolves the serverVehicleID into the gameVehicleID
     Parameters ....: serverVehicleID                - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
     Return values .: 
         if success : (Integer) GameVehicleID (eg. 11171)
@@ -165,7 +213,7 @@ end
     Description ...: Returns the Players %#% and ID
     Parameters ....: name                            - (String) The Players Name
     Return values .: 
-        if success : player, playerID
+        if success : (%#%) player, (Integer) playerID
         if error   : nil                             - If the Playername is either unknown or invalid
     Remarks .......: 
     Example .......: getPlayerByName("Neverless")
@@ -221,7 +269,6 @@ end
     Remarks .......: 
     Example .......: getOwnMap()
 -----------------------------------------------------------------------------------------------------------------------------------]]
--- RETURN THE MAP OF OWNED VEHICLES
 local function getOwnMap()
 	local own = {}
 
@@ -339,6 +386,28 @@ local function hideNicknames(hide)
 end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: getPlayers
+    Description ...: Returns the whole Players table
+    Parameters ....: none
+    Return values .: 
+        if success : (table) %#%
+    Remarks .......: 
+    Example .......: getPlayers()
+-----------------------------------------------------------------------------------------------------------------------------------]]
+local function getPlayers() return players end
+
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
+    Name ..........: getVehicles
+    Description ...: Returns the whole Vehicles table
+    Parameters ....: none
+    Return values .: 
+        if success : (table) %#%
+    Remarks .......: 
+    Example .......: getVehicles()
+-----------------------------------------------------------------------------------------------------------------------------------]]
+local function getVehicles() return vehicles end
+
+--[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setVehicleRole
     Description ...: Sets custom roles and names to player vehicles
     Parameters ....: playerIDVehicleID          - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
@@ -452,6 +521,8 @@ local function removeRole(roleName)
 	custom_roleToInfo[roleName] = nil
 	return true
 end
+
+-- ============== INTERNAL FUNCTIONS ==============
 
 -- this is not a function that is callable from outside of this .lua
 local function localVehiclesExist()
@@ -638,9 +709,6 @@ function Vehicle:onSerialized()
 	}
 	return t
 end
-
-local function getPlayers() return players end
-local function getVehicles() return vehicles end
 
 local function serializePlayers()
 	local t = {}

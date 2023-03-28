@@ -63,12 +63,12 @@ local custom_roleToInfo = {}
 local custom_vehicleRoles = {}
 --[[ Custom_vehicleRoles Format
 	{
-	serverVehicleID_1: (table)                             - eg. 0-0
+	serverVehicleID_1: (Table)                             - eg. 0-0
 		{
 		Role: (String)                                     - Contains the RoleName eg. BLANK
 		DisplayName: (String)                              - Contains the Name to display for this vehicle
 		},
-	serverVehicleID_N	
+	serverVehicleID_N: ..
 	}
 	
 	This Format allows for custom Playerroles and Displaynames for each Multiplayer Vehicle.	
@@ -78,7 +78,7 @@ local players = {}
 --[[ Players Format
 	
 	{
-	PlayerID_1: (Integer)                                  - eg. 0
+	PlayerID_1: (Table)                                  - eg. 0
 		{
 		name: (String),                                    - Holds the PlayerName linked to this PlayerID
 		activeVehicleID: (Integer)                         - Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be his own or another players.
@@ -103,7 +103,7 @@ local players = {}
 			tag: (String or nil),
 			shortag: (String or nil)
 			},
-		vehicles: (table)                                  - %#% Unsure about this tables contents
+		vehicles: (Table)                                  - %#% Unsure about this tables contents
 			{
 			gameVehicleID: (Integer),
 			isSpawned: (Bool),
@@ -163,7 +163,7 @@ local distanceMap = {}
 --[[ DistanceMap Format
 	
 	{
-	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle
+	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle in %#%
 	gameVehicleID_N: ..
 	}
 --]]

@@ -163,7 +163,7 @@ local distanceMap = {}
 --[[ DistanceMap Format
 	
 	{
-	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle in %#%
+	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle in meters
 	gameVehicleID_N: ..
 	}
 --]]

@@ -81,7 +81,7 @@ local players = {}
 	PlayerID_1: (Table)                                  - eg. 0
 		{
 		name: (String),                                    - Holds the PlayerName linked to this PlayerID
-		activeVehicleID: (Integer)                         - Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be his own or another players.
+		activeVehicleID: (Integer)                         - Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be the players own or another players.
 		shortname: (String),                               - Shortend name for the Short names Option
 		playerID: (Integer),                               - Server side PlayerID
 		isLocal = (Bool),                                  - If this is our Player
@@ -103,12 +103,12 @@ local players = {}
 			tag: (String or nil),
 			shortag: (String or nil)
 			},
-		vehicles: (Table)                                  - %#% Unsure about this tables contents
+		vehicles: (Table)                                  - Note from the Author of this Documentation: Im unsure about this tables contents
 			{
 			gameVehicleID: (Integer),
 			isSpawned: (Bool),
 			jbeam: (String),                               - jbm name of the Vehicle
-			IDs: (%#%)                                     - Looks like a table containing id = id.
+			IDs: (Unknown)                                 - Looks like a table containing id = id.
 			}
 		},
 	PlayerID_N: ..
@@ -129,8 +129,8 @@ local vehicles = {}
 		ownerID: (Integer),                                - The PlayerID of the Player that owns this Vehicle
 		ownerName: (String),                               - Holds the OwnerName of that Vehicle (Duplicate?)
 		isLocal: (Bool),                                   - True when this Vehicle is owned by this Client
-		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World. Is False when isDeleted
-		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client manually (becomes a black blob)
+		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World. Is set to False when isDeleted
+		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client (it becomes a black blob)
 		position: (nil),                                   - Appears to be Unused
 		rotation: (nil),                                   - Appears to be Unused
 		spectators: (Table)                                - Holds PlayerID's that are spectating this Vehicle at the moment
@@ -279,15 +279,12 @@ end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setOwn
-    Description ...: #
-    Parameters ....: #
-                   : #
-                   : #
-    Return values .: # IS THIS FUNCTION ACTUALLY MENT TO BE USED BY SCRIPTERS?
-        if success : #
-        if error   : #
-    Remarks .......: #
-    Example .......: No
+    Description ...: Sets the given Vehicles owner Status for this Client
+    Parameters ....: serverVehicleID                - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
+                   : own                            - (Bool)
+    Return values .: none
+    Remarks .......: Note from the documentation author: I dont think this function is save to be used by a Scripter. So if you, as a Scripter, use it then make sure that you know the Consequences
+    Example .......: setOwn("0-0", true)
 -----------------------------------------------------------------------------------------------------------------------------------]]
 -- SET IF A USER OWNS A VEHICLE
 local function setOwn(serverVehicleID, own)
@@ -334,7 +331,7 @@ end
 
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: getDistanceMap
-    Description ...: Returns a table containing the distances from each Multiplayer Vehicle to the Clients Point of View % currently selected Vehicle %#%
+    Description ...: Returns a table containing the distances from each Multiplayer Vehicle to this Clients Point of View
     Parameters ....: none
     Return values .: 
         if success : (Table)
@@ -367,9 +364,9 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setPlayerNickPrefix
     Description ...: Adds a Prefix to a given PlayerTag
-    Parameters ....: targetName                         - PlayerName
-                   : tagSource                          - Name of the Prefix
-                   : text                               - Text to add
+    Parameters ....: targetName                         - (String) PlayerName
+                   : tagSource                          - (String) Name of the Prefix
+                   : text                               - (String) Text to add
     Return values .: nil
     Remarks .......: 
     Example .......: setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
@@ -388,9 +385,9 @@ end
 --[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
     Name ..........: setPlayerNickSuffix
     Description ...: Adds a Suffic to a given PlayerTag
-    Parameters ....: targetName                        - PlayerName
-                   : tagsource                         - Name of the Prefix
-                   : text                              - Text to add
+    Parameters ....: targetName                        - (String) PlayerName
+                   : tagsource                         - (String) Name of the Prefix
+                   : text                              - (String) Text to add
     Return values .: nil
     Remarks .......: 
     Example .......: setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")

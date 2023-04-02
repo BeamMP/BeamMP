@@ -3,6 +3,8 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
+--- MPVehicleGE API
+-- @module MPVehicleGE
 
 
 local M = {}
@@ -26,6 +28,11 @@ local original_spawnNewVehicle
 local original_replaceVehicle
 local original_spawnDefault
 
+
+--- Contains Information about Backend authorized Roles
+-- @table roleToInfo
+-- @tfield roleToInfo_subtable RoleName Contains the Role Specific Data
+-- @usage local roleInfo = roleToInfo["USER"]
 local roleToInfo = {
 	['USER']	= { backcolor = ColorI(000, 000, 000, 127), tag = "", shorttag = "" },
 	['EA']		= { backcolor = ColorI(069, 000, 150, 127), tag = " [Early Access]", shorttag = " [EA]" },
@@ -39,6 +46,17 @@ local roleToInfo = {
 	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" }
 }
 
+--- (in table) Specifies the table in roleToInfo
+-- @table roleToInfo_subtable
+-- @tfield ColorI backcolor Contains the RGBA Values
+-- @tfield string tag Contains the Tag
+-- @tfield string shorttag Contains the Short version of Tag
+-- @usage local roleInfo = roleToInfo["USER"].tag
+-- @usage local roleInfo = roleToInfo["USER"].backcolor.r
+
+--- Contains the known simplified Vehicle versions
+-- @table simplified_vehicles
+-- @tfield string JBeamName
 local simplified_vehicles = {
 	coupe = "simple_traffic_coupe",
 	covet = "simple_covet",
@@ -56,130 +74,124 @@ local settingsCache = {
 }
 -- ============= VARIABLES =============
 
+--- Contains the Custom Roles created with createRole
+-- @table custom_roleToInfo
+-- @tfield roleToInfo_subtable RoleName_1 Contains the Role Specific Data
+-- @tfield roleToInfo_subtable RoleName_N ..
+-- @usage local roleInfo = custom_roleToInfo["CUSTOMROLE"]
 local custom_roleToInfo = {}
---[[ Custom_roleToInfo Format - same as roleToInfo
-	Just contains the Custom roles created with createRole() --]]
 
+
+--- Contains only the Vehicles that have set Custom roles to it with setVehicleRole
+-- @table custom_vehicleRoles
+-- @tfield custom_vehicleRoles_subtable serverVehicleID_1 Contains Role and DisplayName of that Vehicle
+-- @tfield custom_vehicleRoles_subtable serverVehicleID_N ..
+-- @usage local roleInfo = custom_vehicleRoles["0-0"]
 local custom_vehicleRoles = {}
---[[ Custom_vehicleRoles Format
-	{
-	serverVehicleID_1: (Table)                             - eg. 0-0
-		{
-		Role: (String)                                     - Contains the RoleName eg. BLANK
-		DisplayName: (String)                              - Contains the Name to display for this vehicle
-		},
-	serverVehicleID_N: ..
-	}
-	
-	This Format allows for custom Playerroles and Displaynames for each Multiplayer Vehicle.	
-	A defaultrole is "BLANK", which disables the name tag drawing for individual cars --]]
 
+--- (in table) Specifies the table in custom_vehicleRoles
+-- @table custom_vehicleRoles_subtable
+-- @tfield string Role Contains the RoleName for this Vehicle
+-- @tfield string DisplayName Contains the custom Displayname for this Vehicle
+-- @usage local displayname = custom_roleToInfo["0-0"].DisplayName
+
+--- Contains all known Players
+-- @table players
+-- @tfield players_subtable PlayerID_1 Contains all information known about this Player
+-- @tfield players_subtable PlayerID_N ..
 local players = {}
---[[ Players Format
-	
-	{
-	PlayerID_1: (Table)                                  - eg. 0
-		{
-		name: (String),                                    - Holds the PlayerName linked to this PlayerID
-		activeVehicleID: (Integer)                         - Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be the players own or another players.
-		shortname: (String),                               - Shortend name for the Short names Option
-		playerID: (Integer),                               - Server side PlayerID
-		isLocal = (Bool),                                  - If this is our Player
-		ping: (Integer),                                   - Ping
-		nickPrefixes = (Table)                             - Contains all Prefixes
-			{
-			tagSource_1: (String),                         - The data is the added text
-			tagSource_N: (String)
-			},
-		nickSuffixes = (Table)                             - Contains all Suffixes
-			{
-			tagSource_1: (String),                         - The data is the added text
-			tagSource_N: (String)
-			},
-		role: (Table)
-			{
-			name: (String),                                - Name of the Role
-			backcolor: (ColorI or nil),                    - Color, tag and shorttag are taken from roleToInfo if available. Otherwise nil
-			tag: (String or nil),
-			shortag: (String or nil)
-			},
-		vehicles: (Table)                                  - Note from the Author of this Documentation: Im unsure about this tables contents
-			{
-			gameVehicleID: (Integer),
-			isSpawned: (Bool),
-			jbeam: (String),                               - jbm name of the Vehicle
-			IDs: (Unknown)                                 - Looks like a table containing id = id.
-			}
-		},
-	PlayerID_N: ..
-	}
---]]
 
+--- (in table) Specifies the table in players
+-- @table players_subtable
+-- @tfield string name Holds the PlayerName linked to this PlayerID
+-- @tfield integer activeVehicleID Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be the players own vehicle or another players vehicle.
+-- @tfield string shortname Shortend name of the Shortnames Option
+-- @tfield integer playerID ID that the Server has given this Player
+-- @tfield bool isLocal true if this player is this client
+-- @tfield integer ping Contains the current known ping of this Player
+-- @tfield players_nickPrefixes nickPrefixes Contains all Prefixes for Tag drawing
+-- @tfield players_nickSuffixes nickSuffixes Contains all Suffixes for Tag drawing
+-- @tfield players_role role Contains information about the backend authorized Role of this Player
+-- @tfield players_vehicles vehicles Note from the Author of this Documentation: Im unsure about this tables contents
+
+--- (in table) Specifies the nickPrefixes table for players_subtable
+-- @table players_nickPrefixes
+-- @tfield string tagSource_1 Contains the added Text
+-- @tfield string tagSource_N Contains the added Text
+
+--- (in table) Specifies the nickSuffixes table for players_subtable
+-- @table players_nickSuffixes
+-- @tfield string tagSource_1 Contains the added Text
+-- @tfield string tagSource_N Contains the added Text
+
+--- (in table) Specifies the role table for players_subtable
+-- @table players_role
+-- @tfield string name Name of the Role
+-- @tfield ColorI backcolor RGBA color. Can be nil
+-- @tfield string tag Can be nil
+-- @tfield string shorttag Can be nil
+
+--- (in table) Specifies the vehicles table for players_subtable. Note from the Author of this Documentation: Im unsure about this tables contents
+-- @table players_vehicles
+-- @tfield integer gameVehicleID
+-- @tfield bool isSpawned
+-- @tfield unknown IDs
+
+--- Contains all known Multiplayer Vehicles
+-- @table vehicles
+-- @tfield vehicles_subtable serverVehicleID_1 Contains all known vehicle related Information
+-- @tfield vehicles_subtable serverVehicleID_N ..
 local vehicles = {}
---[[ Vehicles Format
-	
-	{
-	serverVehicleID_1: (Table)                             - eg. 0-0
-		{
-		name: (String),                                    - Holds the OwnerName of that Vehicle
-		gameVehicleID: (Integer),                          - The ID that the Game gives this Vehicle on Spawn
-		jbeam: (String),                                   - jbm name of the Vehicle
-		remoteVehID: (Integer),                            - gameVehicleID of the Client who owns this Vehicle
-		serverVehicleString: (Integer),                    - serverVehicleID as eg. 0 not 0-0
-		ownerID: (Integer),                                - The PlayerID of the Player that owns this Vehicle
-		ownerName: (String),                               - Holds the OwnerName of that Vehicle (Duplicate?)
-		isLocal: (Bool),                                   - True when this Vehicle is owned by this Client
-		isSpawned: (Bool),                                 - True once the Vehicle is no longer quoed and Available in the World. Is set to False when isDeleted
-		isDeleted: (Bool),                                 - True once the Vehicle has been deleted by the Client (it becomes a black blob)
-		position: (nil),                                   - Appears to be Unused
-		rotation: (nil),                                   - Appears to be Unused
-		spectators: (Table)                                - Holds PlayerID's that are spectating this Vehicle at the moment
-			{
-			PlayerID_1: (Bool),                            - Always True
-			PlayerID_N: ..
-			},
-		spawnQueue: (Table or nil)                         - Holds the data required for when the Spawn is triggered.
-			{
-			playerNickname: (String),                      - OwnerName of the Vehicle to be Spawned
-			serverVehicleID: (String),                     - serverVehicleID as eg. 0-0
-			data: (String)                                 - ROLE:PlayerName:serverVehicleID:{vehicleJson}
-			},
-		editQueue: (String or nil)                         - Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}
-		},
-	serverVehicleID_N: ..
-	}
---]]
 
+--- (in table) Specifies the table in vehicles
+-- @table vehicles_subtable
+-- @tfield string name Holds the OwnerName of this Vehicle
+-- @tfield integer gameVehicleID The ID that the game gives this Vehicle on Spawn
+-- @tfield string jbeam JBeam name of the Vehicle
+-- @tfield integer remoteVehID gameVehicleID on the Client that owns this Vehicle
+-- @tfield integer serverVehicleString serverVehicleID as eg. 0 not 0-0
+-- @tfield integer ownerID The PlayerID of the player that owns this Vehicle
+-- @tfield ownerName Holds the OwnerName of that Vehicle (duplicate?)
+-- @tfield bool isLocal True when this Vehicle is owned by this Client
+-- @tfield bool isSpawned True once the Vehicle is no longer quoed and Available in the World. Is set to False when isDeleted
+-- @tfield bool isDeleted True once the Vehicle has been deleted by the Client (it becomes a black blob)
+-- @tfield nil position Appears to be unused
+-- @tfield nil rotation Appears to be unused
+-- @tfield vehicles_spectators spectators Holds PlayerID's that are spectating this Vehicle at the moment
+-- @tfield vehicles_spawnQueue spawnQueue Holds the data required for when the Spawn is triggered. Is nil if this Vehicles Spawn is not qued. Format = serverVehicleID:{vehicleJson}
+-- @tfield string editQueue Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}. Is nil is no Edit for this Vehicle is qued
+
+--- (in table) Specifies the spectators table in vehicles_subtable. Every player in this table is currently spectating this vehicle. The bool is always true
+-- @table vehicles_spectators
+-- @tfield bool PlayerID_1
+-- @tfield bool PlayerID_N
+
+--- (in table) Specifies the spawnQueue table in vehicles_subtable
+-- @table vehicles_spawnQueue
+-- @tfield string playerNickname OwnerName of the Vehicle to be Spawned
+-- @tfield string serverVehicleID serverVehicleID as eg. 0-0
+-- @tfield string data Format = ROLE:PlayerName:serverVehicleID:{vehicleJson}
+
+--- Resolves gameVehicleID to serverVehicleID
+-- @table vehiclesMap
+-- @tfield integer gameVehicleID_1 Contains serverVehicleID as eg. 0 not 0-0
+-- @tfield integer gameVehicleID_N ..
 local vehiclesMap = {}
---[[ VehiclesMap Format
-	
-	{
-	gameVehicleID_1: (Integer),                             - serverVehicleID as eg. 0 not 0-0
-	gameVehicleID_N: ..
-	}
---]]
 
+--- Contains the Distances in meters from the Clients POV to the known Multiplayer Vehicles
+-- @table distanceMap
+-- @tfield float gameVehicleID_1
+-- @tfield float gameVehicleID_N
 local distanceMap = {}
---[[ DistanceMap Format
-	
-	{
-	gameVehicleID_1: (Float),                               - Distance from the Players Point of View to this Vehicle in meters
-	gameVehicleID_N: ..
-	}
---]]
+
 
 -- VV============== FUNCTIONS USEABLE BY SCRIPTERS ==============VV
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getGameVehicleID
-    Description ...: Resolves the serverVehicleID into the gameVehicleID
-    Parameters ....: serverVehicleID                - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
-    Return values .: 
-        if success : (Integer) GameVehicleID (eg. 11171)
-        if error   : -1                             - If either the Vehicle is unknown or the Vehicle is not Spawned on the Client
-    Remarks .......: 
-    Example .......: getGameVehicleID("0-0")
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Resolves a serverVehicleID into the gameVehicleID
+-- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @treturn[1] integer If success eg. 11171
+-- @treturn[2] -1 If either the Vehicle is unknown or the Vehicle is not Spawned on the Client
+-- @usage local gameVehicleID = getGameVehicleID("0-0")
 local function getGameVehicleID(serverVehicleID)
 	if vehicles[serverVehicleID] and vehicles[serverVehicleID].gameVehicleID then
 		return vehicles[serverVehicleID].gameVehicleID
@@ -189,16 +201,11 @@ local function getGameVehicleID(serverVehicleID)
 	end
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getServerVehicleID
-    Description ...: Resolves the gameVehicleID into the serverVehicleID
-    Parameters ....: gameVehicleID                  - (Integer)
-    Return values .: 
-        if success : (String) serverVehicleID (eg. 0-0)
-        if error   : nil                            - If either the gameVehicleID is unknown or Invalid
-    Remarks .......: 
-    Example .......: getServerVehicleID(11171)
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Reolves a gameVehicleID into the serverVehicleID
+-- @tparam integer gameVehicleID
+-- @treturn[1] string If success. serverVehicleID eg. "0-0"
+-- @treturn[2] nil If either the gameVehicleID is unknown or invalid
+-- @usage local serverVehicleID = getServerVehicleID(11171)
 local function getServerVehicleID(gameVehicleID)
 	if type(gameVehicleID) == "string" then
 		log('W', "getServerVehicleID", "received string ID, please use numbers")
@@ -214,44 +221,30 @@ local function getServerVehicleID(gameVehicleID)
 	return vehiclesMap[gameVehicleID]
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getVehicleByServerID
-    Description ...: Returns this Vehicles table
-    Parameters ....: serverVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
-    Return values .: 
-        if success : (Table)
-        if error   : nil                             - If the serverVehicleID is invalid
-    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
-    Example .......: getVehicleByServerID("0-0")
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns the vehicle table for this Vehicle
+-- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @treturn[1] vehicles_subtable
+-- @treturn[2] nil If the serverVehicleID is invalid
+-- @usage local vehicle = getVehicleByServerID("0-0")
 local function getVehicleByServerID(serverVehicleID)
 	return vehicles[serverVehicleID]
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getVehicleByGameID
-    Description ...: Returns this Vehicles table
-    Parameters ....: gameVehicleID                   - (Integer)
-    Return values .: 
-        if success : (Table)
-        if error   : nil                             - If either the getGameVehicleID is unknown or invalid
-    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
-    Example .......: getVehicleByGameID(11171)
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Return the vehicle table for this Vehicle
+-- @tparam integer gameVehicleID
+-- @treturn[1] vehicles_subtable
+-- @treturn[2] nil If the gameVehicleID is invalid
+-- @usage local vehicle = getVehicleByGameID(11171)
 local function getVehicleByGameID(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]]
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getPlayerByName
-    Description ...: Returns this Players table and ID
-    Parameters ....: name                            - (String) The Players Name
-    Return values .: 
-        if success : (Table) player, (Integer) playerID
-        if error   : nil                             - If the Playername is either unknown or invalid
-    Remarks .......: Search for "Players Format" to see the Structure of this table
-    Example .......: getPlayerByName("Neverless")
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Return this Players table and ID
+-- @tparam string name The Players Name
+-- @treturn[1] players_subtable
+-- @treturn[1] integer playerID
+-- @treturn[2] nil If the name is invalid
+-- @usage local player, playerID = getPlayerByName("Neverless")
 local function getPlayerByName(name)
 	for playerID, player in pairs(players) do
 		if player.name == name then
@@ -260,15 +253,11 @@ local function getPlayerByName(name)
 	end
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: isOwn
-    Description ...: Tells if the given gameVehicleID belongs to a clients own car
-    Parameters ....: gameVehicleID                   - (Integer)
-    Return values .: 
-        if success : (Bool)
-    Remarks .......: Returns false when the Vehicle is not owned by the Client and when the Vehicle does not exist
-    Example .......: isOwn(11171)
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Checks if the given vehicle belongs to this Client
+-- @tparam integer gameVehicleID
+-- @treturn[1] bool true if this Vehicle belongs to this Client
+-- @treturn[2] bool false if this Vehicle does not belong to this Client or when the Vehicle does not exist
+-- @usage local exists = isOwn(11171)
 local function isOwn(gameVehicleID)
 	if type(gameVehicleID) == "string" then
 		log('W', "isOwn", "received string ID, please use numbers")
@@ -277,29 +266,20 @@ local function isOwn(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]] and vehicles[vehiclesMap[gameVehicleID]].isLocal == true or false
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: setOwn
-    Description ...: Sets the given Vehicles owner Status for this Client
-    Parameters ....: serverVehicleID                - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
-                   : own                            - (Bool)
-    Return values .: none
-    Remarks .......: Note from the documentation author: I dont think this function is save to be used by a Scripter. So if you, as a Scripter, use it then make sure that you know the Consequences
-    Example .......: setOwn("0-0", true)
------------------------------------------------------------------------------------------------------------------------------------]]
--- SET IF A USER OWNS A VEHICLE
+--- Sets if the given given Vehicle belongs to this Client. Note from Author of this documentation: Using this function could cause issues.
+-- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @tparam bool own
+-- @treturn nil
+-- @usage setOwn("0-0", true)
 local function setOwn(serverVehicleID, own)
 	vehicles[serverVehicleID].isLocal = own
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getOwnMap
-    Description ...: Returns a table of all Client owned Vehicles
-    Parameters ....: none
-    Return values .: 
-        if success : (Table) {gameVehicleID = {vehicletable}}
-    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
-    Example .......: getOwnMap()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns a table that contains a list of all Vehicles that are owned by this Client
+-- @treturn table {gameVehicleID_1 = vehicles_subtable}
+-- @treturn table {gameVehicleID_N = vehicles_subtable}
+-- @usage local myVehicles = getOwnMap()
+-- @see vehicles_subtable
 local function getOwnMap()
 	local own = {}
 
@@ -311,15 +291,10 @@ local function getOwnMap()
 	return own
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getVehicleMap
-    Description ...: Returns a table of all known multiplayer vehicles
-    Parameters ....: none
-    Return values .: 
-        if success : (Table) {serverVehicleID = gameVehicleID}
-    Remarks .......: 
-    Example .......: getVehicleMap()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns a table of all known multiplayer vehicles
+-- @treturn table {serverVehicleID_1 = gameVehicleID}
+-- @treturn table {serverVehicleID_N = gameVehicleID}
+-- @usage local vehicles = getVehicleMap()
 local function getVehicleMap()
 	local t = {}
 
@@ -329,28 +304,17 @@ local function getVehicleMap()
 	return t
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getDistanceMap
-    Description ...: Returns a table containing the distances from each Multiplayer Vehicle to this Clients Point of View
-    Parameters ....: none
-    Return values .: 
-        if success : (Table)
-    Remarks .......: Search for "DistanceMap Format" to see the Structure of this table
-    Example .......: getDistanceMap()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns a table containing the distance from each Multiplayer Vehicle to this Clients Point of View
+-- @treturn distanceMap
+-- @usage local distanceMap = getDistanceMap()
 local function getDistanceMap()
 	return distanceMap
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getNicknameMap
-    Description ...: Returns a table containing all Multiplayer gameVehicleID's with their Ownernames
-    Parameters ....: none
-    Return values .: 
-        if success : (table) {gameVehicleID = OwnerName of the Vehicle}
-    Remarks .......: 
-    Example .......: getNicknameMap()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns a table containing all Multiplayer gameVehicleID's with their Ownernames
+-- @treturn table {gameVehicleID_1 = OwnerName}
+-- @treturn table {gameVehicleID_N = OwnerName}
+-- @usage local nicknameMap = getNicknameMap()
 local function getNicknameMap() -- Returns a [localID] = "username" table of all vehicles, including own ones
 	local nicknameSimple = {}
 
@@ -361,17 +325,12 @@ local function getNicknameMap() -- Returns a [localID] = "username" table of all
 	return nicknameSimple
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: setPlayerNickPrefix
-    Description ...: Adds a Prefix to a given PlayerTag
-    Parameters ....: targetName                         - (String) PlayerName
-                   : tagSource                          - (String) Name of the Prefix
-                   : text                               - (String) Text to add
-    Return values .: nil
-    Remarks .......: 
-    Example .......: setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
-                   : Will change the playertag like this: 1st. Neverless
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Adds a Prefix to a given PlayerTag. eg "1st. Neverless"
+-- @tparam string targetName PlayerName
+-- @tparam string tagSource Name of the Prefix
+-- @tparam string text Text to add
+-- @treturn nil
+-- @usage = setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
 local function setPlayerNickPrefix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do
@@ -382,17 +341,12 @@ local function setPlayerNickPrefix(targetName, tagSource, text)
 	end
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: setPlayerNickSuffix
-    Description ...: Adds a Suffic to a given PlayerTag
-    Parameters ....: targetName                        - (String) PlayerName
-                   : tagsource                         - (String) Name of the Prefix
-                   : text                              - (String) Text to add
-    Return values .: nil
-    Remarks .......: 
-    Example .......: setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")
-                   : Will change the playertag like this: Neverless [In Mission]
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Adds a Suffic to a given PlayerTag. eg "Neverless [In Mission]"
+-- @tparam string targetName PlayerName
+-- @tparam string tagSource Name of the Prefix
+-- @tparam string text Text to add
+-- @treturn nil
+-- @usage = setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")
 local function setPlayerNickSuffix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do
@@ -403,55 +357,32 @@ local function setPlayerNickSuffix(targetName, tagSource, text)
 	end
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: hideNicknames
-    Description ...: Hides the PlayerTag drawing all together from BeamMP
-    Parameters ....: hide                              - (Bool)
-    Return values .: nil
-    Remarks .......: Usefull when you want to hide all Playertags or when you want to custom draw Player Tags
-    Example .......: hideNicknames(true)
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Turns On or Off the Nametag drawing from BeamMP
+-- @tparam bool hide
+-- @treturn nil
+-- @usage hideNicknames(true)
 local function hideNicknames(hide)
 	nicknamesAllowed = not hide
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getPlayers
-    Description ...: Returns the whole Players table
-    Parameters ....: none
-    Return values .: 
-        if success : (table)
-    Remarks .......: Search for "Players Format" to see the Structure of this table
-    Example .......: getPlayers()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns the whole Players table
+-- @treturn players
+-- @usage local players = getPlayers()
 local function getPlayers() return players end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: getVehicles
-    Description ...: Returns the whole Vehicles table
-    Parameters ....: none
-    Return values .: 
-        if success : (table) %#%
-    Remarks .......: Search for "Vehicles Format" to see the Structure of this table
-    Example .......: getVehicles()
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Returns the whole Vehicles table
+-- @treturn vehicles
+-- @usage local vehicles = getVehicles()
 local function getVehicles() return vehicles end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: setVehicleRole
-    Description ...: Sets custom roles and names to player vehicles
-    Parameters ....: playerIDVehicleID          - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
-                   : roleName                   - (String) The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
-                   : displayName                - (Optional) (String) sets a Custom player name
-    Return values .: 
-        if success : 1
-        if error   : 0                          - playerIDVehicleID is invalid. Vehicle or Player might not exists
-                   : -1                         - roleName does not exist
-    Remarks .......: Give 0 in a parameter to not use a Optional. Already existing vehicle roles will be overwritten.
-    Example .......: setVehicleRole("0-0", "MYROLE", "Unknown")
-                   : The playerIDVehicleID 0-0 will be given the MYROLE playertag with a customname: *Unknown
-    Author         : Neverless
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Sets a custom role and name to a vehicle
+-- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @tparam string roleName The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
+-- @tparam[opt] string displayName sets a Custom name to this Vehicle. Give 0 to not set a custom name
+-- @treturn[1] 1 If success
+-- @treturn[2] 0 playerIDVehicleID is invalid. Vehicle or Player might not exists
+-- @treturn[3] -1 roleName does not exist
+-- @usage setVehicleRole("0-0", "MYROLE", "Unknown")
 local function setVehicleRole(playerIDVehicleID, roleName, displayName)
 	if vehicles[playerIDVehicleID] == nil then return 0 end
 	roleName = string.upper(roleName)
@@ -473,36 +404,25 @@ local function setVehicleRole(playerIDVehicleID, roleName, displayName)
 	return 1
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: removeVehicleRole
-    Description ...: Removes a custom Role and Name from a Vehicle
-    Parameters ....: playerIDVehicleID                 - (String) X-Y. Where X is the PlayerID and Y the Players VehicleID
-    Return values .: nil                               - if success or error
-    Remarks .......: 
-    Example .......: removeVehicleRole("0-0")
-    Author         : Neverless
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Removes a custom Role and Name from a Vehicle
+-- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @treturn nil
+-- @usage removeVehicleRole("0-0")
 local function removeVehicleRole(playerIDVehicleID)
 	custom_vehicleRoles[playerIDVehicleID] = nil
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: createRole
-    Description ...: Creates a custom role to be used with setVehicleRole
-    Parameters ....: roleName                  - (String) Name of the Role
-                   : tag                       - (Optional) (String) Sets a optional tag: Playername [Long tag]
-                   : shortag                   - (Optional) (String) Sets a optional shorttag: Playername [Short Tag]
-                   : red                       - (Optional) (Integer) 0 to 255
-                   : green                     - (Optional) (Integer) 0 to 255
-                   : blue                      - (Optional) (Integer) 0 to 255
-    Return values .: 
-        if success : true
-        if error   : false                     - When a color value is below 0 or when the roleName == "BLANK"
-    Remarks .......: Give 0 in a parameter to not use a Optional. Already existing Roles with that name will be overwritten.
-    Example .......: createRole("MYROLE", "Custom", "Ctm", 252, 107, 003)
-                   : a player with that role would have a Orange background and custom tag: PlayerName [*Custom]
-    Author         : Neverless
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Creates a custom role to be used with setVehicleRole.
+-- Give 0 to not use a Optional param.
+-- @tparam string roleName Name of the Role
+-- @tparam[opt] string tag Sets a optional tag. Playername [Long tag]
+-- @tparam[opt] string shorttag Sets a optional shorttag: Playername [Short Tag]
+-- @tparam[opt] integer red 0 to 255
+-- @tparam[opt] integer green 0 to 255
+-- @tparam[opt] integer blue 0 to 255
+-- @treturn[1] true If success
+-- @treturn[2] false When a color value is below 0 or when the roleName == "BLANK"
+-- @usage createRole("MYROLE", "Custom", "Ctm", 252, 107, 3)
 local function createRole(roleName, tag, shorttag, red, green, blue)
 	if red < 0 then return false end
 	if green < 0 then return false end
@@ -527,17 +447,12 @@ local function createRole(roleName, tag, shorttag, red, green, blue)
 	return true
 end
 
---[[#FUNCTION#----------------------------------------------------------------------------------------------------------------------
-    Name ..........: removeRole
-    Description ...: Removes a custom role
-    Parameters ....: roleName                   - (String) Name of the Role
-    Return values .: 
-        if success : true
-        if error   : false                      - When the Role doesnt exist
-    Remarks .......: 
-    Example .......: removeRole("MYROLE")
-    Author         : Neverless
------------------------------------------------------------------------------------------------------------------------------------]]
+--- Removes a custom role.
+-- All vehicles with that role will also loose it.
+-- @tparam string roleName
+-- @treturn true If success
+-- @treturn false When the Role doesnt exists
+-- @usage removeRole("MYROLE")
 local function removeRole(roleName)
 	roleName = string.upper(roleName)
 	if custom_roleToInfo[roleName] == nil then return false end

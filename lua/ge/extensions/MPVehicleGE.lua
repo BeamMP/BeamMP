@@ -175,7 +175,7 @@ local vehicles = {}
 -- @tfield nil position Appears to be unused
 -- @tfield nil rotation Appears to be unused
 -- @tfield vehicles_spectators spectators Holds PlayerID's that are spectating this Vehicle at the moment
--- @tfield vehicles_spawnQueue spawnQueue Holds the data required for when the Spawn is triggered. Is nil if this Vehicles Spawn is not qued. Format = serverVehicleID:{vehicleJson}
+-- @tfield vehicles_spawnQueue spawnQueue Holds the data required for when the Spawn is triggered. Is nil if this Vehicles Spawn is not qued.
 -- @tfield string editQueue Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}. Is nil is no Edit for this Vehicle is qued
 -- @usage local gameVehicleID = vehicles["0-0"].gameVehicleID
 

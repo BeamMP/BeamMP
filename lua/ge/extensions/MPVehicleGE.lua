@@ -356,7 +356,7 @@ end
 -- @tparam string tagSource Name of the Prefix
 -- @tparam string text Text to add
 -- @treturn nil
--- @usage = setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
+-- @usage setPlayerNickPrefix("Neverless", "MYPREFIX", "1st.")
 function setPlayerNickPrefix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do
@@ -373,7 +373,7 @@ end
 -- @tparam string tagSource Name of the Prefix
 -- @tparam string text Text to add
 -- @treturn nil
--- @usage = setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")
+-- @usage setPlayerNickSuffix("Neverless", "MYSUFFIX", "[In Mission]")
 function setPlayerNickSuffix(targetName, tagSource, text)
 	if targetName == nil then return end
 	for k,player in pairs(players) do

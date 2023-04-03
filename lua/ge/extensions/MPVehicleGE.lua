@@ -168,7 +168,7 @@ local vehicles = {}
 -- @tfield integer remoteVehID gameVehicleID on the Client that owns this Vehicle
 -- @tfield integer serverVehicleString serverVehicleID as eg. 0 not 0-0
 -- @tfield integer ownerID The PlayerID of the player that owns this Vehicle
--- @tfield ownerName Holds the OwnerName of that Vehicle (duplicate?)
+-- @tfield string Holds the OwnerName of that Vehicle (duplicate?)
 -- @tfield bool isLocal True when this Vehicle is owned by this Client
 -- @tfield bool isSpawned True once the Vehicle is no longer quoed and Available in the World. Is set to False when isDeleted
 -- @tfield bool isDeleted True once the Vehicle has been deleted by the Client (it becomes a black blob)
@@ -289,15 +289,6 @@ function isOwn(gameVehicleID)
 		gameVehicleID = tonumber(gameVehicleID)
 	end
 	return vehicles[vehiclesMap[gameVehicleID]] and vehicles[vehiclesMap[gameVehicleID]].isLocal == true or false
-end
-
---- Sets if the given given Vehicle belongs to this Client. Note from Author of this documentation: Using this function could cause issues.
--- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
--- @tparam bool own
--- @treturn nil
--- @usage setOwn("0-0", true)
-function setOwn(serverVehicleID, own)
-	vehicles[serverVehicleID].isLocal = own
 end
 
 --- Returns a table that contains a list of all Vehicles that are owned by this Client
@@ -496,7 +487,15 @@ end
 
 -- ============== INTERNAL FUNCTIONS ==============
 
--- this is not a function that is callable from outside of this .lua
+--- Sets if the given given Vehicle belongs to this Client
+-- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
+-- @tparam bool own
+-- @treturn nil
+-- @usage setOwn("0-0", true)
+local function setOwn(serverVehicleID, own)
+	vehicles[serverVehicleID].isLocal = own
+end
+
 local function localVehiclesExist()
 	for k, v in pairs(vehicles) do
 		if v.isLocal then return true end

@@ -102,6 +102,16 @@ local function onWorldReadyState(state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+			
+            -- QUICK DIRTY PATCH FOR THE CAMERA SPAWNING UNDERGROUND FROM THE 0.28 UDPATE
+            local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json")
+
+            local position = contents["position"] or { 0, 0, 0 }
+
+            position[3] = position[3] + 2 -- otherwise the cam spawns in the ground
+
+            -- local rotation = contents["rotationMatrix"] -- the info in this table can be borked, so we use 0 for all rotations
+            core_camera.setPosRot(0, position[1], position[2], position[3], 0, 0, 0, 0)
 		end
 	end
 end

@@ -124,7 +124,7 @@ angular.module('beamng.stuff')
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
       // TODO #203 Fix this to actually use the real launcher version!
-      scope.beammpGameVer = '4.7.1'
+      scope.beammpGameVer = '4.7.3'
       scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display

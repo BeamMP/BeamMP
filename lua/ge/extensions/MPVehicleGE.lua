@@ -1404,7 +1404,7 @@ local function onPreRender(dt)
 
 
 		-- get camera position, apply queue
-		local cameraPos = vec3(getCameraPosition())
+		local cameraPos = vec3(core_camera.getPosition())
 		if activeVeh then
 			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 

@@ -104,15 +104,15 @@ local function onWorldReadyState(state)
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 			
             -- QUICK DIRTY PATCH FOR THE CAMERA SPAWNING UNDERGROUND FROM THE 0.28 UDPATE
-            local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json") -- first vanilla path
+			local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json") -- first vanilla path
 			
 			if contents == nil then
 				contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/spawnpoints/items.level.json") -- alternate vanilla path
 			end
 
-            local position = contents["position"] or { 0, 0, 0 }
-            position[3] = position[3] + 2 -- otherwise the cam spawns in the ground
-            core_camera.setPosRot(0, position[1], position[2], position[3], 0, 0, 0, 0)
+			local position = contents["position"] or { 0, 0, 0 }
+			position[3] = position[3] + 2 -- otherwise the cam spawns in the ground
+			core_camera.setPosRot(0, position[1], position[2], position[3], 0, 0, 0, 0)
 		end
 	end
 end

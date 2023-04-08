@@ -46,8 +46,10 @@ local roleToInfo = {
 	['STAFF']	= { backcolor = ColorI(068, 109, 184, 127), tag = " [BeamMP Staff]", shorttag = " [Staff]" },
 	['MOD']		= { backcolor = ColorI(068, 109, 184, 127), tag = " [Moderator]", shorttag = " [Mod]" },
 	['ADM']		= { backcolor = ColorI(218, 000, 078, 127), tag = " [Admin]", shorttag = " [Adm]" },
-	['GDEV']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
-	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" }
+	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" },
+	['NGDEV']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Developer]", shorttag = " [BNG]" },
+	['NGSTAFF']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
+	['NGAFFIL']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
 }
 
 --- (in table) Specifies the table in roleToInfo
@@ -1587,7 +1589,7 @@ local function onPreRender(dt)
 
 
 		-- get camera position, apply queue
-		local cameraPos = vec3(getCameraPosition())
+		local cameraPos = vec3(core_camera.getPosition())
 		if activeVeh then
 			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 

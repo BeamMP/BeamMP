@@ -15,9 +15,14 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   })
   $translateProvider.useSanitizeValueStrategy('escaped')
   $translateProvider.preferredLanguage('en-US') // this is the default language to load
-  $translateProvider.fallbackLanguage('en-US') // this is the fallback in case individual translations are missing
+  // this is the fallback in case individual translations are missing:
+  if (beamng.shipping) {
+    $translateProvider.fallbackLanguage('en-US')
+  } else {
+    $translateProvider.fallbackLanguage(['en-US', 'not-shipping.internal'])
+  }
   //$translateProvider.use('de-DE')
-  
+
   //DISABLE_TRANSLATIONS = true
 
   $logProvider.debugEnabled(false)
@@ -105,6 +110,9 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       params: {
         missionId: null
       },
+      careerUiLayout: 'careerBigMap',
+      uiLayout: 'blank',
+      uiAppsShown: true, // defaults to false
     })
 
     .state('menu.levels', {
@@ -217,7 +225,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-
+	
     // -------------------------------------- BEAMMP -------------------------------------- //
     .state('menu.multiplayer', {
       url: '/multiplayer',
@@ -278,7 +286,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-    // -------------------------------------- BEAMMP -------------------------------------- //
+	// -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
         url: '/multiplayer',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
@@ -345,6 +353,13 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
         backState: 'BACK_TO_MENU',
       })
 
+      .state('menu.options.stats', {
+        url: '/stat:category',
+        templateUrl: '/ui/modules/stat/stats.html',
+        controller: 'StatsController as statCtrl',
+        backState: 'menu.mainmenu',
+      })
+
       .state('menu.options.other', {
         url: '/other',
         templateUrl: '/ui/modules/options/other.partial.html',
@@ -383,7 +398,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
                   controller: 'ControlsEditCtrl as controlsEdit'
                 }
               },
-              params: {action: '', oldBinding: {}, showFfb: false},
+              params: {action: '', oldBinding: {}},
               backState: 'BACK_TO_MENU',
             })
 
@@ -417,7 +432,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
                   controller: 'ControlsEditCtrl as controlsEdit'
                 }
               },
-              params: {action: '', oldBinding: {}, showFfb: ''},
+              params: {action: '', oldBinding: {}},
               backState: 'BACK_TO_MENU',
             })
 
@@ -621,6 +636,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     templateUrl: '/ui/modules/scenariocontrol/start.html',
     controller: 'ScenarioStartController as scenarioStart',
     backState: 'BACK_TO_MENU',
+    uiLayout: 'blank',
+    uiAppsShown: true
   })
 
   .state('scenario-end', {
@@ -634,6 +651,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     templateUrl: '/ui/modules/scenariocontrol/end.html',
     controller: 'ScenarioEndController',
     backState: 'BACK_TO_MENU',
+    careerUiLayout: 'careerMissionEnd',
+    uiAppsShown: true
   })
 
   .state('quickrace-end', {
@@ -692,7 +711,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   })
 
   .state('blank', {
-
+    uiAppsShown: true
   })
 
   .state('iconViewer', {
@@ -708,7 +727,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     params: {
         fadeIn: 1,
         pause: 0,
-        fadeOut: 1
+        fadeOut: 1,
+        data: {}
     },
     controller: 'fadeScreen',
     backState: 'BLOCK',
@@ -835,6 +855,17 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: "menu.mainmenu",
     })
 
+    .state('menu.partInventory', {
+      url: '/partInventory',
+      params: {
+      },
+      templateUrl: '/ui/modules/partInventory/partInventory.html',
+      controller: 'PartInventoryController',
+      uiAppsShown: true,
+      backState: "menu.mainmenu",
+    })
+
+
     .state('menu.career', {
       url: '/career',
       templateUrl: '/ui/modules/career/career.html',
@@ -850,6 +881,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
         isCareer: true
       },
       backState: 'BACK_TO_MENU',
+      uiLayout: 'blank',
+      uiAppsShown: true, // defaults to false
     })
 
     .state('menu.careerPause', {
@@ -857,8 +890,52 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       templateUrl: '/ui/modules/careerPause/careerPause.html',
       controller: 'CareerPauseController',
       backState: 'BACK_TO_MENU',
-    });
+      careerUiLayout: 'careerPause',
+      uiAppsShown: true,
+    })
 
+    .state('menu.careerQuests', {
+      url: '/career-quest',
+      templateUrl: '/ui/modules/careerQuests/questsOverview.html',
+      controller: 'QuestOverviewController',
+      params: {
+        questId: undefined
+      },
+      backState: 'BACK_TO_MENU',
+    })
+
+    .state('menu.careerVehicleSelect', {
+      url: '/careerVehicleSelect',
+      templateUrl: '/ui/modules/careerVehicleSelect/careerVehicleSelect.html',
+      params: {
+        data: {}
+      },
+      //uiAppsShown: false,
+      controller: 'CareerVehicleSelectController',
+      backState: 'BACK_TO_MENU',
+    })
+
+    .state('menu.threeElementSelect', {
+      url: '/threeElementSelect',
+      templateUrl: '/ui/modules/threeElementSelect/threeElementSelect.html',
+      params: {
+        data: {}
+      },
+      //uiAppsShown: false,
+      controller: 'ThreeElementSelectController',
+      backState: 'BACK_TO_MENU',
+    })
+
+    .state('menu.careerLogBook', {
+      url: '/careerLogBook',
+      templateUrl: '/ui/modules/careerLogBook/logBook.html',
+      params: {
+        entryId: undefined
+      },
+      //uiAppsShown: false,
+      controller: 'CareerLogBookController',
+      backState: 'BACK_TO_MENU',
+    })
 
   // default entry that is loaded on startup:
   $urlRouterProvider.otherwise('menu.start')
@@ -990,28 +1067,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
 
 }])
 
-.run(['$animate', '$http', '$rootScope', '$templateCache', '$window', '$translate', 'UIAppStorage', 'Settings', 'SettingsAuxData', 'bngWSApi', '$state',
+.run(['$animate', '$http', '$rootScope', '$templateCache', '$window', '$translate', 'UIAppStorage', 'Settings', 'SettingsAuxData', 'bngWSApi', '$state', 
 function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIAppStorage, Settings, SettingsAuxData, bngWSApi, $state) {
-
-  $http.get('/ui/modules/vehicleconfig/vehicle-config-tree.html').then(function (tmpl) {
-    $templateCache.put('vehicle-config-tree', tmpl.data)
-  })
-
-  $http.get('/ui/assets/sprites/svg-symbols.svg')
-  .success(svgSprite => {
-    var iconsSprite = angular.element(svgSprite)
-    angular.element(document.head).append(iconsSprite)
-  })
-
-  registerWindowHooks($rootScope, $window)
-
-  /* --- VUE3 START --- */
-  // i18n vue3 basics
-
-  window.bngVue && window.bngVue.start({
-    i18n: vueI18n,
-    bngApi: bngApi
-  })
 
   // apply language settings
   $rootScope.$on('SettingsChanged', function(evt, data) {
@@ -1024,6 +1081,27 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       })
     }
   })
+
+
+  $http.get('/ui/modules/vehicleconfig/vehicle-config-tree.html').then(function (tmpl) {
+    $templateCache.put('vehicle-config-tree', tmpl.data)
+  })
+
+  $http.get('/ui/assets/sprites/svg-symbols.svg')
+  .success(svgSprite => {
+    var iconsSprite = angular.element(svgSprite)
+    angular.element(document.head).append(iconsSprite)
+  })
+
+  window.globalAngularRootScope = $rootScope
+
+  /* --- VUE3 START --- */
+  // i18n vue3 basics
+  window.bngVue && window.bngVue.start({
+    i18n: vueI18n
+  })
+  i18NLanguageFinished = true
+
 
   /* --- VUE3 END --- */
   $rootScope.$on('$translateChangeSuccess', (event, data) => {
@@ -1460,7 +1538,9 @@ angular.module('beamng.stuff')
   vm.physicsMaybePaused = false
   vm.showPauseIcon = false
   vm.showCrosshair = false
-  vm.uiLayoutPrevious = false
+  // vm.uiLayoutPrevious = false
+  vm.playmodeState = null
+
   function updatePauseState() {
       vm.physicsPaused= !vm.replayActive && vm.physicsMaybePaused
       vm.showPauseIcon = vm.physicsPaused || vm.replayPaused
@@ -1472,9 +1552,9 @@ angular.module('beamng.stuff')
   // TODO change this to use the $state.transition promise
   var transitioningTo
 
+  // Screens that tasklist UI app will be visible
   const captureInput = InputCapturer();
   $scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
-
     //console.log(`switching stage from ${fromState.name} to ${toState.name}`)
     //console.trace()
     vm.currentStateName = toState.name
@@ -1504,38 +1584,72 @@ angular.module('beamng.stuff')
     // });
 
     // update ui apps layout
-    if ($state.current.uiLayout === undefined) {
-      // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
-      // console.log(`No layout defined - using previous (${vm.uiLayoutPrevious})`)
-      // console.log(vm.uiLayoutPrevious)
-      if (vm.uiLayoutPrevious) {
-        $scope.$emit('appContainer:loadLayoutByReqData', vm.uiLayoutPrevious)
-        vm.uiLayoutPrevious = null
-      }
-    } else {
-      // console.log(`Layout defined (${$state.current.uiLayout})`)
+    bngApi.engineLua("career_career.isCareerActive()", isCareerActive => {
+      $scope.$evalAsync(() => {
+        if (isCareerActive && $state.current.careerUiLayout) {
+          $scope.$emit('appContainer:loadLayoutByType', $state.current.careerUiLayout)
+          isUILayoutOverriden = true
+        } else {
+          if (vm.currentStateName === 'blank') {
+            console.log('Current state name is blank. Ignoring layout update because this may be already handled ' +
+              'ChangeState for Vue screens.')
+          } else if ($state.current.uiLayout === 'blank') {
+            console.log('Current layout name is blank. Clearing layout.')
+            $scope.$emit('appContainer:clear')
+            // $scope.$emit('appContainer:clear')
+          } else if ($state.current.uiLayout === undefined) {
+            // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
+            // console.log(`No layout defined - using previous (${vm.uiLayoutPrevious})`)
+      
+            if (!(vm.playmodeState && (vm.playmodeState.state || vm.playmodeState.appLayout)) ||
+              // ignore menu.appselect from emitting layout to prevent issue menu.appedit 
+              // selected layout will always be current game layout
+              vm.currentStateName === "menu.appselect")
+              return
+      
+            if (typeof vm.playmodeState.appLayout == "string") {
+              $scope.$emit('appContainer:loadLayoutByType', vm.playmodeState.appLayout)
+            } else if (typeof vm.playmodeState.appLayout == "object") {
+              $scope.$emit('appContainer:loadLayoutByObject', vm.playmodeState.appLayout)
+            }
+            else {
+              $scope.$emit('appContainer:loadLayoutByReqData', {type: vm.playmodeState.state});
+            }
+            // if (vm.uiLayoutPrevious) {
+            //   $scope.$emit('appContainer:loadLayoutByReqData', vm.uiLayoutPrevious)
+            //   vm.uiLayoutPrevious = null
+            // }
+          } else {
+            // console.log(`Layout defined (${$state.current.uiLayout})`)
+      
+            // this state requires a particular ui layout, set
+            // vm.uiLayoutPrevious = UiAppsService.getLayout()
+            $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
+          }
+        }
+  
+        // update ui apps visibility
+        $scope.$emit("ShowApps", !!$state.current.uiAppsShown);
+  
+        $state.previous = fromState;
+        $state.previousArgs = fromParams;
+  
+        if (
+          fromState.name !== "menu" && fromState.name.indexOf("menu.") !== 0 &&
+          (toState.name === "menu" || toState.name.indexOf("menu.") === 0)
+        ) {
+          $state.gamestate = fromState;
+          $state.gamestateArgs = fromParams;
+        }
+  
+        transitioningTo = undefined
+        updatePauseState()
+      })
+      })
+  })
 
-      // this state requires a particular ui layout, set
-      vm.uiLayoutPrevious = UiAppsService.getLayout()
-      $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
-    }
-
-    // update ui apps visibility
-    $scope.$emit("ShowApps", !!$state.current.uiAppsShown);
-
-    $state.previous = fromState;
-    $state.previousArgs = fromParams;
-
-    if (
-      fromState.name !== "menu" && fromState.name.indexOf("menu.") !== 0 &&
-      (toState.name === "menu" || toState.name.indexOf("menu.") === 0)
-    ) {
-      $state.gamestate = fromState;
-      $state.gamestateArgs = fromParams;
-    }
-
-    transitioningTo = undefined
-    updatePauseState()
+  $scope.$on('GameStateUpdate', function (event, data) {
+    vm.playmodeState = data;
   })
 
   $scope.$on('setNavigationStickyPlayState', function(event, stateName) {
@@ -1554,7 +1668,16 @@ angular.module('beamng.stuff')
   vm.changeAngularStateFromVue = function(state) {
     vm.switchState(state)
   }
+
+  const vueTasklistScreens = ['menu.refueling']
   $scope.$on('$stateNotFound', function (event, unfoundState, fromState, fromParams) {
+    if (vueTasklistScreens.includes(unfoundState.to)) {
+      bngApi.engineLua("career_career.isCareerActive()", isCareerActive => {
+        if (isCareerActive) {
+          $scope.$emit('appContainer:loadLayoutByType', 'tasklist')
+        }
+      })
+    }
     // angular doesn't recognise the state, so try Vue (making sure it doesn't pingpong back to here)
     bngVue.gotoGameState(unfoundState.to, {tryAngularJS: false})
     unfoundState.to = 'blank'
@@ -1566,6 +1689,10 @@ angular.module('beamng.stuff')
       event.preventDefault()
       return
     }
+    //hack to prevent undesired sound effect stacking
+    if(toState.name == 'menu.bigmap') {
+      dontPlayPauseSound = true
+    }
     newPageSilenceEventCounter = 2
     newPageTimestamp = Date.now()
     //console.log('stateChangeStart', toState, toParams, fromState, fromParams)
@@ -1575,17 +1702,26 @@ angular.module('beamng.stuff')
   })
 
 
-  $scope.$on('ChangeState', function (event, data, ifCurrent) {
-    //console.log('received ForceStateChange w/', data, ifCurrent, $state.current.name, transitioningTo)
-    params = data.params || {}
+  $scope.$on('ChangeState', function (event, target, ifCurrent) {
+    let targetName = typeof target === "string" ? target : target.state;
+    let current = $state.current.name;
+    // console.log('received ForceStateChange w/', { targetName, ifCurrent, current, transitioningTo});
+    // set current name if we're during a transition
+    if (typeof transitioningTo !== "undefined" && transitioningTo !== current) {
+      current = transitioningTo;
+    }
 
-
-    state = (typeof data === 'string' ? data : data.state)
-    help = (transitioningTo !== undefined && transitioningTo !== $state.current.name ? transitioningTo : $state.current.name)
-    if (help === ifCurrent || ifCurrent === undefined || (Array.isArray(ifCurrent) && ifCurrent.indexOf(help) !== -1)) {
-      //console.log(`switching to state: ${state}`)
-      var stateTransitioning = $state.go(state, params, {reload: true})
-      //console.log(`switched: ${stateTransitioning}`)
+    // fix ifCurrent
+    if (typeof ifCurrent !== "undefined" && !Array.isArray(ifCurrent)) {
+      ifCurrent = [ifCurrent];
+    }
+    // console.log(current, ifCurrent, ifCurrent.includes(current));
+    // decide if we're going to change state
+    if (!ifCurrent || ifCurrent.includes(current)) {
+      // console.log(`switching to state: ${targetName}`);
+      let params = target.params || {};
+      let stateTransitioning = $state.go(targetName, params, { reload: true });
+      // console.log("switched:", stateTransitioning);
     }
   })
 
@@ -1935,6 +2071,9 @@ angular.module('beamng.stuff')
     case 'vehicleconfig':
       $state.go('menu.vehicleconfig.parts')
       break
+    case 'vehicledebug':
+      $state.go('menu.vehicleconfig.debug')
+      break
     case 'options':
       $state.go('menu.options.display')
       break
@@ -1965,8 +2104,11 @@ angular.module('beamng.stuff')
     $scope.$evalAsync(function () {
       // Clicking Options in menu will trigger pause even if game is already paused
       // Need to check if previous state is already paused
-      if (vm.physicsMaybePaused === false && state === false) {
+      if (vm.physicsMaybePaused === false && state === false && typeof dontPlayPauseSound === "undefined") {
         bngApi.engineLua(`Engine.Audio.playOnce('AudioGui', 'event:>UI>Generic>Pause')`)
+      }
+      if(typeof dontPlayPauseSound !== "undefined") {
+        delete dontPlayPauseSound
       }
       vm.physicsMaybePaused = !state
       updatePauseState()

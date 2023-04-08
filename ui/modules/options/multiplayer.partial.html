@@ -176,6 +176,12 @@
 <md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink>
+  <p><span class="mp-setting-highlight">NEW</span> {{:: 'ui.options.multiplayer.showInactiveNametags' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showInactiveNametags.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.showInactiveNametags" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink>
   <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
   <md-checkbox ng-model="options.data.values.hideNameTags" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>

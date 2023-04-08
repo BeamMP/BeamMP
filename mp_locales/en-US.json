@@ -57,6 +57,8 @@
     "ui.options.multiplayer.tuneColorDeleted": "Deleted vehicle",
     "ui.options.multiplayer.blobsTitle": "Blobs",
     "ui.options.multiplayer.nameTagTitle": "Nametags",
+    "ui.options.multiplayer.showInactiveNametags": "Show nametags over inactive vehicles",
+    "ui.options.multiplayer.showInactiveNametags.tooltip": "Show all nametags, including on trailers and traffic vehicles not actively driven by any player (old behaviour)",
     "ui.options.multiplayer.others": "Others",
     "ui.multiplayer.multiplayer": "Multiplayer",
     "ui.multiplayer.connecting": "Connecting",

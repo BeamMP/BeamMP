@@ -267,7 +267,7 @@ function Player:delete()
 	for k, v in pairs(self.vehicles) do
 		v:delete()
 	end
-	if self.activeVehicleID then vehicles[self.activeVehicleID].spectators[self.playerID] = nil end
+	if self.activeVehicleID and vehicles[self.activeVehicleID] then vehicles[self.activeVehicleID].spectators[self.playerID] = nil end
 	players[self.playerID] = nil
 	self = nil
 end
@@ -292,6 +292,20 @@ function Player:onSettingsChanged()
 	if #short ~= #self.name then short = short .. "..." end
 
 	self.shortname = short
+end
+function Player:getVehicleCount()
+	return tableSize(self.vehicles.IDs)
+end
+function Player:setActiveVehicle(serverVehicleID)
+  log('W', 'Player:setActiveVehicle', string.format('Player %s (%i) is now spectating vehicle %s', self.name, self.playerID, serverVehicleID))
+
+	if self.activeVehicleID and vehicles[self.activeVehicleID] then
+		vehicles[self.activeVehicleID].spectators[self.playerID] = nil -- clear prev spectator field
+    log('W', 'Player:setActiveVehicle', 'No longer spectating ' .. self.activeVehicleID)
+	end
+
+	self.activeVehicleID = serverVehicleID
+	vehicles[serverVehicleID].spectators[self.playerID] = true
 end
 
 local Vehicle = {}
@@ -671,10 +685,10 @@ end
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	if MPCoreNetwork.isMPSession() then
-		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
+		log('I', "onVehicleSwitched", "Vehicle switched from "..(oldGameVehicleID or "unknown").." to "..(newGameVehicleID or "unknown"))
 
 		if newGameVehicleID and newGameVehicleID > -1 then
-			local skipOthers = settings.getValue("skipOtherPlayersVehicles") or false
+			local skipOthers = settings.getValue("skipOtherPlayersVehicles", false)
 			local oldVehicle = be:getObjectByID(oldGameVehicleID or -1)
 			local newVehicle = be:getObjectByID(newGameVehicleID or -1)
 
@@ -734,7 +748,11 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 					local playerID, serverVehicleID = MPConfig.getPlayerServerID(), newServerVehicleID
 					local s = tostring(playerID) .. ':' .. newServerVehicleID
 
+					log('I', "onVehicleSwitched", "Telling server that you switched to " .. newServerVehicleID)
+
 					MPGameNetwork.send('Om:'.. s)
+				else
+					log('E', "onVehicleSwitched", "Could not find new vehicle " .. tostring(newGameVehicleID))
 				end
 			end
 		end
@@ -803,6 +821,12 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		players[playerServerID]:addVehicle(vehObject)
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
+
+		if be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID then -- if this newly synced vehicle is the active vehicle
+			local s = decodedData.pid .. ':' .. serverVehicleID
+			MPGameNetwork.send('Om:'.. s)
+			log('I', "onServerVehicleSpawned", "Telling server that you switched to " .. serverVehicleID)
+		end
 
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
 
@@ -936,12 +960,8 @@ end
 local function onServerCameraSwitched(playerID, serverVehicleID)
 	if not players[playerID] then return end -- TODO: better fix?
 	if not vehicles[serverVehicleID] then return end
-	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
-		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
-	end
 
-	players[playerID].activeVehicleID = serverVehicleID
-	vehicles[serverVehicleID].spectators[playerID] = true
+	players[playerID]:setActiveVehicle(serverVehicleID)
 end
 
 
@@ -1424,7 +1444,7 @@ local function onPreRender(dt)
 
 					for spectatorID, _ in pairs(v.spectators) do
 						local spectator = players[spectatorID]
-						if not (spectator == owner or spectator.isLocal) then
+						if spectator ~= owner and not spectator.isLocal then
 							spectators = spectators .. spectator.name .. ', '
 						end
 					end
@@ -1447,12 +1467,14 @@ local function onPreRender(dt)
 				end
 
 				-- draw main nametag
-				debugDrawer:drawTextAdvanced(
-					pos, -- Location
-					String(" " .. table.concat({prefix, name, suffix, tag, dist}) .. " "), -- Text
-					ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
-					backColor -- Background Color
-				)
+				if settings.getValue("showInactiveNametags") or activeVehID == gameVehicleID or owner:getVehicleCount() < 2 or owner.activeVehicleID == serverVehicleID or owner.activeVehicleID == nil then
+					debugDrawer:drawTextAdvanced(
+						pos, -- Location
+						String(" " .. table.concat({prefix, name, suffix, tag, dist}) .. " "), -- Text
+						ColorF(1, 1, 1, nametagAlpha), true, false, -- Foreground Color / Draw background / Wtf
+						backColor -- Background Color
+					)
+				end
 			end
 			:: skip_vehicle ::
 		end

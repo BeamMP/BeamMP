@@ -306,10 +306,10 @@ local function leaveServer(goBack)
 	isGoingMpSession = false
 	loadMods = false
 	currentServer = nil
+	status = "" -- Reset status
 	UI.updateLoading("")
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
-	status = "" -- Reset status
 	local callback = nop
 	if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
 	if goBack then endActiveGameMode(callback) end

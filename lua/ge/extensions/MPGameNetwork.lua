@@ -8,10 +8,9 @@
 local M = {}
 
 
-
 -- ============= VARIABLES =============
 local socket = require('socket')
-local TCPSocket
+local TCPLauncherSocket = nop
 local launcherConnected = false
 local isConnecting = false
 local eventTriggers = {}
@@ -24,13 +23,21 @@ local keypressTriggers = {}
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
+	-- Check if we are using V3
+	if MP then
+		M.send('A') -- immediately heartbeat to check if connection was established
+		log('W', 'connectToLauncher', 'Launcher already connected!')
+		return
+	end
+
+	-- Okay we are not using V3, lets do the V2 stuff
 	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
 	if not launcherConnected then
 		isConnecting = true
-		TCPSocket = socket.tcp()
-		TCPSocket:setoption("keepalive", true)
-		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
+		TCPLauncherSocket = socket.tcp()
+		TCPLauncherSocket:setoption("keepalive", true)
+		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
+		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
 		M.send('A')
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -40,8 +47,11 @@ end
 
 
 local function disconnectLauncher()
+	if MP then
+		return
+	end
 	if launcherConnected then
-		TCPSocket:close()
+		TCPLauncherSocket:close()
 		launcherConnected = false
 	end
 end
@@ -49,8 +59,20 @@ end
 
 
 local function sendData(s)
-	if not TCPSocket then return end
-	local bytes, error, index = TCPSocket:send(#s..'>'..s)
+	-- First check if we are V3 Networking or not
+	if MP then
+		MP.Game(s)
+		if not launcherConnected then launcherConnected = true isConnecting = false end
+		if settings.getValue("showDebugOutput") then
+			log('M', 'sendData', 'Sending Data ('..#s..'): '..s)
+		end
+		if MPDebug then MPDebug.packetSent(#s) end
+		return
+	end
+
+	-- Else we now will use the V2 Networking
+	if not TCPLauncherSocket then return end
+	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
 	if error then
 		isConnecting = false
 		log('E', 'sendData', 'Socket error: '..error)
@@ -110,7 +132,7 @@ local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 end
 
 function TriggerServerEvent(name, data)
-	sendData('E:'..name..':'..data)
+	M.send('E:'..name..':'..data)
 end
 
 function TriggerClientEvent(name, data)
@@ -193,25 +215,27 @@ local heartbeatTimer = 0
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		while(true) do
-			local received, status, partial = TCPSocket:receive() -- Receive data
-			if received == nil or received == "" then break end
+		if TCPLauncherSocket ~= nop then
+			while(true) do
+				local received, status, partial = TCPLauncherSocket:receive() -- Receive data
+				if received == nil or received == "" then break end
 
-			if settings.getValue("showDebugOutput") == true then
-				log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+				if settings.getValue("showDebugOutput") == true then
+					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+				end
+
+				-- break it up into code + data
+				local code = string.sub(received, 1, 1)
+				local data = string.sub(received, 2)
+				HandleNetwork[code](data)
+
+				if MPDebug then MPDebug.packetReceived(#received) end
 			end
-
-			-- break it up into code + data
-			local code = string.sub(received, 1, 1)
-			local data = string.sub(received, 2)
-			HandleNetwork[code](data)
-
-			if MPDebug then MPDebug.packetReceived(#received) end
 		end
 	end
 	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() then --TODO: something
 		heartbeatTimer = 0
-		sendData('A')
+		M.send('A')
 	end
 end
 
@@ -223,6 +247,10 @@ end
 
 local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
+end
+
+M.receiveIPCGameData = function(code, data)
+	HandleNetwork[code](data)
 end
 
 detectGlobalWrites() -- reenable global write notifications

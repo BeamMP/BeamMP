@@ -33,6 +33,8 @@
     "ui.options.multiplayer.disableLuaReload.tooltip": "Lua reloads are required to ensure that the game is put back to a working state if mods had replaced game functions. Can be disabled for a smoother experience at your own risk.",
     "ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",
     "ui.options.multiplayer.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
+    "ui.options.multiplayer.enableNewChatMenu": "Enable new chat menu",
+    "ui.options.multiplayer.enableNewChatMenu.tooltip": "This will enable the new chat menu, which is still in development and may have bugs.",
     "ui.options.multiplayer.simplifyRemoteVehicles": "Use simplified vehicles when available",
     "ui.options.multiplayer.simplifyRemoteVehicles.tooltip": "This setting will replace remote vehicles with the BeamNG provided 'traffic' versions. Reduces accuracy of collisions and visuals, but improves performance",
     "ui.options.multiplayer.enableBlobs": "Enable blobs for unspawned vehicles",

@@ -33,6 +33,8 @@
   "ui.options.multiplayer.disableLuaReload.tooltip": "Les rechargements de Lua sont nécessaires pour s'assurer que le jeu est remis en état de marche si les mods ont remplacé les fonctions du jeu. Peut être désactivé pour une expérience plus fluide, mais à vos risques et périls.",
   "ui.options.multiplayer.disableInstabilityPausing": "Désactiver les pauses causées par les instabilités",
   "ui.options.multiplayer.disableInstabilityPausing.tooltip": "Cela rendra le gameplay plus fluide, mais peut entraîner des problèmes de synchronisation après plusieurs instabilités",
+  "ui.options.multiplayer.enableNewChatMenu": "Activer le nouveau menu de chat",
+  "ui.options.multiplayer.enableNewChatMenu.tooltip": "Cela activera le nouveau menu de chat, qui est toujours en développement et peut avoir des bugs.",
   "ui.options.multiplayer.simplifyRemoteVehicles": "Utiliser des véhicules simplifiés lorsqu'ils sont disponibles",
   "ui.options.multiplayer.simplifyRemoteVehicles.tooltip": "Ce paramètre remplacera les véhicules à distance par les versions 'traffic' fournies par BeamNG. Réduit la précision des collisions et des visuelles, mais améliore la performance",
   "ui.options.multiplayer.enableBlobs": "Activer les boule",

@@ -90,7 +90,7 @@ angular.module('beamng.stuff')
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
           <div ng-show='!showBuildInfo'>BeamMP v{{ ::beammpGameVer }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP v{{ ::beammpGameVer }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP v{{ ::beammpGameVer }} <br/> Launcher v{{ ::beammpLauncherVer }}</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
@@ -124,7 +124,7 @@ angular.module('beamng.stuff')
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
       // TODO #203 Fix this to actually use the real launcher version!
-      scope.beammpGameVer = '4.7.3'
+      scope.beammpGameVer = '5.0.0'
       scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display

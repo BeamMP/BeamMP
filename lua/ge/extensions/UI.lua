@@ -103,8 +103,30 @@ end
 local function updatePlayersList(data)
 	playersString = data or playersString
 	local players = split(playersString, ",")
+	local playerListData = {}
+	for index, p in ipairs(players) do
+		local player = MPVehicleGE.getPlayerByName(p)
+		local username = p
+		local color = {}
+		local id = '?'
+		if player then
+			local prefix = ""
+			for source, tag in pairs(player.nickPrefixes)
+				do prefix = prefix..tag.." " end
+	
+			local suffix = ""
+			for source, tag in pairs(player.nickSuffixes)
+				do suffix = suffix..tag.." " end
+		
+			username = prefix..''..username..''..suffix..''..player.role.shorttag
+			local c = player.role.forecolor
+			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
+			id = player.playerID
+		end
+		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id})
+	end
 	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
-	guihooks.trigger("playerList", jsonEncode(players))
+	guihooks.trigger("playerList", jsonEncode(playerListData))
 	guihooks.trigger("playerPings", jsonEncode(pings))
 	playerListWindow.updatePlayerList(pings) -- Send pings because this is a key-value table that contains name and the ping
 end

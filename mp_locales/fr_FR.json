@@ -77,6 +77,7 @@
   "ui.multiplayer.forum": "FORUM",
   "ui.multiplayer.wiki": "WIKI",
   "ui.multiplayer.discord": "Discord",
+  "ui.multiplayer.patreon": "Patreon",
   "ui.multiplayer.players": "Joueurs",
   "ui.multiplayer.emptyOnly": "Vide seulement",
   "ui.multiplayer.emptyOnlyTooltip": "Afficher uniquement les serveurs vides",

@@ -318,23 +318,32 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	chatcounter = chatcounter+1
 	local message = string.sub(rawMessage, 2)
 	local parts = split(message, ':')
-	print(parts)
 	local username = parts[1]
 	parts[1] = ''
-	local msg = string.sub(table.concat(parts), 1)
+	local msg = string.gsub(message, username..': ', '')
 	local player = MPVehicleGE.getPlayerByName(username)
 	if player then
-		username = ''..username..''..player.role.shorttag
+		local prefix = ""
+		for source, tag in pairs(player.nickPrefixes)
+			do prefix = prefix..tag.." " end
+
+		local suffix = ""
+		for source, tag in pairs(player.nickSuffixes)
+			do suffix = suffix..tag.." " end
+		username = prefix..''..username..''..suffix..''..player.role.shorttag
+		local c = player.role.forecolor
+		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter, color = player.role.backcolor})
+		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter, color = color})
+		-- For IMGUI
+		chatWindow.addMessage(username, msg, chatcounter, color)
 	else
 		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..msg) -- DO NOT REMOVE
 		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter})
+		-- For IMGUI
+		chatWindow.addMessage(username, msg, id)
 	end
 	TriggerClientEvent("ChatMessageReceived", message, username) -- Username added last to not break other mods.
-
-	-- For IMGUI
-	chatWindow.addMessage(username, msg)
 end
 
 

@@ -33,9 +33,10 @@ local function sendChatMessage(message)
     ffi.copy(chatMessage, "")
 end
 
-local function addMessage(username, message)
+local function addMessage(username, message, id, color)
     local messageTable = {
         username = username,
+        color = color,
         message = message,
         sentTime = os.time(),
         id = #M.chatMessages + 1
@@ -64,24 +65,30 @@ local function render()
         end
 
         for _, message in ipairs(M.chatMessages) do
-            imgui.Columns(3, "ChatColumns", false)
-
-            imgui.SetColumnWidth(0, 120)
-
-            imgui.Text(message.username)
-            imgui.NextColumn()
+            imgui.Columns(2, "ChatColumns", false)
 
             if not scrollbarVisible then
-                imgui.SetColumnWidth(1, windowWidth - 120 - 42)
+                imgui.SetColumnWidth(0, windowWidth - 42)
             else
-                imgui.SetColumnWidth(1, windowWidth - 120 - 42 - scrollbarSize)
+                imgui.SetColumnWidth(0, windowWidth - 42 - scrollbarSize)
             end
+
+            if message.color then
+                imgui.TextColored(imgui.ImVec4(message.color[0]/255, message.color[1]/255, message.color[2]/255, message.color[3]/255), message.username)
+                imgui.SameLine()
+            else
+                imgui.Text(message.username)
+                imgui.SameLine()
+            end
+            
+            imgui.Text(': ')
+            imgui.SameLine()
 
             imgui.TextWrapped(message.message)
             imgui.NextColumn()
             imgui.Text(os.date("%H:%M", message.sentTime))
 
-            imgui.Columns(0)
+            imgui.Columns(1)
         end
 
         if scrollToBottom then

@@ -29,18 +29,18 @@ local original_replaceVehicle
 local original_spawnDefault
 
 local roleToInfo = {
-	['USER']	= { backcolor = ColorI(000, 000, 000, 127), tag = "", shorttag = "" },
-	['EA']		= { backcolor = ColorI(069, 000, 150, 127), tag = " [Early Access]", shorttag = " [EA]" },
-	['YT']		= { backcolor = ColorI(200, 000, 000, 127), tag = " [YouTuber]", shorttag = " [YT]" },
-	['ET']		= { backcolor = ColorI(210, 214, 109, 127), tag = " [Events Team]", shorttag = " [Events]" },
-	['SUPPORT']	= { backcolor = ColorI(068, 109, 184, 127), tag = " [Support]", shorttag = " [Staff]" },
-	['STAFF']	= { backcolor = ColorI(068, 109, 184, 127), tag = " [BeamMP Staff]", shorttag = " [Staff]" },
-	['MOD']		= { backcolor = ColorI(068, 109, 184, 127), tag = " [Moderator]", shorttag = " [Mod]" },
-	['ADM']		= { backcolor = ColorI(218, 000, 078, 127), tag = " [Admin]", shorttag = " [Adm]" },
-	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" },
-	['NGDEV']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Developer]", shorttag = " [BNG]" },
-	['NGSTAFF']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
-	['NGAFFIL']	= { backcolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
+	['USER']	= { backcolor = ColorI(000, 000, 000, 127), forecolor = ColorI(255, 255, 255, 127), tag = "", shorttag = "" },
+	['EA']		= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Early Access]", shorttag = " [EA]" },
+	['YT']		= { backcolor = ColorI(200, 000, 000, 127), forecolor = ColorI(255, 000, 000, 127), tag = " [YouTuber]", shorttag = " [YT]" },
+	['ET']		= { backcolor = ColorI(210, 214, 109, 127), forecolor = ColorI(210, 214, 109, 127), tag = " [Events Team]", shorttag = " [Events]" },
+	['SUPPORT']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Support]", shorttag = " [Staff]" },
+	['STAFF']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [BeamMP Staff]", shorttag = " [Staff]" },
+	['MOD']		= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Moderator]", shorttag = " [Mod]" },
+	['ADM']		= { backcolor = ColorI(218, 000, 078, 127), forecolor = ColorI(255, 000, 089, 127), tag = " [Admin]", shorttag = " [Adm]" },
+	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), forecolor = ColorI(255, 070, 101, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" },
+	['NGDEV']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Developer]", shorttag = " [BNG]" },
+	['NGSTAFF']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
+	['NGAFFIL']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
 }
 
 --[[Format - same as roleToInfo

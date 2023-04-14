@@ -346,15 +346,15 @@ angular.module('beamng.stuff')
   let buttonsDefault = [
     // big
     {
-      translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
-      targetState: 'menu.multiplayer.tos'
-    },
-    // rows with 4 elements each
-    {
       translateid: 'ui.playmodes.freeroam',
       icon: '/ui/modules/mainmenu/drive/icons/play.svg',
       targetState: 'menu.levels'
+    },
+    // rows with 4 elements each
+    {
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
     },
     {
       translateid: 'ui.playmodes.campaigns',

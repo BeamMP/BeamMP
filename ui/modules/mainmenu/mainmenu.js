@@ -352,6 +352,11 @@ angular.module('beamng.stuff')
     },
     // rows with 4 elements each
     {
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
+    },
+    {
       translateid: 'ui.playmodes.campaigns',
       icon: '/ui/modules/mainmenu/drive/icons/campaigns.svg',
       targetState: 'menu.campaigns'
@@ -365,11 +370,6 @@ angular.module('beamng.stuff')
       translateid: 'ui.playmodes.quickrace',
       icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
       targetState: 'menu.quickraceOverview'
-    },
-    {
-      translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
-      targetState: 'menu.multiplayer.tos'
     },
     {
       translateid: 'ui.mainmenu.garage',

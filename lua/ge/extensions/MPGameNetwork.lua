@@ -25,8 +25,9 @@ setmetatable(_G,{}) -- temporarily disable global notifications
 local function connectToLauncher()
 	-- Check if we are using V3
 	if MP then
-		M.send('A') -- immediately heartbeat to check if connection was established
-		log('W', 'connectToLauncher', 'Launcher already connected!')
+		launcherConnected = true
+		--M.send('A') -- immediately heartbeat to check if connection was established
+		log('W', 'connectToLauncher', 'Launcher should already be connected!')
 		return
 	end
 
@@ -48,6 +49,7 @@ end
 
 local function disconnectLauncher()
 	if MP then
+		launcherConnected = false
 		return
 	end
 	if launcherConnected then
@@ -250,7 +252,12 @@ local function connectionStatus() --legacy, here because some mods use it
 end
 
 M.receiveIPCGameData = function(code, data)
+	local received = code..data
 	HandleNetwork[code](data)
+	if settings.getValue("showDebugOutput") == true then
+		log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+	end
+	if MPDebug then MPDebug.packetReceived(#received) end
 end
 
 detectGlobalWrites() -- reenable global write notifications

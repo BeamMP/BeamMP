@@ -384,10 +384,9 @@ local function onUpdate(dt)
 			while (true) do
 				local msg = MP:try_pop()
 				if msg then
-					print(msg)
 					local code = string.sub(msg, 1, 1)
 					local received = string.sub(msg, 2)
-					if settings.getValue("showDebugOutput") == true then
+					if settings.getValue("showDebugOutput") == true and code == 'C' then
 						log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
 					end
 			
@@ -397,7 +396,7 @@ local function onUpdate(dt)
 					local d = string.sub(received, 2)
 					if code == 'C' then
 						HandleNetwork[c](d)
-					elseif code == 'G' then
+					elseif code == 'G' and MPGameNetwork.launcherConnected() then
 						MPGameNetwork.receiveIPCGameData(c, d)
 					end
 			
@@ -433,7 +432,7 @@ local function onUpdate(dt)
 			updateUiTimer = 0
 			send('Ul') -- Ask the launcher for a loading screen update
 		end
-		if MPGameNetwork and MPGameNetwork.launcherConnected() and pingTimer >= 1 then
+		if MPGameNetwork and MPGameNetwork.launcherConnected() and pingTimer >= 1 and isMPSession() then
 			pingTimer = 0
 			send('Up')
 		end

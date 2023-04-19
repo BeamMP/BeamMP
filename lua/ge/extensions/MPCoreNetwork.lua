@@ -377,7 +377,9 @@ local function onUpdate(dt)
 	if status == "LoadingResources" then
 		updateUiTimer = updateUiTimer + dt
 	end
-	heartbeatTimer = heartbeatTimer + dt
+	if not MP then -- This is not required in V3
+		heartbeatTimer = heartbeatTimer + dt
+	end
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
 		if MP then
@@ -476,6 +478,9 @@ runPostJoin = function() -- gets called once loaded into a map
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
+		if MP then
+			send('A')
+		end
 	end
 end
 

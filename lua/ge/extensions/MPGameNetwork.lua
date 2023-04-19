@@ -28,6 +28,7 @@ local function connectToLauncher()
 		launcherConnected = true
 		--M.send('A') -- immediately heartbeat to check if connection was established
 		log('W', 'connectToLauncher', 'Launcher should already be connected!')
+		M.send('A')
 		return
 	end
 
@@ -235,7 +236,7 @@ local function onUpdate(dt)
 			end
 		end
 	end
-	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() then --TODO: something
+	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() and launcherConnected then --TODO: something
 		heartbeatTimer = 0
 		M.send('A')
 	end

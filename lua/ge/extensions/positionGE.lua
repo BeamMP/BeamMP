@@ -13,6 +13,7 @@ local highVelocityFixPause = {} -- serverVehicleID:os.time()
 local highVelocityFixPauseTime = 1 -- seconds
 local highVelocityChangePositive = 20 -- m/s
 local highVelocityChangeNegativ = -120 -- m/s. Needs to be this low in order to not apply the fix when someone is sending his vehicle at full speed into a wall
+local highDistanceMultiplicator = 3
 local gameIsLagging = false
 
 local function tick()
@@ -51,6 +52,10 @@ local function getVelocityDifference(x1, y1, z1, x2, y2, z2)
 	return math.sqrt(x1^2 + y1^2 + z1^2) - math.sqrt(x2^2 + y2^2 + z2^2)
 end
 
+local function getDistanceDifference(x1, y1, z1, x2, y2, z2)
+	return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
+end
+
 local function applyPos(data, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
@@ -85,9 +90,10 @@ local function applyPos(data, serverVehicleID)
 			The fix is also not applied when the game is considered lagging. Vehicles dont drive smoothly anyway in a lagging
 			environment and this fix would make it worse for those. --]]
 
-		local performDefaultVehicleUpdate = true
 		local currentVel = veh:getVelocity()
 		local velocityChange = getVelocityDifference(currentVel.x, currentVel.y, currentVel.z, decoded.vel[1], decoded.vel[2], decoded.vel[3])
+		--local currentPos = veh:getPosition()
+		--local distanceChange = getDistanceDifference(currentPos.x, currentPos.y, currentPos.z, decoded.pos[1], decoded.pos[2], decoded.pos[3])
 
 		-- only act when the current vehicular speed is to different from the vehicular speed given in this packet.
 		if velocityChange > highVelocityChangePositive or velocityChange < highVelocityChangeNegativ then
@@ -109,7 +115,7 @@ local function applyPos(data, serverVehicleID)
 					-- tp. note: sets the vehicle a bit into the air unintentionally.
 					-- doing the no physics reset and then the posrot update both somehow gives better results then if we do just one of these
 					veh:setPositionNoPhysicsReset(vec3(decoded.pos[1], decoded.pos[2], decoded.pos[3]))
-					veh:setPositionRotation(decoded.pos[1], decoded.pos[2], decoded.pos[3], decoded.rot[1], decoded.rot[2], decoded.rot[3], decoded.rot[4])
+					veh:setPositionRotation(decoded.pos[1], decoded.pos[2], decoded.pos[3] + 0.2, decoded.rot[1], decoded.rot[2], decoded.rot[3], decoded.rot[4])
 
 					-- release parking brake
 					veh:queueLuaCommand("input.event('parkingbrake', 0, 1)")
@@ -118,15 +124,14 @@ local function applyPos(data, serverVehicleID)
 					-- ~ todo
 
 					-- set instant velocity
-					veh:applyClusterVelocityScaleAdd(veh:getRefNodeId(), 1, decoded.vel[1], decoded.vel[2], decoded.vel[3])
+					veh:applyClusterVelocityScaleAdd(veh:getRefNodeId(), 1, decoded.vel[1], decoded.vel[2], decoded.vel[3] + 0.2)
 
 					highVelocityFixPause[serverVehicleID] = os.time()
-					performDefaultVehicleUpdate = false
 				end
 			end
 		end
 
-		if performDefaultVehicleUpdate then veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')") end
+		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
 	end
 
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)

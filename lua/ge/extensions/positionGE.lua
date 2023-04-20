@@ -47,14 +47,8 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	end
 end
 
-local function _getVelocity(x, y, z)
-	return math.sqrt(x^2 + y^2 + z^2)
-end
-
 local function getVelocityDifference(x1, y1, z1, x2, y2, z2)
-	local vel1 = math.floor(_getVelocity(x1, y1, z1))
-	local vel2 = math.floor(_getVelocity(x2, y2, z2))
-	return vel1 - vel2
+	return math.sqrt(x1^2 + y1^2 + z1^2) - math.sqrt(x2^2 + y2^2 + z2^2)
 end
 
 local function applyPos(data, serverVehicleID)

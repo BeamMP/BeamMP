@@ -12,7 +12,7 @@ local actualSimSpeed = 1
 local highVelocityFixPause = {} -- serverVehicleID:os.time()
 local highVelocityFixPauseTime = 1 -- seconds
 local highVelocityChangePositive = 20 -- m/s
-local highVelocityChangeNegativ = -20 -- m/s
+local highVelocityChangeNegativ = -120 -- m/s. Needs to be this low in order to not apply the fix when someone is sending his vehicle at full speed into a wall
 local gameIsLagging = false
 
 local function tick()
@@ -83,8 +83,7 @@ local function applyPos(data, serverVehicleID)
 			fully synced again. Not doing this pause will cause the vehicle to get fixed over and over again.
 			
 			The fix is also not applied when the game is considered lagging. Vehicles dont drive smoothly anyway in a lagging
-			environment and this fix would make it worse for those.
-		--]]
+			environment and this fix would make it worse for those. --]]
 
 		local performDefaultVehicleUpdate = true
 		local currentVel = veh:getVelocity()

@@ -82,7 +82,7 @@
     "ui.multiplayer.notEmptyTooltip": "Only show not empty servers",
     "ui.multiplayer.notFull": "Not full",
     "ui.multiplayer.notFullTooltip": "Only show not full servers",
-    "ui.multiplayer.mapFilterTooltip": "Enable mod size limiter",
+    "ui.multiplayer.mapFilterTooltip": "Enable map filter",
     "ui.multiplayer.modSlider": "Mod size limiter",
     "ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
     "ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the game using the BeamMP Launcher.",

@@ -85,6 +85,7 @@
     "ui.multiplayer.mapFilterTooltip": "Enable map filter",
     "ui.multiplayer.modSlider": "Mod size limiter",
     "ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
+    "ui.multiplayer.clearRecent": "Clear Recents",
     "ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the game using the BeamMP Launcher.",
     "ui.multiplayerlauncher.connect": "Connect",
     "ui.multiplayertos.title": "Rules and terms of service",

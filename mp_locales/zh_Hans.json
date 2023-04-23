@@ -86,6 +86,8 @@
     "ui.multiplayer.modSlider": "模组大小限制",
     "ui.multiplayer.modSliderTooltip": "启用模组大小限制",
     "ui.multiplayer.clearRecent": "清空历史记录",
+    "ui.multiplayer.pasteFromClipboard": "从剪贴板粘贴",
+    "ui.multiplayer.logout": "登出",
     "ui.multiplayerlauncher.lost": "游戏未链接至启动器，请使用启动器打开游戏。",
     "ui.multiplayerlauncher.connect": "连接",
     "ui.multiplayertos.title": "规则与服务条款",

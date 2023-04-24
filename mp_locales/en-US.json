@@ -57,7 +57,7 @@
     "ui.options.multiplayer.showAdvancedOptions.tooltip": "Display all BeamMP settings",
     "ui.options.multiplayer.tuneBlobColors": "Tune colors",
     "ui.options.multiplayer.tuneBlobColorsHelp": "HEX color value (ex: #FF6400)",
-    "ui.options.multiplayer.tuneBlobColorsVisible": "Visuble",
+    "ui.options.multiplayer.tuneBlobColorsVisible": "Visible",
     "ui.options.multiplayer.tuneColorQueued": "Queued vehicle",
     "ui.options.multiplayer.tuneColorIllegal": "Illegal vehicle ",
     "ui.options.multiplayer.tuneColorIllegalHelp": "(missing mod, can not be spawned)",

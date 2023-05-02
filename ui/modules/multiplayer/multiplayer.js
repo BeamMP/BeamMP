@@ -362,6 +362,11 @@ function($scope, $state, $timeout) {
 			vm.selectMap,
 			bngApi
 		);
+		if(vm.checkIsEmpty == true && vm.checkIsNotEmpty == true){
+			vm.checkIsEmpty = false;
+			vm.checkIsNotEmpty = false;
+			bngApi.engineLua('MPCoreNetwork.requestServerList()');
+		}
 		serverListOptions = {
 			checkIsEmpty : vm.checkIsEmpty,
 			checkIsNotEmpty : vm.checkIsNotEmpty,

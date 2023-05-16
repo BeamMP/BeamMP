@@ -115,16 +115,14 @@
 
     <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; border-top: solid 2px var(--bng-orange); padding-top:0; padding-bottom:0;">
       <div style="flex: 1 1 auto;">
-        <!--
-        <md-checkbox ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
-          {{:: 'ui.vehicleconfig.subparts' | translate}}
-        </md-checkbox>
-        -->
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.showAuxiliary" md-no-ink flex>
           <md-icon class="material-icons">report</md-icon> {{:: "ui.showAuxiliary" | translate}}
         </md-checkbox>
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{:: 'ui.vehicleconfig.simpleTree' | translate}}
+        </md-checkbox>
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
+          {{:: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>
       </div>
 

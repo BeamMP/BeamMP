@@ -464,7 +464,7 @@ end
 
 local function onReset()
 	if v.mpVehicleType == 'L' then
-		electrics.values.absMode = settings.getValue("absBehavior") or "realistic"
+		electrics.values.absMode = settings.getValue("absBehavior", "realistic")
 	end
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")

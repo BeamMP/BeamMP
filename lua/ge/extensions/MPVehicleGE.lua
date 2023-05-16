@@ -992,7 +992,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 
 		if newGameVehicleID and newGameVehicleID > -1 then
-			local skipOthers = settings.getValue("skipOtherPlayersVehicles") or false
+			local skipOthers = settings.getValue("skipOtherPlayersVehicles", false)
 			local oldVehicle = be:getObjectByID(oldGameVehicleID or -1)
 			local newVehicle = be:getObjectByID(newGameVehicleID or -1)
 
@@ -1649,7 +1649,7 @@ local function onPreRender(dt)
 			local pos = Point3F(v.position.x, v.position.y, v.position.z)
 
 			local nametagAlpha = 1
-			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance") or 40
+			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance", 40)
 
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat

@@ -1,0 +1,1549 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/ge.extensions.MPGameNetwork.html">ge.extensions.MPGameNetwork</a></li>
+  <li><strong>MPVehicleGE</strong></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPVehicleGE</code></h1>
+<p>MPVehicleGE API.</p>
+<p>
+ Author of this documentation is Neverless</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">local gameVehicleID = getGameVehicleID(&quot;0-0&quot;) -- internal access
+</pre></li>
+        <li><pre class="example">local gameVehicleID = MPVehicleGE.getGameVehicleID(&quot;0-0&quot;) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#getGameVehicleID">getGameVehicleID (serverVehicleID)</a></td>
+	<td class="summary">Resolves a serverVehicleID into the gameVehicleID</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getServerVehicleID">getServerVehicleID (gameVehicleID)</a></td>
+	<td class="summary">Reolves a gameVehicleID into the serverVehicleID</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getVehicleByServerID">getVehicleByServerID (serverVehicleID)</a></td>
+	<td class="summary">Returns the vehicle table for this Vehicle</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getVehicleByGameID">getVehicleByGameID (gameVehicleID)</a></td>
+	<td class="summary">Returns the vehicle table for this Vehicle</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getPlayerByName">getPlayerByName (name)</a></td>
+	<td class="summary">Returns this Players table and ID</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isOwn">isOwn (gameVehicleID)</a></td>
+	<td class="summary">Checks if the given vehicle belongs to this Client</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getOwnMap">getOwnMap ()</a></td>
+	<td class="summary">Returns a table that contains a list of all Vehicles that are owned by this Client</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getVehicleMap">getVehicleMap ()</a></td>
+	<td class="summary">Returns a table of all known multiplayer vehicles</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getDistanceMap">getDistanceMap ()</a></td>
+	<td class="summary">Returns a table containing the distance from each Multiplayer Vehicle to this Clients Point of View</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getNicknameMap">getNicknameMap ()</a></td>
+	<td class="summary">Returns a table containing all Multiplayer gameVehicleID's with their Ownernames</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPlayerNickPrefix">setPlayerNickPrefix (targetName, tagSource, text)</a></td>
+	<td class="summary">Adds a Prefix to a given PlayerTag.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPlayerNickSuffix">setPlayerNickSuffix (targetName, tagSource, text)</a></td>
+	<td class="summary">Adds a Suffix to a given PlayerTag.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#hideNicknames">hideNicknames (hide)</a></td>
+	<td class="summary">Turns On or Off the Nametag drawing from BeamMP</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getPlayers">getPlayers ()</a></td>
+	<td class="summary">Returns the whole Players table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getVehicles">getVehicles ()</a></td>
+	<td class="summary">Returns the whole Vehicles table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setVehicleRole">setVehicleRole (playerIDVehicleID, roleName[, displayName])</a></td>
+	<td class="summary">Sets a custom role and name to a vehicle</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#removeVehicleRole">removeVehicleRole (playerIDVehicleID)</a></td>
+	<td class="summary">Removes a custom Role and Name from a Vehicle</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#createRole">createRole (roleName[, tag[, shorttag[, red[, green[, blue]]]]])</a></td>
+	<td class="summary">Creates a custom role to be used with setVehicleRole.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#removeRole">removeRole (roleName)</a></td>
+	<td class="summary">Removes a custom role.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#roleToInfo">roleToInfo</a></td>
+	<td class="summary">Contains Information about Backend authorized Roles</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#roleToInfo_subtable">roleToInfo_subtable</a></td>
+	<td class="summary">(in table) Specifies the table in roleToInfo</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#simplified_vehicles">simplified_vehicles</a></td>
+	<td class="summary">Contains the known simplified Vehicle versions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#custom_roleToInfo">custom_roleToInfo</a></td>
+	<td class="summary">Contains the Custom Roles created with createRole</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#custom_vehicleRoles">custom_vehicleRoles</a></td>
+	<td class="summary">Contains only the Vehicles that have set Custom roles to it with setVehicleRole</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#custom_vehicleRoles_subtable">custom_vehicleRoles_subtable</a></td>
+	<td class="summary">(in table) Specifies the table in custom_vehicleRoles</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players">players</a></td>
+	<td class="summary">Contains all known Players.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players_subtable">players_subtable</a></td>
+	<td class="summary">(in table) Specifies the table in players</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players_nickPrefixes">players_nickPrefixes</a></td>
+	<td class="summary">(in table) Specifies the nickPrefixes table for players_subtable</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players_nickSuffixes">players_nickSuffixes</a></td>
+	<td class="summary">(in table) Specifies the nickSuffixes table for players_subtable</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players_role">players_role</a></td>
+	<td class="summary">(in table) Specifies the role table for players_subtable</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#players_vehicles">players_vehicles</a></td>
+	<td class="summary">(in table) Specifies the vehicles table for players_subtable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#vehicles">vehicles</a></td>
+	<td class="summary">Contains all known Multiplayer Vehicles.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#vehicles_subtable">vehicles_subtable</a></td>
+	<td class="summary">(in table) Specifies the table in vehicles</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#vehicles_spectators">vehicles_spectators</a></td>
+	<td class="summary">(in table) Specifies the spectators table in vehicles_subtable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#vehicles_spawnQueue">vehicles_spawnQueue</a></td>
+	<td class="summary">(in table) Specifies the spawnQueue table in vehicles_subtable</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#vehiclesMap">vehiclesMap</a></td>
+	<td class="summary">Resolves gameVehicleID to serverVehicleID</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#distanceMap">distanceMap</a></td>
+	<td class="summary">Contains the Distances in meters from the Clients POV to the known Multiplayer Vehicles</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "getGameVehicleID"></a>
+    <strong>getGameVehicleID (serverVehicleID)</strong>
+    </dt>
+    <dd>
+    Resolves a serverVehicleID into the gameVehicleID
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">serverVehicleID</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         X-Y. Where X is the PlayerID and Y the Players VehicleID
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">integer</span></span>
+        If success eg. 11171
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">-1</span></span>
+        If either the Vehicle is unknown or the Vehicle is not Spawned on the Client
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> gameVehicleID = <span class="function-name">getGameVehicleID</span>(<span class="string">"0-0"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getServerVehicleID"></a>
+    <strong>getServerVehicleID (gameVehicleID)</strong>
+    </dt>
+    <dd>
+    Reolves a gameVehicleID into the serverVehicleID
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        If success. serverVehicleID eg. "0-0"
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+        If either the gameVehicleID is unknown or invalid
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> serverVehicleID = <span class="function-name">getServerVehicleID</span>(<span class="number">11171</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getVehicleByServerID"></a>
+    <strong>getVehicleByServerID (serverVehicleID)</strong>
+    </dt>
+    <dd>
+    Returns the vehicle table for this Vehicle
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">serverVehicleID</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         X-Y. Where X is the PlayerID and Y the Players VehicleID
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_subtable</a></span>
+
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+        If the serverVehicleID is invalid
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> vehicle = <span class="function-name">getVehicleByServerID</span>(<span class="string">"0-0"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getVehicleByGameID"></a>
+    <strong>getVehicleByGameID (gameVehicleID)</strong>
+    </dt>
+    <dd>
+    Returns the vehicle table for this Vehicle
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_subtable</a></span>
+
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+        If the gameVehicleID is invalid
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> vehicle = <span class="function-name">getVehicleByGameID</span>(<span class="number">11171</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getPlayerByName"></a>
+    <strong>getPlayerByName (name)</strong>
+    </dt>
+    <dd>
+    Returns this Players table and ID
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The Players Name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_subtable</a></span>
+        </li>
+        <li>
+           <span class="types"><span class="type">integer</span></span>
+        playerID</li>
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+        If the name is invalid
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> player, playerID = <span class="function-name">getPlayerByName</span>(<span class="string">"Neverless"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isOwn"></a>
+    <strong>isOwn (gameVehicleID)</strong>
+    </dt>
+    <dd>
+    Checks if the given vehicle belongs to this Client
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        true if this Vehicle belongs to this Client
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        false if this Vehicle does not belong to this Client or when the Vehicle does not exist
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example"><span class="keyword">if</span> <span class="function-name">getServerVehicleID</span>(<span class="number">11171</span>) ~= <span class="keyword">nil</span> <span class="keyword">and</span> <span class="function-name">isOwn</span>(<span class="number">11171</span>) <span class="keyword">then</span> <span class="keyword">local</span> isOwn = <span class="keyword">true</span> <span class="keyword">end</span> <span class="comment">-- only true when the vehicle exists and isOwn()</span></pre></li>
+        <li><pre class="example"><span class="keyword">local</span> isOwn = <span class="function-name">isOwn</span>(<span class="number">11171</span>)</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getOwnMap"></a>
+    <strong>getOwnMap ()</strong>
+    </dt>
+    <dd>
+    Returns a table that contains a list of all Vehicles that are owned by this Client
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {gameVehicleID_1 = vehicles_subtable}</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {gameVehicleID_N = vehicles_subtable}</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/MPVehicleGE.html#vehicles_subtable">vehicles_subtable</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> myVehicles = <span class="function-name">getOwnMap</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getVehicleMap"></a>
+    <strong>getVehicleMap ()</strong>
+    </dt>
+    <dd>
+    Returns a table of all known multiplayer vehicles
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {serverVehicleID_1 = gameVehicleID}</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {serverVehicleID_N = gameVehicleID}</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> vehicles = <span class="function-name">getVehicleMap</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getDistanceMap"></a>
+    <strong>getDistanceMap ()</strong>
+    </dt>
+    <dd>
+    Returns a table containing the distance from each Multiplayer Vehicle to this Clients Point of View
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#distanceMap">distanceMap</a></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> distanceMap = <span class="function-name">getDistanceMap</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getNicknameMap"></a>
+    <strong>getNicknameMap ()</strong>
+    </dt>
+    <dd>
+    Returns a table containing all Multiplayer gameVehicleID's with their Ownernames
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {gameVehicleID_1 = OwnerName}</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        {gameVehicleID_N = OwnerName}</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> nicknameMap = <span class="function-name">getNicknameMap</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setPlayerNickPrefix"></a>
+    <strong>setPlayerNickPrefix (targetName, tagSource, text)</strong>
+    </dt>
+    <dd>
+    Adds a Prefix to a given PlayerTag.
+ eg. "1st. Neverless". You can set multiple by having alternating tagSource's
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">targetName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         PlayerName
+        </li>
+        <li><span class="parameter">tagSource</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Name of the Prefix
+        </li>
+        <li><span class="parameter">text</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Text to add
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">setPlayerNickPrefix</span>(<span class="string">"Neverless"</span>, <span class="string">"MYPREFIX"</span>, <span class="string">"1st."</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setPlayerNickSuffix"></a>
+    <strong>setPlayerNickSuffix (targetName, tagSource, text)</strong>
+    </dt>
+    <dd>
+    Adds a Suffix to a given PlayerTag.
+ eg. "Neverless [In Mission]". You can set multiple by having alternating tagSource's
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">targetName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         PlayerName
+        </li>
+        <li><span class="parameter">tagSource</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Name of the Prefix
+        </li>
+        <li><span class="parameter">text</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Text to add
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">setPlayerNickSuffix</span>(<span class="string">"Neverless"</span>, <span class="string">"MYSUFFIX"</span>, <span class="string">"[In Mission]"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "hideNicknames"></a>
+    <strong>hideNicknames (hide)</strong>
+    </dt>
+    <dd>
+    Turns On or Off the Nametag drawing from BeamMP
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">hide</span>
+            <span class="types"><span class="type">bool</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">hideNicknames</span>(<span class="keyword">true</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getPlayers"></a>
+    <strong>getPlayers ()</strong>
+    </dt>
+    <dd>
+    Returns the whole Players table
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players</a></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> players = <span class="function-name">getPlayers</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getVehicles"></a>
+    <strong>getVehicles ()</strong>
+    </dt>
+    <dd>
+    Returns the whole Vehicles table
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles</a></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> vehicles = <span class="function-name">getVehicles</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setVehicleRole"></a>
+    <strong>setVehicleRole (playerIDVehicleID, roleName[, displayName])</strong>
+    </dt>
+    <dd>
+    Sets a custom role and name to a vehicle
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">playerIDVehicleID</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         X-Y. Where X is the PlayerID and Y the Players VehicleID
+        </li>
+        <li><span class="parameter">roleName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
+        </li>
+        <li><span class="parameter">displayName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         sets a Custom name to this Vehicle. Give 0 to not set a custom name
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">1</span></span>
+        If success
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">0</span></span>
+        playerIDVehicleID is invalid. Vehicle or Player might not exists
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">-1</span></span>
+        roleName does not exist
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">setVehicleRole</span>(<span class="string">"0-0"</span>, <span class="string">"MYROLE"</span>, <span class="string">"Unknown"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "removeVehicleRole"></a>
+    <strong>removeVehicleRole (playerIDVehicleID)</strong>
+    </dt>
+    <dd>
+    Removes a custom Role and Name from a Vehicle
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">playerIDVehicleID</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         X-Y. Where X is the PlayerID and Y the Players VehicleID
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">nil</span></span>
+
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">removeVehicleRole</span>(<span class="string">"0-0"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "createRole"></a>
+    <strong>createRole (roleName[, tag[, shorttag[, red[, green[, blue]]]]])</strong>
+    </dt>
+    <dd>
+    Creates a custom role to be used with setVehicleRole.
+ Give 0 to not use a Optional param.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">roleName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Name of the Role
+        </li>
+        <li><span class="parameter">tag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Sets a optional tag. Playername [Long tag]
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">shorttag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Sets a optional shorttag: Playername [Short Tag]
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">red</span>
+            <span class="types"><span class="type">integer</span></span>
+         0 to 255
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">green</span>
+            <span class="types"><span class="type">integer</span></span>
+         0 to 255
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">blue</span>
+            <span class="types"><span class="type">integer</span></span>
+         0 to 255
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">true</span></span>
+        If success
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+           <span class="types"><span class="type">false</span></span>
+        When a color value is below 0 or when the roleName == "BLANK"
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">createRole</span>(<span class="string">"MYROLE"</span>, <span class="string">"Custom"</span>, <span class="string">"Ctm"</span>, <span class="number">252</span>, <span class="number">107</span>, <span class="number">3</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "removeRole"></a>
+    <strong>removeRole (roleName)</strong>
+    </dt>
+    <dd>
+    Removes a custom role.
+ All vehicles with that role will also loose it.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">roleName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span></span>
+        If success</li>
+        <li>
+           <span class="types"><span class="type">false</span></span>
+        When the Role doesnt exists</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">removeRole</span>(<span class="string">"MYROLE"</span>)</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "roleToInfo"></a>
+    <strong>roleToInfo</strong>
+    </dt>
+    <dd>
+    Contains Information about Backend authorized Roles
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">RoleName_1</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#roleToInfo">roleToInfo_subtable</a></span>
+         Contains the Role Specific Data
+        </li>
+        <li><span class="parameter">RoleName_N</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#roleToInfo">roleToInfo_subtable</a></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> roleInfo = roleToInfo[<span class="string">"USER"</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "roleToInfo_subtable"></a>
+    <strong>roleToInfo_subtable</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the table in roleToInfo
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">backcolor</span>
+            <span class="types"><span class="type">ColorI</span></span>
+         Contains RGBA Values wiki.beamng.com/Lua:Reference#ColorI
+        </li>
+        <li><span class="parameter">tag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the Tag
+        </li>
+        <li><span class="parameter">shorttag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the Short version of Tag
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example"><span class="keyword">local</span> roleInfo = roleToInfo[<span class="string">"USER"</span>].tag</pre></li>
+        <li><pre class="example"><span class="keyword">local</span> roleInfo = roleToInfo[<span class="string">"USER"</span>].backcolor.r</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "simplified_vehicles"></a>
+    <strong>simplified_vehicles</strong>
+    </dt>
+    <dd>
+    Contains the known simplified Vehicle versions.
+ JBeamNames are Strings eg. "moonhawk", "unicycle"
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">JBeamName_1</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         eg. "simple_traffic_coupe"
+        </li>
+        <li><span class="parameter">JBeamName_N</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> simplified = simplified_vehicles[<span class="string">"coupe"</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "custom_roleToInfo"></a>
+    <strong>custom_roleToInfo</strong>
+    </dt>
+    <dd>
+    Contains the Custom Roles created with createRole
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">RoleName_1</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#roleToInfo">roleToInfo_subtable</a></span>
+         Contains the Role Specific Data
+        </li>
+        <li><span class="parameter">RoleName_N</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#roleToInfo">roleToInfo_subtable</a></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> roleInfo = custom_roleToInfo[<span class="string">"CUSTOMROLE"</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "custom_vehicleRoles"></a>
+    <strong>custom_vehicleRoles</strong>
+    </dt>
+    <dd>
+    Contains only the Vehicles that have set Custom roles to it with setVehicleRole
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">serverVehicleID_1</span>
+            <span class="types"><span class="type">custom_vehicleRoles_subtable</span></span>
+         Contains Role and DisplayName of that Vehicle
+        </li>
+        <li><span class="parameter">serverVehicleID_N</span>
+            <span class="types"><span class="type">custom_vehicleRoles_subtable</span></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> roleInfo = custom_vehicleRoles[<span class="string">"0-0"</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "custom_vehicleRoles_subtable"></a>
+    <strong>custom_vehicleRoles_subtable</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the table in custom_vehicleRoles
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">Role</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the RoleName for this Vehicle
+        </li>
+        <li><span class="parameter">DisplayName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the custom Displayname for this Vehicle
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> displayName = custom_roleToInfo[<span class="string">"0-0"</span>].DisplayName</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players"></a>
+    <strong>players</strong>
+    </dt>
+    <dd>
+    Contains all known Players.
+ PlayerID's are integers starting at 0
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">PlayerID_1</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_subtable</a></span>
+         Contains all information known about this Player
+        </li>
+        <li><span class="parameter">PlayerID_N</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_subtable</a></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> player = players[<span class="number">0</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players_subtable"></a>
+    <strong>players_subtable</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the table in players
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Holds the PlayerName linked to this PlayerID
+        </li>
+        <li><span class="parameter">activeVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+         Contains the serverVehicleID as eg. 0 not 0-0, that the Client is currently Viewing. Can be the players own vehicle or another players vehicle.
+        </li>
+        <li><span class="parameter">shortname</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Shortend name of the Shortnames Option
+        </li>
+        <li><span class="parameter">playerID</span>
+            <span class="types"><span class="type">integer</span></span>
+         ID that the Server has given this Player
+        </li>
+        <li><span class="parameter">isLocal</span>
+            <span class="types"><span class="type">bool</span></span>
+         true if this player is this client
+        </li>
+        <li><span class="parameter">ping</span>
+            <span class="types"><span class="type">integer</span></span>
+         Contains the current known ping of this Player
+        </li>
+        <li><span class="parameter">nickPrefixes</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_nickPrefixes</a></span>
+         Contains all Prefixes for Tag drawing
+        </li>
+        <li><span class="parameter">nickSuffixes</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_nickSuffixes</a></span>
+         Contains all Suffixes for Tag drawing
+        </li>
+        <li><span class="parameter">role</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_role</a></span>
+         Contains information about the backend authorized Role of this Player
+        </li>
+        <li><span class="parameter">vehicles</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#players">players_vehicles</a></span>
+         Note from the Author of this Documentation: Im unsure about this tables contents
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> name = players[<span class="number">0</span>].name</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players_nickPrefixes"></a>
+    <strong>players_nickPrefixes</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the nickPrefixes table for players_subtable
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">tagSource_1</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the added Text
+        </li>
+        <li><span class="parameter">tagSource_N</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the added Text
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> prefixes = players[<span class="number">0</span>].nickPrefixes</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players_nickSuffixes"></a>
+    <strong>players_nickSuffixes</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the nickSuffixes table for players_subtable
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">tagSource_1</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the added Text
+        </li>
+        <li><span class="parameter">tagSource_N</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Contains the added Text
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> suffixes = players[<span class="number">0</span>].nickSuffixes</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players_role"></a>
+    <strong>players_role</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the role table for players_subtable
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Name of the Role
+        </li>
+        <li><span class="parameter">backcolor</span>
+            <span class="types"><span class="type">ColorI</span></span>
+         RGBA color. Can be nil
+        </li>
+        <li><span class="parameter">tag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Can be nil
+        </li>
+        <li><span class="parameter">shorttag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Can be nil
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example"><span class="keyword">local</span> roleInfo = players[<span class="number">0</span>].role</pre></li>
+        <li><pre class="example"><span class="keyword">local</span> roleInfo = players[<span class="number">0</span>].role.backcolor.r</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "players_vehicles"></a>
+    <strong>players_vehicles</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the vehicles table for players_subtable.
+ Note from the Author of this Documentation: Im unsure about this tables contents
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+
+        </li>
+        <li><span class="parameter">isSpawned</span>
+            <span class="types"><span class="type">bool</span></span>
+
+        </li>
+        <li><span class="parameter">IDs</span>
+            <span class="types"><span class="type">unknown</span></span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "vehicles"></a>
+    <strong>vehicles</strong>
+    </dt>
+    <dd>
+    Contains all known Multiplayer Vehicles.
+ serverVehicleID is a String X-Y. Where X is the PlayerID and Y the Players VehicleID
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">serverVehicleID_1</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_subtable</a></span>
+         Contains all known vehicle related Information
+        </li>
+        <li><span class="parameter">serverVehicleID_N</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_subtable</a></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> vehicle = vehicles[<span class="string">"0-0"</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "vehicles_subtable"></a>
+    <strong>vehicles_subtable</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the table in vehicles
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Holds the OwnerName of this Vehicle
+        </li>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+         The ID that the game gives this Vehicle on Spawn
+        </li>
+        <li><span class="parameter">jbeam</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         JBeam name of the Vehicle
+        </li>
+        <li><span class="parameter">remoteVehID</span>
+            <span class="types"><span class="type">integer</span></span>
+         gameVehicleID on the Client that owns this Vehicle
+        </li>
+        <li><span class="parameter">serverVehicleString</span>
+            <span class="types"><span class="type">integer</span></span>
+         serverVehicleID as eg. 0 not 0-0
+        </li>
+        <li><span class="parameter">ownerID</span>
+            <span class="types"><span class="type">integer</span></span>
+         The PlayerID of the player that owns this Vehicle
+        </li>
+        <li><span class="parameter">Holds</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         the OwnerName of that Vehicle (duplicate?)
+        </li>
+        <li><span class="parameter">isLocal</span>
+            <span class="types"><span class="type">bool</span></span>
+         True when this Vehicle is owned by this Client
+        </li>
+        <li><span class="parameter">isSpawned</span>
+            <span class="types"><span class="type">bool</span></span>
+         True once the Vehicle is no longer quoed and Available in the World. Is set to False when isDeleted
+        </li>
+        <li><span class="parameter">isDeleted</span>
+            <span class="types"><span class="type">bool</span></span>
+         True once the Vehicle has been deleted by the Client (it becomes a black blob)
+        </li>
+        <li><span class="parameter">position</span>
+            <span class="types"><span class="type">nil</span></span>
+         Appears to be unused
+        </li>
+        <li><span class="parameter">rotation</span>
+            <span class="types"><span class="type">nil</span></span>
+         Appears to be unused
+        </li>
+        <li><span class="parameter">spectators</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_spectators</a></span>
+         Holds PlayerID's that are spectating this Vehicle at the moment
+        </li>
+        <li><span class="parameter">spawnQueue</span>
+            <span class="types"><a class="type" href="../modules/MPVehicleGE.html#vehicles">vehicles_spawnQueue</a></span>
+         Holds the data required for when the Spawn is triggered. Is nil if this Vehicles Spawn is not qued.
+        </li>
+        <li><span class="parameter">editQueue</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Holds the data required for when a Edit is triggered. serverVehicleID:{vehicleJson}. Is nil is no Edit for this Vehicle is qued
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> gameVehicleID = vehicles[<span class="string">"0-0"</span>].gameVehicleID</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "vehicles_spectators"></a>
+    <strong>vehicles_spectators</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the spectators table in vehicles_subtable.
+ Every player in this table is currently spectating this vehicle
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">PlayerID_1</span>
+            <span class="types"><span class="type">true</span></span>
+
+        </li>
+        <li><span class="parameter">PlayerID_N</span>
+            <span class="types"><span class="type">true</span></span>
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example"><span class="keyword">for</span> PlayerID, v <span class="keyword">in</span> <span class="global">pairs</span>(vehicles[<span class="string">"0-0"</span>].spectators) <span class="keyword">do</span> <span class="keyword">end</span></pre></li>
+        <li><pre class="example"><span class="keyword">local</span> spectators = vehicles[<span class="string">"0-0"</span>].spectators</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "vehicles_spawnQueue"></a>
+    <strong>vehicles_spawnQueue</strong>
+    </dt>
+    <dd>
+    (in table) Specifies the spawnQueue table in vehicles_subtable
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">playerNickname</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         OwnerName of the Vehicle to be Spawned
+        </li>
+        <li><span class="parameter">serverVehicleID</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         serverVehicleID as eg. 0-0
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         Format = ROLE:PlayerName:serverVehicleID:{vehicleJson}
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">if</span> vehicles[<span class="string">"0-0"</span>].spawnQueue <span class="keyword">then</span> <span class="keyword">local</span> vehicleData = vehicles[<span class="string">"0-0"</span>].spawnQueue.data <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "vehiclesMap"></a>
+    <strong>vehiclesMap</strong>
+    </dt>
+    <dd>
+    Resolves gameVehicleID to serverVehicleID
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID_1</span>
+            <span class="types"><span class="type">integer</span></span>
+         Contains serverVehicleID as eg. 0 not 0-0
+        </li>
+        <li><span class="parameter">gameVehicleID_N</span>
+            <span class="types"><span class="type">integer</span></span>
+         ..
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> serverVehicleID = vehiclesMap[<span class="number">11171</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "distanceMap"></a>
+    <strong>distanceMap</strong>
+    </dt>
+    <dd>
+    Contains the Distances in meters from the Clients POV to the known Multiplayer Vehicles
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID_1</span>
+            <span class="types"><span class="type">float</span></span>
+
+        </li>
+        <li><span class="parameter">gameVehicleID_N</span>
+            <span class="types"><span class="type">float</span></span>
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> distanceTo = distanceMap[<span class="number">11171</span>]</pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 20:36:58 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

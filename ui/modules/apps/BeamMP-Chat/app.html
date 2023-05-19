@@ -1,0 +1,98 @@
+<div ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
+	<style>
+		.error {
+			color: red;
+		}
+		#chat-window {
+			display: flex;
+			flex-direction: column;
+			height:100%;
+			width:100%;
+			font-size:1em;
+			font-family: sans-serif, Arial, Helvetica;
+		}
+		#chat-input {
+			width:100%;
+			height:auto;
+			background-color:rgba(0, 0, 0, 0.25);
+			border: 2px solid rgba(175, 175, 175, 0.45);
+			padding-left: 5px;
+			color:white;
+			transition: 0.20s;
+		}
+		#chat-input::placeholder {
+			color: #DDDDDD;
+		}
+		#chat-input:hover {
+			background-color:rgba(0, 0, 0, 0.5);
+		}
+		.buttons {
+			color: #DDDDDD;
+			border: 2px solid rgba(175, 175, 175, 0.45);
+			transition: 0.20s;
+			background-color:rgba(0, 0, 0, 0.45);
+			height:100%;
+		}
+		.buttons:hover {
+			background-color:rgba(0, 0, 0, 0.65);
+			color: #FFFFFF;
+		}
+		.swap-buttons {
+			min-width:23px;
+			text-align: center;
+		}
+		#chatbox {
+			display: flex;
+			min-height:40px;
+			width:250px;
+			transition: 0.13s;
+			transition-delay:700ms;
+		}
+		#chatbox:hover {
+			width:100%;
+			transition-delay:0ms;
+		}
+		ul#chat-list {
+			list-style: none;
+			padding-left: 0px;
+			overflow-y: scroll;
+			overflow-wrap: break-word;
+		}
+		#chat-list {
+			display:flex;
+			flex-direction: column;
+			margin-top:auto;
+			margin-bottom:0px;
+			width:100%;
+		}
+
+		.chat-message {
+			padding: 3px 0px;
+			background-color: rgba(0, 0, 0, 0.60);
+		}
+		.chat-message:nth-child(2n+1) {
+			background-color:rgba(0, 0, 0, 0.45);
+		}
+
+		.chat-message-timestamp{
+			font-size: 0.7em;
+			line-height: 0.7em;
+			color: rgba(255, 255, 255, 0.6);
+			padding-right: 5px;
+		}
+
+		::-webkit-scrollbar {
+			width: 0px;  /* Remove scrollbar space */
+			background: transparent;  /* Optional: just make scrollbar invisible */
+		}
+	</style>
+	<div id="chat-window">
+		<ul id="chat-list"></ul>
+		<form id="chatbox">
+			<button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
+			<input id="chat-input" type="text" ng-click="select()" placeholder="Chat here"></input>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
+			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
+		</form>
+	</div>
+</div>

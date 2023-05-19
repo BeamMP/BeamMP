@@ -1,0 +1,279 @@
+<link rel="stylesheet" type="text/css" href="/ui/modules/options/multiplayer.partial.css" />
+
+<md-list-item layout="column" layout-align="start start">
+  <p>
+  <h3>{{:: 'ui.options.general' | translate}}</h3>
+  </p>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.showAdvancedOptions' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showAdvancedOptions.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.showAdvancedMPOptions" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+<p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableLuaReload' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableLuaReload.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.disableLuaReload" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableInstabilityPausing' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableInstabilityPausing.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.disableInstabilityPausing" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+<md-divider></md-divider>
+
+<md-list-item md-no-ink>
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<div class="mp-setting-border" ng-show="options.data.values.enableSpawnQueue">
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueApplySpeed.tooltip' | translate }}</md-tooltip>
+    <p flex="50"><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.queueApplySpeed' | translate }}</p>
+    <md-slider flex ng-model="options.data.values.queueApplySpeed" min="0" max="10" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{
+      (options.data.values.queueApplySpeed*2.23694).toFixed(1) }} mph</span>
+    <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{
+      (options.data.values.queueApplySpeed*3.6).toFixed(1) }} km/h</span>
+    <span style="margin-left:5px">({{ (options.data.values.queueApplySpeed).toFixed(0) }} m/s)</span>
+
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueApplyTimeout.tooltip' | translate }}</md-tooltip>
+    <p flex="50"><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.queueApplyTimeout' | translate }}</p>
+    <md-slider flex ng-model="options.data.values.queueApplyTimeout" min="0" max="20" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ (options.data.values.queueApplyTimeout).toFixed(0) }}s</span>
+  </md-list-item>
+
+  <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+    <p>{{:: 'ui.options.multiplayer.queueAutoSkipRemote' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAutoSkipRemote.tooltip' | translate }}
+    </md-tooltip>
+    <md-checkbox ng-model="options.data.values.queueAutoSkipRemote" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+    <p>{{:: 'ui.options.multiplayer.queueSkipUnicycle' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSkipUnicycle.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.queueSkipUnicycle" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+</div>
+
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.autoSyncVehicles' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.autoSyncVehicles.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.autoSyncVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.skipOtherPlayersVehicles' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.skipOtherPlayersVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p>{{:: 'ui.options.multiplayer.fadeVehicles' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.fadeVehicles.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.blobsTitle' | translate }}</h3></p></md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.enableBlobs' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.enableBlobs.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.enableBlobs" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+
+<div class="mp-setting-border" ng-show="options.data.values.enableBlobs">
+  <bng-accordion flex class="vAccordion--default" multiple>
+    <bng-accordion-pane is-open="false" style="padding-right: 10px; padding-left: 10px" class="md-list-item">
+      <bng-pane-header style="border-bottom-width: 0px">{{:: 'ui.options.multiplayer.tuneBlobColors' | translate }}
+      </bng-pane-header>
+      <bng-pane-body>
+        <bng-accordion flex class="vAccordion--default" multiple>
+          <div class="md-list-item">
+            <p>{{:: 'ui.options.multiplayer.tuneColorQueued' | translate }}</p>
+            <div>
+              <md-checkbox ng-model="options.data.values.showBlobQueued" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
+              </md-checkbox>
+              <md-input-container>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
+                <input id="queuedColor" flex type="text" ng-model="options.data.values.blobColorQueued"
+                  ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}">
+                <div id="queuedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+              </md-input-container>
+            </div>
+          </div>
+          
+          <div class="md-list-item">
+            <p>{{:: 'ui.options.multiplayer.tuneColorIllegal' | translate }}<small>{{:: 'ui.options.multiplayer.tuneColorIllegalHelp' | translate }}</small></p>
+            <div>
+              <md-checkbox ng-model="options.data.values.showBlobIllegal" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
+              </md-checkbox>
+              <md-input-container>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
+                <input id="illegalColor" flex type="text" ng-model="options.data.values.blobColorIllegal"
+                  ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
+                  spellcheck="false" maxlength="7">
+                <div id="illegalColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+              </md-input-container>
+            </div>
+          </div>
+
+          <div class="md-list-item">
+            <p>{{:: 'ui.options.multiplayer.tuneColorDeleted' | translate }}</p>
+            <div>
+              <md-checkbox ng-model="options.data.values.showBlobDeleted" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
+              </md-checkbox>
+              <md-input-container>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
+                <input id="deletedColor" flex type="text" ng-model="options.data.values.blobColorDeleted"
+                  ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
+                  spellcheck="false" maxlength="7">
+                <div id="deletedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+              </md-input-container>
+            </div>
+          </div>
+        </bng-accordion>
+      </bng-pane-body>
+    </bng-accordion-pane>
+  </bng-accordion>
+</div>
+
+
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.nameTagTitle' | translate }}</h3></p></md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.nameTags' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.hideNameTags" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.nameTagShowDistance' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.nameTagShowDistance" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p>{{:: 'ui.options.multiplayer.nametagFade' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.nameTagFadeEnabled" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<div class="mp-setting-border" ng-show="options.data.values.nameTagFadeEnabled && options.data.values.showAdvancedMPOptions">
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagFadeDistance.tooltip' | translate }}
+    </md-tooltip>
+    <p flex="30">{{:: 'ui.options.multiplayer.nametagFadeDistance' | translate }}</p>
+    <md-slider flex ng-model="options.data.values.nameTagFadeDistance" min="0" max="1500" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{
+      (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
+    <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{
+      (options.data.values.nameTagFadeDistance).toFixed(0) }} {{:: 'ui.unit.m' | translate }}</span>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.nametagInvertFade' | translate }}</p>
+    <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">{{:: 'ui.options.multiplayer.nametagFadeIn' | translate }}</span>
+    <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">{{:: 'ui.options.multiplayer.nametagFadeOut' | translate }}</span>
+    <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.nametagDontFullyHide' | translate }}</p>
+    <md-checkbox ng-model="options.data.values.nameTagDontFullyHide" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+</div>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.shortenNametags' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.shortenNametags.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.shortenNametags" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<div class="mp-setting-border" ng-show="options.data.values.shortenNametags">
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.nametagCharLimit.tooltip' | translate }}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.multiplayer.nametagCharLimit' | translate }}</p>
+    <md-slider flex ng-model="options.data.values.nametagCharLimit" min="0" max="50" step="1" aria-label="_"
+      ng-change="options.applyState()">
+    </md-slider>
+    <span style="margin-left:15px">{{ (options.data.values.nametagCharLimit).toFixed(0) }}</span>
+  </md-list-item>
+</div>
+
+<md-list-item md-no-ink>
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.showSpectators' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showSpectators.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.showSpectators" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<div class="mp-setting-border" ng-show="options.data.values.showSpectators">
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.spectatorUnifiedColors' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.spectatorUnifiedColors.tooltip' | translate }}
+    </md-tooltip>
+    <md-checkbox ng-model="options.data.values.spectatorUnifiedColors" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+</div>
+
+
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start" ng-show="options.data.values.showAdvancedMPOptions"><p><h3>{{:: 'ui.options.multiplayer.others' |  translate }}</h3></p></md-list-item>
+
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p>{{:: 'ui.options.multiplayer.debugOutput' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.showDebugOutput" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0" ng-show="options.data.values.showAdvancedMPOptions">
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
+  <p flex="70" bng-translate="ui.options.multiplayer.launcherPort"></p>
+  <md-input-container style="padding-top:25px">
+    <input mdInput type="number" ng-model="options.data.values.launcherPort" min="1024" max="65535" step="1"
+      aria-label="_" ng-change="options.applyState()"/>
+  </md-input-container>
+  <span ng-if="options.data.values.launcherPort != 4444" style="margin-left:15px">{{:: 'ui.options.multiplayer.launcherPortDefaultPort' | translate}}</span>
+  <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">({{:: 'ui.common.default' | translate}})</span>
+</md-list-item>
+
+<!--<md-list-item md-no-ink>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.clearLauncherCache.tooltip' | translate }}</md-tooltip>
+    <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>
+  </md-list-item>
+
+<md-list-item layout>
+  <md-button md-no-ink class="md-raised md-warn" flex ng-click="options.clearLauncherCache()">
+    <md-icon class="material-icons">check</md-icon> {{ ::'ui.multiplayer.clear' | translate }}
+  </md-button>
+</md-list-item>-->

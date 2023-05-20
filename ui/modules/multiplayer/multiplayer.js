@@ -906,12 +906,12 @@ async function getFeatured() {
 		});*/
 		var feat = []
 		servers.forEach(server => {
-			if (server.official === true || server.featured === true) {
+			if (server.featured === true) {
 				feat.push(server)
 			}
 		});
 		
-		console.log(feat)
+		//console.log(feat)
 		
 		resolve(feat || []);
 	});

@@ -124,7 +124,7 @@ angular.module('beamng.stuff')
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
       // TODO #203 Fix this to actually use the real launcher version!
-      scope.beammpGameVer = '4.7.2'
+      scope.beammpGameVer = '4.7.3'
       scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
@@ -352,6 +352,11 @@ angular.module('beamng.stuff')
     },
     // rows with 4 elements each
     {
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
+    },
+    {
       translateid: 'ui.playmodes.campaigns',
       icon: '/ui/modules/mainmenu/drive/icons/campaigns.svg',
       targetState: 'menu.campaigns'
@@ -365,11 +370,6 @@ angular.module('beamng.stuff')
       translateid: 'ui.playmodes.quickrace',
       icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
       targetState: 'menu.quickraceOverview'
-    },
-    {
-      translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
-      targetState: 'menu.multiplayer.tos'
     },
     {
       translateid: 'ui.mainmenu.garage',

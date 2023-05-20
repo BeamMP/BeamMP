@@ -11,13 +11,13 @@
 <div id="addCustomFav" style="display: none;">
 	<md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </md-button>
 	<md-list-item layout class="md-padding">
-		<h1>Add custom server :</h1>
+		<h1>{{:: 'ui.multiplayer.addCustomServer' | translate}}: </h1>
 	</md-list-item>
 	<center>
 		<input type="text" id="customFavName" name="customFavName" placeholder="Custom server"/>
 		<input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP"/>
 		<input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814"/>
-		<md-button class="button" ng-click="multiplayer.addCustomServer()">Save</md-button>
+		<md-button class="button" ng-click="multiplayer.addCustomServer()">{{:: 'ui.multiplayer.save' | translate}}</md-button>
 	</center>
 </div>
 
@@ -81,7 +81,7 @@
 	    
         <md-button id="direct-connect-btn" ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
           <md-icon class="material-icons">exit_to_app</md-icon>
-				  Logout
+				  {{:: 'ui.multiplayer.logout' | translate}}
         </md-button>
       </md-content>
 

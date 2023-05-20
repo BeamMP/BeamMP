@@ -74,6 +74,7 @@
     "ui.multiplayer.servers": "服务器",
     "ui.multiplayer.recent": "历史记录",
     "ui.multiplayer.favorites": "收藏",
+    "ui.multiplayer.featured": "特色服务器",
     "ui.multiplayer.direct_connect": "直接连接",
     "ui.multiplayer.refresh": "刷新",
     "ui.multiplayer.connect": "连接",

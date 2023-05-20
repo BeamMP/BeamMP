@@ -3,7 +3,7 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
---- MPVehicleGE API.
+--- MPVehicleGE API - This is responsible for all Vehicle related controlling within BeamMP for the Game Engine (GE).
 -- Author of this documentation is Neverless
 -- @module MPVehicleGE
 -- @usage local gameVehicleID = getGameVehicleID("0-0") -- internal access
@@ -256,7 +256,7 @@ function getGameVehicleID(serverVehicleID)
 end
 
 
---- Reolves a gameVehicleID into the serverVehicleID
+--- Resolves a gameVehicleID into the serverVehicleID
 -- @tparam integer gameVehicleID
 -- @treturn[1] string If success. serverVehicleID eg. "0-0"
 -- @treturn[2] nil If either the gameVehicleID is unknown or invalid

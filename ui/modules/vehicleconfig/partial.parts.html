@@ -30,7 +30,7 @@
           <div flex style="min-width:50%;padding-right:40px;">Active part</div>
         </div>
         <div ng-repeat="entry in vehConf_parts.searchResults track by entry.slot"
-          ng-mouseover="vehConf_parts.selectPart($event, entry.val)">
+          ng-mouseover="vehConf_parts.selectParts($event, entry)">
           <div layout="row" layout-align="space-between center" ng-class="{'highlightChanged': entry.changed}"
             ng-if="entry.options.length > 0">
 

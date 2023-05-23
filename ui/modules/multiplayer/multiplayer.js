@@ -1,5 +1,6 @@
 var highlightedServer;
 var servers = [];
+var official = [];
 var featured = [];
 var favorites = [];
 var recents = [];
@@ -72,7 +73,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	LOGIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, $state, $timeout, $document) {
+.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
@@ -295,6 +297,88 @@ function($scope, $state, $timeout, $mdDialog) {
 
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////
+*	OFFICIAL TAB
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerOfficialController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
+
+	var vm = this;
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
+
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+
+	// Go back to the main menu on exit
+	vm.exit = function ($event) {
+		if ($event) console.log('[MultiplayerOfficialController] exiting by keypress event %o', $event);
+		$state.go('menu.mainmenu');
+	};
+
+	// Page loading timeout
+	var timeOut = $timeout(function() {
+		if (vm.loadingPage === true) {
+			vm.loadTimeout = true;
+		}
+	}, 10000);
+
+	// Called when the page is left
+	$scope.$on('$destroy', function () {
+		$timeout.cancel(timeOut);
+		//console.log('[MultiplayerOfficialController] destroyed.');
+	});
+	
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
+		official = await getOfficial();
+		vm.repopulate();
+	});
+	
+	vm.repopulate = async function() {
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			official,
+			4, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3, Official = 4
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
+	};
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
 *	SERVERS TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerServersController', ['$scope', '$state', '$timeout', 
@@ -376,7 +460,7 @@ function($scope, $state, $timeout) {
 
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////
-*	SERVERS TAB
+*	FEATURED TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerFeaturedController', ['$scope', '$state', '$timeout', 
 function($scope, $state, $timeout) {
@@ -897,13 +981,23 @@ function stripCustomFormatting(name){
 	return name;
 }
 
+async function getOfficial() {
+	return new Promise(function(resolve, reject) {
+		var _official = []
+		servers.forEach(server => {
+			if (server.official === true || server.approved === true) {
+				_official.push(server)
+			}
+		});
+		
+		//console.log(_official)
+		
+		resolve(_official || []);
+	});
+}
+
 async function getFeatured() {
 	return new Promise(function(resolve, reject) {
-		/*bngApi.engineLua("MPConfig.getFavorites()", (data) => {
-			if (!data) { resolve([]); return; }
-			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
-			resolve(data || []);
-		});*/
 		var feat = []
 		servers.forEach(server => {
 			if (server.featured === true) {
@@ -1042,7 +1136,7 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 		// Filter by empty or full
 		else if(checkIsEmpty && server.players > 0) shown = false;
 		else if(checkIsNotEmpty && server.players == 0) shown = false;
-		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
+		else if(checkIsNotFull && server.players >= server.maxplayers) shown = false;
 		
 		// Filter by mod size
 		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;

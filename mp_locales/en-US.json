@@ -71,6 +71,7 @@
     "ui.multiplayer.connecting": "Connecting",
     "ui.multiplayer.connectingToServer": "Connecting to server...",
     "ui.multiplayer.loading": "Loading...",
+    "ui.multiplayer.official": "Official Servers",
     "ui.multiplayer.servers": "Public Servers",
     "ui.multiplayer.favorites": "Favorites",
     "ui.multiplayer.featured": "Featured Servers",

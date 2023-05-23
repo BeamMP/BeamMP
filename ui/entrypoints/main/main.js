@@ -258,6 +258,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
         controller: 'MultiplayerServersController as multiplayermenu',
         backState: 'BACK_TO_MENU'
       })
+      .state('menu.multiplayer.official', {
+        url: '/mpofficial',
+        templateUrl: '/ui/modules/multiplayer/official.partial.html',
+        controller: 'MultiplayerOfficialController as multiplayermenu',
+        backState: 'BACK_TO_MENU'
+      })
       .state('menu.multiplayer.featured', {
         url: '/mpfeatured',
         templateUrl: '/ui/modules/multiplayer/featured.partial.html',

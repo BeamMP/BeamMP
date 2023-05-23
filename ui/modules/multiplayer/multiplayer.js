@@ -1136,7 +1136,7 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 		// Filter by empty or full
 		else if(checkIsEmpty && server.players > 0) shown = false;
 		else if(checkIsNotEmpty && server.players == 0) shown = false;
-		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
+		else if(checkIsNotFull && server.players >= server.maxplayers) shown = false;
 		
 		// Filter by mod size
 		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;

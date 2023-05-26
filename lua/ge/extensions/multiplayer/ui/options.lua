@@ -13,8 +13,8 @@ end
 --------------------------------
 -----[ Utility Functions ]------
 --------------------------------
-local function saveConfig()
-    local jsonData = jsonEncode(UI.settings)
+local function saveConfig(settings)
+    local jsonData = jsonEncode(settings or UI.settings)
     local config = io.open("./settings/BeamMP/chat.json", "w")
     config:write(jsonData)
     config:close()
@@ -68,10 +68,12 @@ end
 
 local function renderGeneral()
     if imgui.BeginChild1("General", imgui.ImVec2(0, imgui.GetWindowHeight() - 100), false) then
+        local posx = longestSettingName * 8 + 10
+
         -- Inactive Fade
         imgui.Text("Inactive fade")
         imgui.SameLine()
-        imgui.SetCursorPosX(longestSettingName * 8 + 10)
+        imgui.SetCursorPosX(posx)
         local pInactiveFade = imgui.BoolPtr(UI.settings.window.inactiveFade)
         if imgui.Checkbox("##Inactive fade", pInactiveFade) then
             UI.settings.window.inactiveFade = pInactiveFade[0]
@@ -80,21 +82,35 @@ local function renderGeneral()
         -- Fade Time
         imgui.Text("Fade time")
         imgui.SameLine()
-        imgui.SetCursorPosX(longestSettingName * 8 + 10)
+        imgui.SetCursorPosX(posx)
         local pFadeTime = imgui.FloatPtr(UI.settings.window.fadeTime)
         if imgui.InputFloat("##Fade time", pFadeTime, 0.1, 1, "%.1f") then
+            if pFadeTime[0] < 0.1 then
+                pFadeTime[0] = 0.1
+            end
+
             UI.settings.window.fadeTime = pFadeTime[0]
         end
 
         -- Fade when collapsed
         imgui.Text("Fade when collapsed")
         imgui.SameLine()
-        imgui.SetCursorPosX(longestSettingName * 8 + 10)
+        imgui.SetCursorPosX(posx)
         local pFadeWhenCollapsed = imgui.BoolPtr(UI.settings.window.fadeWhenCollapsed)
         if imgui.Checkbox("##Fade when collapsed", pFadeWhenCollapsed) then
             UI.settings.window.fadeWhenCollapsed = pFadeWhenCollapsed[0]
         end
 
+        -- Show on message
+        imgui.Text("Show on message")
+        imgui.SameLine()
+        imgui.SetCursorPosX(posx)
+        local pShowOnMessage = imgui.BoolPtr(UI.settings.window.showOnMessage)
+        if imgui.Checkbox("##Show on message", pShowOnMessage) then
+            UI.settings.window.showOnMessage = pShowOnMessage[0]
+        end
+
+        -- Bottom Buttons
         imgui.EndChild()
 
         imgui.SetCursorPosY(imgui.GetWindowHeight() - 32)
@@ -178,5 +194,6 @@ end
 
 M.render = render
 M.onInit = onInit
+M.saveConfig = saveConfig
 
 return M

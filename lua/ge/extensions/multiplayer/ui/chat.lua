@@ -112,13 +112,14 @@ local function render()
         local windowWidth = imgui.GetWindowWidth()
         local scrollbarPos = imgui.GetScrollY()
 
-        if scrollbarPos >= imgui.GetScrollMaxY() then -- Todo: Fix scroll with multiple lines, u wanna do this Deer? :think:
+        if scrollbarPos >= imgui.GetScrollMaxY() then
             wasMessageSent = false
             forceBottom = true
         else
             forceBottom = false
         end
 
+        -- Render Message | Time
         for _, message in ipairs(M.chatMessages) do
             imgui.Columns(2, "ChatColumns", false)
 
@@ -129,19 +130,16 @@ local function render()
             end
 
             imgui.TextWrapped(message.message)
+
+            if scrollToBottom or forceBottom then
+                imgui.SetScrollHereY(1)
+                scrollToBottom = false
+            end
+
             imgui.NextColumn()
             imgui.Text(os.date("%H:%M", message.sentTime))
 
             imgui.Columns(1)
-        end
-
-        if scrollToBottom then
-            imgui.SetScrollHereY(1)
-            scrollToBottom = false
-        end
-
-        if forceBottom then
-            imgui.SetScrollHereY(1)
         end
 
         imgui.EndChild()

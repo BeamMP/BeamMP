@@ -205,7 +205,7 @@ local function renderWindow()
         -- check to fade out if inactive, check if hovered
         if M.settings.window.inactiveFade then
             if imgui.IsWindowFocused(imgui.HoveredFlags_ChildWindows) or imgui.IsWindowHovered(imgui.HoveredFlags_ChildWindows)
-                or imgui.IsAnyItemHovered() or imgui.IsAnyItemActive() or imgui.IsAnyItemFocused()
+                -- or imgui.IsAnyItemHovered() or imgui.IsAnyItemActive() or imgui.IsAnyItemFocused() -- Not exactly sure why I added this but it might be important.
                 or (collapsed and not M.settings.window.fadeWhenCollapsed) then
                 windowOpacity = 0.9
                 fadeTimer = 0
@@ -307,14 +307,40 @@ local function loadConfig()
     local jsonData = config:read("*all")
     config:close()
 
-    local decoded = jsonDecode(jsonData)
-    if not decoded then
+    local settings = jsonDecode(jsonData)
+    if not settings then
         log("E", "beammp_chat", "Failed to decode config file")
         return
     end
 
+    -- Find missing keys/settings
+    local function findMissingKeys(src, tbl)
+        local missing = {}
+        for key, value in pairs(src) do
+            if type(value) == "table" then
+                local subKeys = findMissingKeys(value, tbl and tbl[key])
+                for _, subKey in ipairs(subKeys) do
+                    table.insert(missing, subKey)
+                end
+            elseif tbl == nil or tbl[key] == nil then
+                table.insert(missing, key)
+            end
+        end
+
+        return missing
+    end
+
     configLoaded = true
-    M.settings = decoded
+
+    if #findMissingKeys(M.defaultSettings, settings) > 0 then
+        log('I', "BeamMP", "Missing one or more settings, resetting config file...")
+        M.settings = deepcopy(M.defaultSettings)
+        optionsWindow.saveConfig(M.settings) -- we pass it in because "UI.lua" and "ui/options.lua" depend on eachother,
+                                             -- so instead of doing "UI.options", we pass it in instead.
+        return
+    end
+
+    M.settings = settings
 end
 
 local function chatMessage(rawMessage) -- chat message received (angular)

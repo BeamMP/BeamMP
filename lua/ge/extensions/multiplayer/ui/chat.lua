@@ -1,11 +1,12 @@
 -- Note: Colors are not used anymore but I may add them back in the future
 
-local M = {}
+local M = {
+    chatMessages = {},
+    newMessageCount = 0
+}
 
 local utils = require("multiplayer.ui.utils")
 local ffi = require('ffi')
-
-M.chatMessages = {}
 
 local imgui = ui_imgui
 local heightOffset = 20
@@ -97,9 +98,10 @@ local function addMessage(message)
         id = #M.chatMessages + 1
     }
 
-    log("I", "chat", "Received message: " .. message)
-
     table.insert(M.chatMessages, messageTable)
+    if not forceBottom then
+        M.newMessageCount = M.newMessageCount + 1
+    end
 end
 
 local scrollbarVisible = false
@@ -113,6 +115,7 @@ local function render()
         local scrollbarPos = imgui.GetScrollY()
 
         if scrollbarPos >= imgui.GetScrollMaxY() then
+            M.newMessageCount = 0
             wasMessageSent = false
             forceBottom = true
         else
@@ -178,8 +181,12 @@ local function render()
         heightOffset = 40
 
         if not forceBottom then
-            local buttonPos = imgui.ImVec2(imgui.GetWindowWidth() - (scrollbarVisible and scrollbarSize or 0) - 24, imgui.GetWindowHeight() - 60)
-            imgui.SetCursorPos(buttonPos)
+            imgui.SetCursorPosY(imgui.GetWindowHeight() - 60)
+
+            -- imgui.Text(tostring(newMessageCount) .. " New Messages")
+            -- imgui.SameLine()
+
+            imgui.SetCursorPosX(imgui.GetWindowWidth() - (scrollbarVisible and scrollbarSize or 0) - 24)
             if utils.imageButton(UI.uiIcons.down.texId, 16) then
                 scrollToBottom = true
                 wasMessageSent = false

@@ -221,6 +221,16 @@ local function renderWindow()
             windowOpacity = 0.9
         end
 
+        -- local mainWindowTitle = "BeamMP Chat"
+        if currentWindow == windows.chat then
+            local msgCount = windows.chat.newMessageCount
+            if msgCount > 0 then
+                windowTitle = "BeamMP Chat (" .. tostring(msgCount) .. ')'
+            else
+                windowTitle = "BeamMP Chat"
+            end
+        end
+
         -- Titlebar
         imgui.PushStyleVar1(imgui.StyleVar_Alpha, windowOpacity)
         if imgui.BeginChild1("ChatTitlebar", imgui.ImVec2(0, 30), false) then
@@ -230,7 +240,6 @@ local function renderWindow()
                 imgui.SetCursorPosY(imgui.GetCursorPosY() + 4)
                 if utils.imageButton(M.uiIcons.back.texId, 12) then
                     currentWindow = windows.chat
-                    windowTitle = "BeamMP Chat"
                 end
                 imgui.SameLine()
                 imgui.SetCursorPosX(imgui.GetStyle().ItemSpacing.x + 20)
@@ -279,8 +288,6 @@ local function renderWindow()
 
     imgui.PopStyleColor(16)
     imgui.PopStyleVar(3)
-    
-    firstRender = false
 end
 
 local function loadConfig()

@@ -3,9 +3,10 @@ local M = {}
 local imgui = ui_imgui
 
 M.imageButton = function(texID, size, color, activeColor, hoveredColor)
-    color = color or imgui.GetStyle().Colors[imgui.Col_Button]
-    activeColor = activeColor or imgui.GetStyle().Colors[imgui.Col_ButtonActive]
-    hoveredColor = hoveredColor or imgui.GetStyle().Colors[imgui.Col_ButtonHovered]
+    local colors = imgui.GetStyle().Colors
+    color = color or colors[imgui.Col_Button]
+    activeColor = activeColor or colors[imgui.Col_ButtonActive]
+    hoveredColor = hoveredColor or colors[imgui.Col_ButtonHovered]
 
     -- Remove background
     imgui.PushStyleColor2(imgui.Col_Button, imgui.ImVec4(0, 0, 0, 0))

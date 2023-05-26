@@ -54,8 +54,9 @@ M.defaultSettings = {
     },
     window = {
         inactiveFade = true,
-        fadeTime = 1,
+        fadeTime = 2.5,
         fadeWhenCollapsed = false,
+        showOnMessage = true
     }
 }
 

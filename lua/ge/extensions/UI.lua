@@ -1,5 +1,5 @@
 --====================================================================================
--- All work by Titch2000, jojos38 & 20dka.
+-- All work by Titch2000, jojos38, 20dka & vulcan-dev.
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
@@ -344,8 +344,9 @@ local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
-local function onMissionLoaded(id)
+local function onClientEndMission()
     chatWindow.chatMessages = {}
+    chatWindow.clearHistory()
 end
 
 local function onExtensionLoaded()
@@ -392,7 +393,7 @@ M.showMdDialog = showMdDialog
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat
 
-M.onMissionLoaded = onMissionLoaded
+M.onClientEndMission = onClientEndMission
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate
 

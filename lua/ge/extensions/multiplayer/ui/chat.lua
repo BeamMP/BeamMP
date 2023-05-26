@@ -11,18 +11,73 @@ local imgui = ui_imgui
 local heightOffset = 20
 local forceBottom = false
 local scrollToBottom = false
-local chatMessage = imgui.ArrayChar(256)
+local chatMessageBuf = imgui.ArrayChar(256)
 local wasMessageSent = false
+local history = {}
+local historyPos = -1
+
+local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
+    if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
+        local prevHistoryPos = historyPos
+        if data.EventKey == imgui.Key_UpArrow then
+            historyPos = historyPos - 1
+            if historyPos < 1 then
+                if historyPos < 0 then
+                    historyPos = #history
+                else
+                    historyPos = 1
+                end
+            end
+        elseif data.EventKey == imgui.Key_DownArrow then
+            if #history > 0 and historyPos == #history then
+                ffi.fill(data.Buf, data.BufSize, 0)  -- Clear the buffer
+                data.CursorPos = 0
+                data.SelectionStart = 0
+                data.SelectionEnd = 0
+                data.BufTextLen = 0
+                data.BufDirty = imgui.Bool(true)
+                historyPos = -1
+                return imgui.Int(0)  -- Return 0 to prevent further processing
+            elseif historyPos == -1 then -- Empty, not on any history
+                return imgui.Int(0)
+            end
+
+            historyPos = historyPos + 1
+        end
+
+        if #history > 0 and prevHistoryPos ~= historyPos then
+            local t = history[historyPos]
+            if type(t) ~= "string" then return imgui.Int(0) end
+            local inplen = string.len(t)
+            local inplenInt = imgui.Int(inplen)
+            ffi.copy(data.Buf, t, math.min(data.BufSize - 1, inplen + 1))
+            data.CursorPos = inplenInt
+            data.SelectionStart = inplenInt
+            data.SelectionEnd = inplenInt
+            data.BufTextLen = inplenInt
+            data.BufDirty = imgui.Bool(true);
+        end
+    elseif data.EventFlag == imgui.InputTextFlags_CallbackCharFilter and
+        data.EventChar == 96 then -- 96 = '`'
+        return imgui.Int(1)
+    end
+    return imgui.Int(0)
+end)
+
+local function clearHistory()
+    log('I', "BeamMP UI", "Cleared chat history")
+    history = {}
+end
 
 local function sendChatMessage(message)
     if message[0] == 0 then return end
 
     message = ffi.string(message)
-    local messageTable = {
-        message = message,
-        sentTime = os.time(),
-        id = #M.chatMessages + 1
-    }
+    -- local messageTable = {
+    --     message = message,
+    --     sentTime = os.time(),
+    --     id = #M.chatMessages + 1
+    -- }
 
     local c = 'C:'..MPConfig.getNickname()..": "..message
 	MPGameNetwork.send(c)
@@ -30,7 +85,9 @@ local function sendChatMessage(message)
 
     -- table.insert(M.chatMessages, messageTable) -- ! For debugging, remove this line and messageTable (addMessage handles this)
     wasMessageSent = true
-    ffi.copy(chatMessage, "")
+    history[#history+1] = ffi.string(chatMessageBuf)
+    historyPos = -1
+    ffi.copy(chatMessageBuf, "")
 end
 
 local function addMessage(message)
@@ -82,7 +139,7 @@ local function render()
             imgui.SetScrollHereY(1)
             scrollToBottom = false
         end
-        
+
         if forceBottom then
             imgui.SetScrollHereY(1)
         end
@@ -99,14 +156,14 @@ local function render()
 
     if imgui.BeginChild1("ChatInput", imgui.ImVec2(0, 30), false) then
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
-        if imgui.InputText("##ChatInputMessage", chatMessage, 256, imgui.InputTextFlags_EnterReturnsTrue) then
-            sendChatMessage(chatMessage)
+        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, inputCallbackC) then
+            sendChatMessage(chatMessageBuf)
             imgui.SetKeyboardFocusHere(1)
         end
 
         imgui.SameLine()
         if utils.imageButton(UI.uiIcons.send.texId, 20) then
-            sendChatMessage(chatMessage)
+            sendChatMessage(chatMessageBuf)
             imgui.SetKeyboardFocusHere(1)
         end
 
@@ -135,5 +192,6 @@ end
 M.render = render
 M.sendChatMessage = sendChatMessage
 M.addMessage = addMessage
+M.clearHistory = clearHistory
 
 return M

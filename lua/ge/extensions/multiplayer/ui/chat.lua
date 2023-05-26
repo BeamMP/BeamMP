@@ -99,7 +99,9 @@ local function addMessage(message)
     }
 
     table.insert(M.chatMessages, messageTable)
-    if not forceBottom then
+
+    local name = messageTable.message:sub(1, messageTable.message:find(':')-1)
+    if not forceBottom and name ~= MPConfig:getNickname() then
         M.newMessageCount = M.newMessageCount + 1
     end
 end
@@ -181,12 +183,7 @@ local function render()
         heightOffset = 40
 
         if not forceBottom then
-            imgui.SetCursorPosY(imgui.GetWindowHeight() - 60)
-
-            -- imgui.Text(tostring(newMessageCount) .. " New Messages")
-            -- imgui.SameLine()
-
-            imgui.SetCursorPosX(imgui.GetWindowWidth() - (scrollbarVisible and scrollbarSize or 0) - 24)
+            imgui.SetCursorPos(imgui.ImVec2(imgui.GetWindowWidth() - (scrollbarVisible and scrollbarSize or 0) - 24, imgui.GetWindowHeight() - 60))
             if utils.imageButton(UI.uiIcons.down.texId, 16) then
                 scrollToBottom = true
                 wasMessageSent = false

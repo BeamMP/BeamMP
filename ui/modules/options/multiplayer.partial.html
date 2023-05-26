@@ -13,26 +13,27 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+<p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableLuaReload' |
     translate }}</p>
-  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
-  </md-tooltip>
-  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableLuaReload.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.disableLuaReload" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.alternateModloading' |
-    translate }}</p>
-  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.alternateModloading.tooltip' | translate }}</md-tooltip>
-  <md-checkbox ng-model="options.data.values.beammpAlternateModloading" ng-change="options.applyState()"></md-checkbox>
-</md-list-item>
-
-<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.disableInstabilityPausing' |
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableInstabilityPausing' |
     translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableInstabilityPausing.tooltip' | translate }}
   </md-tooltip>
   <md-checkbox ng-model="options.data.values.disableInstabilityPausing" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+<md-divider></md-divider>
+
+<md-list-item md-no-ink>
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.simplifyRemoteVehicles' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.simplifyRemoteVehicles.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.simplifyRemoteVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
@@ -58,7 +59,7 @@
 
   <md-list-item md-no-ink>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueApplySpeed.tooltip' | translate }}</md-tooltip>
-    <p flex="50"><span class="mp-setting-highlight">NEW</span> {{:: 'ui.options.multiplayer.queueApplySpeed' | translate }}</p>
+    <p flex="50"><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.queueApplySpeed' | translate }}</p>
     <md-slider flex ng-model="options.data.values.queueApplySpeed" min="0" max="10" step="1" aria-label="_"
       ng-change="options.applyState()">
     </md-slider>
@@ -72,7 +73,7 @@
 
   <md-list-item md-no-ink>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueApplyTimeout.tooltip' | translate }}</md-tooltip>
-    <p flex="50"><span class="mp-setting-highlight">NEW</span> {{:: 'ui.options.multiplayer.queueApplyTimeout' | translate }}</p>
+    <p flex="50"><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.queueApplyTimeout' | translate }}</p>
     <md-slider flex ng-model="options.data.values.queueApplyTimeout" min="0" max="20" step="1" aria-label="_"
       ng-change="options.applyState()">
     </md-slider>
@@ -106,8 +107,8 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p>Fade out vehicles as they get closer</p>
-  <md-tooltip md-direction="right">Good when paired with disabled collisions</md-tooltip>
+  <p>{{:: 'ui.options.multiplayer.fadeVehicles' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.fadeVehicles.tooltip' | translate }}</md-tooltip>
   <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
@@ -131,28 +132,28 @@
           <div class="md-list-item">
             <p>{{:: 'ui.options.multiplayer.tuneColorQueued' | translate }}</p>
             <div>
-              <md-checkbox ng-model="options.data.values.showBlobQueued" ng-change="options.applyState()">Visible
+              <md-checkbox ng-model="options.data.values.showBlobQueued" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
               </md-checkbox>
               <md-input-container>
-                <label>HEX color value (ex: #FF6400)</label>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
                 <input id="queuedColor" flex type="text" ng-model="options.data.values.blobColorQueued"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}">
-                <div id="queuedColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="queuedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
-
+          
           <div class="md-list-item">
-            <p>Illegal vehicle <small>(missing mod, can not be spawned)</small></p>
+            <p>{{:: 'ui.options.multiplayer.tuneColorIllegal' | translate }}<small>{{:: 'ui.options.multiplayer.tuneColorIllegalHelp' | translate }}</small></p>
             <div>
-              <md-checkbox ng-model="options.data.values.showBlobIllegal" ng-change="options.applyState()">Visible
+              <md-checkbox ng-model="options.data.values.showBlobIllegal" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
               </md-checkbox>
               <md-input-container>
-                <label>HEX color value (ex: #FF6400)</label>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
                 <input id="illegalColor" flex type="text" ng-model="options.data.values.blobColorIllegal"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="illegalColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="illegalColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -160,14 +161,14 @@
           <div class="md-list-item">
             <p>{{:: 'ui.options.multiplayer.tuneColorDeleted' | translate }}</p>
             <div>
-              <md-checkbox ng-model="options.data.values.showBlobDeleted" ng-change="options.applyState()">Visible
+              <md-checkbox ng-model="options.data.values.showBlobDeleted" ng-change="options.applyState()">{{:: 'ui.options.multiplayer.tuneBlobColorsVisible' | translate }}
               </md-checkbox>
               <md-input-container>
-                <label>HEX color value (ex: #FF6400)</label>
+                <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
                 <input id="deletedColor" flex type="text" ng-model="options.data.values.blobColorDeleted"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="deletedColorPreview" style="opacity=0;">&nbsp;&nbsp;</div>
+                <div id="deletedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -207,12 +208,12 @@
     <span ng-if="options.data.values.uiUnitLength == 'imperial'" style="margin-left:15px">{{
       (options.data.values.nameTagFadeDistance*3.281).toFixed(0) }} feet</span>
     <span ng-if="options.data.values.uiUnitLength != 'imperial'" style="margin-left:15px">{{
-      (options.data.values.nameTagFadeDistance).toFixed(0) }} meters</span>
+      (options.data.values.nameTagFadeDistance).toFixed(0) }} {{:: 'ui.unit.m' | translate }}</span>
   </md-list-item>
   <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.nametagInvertFade' | translate }}</p>
-    <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">Fade in</span>
-    <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">Fade out</span>
+    <span flex ng-if="options.data.values.nameTagFadeInvert" style="text-align:right">{{:: 'ui.options.multiplayer.nametagFadeIn' | translate }}</span>
+    <span flex ng-if="!options.data.values.nameTagFadeInvert" style="text-align:right">{{:: 'ui.options.multiplayer.nametagFadeOut' | translate }}</span>
     <md-checkbox ng-model="options.data.values.nameTagFadeInvert" ng-change="options.applyState()"></md-checkbox>
   </md-list-item>
   <md-list-item md-no-ink>
@@ -239,7 +240,7 @@
 </div>
 
 <md-list-item md-no-ink>
-  <p><span class="mp-setting-highlight">NEW</span> {{:: 'ui.options.multiplayer.showSpectators' | translate }}</p>
+  <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.new' | translate }}</span> {{:: 'ui.options.multiplayer.showSpectators' | translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showSpectators.tooltip' | translate }}</md-tooltip>
   <md-checkbox ng-model="options.data.values.showSpectators" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
@@ -266,11 +267,11 @@
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.launcherPort.tooltip' | translate}}</md-tooltip>
   <p flex="70" bng-translate="ui.options.multiplayer.launcherPort"></p>
   <md-input-container style="padding-top:25px">
-    <input mdInput type="number" ng-model="options.data.values.launcherPort" min="4444" max="9999" step="1"
-      aria-label="_" />
+    <input mdInput type="number" ng-model="options.data.values.launcherPort" min="1024" max="65535" step="1"
+      aria-label="_" ng-change="options.applyState()"/>
   </md-input-container>
-  <span ng-if="options.data.values.launcherPort > 4444" style="margin-left:15px">Default is 4444</span>
-  <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">(Default)</span>
+  <span ng-if="options.data.values.launcherPort != 4444" style="margin-left:15px">{{:: 'ui.options.multiplayer.launcherPortDefaultPort' | translate}}</span>
+  <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">({{:: 'ui.common.default' | translate}})</span>
 </md-list-item>
 
 <!--<md-list-item md-no-ink>

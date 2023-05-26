@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPPowertrainGE...")
 
 
 
@@ -23,7 +22,7 @@ end
 
 
 local function sendLivePowertrain(data, gameVehicleID)
-	if MPGameNetwork.connectionStatus() > 0 then -- If TCP connected
+	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send('Yl:'..serverVehicleID..":"..data) -- Send powertrain to server
@@ -47,6 +46,8 @@ local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == "l" then
 		applyLivePowertrain(data, serverVehicleID)
+	else
+		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
 
@@ -54,10 +55,8 @@ end
 
 M.tick                   = tick
 M.handle                 = handle
-M.sendPowertrain         = sendPowertrain
 M.sendLivePowertrain     = sendLivePowertrain
 
 
 
-print("MPPowertrainGE loaded")
 return M

@@ -27,16 +27,22 @@ function($scope, $state, $timeout, $document) {
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.validate = function () {
 		localStorage.setItem("tosAccepted", "true");
+		bngApi.engineLua(`MPConfig.acceptTos()`);
 		$state.go('menu.multiplayer.servers');
 	};
 
 	$scope.openExternalLink = function(url) {
 		bngApi.engineLua(`openWebBrowser("`+url+`")`);
 	}
-	
 
-
-	
+	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
+		if (data != null) {
+			if (!localStorage.getItem("tosAccepted")) {
+				localStorage.setItem("tosAccepted", data.tos);
+				$state.go('menu.multiplayer.servers');
+			}
+		}
+	});
 }])
 
 
@@ -50,11 +56,11 @@ function($scope, $state, $timeout, $document) {
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
 	$scope.connect = function () {
-		bngApi.engineLua('MPCoreNetwork.disconnectLauncher(true)');
+		bngApi.engineLua('MPCoreNetwork.connectToLauncher()');
 	};
 	
-	$scope.$on('launcherConnected', function (event, data) {
-		$state.go('menu.multiplayer.servers');
+	$scope.$on('onLauncherConnected', function (event, data) {
+		$state.go('menu.multiplayer.login');
 	});
 	
 	// The game's lua has an auto launcher reconnect in case
@@ -110,7 +116,8 @@ function($scope, $state, $timeout, $document) {
 	});
 	
 	// Try to auto login
-	bngApi.engineLua('MPCoreNetwork.autoLogin()');
+	// bngApi.engineLua('MPCoreNetwork.autoLogin()');
+	// autologin is called from lua
 }])
 
 
@@ -177,6 +184,10 @@ function($scope, $state, $timeout, $mdDialog) {
 		}
 	});
 
+	$scope.$on('onServerJoined', function (event, data) {
+		$state.go('play');
+	});
+
 	$scope.logout = function() {
 		bngApi.engineLua(`MPCoreNetwork.logout()`);
 		$state.go('menu.multiplayer.login');
@@ -188,8 +199,8 @@ function($scope, $state, $timeout, $mdDialog) {
 	}
 
 	vm.refreshList = function() {
-		console.log("Attempting to refresh server list.")
-		bngApi.engineLua('MPCoreNetwork.getServers()');
+		//console.log("Attempting to refresh server list.")
+		bngApi.engineLua('MPCoreNetwork.requestServerList()');
 	}
 	
 	vm.clearRecents = function() {
@@ -225,7 +236,7 @@ function($scope, $state, $timeout, $mdDialog) {
 		if (!valid) return;
 		var server = {
 			cversion: await getLauncherVersion(), ip: ip.value, location: "--", map: "", maxplayers: "0", players: "0",
-			owner: "", playersList: "", pps: "", sdesc: "", sname: name.value, strippedName: name.value,
+			owner: "", playersList: "", sdesc: "", sname: name.value, strippedName: name.value,
 			custom: true, port: port.value
 		};
 		addFav(server);
@@ -276,7 +287,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerController] destroyed.');
+		//console.log('[MultiplayerController] destroyed.');
 	});
 }])
 
@@ -289,16 +300,27 @@ function($scope, $state, $timeout, $mdDialog) {
 function($scope, $state, $timeout) {
 
 	var vm = this;
-	vm.checkIsEmpty = false;
-	vm.checkIsNotEmpty = false;
-	vm.checkIsNotFull = false;
-	vm.checkModSlider = false;
-	vm.sliderMaxModSize = 500; //should be almost a terabyte
-	vm.selectMap = "Any"
-	vm.searchText = "";
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
 
-	// Request for the servers
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
+
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
 	// Go back to the main menu on exit
 	vm.exit = function ($event) {
@@ -316,11 +338,11 @@ function($scope, $state, $timeout) {
 	// Called when the page is left
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerServersController] destroyed.');
+		//console.log('[MultiplayerServersController] destroyed.');
 	});
 	
-	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
@@ -340,6 +362,15 @@ function($scope, $state, $timeout) {
 			vm.selectMap,
 			bngApi
 		);
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
 }])
 
@@ -354,11 +385,9 @@ function($scope, $state, $timeout) {
 	
 	vm.searchText = "";
 
-	bngApi.engineLua('MPCoreNetwork.getServers()');
-
-	// Called when getServers() answered
-	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
@@ -397,7 +426,7 @@ function($scope, $state, $timeout) {
 	// When page is unloaded
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerRecentController] destroyed.');
+		//console.log('[MultiplayerRecentController] destroyed.');
 	});
 }])
 
@@ -414,25 +443,24 @@ function($scope, $state, $timeout) {
 	vm.checkIsNotEmpty = false;
 	vm.checkIsNotFull = false;
 	vm.checkModSlider = false;
-	vm.sliderMaxModSize = 500; //should be almost a terabyte
+	vm.sliderMaxModSize = 500; // in MB
 	vm.selectMap = "Any";
 	vm.searchText = "";
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
 
 	vm.exit = function ($event) {
 		if ($event)
 		console.log('[MultiplayerServersController] exiting by keypress event %o', $event);
 		$state.go('menu.mainmenu');
 	};
-	
-	// Called when getServers() answered
-	$scope.$on('onServersReceived', async function (event, data) {
-		servers = await receiveServers(JSON.parse(data));
+
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
 		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
-	
+
 	vm.repopulate = async function() {
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -457,7 +485,7 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerServersController] destroyed.');
+		//console.log('[MultiplayerServersController] destroyed.');
 	});
 
 	function setColor(row) {
@@ -490,7 +518,7 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('$destroy', function () {
 		$timeout.cancel(timeOut);
-		console.log('[MultiplayerDirectController] destroyed.');
+		//console.log('[MultiplayerDirectController] destroyed.');
 	});
 }])
 
@@ -804,7 +832,7 @@ function addFav(server, isUpdate) {
 	server.addTime = Date.now();
 	favorites.push(server);
 	saveFav();
-	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.getServers()');
+	if (!isUpdate) bngApi.engineLua('MPCoreNetwork.requestServerList()');
 }
 
 function removeFav(server) {
@@ -815,7 +843,7 @@ function removeFav(server) {
 		}
 	}
 	saveFav();
-	bngApi.engineLua('MPCoreNetwork.getServers()');
+	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
 }
 
 function saveFav() {
@@ -864,7 +892,6 @@ function getServerInfoHTML(d) {
 						</div>
 						<div class="col">
 							<ul class="serverItemDetails">
-								<li>PPS: ${d.pps|| ""}</li>
 								<li>Mods: ${modCount(d.modlist|| "")}</li>
 								<li>Mod Names: ${modList(d.modlist|| "")}</li>
 								<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
@@ -882,28 +909,6 @@ function getServerInfoHTML(d) {
 			</td>`;
 };
 
-function formatHealth(pps) {
-	let signel = '';
-	if (pps > 40) {
-		signel = 'signal-4'
-	} else if (pps > 20) {
-		signel = 'signal-3'
-	} else if (pps > 10) {
-		signel = 'signal-2'
-	} else if (pps > 5) {
-		signel = 'signal-1'
-	} else {
-		signel = 'signal-0'
-	}
-	return `
-	<i class="icon__signal-strength ${signel}">
-		<span class="bar-1"></span>
-		<span class="bar-2"></span>
-		<span class="bar-3"></span>
-		<span class="bar-4"></span>
-	</i>
-	`
-}
 
 function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) {
 	let newRow = table.insertRow(table.length);
@@ -911,12 +916,17 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 	newRow.server = server;
 	newRow.server.favorite = isFavorite;
 	newRow.server.recent = isRecent;
-	newRow.innerHTML = `
+	/*newRow.innerHTML = `
 		<td style="background-color:${bgcolor}; font-size: initial;"><i class="flag flag-${server.location}"></i> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
-		<td style="background-color:${bgcolor}; font-size: initial; min-width: 60px;">${formatHealth(server.pps)}${server.pps}</td>
+	`;*/
+	newRow.innerHTML = `
+		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
+		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;
 	newRow.onclick = function() { select(this, bngApi); };
 }
@@ -995,14 +1005,14 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 }
 
 // Used to connect to the backend with ids
-function connect(ip, port, mods, name) {
+function connect(ip, port, name) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + mods + '","' + name + '")');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '")');
 }
 
 // Used to select a row (when it's clicked)
@@ -1029,7 +1039,7 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.modlist, row.server.strippedName) };
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName) };
 	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');

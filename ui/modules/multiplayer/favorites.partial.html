@@ -15,24 +15,24 @@
 			<md-button id="addserver-button" class="button servers-button" ng-class="" ng-click="multiplayer.showCustomServer()">{{:: 'ui.multiplayer.addCustomServer' | translate}}</md-button>
 
 			<md-checkbox ng-model="multiplayermenu.checkIsEmpty" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-			Only show empty servers
-			</md-tooltip md-no-ink>
-			Empty only
+				<md-tooltip md-direction="right">
+					{{:: 'ui.multiplayer.emptyOnlyTooltip' | translate}}
+				</md-tooltip md-no-ink>
+				{{:: 'ui.multiplayer.emptyOnly' | translate}}
 			</md-checkbox>
 
 			<md-checkbox ng-model="multiplayermenu.checkIsNotEmpty" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-			Only show not empty servers
-			</md-tooltip md-no-ink>
-			Not empty
+				<md-tooltip md-direction="right">
+					{{:: 'ui.multiplayer.notEmptyTooltip' | translate}}
+				</md-tooltip md-no-ink>
+				{{:: 'ui.multiplayer.notEmpty' | translate}}
 			</md-checkbox>
 
 			<md-checkbox ng-model="multiplayermenu.checkIsNotFull" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-			Only show not full servers
-			</md-tooltip md-no-ink>
-			Not full
+				<md-tooltip md-direction="right">
+					{{:: 'ui.multiplayer.notFullTooltip' | translate}}
+				</md-tooltip md-no-ink>
+				{{:: 'ui.multiplayer.notFull' | translate}}
 			</md-checkbox>
 
 			<md-select id="map-select" ng-model="multiplayermenu.selectMap" placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
@@ -46,10 +46,10 @@
 			</md-select>
 
 			<md-checkbox ng-model="multiplayermenu.checkModSlider" ng-change="multiplayermenu.repopulate();">
-			<md-tooltip md-direction="right">
-			Enable mod size limiter
-			</md-tooltip md-no-ink>
-			Mod size slider
+				<md-tooltip md-direction="right">
+					{{:: 'ui.multiplayer.modSliderTooltip' | translate}}
+				</md-tooltip md-no-ink>
+				{{:: 'ui.multiplayer.modSlider' | translate}}
 			</md-checkbox>
 
 			<md-slider flex ng-if="multiplayermenu.checkModSlider"
@@ -68,7 +68,6 @@
 				<th>{{:: 'ui.multiplayer.description' | translate}}</th>
 				<th>{{:: 'ui.multiplayer.map' | translate}}</th>
 				<th>{{:: 'ui.multiplayer.players' | translate}}</th>
-				<th>PPS</th>
 			</tr>
 		</thead>
 		<tbody id="serversTableBody">

@@ -30,7 +30,7 @@
           <div flex style="min-width:50%;padding-right:40px;">Active part</div>
         </div>
         <div ng-repeat="entry in vehConf_parts.searchResults track by entry.slot"
-          ng-mouseover="vehConf_parts.selectPart($event, entry.val)">
+          ng-mouseover="vehConf_parts.selectParts($event, entry)">
           <div layout="row" layout-align="space-between center" ng-class="{'highlightChanged': entry.changed}"
             ng-if="entry.options.length > 0">
 
@@ -115,16 +115,14 @@
 
     <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; border-top: solid 2px var(--bng-orange); padding-top:0; padding-bottom:0;">
       <div style="flex: 1 1 auto;">
-        <!--
-        <md-checkbox ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
-          {{:: 'ui.vehicleconfig.subparts' | translate}}
-        </md-checkbox>
-        -->
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.showAuxiliary" md-no-ink flex>
           <md-icon class="material-icons">report</md-icon> {{:: "ui.showAuxiliary" | translate}}
         </md-checkbox>
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{:: 'ui.vehicleconfig.simpleTree' | translate}}
+        </md-checkbox>
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
+          {{:: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>
       </div>
 
@@ -153,15 +151,17 @@
           {{:: 'ui.vehicleconfig.applyPartChangesAutomatically' | translate}}
         </md-checkbox>
       </div>
-      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-show="!vehConf_parts.applyPartChangesAutomatically"
-        class="md-raised md-primary">
-        {{:: 'ui.common.apply' | translate}}
-      </md-button>
-      <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-raised md-warn">
+      <md-button ng-click="vehConf_parts.reset()" md-no-ink class="md-warn" ng-disabled="!vehConf_parts.d.data">
+        <md-icon class="material-icons">undo</md-icon>
         {{:: 'ui.common.reset' | translate}}
       </md-button>
+      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-disabled="vehConf_parts.applyPartChangesAutomatically"
+        class="md-raised md-primary">
+        <md-icon class="material-icons">check</md-icon>
+        {{:: 'ui.common.apply' | translate}}
+      </md-button>
       <md-button ng-hide="!vehConf_parts.isMPSession" ng-click="vehConf_parts.mpapply()" md-no-ink class="md-raised md-primary">
-        {{:: 'ui.common.sync' | translate}}
+        {{:: 'ui.common.multiplayer.sync' | translate}}
       </md-button>
     </div>
 

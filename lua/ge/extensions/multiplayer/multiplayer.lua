@@ -1,164 +1,12 @@
 local M = {state={}}
 
-local logTag = 'multiplayer'
-log("I", "", "Gamemode Loaded")
-
-local inputActionFilter = extensions.core_input_actionFilter
-
-local originalGetDriverData = nop
-local originalToggleWalkingMode = nop
 
 
-local function startMultiplayerHelper (level, startPointName)
-	core_gamestate.requestEnterLoadingScreen(logTag .. '.startMultiplayerHelper')
-	loadGameModeModules()
-	M.state = {}
-	M.state.multiplayerActive = true
-
-	local levelPath = level
-	if type(level) == 'table' then
-		setSpawnpoint.setDefaultSP(startPointName, level.levelName)
-		levelPath = level.misFilePath
-	end
-
-	inputActionFilter.clear(0)
-
-	spawn.preventPlayerSpawning = true -- no default pickup pog
-	core_levels.startLevel(levelPath)
-	core_gamestate.requestExitLoadingScreen(logTag .. '.startMultiplayerHelper')
-end
-
-local function startAssociatedFlowgraph(level)
-	-- load flowgaphs associated with this level.
-		if level.flowgraphs then
-			for _, absolutePath in ipairs(level.flowgraphs or {}) do
-				local relativePath = level.misFilePath..absolutePath
-				local path = FS:fileExists(absolutePath) and absolutePath or (FS:fileExists(relativePath) and (relativePath) or nil)
-				if path then
-					local mgr = core_flowgraphManager.loadManager(path)
-					--core_flowgraphManager.startOnLoadingScreenFadeout(mgr)
-					mgr:setRunning(true)
-					mgr.stopRunningOnClientEndMission = true -- make mgr self-destruct when level is ended.
-					mgr.removeOnStopping = true -- make mgr self-destruct when level is ended.
-					log("I", "Flowgraph loading", "Loaded level-associated flowgraph from file "..dumps(path))
-				 else
-					 log("E", "Flowgraph loading", "Could not find file in either '" .. absolutePath.."' or '" .. relativePath.."'!")
-				 end
-			end
-		end
-	end
-
-local function startMultiplayer(level, startPointName, wasDelayed)
-	core_gamestate.requestEnterLoadingScreen(logTag)
-	-- if this was a delayed start, load the FGs now.
-	--if wasDelayed then
-		--startAssociatedFlowgraph(level)
-	--end
-
-	-- this is to prevent bug where multiplayer is started while a different level is still loaded.
-	-- Loading the new multiplayer causes the current loaded multiplayer to unload which breaks the new multiplayer
-	local delaying = false
-	if scenetree.MissionGroup then
-		log('D', 'startMultiplayer', 'Delaying start of multiplayer until current level is unloaded...')
-		M.triggerDelayedStart = function()
-			log('D', 'startMultiplayer', 'Triggering a delayed start of multiplayer...')
-			M.triggerDelayedStart = nil
-			startMultiplayer(level, startPointName, true)
-		end
-		endActiveGameMode(M.triggerDelayedStart)
-		delaying = true
-	elseif not core_gamestate.getLoadingStatus(logTag .. '.startMultiplayerHelper') then -- remove again at some point
-		startMultiplayerHelper(level, startPointName)
-		core_gamestate.requestExitLoadingScreen(logTag)
-	end
-	-- if there was no delaying and the function call itself didnt
-	-- come from a delayed start, load the FGs (starting from main menu)
-	if not wasDelayed and not delaying then
-		startAssociatedFlowgraph(level)
-	end
-
-	if not shipping_build and settings.getValue('enableCrashCam') then
-    extensions.load('core_crashCamMode')
-  end
-end
-
-local function startMultiplayerByName(levelName)
-  local level = core_levels.getLevelByName(levelName)
-  if level then
-			startMultiplayer(level)
-			return true
-	end
-	return false
-end
-
-local function onClientPreStartMission(mission)
-	if MPCoreNetwork.isMPSession() then
-		local path, file, ext = path.splitWithoutExt(mission)
-		file = path .. 'mainLevel'
-		if not FS:fileExists(file..'.lua') then return end
-		extensions.loadAtRoot(file,"")
-		if mainLevel and mainLevel.onClientPreStartMission then
-			mainLevel.onClientPreStartMission(mission)
-		end
-	end
-end
-
-local function onClientPostStartMission()
-	if MPCoreNetwork.isMPSession() then
-		MPGameNetwork.connectToLauncher()
-	end
-end
-
-local function onClientStartMission(mission)
-	be:executeJS("document.getElementsByTagName('fancy-background')[0].remove();")
-	if M.state.multiplayerActive then
-		extensions.hook('onMultiplayerLoaded', mission)
-		local ExplorationCheckpoints = scenetree.findObject("ExplorationCheckpointsActionMap")
-		local am = scenetree.findObject("ExplorationCheckpointsActionMap")
-    if am then am:push() end
-	end
-end
-
-local function onClientEndMission(mission)
-	if M.state.multiplayerActive then
-		M.state.multiplayerActive = false
-		local am = scenetree.findObject("ExplorationCheckpointsActionMap")
-    if am then am:pop() end
-	end
-
-	if not mainLevel then return end
-	local path, file, ext = path.splitWithoutExt(mission)
-	extensions.unload(path .. 'mainLevel')
-end
-
-
-
--- Resets previous vehicle alpha when switching between different vehicles
--- Used to fix multipart highlighting when switching vehicles
-local function onVehicleSwitched(oldId, newId, player)
-  if oldId then
-    local veh = be:getObjectByID(oldId)
-    if veh then
-      extensions.core_vehicle_partmgmt.selectReset()
-    end
-  end
-  if newId then
-    local veh = be:getObjectByID(newId)
-    if veh then
-      veh:refreshLastAlpha()
-    end
-  end
-end
-
-local function onResetGameplay(playerID)
-  if scenario_scenarios and scenario_scenarios.getScenario() then return end
-  if campaign_campaigns and campaign_campaigns.getCampaign() then return end
-  if career_career      and career_career.isCareerActive() then return end
-  for _, mgr in ipairs(core_flowgraphManager.getAllManagers()) do
-    if mgr:blocksOnResetGameplay() then return end
-  end
-  be:resetVehicle(playerID)
-end
+local originalGetDriverData
+local originalToggleWalkingMode
+local original_onInstabilityDetected
+local original_bigMapMode
+local original_bullettime
 
 local function modifiedGetDriverData(veh)
 	if not veh then return nil end
@@ -184,72 +32,95 @@ local function modifiedToggleWalkingMode()
 	end
 end
 
+local function modified_onInstabilityDetected(jbeamFilename)
+	log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))
+end
+
+local function modified_bigMapMode()
+	bullettime.pause = nop
+	return true --TODO: maybe add a check to stop map opening if no vehicle is present
+end
+
+original_bullettime = bullettime.pause
+
+local function onBigMapActivated()
+	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
+end
+
 local function onUpdate(dt)
-	if core_camera.getDriverData ~= modifiedGetDriverData then
-		originalGetDriverData = core_camera.getDriverData
-		core_camera.getDriverData = modifiedGetDriverData
-	end
-	if gameplay_walk and gameplay_walk.toggleWalkingMode ~= modifiedToggleWalkingMode then
-		originalToggleWalkingMode = gameplay_walk.toggleWalkingMode
-		gameplay_walk.toggleWalkingMode = modifiedToggleWalkingMode
-	end
-	
-	if worldReadyState == 0 then
-    -- When the world is ready, we have to set the camera we want to use. However, we want to do this
-    -- when we have vehicles spawned.
-    local vehicles = scenetree.findClassObjects('BeamNGVehicle')
-    for k, vecName in ipairs(vehicles) do
-      local to = scenetree.findObject(vecName)
-      if to and to.obj and to.obj:getId() then
-        commands.setGameCamera()
-        break
-      end
-    end
-		-- Workaround for worldReadyState not being set properly if there are no vehicles
-		serverConnection.onCameraHandlerSetInitial()
-		extensions.hook('onCameraHandlerSet')
-		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
-			log('M', 'onUpdate', 'Setting game state to multiplayer.')
-			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer') -- This is added to set the UI elements
+	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
+		--log('W', 'onUpdate', 'Running modified beammp code!')
+		if core_camera.getDriverData ~= modifiedGetDriverData then
+			log('W', 'onUpdate', 'Setting modifiedGetDriverData')
+			originalGetDriverData = core_camera.getDriverData
+			core_camera.getDriverData = modifiedGetDriverData
 		end
-  end
+		if gameplay_walk and gameplay_walk.toggleWalkingMode ~= modifiedToggleWalkingMode then
+			log('W', 'onUpdate', 'Setting modifiedToggleWalkingMode')
+			originalToggleWalkingMode = gameplay_walk.toggleWalkingMode
+			gameplay_walk.toggleWalkingMode = modifiedToggleWalkingMode
+		end
+
+		if worldReadyState == 0 then
+			-- Workaround for worldReadyState not being set properly if there are no vehicles
+			serverConnection.onCameraHandlerSetInitial()
+			extensions.hook('onCameraHandlerSet')
+			--commands.setGameCamera()
+		end
+	end
 end
 
-local function onAnyActivityChanged(state)
-  if not shipping_build then
-    if state == "started" then
-      if core_crashCamMode then
-        extensions.unload('core_crashCamMode')
-      end
-    elseif state == "stopped" then
-      if settings.getValue('enableCrashCam') then
-        extensions.load('core_crashCamMode')
-      end
-    end
-  end
+
+
+
+
+local function runPostJoin()
+	--save the original functions so they can be restored after leaving an mp session
+	original_onInstabilityDetected = onInstabilityDetected
+	original_bigMapMode = freeroam_bigMapMode.canBeActivated
+
+	--replace the functions
+	if settings.getValue("disableInstabilityPausing") then
+		onInstabilityDetected = modified_onInstabilityDetected
+	end
+	onInstabilityDetected = modified_onInstabilityDetected
+	freeroam_bigMapMode.canBeActivated = modified_bigMapMode
 end
 
-local function onSettingsChanged()
-  if not shipping_build then
-    if settings.getValue('enableCrashCam') then
-      extensions.load('core_crashCamMode')
-    elseif core_crashCamMode then
-      extensions.unload('core_crashCamMode')
-    end
-  end
+
+local function onServerLeave()
+	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
+	if original_bigMapMode then freeroam_bigMapMode.canBeActivated = original_bigMapMode end
+	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
+	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
+end
+
+
+local function onWorldReadyState(state)
+	log('W', 'onWorldReadyState', state)
+	if state == 2 then
+		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
+			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
+			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+			
+            -- QUICK DIRTY PATCH FOR THE CAMERA SPAWNING UNDERGROUND FROM THE 0.28 UDPATE
+            local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json")
+
+            local position = contents["position"] or { 0, 0, 0 }
+
+            position[3] = position[3] + 2 -- otherwise the cam spawns in the ground
+
+            -- local rotation = contents["rotationMatrix"] -- the info in this table can be borked, so we use 0 for all rotations
+            core_camera.setPosRot(0, position[1], position[2], position[3], 0, 0, 0, 0)
+		end
+	end
 end
 
 -- public interface
-M.startMultiplayer          = startMultiplayer
-M.startMultiplayerByName    = startMultiplayerByName
-M.onClientPreStartMission   = onClientPreStartMission
-M.onClientPostStartMission  = onClientPostStartMission
-M.onClientStartMission      = onClientStartMission
-M.onClientEndMission        = onClientEndMission
-M.onVehicleSwitched         = onVehicleSwitched
-M.onResetGameplay           = onResetGameplay
-M.onUpdate                  = onUpdate
-M.onAnyActivityChanged    = onAnyActivityChanged
-M.onSettingsChanged       = onSettingsChanged
+M.onUpdate          = onUpdate
+M.onWorldReadyState = onWorldReadyState
+M.onBigMapActivated = onBigMapActivated
 
+M.runPostJoin = runPostJoin
+M.onServerLeave = onServerLeave
 return M

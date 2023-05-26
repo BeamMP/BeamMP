@@ -6,29 +6,27 @@
 
 
 local M = {}
-print("Loading MPUpdatesGE...")
 
 
+-- Tickrate - how often data is being sent from the client, in seconds
+local nodesTimer = 0
+local nodesTickrate = 1.0
 
-local nodesDelay = 0
-local nodesTickrate = 1.0 -- in seconds
-
-local positionDelay = 0
+local positionTimer = 0
 local positionTickrate = 0.020
 
-local inputsDelay = 0
-local inputsTickrate = 1/32 -- 32 times / second
+local inputsTimer = 0
+local inputsTickrate = 1/30
 
-local electricsDelay = 0
-local electricsTickrate = 1/16 -- 16 times / second
+local electricsTimer = 0
+local electricsTickrate = 1/15
 
-local powertrainDelay = 0
+local powertrainTimer = 0
 local powertrainTickrate = 1/10
 
 
-
+ -- This doesn't do anything because the data isn't queued on the receiving end
 local function onPlayerConnect()
-	-- Update everything for the new connected player
 	MPElectricsGE.tick()
 	--nodesGE.tick()
 	positionGE.tick()
@@ -39,35 +37,35 @@ end
 
 
 local function onUpdate(dt)
-	if MPGameNetwork.connectionStatus() == 1 then -- If TCP connected
-		--nodesDelay = nodesDelay + dt
-		--if nodesDelay > getNodesTickrate() then
-		--	nodesDelay = 0 -- Reset the delay
+	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+		--nodesTimer = nodesTimer + dt
+		--if nodesTimer >= getNodesTickrate() then
+		--	nodesTimer = 0
 		--	nodesGE.tick() -- Comment this line to disable nodes synchronization
 		--end
 
-		positionDelay = positionDelay + dt
-		if positionDelay > positionTickrate then
-			positionDelay = 0 -- Reset the delay
+		positionTimer = positionTimer + dt
+		if positionTimer >= positionTickrate then
+			positionTimer = 0
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
-		inputsDelay = inputsDelay + dt
-		if inputsDelay > inputsTickrate then
-			inputsDelay = 0 -- Reset the delay
+		inputsTimer = inputsTimer + dt
+		if inputsTimer >= inputsTickrate then
+			inputsTimer = 0
 			MPInputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
-		electricsDelay = electricsDelay + dt
-		if electricsDelay > electricsTickrate then
-			electricsDelay = 0 -- Reset the delay
+		electricsTimer = electricsTimer + dt
+		if electricsTimer >= electricsTickrate then
+			electricsTimer = 0
 			MPElectricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 		
-		powertrainDelay = powertrainDelay + dt
-		if powertrainDelay > powertrainTickrate then
-			powertrainDelay = 0 -- Reset the delay
-			MPPowertrainGE.tick() -- Comment this line to disable electrics synchronization
+		powertrainTimer = powertrainTimer + dt
+		if powertrainTimer >= powertrainTickrate then
+			powertrainTimer = 0
+			MPPowertrainGE.tick() -- Comment this line to disable powertrain synchronization
 		end
 	end
 end
@@ -79,5 +77,4 @@ M.onUpdate        = onUpdate
 
 
 
-print("MPUpdatesGE loaded")
 return M

@@ -13,44 +13,27 @@ local M = {}
 local lastElectrics = {}
 local latestData
 local electricsChanged = false
-local absBehavior = settings.getValue("absBehavior") or "realistic"
 local localSwingwing = 0 -- for DH Super bolide
-local lastgear = 0 -- backwards compatibility
-local geartimer = 0 -- backwards compatibility
-local GearData = 0 -- backwards compatibility
 -- ============= VARIABLES =============
 
 
 
 local function getEsc()
-	local driveModesController = controller.getController('driveModes')
-	local escController = controller.getController('esc')
-	if driveModesController ~= nil then
-		return driveModesController.serialize().activeDriveModeKey
-	elseif escController ~= nil then
-		return escController.serialize().escConfigKey
+	if controller.getController('driveModes') then
+		return controller.getController('driveModes').serialize().activeDriveModeKey
+	elseif controller.getController('esc') then
+		return controller.getController('esc').serialize().escConfigKey
 	end
 end
 
 local function setEsc(key)
-	local driveModesController = controller.getController('driveModes')
-	local escController = controller.getController('esc')
-	if driveModesController ~= nil then
-		driveModesController.setDriveMode(key)
-	elseif escController ~= nil then
-		escController.setESCMode(key)
+	if controller.getController('driveModes') then
+		controller.getController('driveModes').setDriveMode(key)
+	elseif controller.getController('esc') then
+		controller.getController('esc').setESCMode(key)
 	end
 end
 
-local function getAbsBehavior()
-	return absBehavior
-end
-
-local function setAbsBehavior(absMode)
-	if wheels then
-		wheels.setABSBehavior(absMode)
-	end
-end
 
 local disallowedKeys = {
 	["wheelThermals"] = 1,
@@ -289,7 +272,6 @@ local function check()
 	local electricsToSend = {} -- This holds the data that is different from the last frame to be sent since it is different
 	local electricsChanged = false
 	electrics.values.escMode = getEsc()
-	electrics.values.absMode = getAbsBehavior()
 	local e = electrics.values
 	if not e then return end -- Error avoidance in console
 	for k,v in pairs(e) do -- For each electric value
@@ -333,7 +315,6 @@ local function applyElectrics(data)
 
 		if decodedData.hazard_enabled == 1 then -- Apply hazard lights
 			electrics.set_warn_signal(decodedData.hazard_enabled)
-			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.hazard_enabled == 0 then -- Apply left signal value
 			if electrics.values.signal_left_input ~= decodedData.signal_left_input then
@@ -341,7 +322,6 @@ local function applyElectrics(data)
 			elseif electrics.values.signal_right_input ~= decodedData.signal_right_input then
 				electrics.toggle_right_signal()
 			end
-			--electrics.update(0) -- Update electrics values -- broke sync in 0.25, works fine without it
 		end
 		if decodedData.lights_state then
 			electrics.setLightsState(decodedData.lights_state) -- Apply lights values
@@ -350,7 +330,7 @@ local function applyElectrics(data)
 			electrics.set_lightbar_signal(decodedData.lightbar) -- Apply lightbar values
 		end
 		if decodedData.horn then
-			if decodedData.horn > 0.99 then electrics.horn(true)
+			if decodedData.horn == 1 then electrics.horn(true)
 			else electrics.horn(false) end
 		end
 		if decodedData.fog then
@@ -367,17 +347,13 @@ local function applyElectrics(data)
 		end
 
 		-- Transbrake syncing
-		if decodedData.transbrake and controller.getController("transbrake") then
-			if electrics.values.transbrake ~= decodedData.transbrake then
-				controller.getController("transbrake").setTransbrake(decodedData.transbrake)
-			end
+		if decodedData.transbrake and electrics.values.transbrake ~= decodedData.transbrake then
+			controller.getControllerSafe("transbrake").setTransbrake(decodedData.transbrake)
 		end
 
 		-- LineLock syncing
-		if decodedData.linelock and controller.getController("lineLock") then
-			if electrics.values.linelock ~= decodedData.linelock then
-				controller.getController("lineLock").setLineLock(decodedData.linelock)
-			end
+		if decodedData.linelock and electrics.values.linelock ~= decodedData.linelock then
+			controller.getControllerSafe("lineLock").setLineLock(decodedData.linelock)
 		end
 
 		-- Ignition syncing
@@ -407,19 +383,6 @@ local function applyElectrics(data)
 					engine:deactivateStarter()
 				end
 			end
-		end
-		
-		-- Gear syncing backwards compatibility
-		if decodedData.gear then
-			GearData = decodedData.gear
-		end
-		
-		geartimer = geartimer + 1
-		
-		if GearData and GearData ~= lastgear or GearData and geartimer == 2 then
-			MPInputsVE.applyGearOld(GearData)
-			geartimer = 0
-			lastgear = GearData
 		end
 
 		-- Unicycle syncing
@@ -451,44 +414,32 @@ local function applyElectrics(data)
 			end
 		end
 		-- Bus door syncing
-		if decodedData.dooropen ~= nil then
-			local doorsController = controller.getControllerSafe('doors')
-			if doorsController then
-				if decodedData.dooropen == 1 then
-					doorsController.setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
-				else
-					doorsController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
-				end
+		if decodedData.dooropen then
+			if decodedData.dooropen == 1 then
+				controller.getControllerSafe('doors').setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
+			else
+				controller.getControllerSafe('doors').setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
 			end
 		end
 		-- Bus suspension height syncing
 		if decodedData.kneel == 1 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
-			end
+			controller.getControllerSafe('airbags').setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
 		elseif decodedData.rideheight == 1 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
-			end
+			controller.getControllerSafe('airbags').setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
 		elseif decodedData.rideheight == 0 then
-			local airbagsController = controller.getController('airbags')
-			if airbagsController then
-				airbagsController.setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
-			end
+			controller.getControllerSafe('airbags').setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
 		end
 		-- ESC Mode syncing
 		if decodedData.escMode then
 			setEsc(decodedData.escMode)
 		end
 		-- ABS Behavior syncing
-		if decodedData.absMode then
-			setAbsBehavior(decodedData.absMode)
+		if decodedData.absMode and wheels then
+			wheels.setABSBehavior(decodedData.absMode)
 		end
 		-- ME262 missile sync
 		if decodedData.missile4_motor == 1 or decodedData.missile3_motor == 1 or decodedData.missile2_motor == 1 or decodedData.missile1_motor == 1 then
-			if controller.getController('missiles') ~= nil then
+			if controller.getController('missiles') then
 				controller.mainController.deployWeaponDown()
 				controller.mainController.deployWeaponUp()
 			end
@@ -512,19 +463,15 @@ end
 
 
 local function onReset()
+	if v.mpVehicleType == 'L' then
+		electrics.values.absMode = settings.getValue("absBehavior", "realistic")
+	end
 	if v.mpVehicleType == "R" then
 		controller.mainController.setGearboxMode("realistic")
+		if wheels then wheels.setABSBehavior(electrics.values.absMode or "realistic") end
 		localSwingwing = 0
 		remoteignition = true
 		remoteengineRunning = 1
-	end
-end
-
-
-
-local function onExtensionLoaded()
-	if v.mpVehicleType == "R" then
-		controller.mainController.setGearboxMode("realistic")
 	end
 end
 
@@ -536,13 +483,11 @@ end
 
 
 
-M.onExtensionLoaded    = onExtensionLoaded
+M.onExtensionLoaded    = onReset
 M.onReset			   = onReset
 M.check				   = check
 M.applyElectrics	   = applyElectrics
 M.applyLatestElectrics = applyLatestElectrics
-M.applyGearOld  	   = applyGearOld -- backwards compatibility
-
 
 
 return M

@@ -85,7 +85,6 @@ detectGlobalWrites() -- reenable global write notifications
 
 M.updateGFX = updateGFX
 M.onExtensionLoaded    = onExtensionLoaded
-M.onReset              = onReset
 
 M.setVehicleType       = setVehicleType
 

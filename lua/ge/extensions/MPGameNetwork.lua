@@ -6,15 +6,14 @@
 
 
 local M = {}
-print("Loading MPGameNetwork")
 
 
 
 -- ============= VARIABLES =============
 local socket = require('socket')
 local TCPSocket
-local launcherConnectionStatus = 0 -- Status: 0 not connected | 1 connecting or connected
-local sysTime = 0
+local launcherConnected = false
+local isConnecting = false
 local eventTriggers = {}
 --keypress handling
 local keyStates = {} -- table of keys and their states, used as a reference
@@ -25,47 +24,53 @@ local keypressTriggers = {}
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
-	log('I', 'connectToLauncher', "Connecting to the Launcher for mp session")
-	if launcherConnectionStatus == 0 then -- If launcher is not connected yet
-		TCPSocket = socket.tcp() -- Set socket to TCP
+	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
+	if not launcherConnected then
+		isConnecting = true
+		TCPSocket = socket.tcp()
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1); -- Connecting
-		launcherConnectionStatus = 1
+		TCPSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444)+1)
+		M.send('A')
 	else
-		log('W', 'connectToLauncher', "Already connected, aborting")
+		log('W', 'connectToLauncher', 'Launcher already connected!')
 	end
 end
 
 
 
 local function disconnectLauncher()
-	if launcherConnectionStatus > 0 then -- If player were connected
-		TCPSocket:close()-- Disconnect from server
-		launcherConnectionStatus = 0
+	if launcherConnected then
+		TCPSocket:close()
+		launcherConnected = false
 	end
 end
 
 
 
 local function sendData(s)
-	if TCPSocket then
-		local r, err = TCPSocket:send(string.len(s)..'>'..s)
-		if err then log('E', 'sendData', err) return end
-		if settings.getValue("showDebugOutput") == true then
-			print('[MPGameNetwork] Sending Data ('..r..'): '..s)
+	if not TCPSocket then return end
+	local bytes, error, index = TCPSocket:send(#s..'>'..s)
+	if error then
+		isConnecting = false
+		log('E', 'sendData', 'Socket error: '..error)
+		if error == "closed" and launcherConnected then
+			log('W', 'sendData', 'Lost launcher connection!')
+			launcherConnected = false
+		elseif error == "Socket is not connected" then
+
+		else
+			log('E', 'sendData', 'Stopped at index: '..index..' while trying to send '..#s..' bytes of data.')
 		end
-		if MPDebug then MPDebug.packetSent(r) end
+		return
+	else
+		if not launcherConnected then launcherConnected = true isConnecting = false end
+		if settings.getValue("showDebugOutput") then
+			log('M', 'sendData', 'Sending Data ('..bytes..'): '..s)
+		end
+		if MPDebug then MPDebug.packetSent(bytes) end
 	end
 end
-
-
-
-local function onPlayerConnect() -- Function called when a player connect to the server
-	MPUpdatesGE.onPlayerConnect()
-end
-
-
 
 local function sessionData(data)
 	local code = string.sub(data, 1, 1)
@@ -81,15 +86,13 @@ local function sessionData(data)
 end
 
 local function quitMP(reason)
-	text = reason~="" and ("Reason: ".. reason) or ""
+	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
 	UI.showMdDialog({
 		dialogtype="alert", title="You have been disconnected from the server", text=text, okText="Return to menu",
 		okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
 	})
-
-	--send('QG') -- Quit game
 end
 
 -------------------------------------------------------------------------------
@@ -106,12 +109,12 @@ local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	end
 end
 
-function TriggerServerEvent(n, d)
-	sendData('E:'..n..':'..d)
+function TriggerServerEvent(name, data)
+	sendData('E:'..name..':'..data)
 end
 
-function TriggerClientEvent(n, d)
-	handleEvents(':'..n..':'..d)
+function TriggerClientEvent(name, data)
+	handleEvents(':'..name..':'..data)
 end
 
 function AddEventHandler(n, f)
@@ -169,14 +172,14 @@ end
 -------------------------------------------------------------------------------
 
 local HandleNetwork = {
-	['V'] = function(params) MPInputsGE.handle(params) end,
+	['V'] = function(params) MPInputsGE.handle(params) end, -- inputs and gears
 	['W'] = function(params) MPElectricsGE.handle(params) end,
-	['X'] = function(params) nodesGE.handle(params) end,
-	['Y'] = function(params) MPPowertrainGE.handle(params) end,
-	['Z'] = function(params) positionGE.handle(params) end,
-	['O'] = function(params) MPVehicleGE.handle(params) end,
+	['X'] = function(params) nodesGE.handle(params) end, -- currently disabled
+	['Y'] = function(params) MPPowertrainGE.handle(params) end, -- powertrain related things like diff locks and transfercases
+	['Z'] = function(params) positionGE.handle(params) end, -- position and velocity
+	['O'] = function(params) MPVehicleGE.handle(params) end, -- all vehicle spawn, modification and delete events, couplers
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
-	['J'] = function(params) onPlayerConnect() UI.showNotification(params) end, -- A player joined
+	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params) end, -- A player joined
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
@@ -186,16 +189,16 @@ local HandleNetwork = {
 }
 
 
-
+local heartbeatTimer = 0
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
-	if launcherConnectionStatus > 0 then -- If player is connecting or connected
-		while (true) do
+	if launcherConnected then
+		while(true) do
 			local received, status, partial = TCPSocket:receive() -- Receive data
 			if received == nil or received == "" then break end
 
 			if settings.getValue("showDebugOutput") == true then
-				print('[MPGameNetwork] Receiving Data: '..received)
+				log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
 			end
 
 			-- break it up into code + data
@@ -203,15 +206,23 @@ local function onUpdate(dt)
 			local data = string.sub(received, 2)
 			HandleNetwork[code](data)
 
-			if MPDebug then MPDebug.packetReceived(string.len(received)) end
+			if MPDebug then MPDebug.packetReceived(#received) end
 		end
+	end
+	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() then --TODO: something
+		heartbeatTimer = 0
+		sendData('A')
 	end
 end
 
 
 
-local function connectionStatus()
-	return launcherConnectionStatus
+local function isLauncherConnected()
+	return launcherConnected
+end
+
+local function connectionStatus() --legacy, here because some mods use it
+	return launcherConnected and 1 or 0
 end
 
 detectGlobalWrites() -- reenable global write notifications
@@ -222,17 +233,16 @@ M.onUpdate = onUpdate
 M.onKeyStateChanged = onKeyStateChanged
 
 --functions
-M.connectionStatus    = connectionStatus
+M.launcherConnected   = isLauncherConnected
+M.connectionStatus    = connectionStatus --legacy
 M.connectToLauncher   = connectToLauncher
 M.disconnectLauncher  = disconnectLauncher
 M.send                = sendData
---M.sendSplit           = sendDataSplit -- doesn't exist
 M.CallEvent           = handleEvents
-M.quitMP               = quitMP
+M.quitMP              = quitMP
 
 M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
 M.getKeyState         = getKeyState         -- takes: string keyName
 M.onVehicleReady      = onVehicleReady
 
-print("MPGameNetwork loaded")
 return M

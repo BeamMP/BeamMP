@@ -6,7 +6,6 @@
 
 
 local M = {}
-print("Loading MPConfig...")
 
 -- MP VARIABLES
 local Nickname = ""
@@ -24,13 +23,17 @@ local defaultSettings = {
 
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
+
+	disableInstabilityPausing = true,
+
+	launcherPort = 4444
 }
 
 local function onExtensionLoaded()
 	for k,v in pairs(defaultSettings) do
-		--if settings.getValue(k) == nil then settings.setValue(k, v) end
-		settings.impl.defaults[k] = { 'local', v }
-		settings.impl.defaultValues[k] = v
+		if settings.getValue(k) == nil then settings.setValue(k, v) end
+		--settings.impl.defaults[k] = { 'local', v }
+		--settings.impl.defaultValues[k] = v
 	end
 	settings.impl.invalidateCache()
 end
@@ -108,9 +111,9 @@ local function setFavorites(favstr)
 		FS:directoryCreate("settings/BeamMP")
 	end
 
-	local favs = json.decode(favstr)
+	local favs = jsonDecode(favstr)
 	local favsfile = '/settings/BeamMP/favorites.json'
-	jsonWriteFile(favsfile, favs)
+	jsonWriteFile(favsfile, favs, true)
 end
 
 
@@ -139,7 +142,7 @@ local function setConfig(settingName, settingVal)
 	config[settingName] = settingVal
 
 	local favsfile = '/settings/BeamMP/config.json'
-	jsonWriteFile(favsfile, config)
+	jsonWriteFile(favsfile, config, true)
 end
 
 
@@ -150,7 +153,7 @@ local function acceptTos()
 	config.tos = true
 
 	local favsfile = '/settings/BeamMP/config.json'
-	jsonWriteFile(favsfile, config)
+	jsonWriteFile(favsfile, config, true)
 end
 
 local function onSerialize()
@@ -185,5 +188,4 @@ M.setConfig = setConfig
 
 M.acceptTos = acceptTos
 
-print("MPConfig loaded")
 return M

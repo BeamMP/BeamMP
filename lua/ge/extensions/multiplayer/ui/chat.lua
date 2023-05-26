@@ -133,7 +133,6 @@ local function render()
 
             if scrollToBottom or forceBottom then
                 imgui.SetScrollHereY(1)
-                scrollToBottom = false
             end
 
             imgui.NextColumn()
@@ -143,6 +142,10 @@ local function render()
         end
 
         imgui.EndChild()
+    end
+
+    if scrollToBottom then
+        scrollToBottom = false
     end
 
     imgui.PushStyleVar2(imgui.StyleVar_FramePadding, imgui.ImVec2(2, 2))

@@ -3,6 +3,7 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
 # Important Links
 
+- [Documentation](https://beammp.github.io/BeamMP/)
 - [Discord](https://discord.gg/BeamMP)
 - [Website](https://beammp.com)
 - [Wiki](https://wiki.beammp.com)

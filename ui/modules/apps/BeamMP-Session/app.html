@@ -55,6 +55,9 @@
 	}
 	</style>
 	<div class="outerDiv">
+		<div>
+			<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">Quit</button>
+		</div>
 		<div class="block" id="server-name-block" style="display: none;">
 			<span id="Session-Status"></span>
 		</div>
@@ -66,9 +69,6 @@
 		</div>
 		<div class="block others-block" id="queue-block" style="display: none; padding: 0px" >
 			<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">0</span></button>
-		</div>
-		<div>
-			<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">Quit</button>
 		</div>
 	</div>
 </div>

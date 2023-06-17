@@ -96,22 +96,38 @@ local function onServerLeave()
 end
 
 
+local function NewSpawnFunc()
+	local new_spawn = scenetree.findObject(setSpawnpoint.loadDefaultSpawnpoint())
+	if new_spawn and new_spawn.obj then
+		local spawnPos = new_spawn.obj:getPosition()
+		core_camera.setPosRot(0, spawnPos.x, spawnPos.y, spawnPos.z + 3, 0, 0, 0, 0)
+		log('I', 'onWorldReadyState', 'NewSpawnFunc')
+		return true
+	end
+	return false
+end
+
+local function DefaultSpawnFunc()
+	local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json")
+	local position = contents and contents["position"]
+	if position then
+		core_camera.setPosRot(0, position[1], position[2], position[3] + 3, 0, 0, 0, 0)
+		log('I', 'onWorldReadyState', 'DefaultSpawnFunc')
+		return true
+	end
+	return false
+end
+
 local function onWorldReadyState(state)
 	log('W', 'onWorldReadyState', state)
 	if state == 2 then
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
-			
-            -- QUICK DIRTY PATCH FOR THE CAMERA SPAWNING UNDERGROUND FROM THE 0.28 UDPATE
-            local contents = jsonReadFile(getMissionPath() .. "main/MissionGroup/PlayerDropPoints/items.level.json")
 
-            local position = contents["position"] or { 0, 0, 0 }
-
-            position[3] = position[3] + 2 -- otherwise the cam spawns in the ground
-
-            -- local rotation = contents["rotationMatrix"] -- the info in this table can be borked, so we use 0 for all rotations
-            core_camera.setPosRot(0, position[1], position[2], position[3], 0, 0, 0, 0)
+			if not DefaultSpawnFunc() then
+				NewSpawnFunc()
+			end
 		end
 	end
 end

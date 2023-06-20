@@ -96,6 +96,8 @@
     "ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
     "ui.multiplayer.clearRecent": "Clear Recents",
     "ui.multiplayer.pasteFromClipboard": "Paste from Clipboard",
+    "ui.multiplayer.votes": "Votes",
+    "ui.multiplayer.vote": "Vote",
     "ui.multiplayer.save": "Save",
     "ui.multiplayer.logout": "Logout",
     "ui.multiplayer.login": "Login",

@@ -874,20 +874,23 @@ function openForumLink(){
 
 function getServerInfoHTML(d) {
 		// `d` is the original data object for the row
-		var favButton;
+		var favButton, voteButton;
 		//console.log(d);
 		if (d.favorite) favButton = `<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav()" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>`;
-		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>`;
+		else favButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(this)" style="margin-left: 10px;">Add Favorite</md-button>`;
+
+		// TODO: If the user has already used their vote for the month then this should be hidden or disabled. Also if they are guest then it should be disabled
+		voteButton = `<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="voteServer(this)" style="margin-left: 10px;">Upvote</md-button>`;
 		return `
 				<td colspan="5">
 					<h1 style="padding-left:10px;">`+officialMark(d.official, true)+formatServerName(d.sname)+`</h1>
-						<div class="row">
+					<div class="row">
 						<div class="col">
 							<table class="description-table">
 								<tr><td>Owner:</td><td>${d.owner|| ""}</td></tr>
 								<tr><td>Map:</td><td>${SmoothMapName(d.map || "")}</td></tr>
 								<tr><td>Players:</td><td>${d.players|| ""}/${d.maxplayers|| ""}</td></tr>
-								<tr><td valign="top">Description:</td><td>${formatDescriptionName(d.sdesc|| "")}</td></tr>
+								<tr><td>Votes:</td><td>${(d.votes) ? d.votes : 0}</td></tr>
 							</table>
 						</div>
 						<div class="col">
@@ -897,10 +900,13 @@ function getServerInfoHTML(d) {
 								<li>Total Mods Size: ${formatBytes(d.modstotalsize) || "0"}</li>
 							</ul>
 						</div>
+						<table style="width: 100%; display: block;">
+							<tr><td valign="top">Description:</td><td>${formatDescriptionName(d.sdesc|| "")}</td></tr>
+						</table>
 					</div>
 					<div class="row" style="padding-left: 10px;">
 						<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect(` + d.ip + `, ` + d.port + `)" style="margin-left: 10px;">Connect</md-button>
-						` + favButton + `
+						` + favButton + voteButton + `
 					</div>
 					<div class="row">
 						<h4></h4>
@@ -916,17 +922,12 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 	newRow.server = server;
 	newRow.server.favorite = isFavorite;
 	newRow.server.recent = isRecent;
-	/*newRow.innerHTML = `
-		<td style="background-color:${bgcolor}; font-size: initial;"><i class="flag flag-${server.location}"></i> ${server.location}</td>
-		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
-		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
-		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
-	`;*/
 	newRow.innerHTML = `
 		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${(server.votes) ? server.votes : '0'}</td>
 	`;
 	newRow.onclick = function() { select(this, bngApi); };
 }

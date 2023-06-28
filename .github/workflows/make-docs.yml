@@ -16,7 +16,7 @@ jobs:
       - name: Generate docs with LDoc
         uses: lunarmodules/ldoc@v1.5.0
         with:
-            args: ./lua --dir docs
+            args: ./lua -a --dir docs
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

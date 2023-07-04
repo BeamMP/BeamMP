@@ -346,7 +346,7 @@ function($scope, $state, $timeout) {
 	
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		getOfficial();
+		official = await getOfficial();
 		vm.repopulate();
 	});
 	
@@ -524,7 +524,7 @@ function($scope, $state, $timeout) {
 	
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		getFeatured();
+		featured = await getFeatured();
 		vm.repopulate();
 	});
 	
@@ -573,7 +573,7 @@ function($scope, $state, $timeout) {
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		getRecents();
+		recents = await getRecents();
 		vm.repopulate();
 	});
 
@@ -640,7 +640,7 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		getFavorites();
+		favorites = await getFavorites();
 		vm.repopulate();
 	});
 

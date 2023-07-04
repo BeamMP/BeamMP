@@ -346,11 +346,14 @@ function($scope, $state, $timeout) {
 	
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		official = await getOfficial();
+		getOfficial();
 		vm.repopulate();
 	});
 	
 	vm.repopulate = async function() {
+		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			official,
@@ -432,6 +435,9 @@ function($scope, $state, $timeout) {
 	});
 	
 	vm.repopulate = async function() {
+		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
@@ -509,11 +515,14 @@ function($scope, $state, $timeout) {
 	
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		featured = await getFeatured();
+		getFeatured();
 		vm.repopulate();
 	});
 	
 	vm.repopulate = async function() {
+		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			featured,
@@ -553,11 +562,14 @@ function($scope, $state, $timeout) {
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		recents = await getRecents();
+		getRecents();
 		vm.repopulate();
 	});
 
 	vm.repopulate = async function() {
+		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
@@ -620,11 +632,14 @@ function($scope, $state, $timeout) {
 
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		favorites = await getFavorites();
+		getFavorites();
 		vm.repopulate();
 	});
 
 	vm.repopulate = async function() {
+		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
@@ -1016,6 +1031,7 @@ async function getFavorites() {
 		bngApi.engineLua("MPConfig.getFavorites()", (data) => {
 			if (!data) { resolve([]); return; }
 			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
+			favorites = data; // Added this here so that we remove the await where this function was called.
 			resolve(data || []);
 		});
 	});
@@ -1046,6 +1062,7 @@ function saveFav() {
 function getRecents() {
 	return new Promise(function(resolve, reject) {
 		var tmpRecents = JSON.parse(localStorage.getItem("recents"));
+		recents = tmpRecents || []; // Moved this to here so that we are no longer awaiting it
 		resolve(tmpRecents || []);
 	});
 }
@@ -1053,7 +1070,7 @@ function getRecents() {
 function addRecent(server, isUpdate) { // has to have name, ip, port
 	server.addTime = Date.now();
 	recents.push(server);
-	recents = recents.slice(-1 * 10); //keep the last 10 entries
+	recents = recents.slice(-1 * 30); //keep the last 30 entries
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
@@ -1129,47 +1146,44 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 	var newTbody = document.createElement('tbody');
 	newTbody.id = "serversTableBody";
 	var mapNames = new Array(); //["Any"];
-	for (var i = 0; i < servers.length; i++) {
+	for (const server of servers) {
 		var shown = true;
-		var server = servers[i];
 		var smoothMapName = SmoothMapName(server.map);
 		var isFavorite = false;
 		var isRecent = false;
 
 		// Filter by search
-		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) shown = false;
+		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) continue;
 		
 		// Filter by empty or full
-		else if(checkIsEmpty && server.players > 0) shown = false;
-		else if(checkIsNotEmpty && server.players == 0) shown = false;
-		else if(checkIsNotFull && server.players >= server.maxplayers) shown = false;
+		else if(checkIsEmpty && server.players > 0) continue;
+		else if(checkIsNotEmpty && server.players == 0) continue;
+		else if(checkIsNotFull && server.players >= server.maxplayers) continue;
 		
 		// Filter by mod size
-		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;
+		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) continue;
 	
 		// Filter by map
-		else if((selectMap != "Any" && selectMap != smoothMapName)) shown = false;
+		else if((selectMap != "Any" && selectMap != smoothMapName)) continue;
 
 		// Add the maps to the combobox on the UI
 		if(!mapNames.includes(smoothMapName)) mapNames.push(smoothMapName);
 
 		// Favorite
 		for (let tmpServer of favorites) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isFavorite = tmpServer.addTime;
-		if (type == 1 && !isFavorite) shown = false; // If it's favorite tab, we only show favorites
+		if (type == 1 && !isFavorite) continue; // If it's favorite tab, we only show favorites
 
 		// Recents
 		for (let tmpServer of recents) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isRecent = tmpServer.addTime;
-		if (type == 2 && !isRecent) shown = false; // Everything happens underneath for recents
+		if (type == 2 && !isRecent) continue; // Everything happens underneath for recents
 
 		// If the server passed the filter
-		if(shown) {
-			// Set the color relative to either favorite, featured, official or normal
-			var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : 'rgba(0, 0, 0, 0)!important';
+		// Set the color relative to either favorite, featured, official or normal
+		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : 'rgba(0, 0, 0, 0)!important';
 
-			createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
-			if (isFavorite) addFav(server, true);
-			if (isRecent) addRecent(server, true);
-		}
+		createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
+		if (isFavorite) addFav(server, true);
+		if (isRecent) addRecent(server, true);
 	}
 	
 	// Here we check if some favorited / recents servers are offline or not

@@ -17,7 +17,7 @@
   "ui.options.multiplayer.queueSkipUnicycle.tooltip": "Si activé, vous spawnerez immédiatement les modèles de joueur",
   "ui.options.multiplayer.luaOptimisations": "Activer les optimisations",
   "ui.options.multiplayer.luaOptimisations.tooltip": "Si activé, d'autres véhicules effectueront des calculs limités",
-  "ui.options.multiplayer.nameTags": "Masquer les étiquettes de nom de joueur"
+  "ui.options.multiplayer.nameTags": "Masquer les étiquettes de nom de joueur",
   "ui.options.multiplayer.nameTagAlternate": "Utiliser des couleurs d'étiquettes de nom alternatives",
   "ui.options.multiplayer.nameTagShowDistance": "Afficher la distance par rapport aux autres joueurs",
   "ui.options.multiplayer.debugOutput": "Afficher l'activité réseau dans la console",
@@ -65,6 +65,7 @@
   "ui.multiplayer.servers": "Serveurs",
   "ui.multiplayer.recent": "Récents",
   "ui.multiplayer.favorites": "Favoris",
+  "ui.multiplayer.featured": "Serveurs en vedette",
   "ui.multiplayer.direct_connect": "Connexion directe",
   "ui.multiplayer.refresh": "Actualiser",
   "ui.multiplayer.connect": "Connecter",

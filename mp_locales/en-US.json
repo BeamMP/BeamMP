@@ -1,6 +1,8 @@
 {
     "ui.playmodes.multiplayer": "Multiplayer",
     "ui.options.multiplayer": "Multiplayer",
+    "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
+    "ui.options.multiplayer.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
     "ui.options.multiplayer.autoSyncVehicles": "Enable auto part sync",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "If enabled, your vehicle parts will automatically be synced to other players after a few seconds",
     "ui.options.multiplayer.queueSpawnEdit": "Queue player updates",

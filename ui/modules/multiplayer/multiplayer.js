@@ -377,6 +377,8 @@ function($scope, $state, $timeout) {
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
+
+	vm.repopulate();
 }])
 
 
@@ -461,6 +463,8 @@ function($scope, $state, $timeout) {
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
+
+	vm.repopulate();
 }])
 
 
@@ -567,9 +571,6 @@ function($scope, $state, $timeout) {
 	});
 
 	vm.repopulate = async function() {
-		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
-		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
-
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
@@ -637,9 +638,6 @@ function($scope, $state, $timeout) {
 	});
 
 	vm.repopulate = async function() {
-		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
-		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
-
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
@@ -1005,7 +1003,7 @@ async function getOfficial() {
 			}
 		});
 		
-		//console.log(_official)
+		official = _official
 		
 		resolve(_official || []);
 	});
@@ -1020,7 +1018,7 @@ async function getFeatured() {
 			}
 		});
 		
-		//console.log(feat)
+		featured = feat
 		
 		resolve(feat || []);
 	});

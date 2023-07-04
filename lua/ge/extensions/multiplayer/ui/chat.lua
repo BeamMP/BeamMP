@@ -106,8 +106,8 @@ local function addMessage(username, message, id, color)
         UI.bringToFront()
     end
 
-    local name = messageTable.message:sub(1, messageTable.message:find(':')-1)
-    if not forceBottom and name ~= MPConfig:getNickname() then
+    --local name = messageTable.message:sub(1, messageTable.message:find(':')-1)
+    if not forceBottom and username ~= MPConfig:getNickname() then
         M.newMessageCount = M.newMessageCount + 1
     end
 end

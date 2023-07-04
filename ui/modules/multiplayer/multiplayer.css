@@ -333,9 +333,11 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   background-position: -4px 16px;
   display: inline-block;
   height: 17px;
-  width: 23px;
+  /*width: 23px;*/
+  float: left;
   position: relative;
   top: 2px;
+  max-width: 34px;
 }
 
 .flag-AD {

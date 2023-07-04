@@ -351,8 +351,10 @@ function($scope, $state, $timeout) {
 	});
 	
 	vm.repopulate = async function() {
-		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
-		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
 
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -391,6 +393,8 @@ function($scope, $state, $timeout) {
 
 	var vm = this;
 	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions)
 
 	if (serverListOptions != null) {
 		vm.checkIsEmpty = serverListOptions.checkIsEmpty
@@ -437,8 +441,10 @@ function($scope, $state, $timeout) {
 	});
 	
 	vm.repopulate = async function() {
-		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
-		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
 
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -523,8 +529,10 @@ function($scope, $state, $timeout) {
 	});
 	
 	vm.repopulate = async function() {
-		if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
-		if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
 
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
@@ -1130,7 +1138,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;*/
 	newRow.innerHTML = `
-		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
+		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>

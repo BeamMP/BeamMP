@@ -453,6 +453,7 @@ function($scope, $state, $timeout) {
 			vm.selectMap,
 			bngApi
 		);
+
 		serverListOptions = {
 			checkIsEmpty : vm.checkIsEmpty,
 			checkIsNotEmpty : vm.checkIsNotEmpty,
@@ -463,8 +464,6 @@ function($scope, $state, $timeout) {
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
-
-	vm.repopulate();
 }])
 
 

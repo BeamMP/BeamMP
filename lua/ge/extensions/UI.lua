@@ -99,8 +99,30 @@ end
 local function updatePlayersList(data)
 	playersString = data or playersString
 	local players = split(playersString, ",")
+	local playerListData = {}
+	for index, p in ipairs(players) do
+		local player = MPVehicleGE.getPlayerByName(p)
+		local username = p
+		local color = {}
+		local id = '?'
+		if player then
+			local prefix = ""
+			for source, tag in pairs(player.nickPrefixes)
+				do prefix = prefix..tag.." " end
+
+			local suffix = ""
+			for source, tag in pairs(player.nickSuffixes)
+				do suffix = suffix..tag.." " end
+
+			username = prefix..''..username..''..suffix..''..player.role.shorttag
+			local c = player.role.forecolor
+			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
+			id = player.playerID
+		end
+		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id})
+	end
 	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
-	guihooks.trigger("playerList", jsonEncode(players))
+	guihooks.trigger("playerList", jsonEncode(playerListData))
 	guihooks.trigger("playerPings", jsonEncode(pings))
 	playerListWindow.updatePlayerList(pings) -- Send pings because this is a key-value table that contains name and the ping
 end
@@ -346,12 +368,33 @@ end
 local function chatMessage(rawMessage) -- chat message received (angular)
 	chatcounter = chatcounter+1
 	local message = string.sub(rawMessage, 2)
-	log('M', 'chatMessage', 'Chat message received: '..message) -- DO NOT REMOVE
-	guihooks.trigger("chatMessage", {message = message, id = chatcounter})
-	TriggerClientEvent("ChatMessageReceived", message)
+	local parts = split(message, ':')
+	local username = parts[1]
+	parts[1] = ''
+	local msg = string.gsub(message, username..': ', '')
+	local player = MPVehicleGE.getPlayerByName(username)
+	if player then
+		local prefix = ""
+		for source, tag in pairs(player.nickPrefixes)
+			do prefix = prefix..tag.." " end
 
-	-- For IMGUI
-	chatWindow.addMessage(message)
+		local suffix = ""
+		for source, tag in pairs(player.nickSuffixes)
+			do suffix = suffix..tag.." " end
+		username = prefix..''..username..''..suffix..''..player.role.shorttag
+		local c = player.role.forecolor
+		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
+		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
+		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter, color = color})
+		-- For IMGUI
+		chatWindow.addMessage(username, msg, chatcounter, color)
+	else
+		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..msg) -- DO NOT REMOVE
+		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter})
+		-- For IMGUI
+		chatWindow.addMessage(username, msg, id)
+	end
+	TriggerClientEvent("ChatMessageReceived", message, username) -- Username added last to not break other mods.
 end
 
 local function chatSend(msg) -- sends chat message to server (angular)

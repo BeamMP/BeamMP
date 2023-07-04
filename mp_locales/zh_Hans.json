@@ -86,6 +86,7 @@
     "ui.multiplayer.forum": "论坛",
     "ui.multiplayer.wiki": "维基",
     "ui.multiplayer.discord": "Discord",
+    "ui.multiplayer.patreon": "Patreon",
     "ui.multiplayer.players": "玩家",
     "ui.multiplayer.emptyOnly": "仅无人",
     "ui.multiplayer.emptyOnlyTooltip": "仅显示无人的服务器",

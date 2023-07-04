@@ -91,8 +91,10 @@ local function sendChatMessage(message)
     ffi.copy(chatMessageBuf, "")
 end
 
-local function addMessage(message)
+local function addMessage(username, message, id, color)
     local messageTable = {
+        username = username,
+        color = color,
         message = message,
         sentTime = os.time(),
         id = #M.chatMessages + 1
@@ -137,6 +139,17 @@ local function render()
             else
                 imgui.SetColumnWidth(0, windowWidth - 42 - scrollbarSize)
             end
+
+            if message.color then
+                imgui.TextColored(imgui.ImVec4(message.color[0]/255, message.color[1]/255, message.color[2]/255, message.color[3]/255), message.username)
+                imgui.SameLine()
+            else
+                imgui.Text(message.username)
+                imgui.SameLine()
+            end
+
+            imgui.Text(': ')
+            imgui.SameLine()
 
             imgui.TextWrapped(message.message)
 

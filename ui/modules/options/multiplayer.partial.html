@@ -138,7 +138,7 @@
                 <label>{{:: 'ui.options.multiplayer.tuneBlobColorsHelp' | translate }}</label>
                 <input id="queuedColor" flex type="text" ng-model="options.data.values.blobColorQueued"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}">
-                <div id="queuedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+                <div id="queuedColorPreview" style="background-color: {{options.data.values.blobColorQueued}}">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -153,7 +153,7 @@
                 <input id="illegalColor" flex type="text" ng-model="options.data.values.blobColorIllegal"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="illegalColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+                <div id="illegalColorPreview" style="background-color: {{options.data.values.blobColorIllegal}}">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>
@@ -168,7 +168,7 @@
                 <input id="deletedColor" flex type="text" ng-model="options.data.values.blobColorDeleted"
                   ng-change="options.applyState()" oninput="updateSettingsColorPreview(this)" pattern="#[0-9a-fA-F]{6}"
                   spellcheck="false" maxlength="7">
-                <div id="deletedColorPreview" style="opacity:0;">&nbsp;&nbsp;</div>
+                <div id="deletedColorPreview" style="background-color: {{options.data.values.blobColorDeleted}}">&nbsp;&nbsp;</div>
               </md-input-container>
             </div>
           </div>

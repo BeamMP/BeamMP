@@ -1,5 +1,3 @@
--- Note: Colors are not used anymore but I may add them back in the future
-
 local M = {
     chatMessages = {},
     newMessageCount = 0
@@ -16,6 +14,98 @@ local chatMessageBuf = imgui.ArrayChar(256)
 local wasMessageSent = false
 local history = {}
 local historyPos = -1
+
+local function colorByRGB(r, g, b, a)
+    return imgui.ImVec4(r/255, g/255, b/255, a/255)
+end
+
+local colorCodes = {
+    ['0'] = colorByRGB(000,000,000,255),
+    ['1'] = colorByRGB(000,000,170,255),
+    ['2'] = colorByRGB(000,170,000,255),
+    ['3'] = colorByRGB(000,170,170,255),
+    ['4'] = colorByRGB(170,000,000,255),
+    ['5'] = colorByRGB(170,000,170,255),
+    ['6'] = colorByRGB(255,170,000,255),
+    ['7'] = colorByRGB(170,170,170,255),
+    ['8'] = colorByRGB(085,085,085,255),
+    ['9'] = colorByRGB(085,085,255,255),
+    ['a'] = colorByRGB(085,255,085,255),
+    ['b'] = colorByRGB(085,255,255,255),
+    ['c'] = colorByRGB(255,085,085,255),
+    ['d'] = colorByRGB(255,085,255,255),
+    ['e'] = colorByRGB(255,255,085,255),
+    ['f'] = colorByRGB(255,255,255,255),
+    ['r'] = colorByRGB(255,255,255,255),
+}
+
+local function textToColorAndText(text, nocolor)
+    local color = colorCodes[string.sub(text, 1, 1)] or colorCodes["r"]
+    local text = string.sub(text, 2, #text)
+    if(nocolor) then color = colorCodes["r"] end
+
+    local txtList = {}
+
+    local currentTxt = ""
+    local wasSpace = false
+    local c = ""
+    
+    for i = 1, #text do
+        c = text:sub(i,i)
+
+        if(c == " ") then 
+            wasSpace = true
+            currentTxt = currentTxt .. c
+        else
+            if(not wasSpace) then currentTxt = currentTxt .. c
+            else
+                table.insert(txtList, {
+                    color = color,
+                    text = currentTxt
+                })
+                currentTxt = c
+            end
+            wasSpace = false
+        end
+    end
+
+    if(currentTxt ~= "") then
+        table.insert(txtList, {
+            color = color,
+            text = currentTxt
+        })
+    end
+
+    return txtList
+end
+
+local function formatTextWithColor(text, nocolor)
+    if(string.sub(text, 1, 1) ~= "^") then
+        text = "^f" .. text
+    end
+
+    local txtList = {}
+
+    local startIdx, endIdx = string.find(text, "%^")
+    
+    while startIdx do
+        local partStr = string.sub(text, 1, startIdx - 1)
+        if partStr ~= "" then
+            for _, v in ipairs(textToColorAndText(partStr, nocolor)) do
+                table.insert(txtList, v)
+            end
+        end
+    
+        text = string.sub(text, endIdx + 1)
+        startIdx, endIdx = string.find(text, "%^")
+    end
+    
+    for _, v in ipairs(textToColorAndText(text, nocolor)) do
+        table.insert(txtList, v)
+    end
+    
+    return txtList
+end
 
 local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
     if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
@@ -92,6 +182,12 @@ local function sendChatMessage(message)
 end
 
 local function addMessage(username, message, id, color)
+    if(username == "Server") then
+        message = formatTextWithColor(message, false)
+    else
+        message = formatTextWithColor(message, true)
+    end
+
     local messageTable = {
         username = username,
         color = color,
@@ -133,25 +229,33 @@ local function render()
         -- Render Message | Time
         for _, message in ipairs(M.chatMessages) do
             imgui.Columns(2, "ChatColumns", false)
-
-            if not scrollbarVisible then
-                imgui.SetColumnWidth(0, windowWidth - 42)
-            else
-                imgui.SetColumnWidth(0, windowWidth - 42 - scrollbarSize)
+            
+            local columnWidth = windowWidth - 42
+            
+            if scrollbarVisible then
+                columnWidth = columnWidth - scrollbarSize
             end
+            
+            imgui.SetColumnWidth(0, columnWidth)
 
+            columnWidth = columnWidth - 10
+            
             if message.color then
                 imgui.TextColored(imgui.ImVec4(message.color[0]/255, message.color[1]/255, message.color[2]/255, message.color[3]/255), message.username)
                 imgui.SameLine()
             else
-                imgui.Text(message.username)
+                imgui.Text(message.username .. ": ")
                 imgui.SameLine()
             end
+            
+            local currentWidth = imgui.CalcTextSize(message.username .. ": ").x
 
-            imgui.Text(': ')
-            imgui.SameLine()
-
-            imgui.TextWrapped(message.message)
+            for _, v in ipairs(message.message) do
+                if (currentWidth + imgui.CalcTextSize(v.text).x <= columnWidth) then imgui.SameLine(currentWidth)
+                else currentWidth = 0 end
+                currentWidth = currentWidth + imgui.CalcTextSize(v.text).x
+                imgui.TextColored(v.color, v.text)
+            end
 
             if scrollToBottom or forceBottom then
                 imgui.SetScrollHereY(1)

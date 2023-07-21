@@ -72,6 +72,7 @@ local simplified_vehicles = {
 	etk800 = "simple_traffic_etk800",
 	etkc = "simple_traffic_etkc",
 	etki = "simple_traffic_etki",
+	lansdale = "simple_traffic_lansdale",
 	legran = "simple_traffic_legran",
 	midsize = "simple_traffic_midsize",
 	pessima = "simple_traffic_pessima",

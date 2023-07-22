@@ -1744,7 +1744,7 @@ local function onPreRender(dt)
 				end
 
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
-				if settings.getValue("dontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
+				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 				
 				local name = ""
 				local tag = ""

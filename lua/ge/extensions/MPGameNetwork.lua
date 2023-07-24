@@ -30,7 +30,7 @@ local function connectToLauncher()
 		TCPSocket = socket.tcp()
 		TCPSocket:setoption("keepalive", true)
 		TCPSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
+		TCPSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444)+1)
 		M.send('A')
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')

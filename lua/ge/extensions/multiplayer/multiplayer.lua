@@ -102,6 +102,32 @@ local function onWorldReadyState(state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
 			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+			local spawnDefaultGroups = { "CameraSpawnPoints", "PlayerSpawnPoints", "PlayerDropPoints", "spawnpoints" }
+
+			for i, v in pairs(spawnDefaultGroups) do
+				if scenetree.findObject(spawnDefaultGroups[i]) then
+					local spawngroupPoint = scenetree.findObject(spawnDefaultGroups[i]):getRandom()
+					if not spawngroupPoint then
+						break
+					end
+					local sgPpointID = scenetree.findObjectById(spawngroupPoint:getId())
+					if not sgPpointID then
+						break
+					end
+					if sgPpointID and sgPpointID.obj then
+						local spawnPos = sgPpointID.obj:getPosition()
+						core_camera.setPosRot(0, spawnPos.x, spawnPos.y, spawnPos.z + 3, 0, 0, 0, 0)
+						return
+					end
+				end
+			end
+
+			local defaultSpawn = scenetree.findObject(setSpawnpoint.loadDefaultSpawnpoint())
+			if defaultSpawn and defaultSpawn.obj then
+				local spawnPos = defaultSpawn.obj:getPosition()
+				core_camera.setPosRot(0, spawnPos.x, spawnPos.y, spawnPos.z + 3, 0, 0, 0, 0)
+				return
+			end
 		end
 	end
 end

@@ -3,6 +3,7 @@ var app = angular.module('beamng.apps');
 let lastSentMessage = "";
 
 let lastMsgId = 0;
+let newChatMenu = false;
 
 app.directive('multiplayerchat', [function () {
 	return {
@@ -15,8 +16,10 @@ app.directive('multiplayerchat', [function () {
 }]); 
 
 
-app.controller("Chat", ['$scope', function ($scope) {
+app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 	$scope.init = function() {
+		newChatMenu = Settings.values.enableNewChatMenu;
+		console.log(`[CHAT] New chat menu: ${newChatMenu}`);
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
 		// To ensure that the element exists
@@ -35,6 +38,13 @@ app.controller("Chat", ['$scope', function ($scope) {
 		// Set chat direction
 		setChatDirection(localStorage.getItem('chatHorizontal'));
 		setChatDirection(localStorage.getItem('chatVertical'));
+
+		const chatbox = document.getElementById("chat-window");
+		if (newChatMenu) {
+			chatbox.style.display = "none";
+		} else {
+			chatbox.style.display = "flex";
+		}
 	};
 
 	$scope.reset = function() {
@@ -103,6 +113,16 @@ app.controller("Chat", ['$scope', function ($scope) {
 		}
 	});
 
+	$scope.$on('SettingsChanged', function (event, data) {
+		Settings.values = data.values;
+		const chatbox = document.getElementById("chat-window");
+		if (newChatMenu) {
+			chatbox.style.display = "none";
+		} else {
+			chatbox.style.display = "flex";
+		}
+	})
+
 	$scope.chatSend = function() {
 		let chatinput = document.getElementById("chat-input");
 		const text = chatinput.value
@@ -150,6 +170,8 @@ async function fadeNode(node) {
 }
 
 async function showChat() {
+	if (newChatMenu) return;
+
 	// While the mouse is over the chat, we wait
 	var chatMessages = []
 	while (chatShown) {

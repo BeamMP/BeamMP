@@ -89,8 +89,8 @@ angular.module('beamng.stuff')
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
-          <div ng-show='!showBuildInfo'>BeamMP v{{ ::beammpGameVer }}</div>
-          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP v{{ ::beammpGameVer }}</div>
+          <div ng-show='!showBuildInfo'>BeamMP v{{ ::beammpData.beammpGameVer }}</div>
+          <div ng-show='showBuildInfo' style="font-size:0.7em;">BeamMP Mod v{{ ::beammpData.beammpGameVer }} <br/> BeamMP Launcher v{{ ::beammpData.beammpLauncherVer }}</div>
         </div>
         <div style="margin-left:16px;border-right:3px solid #333;height:100%">&nbsp;</div>
         <div bng-no-nav="true" ng-click="showBuildInfo = !showBuildInfo" style="text-align:right;cursor: pointer; color:white;margin-left:16px;">
@@ -123,9 +123,6 @@ angular.module('beamng.stuff')
       // VERSION INFO
       scope.showBuildInfo = false
       scope.versionStr = beamng.version
-      // TODO #203 Fix this to actually use the real launcher version!
-      scope.beammpGameVer = '4.7.1'
-      scope.beammpLauncherVer = '3.0.0'
 
       // convert from 1.2.3.4 to 1.2.3 as we do not want to attach the build number in the simple display
       var versionSplit = scope.versionStr.split('.')
@@ -352,6 +349,11 @@ angular.module('beamng.stuff')
     },
     // rows with 4 elements each
     {
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
+    },
+    {
       translateid: 'ui.playmodes.campaigns',
       icon: '/ui/modules/mainmenu/drive/icons/campaigns.svg',
       targetState: 'menu.campaigns'
@@ -365,11 +367,6 @@ angular.module('beamng.stuff')
       translateid: 'ui.playmodes.quickrace',
       icon: '/ui/modules/mainmenu/drive/icons/timetrials.svg',
       targetState: 'menu.quickraceOverview'
-    },
-    {
-      translateid: 'ui.playmodes.multiplayer',
-      icon: '/ui/modules/multiplayer/icons/account-multiple.svg',
-      targetState: 'menu.multiplayer.tos'
     },
     {
       translateid: 'ui.mainmenu.garage',

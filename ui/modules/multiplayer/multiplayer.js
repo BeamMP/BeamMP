@@ -1,5 +1,7 @@
 var highlightedServer;
 var servers = [];
+var official = [];
+var featured = [];
 var favorites = [];
 var recents = [];
 var mdDialog;
@@ -71,7 +73,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	LOGIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', function($scope, $state, $timeout, $document) {
+.controller('MultiplayerLoginController', ['$scope', '$state', '$timeout', '$document', 
+function($scope, $state, $timeout, $document) {
 	'use strict';
 	// The lua setting need to be functional before we redirect, otherwise we'll land here again.
 	// for that reason, we listen for the settings changed event that will ensure that the main menu will not get back here again
@@ -294,6 +297,95 @@ function($scope, $state, $timeout, $mdDialog) {
 
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////
+*	OFFICIAL TAB
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerOfficialController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
+
+	var vm = this;
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
+
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+
+	// Go back to the main menu on exit
+	vm.exit = function ($event) {
+		if ($event) console.log('[MultiplayerOfficialController] exiting by keypress event %o', $event);
+		$state.go('menu.mainmenu');
+	};
+
+	// Page loading timeout
+	var timeOut = $timeout(function() {
+		if (vm.loadingPage === true) {
+			vm.loadTimeout = true;
+		}
+	}, 10000);
+
+	// Called when the page is left
+	$scope.$on('$destroy', function () {
+		$timeout.cancel(timeOut);
+		//console.log('[MultiplayerOfficialController] destroyed.');
+	});
+	
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
+		official = await getOfficial();
+		vm.repopulate();
+	});
+	
+	vm.repopulate = async function() {
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
+
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			official,
+			4, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3, Official = 4
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
+	};
+
+	vm.repopulate();
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
 *	SERVERS TAB
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerServersController', ['$scope', '$state', '$timeout', 
@@ -301,6 +393,8 @@ function($scope, $state, $timeout) {
 
 	var vm = this;
 	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions)
 
 	if (serverListOptions != null) {
 		vm.checkIsEmpty = serverListOptions.checkIsEmpty
@@ -343,16 +437,107 @@ function($scope, $state, $timeout) {
 	
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		favorites = await getFavorites();
-		recents = await getRecents();
 		vm.repopulate();
 	});
 	
 	vm.repopulate = async function() {
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
+
 		vm.availableMaps = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
 			0, // Favorite, Recent or Servers tab
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
+	};
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	FEATURED TAB
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerFeaturedController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
+
+	var vm = this;
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
+
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+
+	// Go back to the main menu on exit
+	vm.exit = function ($event) {
+		if ($event) console.log('[MultiplayerFeaturedController] exiting by keypress event %o', $event);
+		$state.go('menu.mainmenu');
+	};
+
+	// Page loading timeout
+	var timeOut = $timeout(function() {
+		if (vm.loadingPage === true) {
+			vm.loadTimeout = true;
+		}
+	}, 10000);
+
+	// Called when the page is left
+	$scope.$on('$destroy', function () {
+		$timeout.cancel(timeOut);
+		//console.log('[MultiplayerFeaturedController] destroyed.');
+	});
+	
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
+		featured = await getFeatured();
+		vm.repopulate();
+	});
+	
+	vm.repopulate = async function() {
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
+
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			featured,
+			3, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3
 			vm.searchText,
 			vm.checkIsEmpty,
 			vm.checkIsNotEmpty,
@@ -388,7 +573,6 @@ function($scope, $state, $timeout) {
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
-		favorites = await getFavorites();
 		recents = await getRecents();
 		vm.repopulate();
 	});
@@ -457,7 +641,6 @@ function($scope, $state, $timeout) {
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		favorites = await getFavorites();
-		recents = await getRecents();
 		vm.repopulate();
 	});
 
@@ -818,11 +1001,42 @@ function stripCustomFormatting(name){
 	return name;
 }
 
+async function getOfficial() {
+	return new Promise(function(resolve, reject) {
+		var _official = []
+		servers.forEach(server => {
+			if (server.official === true || server.approved === true) {
+				_official.push(server)
+			}
+		});
+		
+		official = _official
+		
+		resolve(_official || []);
+	});
+}
+
+async function getFeatured() {
+	return new Promise(function(resolve, reject) {
+		var feat = []
+		servers.forEach(server => {
+			if (server.featured === true) {
+				feat.push(server)
+			}
+		});
+		
+		featured = feat
+		
+		resolve(feat || []);
+	});
+}
+
 async function getFavorites() {
 	return new Promise(function(resolve, reject) {
 		bngApi.engineLua("MPConfig.getFavorites()", (data) => {
 			if (!data) { resolve([]); return; }
 			if (typeof data === "object") if (Object.keys(data).length == 0) data = [];
+			favorites = data; // Added this here so that we remove the await where this function was called.
 			resolve(data || []);
 		});
 	});
@@ -853,6 +1067,7 @@ function saveFav() {
 function getRecents() {
 	return new Promise(function(resolve, reject) {
 		var tmpRecents = JSON.parse(localStorage.getItem("recents"));
+		recents = tmpRecents || []; // Moved this to here so that we are no longer awaiting it
 		resolve(tmpRecents || []);
 	});
 }
@@ -860,7 +1075,7 @@ function getRecents() {
 function addRecent(server, isUpdate) { // has to have name, ip, port
 	server.addTime = Date.now();
 	recents.push(server);
-	recents = recents.slice(-1 * 10); //keep the last 10 entries
+	recents = recents.slice(-1 * 30); //keep the last 30 entries
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
@@ -916,8 +1131,14 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 	newRow.server = server;
 	newRow.server.favorite = isFavorite;
 	newRow.server.recent = isRecent;
-	newRow.innerHTML = `
+	/*newRow.innerHTML = `
 		<td style="background-color:${bgcolor}; font-size: initial;"><i class="flag flag-${server.location}"></i> ${server.location}</td>
+		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
+		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
+	`;*/
+	newRow.innerHTML = `
+		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
@@ -930,46 +1151,44 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 	var newTbody = document.createElement('tbody');
 	newTbody.id = "serversTableBody";
 	var mapNames = new Array(); //["Any"];
-	for (var i = 0; i < servers.length; i++) {
+	for (const server of servers) {
 		var shown = true;
-		var server = servers[i];
 		var smoothMapName = SmoothMapName(server.map);
 		var isFavorite = false;
 		var isRecent = false;
 
 		// Filter by search
-		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) shown = false;
+		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) continue;
 		
 		// Filter by empty or full
-		else if(checkIsEmpty && server.players > 0) shown = false;
-		else if(checkIsNotEmpty && server.players == 0) shown = false;
-		else if(checkIsNotFull && server.players == server.maxplayers) shown = false;
+		else if(checkIsEmpty && server.players > 0) continue;
+		else if(checkIsNotEmpty && server.players == 0) continue;
+		else if(checkIsNotFull && server.players >= server.maxplayers) continue;
 		
 		// Filter by mod size
-		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) shown = false;
+		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) continue;
 	
 		// Filter by map
-		else if((selectMap != "Any" && selectMap != smoothMapName)) shown = false;
+		else if((selectMap != "Any" && selectMap != smoothMapName)) continue;
 
 		// Add the maps to the combobox on the UI
 		if(!mapNames.includes(smoothMapName)) mapNames.push(smoothMapName);
 
 		// Favorite
 		for (let tmpServer of favorites) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isFavorite = tmpServer.addTime;
-		if (type == 1 && !isFavorite) shown = false; // If it's favorite tab, we only show favorites
+		if (type == 1 && !isFavorite) continue; // If it's favorite tab, we only show favorites
 
 		// Recents
 		for (let tmpServer of recents) if (tmpServer.ip == server.ip && tmpServer.port == server.port) isRecent = tmpServer.addTime;
-		if (type == 2 && !isRecent) shown = false; // Everything happens underneath for recents
+		if (type == 2 && !isRecent) continue; // Everything happens underneath for recents
 
 		// If the server passed the filter
-		if(shown) {
-			// Set the color relative to either favorite, official or normal
-			var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.official ? 'rgba(255,106,0,0.25)!important' : 'rgba(0,0,0,0)!important';
-			createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
-			if (isFavorite) addFav(server, true);
-			if (isRecent) addRecent(server, true);
-		}
+		// Set the color relative to either favorite, featured, official or normal
+		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : 'rgba(0, 0, 0, 0)!important';
+
+		createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
+		if (isFavorite) addFav(server, true);
+		if (isRecent) addRecent(server, true);
 	}
 	
 	// Here we check if some favorited / recents servers are offline or not

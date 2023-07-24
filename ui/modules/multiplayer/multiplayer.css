@@ -325,6 +325,29 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   }
 }
 
+@keyframes loadingShimmer{
+  0%{
+      background-position: -468px 0
+  }
+  100%{
+      background-position: 468px 0
+  }
+}
+.loading-shimmer {
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: loadingShimmer;
+  animation-timing-function: linear;
+  background: rgba(255, 255, 255, 0);
+  background: linear-gradient(to right, #eeeeee00 8%, #dddddd75 18%, #eeeeee00 33%);
+  background-size: 1000px 22px;
+  height: 22px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
 /** ######################################################## **/
 /**             FLAG STYLING                                 **/
 /** ######################################################## **/
@@ -333,9 +356,11 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   background-position: -4px 16px;
   display: inline-block;
   height: 17px;
-  width: 23px;
+  /*width: 23px;*/
+  float: left;
   position: relative;
-  top: 4px;
+  top: 2px;
+  max-width: 34px;
 }
 
 .flag-AD {

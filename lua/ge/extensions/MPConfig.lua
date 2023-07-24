@@ -18,6 +18,9 @@ local defaultSettings = {
 	-- colors
 	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333",
 
+	-- new chat menu
+	enableNewChatMenu = true,
+
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
 
@@ -99,7 +102,32 @@ local function getFavorites()
 	else
 		log('M', 'getFavorites', "Favs file doesn't exist")
 	end
-	return favs
+	
+	local function sortByAgeDesc(a, b)
+		return a.addTime > b.addTime
+	end
+
+	-- Sort the data table using the comparison function
+	table.sort(favs, sortByAgeDesc)
+
+	local cleanedServers = {}
+
+  -- Create a table to track which keys have already been added to the filtered data
+  local addedKeys = {}
+
+  -- Iterate over the input data table
+  for i, server in ipairs(favs) do
+    -- Get the value of the key for this object
+    local serverKey = ''..server['ip']..':'..server['port']
+
+    -- If the key has not been added to the filtered data yet, add the object and mark the key as added
+    if not addedKeys[serverKey] then
+      table.insert(cleanedServers, server)
+      addedKeys[serverKey] = true
+    end
+  end
+
+	return cleanedServers
 end
 
 

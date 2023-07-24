@@ -94,25 +94,55 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 			// Clear the player list
 			clearPlayerList();
 	
+			parsedList.sort(function(a, b) {
+				var keyA = a.id,
+					  keyB = b.id;
+				// Compare the 2 dates
+				if (keyA < keyB) return -1;
+				if (keyA > keyB) return 1;
+				return 0;
+			});
+
 			// And fill it with the updated players
 			for (let i = 0; i < parsedList.length; i++) {
 				// Insert a row at the end of the players list
 				var row = playersList.insertRow(playersList.rows.length);
 	
+				// Insert a cell containing the player server id
+				var idCell = row.insertCell(0);
+				idCell.textContent = parsedList[i].id;
+				idCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i].name+"')");
+				idCell.setAttribute("class", "player-id");
+
+
 				// Insert a cell containing the player name
-				var nameCell = row.insertCell(0);
-				nameCell.textContent = parsedList[i];
-				nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i]+"')");
-				nameCell.setAttribute("class", "player-button player-button");
+				var nameCell = row.insertCell(1);
+				nameCell.textContent = parsedList[i].formatted_name;
+				//var c = parsedList[i].color
+				//nameCell.style = `color:rgba(${c[0]},${c[1]},${c[2]},255)`;
+				nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i].name+"')");
+				nameCell.setAttribute("class", "player-button");
+
+				// Insert a cell containing the link to forum
+				//var infoCell = row.insertCell(2);
+				//infoCell.setAttribute("class", "view-button");
+
+				// Insert the button inside the link to forum
+				//var btn = document.createElement("BUTTON");
+				//var pingText = "?";
+				//btn.appendChild(document.createTextNode(pingText));
+				//btn.setAttribute("onclick","viewPlayer('"+parsedList[i].name+"')");
+				//btn.setAttribute("class", "view-button buttons");
+				//infoCell.appendChild(btn);
 	
 				// Insert a cell containing the player ping
-				var pingCell = row.insertCell(1);
+				var pingCell = row.insertCell(2);
 				pingCell.setAttribute("class", "tp-button");
 	
 				// Insert the button inside the cell
 				var btn = document.createElement("BUTTON");
-				var pingText = pingList[parsedList[i]] || "?";
-				btn.appendChild(document.createTextNode(pingText));
+				var pingText = pingList[parsedList[i].name] || "?";
+				btn.appendChild(document.createTextNode(pingText+='ms'));
 				btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
 				btn.setAttribute("class", "tp-button buttons");
 				pingCell.appendChild(btn);
@@ -139,6 +169,10 @@ function clearPlayerList() {
 function teleportToPlayer(targetPlayerName) {
 	//console.log("teleportEvent: " + targetPlayerName);
 	//bngApi.engineLua('MPVehicleGE.teleportVehToPlayer("'+targetPlayerName+'")')
+}
+
+function viewPlayer(targetPlayerName) {
+	openExternalLink(`https://forum.beammp.com/u/${targetPlayerName}/summary`)
 }
 
 function showPlayerInfo(targetPlayerName) {

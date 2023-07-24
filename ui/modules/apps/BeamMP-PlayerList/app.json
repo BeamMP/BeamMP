@@ -7,9 +7,9 @@
   "css": {
   	"right": "0px",
   	"top": "90px",
-    "min-width": "240px",
+    "min-width": "300px",
   	"width": "auto",
-    "height": "527px"
+    "height": "530px"
   },
   "description": "The playerlist for the multiplayer session.",
   "author": "BeamMP Team",

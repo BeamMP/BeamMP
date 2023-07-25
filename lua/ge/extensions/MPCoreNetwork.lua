@@ -43,11 +43,11 @@ C  -> The client asks for the server's mods
 
 -- ============= LAUNCHER RELATED =============
 
--- Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V3 Networking.
--- If V3 Networking is available, it will be used, otherwise V2 Networking will be used.
+-- Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.
+-- If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
 -- @param s string containing the data to send to the launcher
 local function send(s)
-	-- First check if we are V3 Networking or not
+	-- First check if we are V2.1 Networking or not
 	if MP then
 		MP.Core(s)
 		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
@@ -85,7 +85,7 @@ end
 -- @param silent boolean determines if the connection request should be done silently
 local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
-	-- Check if we are using V3
+	-- Check if we are using V2.1
 	if MP then
 		send('A') -- immediately heartbeat to check if connection was established
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -93,7 +93,7 @@ local function connectToLauncher(silent)
 		return
 	end
 
-	-- Okay we are not using V3, lets do the V2 stuff
+	-- Okay we are not using V2.1, lets do the V2 stuff
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
 	if not launcherConnected and not MP then
@@ -380,7 +380,7 @@ local function onUpdate(dt)
 	if status == "LoadingResources" then
 		updateUiTimer = updateUiTimer + dt
 	end
-	if not MP then -- This is not required in V3
+	if not MP then -- This is not required in V2.1
 		heartbeatTimer = heartbeatTimer + dt
 	end
 	--====================================================== DATA RECEIVE ======================================================

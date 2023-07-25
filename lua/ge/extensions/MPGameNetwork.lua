@@ -23,7 +23,7 @@ local keypressTriggers = {}
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
-	-- Check if we are using V3
+	-- Check if we are using V2.1
 	if MP then
 		launcherConnected = true
 		--M.send('A') -- immediately heartbeat to check if connection was established
@@ -32,7 +32,7 @@ local function connectToLauncher()
 		return
 	end
 
-	-- Okay we are not using V3, lets do the V2 stuff
+	-- Okay we are not using V2.1, lets do the V2 stuff
 	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
 	if not launcherConnected then
 		isConnecting = true
@@ -62,7 +62,7 @@ end
 
 
 local function sendData(s)
-	-- First check if we are V3 Networking or not
+	-- First check if we are V2.1 Networking or not
 	if MP then
 		MP.Game(s)
 		if not launcherConnected then launcherConnected = true isConnecting = false end

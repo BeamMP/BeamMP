@@ -32,7 +32,7 @@ local windowOpacity = 0.9
 M.windowOpen = imgui.BoolPtr(true)
 M.windowFlags = imgui.flags(imgui.WindowFlags_NoDocking, imgui.WindowFlags_NoTitleBar)
 M.windowCollapsedFlags = imgui.flags(imgui.WindowFlags_NoDocking, imgui.WindowFlags_NoTitleBar, imgui.WindowFlags_NoScrollbar, imgui.WindowFlags_NoScrollWithMouse, imgui.WindowFlags_NoResize)
-M.windowMinSize = imgui.ImVec2(300, 300)
+M.windowMinSize = imgui.ImVec2(25, 25)
 M.windowPadding = imgui.ImVec2(5, 5)
 
 M.canRender = true

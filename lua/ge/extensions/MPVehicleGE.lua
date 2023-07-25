@@ -25,6 +25,7 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
+local hideNicknames = false
 
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
@@ -252,10 +253,7 @@ function getGameVehicleID(serverVehicleID)
 	end
 end
 
--- Global variable to keep track of the current state
-local hideNicknames = false
 
--- Function to toggle the state and call the appropriate function
 function toggleNicknames()
     hideNicknames = not hideNicknames
     if hideNicknames then

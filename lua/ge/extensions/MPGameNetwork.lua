@@ -1,7 +1,14 @@
 --====================================================================================
 -- All work by Titch2000, jojos38 & 20dka.
--- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+-- You have no permission to edit, redistribute or upload other than for the purposes of contributing. 
+-- Contact BeamMP for more info!
 --====================================================================================
+
+--- MPCoreNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod. It handles the Initial TCP connection establishment with the Launcher.
+-- Author of this documentation is Titch2000
+-- @module MPCoreNetwork
+-- @usage connectToLauncher() -- internal access
+-- @usage MPCoreNetwork.connectToLauncher() -- external access
 
 
 
@@ -9,19 +16,26 @@ local M = {}
 
 
 -- ============= VARIABLES =============
+
 local socket = require('socket')
 local TCPLauncherSocket = nop
 local launcherConnected = false
 local isConnecting = false
 local eventTriggers = {}
+
 --keypress handling
+
 local keyStates = {} -- table of keys and their states, used as a reference
 local keysToPoll = {} -- list of keys we want to poll for state changes
 local keypressTriggers = {}
+
 -- ============= VARIABLES =============
 
 setmetatable(_G,{}) -- temporarily disable global notifications
 
+
+--- Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.
+-- @usage `MPGameNetwork.connectToLauncher(true)`
 local function connectToLauncher()
 	-- Check if we are using V2.1
 	if mp_game then
@@ -47,7 +61,8 @@ local function connectToLauncher()
 end
 
 
-
+--- Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
+-- @usage `MPGameNetwork.disconnectLauncher(true)`
 local function disconnectLauncher()
 	if mp_game then
 		launcherConnected = false
@@ -60,7 +75,9 @@ local function disconnectLauncher()
 end
 
 
-
+--- Send data over the TCP connection to the Launcher and then onto the Server.
+-- @tparam string s The data to be sent to the Launcher/server.
+-- @usage `MPGameNetwork.sendData(<data>)`
 local function sendData(s)
 	-- First check if we are V2.1 Networking or not
 	if mp_game then
@@ -97,6 +114,9 @@ local function sendData(s)
 	end
 end
 
+--- Process session data received from the Launcher.
+-- @tparam string data The session data received.
+-- @usage `MPGameNetwork.sessionData(<data>)`
 local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
@@ -110,6 +130,9 @@ local function sessionData(data)
 	end
 end
 
+--- Quit the multiplayer session.
+-- @tparam string reason The reason for quitting the session.
+-- @usage `MPGameNetwork.quitMP(<reason>)`
 local function quitMP(reason)
 	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
@@ -124,6 +147,9 @@ end
 -- Events System
 -------------------------------------------------------------------------------
 
+--- Handles events triggered by TriggerClientEvent.
+-- @tparam string p - The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
+-- @usage `MPGameNetwork.CallEvent(<event data string>)
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	local eventName, eventData = string.match(p,"^%:([^%:]+)%:(.*)")
 	if not eventName then quitMP(p) return end
@@ -134,14 +160,26 @@ local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	end
 end
 
+--- Triggers a server event with the specified name and data.
+-- @tparam string name - The name of the event
+-- @tparam string data - The data to be sent with the event
+-- @usage `TriggerServerEvent(<name>, <data>)`
 function TriggerServerEvent(name, data)
 	M.send('E:'..name..':'..data)
 end
 
+--- Triggers a client event with the specified name and data.
+-- @tparam string name - The name of the event
+-- @tparam string data - The data to be sent with the event
+-- @usage `TriggerClientEvent(<name>, <data>)`
 function TriggerClientEvent(name, data)
 	handleEvents(':'..name..':'..data)
 end
 
+--- Adds an event handler for the specified event name and function.
+-- @tparam string n - The name of the event
+-- @tparam function f - The event handler function
+-- @usage `AddEventHandler(<name>, function (<data>) ... end)`
 function AddEventHandler(n, f)
 	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
 	if type(f) ~= "function" or f == nop then
@@ -154,22 +192,41 @@ end
 -------------------------------------------------------------------------------
 -- Keypress handling
 -------------------------------------------------------------------------------
+
+--- Sets a function to be called when the specified key is pressed.
+-- @tparam string keyname - The name of the key
+-- @tparam function f - The function to be called when the key is pressed
+-- @usage `onKeyPressed("NUMPAD1", function (<data>) ... end)`
 function onKeyPressed(keyname, f)
 	addKeyEventListener(keyname, f, 'down')
 end
+
+--- Sets a function to be called when the specified key is released.
+-- @tparam string keyname - The name of the key
+-- @tparam function f - The function to be called when the key is released
+-- @usage `onKeyPressed("NUMPAD1", function (<data>) ... end)`
 function onKeyReleased(keyname, f)
 	addKeyEventListener(keyname, f, 'up')
 end
 
+--- Adds a key event listener for the specified key and function.
+-- @tparam string keyname - The name of the key
+-- @tparam function f - The function to be called when the key event is triggered
+-- @tparam string type - The type of key event ('down', 'up', or 'both')
+-- @usage `addKeyEventListener("NUMPAD1", function (<data>) ... end, "up")`
 function addKeyEventListener(keyname, f, type)
 	f = f or function() end
-	log('W','AddKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
+	log('W','addKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
 	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
 	table.insert(keysToPoll, keyname)
 
 	be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
 end
 
+--- Handles the state change of a key.
+-- @tparam string key - The name of the key
+-- @tparam boolean state - The state of the key ('true' for pressed, 'false' for released)
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onKeyStateChanged(key, state)
 	keyStates[key] = state
 	--dump(keyStates)
@@ -181,10 +238,17 @@ local function onKeyStateChanged(key, state)
 	end
 end
 
+--- Returns the state of the specified key.
+-- @tparam string key - The name of the key
+-- @return boolean - The state of the key ('true' for pressed, 'false' for released)
+-- @usage `local state = getKeyState('NUMPAD1')`
 function getKeyState(key)
 	return keyStates[key] or false
 end
 
+--- Handles the event when a vehicle is ready.
+-- @tparam integer gameVehicleID - The ID of the game vehicle
+-- @usage `MPGameNetwork.onVehicleReady(<game vehicle id>)`
 local function onVehicleReady(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if not veh then
@@ -215,6 +279,10 @@ local HandleNetwork = {
 
 
 local heartbeatTimer = 0
+
+--- onUpdate is called each game frame by the games engine. It is used to run scripts in a loop such as getting data from the network buffer.
+-- @tparam integer delta time
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
@@ -243,11 +311,16 @@ local function onUpdate(dt)
 end
 
 
-
+--- Return whether the launcher is connected to the game or not.
+-- @treturn[1] boolean Return the connection state of TCP with the launcher
+-- @usage `local connected = MPGameNetwork.isLauncherConnected()`
 local function isLauncherConnected()
 	return launcherConnected
 end
 
+--- Return the launcher connection status.
+-- @treturn[1] boolean Return the connection state of TCP with the launcher
+-- @usage `local status = MPGameNetwork.connectionStatus()`
 local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
 end

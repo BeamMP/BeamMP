@@ -252,6 +252,19 @@ function getGameVehicleID(serverVehicleID)
 	end
 end
 
+-- Global variable to keep track of the current state
+local hideNicknames = false
+
+-- Function to toggle the state and call the appropriate function
+function toggleNicknames()
+    hideNicknames = not hideNicknames
+    if hideNicknames then
+        MPVehicleGE.hideNicknames(1)
+    else
+        MPVehicleGE.hideNicknames()
+    end
+end
+
 --- Reolves a gameVehicleID into the serverVehicleID
 -- @tparam integer gameVehicleID
 -- @treturn[1] string If success. serverVehicleID eg. "0-0"

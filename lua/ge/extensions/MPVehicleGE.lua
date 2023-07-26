@@ -1954,8 +1954,8 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
-M.getPlayers               = getPlayers
-M.getVehicles              = getVehicles
+M.getPlayers               = getPlayers               -- takes: -
+M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle
 M.getVehicleByServerID     = getVehicleByServerID     -- takes: string serverVehicleID, returns Vehicle
 M.getPlayerByName          = getPlayerByName          -- takes: string name, returns Player
@@ -1989,6 +1989,6 @@ M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetNam
 M.queryRoadNodeToPosition  = queryRoadNodeToPosition  -- takes: vec3 target position, optional string targetname
 M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
-M.onSettingsChanged        = onSettingsChanged
+M.onSettingsChanged        = onSettingsChanged        -- takes: -
 
 return M

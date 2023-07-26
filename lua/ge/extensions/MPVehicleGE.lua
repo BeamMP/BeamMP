@@ -255,15 +255,6 @@ function getGameVehicleID(serverVehicleID)
 end
 
 
-function toggleNicknames()
-    hideNicknames = not hideNicknames
-    if hideNicknames then
-        MPVehicleGE.hideNicknames(1)
-    else
-        MPVehicleGE.hideNicknames()
-    end
-end
-
 --- Reolves a gameVehicleID into the serverVehicleID
 -- @tparam integer gameVehicleID
 -- @treturn[1] string If success. serverVehicleID eg. "0-0"
@@ -420,6 +411,18 @@ end
 -- @usage hideNicknames(true)
 function hideNicknames(hide)
 	nicknamesAllowed = not hide
+end
+
+
+--- Simple function to toggle the displaying of nametags. This is only for the current lua instance and does not persist between restarts.
+-- @usage `MPVehicleGE.toggleNicknames()`
+function toggleNicknames()
+    hideNicknames = not hideNicknames
+    if hideNicknames then
+        MPVehicleGE.hideNicknames(1)
+    else
+        MPVehicleGE.hideNicknames()
+    end
 end
 
 --- Returns the whole Players table
@@ -1968,6 +1971,7 @@ M.getDistanceMap           = getDistanceMap           -- takes: -      returns: 
 M.getVehicleMap            = getVehicleMap            -- takes: -
 M.getNicknameMap           = getNicknameMap           -- takes: -
 M.hideNicknames            = hideNicknames            -- takes: bool   returns: -
+M.toggleNicknames          = toggleNicknames          -- takes: -
 M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
 M.createRole               = createRole               -- takes: string roleName, string tag, string shortag, int red, int green, int blue

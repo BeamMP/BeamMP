@@ -41,6 +41,7 @@ local original_spawnDefault
 local roleToInfo = {
 	['USER']	= { backcolor = ColorI(000, 000, 000, 127), forecolor = ColorI(255, 255, 255, 127), tag = "", shorttag = "" },
 	['EA']		= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Early Access]", shorttag = " [EA]" },
+	['CONT']	= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Contributor]", shorttag = " [CO]" },
 	['YT']		= { backcolor = ColorI(200, 000, 000, 127), forecolor = ColorI(255, 000, 000, 127), tag = " [Content Creator]", shorttag = " [CC]" },
 	['ET']		= { backcolor = ColorI(210, 214, 109, 127), forecolor = ColorI(210, 214, 109, 127), tag = " [Events Team]", shorttag = " [Events]" },
 	['SUPPORT']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Support]", shorttag = " [Staff]" },
@@ -1758,7 +1759,7 @@ local function onPreRender(dt)
 				end
 
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
-				if settings.getValue("dontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
+				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 				
 				local name = ""
 				local tag = ""

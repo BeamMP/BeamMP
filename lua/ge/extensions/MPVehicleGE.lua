@@ -418,11 +418,6 @@ end
 -- @usage `MPVehicleGE.toggleNicknames()`
 function toggleNicknames()
     hideNicknames = not hideNicknames
-    if hideNicknames then
-        MPVehicleGE.hideNicknames(1)
-    else
-        MPVehicleGE.hideNicknames()
-    end
 end
 
 --- Returns the whole Players table
@@ -1719,7 +1714,7 @@ local function onPreRender(dt)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 
-			if not settings.getValue("hideNameTags") and nicknamesAllowed then
+			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknames then
 
 				local dist = ""
 				if distfloat > 10 and settings.getValue("nameTagShowDistance") then

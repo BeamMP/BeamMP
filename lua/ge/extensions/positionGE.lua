@@ -90,10 +90,9 @@ local function applyPos(data, serverVehicleID)
 			The fix is also not applied when the game is considered lagging. Vehicles dont drive smoothly anyway in a lagging
 			environment and this fix would make it worse for those. --]]
 
+		local performDefaultVehicleUpdate = true
 		local currentVel = veh:getVelocity()
 		local velocityChange = getVelocityDifference(currentVel.x, currentVel.y, currentVel.z, decoded.vel[1], decoded.vel[2], decoded.vel[3])
-		--local currentPos = veh:getPosition()
-		--local distanceChange = getDistanceDifference(currentPos.x, currentPos.y, currentPos.z, decoded.pos[1], decoded.pos[2], decoded.pos[3])
 
 		-- only act when the current vehicular speed is to different from the vehicular speed given in this packet.
 		if velocityChange > highVelocityChangePositive or velocityChange < highVelocityChangeNegativ then
@@ -112,7 +111,7 @@ local function applyPos(data, serverVehicleID)
 					-- reset car
 					veh:reset()
 
-					-- tp. note: sets the vehicle a bit into the air unintentionally.
+					-- tp. note: sets the vehicle a bit into the air
 					-- doing the no physics reset and then the posrot update both somehow gives better results then if we do just one of these
 					veh:setPositionNoPhysicsReset(vec3(decoded.pos[1], decoded.pos[2], decoded.pos[3]))
 					veh:setPositionRotation(decoded.pos[1], decoded.pos[2], decoded.pos[3] + 0.2, decoded.rot[1], decoded.rot[2], decoded.rot[3], decoded.rot[4])
@@ -123,15 +122,16 @@ local function applyPos(data, serverVehicleID)
 					-- set back old gear or alternativly set back all previous vehicle electrics
 					-- ~ todo
 
-					-- set instant velocity
-					veh:applyClusterVelocityScaleAdd(veh:getRefNodeId(), 1, decoded.vel[1], decoded.vel[2], decoded.vel[3] + 0.2)
+					-- set instant velocity with a tiny uptilt of the front of the vehicle
+					veh:applyClusterVelocityScaleAdd(veh:getRefNodeId(), 1, decoded.vel[1], decoded.vel[2], decoded.vel[3] + 0.15)
 
 					highVelocityFixPause[serverVehicleID] = os.time()
+					performDefaultVehicleUpdate = false
 				end
 			end
 		end
 
-		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
+		if performDefaultVehicleUpdate then veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')") end
 	end
 
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)

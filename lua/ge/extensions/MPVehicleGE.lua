@@ -1747,9 +1747,9 @@ local function onPreRender(dt)
 					dist = string.format(" %s %s", tostring(mapEntry), unit)
 				end
 
-				if settings.getValue("fadeVehicles") then
+				if settings.getValue("fadeVehicles") and veh then
 					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
-					else veh:setMeshAlpha(1-nametagAlpha, "", false) end
+					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then

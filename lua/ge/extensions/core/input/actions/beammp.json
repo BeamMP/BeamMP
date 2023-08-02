@@ -1,0 +1,36 @@
+{
+    "bringToFront": {
+        "cat": "beammp",
+        "order": 0,
+        "ctx": "tlua",
+        "onUp": "if UI then UI.bringToFront() end",
+        "isBasic": true,
+        "title": "Bring to Front",
+        "desc": "Bring the chat window to the front"
+    },
+    "playernametags": {
+        "cat": "beammp",
+        "order": 1,
+        "ctx": "tlua",
+        "onDown": "toggleNicknames()",
+        "title": "Player Nametags",
+        "desc": "Toggle all player nametags"
+    },
+    "applyQueuedEvents": {
+        "cat": "beammp",
+        "order": 2,
+        "ctx": "tlua",
+        "onDown": "MPVehicleGE.applyQueuedEvents()",
+        "title": "Queue Events",
+        "desc": "Queue all player events"
+    },
+    "toggleChat": {
+        "cat": "beammp",
+        "order": 3,
+        "ctx": "tlua",
+        "onUp": "if UI then UI.toggleChat() end",
+        "isBasic": true,
+        "title": "Toggle Chat",
+        "desc": "Toggle the chat window"
+    }
+}

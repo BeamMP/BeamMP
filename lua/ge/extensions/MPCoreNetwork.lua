@@ -16,6 +16,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
+local modVersion = "4.8.1" -- the mod version
 -- server
 local serverList -- server list JSON
 local currentServer = nil -- Table containing the current server IP, port and name
@@ -72,7 +73,7 @@ local function connectToLauncher(silent)
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444))
+		TCPLauncherSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444))
 		send('A') -- immediately heartbeat to check if connection was established
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -126,7 +127,7 @@ local function logout()
 end
 
 
--- sends the current player and server count.
+-- sends the current player and server count plus the mod and launcher version.
 local function sendBeamMPInfo()
 	local servers = jsonDecode(serverList)
 	if not servers or tableIsEmpty(servers) then return log('M', 'No server list.') end
@@ -139,7 +140,9 @@ local function sendBeamMPInfo()
 	-- send player and server values to front end.
 	guihooks.trigger('BeamMPInfo', { -- <players> count on the bottom of the screen
 		players = ''..p,
-		servers = ''..s
+		servers = ''..s,
+		beammpGameVer = ''..modVersion,
+		beammpLauncherVer = ''..launcherVersion
 	})
 end
 

@@ -1,18 +1,8 @@
-<!-- DataTables CSS --
-<link href="modules/multiplayer/css/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-
-<!-- DataTables Responsive CSS -->
-<link href="modules/multiplayer/css/dataTables/dataTables.responsive.css" rel="stylesheet">
-
-<!-- DataTables JavaScript -->
-<!--<script src="./modules/multiplayer/js/dataTables/jquery.dataTables.min.js"></script>
-<script src="./modules/multiplayer/js/dataTables/dataTables.bootstrap.min.js"></script>-->
-
 <md-content>
 	<div layout="row" layout-padding="">
 			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
 			<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
-			<md-button id="clear-button" class="button servers-button" ng-class="" ng-click="multiplayer.clearRecents()">Clear recents</md-button>
+			<md-button id="clear-button" class="button servers-button" ng-class="" ng-click="multiplayer.clearRecents()">{{:: 'ui.multiplayer.clearRecent' | translate}}</md-button>
 
 		<md-divider></md-divider>
 	</div>
@@ -27,6 +17,54 @@
 			</tr>
 		</thead>
 		<tbody id="serversTableBody">
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			<tr><td class="loading-shimmer" colspan="4"></td></tr>
 		</tbody>
 	</table>
 

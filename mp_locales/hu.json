@@ -20,6 +20,7 @@
 	"ui.multiplayer.loading": "Betöltés...",
 	"ui.multiplayer.servers": "Szerverek",
 	"ui.multiplayer.favorites": "Kedvencek",
+	"ui.multiplayer.featured": "Kiemelt szerverek",
 	"ui.multiplayer.direct_connect": "Közvetlen csatlakozás",
 	"ui.multiplayer.refresh": "Frissítés",
 	"ui.multiplayer.connect": "Csatlakozás",

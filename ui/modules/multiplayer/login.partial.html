@@ -4,20 +4,20 @@
 			<img src="local://local/ui/modules/multiplayer/beammp.png" alt="BeamMP Logo">
 			<h2 class="text-red" id="LOGINERRORFIELD"></h2>
 			<form id="LoginContainer">
-				<h2 class="text-white" id="loginHeader">Login with your BeamMP account.</h2>
+				<h2 class="text-white" id="loginHeader">{{:: 'ui.multiplayer.loginDescription1' | translate}}</h2>
 				<input (keyup.enter)="multiplayer.login()" type="text" id="loginUsername" placeholder="Username / Email"/>
 				<input (keyup.enter)="multiplayer.login()" type="password" id="loginPassword" placeholder="Password"/>
 				<div style="display:flex; align-content: space-evenly;">
-					<md-button class="button" ng-click="login()">Login</md-button>
-					<md-button class="button" ng-click="switchConnection()">Play as Guest</md-button>
-					<md-button class="button" onclick="openExternalLink('https://forum.beammp.com/signup')">Register</md-button>
+					<md-button class="button" ng-click="login()">{{:: 'ui.multiplayer.login' | translate}}</md-button>
+					<md-button class="button" ng-click="switchConnection()">{{:: 'ui.multiplayer.playAsGuest' | translate}}</md-button>
+					<md-button class="button" onclick="openExternalLink('https://forum.beammp.com/signup')">{{:: 'ui.multiplayer.register' | translate}}</md-button>
 				</div>
 			</form>
 			<form id="GuestContainer" style="display: none;">
-				<h3 class="text-white">Playing as a guest may have some server restrictions, for the full experience we recommend using a registered account.</h3>
+				<h3 class="text-white">{{:: 'ui.multiplayer.guestDescription1' | translate}}</h3>
 				<div style="display:flex;  align-content: space-evenly;">
-					<md-button class="button" ng-click="guestLogin()">Play</md-button>
-					<md-button class="button" ng-click="switchConnection()">I have an account</md-button>
+					<md-button class="button" ng-click="guestLogin()">{{:: 'ui.multiplayer.play' | translate}}</md-button>
+					<md-button class="button" ng-click="switchConnection()">{{:: 'ui.multiplayer.iHaveAnAccount' | translate}}</md-button>
 				</div>
 			</form>
 		</div>

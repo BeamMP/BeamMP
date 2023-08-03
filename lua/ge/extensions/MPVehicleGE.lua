@@ -25,7 +25,7 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
-local hideNicknames = false
+local hideNicknamesToggle = false
 
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
@@ -416,9 +416,7 @@ end
 
 --- Simple function to toggle the displaying of nametags. This is only for the current lua instance and does not persist between restarts.
 -- @usage `MPVehicleGE.toggleNicknames()`
-function toggleNicknames()
-    hideNicknames = not hideNicknames
-end
+function toggleNicknames() hideNicknamesToggle = not hideNicknamesToggle end
 
 --- Returns the whole Players table
 -- @treturn players
@@ -1713,8 +1711,8 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-
-			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknames then
+			
+			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
 				if distfloat > 10 and settings.getValue("nameTagShowDistance") then

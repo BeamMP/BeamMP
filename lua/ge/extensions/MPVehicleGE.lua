@@ -25,6 +25,7 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
+local hideNicknamesToggle = false
 
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
@@ -253,6 +254,7 @@ function getGameVehicleID(serverVehicleID)
 	end
 end
 
+
 --- Reolves a gameVehicleID into the serverVehicleID
 -- @tparam integer gameVehicleID
 -- @treturn[1] string If success. serverVehicleID eg. "0-0"
@@ -410,6 +412,11 @@ end
 function hideNicknames(hide)
 	nicknamesAllowed = not hide
 end
+
+
+--- Simple function to toggle the displaying of nametags. This is only for the current lua instance and does not persist between restarts.
+-- @usage `MPVehicleGE.toggleNicknames()`
+function toggleNicknames() hideNicknamesToggle = not hideNicknamesToggle end
 
 --- Returns the whole Players table
 -- @treturn players
@@ -1704,8 +1711,8 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-
-			if not settings.getValue("hideNameTags") and nicknamesAllowed then
+			
+			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
 				if distfloat > 10 and settings.getValue("nameTagShowDistance") then
@@ -1733,9 +1740,9 @@ local function onPreRender(dt)
 					dist = string.format(" %s %s", tostring(mapEntry), unit)
 				end
 
-				if settings.getValue("fadeVehicles") then
+				if settings.getValue("fadeVehicles") and veh then
 					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
-					else veh:setMeshAlpha(1-nametagAlpha, "", false) end
+					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
@@ -1957,6 +1964,7 @@ M.getDistanceMap           = getDistanceMap           -- takes: -      returns: 
 M.getVehicleMap            = getVehicleMap            -- takes: -
 M.getNicknameMap           = getNicknameMap           -- takes: -
 M.hideNicknames            = hideNicknames            -- takes: bool   returns: -
+M.toggleNicknames          = toggleNicknames          -- takes: -
 M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
 M.createRole               = createRole               -- takes: string roleName, string tag, string shortag, int red, int green, int blue

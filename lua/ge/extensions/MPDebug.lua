@@ -258,8 +258,8 @@ end
 
 M.onExtensionLoaded		= onExtensionLoaded
 M.onUpdate				= onUpdate
---M.showUI				= showUI
---M.hideUI				= hideUI
+M.showUI				= showUI
+M.hideUI				= hideUI
 
 
 M.packetSent = packetSent

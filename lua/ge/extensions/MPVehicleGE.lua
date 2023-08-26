@@ -1682,27 +1682,27 @@ local function onPreRender(dt)
 			local pos = Point3F(v.position.x, v.position.y, v.position.z)
 
 			if settings.getValue("enableBlobs") and not v.isSpawned then
-					local colors = nil
+				local colors = nil
 
-					if v.spawnQueue then -- in queue
-						if settingsCache.showBlobQueued then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
-						end
-					elseif v.isIllegal then -- illegal (modded)
-						if settingsCache.showBlobIllegal then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
-						end
-					elseif v.isDeleted then
-						if settingsCache.showBlobDeleted then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
-						end
-					else
-						colors = { 1, 0, 1 }
+				if v.spawnQueue then -- in queue
+					if settingsCache.showBlobQueued then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
 					end
+				elseif v.isIllegal then -- illegal (modded)
+					if settingsCache.showBlobIllegal then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
+					end
+				elseif v.isDeleted then
+					if settingsCache.showBlobDeleted then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
+					end
+				else
+					colors = { 1, 0, 1 }
+				end
 
-					if colors then
-						debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
-					end
+				if colors then
+					debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
+				end
 			end
 
 			local nametagAlpha = 1

@@ -1080,7 +1080,7 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 }
 
 function openExternalLink(url){
-	bngApi.engineLua(`openWebBrowser("`+url+`")`);
+	bngApi.engineLua(`MP.open_url("`+url+`")`);
 }
 
 function openForumLink(){

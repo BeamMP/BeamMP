@@ -80,10 +80,18 @@ local chatcounter = 0
 
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
-	local msg = string.sub(data, 2)
+	local msg = string.sub(data, 4)
+    print(msg)
 	if code == "l" then
 		guihooks.trigger('LoadingInfo', {message = msg})
 	end
+end
+
+local function promptAutoJoinConfirmation(data)
+    print(data)
+    guihooks.trigger('AutoJoinConfirmation', {message = data})
+    local jscode = "const [IP, PORT] = ['your_server_ip', 'your_server_port'], confirmationMessage = `Do you want to connect to the server at ${IP}:${PORT}?`, userConfirmed = window.confirm(confirmationMessage); userConfirmed ? alert('Connecting to the server...') : alert('Connection canceled.');"
+    --bngApi
 end
 
 local function split(s, sep)
@@ -454,6 +462,7 @@ local function onUpdate()
 end
 
 M.updateLoading = updateLoading
+M.promptAutoJoinConfirmation = promptAutoJoinConfirmation
 M.updatePlayersList = updatePlayersList
 M.setPing = setPing
 M.setNickname = setNickname

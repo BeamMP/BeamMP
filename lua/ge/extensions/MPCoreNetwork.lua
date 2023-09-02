@@ -356,14 +356,19 @@ local function handleU(params)
 	end
 end
 
+local function promptAutoJoin(params)
+	UI.promptAutoJoinConfirmation(params)
+end
+
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
-	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
+	['J'] = function(params) promptAutoJoin(params) end, -- Automatic Server Joining
+	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
-	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
+	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['Z'] = function(params) launcherVersion = params; end,
 }
 

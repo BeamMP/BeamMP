@@ -1083,6 +1083,18 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
 function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIAppStorage, Settings, SettingsAuxData, bngWSApi, $state) {
 
   // apply language settings
+  $rootScope.$on('AutoJoinConfirmation', function(evt, data) {
+    console.log('AutoJoinConfirmation',evt,data)
+    var d = JSON.parse(decodeURI(data.message))
+    confirmationMessage = `Do you want to connect to the server at ${d.ip}:${d.port}?`
+    userConfirmed = window.confirm(confirmationMessage); 
+    //userConfirmed ? alert('Connecting to the server...') : alert('Connection canceled.');
+    if (userConfirmed) {
+      bngApi.engineLua(`MPCoreNetwork.connectToServer("${d.ip}","${d.port}","${d.sname}")`);
+    }
+  })
+
+  // apply language settings
   $rootScope.$on('SettingsChanged', function(evt, data) {
     if(data.values.uiLanguage) {
       let lang = data.values.uiLanguage

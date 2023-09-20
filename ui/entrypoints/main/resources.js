@@ -30,7 +30,7 @@ export default [
   ...onCondition(conditions.VUE_DEV,
     {src:'http://localhost:9000/src/main.js', type: 'module'}
   ),
-  {src: `${paths.EXTERNAL_LIBS}/vue-i18n-next/vue-i18n.global.prod.js`, defer: true},
+  {src: `${paths.EXTERNAL_LIBS}/vue-i18n-next/vue-i18n.global.prod.js`}, // , defer: true},
   {src: `${paths.EXTERNAL_LIBS}/tiny-emitter/tinyemitter.js`, defer: true},
   {src: `${paths.INTERNAL_LIBS}/vueService.js`}, //, defer: true},
 
@@ -62,9 +62,6 @@ export default [
 
     '/qrcode.min.js',
 
-    // LottieJS
-    '/lottie.min.js',
-
     // 3rd party test
     '/ng-FitText.js',
 
@@ -86,7 +83,9 @@ export default [
   ]),
   ...inPath(paths.EXTERNAL_LIBS, [
     '/mdx.js',
-    '/crossfire-chrome.js',
+
+    // TODO - remove when we're sure moved version is working OK and not needed to be included
+    // '/crossfire-chrome.js',
   ]),
 
   // Controls
@@ -116,7 +115,9 @@ export default [
     '/dragrace/dragrace.js',
     '/mapview/mapview.js',
     '/gameContext/gameContext.js',
+    '/missionGenericDataDisplay/genericDataDisplay.js',
     '/bigmap/bigmap.js',
+    '/stat/statControllers.js',
 
     '/mainmenu/mainmenu.js',
     '/menu/menu.js',
@@ -128,15 +129,12 @@ export default [
     '/careerTasklist/tasklist.js',
     '/careerVehicleSelect/careerVehicleSelect.js',
     '/threeElementSelect/threeElementSelect.js',
-    '/careerLogBook/logBook.js',
 
     '/appselect/appselect.js',
     '/appedit/appedit.js',
     '/modmanager/modmanager.js',
     '/play/play.js',
     '/garage/garage.js',
-    '/refueling/refueling.js',
-    '/partInventory/partInventory.js',
     '/apps/app-service.js',
     '/apps/app-container.js',
     '/apps/app.js',
@@ -161,7 +159,7 @@ export default [
     '/mission-popups/mission-popups.js',
     '/colorpicker/color.js',
     '/ui-components/bng-components.js',
-    '/ui-components/bng-components.css'
+    '/ui-components/bng-components.css',
   ]),
 
   `${paths.EXTERNAL_LIBS}/keys.css`

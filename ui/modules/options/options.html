@@ -79,6 +79,12 @@
       <!--
       <md-checkbox ng-model="fullscreenOptions">Fullscreen Options</md-checkbox>
       -->
+      <md-button
+        ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.stats') !== -1)}"
+        ui-sref="menu.options.stats"  style="text-align:left;" bng-sound-class="bng_click_generic_small">
+        <md-icon class="material-icons">equalizer</md-icon>
+        {{:: 'stats' | translate}}
+      </md-button> 
 
       <md-button
         ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.help') !== -1)}"
@@ -110,7 +116,7 @@
     </md-content>
 
     <div flex style="position: relative; width:100%">
-      <md-content ui-view class="container" style="overflow: auto;"></md-content>
+      <md-content ui-view class="container" style="overflow: auto;" bng-nav-scroll bng-nav-scroll-force></md-content>
     </div>
 
     <div ui-view="edit" layout="column"></div>

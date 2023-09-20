@@ -57,19 +57,27 @@ angular.module('beamng.stuff')
       <div class="menuNavbar" layout="row" bng-blur="true" layout-align="center center" layout-wrap="">
         <div layout="row" layout-align="start stretch" flex="noshrink" flex="75" flex-md="100">
 
-          <span bng-no-nav="true" class="navBtn" layout="row" layout-align="center center" style="pointer-events: none; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px"><span style="margin: 0 10px; font-size: 95%; text-shadow: initial;display: inline-block;" layout="row" layout-align="center center"><div style="height: 1.4em; width: 1.4em; filter: invert(1) brightness(1.5);"><object style="max-height: 100%; max-width: 100%; pointer-events: none;" type="image/svg+xml" data="/ui/modules/options/deviceIcons/xbox/x_dpad_default_filled.svg"></object></div></span> {{ "ui.mainmenu.navbar.navigate" | translate }}</span>
+          <span bng-no-nav="true" class="navBtn" layout="row" layout-align="center center" style="pointer-events: none; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0.5em"><div class="binding-icon-mask icon-light" style="margin-right: 0.25em; -webkit-mask-image: url('/ui/modules/options/deviceIcons/xbox/x_dpad_default_filled.svg');"></div><span>{{ "ui.mainmenu.navbar.navigate" | translate }}</span></span>
 
-          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('confirm')"></span>
-          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 8px" ng-click="nav('back')"></span>
-          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_left' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-left')"></span>
-          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_right' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0px; margin-right: 8px" ng-click="nav('tab-right')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.select' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0.5em" ng-click="nav('confirm')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.back' class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0.5em" ng-click="nav('back')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_left' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0.5em; margin-right: 0.5em" ng-click="nav('tab-left')"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.tab_right' ng-if="!mainmenu" class="navBtn" layout="row" layout-align="center center" style="margin-top: 0px; margin-bottom: 0px; margin-right: 0.5em; margin-right: 0.5em" ng-click="nav('tab-right')"></span>
+          <!--
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.scroll_h' id="xf_scroll_h" class="navBtn" layout="row" layout-align="center center" style="display: none; margin-top: 0px; margin-bottom: 0px; margin-right: 0.5em; margin-right: 0.5em"></span>
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.scroll_v' id="xf_scroll_v" class="navBtn" layout="row" layout-align="center center" style="display: none; margin-top: 0px; margin-bottom: 0px; margin-right: 0.5em; margin-right: 0.5em"></span>
+          -->
+          <span bng-no-nav="true" bng-translate='ui.mainmenu.navbar.scroll' id="xf_scroll" class="navBtn" layout="row" layout-align="center center" style="display: none; margin-top: 0px; margin-bottom: 0px; margin-right: 0.5em; margin-right: 0.5em"></span>
         </div>
         <div layout="row" layout-align="start fill" style="margin:0;padding:0;color:white;">
-          <div ng-if="steamData && steamData.working && steamData.loggedin" layout="row" layout-align="start center" ng-cloak >
+          <div ng-if="serviceProviderInfo && serviceProviderInfo.eos && serviceProviderInfo.eos.loggedin" layout="row" layout-align="start center" ng-cloak >
+            <img src="/ui/modules/mainmenu/eosicon.png" style="padding: 5px">
+          </div>
+          <div ng-if="serviceProviderInfo && serviceProviderInfo.steam && serviceProviderInfo.steam.working && serviceProviderInfo.steam.loggedin" layout="row" layout-align="start center" ng-cloak >
             <img src="/ui/modules/mainmenu/steamicon.png" style="padding: 5px">
             <div layout="row" style="padding: 5px">
-              <span>{{ ::steamData.playerName }}</span>
-              <span ng-if="::steamData.branch != 'public'" style="padding-left: 5px;">Branch: {{ ::steamData.branch }}</span>
+              <span>{{ ::serviceProviderInfo.steam.playerName }}</span>
+              <span ng-if="::serviceProviderInfo.steam.branch != 'public'" style="padding-left: 5px;">Branch: {{ ::serviceProviderInfo.steam.branch }}</span>
             </div>
           </div>
           <div id="onlinestate" ng-show="onlineState">
@@ -134,15 +142,15 @@ angular.module('beamng.stuff')
       scope.buildInfoStr = beamng.buildinfo
 
       // account info
-      scope.$on('SteamInfo', function (event, data) {
+      scope.$on('ServiceProviderInfo', function (event, data) {
         scope.$apply(function () {
-          scope.steamData = data
+          scope.serviceProviderInfo = data
         })
       })
+      beamng.requestServiceProviderInfo()
       scope.onlineState = false
       scope.$on('OnlineStateChanged', function (event, data) {
-        // console.log('OnlineStateChanged', data)
-        scope.$apply(function () {
+        scope.$applyAsync(function () {
           scope.onlineState = data
         })
       })
@@ -455,7 +463,7 @@ angular.module('beamng.stuff')
   }
 
   $scope.inCareer = false;
-  bngApi.engineLua("career_career.isCareerActive()", data => {
+  bngApi.engineLua("career_career.isActive()", data => {
     $scope.inCareer = !!data;
   });
 

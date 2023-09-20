@@ -100,6 +100,7 @@ local simplified_vehicles = {
 	scintilla = "simple_traffic_scintilla",
 	semi = "simple_traffic_semi",
 	sunburst = "simple_traffic_sunburst",
+	utv = "simple_traffic_utv",
 	van = "simple_traffic_van",
 	vivace = "simple_vivace_slothub",
 	wendover = "simple_traffic_wendover",

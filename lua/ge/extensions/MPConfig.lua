@@ -19,7 +19,7 @@ local defaultSettings = {
 	showBlobQueued = true, blobColorQueued = "#FF6400", showBlobIllegal = true, blobColorIllegal = "#000000", showBlobDeleted = true, blobColorDeleted = "#333333",
 
 	-- new chat menu
-	enableNewChatMenu = true,
+	enableNewChatMenu = false,
 
 	-- show custom vehicles in vehicle selector
 	showPcs = true,

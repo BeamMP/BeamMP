@@ -1152,6 +1152,12 @@ async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty
 	newTbody.id = "serversTableBody";
 	var mapNames = new Array(); //["Any"];
 	for (const server of servers) {
+		if (!server) {
+			break;
+		}
+		if (!searchText) {
+			searchText = ''
+		}
 		var shown = true;
 		var smoothMapName = SmoothMapName(server.map);
 		var isFavorite = false;

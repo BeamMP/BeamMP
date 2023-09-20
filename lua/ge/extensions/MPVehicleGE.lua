@@ -913,7 +913,7 @@ local function applyVehEdit(serverID, data)
 			tableMerge(playerVehicle.config, vehicleConfig) -- add new parts to the existing config
 
 			if configChanged then
-				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
+				veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
 				veh:respawn(serialize(playerVehicle.config))
 			elseif vehicleConfig.paints then
 				log('I','applyVehEdit', "only color changed")
@@ -933,6 +933,7 @@ local function applyVehEdit(serverID, data)
 			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
 		}
 
+		veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
 		spawn.setVehicleObject(veh, options)
 	end

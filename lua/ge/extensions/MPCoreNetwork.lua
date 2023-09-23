@@ -302,6 +302,7 @@ local function loginReceived(params)
 end
 
 local function leaveServer(goBack)
+	guihooks.trigger('clearChatHistory')
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
 	extensions.hook('onServerLeave')

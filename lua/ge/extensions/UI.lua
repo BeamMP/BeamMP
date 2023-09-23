@@ -80,7 +80,7 @@ local chatcounter = 0
 
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
-	local msg = string.sub(data, 4)
+	local msg = string.sub(data, 2)
     --print(msg)
 	if code == "l" then
 		guihooks.trigger('LoadingInfo', {message = msg})

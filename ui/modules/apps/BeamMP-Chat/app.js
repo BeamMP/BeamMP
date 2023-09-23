@@ -18,8 +18,9 @@ app.directive('multiplayerchat', [function () {
 
 app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 	$scope.init = function() {
+		var chatMessages = retrieveChatMessages()
 		newChatMenu = Settings.values.enableNewChatMenu;
-		console.log(`[CHAT] New chat menu: ${newChatMenu}`);
+		//console.log(`[CHAT] New chat menu: ${newChatMenu}`);
 		// Set listeners
 		var chatinput = document.getElementById("chat-input");
 		// To ensure that the element exists
@@ -45,6 +46,10 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		} else {
 			chatbox.style.display = "flex";
 		}
+
+		chatMessages.map((v, i) => {
+			addMessage(v.message, v.time)
+		})
 	};
 
 	$scope.reset = function() {
@@ -109,9 +114,25 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 	$scope.$on('chatMessage', function (event, data) {
 		if (data.id > lastMsgId) {
 			lastMsgId = data.id;
+
+			var now = new Date();
+			var hour    = now.getHours();
+			var minute  = now.getMinutes();
+			var second  = now.getSeconds();
+			if(hour < 10) hour = '0'+hour;
+			if(minute < 10) minute = '0'+minute;
+			if(second < 10) second = '0'+second;
+		
+			var time = hour + ":" + minute + ":" + second;
+			
+			storeChatMessage({message: data.message, time: time})
 			addMessage(data.message);
 		}
 	});
+
+	$scope.$on('clearChatHistory', function (event, data) {
+		localStorage.removeItem('chatMessages');
+	})
 
 	$scope.$on('SettingsChanged', function (event, data) {
 		Settings.values = data.values;
@@ -264,20 +285,58 @@ function formatRichString(string) {
 }
 // -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //
 
+function storeChatMessage(message) {
+  // Check if localStorage is available
+  if (typeof(Storage) !== "undefined") {
+    // Get the existing chat messages from localStorage (if any)
+    let chatMessages = JSON.parse(localStorage.getItem("chatMessages")) || [];
 
-function addMessage(msg) {
+    // Add the new message to the chatMessages array
+    chatMessages.push(message);
+
+		if (chatMessages.length > 70) {
+			chatMessages.shift()
+		}
+
+    // Store the updated chatMessages array back in localStorage
+    localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
+
+    // You can optionally return the updated chatMessages array or perform other actions
+    return chatMessages;
+  } else {
+    console.error("localStorage is not available in this browser.");
+    return null;
+  }
+}
+
+function retrieveChatMessages() {
+	// Check if localStorage is available
+	if (typeof localStorage !== 'undefined') {
+		// Get the chat messages from localStorage
+		const storedMessages = localStorage.getItem('chatMessages');
+
+		// Parse the stored data if it exists
+		if (storedMessages) {
+			return JSON.parse(storedMessages);
+		}
+	}
+}
+
+function addMessage(msg, time = null) {
 	//getting current time and adding it to the message before displaying
-	var now = new Date();
-	var hour    = now.getHours();
-	var minute  = now.getMinutes();
-	var second  = now.getSeconds();
-	if(hour < 10) hour = '0'+hour;
-	if(minute < 10) minute = '0'+minute;
-	if(second < 10) second = '0'+second;
+	if (time == null) {
+		var now = new Date();
+		var hour    = now.getHours();
+		var minute  = now.getMinutes();
+		var second  = now.getSeconds();
+		if(hour < 10) hour = '0'+hour;
+		if(minute < 10) minute = '0'+minute;
+		if(second < 10) second = '0'+second;
 
-	var time = hour + ":" + minute + ":" + second;
+		time = hour + ":" + minute + ":" + second;
+	}
 
-  	const msgText = "" + msg
+  const msgText = "" + msg
 	msg = time + " " + msg;
 
 	// Create the message node

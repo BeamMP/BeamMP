@@ -47,9 +47,11 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 			chatbox.style.display = "flex";
 		}
 
-		chatMessages.map((v, i) => {
-			addMessage(v.message, v.time)
-		})
+		if (chatMessages) {
+			chatMessages.map((v, i) => {
+				addMessage(v.message, v.time)
+			})
+		}
 	};
 
 	$scope.reset = function() {

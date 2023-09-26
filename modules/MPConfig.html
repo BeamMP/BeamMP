@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>MPConfig</strong></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/ge.extensions.UI.html">ge.extensions.UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPConfig</code></h1>
+<p>MPConfig API - This is the file responsible for storing the settings and values for a given session.</p>
+<p>
+ Author of this documentation is Titch2000</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">local nickname = getNickname() -- internal access
+</pre></li>
+        <li><pre class="example">local nickname = MPConfig.getNickname() -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionLoaded">onExtensionLoaded ()</a></td>
+	<td class="summary">Called when the mod is loaded by the games modloader.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setNickname">setNickname (The)</a></td>
+	<td class="summary">Set the users Nickname variable for use by other aspects of the mod.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getNickname">getNickname ()</a></td>
+	<td class="summary">Get the users Nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPlayerServerID">setPlayerServerID (x)</a></td>
+	<td class="summary">Set the PlayerServerID variable for use by other aspects of the mod.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getPlayerServerID">getPlayerServerID ()</a></td>
+	<td class="summary">Get the PlayerServerID variable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#checkForOldConfig">checkForOldConfig ()</a></td>
+	<td class="summary">Check for old configuration files and move them to the new location if found.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getFavorites">getFavorites ()</a></td>
+	<td class="summary">Get the favorites from the favorites.json file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setFavorites">setFavorites (favstr)</a></td>
+	<td class="summary">Set the favorites in the favorites.json file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getConfig">getConfig ()</a></td>
+	<td class="summary">Get the configuration from the config.json file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setConfig">setConfig (settingName, settingVal)</a></td>
+	<td class="summary">Set a configuration setting in the config.json file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#acceptTos">acceptTos ()</a></td>
+	<td class="summary">Accept the BeamMP terms of service.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onSerialize">onSerialize ()</a></td>
+	<td class="summary">Serialize the data for saving.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onDeserialized">onDeserialized (data)</a></td>
+	<td class="summary">Deserialize the data when loading.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "onExtensionLoaded"></a>
+    <strong>onExtensionLoaded ()</strong>
+    </dt>
+    <dd>
+    Called when the mod is loaded by the games modloader.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setNickname"></a>
+    <strong>setNickname (The)</strong>
+    </dt>
+    <dd>
+    Set the users Nickname variable for use by other aspects of the mod.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">The</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         users nickname that we have received.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPConfig.setNickname(&lt;nickname&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getNickname"></a>
+    <strong>getNickname ()</strong>
+    </dt>
+    <dd>
+    Get the users Nickname.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        The users nickname.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local nickname = MPConfig.getNickname()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setPlayerServerID"></a>
+    <strong>setPlayerServerID (x)</strong>
+    </dt>
+    <dd>
+    Set the PlayerServerID variable for use by other aspects of the mod.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The PlayerServerID that we have received.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPConfig.setPlayerServerID(&lt;players server ID&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getPlayerServerID"></a>
+    <strong>getPlayerServerID ()</strong>
+    </dt>
+    <dd>
+    Get the PlayerServerID variable.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The users server ID.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local nickname = MPConfig.getPlayerServerID()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "checkForOldConfig"></a>
+    <strong>checkForOldConfig ()</strong>
+    </dt>
+    <dd>
+    Check for old configuration files and move them to the new location if found.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if any files were moved, false otherwise.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local updatedConfigs = MPConfig.checkForOldConfig()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getFavorites"></a>
+    <strong>getFavorites ()</strong>
+    </dt>
+    <dd>
+    Get the favorites from the favorites.json file.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The favorites data.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local favorites = MPConfig.getFavorites()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setFavorites"></a>
+    <strong>setFavorites (favstr)</strong>
+    </dt>
+    <dd>
+    Set the favorites in the favorites.json file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">favstr</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The favorites data as a table.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPConfig.setFavorites(&lt;favorites table&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getConfig"></a>
+    <strong>getConfig ()</strong>
+    </dt>
+    <dd>
+    Get the configuration from the config.json file.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The configuration data.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local config = MPConfig.getConfig()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setConfig"></a>
+    <strong>setConfig (settingName, settingVal)</strong>
+    </dt>
+    <dd>
+    Set a configuration setting in the config.json file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">settingName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The name of the setting.
+        </li>
+        <li><span class="parameter">settingVal</span>
+         The value of the setting.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPConfig.setConfig(&lt;setting name&gt;, &lt;setting value&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "acceptTos"></a>
+    <strong>acceptTos ()</strong>
+    </dt>
+    <dd>
+    Accept the BeamMP terms of service.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onSerialize"></a>
+    <strong>onSerialize ()</strong>
+    </dt>
+    <dd>
+    Serialize the data for saving.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The serialized data.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onDeserialized"></a>
+    <strong>onDeserialized (data)</strong>
+    </dt>
+    <dd>
+    Deserialize the data when loading.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The deserialized data.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-09-26 12:12:49 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

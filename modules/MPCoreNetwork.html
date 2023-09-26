@@ -1,0 +1,642 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><strong>MPCoreNetwork</strong></li>
+  <li><strong>MPCoreNetwork</strong></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/ge.extensions.UI.html">ge.extensions.UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPCoreNetwork</code></h1>
+<p>MPCoreNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod.</p>
+<p> It handles the Initial TCP connection establishment with the Launcher.
+ Author of this documentation is Titch2000</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">connectToLauncher() -- internal access
+</pre></li>
+        <li><pre class="example">MPCoreNetwork.connectToLauncher() -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#TriggerServerEvent">TriggerServerEvent (name, data)</a></td>
+	<td class="summary">Triggers a server event with the specified name and data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#TriggerClientEvent">TriggerClientEvent (name, data)</a></td>
+	<td class="summary">Triggers a client event with the specified name and data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#AddEventHandler">AddEventHandler (n, f)</a></td>
+	<td class="summary">Adds an event handler for the specified event name and function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onKeyPressed">onKeyPressed (keyname, f)</a></td>
+	<td class="summary">Sets a function to be called when the specified key is pressed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onKeyReleased">onKeyReleased (keyname, f)</a></td>
+	<td class="summary">Sets a function to be called when the specified key is released.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addKeyEventListener">addKeyEventListener (keyname, f, type)</a></td>
+	<td class="summary">Adds a key event listener for the specified key and function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getKeyState">getKeyState (key)</a></td>
+	<td class="summary">Returns the state of the specified key.</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#connectToLauncher">connectToLauncher ()</a></td>
+	<td class="summary">Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#disconnectLauncher">disconnectLauncher ()</a></td>
+	<td class="summary">Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sendData">sendData (s)</a></td>
+	<td class="summary">Send data over the TCP connection to the Launcher and then onto the Server.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sessionData">sessionData (data)</a></td>
+	<td class="summary">Process session data received from the Launcher.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#quitMP">quitMP (reason)</a></td>
+	<td class="summary">Quit the multiplayer session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#handleEvents">handleEvents (p)</a></td>
+	<td class="summary">Handles events triggered by TriggerClientEvent.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onKeyStateChanged">onKeyStateChanged (key, state)</a></td>
+	<td class="summary">Handles the state change of a key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onVehicleReady">onVehicleReady (gameVehicleID)</a></td>
+	<td class="summary">Handles the event when a vehicle is ready.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (delta)</a></td>
+	<td class="summary">onUpdate is called each game frame by the games engine.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isLauncherConnected">isLauncherConnected ()</a></td>
+	<td class="summary">Return whether the launcher is connected to the game or not.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#connectionStatus">connectionStatus ()</a></td>
+	<td class="summary">Return the launcher connection status.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "TriggerServerEvent"></a>
+    <strong>TriggerServerEvent (name, data)</strong>
+    </dt>
+    <dd>
+    Triggers a server event with the specified name and data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the event
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The data to be sent with the event
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`TriggerServerEvent(&lt;name&gt;, &lt;data&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "TriggerClientEvent"></a>
+    <strong>TriggerClientEvent (name, data)</strong>
+    </dt>
+    <dd>
+    Triggers a client event with the specified name and data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the event
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The data to be sent with the event
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`TriggerClientEvent(&lt;name&gt;, &lt;data&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "AddEventHandler"></a>
+    <strong>AddEventHandler (n, f)</strong>
+    </dt>
+    <dd>
+    Adds an event handler for the specified event name and function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the event
+        </li>
+        <li><span class="parameter">f</span>
+            <span class="types"><span class="type">function</span></span>
+         - The event handler function
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`AddEventHandler(&lt;name&gt;, function (&lt;data&gt;) ... end)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onKeyPressed"></a>
+    <strong>onKeyPressed (keyname, f)</strong>
+    </dt>
+    <dd>
+    Sets a function to be called when the specified key is pressed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">keyname</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the key
+        </li>
+        <li><span class="parameter">f</span>
+            <span class="types"><span class="type">function</span></span>
+         - The function to be called when the key is pressed
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`onKeyPressed("NUMPAD1", function (&lt;data&gt;) ... end)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onKeyReleased"></a>
+    <strong>onKeyReleased (keyname, f)</strong>
+    </dt>
+    <dd>
+    Sets a function to be called when the specified key is released.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">keyname</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the key
+        </li>
+        <li><span class="parameter">f</span>
+            <span class="types"><span class="type">function</span></span>
+         - The function to be called when the key is released
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`onKeyPressed("NUMPAD1", function (&lt;data&gt;) ... end)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "addKeyEventListener"></a>
+    <strong>addKeyEventListener (keyname, f, type)</strong>
+    </dt>
+    <dd>
+    Adds a key event listener for the specified key and function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">keyname</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the key
+        </li>
+        <li><span class="parameter">f</span>
+            <span class="types"><span class="type">function</span></span>
+         - The function to be called when the key event is triggered
+        </li>
+        <li><span class="parameter">type</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The type of key event ('down', 'up', or 'both')
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`addKeyEventListener("NUMPAD1", function (&lt;data&gt;) ... end, "up")`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getKeyState"></a>
+    <strong>getKeyState (key)</strong>
+    </dt>
+    <dd>
+    Returns the state of the specified key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the key
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean - The state of the key ('true' for pressed, 'false' for released)
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local state = getKeyState('NUMPAD1')`</span></pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "connectToLauncher"></a>
+    <strong>connectToLauncher ()</strong>
+    </dt>
+    <dd>
+    Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.connectToLauncher(true)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "disconnectLauncher"></a>
+    <strong>disconnectLauncher ()</strong>
+    </dt>
+    <dd>
+    Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.disconnectLauncher(true)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "sendData"></a>
+    <strong>sendData (s)</strong>
+    </dt>
+    <dd>
+    Send data over the TCP connection to the Launcher and then onto the Server.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">s</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The data to be sent to the Launcher/server.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.sendData(&lt;data&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "sessionData"></a>
+    <strong>sessionData (data)</strong>
+    </dt>
+    <dd>
+    Process session data received from the Launcher.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The session data received.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.sessionData(&lt;data&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "quitMP"></a>
+    <strong>quitMP (reason)</strong>
+    </dt>
+    <dd>
+    Quit the multiplayer session.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">reason</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The reason for quitting the session.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.quitMP(&lt;reason&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "handleEvents"></a>
+    <strong>handleEvents (p)</strong>
+    </dt>
+    <dd>
+    Handles events triggered by TriggerClientEvent.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">p</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">`MPGameNetwork.<span class="function-name">CallEvent</span>(&lt;event data <span class="global">string</span>&gt;)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onKeyStateChanged"></a>
+    <strong>onKeyStateChanged (key, state)</strong>
+    </dt>
+    <dd>
+    Handles the state change of a key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         - The name of the key
+        </li>
+        <li><span class="parameter">state</span>
+            <span class="types"><span class="type">boolean</span></span>
+         - The state of the key ('true' for pressed, 'false' for released)
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onVehicleReady"></a>
+    <strong>onVehicleReady (gameVehicleID)</strong>
+    </dt>
+    <dd>
+    Handles the event when a vehicle is ready.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">gameVehicleID</span>
+            <span class="types"><span class="type">integer</span></span>
+         - The ID of the game vehicle
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPGameNetwork.onVehicleReady(&lt;game vehicle id&gt;)`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (delta)</strong>
+    </dt>
+    <dd>
+    onUpdate is called each game frame by the games engine.  It is used to run scripts in a loop such as getting data from the network buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">delta</span>
+            <span class="types"><span class="type">integer</span></span>
+         time
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isLauncherConnected"></a>
+    <strong>isLauncherConnected ()</strong>
+    </dt>
+    <dd>
+    Return whether the launcher is connected to the game or not.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        Return the connection state of TCP with the launcher
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local connected = MPGameNetwork.isLauncherConnected()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "connectionStatus"></a>
+    <strong>connectionStatus ()</strong>
+    </dt>
+    <dd>
+    Return the launcher connection status.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        Return the connection state of TCP with the launcher
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`local status = MPGameNetwork.connectionStatus()`</span></pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-09-26 12:12:49 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

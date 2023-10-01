@@ -237,6 +237,8 @@ local function connectToServer(ip, port, name)
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
+	
+	guihooks.trigger('clearChatHistory')
 end
 
 local function parseMapName(map) -- TODO: finish
@@ -311,7 +313,6 @@ local function loginReceived(params)
 end
 
 local function leaveServer(goBack)
-	guihooks.trigger('clearChatHistory')
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
 	extensions.hook('onServerLeave')

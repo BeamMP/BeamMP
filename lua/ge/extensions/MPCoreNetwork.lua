@@ -11,12 +11,12 @@ local M = {}
 
 -- ============= VARIABLES =============
 -- launcher
-local TCPLauncherSocket -- Launcher socket
+local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.8.1" -- the mod version
+local modVersion = "4.9.5" -- the mod version
 -- server
 local serverList -- server list JSON
 local currentServer = nil -- Table containing the current server IP, port and name
@@ -42,8 +42,24 @@ C  -> The client asks for the server's mods
 
 
 -- ============= LAUNCHER RELATED =============
+
+-- Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.
+-- If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
+-- @param s string containing the data to send to the launcher
 local function send(s)
+	-- First check if we are V2.1 Networking or not
+	if mp_core then
+		mp_core(s)
+		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
+
+		if not settings.getValue("showDebugOutput") then return end
+		log('M', 'send', 'Sending Data ('..#s..'): '..s)
+		return
+	
+	end
+	-- Else we now will use the V2 Networking
 	if not TCPLauncherSocket then return end
+
 	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
 	if error then
 		isConnecting = false
@@ -65,11 +81,22 @@ local function send(s)
 	end
 end
 
+-- Connects to the V2 Launcher using V2 Networking.
+-- @param silent boolean determines if the connection request should be done silently
 local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
+	-- Check if we are using V2.1
+	if mp_core then
+		send('A') -- immediately heartbeat to check if connection was established
+		log('W', 'connectToLauncher', 'Launcher already connected!')
+		guihooks.trigger('onLauncherConnected')
+		return
+	end
+
+	-- Okay we are not using V2.1, lets do the V2 stuff
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
-	if not launcherConnected then
+	if not launcherConnected and not mp_core then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
@@ -104,7 +131,7 @@ end
 -- ================ UI ================
 -- Called from multiplayer.js UI
 local function getLauncherVersion()
-	return launcherVersion
+	return "2.0" --launcherVersion
 end
 local function isLoggedIn()
 	return loggedIn
@@ -177,6 +204,15 @@ local function getCurrentServer()
 end
 
 local function setCurrentServer(ip, port, name)
+	-- If the server is different then lets also clear the existing chat data as this does not always done on leaving
+	if currentServer ~= nil then
+		if currentServer.port ~= port and currentServer.ip ~= ip then	
+			guihooks.trigger('clearChatHistory')
+		end
+	else
+		-- otherwise lets clear it again anyway for good measure as the server we are joining may not be the same server.
+		guihooks.trigger('clearChatHistory')
+	end
 	currentServer = {
 		ip		   = ip,
 		port	   = port,
@@ -201,6 +237,8 @@ local function connectToServer(ip, port, name)
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
+	
+	guihooks.trigger('clearChatHistory')
 end
 
 local function parseMapName(map) -- TODO: finish
@@ -273,7 +311,7 @@ local function loginReceived(params)
 		guihooks.trigger('LoginError', result.message or '')
 	end
 end
-local returnToMenu = true
+
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
@@ -282,10 +320,10 @@ local function leaveServer(goBack)
 	isGoingMpSession = false
 	loadMods = false
 	currentServer = nil
+	status = "" -- Reset status
 	UI.updateLoading("")
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
-	status = "" -- Reset status
 	local callback = nop
 	if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
 	if goBack then endActiveGameMode(callback) end
@@ -329,14 +367,19 @@ local function handleU(params)
 	end
 end
 
+local function promptAutoJoin(params)
+	UI.promptAutoJoinConfirmation(params)
+end
+
 -- ============= EVENTS =============
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
-	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
+	['J'] = function(params) promptAutoJoin(params) end, -- Automatic Server Joining
+	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
-	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
+	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['Z'] = function(params) launcherVersion = params; end,
 }
 
@@ -346,26 +389,60 @@ local updateUiTimer = 0
 local heartbeatTimer = 0
 local reconnectTimer = 0
 local reconnectAttempt = 0
+
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
-	updateUiTimer = updateUiTimer + dt
-	heartbeatTimer = heartbeatTimer + dt
+	if status == "LoadingResources" then
+		updateUiTimer = updateUiTimer + dt
+	end
+	if not mp_core then -- This is not required in V2.1
+		heartbeatTimer = heartbeatTimer + dt
+	end
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		while(true) do
-			local received, stat, partial = TCPLauncherSocket:receive()
-			if not received or received == "" then
-				break
-			end
-			if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
-				log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-			end
+		if mp_core then
+			while (true) do
+				local msg = mp_try_pop()
+				if msg then
+					local code = string.sub(msg, 1, 1)
+					local received = string.sub(msg, 2)
+					if settings.getValue("showDebugOutput") == true and code == 'C' then
+						log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+					end
+			
 
-			-- break it up into code + data
-			local code = string.sub(received, 1, 1)
-			local data = string.sub(received, 2)
-			HandleNetwork[code](data)
+					-- break it up into code + data
+					local c = string.sub(received, 1, 1)
+					local d = string.sub(received, 2)
+					if code == 'C' then
+						HandleNetwork[c](d)
+					elseif code == 'G' and MPGameNetwork.launcherConnected() then
+						MPGameNetwork.receiveIPCGameData(c, d)
+					end
+			
+					if MPDebug then MPDebug.packetReceived(#received) end
+				else
+					break
+				end
+			end
+		end
+
+		if TCPLauncherSocket ~= nop then
+			while(true) do
+				local received, stat, partial = TCPLauncherSocket:receive()
+				if not received or received == "" then
+					break
+				end
+				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
+					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
+				end
+
+				-- break it up into code + data
+				local code = string.sub(received, 1, 1)
+				local data = string.sub(received, 2)
+				HandleNetwork[code](data)
+			end
 		end
 		--================================ SECONDS TIMER ================================
 		if heartbeatTimer >= 1 then
@@ -376,7 +453,7 @@ local function onUpdate(dt)
 			updateUiTimer = 0
 			send('Ul') -- Ask the launcher for a loading screen update
 		end
-		if MPGameNetwork and MPGameNetwork.launcherConnected() and pingTimer >= 1 then
+		if MPGameNetwork and MPGameNetwork.launcherConnected() and pingTimer >= 1 and isMPSession() then
 			pingTimer = 0
 			send('Up')
 		end
@@ -420,6 +497,9 @@ runPostJoin = function() -- gets called once loaded into a map
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
+		if mp_core then
+			send('A')
+		end
 	end
 end
 
@@ -457,6 +537,12 @@ local function onDeserialized(data)
 end
 
 local function onExtensionLoaded()
+	if mp_core then
+		onLauncherConnected()
+	end
+	if not mp_core then
+		connectToLauncher(true)
+	end
 	if FS:fileExists('settings/BeamMP/ui_info.json') then --TODO: remove this after a while
 		FS:removeFile('settings/BeamMP/ui_info.json')
 	end

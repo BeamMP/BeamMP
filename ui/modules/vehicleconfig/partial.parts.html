@@ -17,7 +17,7 @@
 
     <div ng-switch="vehConf_parts.searchMode" flex class="md-padding" style="overflow-y:auto; flex: 1 1 auto;"
       ng-mouseleave="vehConf_parts.deselectPart(vehConf_parts.stickyPartSelection)">
-      <div ng-switch-when="false">
+      <div ng-switch-when="false" style="padding-left:1em">
         <!-- Tree mode -->
         <div ng-repeat="entry in vehConf_parts.d.data track by entry.slot" ng-include="'vehicle-config-tree'"></div>
       </div>
@@ -29,31 +29,32 @@
           <div ng-if="vehConf_parts.partSearchQuery['slot']" class="inputName" flex>Slot</div>
           <div flex style="min-width:50%;padding-right:40px;">Active part</div>
         </div>
-        <div ng-repeat="entry in vehConf_parts.searchResults track by entry.slot"
-          ng-mouseover="vehConf_parts.selectParts($event, entry)">
-          <div layout="row" layout-align="space-between center" ng-class="{'highlightChanged': entry.changed}"
-            ng-if="entry.options.length > 0">
+        <div ng-repeat="entry in vehConf_parts.searchResults track by entry.slot">
+          <div ng-mouseover="vehConf_parts.selectParts($event, entry)" style="position:relative">
+            <div layout="row" layout-align="space-between center" ng-class="{'highlightChanged': entry.changed}"
+              ng-if="entry.options.length > 0">
 
-            <div flex class="inputName"
-              ng-bind-html="entry.name | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
-            <div ng-if="vehConf_parts.partSearchQuery['slot']" flex class="inputName"
-              ng-bind-html="entry.slot | highlightResults: vehConf_parts.partSearchQuery['slot']"></div>
-            <md-select ng-model="entry.val" ng-change="vehConf_parts.partConfigChanged(entry)" aria-label="_"
-              ng-click="vehConf_parts.stopPropagation($event);" style="width:50%;">
-              <md-option md-no-ink
-                ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'name'] track by $index"
-                ng-value="opt.val"
-                ng-bind-html="((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.name | highlightResults: vehConf_parts.partSearchQuery['name'])"
-                style="white-space:nowrap">
-              </md-option>
-            </md-select>
-            <!-- visibility toggle -->
-            <input ng-attr-id="{{:: entry}}" style="display: none" type="checkbox" ng-model="entry.highlight"
-              ng-click="vehConf_parts.stopPropagation($event)" ng-change="vehConf_parts.highlightParts(entry)"></input>
-            <label ng-click="vehConf_parts.stopPropagation($event)" ng-attr-for="{{:: entry}}">
-              <md-icon class="material-icons md-default-theme" style="cursor: pointer"
-                ng-style="{'color': (entry.highlight) ? '#ffffff' : '#5b5b5b'}">remove_red_eye</md-icon>
-            </label>
+              <div flex class="inputName"
+                ng-bind-html="entry.name | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
+              <div ng-if="vehConf_parts.partSearchQuery['slot']" flex class="inputName"
+                ng-bind-html="entry.slot | highlightResults: vehConf_parts.partSearchQuery['slot']"></div>
+              <md-select ng-model="entry.val" ng-change="vehConf_parts.partConfigChanged(entry)" aria-label="_"
+                ng-click="vehConf_parts.stopPropagation($event);" style="width:50%;">
+                <md-option md-no-ink
+                  ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'name'] track by $index"
+                  ng-value="opt.val"
+                  ng-bind-html="((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.name | highlightResults: vehConf_parts.partSearchQuery['name'])"
+                  style="white-space:nowrap">
+                </md-option>
+              </md-select>
+              <!-- visibility toggle -->
+              <input ng-attr-id="{{:: entry}}" style="display: none" type="checkbox" ng-model="entry.highlight"
+                ng-click="vehConf_parts.stopPropagation($event)" ng-change="vehConf_parts.highlightParts(entry)"></input>
+              <label ng-click="vehConf_parts.stopPropagation($event)" ng-attr-for="{{:: entry}}">
+                <md-icon class="material-icons md-default-theme" style="cursor: pointer"
+                  ng-style="{'color': (entry.highlight) ? '#ffffff' : '#5b5b5b'}">remove_red_eye</md-icon>
+              </label>
+            </div>
           </div>
 
         </div>
@@ -126,7 +127,7 @@
         </md-checkbox>
       </div>
 
-      <form novalidate ng-submit="vehConf_parts.applyLicensePlate()" layout="row" layout-align="start center" style="position: relative; flex: 0 0 auto;">
+      <form novalidate ng-submit="vehConf_parts.applyLicensePlate()" layout="row" layout-align="start center" style="position: relative; flex: 0 0 auto;" ng-disabled="vehConf_parts.skipLicGen">
         <md-button class="md-raised md-primary md-hue-1" md-no-ink ng-click="vehConf_parts.applyRandomLicensePlate()" type='button' aria-label="_"
           style="min-width: 20px;">
           <md-icon class="material-icons">shuffle</md-icon>
@@ -146,7 +147,7 @@
     </div>
     <div layout="row" layout-align="start center" class="md-padding" style="flex: 0 0 auto; padding-top:0;">
       <div flex>
-        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-show="!vehConf_parts.partsChanged" ng-model="vehConf_parts.applyPartChangesAutomatically"
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-disabled="vehConf_parts.partsChanged" ng-model="vehConf_parts.applyPartChangesAutomatically"
           ng-change="vehConf_parts.applySettingChanged()" md-no-ink flex>
           {{:: 'ui.vehicleconfig.applyPartChangesAutomatically' | translate}}
         </md-checkbox>
@@ -155,7 +156,7 @@
         <md-icon class="material-icons">undo</md-icon>
         {{:: 'ui.common.reset' | translate}}
       </md-button>
-      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-disabled="vehConf_parts.applyPartChangesAutomatically"
+      <md-button ng-click="vehConf_parts.write()" md-no-ink ng-disabled="vehConf_parts.applyPartChangesAutomatically || !vehConf_parts.partsChanged"
         class="md-raised md-primary">
         <md-icon class="material-icons">check</md-icon>
         {{:: 'ui.common.apply' | translate}}

@@ -25,7 +25,7 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local isAtSyncSpeed = true
-local hideNicknames = false
+local hideNicknamesToggle = false
 
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
@@ -100,6 +100,7 @@ local simplified_vehicles = {
 	scintilla = "simple_traffic_scintilla",
 	semi = "simple_traffic_semi",
 	sunburst = "simple_traffic_sunburst",
+	utv = "simple_traffic_utv",
 	van = "simple_traffic_van",
 	vivace = "simple_vivace_slothub",
 	wendover = "simple_traffic_wendover",
@@ -416,14 +417,7 @@ end
 
 --- Simple function to toggle the displaying of nametags. This is only for the current lua instance and does not persist between restarts.
 -- @usage `MPVehicleGE.toggleNicknames()`
-function toggleNicknames()
-    hideNicknames = not hideNicknames
-    if hideNicknames then
-        MPVehicleGE.hideNicknames(1)
-    else
-        MPVehicleGE.hideNicknames()
-    end
-end
+function toggleNicknames() hideNicknamesToggle = not hideNicknamesToggle end
 
 --- Returns the whole Players table
 -- @treturn players
@@ -919,7 +913,7 @@ local function applyVehEdit(serverID, data)
 			tableMerge(playerVehicle.config, vehicleConfig) -- add new parts to the existing config
 
 			if configChanged then
-				--veh:setDynDataFieldbyName("autoEnterVehicle", 0, (be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false) -- this only works one way :(
+				veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
 				veh:respawn(serialize(playerVehicle.config))
 			elseif vehicleConfig.paints then
 				log('I','applyVehEdit', "only color changed")
@@ -939,6 +933,7 @@ local function applyVehEdit(serverID, data)
 			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
 		}
 
+		veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
 		spawn.setVehicleObject(veh, options)
 	end
@@ -1689,27 +1684,27 @@ local function onPreRender(dt)
 			local pos = Point3F(v.position.x, v.position.y, v.position.z)
 
 			if settings.getValue("enableBlobs") and not v.isSpawned then
-					local colors = nil
+				local colors = nil
 
-					if v.spawnQueue then -- in queue
-						if settingsCache.showBlobQueued then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
-						end
-					elseif v.isIllegal then -- illegal (modded)
-						if settingsCache.showBlobIllegal then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
-						end
-					elseif v.isDeleted then
-						if settingsCache.showBlobDeleted then
-							colors = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
-						end
-					else
-						colors = { 1, 0, 1 }
+				if v.spawnQueue then -- in queue
+					if settingsCache.showBlobQueued then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
 					end
+				elseif v.isIllegal then -- illegal (modded)
+					if settingsCache.showBlobIllegal then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
+					end
+				elseif v.isDeleted then
+					if settingsCache.showBlobDeleted then
+						colors = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
+					end
+				else
+					colors = { 1, 0, 1 }
+				end
 
-					if colors then
-						debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
-					end
+				if colors then
+					debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
+				end
 			end
 
 			local nametagAlpha = 1
@@ -1718,8 +1713,8 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-
-			if not settings.getValue("hideNameTags") and nicknamesAllowed then
+			
+			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
 				if distfloat > 10 and settings.getValue("nameTagShowDistance") then
@@ -1747,9 +1742,9 @@ local function onPreRender(dt)
 					dist = string.format(" %s %s", tostring(mapEntry), unit)
 				end
 
-				if settings.getValue("fadeVehicles") then
+				if settings.getValue("fadeVehicles") and veh then
 					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
-					else veh:setMeshAlpha(1-nametagAlpha, "", false) end
+					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then

@@ -1080,7 +1080,7 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 }
 
 function openExternalLink(url){
-	bngApi.engineLua(`openWebBrowser("`+url+`")`);
+	bngApi.engineLua(`mp_open_url("`+url+`")`);
 }
 
 function openForumLink(){
@@ -1147,11 +1147,14 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 }
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
-async function populateTable(tableTbody, servers, type, searchText, checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap, bngApi) {
+async function populateTable(tableTbody, servers, type, searchText = '', checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap = 'Any', bngApi) {
 	var newTbody = document.createElement('tbody');
 	newTbody.id = "serversTableBody";
 	var mapNames = new Array(); //["Any"];
 	for (const server of servers) {
+		if (!server) {
+			break;
+		}
 		var shown = true;
 		var smoothMapName = SmoothMapName(server.map);
 		var isFavorite = false;

@@ -23,7 +23,10 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
   }
   //$translateProvider.use('de-DE')
 
-  //DISABLE_TRANSLATIONS = true
+  MARK_TRANSLATIONS = 1 // force translation markers AUTO
+  //MARK_TRANSLATIONS = 1 // force translation markers OFF
+  //MARK_TRANSLATIONS = 2 // force translation markers ON (quiet)
+  //MARK_TRANSLATIONS = 3 // force translation markers ON (verbose)
 
   $logProvider.debugEnabled(false)
 
@@ -894,7 +897,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       },
       backState: 'BACK_TO_MENU',
       uiLayout: 'blank',
-      uiAppsShown: true, // defaults to false
+      uiAppsShown: true, // defaults to false,
     })
 
     .state('menu.careerPause', {
@@ -1079,8 +1082,20 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
 
 }])
 
-.run(['$animate', '$http', '$rootScope', '$templateCache', '$window', '$translate', 'UIAppStorage', 'Settings', 'SettingsAuxData', 'bngWSApi', '$state', 
+.run(['$animate', '$http', '$rootScope', '$templateCache', '$window', '$translate', 'UIAppStorage', 'Settings', 'SettingsAuxData', 'bngWSApi', '$state',
 function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIAppStorage, Settings, SettingsAuxData, bngWSApi, $state) {
+
+  // apply language settings
+  $rootScope.$on('AutoJoinConfirmation', function(evt, data) {
+    console.log('AutoJoinConfirmation',evt,data)
+    var d = JSON.parse(decodeURI(data.message))
+    confirmationMessage = `Do you want to connect to the server at ${d.ip}:${d.port}?`
+    userConfirmed = window.confirm(confirmationMessage); 
+    //userConfirmed ? alert('Connecting to the server...') : alert('Connection canceled.');
+    if (userConfirmed) {
+      bngApi.engineLua(`MPCoreNetwork.connectToServer("${d.ip}","${d.port}","${d.sname}")`);
+    }
+  })
 
   // apply language settings
   $rootScope.$on('SettingsChanged', function(evt, data) {
@@ -1089,7 +1104,7 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
       if(lang == '') lang = 'en-US'
       $http.get(`/locales/${lang}.json`,).then(function(res) {
         vueI18n.global.locale = lang
-        vueI18n.global.setLocaleMessage(lang, res.data)
+        vueI18n.global.setLocaleMessage(lang, window.bngVue.preprocessLocaleJSON(res.data))
       })
     }
   })
@@ -1246,7 +1261,12 @@ angular.module('beamng.stuff')
 
 .service('translateService', ['$translate', function($translate){
 
-  contextTranslate = function(val, translateContext) {
+  // super hacky workaround to allow use of $translate in our new Vue stuff...
+  // (at least temporarily in areas where translation strings containing AngularJS interpolation syntax are
+  // shared between AngularJS and Vue areas)
+  window.angular$translate = $translate
+
+  const contextTranslate = function(val, translateContext) {
     if(typeof val == "string") {
       return $translate.instant(val)
     } else {
@@ -1266,7 +1286,7 @@ angular.module('beamng.stuff')
     }
     return val
   }
-  multiContextTranslate = function(val) {
+  const multiContextTranslate = function(val) {
     if(val.txt) {
       return contextTranslate(val)
     }
@@ -1294,11 +1314,14 @@ angular.module('beamng.stuff')
 .service('gamepadNav', ['$rootScope', function ($rootScope) {
     'use strict'
 
+    const UINav = () => (window.bridge && window.bridge.uiNavEvents) || {}
+
     // TODO: hook this up to lua settings
     // TODO: think about using a list of actions, so when one module unregisters it's action the old action gets used.
     // this would have the benefit for example of dropdowns beeing opened, and while open their actions would be used
     // todo: actually test the list approach
-    let useCrossfire = true
+    // let useCrossfire = true
+
     let useGamepadNavigation = false
     let noop = () => {}
     let actions = {
@@ -1318,6 +1341,8 @@ angular.module('beamng.stuff')
       back: 'menu_item_back',
       'radial-x': 'menu_item_radial_x',
       'radial-y': 'menu_item_radial_y',
+      'radial-right-x': 'menu_item_radial_right_x',
+      'radial-right-y': 'menu_item_radial_right_y',
       'tab-right': 'menu_tab_right',
       'tab-left': 'menu_tab_left',
     }
@@ -1358,48 +1383,79 @@ angular.module('beamng.stuff')
       }
     }
 
+    // const navActions = ["left", "right", "up", "down"];
+    // const scrollActions = {
+    //   "radial-right-x": "horizontal",
+    //   "radial-right-y": "vertical",
+    // };
+
     $rootScope.$on('MenuItemNavigation', function (event, action, val) {
-      //console.log('MenuItemNavigation - Got action: ' + action)
+      // console.log('MenuItemNavigation - Got action: ' + action, val)
       //console.log('Enabled Librarys', useCrossfire, useGamepadNavigation)
       if(!beamng.ingame) return
 
+      // NOTE - this needs to stay for now. Used quite a lot
       if (action == 'toggleMenues') {
+        console.log("received MenuItemNavigation 'toggleMenues' action")
         $rootScope.$broadcast('MenuToggle', val)
         return
       }
-      if(action == 'back') {
-        $rootScope.$broadcast('MenuToggle')
-        return
-      }
-      if (["left", "right", "up", "down"].indexOf(action) != -1) {
-        bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
-      }
 
-      if (useCrossfire) {
-        if (action == 'confirm') {
-          const active = document.activeElement;
-          if (isNavigatable(active)) {
-            if (typeof active.click === "function") {
-              active.click()
-            } else {
-              let click = new CustomEvent("click")
-              active.dispatchEvent(click)
-            }
-          }
-        } else if(action == 'back') {
-          $rootScope.$broadcast('MenuToggle')
-        } else if (["left", "right", "up", "down"].indexOf(action) != -1) {
-          bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
-          const targets = collectRects(action);
-          navigate(targets, action);
-          //console.log(`navigation ${action} handled by Crossfire`)
-        } else if (action == 'tab-left') {
-            $rootScope.$broadcast('$tabLeft')
-        } else if (action == 'tab-right') {
-            $rootScope.$broadcast('$tabRight')
-        }
-      }
+      // TODO - remove when tested - Crossfire now fed from UINavEvents
+      // if(action == 'back') {
+      //   console.log("received MenuItemNavigation 'back' action")
+      //   $rootScope.$broadcast('MenuToggle')
+      //   return
+      // }
 
+      // TODO - remove when tested - Crossfire now fed from UINavEvents
+      // if (navActions.includes(action)) {
+      //   bngApi.engineLua('extensions.hook("onMenuItemNavigation")')
+      // }
+
+      // if (useCrossfire) {
+
+        // TODO - remove when tested - Crossfire now fed from UINavEvents
+        // if (action == 'confirm') {
+        //   const active = document.activeElement;
+        //   if (isNavigatable(active)) {
+        //     if (typeof active.click === "function") {
+        //       active.click()
+        //     } else {
+        //       let click = new CustomEvent("click")
+        //       active.dispatchEvent(click)
+        //     }
+        //   }
+        // } else if(action == 'back') {
+        //
+        //
+
+        // // Is this even used??? If action='back' it will have been handled above
+        // if (action == 'back') {
+        //   console.log("received MenuItemNavigation 'back' action (crossfire)")
+        //   $rootScope.$broadcast('MenuToggle')
+
+        //}
+
+        // TODO - remove when tested - Crossfire now fed from UINavEvents
+        // } else if (navActions.includes(action)) {
+        //   const targets = collectRects(action);
+        //   navigate(targets, action);
+        //   //console.log(`navigation ${action} handled by Crossfire`)
+
+        // TODO - remove when tested - Crossfire now fed from UINavEvents
+        // } else if (scrollActions.hasOwnProperty(action)) {
+        //   navigateScroll(scrollActions[action], val);
+        // } else if (action == 'tab-left') {
+        // if (action == 'tab-left') {
+        //     $rootScope.$broadcast('$tabLeft')
+        // } else if (action == 'tab-right') {
+        //     $rootScope.$broadcast('$tabRight')
+        // }
+      // }
+
+
+      // TODO - check what this is? Is it used?
       if (useGamepadNavigation && actions[action]) {
         //console.log(actions[action])
         // console.log(actions[action][0])
@@ -1408,17 +1464,23 @@ angular.module('beamng.stuff')
     })
 
     return {
-      crossfireEnabled: () => useCrossfire,
+      // crossfireEnabled: () => useCrossfire,
+      crossfireEnabled: () => UINav().useCrossfire,
       gamepadNavEnabled: () => useGamepadNavigation,
-      spatialNavEnabled: () => useCrossfire,
-      // TODO: make this intuitive (omiting the value shouldn't do something unexpected)
-      enableCrossfire: (val) => useCrossfire = val,
-      enableGamepadNav: (val) => useGamepadNavigation = val,
-      enableSpatialNav: (val) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); useCrossfire = val },
+      // spatialNavEnabled: () => useCrossfire,
+      spatialNavEnabled: () => UINav().useCrossfire,
+      // // TODO: make this intuitive (omiting the value shouldn't do something unexpected)
+      // enableCrossfire: (val) => useCrossfire = val,
+      enableCrossfire: (val=true) => UINav().useCrossfire = val,
+      enableGamepadNav: (val=true) => useGamepadNavigation = val,
+      // enableSpatialNav: (val) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); useCrossfire = val },
+      enableSpatialNav: (val=true) => { log.error("SpatialNavigation is deprecated. Please use Crossfire."); UINav().useCrossfire = val },
+
+      // TODO - Find out what these are???
       registerActions: assignNavFunc,
       unregisterActions: unregisterActions,
-      provideScope: (scope) => scope = scope,
-      prefix: (val) => prefix[val] || val,
+      provideScope: scope => scope = scope,
+      prefix: val => prefix[val] || val,
     }
 }])
 
@@ -1427,8 +1489,8 @@ angular.module('beamng.stuff')
  * @name beamng.stuff.controller:AppCtrl
  * @description This is the top-level controller used throughout the game
 **/
-.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService', 'MessageToasterService', 'InputCapturer',
-  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService,messageToasterService, InputCapturer) {
+.controller('AppCtrl', ['$document', '$log', '$rootScope', '$scope', '$sce', '$compile', '$state', '$stateParams', '$translate', '$window', 'ControlsUtils', 'Utils', 'Settings', 'toastr', '$timeout', 'gamepadNav', '$injector', '$location', 'translateService', 'UiAppsService', 'MessageToasterService', 'InputCapturer', 'ConfirmationDialog',
+  function($document, $log, $rootScope, $scope, $sce, $compile, $state, $stateParams, $translate, $window, ControlsUtils, Utils, Settings, toastr, $timeout, gamepadNav, $injector, $location, translateService, UiAppsService,messageToasterService, InputCapturer, ConfirmationDialog) {
   var vm = this
   vm.uiSheetActive = false
 
@@ -1474,7 +1536,38 @@ angular.module('beamng.stuff')
     $scope.$applyAsync(function () {
       vm.uitest = enabled
       bngVue.debug(enabled)
+      vm.translationMarkCycle(0)
     })
+  })
+
+  let openDialogs = {}
+  $scope.$on('ConfirmationDialogOpen', function (event, title, body, buttonOkText, buttonOkLua, buttonCancelText, buttonCancelLua) {
+    let def = false
+    let buttons = []
+    if (typeof(buttonCancelText) == "string" && typeof(buttonCancelLua) == "string") {
+      buttons.push({ label: buttonCancelText, key: "cancel", default: def, isCancel: true })
+      def = true
+    }
+    if (typeof(buttonOkText) == "string" &&  typeof(buttonOkLua) == "string") {
+      buttons.push({ label: buttonOkText,     key: "ok",     default: def, isCancel: false })
+    }
+    openDialogs[title] = ConfirmationDialog.open(title, body, buttons, {class:'leftAlignPrompt'})
+    openDialogs[title].then((res) => {
+      delete(openDialogs[title])
+      if        (res === "cancel") {
+        bngApi.engineLua(buttonCancelLua)
+      } else if (res === "ok") {
+        bngApi.engineLua(buttonOkLua)
+      } else if (res === undefined) {
+        // do nothing special, just let it close
+      } else {
+        console.log("Unrecognized ConfirmationDialog return value: "+res)
+      }
+    })
+  })
+
+  $scope.$on('ConfirmationDialogClose', function (event, title) {
+    openDialogs[title].close()
   })
 
   // figure out if CEF devtools are already open
@@ -1482,6 +1575,7 @@ angular.module('beamng.stuff')
     $scope.$applyAsync(function () {
       vm.uitest = enabled
       bngVue.debug(enabled)
+      vm.translationMarkCycle(0)
     })
   })
 
@@ -1496,9 +1590,9 @@ angular.module('beamng.stuff')
   vm.emitMenuNav = function(action, val) {
     $rootScope.$broadcast('MenuItemNavigation', action, val)
   }
-  vm.switchState = function(stateName) {
+  vm.switchState = function(stateName, params) {
     if(stateName !== undefined) {
-      $state.go(stateName)
+      $state.go(stateName, params)
     }
   }
   vm.prevState = function() {
@@ -1514,6 +1608,15 @@ angular.module('beamng.stuff')
     if(nextStateIdx != -1) {
       console.log("Switching to new state: " + vm.states[nextStateIdx].name)
       $state.go(vm.states[nextStateIdx].name)
+    }
+  }
+  vm.translationMark = MARK_TRANSLATIONS
+  vm.translationMarkCycle = function(amount) {
+    vm.translationMark = (vm.translationMark + amount) % 4
+    if (vm.translationMark == 0) {
+      MARK_TRANSLATIONS = vm.uitest ? 2 : 1
+    } else {
+      MARK_TRANSLATIONS = vm.translationMark
     }
   }
   vm.nextState = function() {
@@ -1581,44 +1684,42 @@ angular.module('beamng.stuff')
     captureInput(menuActionMapEnabled);
     bngApi.engineLua(`extensions.hook("onUiChangedState", "${toState.name}", "${fromState.name}")`)
 
-    // bngApi.engineLua("career_career.isCareerActive()", data => {
+    // bngApi.engineLua("career_career.isActive()", data => {
     //   if (data) {
     //     console.log(toState)
     //     if (toState.name == 'play') {
     //       console.log(menuActionMapEnabled)
-    //       bngApi.engineLua(`bullettime.pause(${menuActionMapEnabled})`);
+    //       bngApi.engineLua(`simTimeAuthority.pause(${menuActionMapEnabled})`);
     //     }
     //     if (fromState.name == 'play') {
     //       console.log(menuActionMapEnabled)
-    //       bngApi.engineLua(`bullettime.pause(${menuActionMapEnabled})`);
+    //       bngApi.engineLua(`simTimeAuthority.pause(${menuActionMapEnabled})`);
     //     }
     //   }
     // });
 
     // update ui apps layout
-    bngApi.engineLua("career_career.isCareerActive()", isCareerActive => {
+    bngApi.engineLua("career_career.isActive()", isCareerActive => {
       $scope.$evalAsync(() => {
         if (isCareerActive && $state.current.careerUiLayout) {
           $scope.$emit('appContainer:loadLayoutByType', $state.current.careerUiLayout)
           isUILayoutOverriden = true
         } else {
           if (vm.currentStateName === 'blank') {
-            console.log('Current state name is blank. Ignoring layout update because this may be already handled ' +
-              'ChangeState for Vue screens.')
+            // console.log('Current state name is blank. Ignoring layout update because this may be already handled ' +
+            //   'ChangeState for Vue screens.')
           } else if ($state.current.uiLayout === 'blank') {
-            console.log('Current layout name is blank. Clearing layout.')
+            // console.log('Current layout name is blank. Clearing layout.')
             $scope.$emit('appContainer:clear')
             // $scope.$emit('appContainer:clear')
           } else if ($state.current.uiLayout === undefined) {
             // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
             // console.log(`No layout defined - using previous (${vm.uiLayoutPrevious})`)
-      
             if (!(vm.playmodeState && (vm.playmodeState.state || vm.playmodeState.appLayout)) ||
-              // ignore menu.appselect from emitting layout to prevent issue menu.appedit 
+              // ignore menu.appselect from emitting layout to prevent issue menu.appedit
               // selected layout will always be current game layout
               vm.currentStateName === "menu.appselect")
               return
-      
             if (typeof vm.playmodeState.appLayout == "string") {
               $scope.$emit('appContainer:loadLayoutByType', vm.playmodeState.appLayout)
             } else if (typeof vm.playmodeState.appLayout == "object") {
@@ -1633,19 +1734,18 @@ angular.module('beamng.stuff')
             // }
           } else {
             // console.log(`Layout defined (${$state.current.uiLayout})`)
-      
             // this state requires a particular ui layout, set
             // vm.uiLayoutPrevious = UiAppsService.getLayout()
             $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
           }
         }
-  
+
         // update ui apps visibility
         $scope.$emit("ShowApps", !!$state.current.uiAppsShown);
-  
+
         $state.previous = fromState;
         $state.previousArgs = fromParams;
-  
+
         if (
           fromState.name !== "menu" && fromState.name.indexOf("menu.") !== 0 &&
           (toState.name === "menu" || toState.name.indexOf("menu.") === 0)
@@ -1653,7 +1753,7 @@ angular.module('beamng.stuff')
           $state.gamestate = fromState;
           $state.gamestateArgs = fromParams;
         }
-  
+
         transitioningTo = undefined
         updatePauseState()
       })
@@ -1677,21 +1777,21 @@ angular.module('beamng.stuff')
   })
 
 
-  vm.changeAngularStateFromVue = function(state) {
-    vm.switchState(state)
+  vm.changeAngularStateFromVue = function(state, params) {
+    vm.switchState(state, params)
   }
 
-  const vueTasklistScreens = ['menu.refueling']
+  const vueTasklistScreens = ['menu.refueling', 'menu.partShopping']
   $scope.$on('$stateNotFound', function (event, unfoundState, fromState, fromParams) {
     if (vueTasklistScreens.includes(unfoundState.to)) {
-      bngApi.engineLua("career_career.isCareerActive()", isCareerActive => {
+      bngApi.engineLua("career_career.isActive()", isCareerActive => {
         if (isCareerActive) {
           $scope.$emit('appContainer:loadLayoutByType', 'tasklist')
         }
       })
     }
     // angular doesn't recognise the state, so try Vue (making sure it doesn't pingpong back to here)
-    bngVue.gotoGameState(unfoundState.to, {tryAngularJS: false})
+    bngVue.gotoGameState(unfoundState.to, {params: unfoundState.toParams, tryAngularJS: false})
     unfoundState.to = 'blank'
   })
 
@@ -1911,10 +2011,6 @@ angular.module('beamng.stuff')
     vm.showApps = data
   })
 
-  $scope.$on("MenuFocusShow", function (event, enabled) {
-    //if (!enabled) uncollectRects($scope)
-  })
-
   // Method used to show mods on repository when 'view ingame' on https://www.beamng.com/resources/ is clicked.
   $scope.$on('ShowMod', function (event, data) {
     var startTimeout
@@ -2049,7 +2145,6 @@ angular.module('beamng.stuff')
 
   $scope.$on('CloseMenu', () => {
     var newTarget = vm.mainmenu ? 'menu.mainmenu' : 'menu'
-    console.log("target", newTarget)
     $state.go(newTarget)
   })
 
@@ -2112,6 +2207,10 @@ angular.module('beamng.stuff')
     }
   })
 
+  $scope.$on('disableNextPauseSound', function (event) {
+    dontPlayPauseSound = true
+  })
+
   $scope.$on('physicsStateChanged', function (event, state) {
     $scope.$evalAsync(function () {
       // Clicking Options in menu will trigger pause even if game is already paused
@@ -2137,7 +2236,7 @@ angular.module('beamng.stuff')
 
 
   vm.unpause = function () {
-    bngApi.engineLua('bullettime.pause(false)')
+    bngApi.engineLua('simTimeAuthority.pause(false)')
   }
 
   $scope.$on('requestPhysicsState', function (event) {
@@ -2174,52 +2273,8 @@ angular.module('beamng.stuff')
 }])
 
 .service('BlurGame', [function () {
-  // todo: find a solution if i should actually overflow at some point
-  let highestId = 0
-  let list = {}
 
-
-  function updateLua () {
-    if(!beamng.ingame) return
-    //console.log('---------update blur to lua' + JSON.stringify(list))
-    bngApi.engineLua(`extensions.ui_gameBlur.replaceGroup("uiBlur", ${bngApi.serializeToLua(list)})`)
-  }
-
-  return {
-    register: function (coord) {
-      if (coord === undefined) {
-        throw new Error('Cannot register bng-blur with coordinates: ' + coord)
-      }
-
-      if (list.isEmpty()) {
-        bngApi.engineLua('extensions.load("ui_gameBlur")')
-      }
-
-      highestId += 1
-      list[highestId] = coord
-      updateLua()
-      return highestId
-    },
-    unregister: function (i) {
-      if (i in list) {
-        delete list[i]
-        updateLua()
-      }
-
-      if (list.isEmpty()) {
-        highestId = 0
-        bngApi.engineLua('extensions.unload("ui_gameBlur")')
-      }
-    },
-    update: function (i, coord) {
-      if (!(i in list)) {
-        console.error("Trying to update bng-blur with an ID that is not registered: " + i + " (of " + Object.keys(list) + ")")
-        throw new Error('Trying to update bng-blur with an ID that is not registered: ' + i + " (of " + Object.keys(list) + ")")
-      }
-      list[i] = coord
-      updateLua()
-    },
-  }
+  return window.bridge.gameBlurrer
 }])
 
 .directive('bngBlur', ['BlurGame', 'RateLimiter', function (BlurGame, RateLimiter) {

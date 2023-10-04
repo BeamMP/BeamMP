@@ -11,7 +11,7 @@ M.imageButton = function(texID, size, color, activeColor, hoveredColor)
     -- Remove background
     imgui.PushStyleColor2(imgui.Col_Button, imgui.ImVec4(0, 0, 0, 0))
     local buttonSize = imgui.ImVec2(size, size)
-    if imgui.ImageButton(texID, buttonSize, imgui.ImVec2Zero, imgui.ImVec2One, 1, imgui.ImVec4(0, 0, 0, 0), imgui.ImVec4(1, 1, 1, 1)) then
+    if imgui.ImageButton("##ImageButton", texID, buttonSize, imgui.ImVec2Zero, imgui.ImVec2One, imgui.ImVec4(0, 0, 0, 0), imgui.ImVec4(1, 1, 1, 1)) then
         imgui.PopStyleColor()
         return true
     end

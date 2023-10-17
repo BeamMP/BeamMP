@@ -206,12 +206,13 @@ end
 local function setCurrentServer(ip, port, name)
 	-- If the server is different then lets also clear the existing chat data as this does not always done on leaving
 	if currentServer ~= nil then
-		if currentServer.port ~= port and currentServer.ip ~= ip then	
-			guihooks.trigger('clearChatHistory')
+		if currentServer.port ~= port and currentServer.ip ~= ip then
+			print('Clearing Chat!')
+			be:executeJS('localStorage.removeItem("chatMessages");')
 		end
 	else
 		-- otherwise lets clear it again anyway for good measure as the server we are joining may not be the same server.
-		guihooks.trigger('clearChatHistory')
+		be:executeJS('localStorage.removeItem("chatMessages");')
 	end
 	currentServer = {
 		ip		   = ip,
@@ -237,8 +238,6 @@ local function connectToServer(ip, port, name)
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
-	
-	guihooks.trigger('clearChatHistory')
 end
 
 local function parseMapName(map) -- TODO: finish

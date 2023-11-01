@@ -16,7 +16,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.9.3" -- the mod version
+local modVersion = "4.9.5" -- the mod version
 -- server
 local serverList -- server list JSON
 local currentServer = nil -- Table containing the current server IP, port and name
@@ -48,8 +48,8 @@ C  -> The client asks for the server's mods
 -- @param s string containing the data to send to the launcher
 local function send(s)
 	-- First check if we are V2.1 Networking or not
-	if MP then
-		MP.Core(s)
+	if mp_core then
+		mp_core(s)
 		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
 
 		if not settings.getValue("showDebugOutput") then return end
@@ -86,7 +86,7 @@ end
 local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
 	-- Check if we are using V2.1
-	if MP then
+	if mp_core then
 		send('A') -- immediately heartbeat to check if connection was established
 		log('W', 'connectToLauncher', 'Launcher already connected!')
 		guihooks.trigger('onLauncherConnected')
@@ -96,7 +96,7 @@ local function connectToLauncher(silent)
 	-- Okay we are not using V2.1, lets do the V2 stuff
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
-	if not launcherConnected and not MP then
+	if not launcherConnected and not mp_core then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
@@ -204,6 +204,15 @@ local function getCurrentServer()
 end
 
 local function setCurrentServer(ip, port, name)
+	-- If the server is different then lets also clear the existing chat data as this does not always done on leaving
+	if currentServer ~= nil then
+		if currentServer.port ~= port and currentServer.ip ~= ip then	
+			guihooks.trigger('clearChatHistory')
+		end
+	else
+		-- otherwise lets clear it again anyway for good measure as the server we are joining may not be the same server.
+		guihooks.trigger('clearChatHistory')
+	end
 	currentServer = {
 		ip		   = ip,
 		port	   = port,
@@ -228,6 +237,8 @@ local function connectToServer(ip, port, name)
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
+	
+	guihooks.trigger('clearChatHistory')
 end
 
 local function parseMapName(map) -- TODO: finish
@@ -385,14 +396,14 @@ local function onUpdate(dt)
 	if status == "LoadingResources" then
 		updateUiTimer = updateUiTimer + dt
 	end
-	if not MP then -- This is not required in V2.1
+	if not mp_core then -- This is not required in V2.1
 		heartbeatTimer = heartbeatTimer + dt
 	end
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		if MP then
+		if mp_core then
 			while (true) do
-				local msg = MP:try_pop()
+				local msg = mp_try_pop()
 				if msg then
 					local code = string.sub(msg, 1, 1)
 					local received = string.sub(msg, 2)
@@ -486,7 +497,7 @@ runPostJoin = function() -- gets called once loaded into a map
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
-		if MP then
+		if mp_core then
 			send('A')
 		end
 	end
@@ -526,10 +537,10 @@ local function onDeserialized(data)
 end
 
 local function onExtensionLoaded()
-	if MP then
+	if mp_core then
 		onLauncherConnected()
 	end
-	if not MP then
+	if not mp_core then
 		connectToLauncher(true)
 	end
 	if FS:fileExists('settings/BeamMP/ui_info.json') then --TODO: remove this after a while

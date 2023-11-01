@@ -45,9 +45,9 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 		local remoteIndex = tonumber(string.sub(data, 2))
 		if remoteGearMode == 'M' and localGearMode == 'M' then
 			if electrics.values.gearIndex < remoteIndex then
-				controller.mainController.shiftUp()
+				controller.mainController.shiftUpOnDown()
 			elseif electrics.values.gearIndex > remoteIndex then
-				controller.mainController.shiftDown()
+				controller.mainController.shiftDownOnUp()
 			end
 		else
 			controller.mainController.shiftToGearIndex(translationTable[remoteGearMode])

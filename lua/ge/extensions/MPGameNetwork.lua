@@ -24,7 +24,7 @@ setmetatable(_G,{}) -- temporarily disable global notifications
 
 local function connectToLauncher()
 	-- Check if we are using V2.1
-	if MP then
+	if mp_game then
 		launcherConnected = true
 		--M.send('A') -- immediately heartbeat to check if connection was established
 		log('W', 'connectToLauncher', 'Launcher should already be connected!')
@@ -49,7 +49,7 @@ end
 
 
 local function disconnectLauncher()
-	if MP then
+	if mp_game then
 		launcherConnected = false
 		return
 	end
@@ -63,8 +63,8 @@ end
 
 local function sendData(s)
 	-- First check if we are V2.1 Networking or not
-	if MP then
-		MP.Game(s)
+	if mp_game then
+		mp_game(s)
 		if not launcherConnected then launcherConnected = true isConnecting = false end
 		if settings.getValue("showDebugOutput") then
 			log('M', 'sendData', 'Sending Data ('..#s..'): '..s)

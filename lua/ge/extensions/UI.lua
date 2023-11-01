@@ -80,7 +80,7 @@ local chatcounter = 0
 
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
-	local msg = string.sub(data, 4)
+	local msg = string.sub(data, 2)
     --print(msg)
 	if code == "l" then
 		guihooks.trigger('LoadingInfo', {message = msg})
@@ -457,7 +457,7 @@ local function onExtensionLoaded()
 end
 
 local function onUpdate()
-    if not settings.getValue("enableNewChatMenu") or not initialized or not M.canRender or MPCoreNetwork and not MPCoreNetwork.isMPSession() then return end
+    if worldReadyState ~= 2 or not settings.getValue("enableNewChatMenu") or not initialized or not M.canRender or MPCoreNetwork and not MPCoreNetwork.isMPSession() then return end
     renderWindow()
 end
 

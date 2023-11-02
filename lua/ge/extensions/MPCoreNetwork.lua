@@ -58,7 +58,7 @@ local function send(s)
 	
 	end
 	-- Else we now will use the V2 Networking
-	if not TCPLauncherSocket then return end
+	if TCPLauncherSocket == nop then return end
 
 	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
 	if error then

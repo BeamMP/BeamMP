@@ -1110,7 +1110,7 @@ async function getFeatured() {
 	return new Promise(function(resolve, reject) {
 		var feat = []
 		servers.forEach(server => {
-			console.log(server)
+			//console.log(server)
 			if (server.featured === true) {
 				feat.push(server)
 			}
@@ -1126,7 +1126,7 @@ async function getPartner() {
 	return new Promise(function(resolve, reject) {
 		var part = []
 		servers.forEach(server => {
-			console.log(server)
+			//console.log(server)
 			if (server.partner === true) {
 				part.push(server)
 			}

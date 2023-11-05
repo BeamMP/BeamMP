@@ -525,6 +525,7 @@ function($scope, $state, $timeout) {
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		featured = await getFeatured();
+		console.log(featured)
 		vm.repopulate();
 	});
 	
@@ -1020,6 +1021,7 @@ async function getFeatured() {
 	return new Promise(function(resolve, reject) {
 		var feat = []
 		servers.forEach(server => {
+			console.log(server)
 			if (server.featured === true) {
 				feat.push(server)
 			}

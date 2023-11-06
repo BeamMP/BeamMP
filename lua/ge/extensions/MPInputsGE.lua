@@ -3,6 +3,11 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
+--- MPInputsGE API.
+--- Author of this documentation is Titch
+--- @module MPInputsGE
+--- @usage applyInputs(...) -- internal access
+--- @usage MPInputsGE.handle(...) -- external access
 
 
 local M = {}

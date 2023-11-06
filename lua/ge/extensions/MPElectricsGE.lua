@@ -3,6 +3,11 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
+--- MPElectricsGE API.
+--- Author of this documentation is Titch
+--- @module MPElectricsGE
+--- @usage applyElectrics(...) -- internal access
+--- @usage MPElectricsGE.handle(...) -- external access
 
 
 local M = {}

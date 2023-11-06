@@ -4,11 +4,11 @@
 -- Contact BeamMP for more info!
 --====================================================================================
 
---- MPCoreNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod. It handles the Initial TCP connection establishment with the Launcher.
--- Author of this documentation is Titch2000
--- @module MPCoreNetwork
--- @usage connectToLauncher() -- internal access
--- @usage MPCoreNetwork.connectToLauncher() -- external access
+--- MPGameNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod. It handles the Initial TCP connection establishment with the Launcher.
+--- Author of this documentation is Titch2000
+--- @module MPGameNetwork
+--- @usage connectToLauncher() -- internal access
+--- @usage MPGameNetwork.connectToLauncher() -- external access
 
 
 

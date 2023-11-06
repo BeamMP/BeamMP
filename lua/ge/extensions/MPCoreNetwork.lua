@@ -151,44 +151,44 @@ end
 --- @return string Example: "2.1.0"
 --- @usage `MPCoreNetwork.getLauncherVersion()`
 local function getLauncherVersion()
-	return "2.0" --launcherVersion
+		return "2.0" --launcherVersion
 end
 
 --- Return if the launcher is using an authenticated session
 --- @return boolean loggedIn Returns true if the launcher is logged in
 --- @usage `MPCoreNetwork.isLoggedIn()`
 local function isLoggedIn()
-	return loggedIn
+		return loggedIn
 end
 
 --- Return whether the launcher is connected to the game or not.
 --- @return boolean Return the connection state of TCP with the launcher
 --- @usage `MPCoreNetwork.isLauncherConnected()`
 local function isLauncherConnected()
-	return launcherConnected
+		return launcherConnected
 end
 
 --- Attempt to log the user into the account: Registered | Guest
 --- @param identifiers string Players identifers / credentials
 --- @usage `MPCoreNetwork.login(<credentials>)`
 local function login(identifiers)
-	log('M', 'login', 'Attempting login...')
-	identifiers = identifiers and jsonEncode(identifiers) or ""
-	send('N:'..identifiers)
+		log('M', 'login', 'Attempting login...')
+		identifiers = identifiers and jsonEncode(identifiers) or ""
+		send('N:'..identifiers)
 end
 
 --- Tell the launcher to attempt to auto login using the local key file
 --- @usage `MPCoreNetwork.autoLogin()`
 local function autoLogin()
-	send('Nc')
+		send('Nc')
 end
 
 --- Tell the launcher to log the current user out. This also removes the local key file
 --- @usage `MPCoreNetwork.logout()`
 local function logout()
-	log('M', 'logout', 'Attempting logout')
-	send('N:LO')
-	loggedIn = false
+		log('M', 'logout', 'Attempting logout')
+		send('N:LO')
+		loggedIn = false
 end
 
 
@@ -459,6 +459,9 @@ local function handleU(params)
 	end
 end
 
+--- Prompts the user for auto join confirmation.
+--- @param params string The parameters received for auto join confirmation.
+--- @usage `MPCoreNetwork.promptAutoJoin(...)`
 local function promptAutoJoin(params)
 	UI.promptAutoJoinConfirmation(params)
 end
@@ -592,7 +595,7 @@ runPostJoin = function() -- gets called once loaded into a map
 	if freeroam_freeroam.onPlayerCameraReady == nop and originalFreeroamOnPlayerCameraReady then -- restore function to original once already loaded in so it works if user switches to freeroam
 		freeroam_freeroam.onPlayerCameraReady = originalFreeroamOnPlayerCameraReady
 	end
-	if isMpSession and isGoingMpSession thenconsole.log
+	if isMpSession and isGoingMpSession then
 		extensions.hook('runPostJoin')
 		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam
 		MPGameNetwork.connectToLauncher()

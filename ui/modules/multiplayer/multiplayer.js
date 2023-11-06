@@ -174,8 +174,8 @@ function($scope, $state, $timeout, $mdDialog) {
 		switch(data.dialogtype) {
 			case "alert":
 				if (mdDialogVisible) { return; }
-				console.log(data);
-				console.log(mdDialogVisible);
+				//console.log(data);
+				//console.log(mdDialogVisible);
 				mdDialogVisible = true;
 				mdDialog.show(
 					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
@@ -199,7 +199,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
-		console.log(src.value);
+		//console.log(src.value);
 	}
 
 	vm.refreshList = function() {
@@ -526,7 +526,7 @@ function($scope, $state, $timeout) {
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		featured = await getFeatured();
-		console.log(featured)
+		//console.log(featured)
 		vm.repopulate();
 	});
 	
@@ -614,7 +614,7 @@ function($scope, $state, $timeout) {
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		partner = await getPartner();
-		console.log(partner)
+		//console.log(partner)
 		vm.repopulate();
 	});
 	

@@ -45,7 +45,7 @@ local function sendElectrics(data, gameVehicleID)
 end
 
 
---- This funct serves to move the electrics data from GE to VE for application
+--- This function serves to send the electrics data from GE to VE for application
 --- @param data table The data to be applied as electrics
 --- @param serverVehicleID string The VehicleID according to the server.
 local function applyElectrics(data, serverVehicleID)

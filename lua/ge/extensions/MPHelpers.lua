@@ -9,10 +9,17 @@ local M = {}
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
+--- Checks if two colors match by comparing their serialized values.
+--- @param old table The first color to compare.
+--- @param new table The second color to compare.
+--- @return boolean True if the colors match, false otherwise.
 local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
 end
 
+--- Converts a hexadecimal color code to RGB values.
+--- @param hex string The hexadecimal color code to convert.
+--- @return table RGB An array containing the RGB values of the color.
 local function hex2rgb(hex)
   if not hex or not hex:find("^#[%x]+$") or #hex ~= 7 then   
     return { 0,0,0 }
@@ -26,6 +33,12 @@ local function hex2rgb(hex)
 end
 
 
+--- Compares two tables and returns the differences between them.
+--- @param old table The first table to compare.
+--- @param new table The second table to compare.
+--- @return table diff A table containing the differences between the two tables.
+--- @return table o A table containing the values from the first table that are different from the second table.
+--- @return table n A table containing the values from the second table that are different from the first table.
 local function tableDiff(old, new)
 	local diff, o, n = {},{},{}
 	
@@ -38,6 +51,9 @@ local function tableDiff(old, new)
 	return diff, o, n
 end
 
+--- Returns a semi formatted string with information about the caller of this function.
+--- @param level number The level of the stack trace to retrieve. (optional)
+--- @return string A string containing the source file, line number, name type, and name of the caller.
 function simpletraces(level)
 	level = (level or 2) +1
 	--level = level+1
@@ -49,12 +65,17 @@ function simpletraces(level)
 		return "unknown"
 	end
 end
+
+--- Logs a message with information about the caller of this function.
+--- @param level number The level of the stack trace to retrieve. (optional)
+--- @usage `simpletrace()`
 function simpletrace(level)
 	level = (level or 1) +1
 	--print('simpletrace level: '..level)
 	log('I', 'simpletrace', "Code was called from: "..simpletraces(level+1))
 end
 
+--- ?
 do 
 local _pairs = pairs 
 function pairs (value) 

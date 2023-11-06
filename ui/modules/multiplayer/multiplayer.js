@@ -1294,7 +1294,8 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 
 		// If the server passed the filter
 		// Set the color relative to either favorite, featured, official or normal
-		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : 'rgba(0, 0, 0, 0)!important';
+		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : server.partner ? 'rgba(0, 123, 195, 0.3)!important' : 'rgba(0, 0, 0, 0)!important';
+
 
 		createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
 		if (isFavorite) addFav(server, true);

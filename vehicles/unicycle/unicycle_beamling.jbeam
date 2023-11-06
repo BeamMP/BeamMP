@@ -1,0 +1,430 @@
+{
+"unicycle_beamling": {
+    "information":{
+        "authors":"BeamNG",
+        "name":"Beamling",
+    },
+    "slotType" : "unicycle_meshes",
+    "slots": [
+        ["type", "default", "description"],
+        ["beamling_head","beamling_head", "Head"],
+		["beamling_arms","beamling_arms", "Arms"],
+		["beamling_neck_accessories","", "Neck Accessories"],
+		["beamling_waist","", "Belt"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_ball", ["unicycle_ball"]],
+        ["beamling_body", ["unicycle_body"]],
+    ],
+},
+//base
+"beamling_head": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Head",
+    },
+    "slotType" : "beamling_head",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_hair","", "Beamling Hair"],
+		["beamling_eyes","beamling_eyes", "Eyes"],
+		["beamling_beard","", "Beard"],
+		
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_head", ["unicycle_body"]],
+    ],
+},
+"beamling_arms": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Arms",
+    },
+    "slotType" : "beamling_arms",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_wrists","", "Wristwear"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_arms", ["unicycle_body"]],
+    ],
+},
+//hair
+"beamling_hair_1": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Hairstyle 1",
+    },
+    "slotType" : "beamling_hair",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_hair_accessories","", "Hair Acessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_hair_1", ["unicycle_body"]],
+    ],
+},
+"beamling_hair_2": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Hairstyle 2",
+    },
+    "slotType" : "beamling_hair",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_hair_accessories","", "Hair Acessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_hair_2", ["unicycle_body"]],
+    ],
+},
+"beamling_hair_3": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Hairstyle 3",
+    },
+    "slotType" : "beamling_hair",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_hair_3", ["unicycle_body"]],
+    ],
+},
+"beamling_hair_4": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Hairstyle 4",
+    },
+    "slotType" : "beamling_hair",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_hair_accessories","", "Hair Acessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_hair_4", ["unicycle_body"]],
+    ]
+},
+//beards
+"beamling_beard": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Beard",
+    },
+    "slotType" : "beamling_beard",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_beard", ["unicycle_body"]],
+    ]
+},
+"beamling_christmasbeard": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Santa Beard",
+    },
+    "slotType" : "beamling_beard",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_christmasbeard", ["unicycle_body"]],
+    ]
+},
+"beamling_moustache": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Moustache",
+    },
+    "slotType" : "beamling_beard",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_stache", ["unicycle_body"]],
+    ]
+},
+"beamling_rednose": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Red Nose",
+    },
+    "slotType" : "beamling_beard",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_rednose", ["unicycle_body"]],
+    ]
+},
+//eyes
+"beamling_eyes": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Eyes",
+    },
+    "slotType" : "beamling_eyes",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_eyewear","", "Glasses"],
+		["beamling_makeup","", "MakeUp"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_eyes", ["unicycle_body"]],
+    ],
+},
+"beamling_glasses": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Glasses",
+    },
+    "slotType" : "beamling_eyewear",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_glasses", ["unicycle_body"]],
+    ],
+},
+"beamling_vr": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"VR-Headset",
+    },
+    "slotType" : "beamling_eyewear",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_vr", ["unicycle_body"]],
+    ],
+},
+"beamling_eyeliner": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Eyeliner",
+    },
+    "slotType" : "beamling_makeup",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_eyeliner", ["unicycle_body"]],
+    ],
+},
+//wrist
+"beamling_digiwatch": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Digital Watch",
+    },
+    "slotType" : "beamling_wrists",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_digiwatch", ["unicycle_body"]],
+    ],
+},
+//neck
+"beamling_hood": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Hood",
+    },
+    "slotType" : "beamling_neck_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_hood", ["unicycle_body"]],
+    ],
+},
+"beamling_suit": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Suit",
+    },
+    "slotType" : "beamling_neck_accessories",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_suit_accessories","", "Tie"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_suit", ["unicycle_body"]],
+    ],
+},
+"beamling_suit_open": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Open Suit",
+    },
+    "slotType" : "beamling_neck_accessories",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_long_suit_accessories","", "Tie"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_suit_open", ["unicycle_body"]],
+    ],
+},
+//neck neck
+"beamling_bowtie": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Bowtie",
+    },
+    "slotType" : "beamling_suit_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_bowtie", ["unicycle_body"]],
+    ],
+},
+"beamling_necktie": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Necktie",
+    },
+    "slotType" : "beamling_suit_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_necktie", ["unicycle_body"]],
+    ],
+},
+"beamling_bowtie_long": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Bowtie",
+    },
+    "slotType" : "beamling_long_suit_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_bowtie", ["unicycle_body"]],
+    ],
+},
+"beamling_necktie_long": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Necktie",
+    },
+    "slotType" : "beamling_long_suit_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_necktie_long", ["unicycle_body"]],
+    ],
+},
+//waist
+"beamling_belt": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Belt",
+    },
+    "slotType" : "beamling_waist",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_belt", ["unicycle_body"]],
+    ],
+},
+"beamling_fannypack": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Fanny pack",
+    },
+    "slotType" : "beamling_waist",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_fannypack", ["unicycle_body"]],
+    ],
+},
+//Head stuff
+"beamling_headphones": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Headphones",
+    },
+    "slotType" : "beamling_hair_accessories",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_headphone_accessories","", "Headphone Accessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_headphones", ["unicycle_body"]],
+    ],
+},
+"beamling_flatcap": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Flatcap",
+    },
+    "slotType" : "beamling_hair_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_flatcap", ["unicycle_body"]],
+    ],
+},
+"beamling_catears_hair": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Cat Ears",
+    },
+    "slotType" : "beamling_hair_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_catears", ["unicycle_body"]],
+    ],
+},
+"beamling_antlers": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Antlers",
+    },
+    "slotType" : "beamling_hair_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_antlers", ["unicycle_body"]],
+    ],
+},
+"beamling_catears_headphones": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Cat ears on Headphones",
+    },
+    "slotType" : "beamling_headphone_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_catears", ["unicycle_body"]],
+    ],
+},
+"beamling_christmashat": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Christmas Hairat",
+    },
+    "slotType" : "beamling_hair_accessories",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_christmas_accessories","", "Christmas Hat Accessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_christmashat", ["unicycle_body"]],
+    ],
+},
+"beamling_christmashat": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"christmas hat",
+    },
+    "slotType" : "beamling_hair_accessories",
+	"slots": [
+        ["type", "default", "description"],
+        ["beamling_christmas_accessories","", "Christmas Hat Accessories"],
+    ],
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_christmashat", ["unicycle_body"]],
+    ],
+},
+"beamling_bell": {
+    "information":{
+        "authors":"Vanilla",
+        "name":"Bell",
+    },
+    "slotType" : "beamling_christmas_accessories",
+    "flexbodies": [
+        ["mesh", "[group]:"],
+        ["beamling_bell", ["unicycle_body"]],
+    ],
+},
+}

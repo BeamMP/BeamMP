@@ -1,0 +1,265 @@
+{
+  "beamling_black": {
+    "name": "beamling_black",
+    "mapTo": "beamling_black",
+    "class": "material",
+    "persistentId": "6710d599-a6ed-4fa3-b405-784bcc3e43bc",
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "metallicFactor": 0.165000007,
+        "roughnessFactor": 0.460000008
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_bodycolour": {
+    "name": "beamling_bodycolour",
+    "mapTo": "beamling_bodycolour",
+    "class": "material",
+    "persistentId": "cc01b1b0-86f7-41e5-87a1-ab3fe97e3e32",
+    "Stages": [
+      {
+        "colorPaletteMap": "/vehicles/unicycle/colour_palette_clothing_map.png",
+        "metallicFactor": 0.184,
+        "roughnessFactor": 0.595000029
+      },
+      {
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "metallicFactor": null,
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_hair": {
+    "name": "beamling_hair",
+    "mapTo": "beamling_hair",
+    "class": "material",
+    "persistentId": "19fd73c0-64eb-4434-8b50-74afa3631e36",
+    "Stages": [
+      {
+        "colorPaletteMap": "/vehicles/unicycle/colour_palette_hair_map.png",
+        "roughnessFactor": 0.675999999
+      },
+      {
+        "roughnessFactor": null
+      },
+      {
+        "roughnessFactor": null
+      },
+      {
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_hat": {
+    "name": "beamling_hat",
+    "mapTo": "beamling_hat",
+    "class": "Material",
+    "persistentId": "b055c593-8a46-4c3f-995d-d5141c3ec5a9",
+    "Stages": [
+      {},
+      {},
+      {},
+      {}
+    ],
+    "activeLayers": 1,
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_metal": {
+    "name": "beamling_metal",
+    "mapTo": "beamling_metal",
+    "class": "material",
+    "persistentId": "b7067cf1-f129-4282-983b-7a63840a3a48",
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.52352798,
+          0.52352798,
+          0.52352798,
+          1
+        ],
+        "metallicFactor": 0.541999996,
+        "roughnessFactor": 0.611999989
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_orange": {
+    "name": "beamling_orange",
+    "mapTo": "beamling_orange",
+    "class": "material",
+    "persistentId": "b055c593-8a46-4c3f-995d-d5141c3ec5a9",
+    "Stages": [
+      {
+        "baseColorFactor": [
+          1,
+          0.400000006,
+          0,
+          1
+        ],
+        "metallicFactor": 0.31099999,
+        "roughnessFactor": 0
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_pink": {
+    "name": "beamling_pink",
+    "mapTo": "beamling_pink",
+    "class": "material",
+    "persistentId": "e6f809a5-36ad-4c91-9a98-73d3e37856a9",
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.961663008,
+          0.845794976,
+          0.954657018,
+          1
+        ]
+      },
+      {
+        "baseColorFactor": null
+      },
+      {
+        "baseColorFactor": null
+      },
+      {
+        "baseColorFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_skin": {
+    "name": "beamling_skin",
+    "mapTo": "beamling_skin",
+    "class": "Material",
+    "persistentId": "b2c1d71a-7b67-4103-8a5e-fd53250d70bf",
+    "Stages": [
+      {
+        "colorPaletteMap": "/vehicles/unicycle/colour_palette_skin_map.png"
+      },
+      {},
+      {},
+      {}
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_tiepattern": {
+    "name": "beamling_tiepattern",
+    "mapTo": "beamling_tiepattern",
+    "class": "Material",
+    "persistentId": "",
+    "Stages": [
+      {},
+      {},
+      {},
+      {}
+    ],
+    "activeLayers": 1,
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_santa": {
+    "name": "beamling_santa",
+    "mapTo": "beamling_santa",
+    "class": "Material",
+    "persistentId": "b055c593-8a46-4c3f-995d-d5141c3ec5a9",
+    "Stages": [
+      {},
+      {},
+      {},
+      {}
+    ],
+    "activeLayers": 1,
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+}

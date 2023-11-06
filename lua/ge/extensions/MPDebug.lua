@@ -5,6 +5,13 @@
 -- Debug menus for monitoring BeamMP performance and more
 --====================================================================================
 
+--- MPDebug API.
+--- Author of this documentation is Titch
+--- @module MPDebug
+--- @usage getPlayerNames() -- internal access
+--- @usage MPDebug.tpPlayerToPos(...) -- external access
+
+
 local M = {}
 
 

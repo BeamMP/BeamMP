@@ -5,6 +5,12 @@
 -- Helper functions for use in BeamMP and its extensions
 --====================================================================================
 
+--- MPHelpers API.
+--- Author of this documentation is Titch
+--- @module MPHelpers
+--- @usage MPHelpers.hex2rgb(...) -- external access
+
+
 local M = {}
 
 setmetatable(_G,{}) -- temporarily disable global write notifications

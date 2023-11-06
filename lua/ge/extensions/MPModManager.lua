@@ -3,6 +3,9 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
+--- MPModManager API.
+--- Author of this documentation is Titch
+--- @module MPModManager
 
 
 local M = {}
@@ -18,6 +21,7 @@ local function unloadLocales()
 	FS:directoryRemove('/temp/beammp')
 end
 
+--- Load the BeamMP provided locales and merge them into a working set for BeamNG
 local function loadLocales() -- loads beammp locales without having to directly replace the game locales
 	unloadLocales()
 	local mp_locales = FS:findFiles('/mp_locales/', '*.json', 0)
@@ -45,7 +49,10 @@ local function loadLocales() -- loads beammp locales without having to directly 
 	FS:directoryRemove('/temp/beammp/locales')
 end
 
-
+--- Check if a mod is allowed according to the servers mods
+--- @param modName string The mod in question to check
+--- @return boolean
+--- @usage `MPModManager.isModAllowed('...')`
 local function isModAllowed(modName)
 	for _,v in pairs(serverMods) do -- checking for server mods
 		if string.lower(v) == string.lower(modName) then --[[ log('M', 'isModAllowed', modName .. ' is allowed.') ]] return true end
@@ -53,12 +60,22 @@ local function isModAllowed(modName)
 	--log('W', 'isModAllowed', modName .. ' is not allowed.')
 	return false
 end
+
+--- Check if a mod is whitelisted according to BeamMP core set E.g. itself, BeamMP.
+--- @param modName string The mod in question to check
+--- @return boolean
+--- @usage `MPModManager.isModWhitelisted('...')`
 local function isModWhitelisted(modName)
 	for _,v in pairs(whitelist) do
 		if string.lower(v) == string.lower(modName) then --[[log('M', 'isModWhitelisted', modName .. ' is whitelisted.')]] return true end
 	end
 	return false
 end
+
+--- Check if a mod is allowed (Calls isModAllowed and isModWhitelist)
+--- If it is now allowed we disable it, if it is in the multiplayer folder we also delete it as this is maintained by BeamMP
+--- @param mod table The mod in question to check
+--- @usage `MPModManager.isModAllowed('...')`
 local function checkMod(mod) --TODO: might have a flaw with repo mods as their name is the repo ID and not the zip name
 	--log('M', 'checkMod', 'Checking mod.modname: '..mod.modname)
 	local modname = mod.modname
@@ -83,7 +100,10 @@ local function checkMod(mod) --TODO: might have a flaw with repo mods as their n
 	end
 end
 
-local function getModNameFromPath(path) --BeamNG function from extensions/core/modmanager.lua
+--- BeamNG function from extensions/core/modmanager.lua
+--- @param path string The raw mod file path
+--- @return string modname The cleaned modname from the mod file path
+local function getModNameFromPath(path) 
 	local modname = string.lower(path)
 	modname = modname:gsub('/mods/', '')
 	modname = modname:gsub('repo/', '')
@@ -93,12 +113,16 @@ local function getModNameFromPath(path) --BeamNG function from extensions/core/m
 	return modname
 end
 
+--- The mods json object which the game manages.
+--- @return table mods The mods according to the game managed db
 local function getModList()
 	local modsDB = jsonReadFile("mods/db.json")
 	return modsDB.mods
 end
 
 local waitForFilesChanged = false
+
+--- Check the game mod list against BeamMP's expected
 local function checkAllMods() --add counters?
 	log('M', 'checkAllMods', 'Checking all mods...')
 	for modname, mod in pairs(getModList()) do
@@ -106,6 +130,7 @@ local function checkAllMods() --add counters?
 	end
 end
 
+--- Load the Servers mods, these are put in by the BeamMP Launcher
 local function loadServerMods()
 	log('W', 'loadServerMods', 'loadServerMods')
 	
@@ -117,6 +142,8 @@ local function loadServerMods()
 	MPCoreNetwork.requestMap()
 end
 
+--- Verify that the servers mods have been loaded by the game.
+--- Currently not properly functioning / missing functionality
 local function verifyMods() --TODO: improve and actually implement this
 	local verifyTable = {}
 	for _,v in pairs(serverMods) do
@@ -129,7 +156,7 @@ local function verifyMods() --TODO: improve and actually implement this
 	end
 end
 
-
+--- Cleanup the mods from the ended session ready for another.
 local function cleanUpSessionMods()
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
 	local count = 0
@@ -145,8 +172,11 @@ local function cleanUpSessionMods()
 	unloadGameModules()
 end
 
-
-local function setServerMods(modsString) -- called from MPCoreNetwork
+--- Set the servers mods as a string in Lua for loading and checking
+--- Called from MPCoreNetwork
+--- @param modsString string The mod string from the server
+--- @usage `MPModManager.setServerMods('...')
+local function setServerMods(modsString) 
 	if modsString == "" then log('M', 'setServerMods', 'Received no mods.') return end
 	log('W', 'setMods', modsString)
 	local mods = {}
@@ -163,6 +193,8 @@ local function setServerMods(modsString) -- called from MPCoreNetwork
 	serverMods = mods
 end
 
+--- A BeamNG event that is called when a mod is loaded by the games mod manager
+--- @param mod table The loaded mod information
 local function onModActivated(mod)
 	log('M', 'onModActivated', mod.modname)
 	if MPCoreNetwork.isMPSession() then
@@ -173,7 +205,8 @@ end
 
 local original_registerCoreModule
 
-local function extensionLoader() -- prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload
+--- This prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload
+local function extensionLoader()
 	original_registerCoreModule = registerCoreModule
 	registerCoreModule = function(modulePath)
 		--log('M', 'extensionLoader', modulePath)
@@ -215,6 +248,8 @@ M.repositoryReplacer = function() --TODO: if this function is called onExtension
 	end
 end
 
+--- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+--- We use this to load our locales, cleanup the mods ahead of mp use and ensure our modloader is used
 local function onExtensionLoaded()
 	loadLocales()
 	cleanUpSessionMods()
@@ -222,12 +257,15 @@ local function onExtensionLoaded()
 	--M.replaceStuff()
 end
 
+--- Triggered by BeamNG when the lua mod is unloaded by the modmanager system.
+--- We use this to cleanup our locales and restore core module defintions
 local function onExtensionUnloaded() -- restore functions back to their default values
 	unloadLocales()
 	registerCoreModule = original_registerCoreModule and original_registerCoreModule
 	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
 end
 
+--- This is used to ensure the cleanup of the mods from the mod manager is done at the end of the session.
 local function onServerLeave()
 	if MPCoreNetwork.isMPSession() or MPCoreNetwork.isGoingMPSession() then
 		log('W', 'onServerLeave', 'MPModManager')
@@ -237,12 +275,17 @@ local function onServerLeave()
 end
 
 local requestLuaReload = false
+
+--- Reload lua but with a 0.5 second delay to allow other states to refresh
 local function reloadLuaReloadWithDelay()
 	if hasMods then -- don't reload if server doesn't contain mods
 		requestLuaReload = true
 	end
 end
 local reloadTimer = 0
+
+--- onUpdate is a game eventloop function. It is called each frame by the game engine.
+--- @param dt float
 local function onUpdate(dt)
 	if requestLuaReload then
 		reloadTimer = reloadTimer + dt

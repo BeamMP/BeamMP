@@ -8,6 +8,10 @@ local original_onInstabilityDetected
 local original_bigMapMode
 local original_bullettime
 
+
+--- Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.
+--- @param veh userdata The vehicle data
+--- @return unknown
 local function modifiedGetDriverData(veh)
 	if not veh then return nil end
 	local caller = debug.getinfo(2).name
@@ -18,6 +22,8 @@ local function modifiedGetDriverData(veh)
 	return core_camera.getDriverDataById(veh and veh:getID())
 end
 
+
+--- Custom walking mode function that handles the getting of the unicycle and handles the deletion of it.
 local function modifiedToggleWalkingMode()
 	local unicycle = gameplay_walk.getPlayerUnicycle()
 	if unicycle ~= nil then
@@ -32,10 +38,16 @@ local function modifiedToggleWalkingMode()
 	end
 end
 
+
+--- A custom onInstabilityDetected function to prevent the freezing / pausing of the game for when in MP session
+--- @param jbeamFilename table Object jbeam data of the object causing the instability
 local function modified_onInstabilityDetected(jbeamFilename)
 	log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))
 end
 
+
+--- A custom function overwrite for if the map should be allowed to open.
+--- @return boolean True if the the map should be allowed to open?
 local function modified_bigMapMode()
 	bullettime.pause = nop
 	return true --TODO: maybe add a check to stop map opening if no vehicle is present
@@ -43,10 +55,15 @@ end
 
 original_bullettime = bullettime.pause
 
+--- Called when the Big Map is loaded by the user. 
 local function onBigMapActivated()
 	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
 end
 
+
+--- onUpdate is a game eventloop function. It is called each frame by the game engine.
+--- This is the main processing thread of BeamMP in the game
+--- @param dt float
 local function onUpdate(dt)
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 		--log('W', 'onUpdate', 'Running modified beammp code!')
@@ -73,7 +90,7 @@ end
 
 
 
-
+--- This function/event is triggered internally upon the joining on a map.
 local function runPostJoin()
 	--save the original functions so they can be restored after leaving an mp session
 	original_onInstabilityDetected = onInstabilityDetected
@@ -88,6 +105,7 @@ local function runPostJoin()
 end
 
 
+--- This function is called when the user leaves a server as part of cleanup 
 local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
 	if original_bigMapMode then freeroam_bigMapMode.canBeActivated = original_bigMapMode end
@@ -96,6 +114,10 @@ local function onServerLeave()
 end
 
 
+--- This function is called by BeamNG upon the change of the world ready state.
+--- 1 = World is loading
+--- 2 = World is ready, You are about to have the loading screen disappear. This is the time to show anything you have.
+--- @param state number The state in numerical form.
 local function onWorldReadyState(state)
 	log('W', 'onWorldReadyState', state)
 	if state == 2 then

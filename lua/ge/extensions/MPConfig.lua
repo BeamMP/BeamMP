@@ -47,7 +47,7 @@ local function onExtensionLoaded()
 end
 
 --- Set the users Nickname variable for use by other aspects of the mod.
--- @tparam string The users nickname that we have received.
+-- @tparam string x The users nickname that we have received.
 -- @usage `MPConfig.setNickname(<nickname>)`
 local function setNickname(x)
 	log('M', 'setNickname', 'Nickname Set To: '..x)

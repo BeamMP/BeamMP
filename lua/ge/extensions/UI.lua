@@ -220,9 +220,9 @@ local function showMdDialog(options)
 	guihooks.trigger("showMdDialog", options)
 end
 
----------------------------------------------------------------
-------------------------- Chat Stuff --------------------------
----------------------------------------------------------------
+-- -------------------------------------------------------------
+-- ----------------------- Chat Stuff --------------------------
+-- -------------------------------------------------------------
 
 --- Render the IMGUI chat window and playerlist windows + the settings for them.
 local function renderWindow()

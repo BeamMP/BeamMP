@@ -132,7 +132,7 @@ end
 
 --- Quit the multiplayer session.
 -- @tparam string reason The reason for quitting the session.
--- @usage `MPGameNetwork.quitMP(<reason>)`
+-- @usage MPGameNetwork.quitMP(<reason>)
 local function quitMP(reason)
 	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
@@ -143,13 +143,13 @@ local function quitMP(reason)
 	})
 end
 
--------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 -- Events System
--------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 
 --- Handles events triggered by TriggerClientEvent.
--- @tparam string p - The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
--- @usage `MPGameNetwork.CallEvent(<event data string>)
+-- @tparam string p The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
+-- @usage MPGameNetwork.CallEvent(<event data string>)
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	local eventName, eventData = string.match(p,"^%:([^%:]+)%:(.*)")
 	if not eventName then quitMP(p) return end
@@ -189,9 +189,9 @@ function AddEventHandler(n, f)
 	end
 end
 
--------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 -- Keypress handling
--------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------
 
 --- Sets a function to be called when the specified key is pressed.
 -- @tparam string keyname - The name of the key
@@ -281,7 +281,7 @@ local HandleNetwork = {
 local heartbeatTimer = 0
 
 --- onUpdate is called each game frame by the games engine. It is used to run scripts in a loop such as getting data from the network buffer.
--- @tparam integer delta time
+-- @tparam integer dt delta time
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onUpdate(dt)
 	--====================================================== DATA RECEIVE ======================================================

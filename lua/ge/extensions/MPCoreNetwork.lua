@@ -248,8 +248,9 @@ local function setMods(receivedMods) -- receiving mods means that the client aut
 	MPModManager.setServerMods(receivedMods)
 end
 
+
 --- Return the current server information
---- @return table the current server information
+--- @return table currentServer the current server information
 --- @usage `MPCoreNetwork.getCurrentServer()
 local function getCurrentServer()
 	--dump(currentServer)

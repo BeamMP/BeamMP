@@ -24,9 +24,9 @@ local function toTitleCase(str)
     return str:gsub("%u", function(c) return " " .. c end):gsub("^%l", string.upper)
 end
 
---------------------------------
------[ Utility Functions ]------
---------------------------------
+-- ------------------------------
+-- ---[ Utility Functions ]------
+-- ------------------------------
 
 --- Saves the configuration settings to file.
 --- @param settings table The settings to be saved. If not provided, UI.settings will be used.
@@ -38,9 +38,9 @@ local function saveConfig(settings)
 end
 
 
---------------------------------
------[       Tabs        ]------
---------------------------------
+-- ------------------------------
+-- ---[       Tabs        ]------
+-- ------------------------------
 --- Renders the theming section of the UI.
 local function renderTheming()
     if imgui.BeginChild1("Colors", imgui.ImVec2(0, imgui.GetWindowHeight() - 100), false) then

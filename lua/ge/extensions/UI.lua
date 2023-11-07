@@ -84,7 +84,7 @@ local playersString = "" -- "player1,player2,player3"
 local chatcounter = 0
 
 --- Updates the loading information/message based on the provided data.
---- @param data string The raw data message containing the code and message.
+-- @param data string The raw data message containing the code and message.
 local function updateLoading(data)
 	local code = string.sub(data, 1, 1)
 	local msg = string.sub(data, 2)
@@ -95,7 +95,7 @@ local function updateLoading(data)
 end
 
 --- Prompts the user for auto join confirmation and triggers the AutoJoinConfirmation event.
---- @param data string The message to display in the confirmation prompt.
+-- @param data string The message to display in the confirmation prompt.
 local function promptAutoJoinConfirmation(data)
     --print(data)
     guihooks.trigger('AutoJoinConfirmation', {message = data})
@@ -104,9 +104,9 @@ local function promptAutoJoinConfirmation(data)
 end
 
 --- Splits a string into fields using the specified separator.
---- @param s string The string to split.
---- @param sep string (optional) The separator to use. Defaults to a space character.
---- @return table An array containing the split fields.
+-- @param s string The string to split.
+-- @param sep string (optional) The separator to use. Defaults to a space character.
+-- @return table An array containing the split fields.
 local function split(s, sep)
     local fields = {}
 
@@ -119,7 +119,7 @@ end
 
 
 --- Update the players string used to create the player list in the UI when in a session.
---- @param data string
+-- @param data string
 local function updatePlayersList(data)
 	playersString = data or playersString
 	local players = split(playersString, ",")
@@ -157,8 +157,8 @@ local function sendQueue() -- sends queue to UI
 end
 
 --- This function is used to update the edit/spawn queue values for the UI indicator.
---- @param spawnCount number
---- @param editCount number
+-- @param spawnCount number
+-- @param editCount number
 local function updateQueue( spawnCount, editCount)
 	UIqueue = {spawnCount = spawnCount, editCount = editCount}
 	UIqueue.show = spawnCount+editCount > 0
@@ -166,7 +166,7 @@ local function updateQueue( spawnCount, editCount)
 end
 
 --- Used to set our ping in the top status bar. It also is used in the math for position prediction
---- @param ping number
+-- @param ping number
 local function setPing(ping)
 	if tonumber(ping) < 0 then return end -- not connected
 	guihooks.trigger("setPing", ""..ping.." ms")
@@ -175,16 +175,16 @@ end
 
 
 --- Set the users nickname so that we know what our username was in lua.
---- Useful in determining who we are 
---- @param name any
+-- Useful in determining who we are 
+-- @param name any
 local function setNickname(name)
 	guihooks.trigger("setNickname", name)
 end
 
 
 --- Set the server name in the status bar at the top while in session
---- This is set as part of the joining process automatically
---- @param serverName string
+-- This is set as part of the joining process automatically
+-- @param serverName string
 local function setServerName(serverName)
 	serverName = serverName or (MPCoreNetwork.getCurrentServer() and MPCoreNetwork.getCurrentServer().name)
 	guihooks.trigger("setServerName", serverName)
@@ -192,16 +192,16 @@ end
 
 
 --- Update the player count in the top status bar when in a server. Should be preformatted
---- This is set as part of the joining process automatically and is updated during the session
---- @param playerCount string
+-- This is set as part of the joining process automatically and is updated during the session
+-- @param playerCount string
 local function setPlayerCount(playerCount)
 	guihooks.trigger("setPlayerCount", playerCount)
 end
 
 
 --- Display a prompt in the top corner as a notification, Good for server related events like joins/leaves
---- @param text string
---- @param type string
+-- @param text string
+-- @param type string
 local function showNotification(text, type)
 	if type and type == "error" then
 		log('I', 'showNotification', "[UI Error] > "..tostring(text))
@@ -215,7 +215,7 @@ local function showNotification(text, type)
 	ui_message(''..text, 10, nil, nil)
 end
 --- Show a UI dialog / alert box to inform the user of something.
---- @param options any
+-- @param options any
 local function showMdDialog(options)
 	guihooks.trigger("showMdDialog", options)
 end
@@ -408,8 +408,8 @@ local function loadConfig()
 end
 
 --- Function is for when the game receives a new chat message from the server. 
---- This is for handling the raw chat message
---- @param rawMessage string The raw chat message with header codes
+-- This is for handling the raw chat message
+-- @param rawMessage string The raw chat message with header codes
 local function chatMessage(rawMessage) -- chat message received (angular)
 	chatcounter = chatcounter+1
 	local message = string.sub(rawMessage, 2)
@@ -444,7 +444,7 @@ end
 
 
 --- Sends a chat message to the server for viewing by other players.
---- @param msg string The chat message typed by the user
+-- @param msg string The chat message typed by the user
 local function chatSend(msg)
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
@@ -468,21 +468,21 @@ local function toggleChat()
 end
 
 --- This function is for mapping player pings to names for the playerlist
---- @param playerName string The player name
---- @param ping number The players ping
+-- @param playerName string The player name
+-- @param ping number The players ping
 local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
 --- Executes when the user or mod ends a mission/session (map) .
---- @param mission table The mission object.
+-- @param mission table The mission object.
 local function onClientEndMission(mission)
     chatWindow.chatMessages = {}
     chatWindow.clearHistory()
 end
 
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
---- We use this to load our UI and config
+-- We use this to load our UI and config
 local function onExtensionLoaded()
     log("D", "MPInterface", "Loaded")
 
@@ -506,8 +506,8 @@ local function onExtensionLoaded()
 end
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
---- This is the main processing thread of BeamMP in the game
---- @param dt float
+-- This is the main processing thread of BeamMP in the game
+-- @param dt float
 local function onUpdate(dt)
     if worldReadyState ~= 2 or not settings.getValue("enableNewChatMenu") or not initialized or not M.canRender or MPCoreNetwork and not MPCoreNetwork.isMPSession() then return end
     renderWindow()

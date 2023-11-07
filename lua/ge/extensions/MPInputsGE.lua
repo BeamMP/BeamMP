@@ -52,7 +52,7 @@ local function applyInputs(data, serverVehicleID)
 end
 
 
---- The raw message from the server. This is unpacked first and then sent to be applied according to applyInputs()
+--- The raw message from the server. This is unpacked first and then sent to applyInputs()
 -- @param rawData string The raw message data.
 local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")

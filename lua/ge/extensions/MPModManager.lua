@@ -50,9 +50,9 @@ local function loadLocales() -- loads beammp locales without having to directly 
 end
 
 --- Check if a mod is allowed according to the servers mods
---- @param modName string The mod in question to check
---- @return boolean
---- @usage `MPModManager.isModAllowed('...')`
+-- @param modName string The mod in question to check
+-- @return boolean
+-- @usage MPModManager.isModAllowed('...')
 local function isModAllowed(modName)
 	for _,v in pairs(serverMods) do -- checking for server mods
 		if string.lower(v) == string.lower(modName) then --[[ log('M', 'isModAllowed', modName .. ' is allowed.') ]] return true end
@@ -62,9 +62,9 @@ local function isModAllowed(modName)
 end
 
 --- Check if a mod is whitelisted according to BeamMP core set E.g. itself, BeamMP.
---- @param modName string The mod in question to check
---- @return boolean
---- @usage `MPModManager.isModWhitelisted('...')`
+-- @param modName string The mod in question to check
+-- @return boolean
+-- @usage MPModManager.isModWhitelisted('...')
 local function isModWhitelisted(modName)
 	for _,v in pairs(whitelist) do
 		if string.lower(v) == string.lower(modName) then --[[log('M', 'isModWhitelisted', modName .. ' is whitelisted.')]] return true end
@@ -73,9 +73,9 @@ local function isModWhitelisted(modName)
 end
 
 --- Check if a mod is allowed (Calls isModAllowed and isModWhitelist)
---- If it is now allowed we disable it, if it is in the multiplayer folder we also delete it as this is maintained by BeamMP
---- @param mod table The mod in question to check
---- @usage `MPModManager.isModAllowed('...')`
+-- If it is now allowed we disable it, if it is in the multiplayer folder we also delete it as this is maintained by BeamMP
+-- @param mod table The mod in question to check
+-- @usage MPModManager.isModAllowed('...')
 local function checkMod(mod) --TODO: might have a flaw with repo mods as their name is the repo ID and not the zip name
 	--log('M', 'checkMod', 'Checking mod.modname: '..mod.modname)
 	local modname = mod.modname
@@ -101,8 +101,8 @@ local function checkMod(mod) --TODO: might have a flaw with repo mods as their n
 end
 
 --- BeamNG function from extensions/core/modmanager.lua
---- @param path string The raw mod file path
---- @return string modname The cleaned modname from the mod file path
+-- @param path string The raw mod file path
+-- @return string modname The cleaned modname from the mod file path
 local function getModNameFromPath(path) 
 	local modname = string.lower(path)
 	modname = modname:gsub('/mods/', '')
@@ -114,7 +114,7 @@ local function getModNameFromPath(path)
 end
 
 --- The mods json object which the game manages.
---- @return table mods The mods according to the game managed db
+-- @return table mods The mods according to the game managed db
 local function getModList()
 	local modsDB = jsonReadFile("mods/db.json")
 	return modsDB.mods
@@ -143,7 +143,7 @@ local function loadServerMods()
 end
 
 --- Verify that the servers mods have been loaded by the game.
---- Currently not properly functioning / missing functionality
+-- Currently not properly functioning / missing functionality
 local function verifyMods() --TODO: improve and actually implement this
 	local verifyTable = {}
 	for _,v in pairs(serverMods) do
@@ -173,9 +173,9 @@ local function cleanUpSessionMods()
 end
 
 --- Set the servers mods as a string in Lua for loading and checking
---- Called from MPCoreNetwork
---- @param modsString string The mod string from the server
---- @usage `MPModManager.setServerMods('...')
+-- Called from MPCoreNetwork
+-- @param modsString string The mod string from the server
+-- @usage MPModManager.setServerMods('...')
 local function setServerMods(modsString) 
 	if modsString == "" then log('M', 'setServerMods', 'Received no mods.') return end
 	log('W', 'setMods', modsString)
@@ -194,7 +194,7 @@ local function setServerMods(modsString)
 end
 
 --- A BeamNG event that is called when a mod is loaded by the games mod manager
---- @param mod table The loaded mod information
+-- @param mod table The loaded mod information
 local function onModActivated(mod)
 	log('M', 'onModActivated', mod.modname)
 	if MPCoreNetwork.isMPSession() then
@@ -249,7 +249,7 @@ M.repositoryReplacer = function() --TODO: if this function is called onExtension
 end
 
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
---- We use this to load our locales, cleanup the mods ahead of mp use and ensure our modloader is used
+-- We use this to load our locales, cleanup the mods ahead of mp use and ensure our modloader is used
 local function onExtensionLoaded()
 	loadLocales()
 	cleanUpSessionMods()
@@ -258,7 +258,7 @@ local function onExtensionLoaded()
 end
 
 --- Triggered by BeamNG when the lua mod is unloaded by the modmanager system.
---- We use this to cleanup our locales and restore core module defintions
+-- We use this to cleanup our locales and restore core module defintions
 local function onExtensionUnloaded() -- restore functions back to their default values
 	unloadLocales()
 	registerCoreModule = original_registerCoreModule and original_registerCoreModule
@@ -285,7 +285,7 @@ end
 local reloadTimer = 0
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
---- @param dt float
+-- @param dt float
 local function onUpdate(dt)
 	if requestLuaReload then
 		reloadTimer = reloadTimer + dt

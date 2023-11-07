@@ -41,8 +41,8 @@ end
 
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
---- This is the main processing thread of BeamMP in the game
---- @param dt float
+-- This is the main processing thread of BeamMP in the game
+-- @param dt float
 local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		nodesTimer = nodesTimer + dt

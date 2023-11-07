@@ -26,10 +26,10 @@ local function tick()
 end
 
 
---- This function is called by VE lua to send the data from VE to GE and then to the server.
---- INTERNAL USE
---- @param data table The node data from VE
---- @param gameVehicleID number The vehicle ID according to the local game
+--- Wraps up node data from player own vehicles and sends it to the server.
+-- INTERNAL USE
+-- @param data table The node data from VE
+-- @param gameVehicleID number The vehicle ID according to the local game
 local function sendNodes(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
@@ -40,10 +40,10 @@ local function sendNodes(data, gameVehicleID)
 end
 
 
---- This function is called by VE lua to send the data from VE to GE and then to the server.
---- INTERNAL USE
---- @param data table The break group data from VE
---- @param gameVehicleID number The vehicle ID according to the local game
+--- Wraps break group data of player own vehicles and sends it to the server.
+-- INTERNAL USE
+-- @param data table The break group data from VE
+-- @param gameVehicleID number The vehicle ID according to the local game
 local function sendBreakGroups(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
@@ -54,9 +54,9 @@ local function sendBreakGroups(data, gameVehicleID)
 end
 
 
---- This function serves to send the nodes data from GE to VE for application
---- @param data table The data to be applied as nodes
---- @param serverVehicleID string The VehicleID according to the server.
+--- This function serves to send the nodes data received for another players vehicle from GE to VE, where it is handled.
+-- @param data table The data to be applied as nodes
+-- @param serverVehicleID string The VehicleID according to the server.
 local function applyNodes(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = be:getObjectByID(gameVehicleID)
@@ -66,9 +66,9 @@ local function applyNodes(data, serverVehicleID)
 end
 
 
---- This function serves to send the break groups data from GE to VE for application
---- @param data table The data to be applied as break groups
---- @param serverVehicleID string The VehicleID according to the server.
+--- This function serves to send the break groups data received for another players vehicle from GE to VE, where it is handled.
+-- @param data table The data to be applied as break groups
+-- @param serverVehicleID string The VehicleID according to the server.
 local function applyBreakGroups(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = be:getObjectByID(gameVehicleID)
@@ -78,8 +78,8 @@ local function applyBreakGroups(data, serverVehicleID)
 end
 
 
---- The raw message from the server. This is unpacked first and then sent to be applied according to message code.
---- @param rawData string The raw message data.
+--- Handles raw node and break group packets received from other players vehicles. Disassembles and sends it to either applyNodes() or applyBreakGroups()
+-- @param rawData string The raw message data.
 local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:(.*)")
 	if code == "n" then

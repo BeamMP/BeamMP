@@ -4,8 +4,8 @@
 -- Contact BeamMP for more info!
 --====================================================================================
 
---- MPCoreNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod. It handles the Initial TCP connection establishment with the Launcher.
---- Author of this documentation is Titch2000
+--- MPCoreNetwork API. Handles Main Launcher <-> Game Network. Version Check, Server list transfer, login, connect to X server, quiting a server etc.
+--- Author of this documentation is Titch
 --- @module MPCoreNetwork
 --- @usage connectToLauncher() -- internal access
 --- @usage MPCoreNetwork.connectToLauncher() -- external access
@@ -147,41 +147,41 @@ end
 -- Returns the version of the launcher.
 -- @return string version The version of the launcher.
 local function getLauncherVersion()
-		return "2.0" --launcherVersion
+	return "2.0" --launcherVersion
 end
 
 --- Returns true or false if the user is logged in.
 -- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
-		return loggedIn
+	return loggedIn
 end
 
 --- Returns true or false if the launcher is connected.
 -- @return boolean launcherConnected True if the launcher is connected, false otherwise.
 local function isLauncherConnected()
-		return launcherConnected
+	return launcherConnected
 end
 
 --- Logs in the user with the given identifiers by sending the request to the launcher
 -- @param identifiers table The identifiers used for login.
 local function login(identifiers)
-		log('M', 'login', 'Attempting login...')
-		identifiers = identifiers and jsonEncode(identifiers) or ""
-		send('N:'..identifiers)
+	log('M', 'login', 'Attempting login...')
+	identifiers = identifiers and jsonEncode(identifiers) or ""
+	send('N:'..identifiers)
 end
 
 --- Automatically logs in the user.
 -- @usage autoLogin() -- Tells the launcher to attempt to auto authenticate with BeamMP Services
 local function autoLogin()
-		send('Nc')
+	send('Nc')
 end
 
 --- Tells the launcher to log out the user.
 -- @usage logout() -- Tells the launcher to logout from BeamMP Services
 local function logout()
-		log('M', 'logout', 'Attempting logout')
-		send('N:LO')
-		loggedIn = false
+	log('M', 'logout', 'Attempting logout')
+	send('N:LO')
+	loggedIn = false
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.

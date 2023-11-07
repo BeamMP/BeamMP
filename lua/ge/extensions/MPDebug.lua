@@ -236,14 +236,14 @@ local function drawNetworkPerf()
 end
 
 --- Used to call the UI to show itself.
----@usage `MPDebug.showUI()`
+---@usage MPDebug.showUI()
 local function showUI()
 	gui.showWindow("MPplayerList")
 	gui.showWindow("MPspawnTeleport")
 	gui.showWindow("MPnetworkPerf")
 end
 --- Used to call the UI to hide itself.
----@usage `MPDebug.hideUI()`
+---@usage MPDebug.hideUI()
 local function hideUI()
 	gui.hideWindow("MPplayerList")
 	gui.hideWindow("MPspawnTeleport")
@@ -258,7 +258,7 @@ function MP_Console(show)
 	end
 end
 
---- onUpdate is a game eventloop function. It is called each frame by the game engine.
+--- Draws Imgui playerlist, spawnTeleport and NetworkPerf.
 --- This is the main processing thread of BeamMP in the game
 --- @param dt float
 local function onUpdate()
@@ -269,13 +269,13 @@ end
 
 
 --- Updates the count and size of sent packets.
---- @param bytes number The size of the packet in bytes. (optional)
+--- @param[opt] bytes number The size of the packet in bytes.
 local function packetSent(bytes)
 	sentPacketCount = sentPacketCount+1
 	sentPacketSize = sentPacketSize + (bytes or 0)
 end
 --- Updates the count and size of received packets.
---- @param bytes number The size of the packet in bytes. (optional)
+--- @param[opt] bytes number The size of the packet in bytes.
 local function packetReceived(bytes)
 	receivedPacketCount = receivedPacketCount+1
 	receivedPacketSize = receivedPacketSize + (bytes or 0)

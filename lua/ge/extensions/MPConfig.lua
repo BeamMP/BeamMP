@@ -48,7 +48,7 @@ end
 
 --- Set the users Nickname variable for use by other aspects of the mod.
 -- @tparam string x The users nickname that we have received.
--- @usage `MPConfig.setNickname(<nickname>)`
+-- @usage MPConfig.setNickname(`<nickname>`)
 local function setNickname(x)
 	log('M', 'setNickname', 'Nickname Set To: '..x)
 	Nickname = x
@@ -56,28 +56,28 @@ end
 
 --- Get the users Nickname.
 -- @treturn string The users nickname.
--- @usage `local nickname = MPConfig.getNickname()`
+-- @usage local nickname = MPConfig.getNickname()
 local function getNickname()
 	return Nickname
 end
 
 --- Set the PlayerServerID variable for use by other aspects of the mod.
 -- @tparam number x The PlayerServerID that we have received.
--- @usage `MPConfig.setPlayerServerID(<players server ID>)`
+-- @usage MPConfig.setPlayerServerID(`<players server ID>`)
 local function setPlayerServerID(x)
 	PlayerServerID = tonumber(x)
 end
 
 --- Get the PlayerServerID variable.
 -- @treturn number The users server ID.
--- @usage `local nickname = MPConfig.getPlayerServerID()`
+-- @usage local nickname = MPConfig.getPlayerServerID()
 local function getPlayerServerID()
 	return PlayerServerID
 end
 
 --- Check for old configuration files and move them to the new location if found.
 -- @treturn boolean True if any files were moved, false otherwise.
--- @usage `local updatedConfigs = MPConfig.checkForOldConfig()`
+-- @usage local updatedConfigs = MPConfig.checkForOldConfig()
 local function checkForOldConfig()
 	if not FS:directoryExists("BeamMP") then
 		return false
@@ -109,7 +109,7 @@ end
 
 --- Get the favorites from the favorites.json file.
 -- @treturn table The favorites data.
--- @usage `local favorites = MPConfig.getFavorites()`
+-- @usage local favorites = MPConfig.getFavorites()
 local function getFavorites()
 	if not FS:directoryExists("settings/BeamMP") then
 		if checkForOldConfig() then
@@ -156,7 +156,7 @@ end
 
 --- Set the favorites in the favorites.json file.
 -- @tparam table favstr The favorites data as a table.
--- @usage `MPConfig.setFavorites(<favorites table>)`
+-- @usage MPConfig.setFavorites(`<favorites table>`)
 local function setFavorites(favstr)
 	if not FS:directoryExists("settings/BeamMP") then
 		FS:directoryCreate("settings/BeamMP")
@@ -169,7 +169,7 @@ end
 
 --- Get the configuration from the config.json file.
 -- @treturn table The configuration data.
--- @usage `local config = MPConfig.getConfig()`
+-- @usage local config = MPConfig.getConfig()
 local function getConfig()
 	if not FS:directoryExists("settings/BeamMP") then
 		if checkForOldConfig() then
@@ -191,7 +191,7 @@ end
 --- Set a configuration setting in the config.json file.
 -- @tparam string settingName The name of the setting.
 -- @param settingVal The value of the setting.
--- @usage `MPConfig.setConfig(<setting name>, <setting value>)`
+-- @usage MPConfig.setConfig(`<setting name>, <setting value>`)
 local function setConfig(settingName, settingVal)
 	local config = getConfig()
 	if not config then config = {} end

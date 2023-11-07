@@ -35,7 +35,7 @@ setmetatable(_G,{}) -- temporarily disable global notifications
 
 
 --- Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.
--- @usage `MPGameNetwork.connectToLauncher(true)`
+-- @usage MPGameNetwork.connectToLauncher(true)
 local function connectToLauncher()
 	-- Check if we are using V2.1
 	if mp_game then
@@ -62,7 +62,7 @@ end
 
 
 --- Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
--- @usage `MPGameNetwork.disconnectLauncher(true)`
+-- @usage MPGameNetwork.disconnectLauncher(true)
 local function disconnectLauncher()
 	if mp_game then
 		launcherConnected = false
@@ -77,7 +77,7 @@ end
 
 --- Send data over the TCP connection to the Launcher and then onto the Server.
 -- @tparam string s The data to be sent to the Launcher/server.
--- @usage `MPGameNetwork.sendData(<data>)`
+-- @usage MPGameNetwork.sendData(`<data>`)
 local function sendData(s)
 	-- First check if we are V2.1 Networking or not
 	if mp_game then
@@ -116,7 +116,7 @@ end
 
 --- Process session data received from the Launcher.
 -- @tparam string data The session data received.
--- @usage `MPGameNetwork.sessionData(<data>)`
+-- @usage MPGameNetwork.sessionData(`<data>`)
 local function sessionData(data)
 	local code = string.sub(data, 1, 1)
 	local data = string.sub(data, 2)
@@ -132,7 +132,7 @@ end
 
 --- Quit the multiplayer session.
 -- @tparam string reason The reason for quitting the session.
--- @usage MPGameNetwork.quitMP(<reason>)
+-- @usage MPGameNetwork.quitMP(`<reason>`)
 local function quitMP(reason)
 	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
@@ -149,7 +149,7 @@ end
 
 --- Handles events triggered by TriggerClientEvent.
 -- @tparam string p The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
--- @usage MPGameNetwork.CallEvent(<event data string>)
+-- @usage MPGameNetwork.CallEvent(`<event data string>`)
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
 	local eventName, eventData = string.match(p,"^%:([^%:]+)%:(.*)")
 	if not eventName then quitMP(p) return end
@@ -163,7 +163,7 @@ end
 --- Triggers a server event with the specified name and data.
 -- @tparam string name - The name of the event
 -- @tparam string data - The data to be sent with the event
--- @usage `TriggerServerEvent(<name>, <data>)`
+-- @usage TriggerServerEvent(`<name>`, `<data>`)
 function TriggerServerEvent(name, data)
 	M.send('E:'..name..':'..data)
 end
@@ -171,7 +171,7 @@ end
 --- Triggers a client event with the specified name and data.
 -- @tparam string name - The name of the event
 -- @tparam string data - The data to be sent with the event
--- @usage `TriggerClientEvent(<name>, <data>)`
+-- @usage `riggerClientEvent(`<name>`, `<data>`)
 function TriggerClientEvent(name, data)
 	handleEvents(':'..name..':'..data)
 end
@@ -179,7 +179,7 @@ end
 --- Adds an event handler for the specified event name and function.
 -- @tparam string n - The name of the event
 -- @tparam function f - The event handler function
--- @usage `AddEventHandler(<name>, function (<data>) ... end)`
+-- @usage AddEventHandler(`<name>`, `<function>`)
 function AddEventHandler(n, f)
 	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
 	if type(f) ~= "function" or f == nop then
@@ -196,7 +196,7 @@ end
 --- Sets a function to be called when the specified key is pressed.
 -- @tparam string keyname - The name of the key
 -- @tparam function f - The function to be called when the key is pressed
--- @usage `onKeyPressed("NUMPAD1", function (<data>) ... end)`
+-- @usage onKeyPressed("NUMPAD1", `<function>`)
 function onKeyPressed(keyname, f)
 	addKeyEventListener(keyname, f, 'down')
 end
@@ -204,7 +204,7 @@ end
 --- Sets a function to be called when the specified key is released.
 -- @tparam string keyname - The name of the key
 -- @tparam function f - The function to be called when the key is released
--- @usage `onKeyPressed("NUMPAD1", function (<data>) ... end)`
+-- @usage onKeyPressed("NUMPAD1", `<function>`)
 function onKeyReleased(keyname, f)
 	addKeyEventListener(keyname, f, 'up')
 end
@@ -213,7 +213,7 @@ end
 -- @tparam string keyname - The name of the key
 -- @tparam function f - The function to be called when the key event is triggered
 -- @tparam string type - The type of key event ('down', 'up', or 'both')
--- @usage `addKeyEventListener("NUMPAD1", function (<data>) ... end, "up")`
+-- @usage addKeyEventListener("NUMPAD1", `<function>`, "up")
 function addKeyEventListener(keyname, f, type)
 	f = f or function() end
 	log('W','addKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
@@ -241,14 +241,14 @@ end
 --- Returns the state of the specified key.
 -- @tparam string key - The name of the key
 -- @return boolean - The state of the key ('true' for pressed, 'false' for released)
--- @usage `local state = getKeyState('NUMPAD1')`
+-- @usage local state = getKeyState('NUMPAD1')
 function getKeyState(key)
 	return keyStates[key] or false
 end
 
 --- Handles the event when a vehicle is ready.
 -- @tparam integer gameVehicleID - The ID of the game vehicle
--- @usage `MPGameNetwork.onVehicleReady(<game vehicle id>)`
+-- @usage MPGameNetwork.onVehicleReady(`<game vehicle id>`)
 local function onVehicleReady(gameVehicleID)
 	local veh = be:getObjectByID(gameVehicleID)
 	if not veh then
@@ -313,14 +313,14 @@ end
 
 --- Return whether the launcher is connected to the game or not.
 -- @treturn[1] boolean Return the connection state of TCP with the launcher
--- @usage `local connected = MPGameNetwork.isLauncherConnected()`
+-- @usage local connected = MPGameNetwork.isLauncherConnected()
 local function isLauncherConnected()
 	return launcherConnected
 end
 
 --- Return the launcher connection status.
 -- @treturn[1] boolean Return the connection state of TCP with the launcher
--- @usage `local status = MPGameNetwork.connectionStatus()`
+-- @usage local status = MPGameNetwork.connectionStatus()
 local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
 end

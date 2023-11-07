@@ -1007,17 +1007,34 @@ local function onVehicleDestroyed(gameVehicleID)
 		local veh = be:getObjectByID(gameVehicleID)
 		if veh:getJBeamFilename() == "unicycle" then -- if the player destroyed their unicycle
 			local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
-			local defaultConfig = {}
-			defaultConfig.format = 2
-			defaultConfig.licenseName = ""
-			defaultConfig.mainPartName = "unicycle"
-			defaultConfig.model = "unicycle"
-			defaultConfig.paints = vehicleConfig.paints
-			defaultConfig.parts = vehicleConfig.parts
+			--[[ Contains as of 0.30
+				[parts] = table
+					["slot_part_n"] = "plug_part_n"
+				[paints] = array[3]
+					[n] = table
+						[metallic] = float
+						[roughness] = float
+						[clearcoat] = float
+						[clearcoatRoughness] = float
+						[baseColor] = array[4]
+							[n] = float
+				[partConfigFilename] = string
+				[mainPartName] = string
+				[licenseName] = string
+				[model] = string
+				
+				the .pc format v2 contains all the same data.. just with "format" and not with "partConfigFilename"
+			]]
+			vehicleConfig.format = 2
+			vehicleConfig.partConfigFilename = nil
 			
 			local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
-			handle:write(jsonEncode(defaultConfig))
-			handle:close()
+			if handle == nil then
+				log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
+			else
+				handle:write(jsonEncode(vehicleConfig))
+				handle:close()
+			end
 		end
 
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then

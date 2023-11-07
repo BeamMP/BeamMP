@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><strong>MPDebug</strong></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPDebug</code></h1>
+<p>MPDebug API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">getPlayerNames() -- internal access
+</pre></li>
+        <li><pre class="example">MPDebug.tpPlayerToPos(...) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#tpPlayerToPos">tpPlayerToPos (targetPos)</a></td>
+	<td class="summary">Teleports the players vehicle to a specified position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getPlayerNames">getPlayerNames ()</a></td>
+	<td class="summary">Returns the names of all players in the current session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getTranslations">getTranslations (_, content)</a></td>
+	<td class="summary">Retrieves translations from a JSON file and caches them?</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionLoaded">onExtensionLoaded ()</a></td>
+	<td class="summary">Triggered by BeamNG when the lua mod is loaded by the modmanager system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drawPlayerList">drawPlayerList ()</a></td>
+	<td class="summary">Draws the IMGUI player list.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drawSpawnTeleport">drawSpawnTeleport ()</a></td>
+	<td class="summary">Draws the IMGUI Teleport / Spawning Menu</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#showUI">showUI ()</a></td>
+	<td class="summary">Used to call the UI to show itself.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#hideUI">hideUI ()</a></td>
+	<td class="summary">Used to call the UI to hide itself.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#packetSent">packetSent (bytes)</a></td>
+	<td class="summary">Updates the count and size of sent packets.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#packetReceived">packetReceived (bytes)</a></td>
+	<td class="summary">Updates the count and size of received packets.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "tpPlayerToPos"></a>
+    <strong>tpPlayerToPos (targetPos)</strong>
+    </dt>
+    <dd>
+    Teleports the players vehicle to a specified position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">targetPos</span>
+         vec3 The target position to teleport the player to. Format: {x, y, z}
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getPlayerNames"></a>
+    <strong>getPlayerNames ()</strong>
+    </dt>
+    <dd>
+    Returns the names of all players in the current session.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table names A table where the key is the username and the value is an owned vehicle ID (can be ignored).
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getTranslations"></a>
+    <strong>getTranslations (_, content)</strong>
+    </dt>
+    <dd>
+    Retrieves translations from a JSON file and caches them?
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">_</span>
+         any Unused parameter.
+        </li>
+        <li><span class="parameter">content</span>
+         string The content of the JSON file.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onExtensionLoaded"></a>
+    <strong>onExtensionLoaded ()</strong>
+    </dt>
+    <dd>
+    Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+ We use this to register our IMGUI windows.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drawPlayerList"></a>
+    <strong>drawPlayerList ()</strong>
+    </dt>
+    <dd>
+    Draws the IMGUI player list.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drawSpawnTeleport"></a>
+    <strong>drawSpawnTeleport ()</strong>
+    </dt>
+    <dd>
+    Draws the IMGUI Teleport / Spawning Menu
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "showUI"></a>
+    <strong>showUI ()</strong>
+    </dt>
+    <dd>
+    Used to call the UI to show itself.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPDebug.showUI()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "hideUI"></a>
+    <strong>hideUI ()</strong>
+    </dt>
+    <dd>
+    Used to call the UI to hide itself.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPDebug.hideUI()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+ This is the main processing thread of BeamMP in the game
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "packetSent"></a>
+    <strong>packetSent (bytes)</strong>
+    </dt>
+    <dd>
+    Updates the count and size of sent packets.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">bytes</span>
+         number The size of the packet in bytes. (optional)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "packetReceived"></a>
+    <strong>packetReceived (bytes)</strong>
+    </dt>
+    <dd>
+    Updates the count and size of received packets.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">bytes</span>
+         number The size of the packet in bytes. (optional)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

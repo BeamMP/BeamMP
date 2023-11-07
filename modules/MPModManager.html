@@ -1,0 +1,507 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><strong>MPModManager</strong></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPModManager</code></h1>
+<p>MPModManager API.</p>
+<p>
+ Author of this documentation is Titch</p>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#loadLocales">loadLocales ()</a></td>
+	<td class="summary">Load the BeamMP provided locales and merge them into a working set for BeamNG</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isModAllowed">isModAllowed (modName)</a></td>
+	<td class="summary">Check if a mod is allowed according to the servers mods</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isModWhitelisted">isModWhitelisted (modName)</a></td>
+	<td class="summary">Check if a mod is whitelisted according to BeamMP core set E.g.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#checkMod">checkMod (mod)</a></td>
+	<td class="summary">Check if a mod is allowed (Calls isModAllowed and isModWhitelist)
+ If it is now allowed we disable it, if it is in the multiplayer folder we also delete it as this is maintained by BeamMP</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getModNameFromPath">getModNameFromPath (path)</a></td>
+	<td class="summary">BeamNG function from extensions/core/modmanager.lua</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getModList">getModList ()</a></td>
+	<td class="summary">The mods json object which the game manages.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#checkAllMods">checkAllMods ()</a></td>
+	<td class="summary">Check the game mod list against BeamMP's expected</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loadServerMods">loadServerMods ()</a></td>
+	<td class="summary">Load the Servers mods, these are put in by the BeamMP Launcher</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#verifyMods">verifyMods ()</a></td>
+	<td class="summary">Verify that the servers mods have been loaded by the game.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cleanUpSessionMods">cleanUpSessionMods ()</a></td>
+	<td class="summary">Cleanup the mods from the ended session ready for another.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setServerMods">setServerMods (modsString)</a></td>
+	<td class="summary">Set the servers mods as a string in Lua for loading and checking
+ Called from MPCoreNetwork</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onModActivated">onModActivated (mod)</a></td>
+	<td class="summary">A BeamNG event that is called when a mod is loaded by the games mod manager</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#extensionLoader">extensionLoader ()</a></td>
+	<td class="summary">This prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionLoaded">onExtensionLoaded ()</a></td>
+	<td class="summary">Triggered by BeamNG when the lua mod is loaded by the modmanager system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionUnloaded">onExtensionUnloaded ()</a></td>
+	<td class="summary">Triggered by BeamNG when the lua mod is unloaded by the modmanager system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onServerLeave">onServerLeave ()</a></td>
+	<td class="summary">This is used to ensure the cleanup of the mods from the mod manager is done at the end of the session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reloadLuaReloadWithDelay">reloadLuaReloadWithDelay ()</a></td>
+	<td class="summary">Reload lua but with a 0.5 second delay to allow other states to refresh</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "loadLocales"></a>
+    <strong>loadLocales ()</strong>
+    </dt>
+    <dd>
+    Load the BeamMP provided locales and merge them into a working set for BeamNG
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "isModAllowed"></a>
+    <strong>isModAllowed (modName)</strong>
+    </dt>
+    <dd>
+    Check if a mod is allowed according to the servers mods
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">modName</span>
+         string The mod in question to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPModManager.<span class="function-name">isModAllowed</span>(<span class="string">'...'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isModWhitelisted"></a>
+    <strong>isModWhitelisted (modName)</strong>
+    </dt>
+    <dd>
+    Check if a mod is whitelisted according to BeamMP core set E.g.  itself, BeamMP.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">modName</span>
+         string The mod in question to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPModManager.<span class="function-name">isModWhitelisted</span>(<span class="string">'...'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "checkMod"></a>
+    <strong>checkMod (mod)</strong>
+    </dt>
+    <dd>
+    Check if a mod is allowed (Calls isModAllowed and isModWhitelist)
+ If it is now allowed we disable it, if it is in the multiplayer folder we also delete it as this is maintained by BeamMP
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mod</span>
+         table The mod in question to check
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPModManager.<span class="function-name">isModAllowed</span>(<span class="string">'...'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getModNameFromPath"></a>
+    <strong>getModNameFromPath (path)</strong>
+    </dt>
+    <dd>
+    BeamNG function from extensions/core/modmanager.lua
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         string The raw mod file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        string modname The cleaned modname from the mod file path
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getModList"></a>
+    <strong>getModList ()</strong>
+    </dt>
+    <dd>
+    The mods json object which the game manages.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table mods The mods according to the game managed db
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "checkAllMods"></a>
+    <strong>checkAllMods ()</strong>
+    </dt>
+    <dd>
+    Check the game mod list against BeamMP's expected
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "loadServerMods"></a>
+    <strong>loadServerMods ()</strong>
+    </dt>
+    <dd>
+    Load the Servers mods, these are put in by the BeamMP Launcher
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "verifyMods"></a>
+    <strong>verifyMods ()</strong>
+    </dt>
+    <dd>
+    Verify that the servers mods have been loaded by the game.
+ Currently not properly functioning / missing functionality
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cleanUpSessionMods"></a>
+    <strong>cleanUpSessionMods ()</strong>
+    </dt>
+    <dd>
+    Cleanup the mods from the ended session ready for another.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setServerMods"></a>
+    <strong>setServerMods (modsString)</strong>
+    </dt>
+    <dd>
+    Set the servers mods as a string in Lua for loading and checking
+ Called from MPCoreNetwork
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">modsString</span>
+         string The mod string from the server
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPModManager.<span class="function-name">setServerMods</span>(<span class="string">'...'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onModActivated"></a>
+    <strong>onModActivated (mod)</strong>
+    </dt>
+    <dd>
+    A BeamNG event that is called when a mod is loaded by the games mod manager
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mod</span>
+         table The loaded mod information
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "extensionLoader"></a>
+    <strong>extensionLoader ()</strong>
+    </dt>
+    <dd>
+    This prevents mods from registering extensions as core modules, which don't get unloaded without a lua reload
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onExtensionLoaded"></a>
+    <strong>onExtensionLoaded ()</strong>
+    </dt>
+    <dd>
+    Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+ We use this to load our locales, cleanup the mods ahead of mp use and ensure our modloader is used
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onExtensionUnloaded"></a>
+    <strong>onExtensionUnloaded ()</strong>
+    </dt>
+    <dd>
+    Triggered by BeamNG when the lua mod is unloaded by the modmanager system.
+ We use this to cleanup our locales and restore core module defintions
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onServerLeave"></a>
+    <strong>onServerLeave ()</strong>
+    </dt>
+    <dd>
+    This is used to ensure the cleanup of the mods from the mod manager is done at the end of the session.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reloadLuaReloadWithDelay"></a>
+    <strong>reloadLuaReloadWithDelay ()</strong>
+    </dt>
+    <dd>
+    Reload lua but with a 0.5 second delay to allow other states to refresh
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

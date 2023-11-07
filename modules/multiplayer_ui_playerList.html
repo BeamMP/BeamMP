@@ -31,6 +31,10 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
 
 
 <h2>Modules</h2>
@@ -51,11 +55,11 @@
   <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
   <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
   <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
-  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><strong>multiplayer_ui_playerList</strong></li>
   <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
   <li><a href="../modules/nodesGE.html">nodesGE</a></li>
   <li><a href="../modules/positionGE.html">positionGE</a></li>
-  <li><strong>vehicle.controller.playerController</strong></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
   <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
 </ul>
 
@@ -63,16 +67,73 @@
 
 <div id="content">
 
-<h1>Module <code>vehicle.controller.playerController</code></h1>
-<p>Propulsion---</p>
-<p></p>
+<h1>Module <code>multiplayer_ui_playerList</code></h1>
+<p>multiplayer_ui_playerList API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">updatePlayerList(jsonData) -- internal access
+</pre></li>
+        <li><pre class="example">multiplayer_ui_playerList.updatePlayerList(jsonData) -- external access
+</pre></li>
+    </ul>
 
 
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#updatePlayerList">updatePlayerList (jsonData)</a></td>
+	<td class="summary">Updates the player list based on the provided JSON data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#render">render ()</a></td>
+	<td class="summary">Renders the player list UI.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "updatePlayerList"></a>
+    <strong>updatePlayerList (jsonData)</strong>
+    </dt>
+    <dd>
+    Updates the player list based on the provided JSON data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">jsonData</span>
+         table The JSON data containing player information.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "render"></a>
+    <strong>render ()</strong>
+    </dt>
+    <dd>
+    Renders the player list UI.
+
+
+
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->

@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><strong>MPInputsGE</strong></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>MPInputsGE</code></h1>
+<p>MPInputsGE API.</p>
+<p> - This is responsible for collecting and setting inputs on vehicle
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">applyInputs(...) -- internal access
+</pre></li>
+        <li><pre class="example">MPInputsGE.handle(...) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#tick">tick ()</a></td>
+	<td class="summary">Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sendInputs">sendInputs (data, gameVehicleID)</a></td>
+	<td class="summary">This function is called by VE lua to send the data from VE to GE and then to the server.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#applyInputs">applyInputs (data, serverVehicleID)</a></td>
+	<td class="summary">This function serves to send the inputs data from GE to VE for application</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#handle">handle (rawData)</a></td>
+	<td class="summary">The raw message from the server.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "tick"></a>
+    <strong>tick ()</strong>
+    </dt>
+    <dd>
+    Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sendInputs"></a>
+    <strong>sendInputs (data, gameVehicleID)</strong>
+    </dt>
+    <dd>
+    This function is called by VE lua to send the data from VE to GE and then to the server.
+ INTERNAL USE
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         table The inputs data from VE
+        </li>
+        <li><span class="parameter">gameVehicleID</span>
+         number The vehicle ID according to the local game
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "applyInputs"></a>
+    <strong>applyInputs (data, serverVehicleID)</strong>
+    </dt>
+    <dd>
+    This function serves to send the inputs data from GE to VE for application
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         table The data to be applied as inputs
+        </li>
+        <li><span class="parameter">serverVehicleID</span>
+         string The VehicleID according to the server.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "handle"></a>
+    <strong>handle (rawData)</strong>
+    </dt>
+    <dd>
+    The raw message from the server.  This is unpacked first and then sent to be applied according to message code.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rawData</span>
+         string The raw message data.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

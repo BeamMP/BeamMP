@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><strong>multiplayer_ui_chat</strong></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>multiplayer_ui_chat</code></h1>
+<p>multiplayer_ui_chat API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">colorByRGB(r,g,b,a) -- internal access
+</pre></li>
+        <li><pre class="example">multiplayer_ui_chat.addMessage(username, message, id, color) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#inputCallbackC">inputCallbackC</a></td>
+	<td class="summary">Callback function for ImGui input text.</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#colorByRGB">colorByRGB (r, g, b, a)</a></td>
+	<td class="summary">Creates an ImGui ImVec4 color based on the provided RGBA values.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#textToColorAndText">textToColorAndText (text, nocolor)</a></td>
+	<td class="summary">Converts a text string into a list of colored text segments for use in IMGUI.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#formatTextWithColor">formatTextWithColor (text, nocolor)</a></td>
+	<td class="summary">Formats a text string with color codes and returns a list of colored text segments for use in IMGUI.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#clearHistory">clearHistory ()</a></td>
+	<td class="summary">Clears the chat history.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sendChatMessage">sendChatMessage (message)</a></td>
+	<td class="summary">Sends a chat message.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addMessage">addMessage (username, message, id, color)</a></td>
+	<td class="summary">Adds a chat message to the chat history and the chat window.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#render">render ()</a></td>
+	<td class="summary">Render the IMGUI windows on each frame.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "inputCallbackC"></a>
+    <strong>inputCallbackC</strong>
+    </dt>
+    <dd>
+    Callback function for ImGui input text.
+
+
+    <ul>
+        <li><span class="parameter">data</span>
+         table The input text data.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "colorByRGB"></a>
+    <strong>colorByRGB (r, g, b, a)</strong>
+    </dt>
+    <dd>
+    Creates an ImGui ImVec4 color based on the provided RGBA values.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">r</span>
+         number The red component of the color (0-255).
+        </li>
+        <li><span class="parameter">g</span>
+         number The green component of the color (0-255).
+        </li>
+        <li><span class="parameter">b</span>
+         number The blue component of the color (0-255).
+        </li>
+        <li><span class="parameter">a</span>
+         number The alpha component of the color (0-255).
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table Returns an ImVec4 color table representing the specified RGB values.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "textToColorAndText"></a>
+    <strong>textToColorAndText (text, nocolor)</strong>
+    </dt>
+    <dd>
+    Converts a text string into a list of colored text segments for use in IMGUI.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+         string The input text to be formatted.
+        </li>
+        <li><span class="parameter">nocolor</span>
+         boolean (optional) If true, all text segments will have the default color.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table Returns a table containing colored text segments.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "formatTextWithColor"></a>
+    <strong>formatTextWithColor (text, nocolor)</strong>
+    </dt>
+    <dd>
+    Formats a text string with color codes and returns a list of colored text segments for use in IMGUI.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+         string The input text to be formatted.
+        </li>
+        <li><span class="parameter">nocolor</span>
+         boolean (optional) If true, all text segments will have the default color.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table Returns a table containing colored text segments.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "clearHistory"></a>
+    <strong>clearHistory ()</strong>
+    </dt>
+    <dd>
+    Clears the chat history.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sendChatMessage"></a>
+    <strong>sendChatMessage (message)</strong>
+    </dt>
+    <dd>
+    Sends a chat message.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+         string The message to send.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "addMessage"></a>
+    <strong>addMessage (username, message, id, color)</strong>
+    </dt>
+    <dd>
+    Adds a chat message to the chat history and the chat window.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">username</span>
+         string The username of the sender.
+        </li>
+        <li><span class="parameter">message</span>
+         string The message content.
+        </li>
+        <li><span class="parameter">id</span>
+         number The ID of the message.
+        </li>
+        <li><span class="parameter">color</span>
+         string The color of the message.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "render"></a>
+    <strong>render ()</strong>
+    </dt>
+    <dd>
+    Render the IMGUI windows on each frame.
+
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

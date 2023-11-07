@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><strong>multiplayer_multiplayer</strong></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>multiplayer_multiplayer</code></h1>
+<p>multiplayer_multiplayer API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">modifiedGetDriverData(veh) -- internal access
+</pre></li>
+        <li><pre class="example">multiplayer_multiplayer.onWorldReadyState(1) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#modifiedGetDriverData">modifiedGetDriverData (veh)</a></td>
+	<td class="summary">Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#modifiedToggleWalkingMode">modifiedToggleWalkingMode ()</a></td>
+	<td class="summary">Custom walking mode function that handles the getting of the unicycle and handles the deletion of it.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#modified_onInstabilityDetected">modified_onInstabilityDetected (jbeamFilename)</a></td>
+	<td class="summary">A custom onInstabilityDetected function to prevent the freezing / pausing of the game for when in MP session</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#modified_bigMapMode">modified_bigMapMode ()</a></td>
+	<td class="summary">A custom function overwrite for if the map should be allowed to open.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onBigMapActivated">onBigMapActivated ()</a></td>
+	<td class="summary">Called when the Big Map is loaded by the user.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#runPostJoin">runPostJoin ()</a></td>
+	<td class="summary">This function/event is triggered internally upon the joining on a map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onServerLeave">onServerLeave ()</a></td>
+	<td class="summary">This function is called when the user leaves a server as part of cleanup</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onWorldReadyState">onWorldReadyState (state)</a></td>
+	<td class="summary">This function is called by BeamNG upon the change of the world ready state.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "modifiedGetDriverData"></a>
+    <strong>modifiedGetDriverData (veh)</strong>
+    </dt>
+    <dd>
+    Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">veh</span>
+         userdata The vehicle data
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        unknown
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "modifiedToggleWalkingMode"></a>
+    <strong>modifiedToggleWalkingMode ()</strong>
+    </dt>
+    <dd>
+    Custom walking mode function that handles the getting of the unicycle and handles the deletion of it.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "modified_onInstabilityDetected"></a>
+    <strong>modified_onInstabilityDetected (jbeamFilename)</strong>
+    </dt>
+    <dd>
+    A custom onInstabilityDetected function to prevent the freezing / pausing of the game for when in MP session
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">jbeamFilename</span>
+         table Object jbeam data of the object causing the instability
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "modified_bigMapMode"></a>
+    <strong>modified_bigMapMode ()</strong>
+    </dt>
+    <dd>
+    A custom function overwrite for if the map should be allowed to open.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean True if the the map should be allowed to open?
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onBigMapActivated"></a>
+    <strong>onBigMapActivated ()</strong>
+    </dt>
+    <dd>
+    Called when the Big Map is loaded by the user.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+ This is the main processing thread of BeamMP in the game
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "runPostJoin"></a>
+    <strong>runPostJoin ()</strong>
+    </dt>
+    <dd>
+    This function/event is triggered internally upon the joining on a map.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onServerLeave"></a>
+    <strong>onServerLeave ()</strong>
+    </dt>
+    <dd>
+    This function is called when the user leaves a server as part of cleanup
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onWorldReadyState"></a>
+    <strong>onWorldReadyState (state)</strong>
+    </dt>
+    <dd>
+    This function is called by BeamNG upon the change of the world ready state.
+ 1 = World is loading
+ 2 = World is ready, You are about to have the loading screen disappear. This is the time to show anything you have.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">state</span>
+         number The state in numerical form.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

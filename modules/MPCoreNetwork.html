@@ -42,10 +42,24 @@
 <ul class="nowrap">
   <li><a href="../modules/MPConfig.html">MPConfig</a></li>
   <li><strong>MPCoreNetwork</strong></li>
-  <li><strong>MPCoreNetwork</strong></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
   <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
-  <li><a href="../modules/ge.extensions.UI.html">ge.extensions.UI</a></li>
+  <li><a href="../modules/UI.html">UI</a></li>
   <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
   <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
   <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
 </ul>
@@ -55,14 +69,14 @@
 <div id="content">
 
 <h1>Module <code>MPCoreNetwork</code></h1>
-<p>MPCoreNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod.</p>
-<p> It handles the Initial TCP connection establishment with the Launcher.
- Author of this documentation is Titch2000</p>
+<p>MPCoreNetwork API.</p>
+<p>
+ Author of this documentation is Titch</p>
     <h3>Usage:</h3>
     <ul>
-        <li><pre class="example">connectToLauncher() -- internal access
+        <li><pre class="example">connectToLauncher(false) -- internal access
 </pre></li>
-        <li><pre class="example">MPCoreNetwork.connectToLauncher() -- external access
+        <li><pre class="example">MPCoreNetwork.connectToLauncher(false) -- external access
 </pre></li>
     </ul>
 
@@ -70,79 +84,123 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#TriggerServerEvent">TriggerServerEvent (name, data)</a></td>
-	<td class="summary">Triggers a server event with the specified name and data.</td>
+	<td class="name" nowrap><a href="#onLauncherConnected">onLauncherConnected ()</a></td>
+	<td class="summary">This function/event is triggered internally upon connection to the launcher.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#TriggerClientEvent">TriggerClientEvent (name, data)</a></td>
-	<td class="summary">Triggers a client event with the specified name and data.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#AddEventHandler">AddEventHandler (n, f)</a></td>
-	<td class="summary">Adds an event handler for the specified event name and function.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#onKeyPressed">onKeyPressed (keyname, f)</a></td>
-	<td class="summary">Sets a function to be called when the specified key is pressed.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#onKeyReleased">onKeyReleased (keyname, f)</a></td>
-	<td class="summary">Sets a function to be called when the specified key is released.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#addKeyEventListener">addKeyEventListener (keyname, f, type)</a></td>
-	<td class="summary">Adds a key event listener for the specified key and function.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getKeyState">getKeyState (key)</a></td>
-	<td class="summary">Returns the state of the specified key.</td>
+	<td class="name" nowrap><a href="#runPostJoin">runPostJoin ()</a></td>
+	<td class="summary">This function/event is triggered internally upon the joining on a map and starts the UDP aspect of the session.</td>
 	</tr>
 </table>
 <h2><a href="#Local_Functions">Local Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#connectToLauncher">connectToLauncher ()</a></td>
-	<td class="summary">Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.</td>
+	<td class="name" nowrap><a href="#send">send (s)</a></td>
+	<td class="summary">Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#disconnectLauncher">disconnectLauncher ()</a></td>
-	<td class="summary">Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.</td>
+	<td class="name" nowrap><a href="#connectToLauncher">connectToLauncher (silent)</a></td>
+	<td class="summary">Connects to the Launcher.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#sendData">sendData (s)</a></td>
-	<td class="summary">Send data over the TCP connection to the Launcher and then onto the Server.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#sessionData">sessionData (data)</a></td>
-	<td class="summary">Process session data received from the Launcher.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#quitMP">quitMP (reason)</a></td>
-	<td class="summary">Quit the multiplayer session.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#handleEvents">handleEvents (p)</a></td>
-	<td class="summary">Handles events triggered by TriggerClientEvent.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#onKeyStateChanged">onKeyStateChanged (key, state)</a></td>
-	<td class="summary">Handles the state change of a key.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#onVehicleReady">onVehicleReady (gameVehicleID)</a></td>
-	<td class="summary">Handles the event when a vehicle is ready.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#onUpdate">onUpdate (delta)</a></td>
-	<td class="summary">onUpdate is called each game frame by the games engine.</td>
+	<td class="name" nowrap><a href="#isLoggedIn">isLoggedIn ()</a></td>
+	<td class="summary">Returns true or false if the user is logged in.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#isLauncherConnected">isLauncherConnected ()</a></td>
-	<td class="summary">Return whether the launcher is connected to the game or not.</td>
+	<td class="summary">Returns true or false if the launcher is connected.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#connectionStatus">connectionStatus ()</a></td>
-	<td class="summary">Return the launcher connection status.</td>
+	<td class="name" nowrap><a href="#login">login (identifiers)</a></td>
+	<td class="summary">Logs in the user with the given identifiers by sending the request to the launcher</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autoLogin">autoLogin ()</a></td>
+	<td class="summary">Automatically logs in the user.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#logout">logout ()</a></td>
+	<td class="summary">Tells the launcher to log out the user.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sendBeamMPInfo">sendBeamMPInfo ()</a></td>
+	<td class="summary">Sends the current player and server count plus the mod and launcher version to the CEF UI.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#requestServerList">requestServerList ()</a></td>
+	<td class="summary">Request the server list data from the launcher.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#requestPlayers">requestPlayers ()</a></td>
+	<td class="summary">Request the UI counts and other metrics by calling `sendBeamMPInfo()`</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getCurrentServer">getCurrentServer ()</a></td>
+	<td class="summary">Returns the current server information</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setCurrentServer">setCurrentServer (ip, port, name)</a></td>
+	<td class="summary">Set the current server information for later use</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loadLevel">loadLevel (map)</a></td>
+	<td class="summary">Load the desired map/level by name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loginReceived">loginReceived (params)</a></td>
+	<td class="summary">Handles the login result received from the launcher.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#leaveServer">leaveServer (goBack)</a></td>
+	<td class="summary">Leaves the server and performs necessary cleanup.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isMPSession">isMPSession ()</a></td>
+	<td class="summary">Returns if the current session is a multiplayer session / if we expect to be in one.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isGoingMPSession">isGoingMPSession ()</a></td>
+	<td class="summary">Returns if the game is currently transitioning to a multiplayer session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#requestMap">requestMap ()</a></td>
+	<td class="summary">Requests the map from the launcher</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#handleU">handleU (params)</a></td>
+	<td class="summary">Handles the update of the loading UI and performs necessary actions based on the received parameters.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#promptAutoJoin">promptAutoJoin (params)</a></td>
+	<td class="summary">Prompts the user for auto join confirmation.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onClientStartMission">onClientStartMission ()</a></td>
+	<td class="summary">Executes when the client starts a mission (map) in for a multiplayer session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onClientEndMission">onClientEndMission (mission)</a></td>
+	<td class="summary">Executes when the user or mod ends a mission/session (map) .</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUiChangedState">onUiChangedState (curUIState, prevUIState)</a></td>
+	<td class="summary">Executes when the UI state changes.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onSerialize">onSerialize ()</a></td>
+	<td class="summary">Serializes data for saving to be loaded on lua reload.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onDeserialized">onDeserialized (data)</a></td>
+	<td class="summary">Deserializes data after loading lua state.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionLoaded">onExtensionLoaded ()</a></td>
+	<td class="summary">Triggered by BeamNG when the lua mod is loaded by the modmanager system.</td>
 	</tr>
 </table>
 
@@ -154,211 +212,31 @@
 
     <dl class="function">
     <dt>
-    <a name = "TriggerServerEvent"></a>
-    <strong>TriggerServerEvent (name, data)</strong>
+    <a name = "onLauncherConnected"></a>
+    <strong>onLauncherConnected ()</strong>
     </dt>
     <dd>
-    Triggers a server event with the specified name and data.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">name</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the event
-        </li>
-        <li><span class="parameter">data</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The data to be sent with the event
-        </li>
-    </ul>
+    This function/event is triggered internally upon connection to the launcher.
 
 
 
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`TriggerServerEvent(&lt;name&gt;, &lt;data&gt;)`</span></pre>
-    </ul>
+
+
 
 </dd>
     <dt>
-    <a name = "TriggerClientEvent"></a>
-    <strong>TriggerClientEvent (name, data)</strong>
+    <a name = "runPostJoin"></a>
+    <strong>runPostJoin ()</strong>
     </dt>
     <dd>
-    Triggers a client event with the specified name and data.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">name</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the event
-        </li>
-        <li><span class="parameter">data</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The data to be sent with the event
-        </li>
-    </ul>
+    This function/event is triggered internally upon the joining on a map and starts the UDP aspect of the session.
 
 
 
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`TriggerClientEvent(&lt;name&gt;, &lt;data&gt;)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "AddEventHandler"></a>
-    <strong>AddEventHandler (n, f)</strong>
-    </dt>
-    <dd>
-    Adds an event handler for the specified event name and function.
 
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">n</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the event
-        </li>
-        <li><span class="parameter">f</span>
-            <span class="types"><span class="type">function</span></span>
-         - The event handler function
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`AddEventHandler(&lt;name&gt;, function (&lt;data&gt;) ... end)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "onKeyPressed"></a>
-    <strong>onKeyPressed (keyname, f)</strong>
-    </dt>
-    <dd>
-    Sets a function to be called when the specified key is pressed.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">keyname</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the key
-        </li>
-        <li><span class="parameter">f</span>
-            <span class="types"><span class="type">function</span></span>
-         - The function to be called when the key is pressed
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`onKeyPressed("NUMPAD1", function (&lt;data&gt;) ... end)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "onKeyReleased"></a>
-    <strong>onKeyReleased (keyname, f)</strong>
-    </dt>
-    <dd>
-    Sets a function to be called when the specified key is released.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">keyname</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the key
-        </li>
-        <li><span class="parameter">f</span>
-            <span class="types"><span class="type">function</span></span>
-         - The function to be called when the key is released
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`onKeyPressed("NUMPAD1", function (&lt;data&gt;) ... end)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "addKeyEventListener"></a>
-    <strong>addKeyEventListener (keyname, f, type)</strong>
-    </dt>
-    <dd>
-    Adds a key event listener for the specified key and function.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">keyname</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the key
-        </li>
-        <li><span class="parameter">f</span>
-            <span class="types"><span class="type">function</span></span>
-         - The function to be called when the key event is triggered
-        </li>
-        <li><span class="parameter">type</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The type of key event ('down', 'up', or 'both')
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`addKeyEventListener("NUMPAD1", function (&lt;data&gt;) ... end, "up")`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "getKeyState"></a>
-    <strong>getKeyState (key)</strong>
-    </dt>
-    <dd>
-    Returns the state of the specified key.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the key
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        boolean - The state of the key ('true' for pressed, 'false' for released)
-    </ol>
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`local state = getKeyState('NUMPAD1')`</span></pre>
-    </ul>
 
 </dd>
 </dl>
@@ -366,218 +244,63 @@
 
     <dl class="function">
     <dt>
-    <a name = "connectToLauncher"></a>
-    <strong>connectToLauncher ()</strong>
+    <a name = "send"></a>
+    <strong>send (s)</strong>
     </dt>
     <dd>
-    Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.
-
-
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.connectToLauncher(true)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "disconnectLauncher"></a>
-    <strong>disconnectLauncher ()</strong>
-    </dt>
-    <dd>
-    Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
-
-
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.disconnectLauncher(true)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "sendData"></a>
-    <strong>sendData (s)</strong>
-    </dt>
-    <dd>
-    Send data over the TCP connection to the Launcher and then onto the Server.
+    Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.
+ If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">s</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         The data to be sent to the Launcher/server.
+         string containing the data to send to the launcher
         </li>
     </ul>
 
 
 
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.sendData(&lt;data&gt;)`</span></pre>
-    </ul>
 
 </dd>
     <dt>
-    <a name = "sessionData"></a>
-    <strong>sessionData (data)</strong>
+    <a name = "connectToLauncher"></a>
+    <strong>connectToLauncher (silent)</strong>
     </dt>
     <dd>
-    Process session data received from the Launcher.
+    Connects to the Launcher.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">data</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         The session data received.
+        <li><span class="parameter">silent</span>
+         boolean determines if the connection request should be done silently
         </li>
     </ul>
 
 
 
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.sessionData(&lt;data&gt;)`</span></pre>
-    </ul>
 
 </dd>
     <dt>
-    <a name = "quitMP"></a>
-    <strong>quitMP (reason)</strong>
+    <a name = "isLoggedIn"></a>
+    <strong>isLoggedIn ()</strong>
     </dt>
     <dd>
-    Quit the multiplayer session.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">reason</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         The reason for quitting the session.
-        </li>
-    </ul>
+    Returns true or false if the user is logged in.
 
 
 
+    <h3>Returns:</h3>
+    <ol>
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.quitMP(&lt;reason&gt;)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "handleEvents"></a>
-    <strong>handleEvents (p)</strong>
-    </dt>
-    <dd>
-    Handles events triggered by TriggerClientEvent.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">p</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
-        </li>
-    </ul>
+        boolean loggedIn True if the user is logged in, false otherwise.
+    </ol>
 
 
 
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">`MPGameNetwork.<span class="function-name">CallEvent</span>(&lt;event data <span class="global">string</span>&gt;)</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "onKeyStateChanged"></a>
-    <strong>onKeyStateChanged (key, state)</strong>
-    </dt>
-    <dd>
-    Handles the state change of a key.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         - The name of the key
-        </li>
-        <li><span class="parameter">state</span>
-            <span class="types"><span class="type">boolean</span></span>
-         - The state of the key ('true' for pressed, 'false' for released)
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "onVehicleReady"></a>
-    <strong>onVehicleReady (gameVehicleID)</strong>
-    </dt>
-    <dd>
-    Handles the event when a vehicle is ready.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">gameVehicleID</span>
-            <span class="types"><span class="type">integer</span></span>
-         - The ID of the game vehicle
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="backtick">`MPGameNetwork.onVehicleReady(&lt;game vehicle id&gt;)`</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "onUpdate"></a>
-    <strong>onUpdate (delta)</strong>
-    </dt>
-    <dd>
-    onUpdate is called each game frame by the games engine.  It is used to run scripts in a loop such as getting data from the network buffer.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">delta</span>
-            <span class="types"><span class="type">integer</span></span>
-         time
-        </li>
-    </ul>
-
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">INTERNAL ONLY / GAME SPECIFIC</pre>
-    </ul>
 
 </dd>
     <dt>
@@ -585,47 +308,497 @@
     <strong>isLauncherConnected ()</strong>
     </dt>
     <dd>
-    Return whether the launcher is connected to the game or not.
+    Returns true or false if the launcher is connected.
 
 
 
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><span class="type">boolean</span></span>
-        Return the connection state of TCP with the launcher
+        boolean launcherConnected True if the launcher is connected, false otherwise.
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "login"></a>
+    <strong>login (identifiers)</strong>
+    </dt>
+    <dd>
+    Logs in the user with the given identifiers by sending the request to the launcher
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">identifiers</span>
+         table The identifiers used for login.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autoLogin"></a>
+    <strong>autoLogin ()</strong>
+    </dt>
+    <dd>
+    Automatically logs in the user.
+
+
+
 
 
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="backtick">`local connected = MPGameNetwork.isLauncherConnected()`</span></pre>
+        <pre class="example"><span class="function-name">autoLogin</span>() <span class="comment">-- Tells the launcher to attempt to auto authenticate with BeamMP Services</span></pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "connectionStatus"></a>
-    <strong>connectionStatus ()</strong>
+    <a name = "logout"></a>
+    <strong>logout ()</strong>
     </dt>
     <dd>
-    Return the launcher connection status.
+    Tells the launcher to log out the user.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="function-name">logout</span>() <span class="comment">-- Tells the launcher to logout from BeamMP Services</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "sendBeamMPInfo"></a>
+    <strong>sendBeamMPInfo ()</strong>
+    </dt>
+    <dd>
+    Sends the current player and server count plus the mod and launcher version to the CEF UI.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">sendBeamMPInfo</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "requestServerList"></a>
+    <strong>requestServerList ()</strong>
+    </dt>
+    <dd>
+    Request the server list data from the launcher.
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">requestServerList</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "requestPlayers"></a>
+    <strong>requestPlayers ()</strong>
+    </dt>
+    <dd>
+    Request the UI counts and other metrics by calling `sendBeamMPInfo()`
+
+
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/MPCoreNetwork.html#sendBeamMPInfo">sendBeamMPInfo</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="backtick">`MPCoreNetwork.requestPlayers()`</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getCurrentServer"></a>
+    <strong>getCurrentServer ()</strong>
+    </dt>
+    <dd>
+    Returns the current server information
 
 
 
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><span class="type">boolean</span></span>
-        Return the connection state of TCP with the launcher
+        currentServer table
     </ol>
 
 
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="backtick">`local status = MPGameNetwork.connectionStatus()`</span></pre>
+        <pre class="example">MPCoreNetwork.<span class="function-name">getCurrentServer</span>()</pre>
     </ul>
+
+</dd>
+    <dt>
+    <a name = "setCurrentServer"></a>
+    <strong>setCurrentServer (ip, port, name)</strong>
+    </dt>
+    <dd>
+    Set the current server information for later use
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ip</span>
+         string The IP/URL of the server
+        </li>
+        <li><span class="parameter">port</span>
+         number The Port of the server
+        </li>
+        <li><span class="parameter">name</span>
+         string The Name of the server (Used at the top of the screen when in session)
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">setCurrentServer</span>(<span class="string">'localhost'</span>, <span class="number">30814</span>, <span class="string">'Test Server'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "loadLevel"></a>
+    <strong>loadLevel (map)</strong>
+    </dt>
+    <dd>
+    Load the desired map/level by name.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+         string The Map String
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">loadLevel</span>(<span class="string">'/levels/gridmap_v2/info.json'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "loginReceived"></a>
+    <strong>loginReceived (params)</strong>
+    </dt>
+    <dd>
+    Handles the login result received from the launcher.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         string The JSON-encoded login results.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "leaveServer"></a>
+    <strong>leaveServer (goBack)</strong>
+    </dt>
+    <dd>
+    Leaves the server and performs necessary cleanup.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">goBack</span>
+         boolean Whether to go back to the previous screen after leaving the server.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">leaveServer</span>(<span class="keyword">true</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isMPSession"></a>
+    <strong>isMPSession ()</strong>
+    </dt>
+    <dd>
+    Returns if the current session is a multiplayer session / if we expect to be in one.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean isMpSession True if it is a multiplayer session, false otherwise.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">if</span> MPCoreNetwork.<span class="function-name">isMPSession</span>() <span class="keyword">then</span> <span class="backtick">`code`</span> <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isGoingMPSession"></a>
+    <strong>isGoingMPSession ()</strong>
+    </dt>
+    <dd>
+    Returns if the game is currently transitioning to a multiplayer session.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean isGoingMpSession True if transitioning to a multiplayer session, false otherwise.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">if</span> MPCoreNetwork.<span class="function-name">isGoingMPSession</span>() <span class="keyword">then</span> <span class="backtick">`code`</span> <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "requestMap"></a>
+    <strong>requestMap ()</strong>
+    </dt>
+    <dd>
+    Requests the map from the launcher
+
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">requestMap</span>()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "handleU"></a>
+    <strong>handleU (params)</strong>
+    </dt>
+    <dd>
+    Handles the update of the loading UI and performs necessary actions based on the received parameters.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         string The parameters received for updating the loading UI.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">handleU</span>(<span class="string">'lstart'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "promptAutoJoin"></a>
+    <strong>promptAutoJoin (params)</strong>
+    </dt>
+    <dd>
+    Prompts the user for auto join confirmation.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         string The parameters received for auto join confirmation.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">MPCoreNetwork.<span class="function-name">promptAutoJoin</span>(<span class="backtick">`...`</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+ This is the main processing thread of BeamMP in the game
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onClientStartMission"></a>
+    <strong>onClientStartMission ()</strong>
+    </dt>
+    <dd>
+    Executes when the client starts a mission (map) in for a multiplayer session.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onClientEndMission"></a>
+    <strong>onClientEndMission (mission)</strong>
+    </dt>
+    <dd>
+    Executes when the user or mod ends a mission/session (map) .
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mission</span>
+         table The mission object.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onUiChangedState"></a>
+    <strong>onUiChangedState (curUIState, prevUIState)</strong>
+    </dt>
+    <dd>
+    Executes when the UI state changes.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">curUIState</span>
+         string The current UI state.
+        </li>
+        <li><span class="parameter">prevUIState</span>
+         string The previous UI state.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onSerialize"></a>
+    <strong>onSerialize ()</strong>
+    </dt>
+    <dd>
+    Serializes data for saving to be loaded on lua reload.  Allows for lua state memory persistence between reloads
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table The serialized data.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onDeserialized"></a>
+    <strong>onDeserialized (data)</strong>
+    </dt>
+    <dd>
+    Deserializes data after loading lua state.  Allows for lua state memory persistence between reloads
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         table The deserialized data.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onExtensionLoaded"></a>
+    <strong>onExtensionLoaded ()</strong>
+    </dt>
+    <dd>
+    Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+ We use this to load our UI info and connect to the launcher
+
+
+
+
+
+
 
 </dd>
 </dl>
@@ -635,7 +808,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-26 12:12:49 </i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

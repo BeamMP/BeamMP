@@ -31,6 +31,10 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
 
 
 <h2>Modules</h2>
@@ -44,7 +48,7 @@
   <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
   <li><a href="../modules/MPModManager.html">MPModManager</a></li>
   <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
-  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><strong>MPUpdatesGE</strong></li>
   <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
   <li><a href="../modules/UI.html">UI</a></li>
   <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
@@ -55,7 +59,7 @@
   <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
   <li><a href="../modules/nodesGE.html">nodesGE</a></li>
   <li><a href="../modules/positionGE.html">positionGE</a></li>
-  <li><strong>vehicle.controller.playerController</strong></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
   <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
 </ul>
 
@@ -63,16 +67,56 @@
 
 <div id="content">
 
-<h1>Module <code>vehicle.controller.playerController</code></h1>
-<p>Propulsion---</p>
-<p></p>
+<h1>Module <code>MPUpdatesGE</code></h1>
+<p>MPUpdatesGE API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">onPlayerConnect() -- internal access
+</pre></li>
+        <li><pre class="example">MPUpdatesGE.onPlayerConnect() -- external access
+</pre></li>
+    </ul>
 
 
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+ This is the main processing thread of BeamMP in the game
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->

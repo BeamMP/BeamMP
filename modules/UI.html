@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/MPConfig.html">MPConfig</a></li>
+  <li><a href="../modules/MPCoreNetwork.html">MPCoreNetwork</a></li>
+  <li><a href="../modules/MPDebug.html">MPDebug</a></li>
+  <li><a href="../modules/MPElectricsGE.html">MPElectricsGE</a></li>
+  <li><a href="../modules/MPGameNetwork.html">MPGameNetwork</a></li>
+  <li><a href="../modules/MPHelpers.html">MPHelpers</a></li>
+  <li><a href="../modules/MPInputsGE.html">MPInputsGE</a></li>
+  <li><a href="../modules/MPModManager.html">MPModManager</a></li>
+  <li><a href="../modules/MPPowertrainGE.html">MPPowertrainGE</a></li>
+  <li><a href="../modules/MPUpdatesGE.html">MPUpdatesGE</a></li>
+  <li><a href="../modules/MPVehicleGE.html">MPVehicleGE</a></li>
+  <li><strong>UI</strong></li>
+  <li><a href="../modules/ge.extensions.core.cameraModes.passenger.html">ge.extensions.core.cameraModes.passenger</a></li>
+  <li><a href="../modules/multiplayer_multiplayer.html">multiplayer_multiplayer</a></li>
+  <li><a href="../modules/multiplayer_ui_chat.html">multiplayer_ui_chat</a></li>
+  <li><a href="../modules/multiplayer_ui_options.html">multiplayer_ui_options</a></li>
+  <li><a href="../modules/multiplayer_ui_playerList.html">multiplayer_ui_playerList</a></li>
+  <li><a href="../modules/multiplayer_ui_utils.html">multiplayer_ui_utils</a></li>
+  <li><a href="../modules/nodesGE.html">nodesGE</a></li>
+  <li><a href="../modules/positionGE.html">positionGE</a></li>
+  <li><a href="../modules/vehicle.controller.playerController.html">vehicle.controller.playerController</a></li>
+  <li><a href="../modules/vehicle.extensions.BeamMP.MPVehicleVE.html">vehicle.extensions.BeamMP.MPVehicleVE</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>UI</code></h1>
+<p>UI API.</p>
+<p>
+ Author of this documentation is Titch</p>
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">applyElectrics(...) -- internal access
+</pre></li>
+        <li><pre class="example">UI.handle(...) -- external access
+</pre></li>
+    </ul>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#updateLoading">updateLoading (data)</a></td>
+	<td class="summary">Updates the loading information/message based on the provided data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#promptAutoJoinConfirmation">promptAutoJoinConfirmation (data)</a></td>
+	<td class="summary">Prompts the user for auto join confirmation and triggers the AutoJoinConfirmation event.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#split">split (s, sep)</a></td>
+	<td class="summary">Splits a string into fields using the specified separator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#updatePlayersList">updatePlayersList (data)</a></td>
+	<td class="summary">Update the players string used to create the player list in the UI when in a session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sendQueue">sendQueue ()</a></td>
+	<td class="summary">Used to tell the Ui of new status for the updates queue.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#updateQueue">updateQueue (spawnCount, editCount)</a></td>
+	<td class="summary">This function is used to update the edit/spawn queue values for the UI indicator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPing">setPing (ping)</a></td>
+	<td class="summary">Used to set our ping in the top status bar.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setNickname">setNickname (name)</a></td>
+	<td class="summary">Set the users nickname so that we know what our username was in lua.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setServerName">setServerName (serverName)</a></td>
+	<td class="summary">Set the server name in the status bar at the top while in session
+ This is set as part of the joining process automatically</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPlayerCount">setPlayerCount (playerCount)</a></td>
+	<td class="summary">Update the player count in the top status bar when in a server.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#showNotification">showNotification (text, type)</a></td>
+	<td class="summary">Display a prompt in the top corner as a notification, Good for server related events like joins/leaves</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#showMdDialog">showMdDialog (options)</a></td>
+	<td class="summary">Show a UI dialog / alert box to inform the user of something.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#renderWindow">renderWindow ()</a></td>
+	<td class="summary">Render the IMGUI chat window and playerlist windows + the settings for them.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loadConfig">loadConfig ()</a></td>
+	<td class="summary">This function is used to load the settings and config of the UI (chat)</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#chatMessage">chatMessage (rawMessage)</a></td>
+	<td class="summary">Function is for when the game receives a new chat message from the server.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#chatSend">chatSend (msg)</a></td>
+	<td class="summary">Sends a chat message to the server for viewing by other players.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#toggleChat">toggleChat ()</a></td>
+	<td class="summary">Toggle the IMGUI chat to show or hide</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setPlayerPing">setPlayerPing (playerName, ping)</a></td>
+	<td class="summary">This function is for mapping player pings to names for the playerlist</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onClientEndMission">onClientEndMission (mission)</a></td>
+	<td class="summary">Executes when the user or mod ends a mission/session (map) .</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onExtensionLoaded">onExtensionLoaded ()</a></td>
+	<td class="summary">Triggered by BeamNG when the lua mod is loaded by the modmanager system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#onUpdate">onUpdate (dt)</a></td>
+	<td class="summary">onUpdate is a game eventloop function.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "updateLoading"></a>
+    <strong>updateLoading (data)</strong>
+    </dt>
+    <dd>
+    Updates the loading information/message based on the provided data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         string The raw data message containing the code and message.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "promptAutoJoinConfirmation"></a>
+    <strong>promptAutoJoinConfirmation (data)</strong>
+    </dt>
+    <dd>
+    Prompts the user for auto join confirmation and triggers the AutoJoinConfirmation event.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         string The message to display in the confirmation prompt.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "split"></a>
+    <strong>split (s, sep)</strong>
+    </dt>
+    <dd>
+    Splits a string into fields using the specified separator.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">s</span>
+         string The string to split.
+        </li>
+        <li><span class="parameter">sep</span>
+         string (optional) The separator to use. Defaults to a space character.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table An array containing the split fields.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "updatePlayersList"></a>
+    <strong>updatePlayersList (data)</strong>
+    </dt>
+    <dd>
+    Update the players string used to create the player list in the UI when in a session.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sendQueue"></a>
+    <strong>sendQueue ()</strong>
+    </dt>
+    <dd>
+    Used to tell the Ui of new status for the updates queue.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "updateQueue"></a>
+    <strong>updateQueue (spawnCount, editCount)</strong>
+    </dt>
+    <dd>
+    This function is used to update the edit/spawn queue values for the UI indicator.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">spawnCount</span>
+         number
+        </li>
+        <li><span class="parameter">editCount</span>
+         number
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setPing"></a>
+    <strong>setPing (ping)</strong>
+    </dt>
+    <dd>
+    Used to set our ping in the top status bar.  It also is used in the math for position prediction
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ping</span>
+         number
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setNickname"></a>
+    <strong>setNickname (name)</strong>
+    </dt>
+    <dd>
+    Set the users nickname so that we know what our username was in lua.
+ Useful in determining who we are
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         any
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setServerName"></a>
+    <strong>setServerName (serverName)</strong>
+    </dt>
+    <dd>
+    Set the server name in the status bar at the top while in session
+ This is set as part of the joining process automatically
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">serverName</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setPlayerCount"></a>
+    <strong>setPlayerCount (playerCount)</strong>
+    </dt>
+    <dd>
+    Update the player count in the top status bar when in a server.  Should be preformatted
+ This is set as part of the joining process automatically and is updated during the session
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">playerCount</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "showNotification"></a>
+    <strong>showNotification (text, type)</strong>
+    </dt>
+    <dd>
+    Display a prompt in the top corner as a notification, Good for server related events like joins/leaves
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+         string
+        </li>
+        <li><span class="parameter">type</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "showMdDialog"></a>
+    <strong>showMdDialog (options)</strong>
+    </dt>
+    <dd>
+    Show a UI dialog / alert box to inform the user of something.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">options</span>
+         any
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "renderWindow"></a>
+    <strong>renderWindow ()</strong>
+    </dt>
+    <dd>
+    Render the IMGUI chat window and playerlist windows + the settings for them.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "loadConfig"></a>
+    <strong>loadConfig ()</strong>
+    </dt>
+    <dd>
+    This function is used to load the settings and config of the UI (chat)
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "chatMessage"></a>
+    <strong>chatMessage (rawMessage)</strong>
+    </dt>
+    <dd>
+    Function is for when the game receives a new chat message from the server.
+ This is for handling the raw chat message
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rawMessage</span>
+         string The raw chat message with header codes
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "chatSend"></a>
+    <strong>chatSend (msg)</strong>
+    </dt>
+    <dd>
+    Sends a chat message to the server for viewing by other players.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msg</span>
+         string The chat message typed by the user
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "toggleChat"></a>
+    <strong>toggleChat ()</strong>
+    </dt>
+    <dd>
+    Toggle the IMGUI chat to show or hide
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "setPlayerPing"></a>
+    <strong>setPlayerPing (playerName, ping)</strong>
+    </dt>
+    <dd>
+    This function is for mapping player pings to names for the playerlist
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">playerName</span>
+         string The player name
+        </li>
+        <li><span class="parameter">ping</span>
+         number The players ping
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onClientEndMission"></a>
+    <strong>onClientEndMission (mission)</strong>
+    </dt>
+    <dd>
+    Executes when the user or mod ends a mission/session (map) .
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mission</span>
+         table The mission object.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onExtensionLoaded"></a>
+    <strong>onExtensionLoaded ()</strong>
+    </dt>
+    <dd>
+    Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+ We use this to load our UI and config
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "onUpdate"></a>
+    <strong>onUpdate (dt)</strong>
+    </dt>
+    <dd>
+    onUpdate is a game eventloop function.  It is called each frame by the game engine.
+ This is the main processing thread of BeamMP in the game
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+         float
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-11-07 14:48:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

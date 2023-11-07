@@ -81,7 +81,7 @@ function simpletrace(level)
 	log('I', 'simpletrace', "Code was called from: "..simpletraces(level+1))
 end
 
---- ?
+-- ?
 do 
 local _pairs = pairs 
 function pairs (value) 

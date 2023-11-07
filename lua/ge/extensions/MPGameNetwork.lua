@@ -4,13 +4,11 @@
 -- Contact BeamMP for more info!
 --====================================================================================
 
---- MPGameNetwork API - This is the main networking and starting point for the BeamMP Multiplayer mod. It handles the Initial TCP connection establishment with the Launcher.
+--- MPGameNetwork API. Handles Proxy Launcher <-> Game Network. Vehicle Spawns, edits, chat, position updates etc. Everything session related.
 --- Author of this documentation is Titch2000
 --- @module MPGameNetwork
 --- @usage connectToLauncher() -- internal access
 --- @usage MPGameNetwork.connectToLauncher() -- external access
-
-
 
 local M = {}
 
@@ -75,8 +73,8 @@ local function disconnectLauncher()
 end
 
 
---- Send data over the TCP connection to the Launcher and then onto the Server.
--- @tparam string s The data to be sent to the Launcher/server.
+--- Send given packet to the Server, over the Launcher.
+-- @tparam string s The packet to be sent to the Launcher/server.
 -- @usage MPGameNetwork.sendData(`<data>`)
 local function sendData(s)
 	-- First check if we are V2.1 Networking or not
@@ -130,7 +128,7 @@ local function sessionData(data)
 	end
 end
 
---- Quit the multiplayer session.
+--- Display given disconnect reason to the Player
 -- @tparam string reason The reason for quitting the session.
 -- @usage MPGameNetwork.quitMP(`<reason>`)
 local function quitMP(reason)
@@ -147,7 +145,7 @@ end
 -- Events System
 -- -----------------------------------------------------------------------------
 
---- Handles events triggered by TriggerClientEvent.
+--- Handles events triggered by MP.TriggerClientEvent send from the Server or localy with TriggerClientEvent.
 -- @tparam string p The event data to be parsed and handled. Should be in the format ":<NAME>:<DATA>"
 -- @usage MPGameNetwork.CallEvent(`<event data string>`)
 local function handleEvents(p)  --- code=E  p=:<NAME>:<DATA>
@@ -168,7 +166,7 @@ function TriggerServerEvent(name, data)
 	M.send('E:'..name..':'..data)
 end
 
---- Triggers a client event with the specified name and data.
+--- Triggers a local client event with the specified name and data.
 -- @tparam string name - The name of the event
 -- @tparam string data - The data to be sent with the event
 -- @usage `riggerClientEvent(`<name>`, `<data>`)
@@ -180,6 +178,7 @@ end
 -- @tparam string n - The name of the event
 -- @tparam function f - The event handler function
 -- @usage AddEventHandler(`<name>`, `<function>`)
+-- @usage if AddEventHandler then AddEventHandler(`<name>`, `<function>`) end -- if your mod is also singleplayer available
 function AddEventHandler(n, f)
 	log('M', 'AddEventHandler', "Adding Event Handler: Name = "..tostring(n))
 	if type(f) ~= "function" or f == nop then
@@ -280,7 +279,7 @@ local HandleNetwork = {
 
 local heartbeatTimer = 0
 
---- onUpdate is called each game frame by the games engine. It is used to run scripts in a loop such as getting data from the network buffer.
+--- Tries to receive data from the Launcher every tick from the gameengine and handles the launcher <-> game heartbeat.
 -- @tparam integer dt delta time
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onUpdate(dt)

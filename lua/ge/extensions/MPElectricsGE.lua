@@ -30,10 +30,10 @@ end
 
 
 
---- This function is called by VE lua to send the data from VE to GE and then to the server.
---- INTERNAL USE
---- @param data table The electrics data from VE
---- @param gameVehicleID number The vehicle ID according to the local game
+--- Wraps player own vehicle electrics into a packet and sends it to the Server.
+-- INTERNAL USE
+-- @param data table The electrics data from VE
+-- @param gameVehicleID number The vehicle ID according to the local game
 local function sendElectrics(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
@@ -45,9 +45,9 @@ local function sendElectrics(data, gameVehicleID)
 end
 
 
---- This function serves to send the electrics data from GE to VE for application
---- @param data table The data to be applied as electrics
---- @param serverVehicleID string The VehicleID according to the server.
+--- This function serves to send the electrics data received for another players vehicle from GE to VE, where it is handled.
+-- @param data table The data to be applied as electrics
+-- @param serverVehicleID string The VehicleID according to the server.
 local function applyElectrics(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
@@ -59,8 +59,8 @@ local function applyElectrics(data, serverVehicleID)
 end
 
 
---- The raw message from the server. This is unpacked first and then sent to be applied according to message code.
---- @param rawData string The raw message data.
+--- The raw message from the server. This is unpacked first and then given to applyElectrics()
+-- @param rawData string The raw message data.
 local function handle(rawData)
 	--print("MPElectricsGE.handle: "..rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")

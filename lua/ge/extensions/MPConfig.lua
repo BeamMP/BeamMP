@@ -4,7 +4,7 @@
 -- Contact BeamMP for more info!
 --====================================================================================
 
---- MPConfig API - This is the file responsible for storing the settings and values for a given session.
+--- MPConfig API - This script sets Default settings if not present and handles session specific data.
 -- Author of this documentation is Titch2000
 -- @module MPConfig
 -- @usage local nickname = getNickname() -- internal access
@@ -61,7 +61,7 @@ local function getNickname()
 	return Nickname
 end
 
---- Set the PlayerServerID variable for use by other aspects of the mod.
+--- Sets the ID the server gave this Client, for use by other aspects of the mod.
 -- @tparam number x The PlayerServerID that we have received.
 -- @usage MPConfig.setPlayerServerID(`<players server ID>`)
 local function setPlayerServerID(x)

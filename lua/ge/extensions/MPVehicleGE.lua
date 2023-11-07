@@ -1003,6 +1003,22 @@ local function onVehicleDestroyed(gameVehicleID)
 
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
+		
+		local veh = be:getObjectByID(gameVehicleID)
+		if veh:getJBeamFilename() == "unicycle" then -- if the player destroyed their unicycle
+			local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
+			local defaultConfig = {}
+			defaultConfig.format = 2
+			defaultConfig.licenseName = ""
+			defaultConfig.mainPartName = "unicycle"
+			defaultConfig.model = "unicycle"
+			defaultConfig.paints = vehicleConfig.paints
+			defaultConfig.parts = vehicleConfig.parts
+			
+			local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
+			handle:write(jsonEncode(defaultConfig))
+			handle:close()
+		end
 
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))

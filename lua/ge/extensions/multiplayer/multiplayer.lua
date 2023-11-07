@@ -1,3 +1,14 @@
+--====================================================================================
+-- All work by Titch2000 & 20dka.
+-- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+--- multiplayer_multiplayer API.
+--- Author of this documentation is Titch
+--- @module multiplayer_multiplayer
+--- @usage modifiedGetDriverData(veh) -- internal access
+--- @usage multiplayer_multiplayer.onWorldReadyState(1) -- external access
+
 local M = {state={}}
 
 

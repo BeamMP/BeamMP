@@ -30,15 +30,26 @@ local translationTable = {
 	['M'] = 6
 }
 
+local gearBoxHandler = {
+	["manualGearbox"] = 1,
+	["sequentialGearbox"] = 1,
+	["dctGearbox"] = 2,
+	["cvtGearbox"] = 2,
+	["automaticGearbox"] = 2,
+	["electricMotor"] = 2
+}
+
 local function applyGear(data) --TODO: add handling for mismatched gearbox types between local and remote vehicle
 	if not electrics.values.gearIndex or electrics.values.gear == data then return end
 	local powertrainDevice = powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor") or "none"
-	local gearboxType = powertrainDevice.type
-	if gearboxType == "manualGearbox" or gearboxType == "sequentialGearbox" then
+	
+	-- certain gearbox need to be shifted with setGearIndex() while others need to be shifted with shiftXOnY()
+	if gearBoxHandler[powertrainDevice.type] == 1 then
 		local index = tonumber(data)
 		if not index then return end
 		powertrainDevice:setGearIndex(index)
-	elseif gearboxType == "dctGearbox" or gearboxType == "cvtGearbox" or gearboxType == "automaticGearbox" or gearboxType == "electricMotor" then
+		
+	elseif gearBoxHandler[powertrainDevice.type] == 2 then
 		if electrics.values.isShifting then return end
 		local remoteGearMode = string.sub(data, 1, 1)
 		local localGearMode = string.sub(electrics.values.gear, 1, 1)
@@ -47,11 +58,14 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 			if electrics.values.gearIndex < remoteIndex then
 				controller.mainController.shiftUpOnDown()
 			elseif electrics.values.gearIndex > remoteIndex then
-				controller.mainController.shiftDownOnUp()
+				controller.mainController.shiftDownOnDown()
 			end
 		else
 			controller.mainController.shiftToGearIndex(translationTable[remoteGearMode])
 		end
+		
+	else
+		print('MPInputsVE Error in "applyGear()" unknown GearBoxType "' .. powertrainDevice.type .. '"')
 	end
 end
 

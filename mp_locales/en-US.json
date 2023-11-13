@@ -64,6 +64,8 @@
     "ui.options.multiplayer.tuneColorIllegal": "Illegal vehicle ",
     "ui.options.multiplayer.tuneColorIllegalHelp": "(missing mod, can not be spawned)",
     "ui.options.multiplayer.tuneColorDeleted": "Deleted vehicle",
+    "ui.options.multiplayer.unicycleTitle": "Set default Unicycle",
+    "ui.options.multiplayer.unicycleDefault": "Which unicycle config to use",
     "ui.options.multiplayer.blobsTitle": "Blobs",
     "ui.options.multiplayer.nameTagTitle": "Nametags",
     "ui.options.multiplayer.others": "Others",

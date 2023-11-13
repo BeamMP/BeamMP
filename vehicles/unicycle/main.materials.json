@@ -90,28 +90,48 @@
     "materialTag1": "vehicle",
     "version": 1.5
   },
-  "beamling_hat": {
-    "name": "beamling_hat",
-    "mapTo": "beamling_hat",
-    "class": "Material",
-    "persistentId": "b055c593-8a46-4c3f-995d-d5141c3ec5a9",
-    "Stages": [
-      {},
-      {},
-      {},
-      {}
-    ],
-    "activeLayers": 1,
-    "dynamicCubemap": true,
-    "materialTag0": "beamng",
-    "materialTag1": "vehicle",
-    "version": 1.5
-  },
   "beamling_metal": {
     "name": "beamling_metal",
     "mapTo": "beamling_metal",
     "class": "material",
     "persistentId": "b7067cf1-f129-4282-983b-7a63840a3a48",
+    "Stages": [
+      {
+        "baseColorFactor": [
+          0.52352798,
+          0.52352798,
+          0.52352798,
+          1
+        ],
+        "metallicFactor": 0.541999996,
+        "roughnessFactor": 0.611999989
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      },
+      {
+        "baseColorFactor": null,
+        "metallicFactor": null,
+        "roughnessFactor": null
+      }
+    ],
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+  "beamling_gold": {
+    "name": "beamling_gold",
+    "mapTo": "beamling_gold",
+    "class": "material",
+    "persistentId": "",
     "Stages": [
       {
         "baseColorFactor": [
@@ -228,23 +248,6 @@
     "materialTag1": "vehicle",
     "version": 1.5
   },
-  "beamling_tiepattern": {
-    "name": "beamling_tiepattern",
-    "mapTo": "beamling_tiepattern",
-    "class": "Material",
-    "persistentId": "",
-    "Stages": [
-      {},
-      {},
-      {},
-      {}
-    ],
-    "activeLayers": 1,
-    "dynamicCubemap": true,
-    "materialTag0": "beamng",
-    "materialTag1": "vehicle",
-    "version": 1.5
-  },
   "beamling_santa": {
     "name": "beamling_santa",
     "mapTo": "beamling_santa",
@@ -262,4 +265,70 @@
     "materialTag1": "vehicle",
     "version": 1.5
   },
+  "beamling_blue": {
+    "name": "beamling_blue",
+    "mapTo": "beamling_blue",
+    "class": "Material",
+    "persistentId": "",
+    "Stages": [
+      {},
+      {},
+      {},
+      {}
+    ],
+    "activeLayers": 1,
+    "dynamicCubemap": true,
+    "materialTag0": "beamng",
+    "materialTag1": "vehicle",
+    "version": 1.5
+  },
+//vanilla materials
+	"unicycle_snowman": {
+    "name": "unicycle_snowman",
+    "mapTo": "unicycle_snowman",
+    "class": "Material",
+    "persistentId": "915574fa-c39e-490b-a9bd-cef99ea305e5",
+    "Stages": [
+      {
+        "diffuseColor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "colorMap" : "snowman_d.dds",
+        "normalMap" : "snowman_n.dds",
+        "pixelSpecular" : true,
+        "specularMap" : "snowman_s.dds",
+        "specularPower" : 16,
+        "useAnisotropic" : true
+      },
+      {},
+      {},
+      {}
+    ],
+    "order_simset": -1136139170,
+    "translucentBlendOp": "None"
+  },
+  "unicycle_debug": {
+    "name": "unicycle_debug",
+    "mapTo": "unicycle_debug",
+    "class": "Material",
+    "persistentId": "9bb1b50b-0ad7-4485-8341-81a8a649d5a7",
+    "Stages": [
+      {
+        "diffuseColor": [
+          0.639999986,
+          0.639999986,
+          0.639999986,
+          1
+        ]
+      },
+      {},
+      {},
+      {}
+    ],
+    "order_simset": 1028334744,
+    "translucentBlendOp": "None"
+  }
 }

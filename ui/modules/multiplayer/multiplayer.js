@@ -1126,7 +1126,6 @@ async function getPartner() {
 	return new Promise(function(resolve, reject) {
 		var part = []
 		servers.forEach(server => {
-			//console.log(server)
 			if (server.partner === true) {
 				part.push(server)
 			}

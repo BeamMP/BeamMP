@@ -1,8 +1,14 @@
 --====================================================================================
--- All work by Titch2000.
--- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+-- All work by Titch2000, 20dka, snepsnepsnep.
+-- You have no permission to edit, redistribute or upload other than for the purposes of contributing. 
+-- Contact BeamMP for more info!
 --====================================================================================
 
+--- MPConfig API - This script sets Default settings if not present and handles session specific data.
+-- Author of this documentation is Titch2000
+-- @module MPConfig
+-- @usage local nickname = getNickname() -- internal access
+-- @usage local nickname = MPConfig.getNickname() -- external access
 
 
 local M = {}
@@ -29,6 +35,8 @@ local defaultSettings = {
 	launcherPort = 4444
 }
 
+--- Called when the mod is loaded by the games modloader. 
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onExtensionLoaded()
 	for k,v in pairs(defaultSettings) do
 		if settings.getValue(k) == nil then settings.setValue(k, v) end
@@ -38,24 +46,38 @@ local function onExtensionLoaded()
 	settings.impl.invalidateCache()
 end
 
-
+--- Set the users Nickname variable for use by other aspects of the mod.
+-- @tparam string x The users nickname that we have received.
+-- @usage MPConfig.setNickname(`<nickname>`)
 local function setNickname(x)
 	log('M', 'setNickname', 'Nickname Set To: '..x)
 	Nickname = x
 end
 
+--- Get the users Nickname.
+-- @treturn string The users nickname.
+-- @usage local nickname = MPConfig.getNickname()
 local function getNickname()
 	return Nickname
 end
 
+--- Sets the ID the server gave this Client, for use by other aspects of the mod.
+-- @tparam number x The PlayerServerID that we have received.
+-- @usage MPConfig.setPlayerServerID(`<players server ID>`)
 local function setPlayerServerID(x)
 	PlayerServerID = tonumber(x)
 end
 
+--- Get the PlayerServerID variable.
+-- @treturn number The users server ID.
+-- @usage local nickname = MPConfig.getPlayerServerID()
 local function getPlayerServerID()
 	return PlayerServerID
 end
 
+--- Check for old configuration files and move them to the new location if found.
+-- @treturn boolean True if any files were moved, false otherwise.
+-- @usage local updatedConfigs = MPConfig.checkForOldConfig()
 local function checkForOldConfig()
 	if not FS:directoryExists("BeamMP") then
 		return false
@@ -85,7 +107,9 @@ local function checkForOldConfig()
 	return movedfiles
 end
 
-
+--- Get the favorites from the favorites.json file.
+-- @treturn table The favorites data.
+-- @usage local favorites = MPConfig.getFavorites()
 local function getFavorites()
 	if not FS:directoryExists("settings/BeamMP") then
 		if checkForOldConfig() then
@@ -130,7 +154,9 @@ local function getFavorites()
 	return cleanedServers
 end
 
-
+--- Set the favorites in the favorites.json file.
+-- @tparam table favstr The favorites data as a table.
+-- @usage MPConfig.setFavorites(`<favorites table>`)
 local function setFavorites(favstr)
 	if not FS:directoryExists("settings/BeamMP") then
 		FS:directoryCreate("settings/BeamMP")
@@ -141,7 +167,9 @@ local function setFavorites(favstr)
 	jsonWriteFile(favsfile, favs, true)
 end
 
-
+--- Get the configuration from the config.json file.
+-- @treturn table The configuration data.
+-- @usage local config = MPConfig.getConfig()
 local function getConfig()
 	if not FS:directoryExists("settings/BeamMP") then
 		if checkForOldConfig() then
@@ -160,6 +188,10 @@ local function getConfig()
 	end
 end
 
+--- Set a configuration setting in the config.json file.
+-- @tparam string settingName The name of the setting.
+-- @param settingVal The value of the setting.
+-- @usage MPConfig.setConfig(`<setting name>, <setting value>`)
 local function setConfig(settingName, settingVal)
 	local config = getConfig()
 	if not config then config = {} end
@@ -170,7 +202,8 @@ local function setConfig(settingName, settingVal)
 	jsonWriteFile(favsfile, config, true)
 end
 
-
+--- Accept the BeamMP terms of service.
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function acceptTos()
 	local config = getConfig()
 	if not config then config = {} end
@@ -181,6 +214,9 @@ local function acceptTos()
 	jsonWriteFile(favsfile, config, true)
 end
 
+--- Serialize the data for saving.
+-- @treturn table The serialized data.
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onSerialize()
 	local data = {
 		Nickname = Nickname,
@@ -189,6 +225,9 @@ local function onSerialize()
 	return data
 end
 
+--- Deserialize the data when loading.
+-- @tparam table data The deserialized data.
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onDeserialized(data)
 	Nickname = data.Nickname
 	PlayerServerID = data.PlayerServerID

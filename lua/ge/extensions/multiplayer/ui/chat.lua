@@ -1,3 +1,14 @@
+--====================================================================================
+-- All work by Vulcan-dev.
+-- You have no permission to redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+--- multiplayer_ui_chat API.
+--- Author of this documentation is Titch
+--- @module multiplayer_ui_chat
+--- @usage colorByRGB(r,g,b,a) -- internal access
+--- @usage multiplayer_ui_chat.addMessage(username, message, id, color) -- external access
+
 local M = {
     chatMessages = {},
     newMessageCount = 0
@@ -15,9 +26,16 @@ local wasMessageSent = false
 local history = {}
 local historyPos = -1
 
+--- Creates an ImGui ImVec4 color based on the provided RGBA values.
+--- @param r number The red component of the color (0-255).
+--- @param g number The green component of the color (0-255).
+--- @param b number The blue component of the color (0-255).
+--- @param a number The alpha component of the color (0-255).
+--- @return table Returns an ImVec4 color table representing the specified RGB values.
 local function colorByRGB(r, g, b, a)
     return imgui.ImVec4(r/255, g/255, b/255, a/255)
 end
+
 
 local colorCodes = {
     ['0'] = colorByRGB(000,000,000,255),
@@ -39,6 +57,10 @@ local colorCodes = {
     ['r'] = colorByRGB(255,255,255,255),
 }
 
+--- Converts a text string into a list of colored text segments for use in IMGUI.
+--- @param text string The input text to be formatted.
+--- @param nocolor boolean (optional) If true, all text segments will have the default color.
+--- @return table Returns a table containing colored text segments.
 local function textToColorAndText(text, nocolor)
     local color = colorCodes[string.sub(text, 1, 1)] or colorCodes["r"]
     local text = string.sub(text, 2, #text)
@@ -49,7 +71,7 @@ local function textToColorAndText(text, nocolor)
     local currentTxt = ""
     local wasSpace = false
     local c = ""
-    
+
     for i = 1, #text do
         c = text:sub(i,i)
 
@@ -79,6 +101,10 @@ local function textToColorAndText(text, nocolor)
     return txtList
 end
 
+--- Formats a text string with color codes and returns a list of colored text segments for use in IMGUI.
+--- @param text string The input text to be formatted.
+--- @param nocolor boolean (optional) If true, all text segments will have the default color.
+--- @return table Returns a table containing colored text segments.
 local function formatTextWithColor(text, nocolor)
     if(string.sub(text, 1, 1) ~= "^") then
         text = "^f" .. text
@@ -87,7 +113,7 @@ local function formatTextWithColor(text, nocolor)
     local txtList = {}
 
     local startIdx, endIdx = string.find(text, "%^")
-    
+
     while startIdx do
         local partStr = string.sub(text, 1, startIdx - 1)
         if partStr ~= "" then
@@ -95,18 +121,22 @@ local function formatTextWithColor(text, nocolor)
                 table.insert(txtList, v)
             end
         end
-    
+
         text = string.sub(text, endIdx + 1)
         startIdx, endIdx = string.find(text, "%^")
     end
-    
+
     for _, v in ipairs(textToColorAndText(text, nocolor)) do
         table.insert(txtList, v)
     end
-    
+
     return txtList
 end
 
+
+--- Callback function for ImGui input text.
+--- @param data table The input text data.
+--- @return number Returns 0 to prevent further processing or 1 to allow further processing.
 local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
     if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
         local prevHistoryPos = historyPos
@@ -155,11 +185,15 @@ local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
     return imgui.Int(0)
 end)
 
+--- Clears the chat history.
 local function clearHistory()
     log('I', "BeamMP UI", "Cleared chat history")
     history = {}
 end
 
+
+--- Sends a chat message.
+--- @param message string The message to send.
 local function sendChatMessage(message)
     if message[0] == 0 then return end
 
@@ -171,16 +205,21 @@ local function sendChatMessage(message)
     -- }
 
     local c = 'C:'..MPConfig.getNickname()..": "..message
-	MPGameNetwork.send(c)
-	TriggerClientEvent("ChatMessageSent", c)
+    MPGameNetwork.send(c)
+    TriggerClientEvent("ChatMessageSent", c)
 
-    -- table.insert(M.chatMessages, messageTable) -- ! For debugging, remove this line and messageTable (addMessage handles this)
     wasMessageSent = true
     history[#history+1] = ffi.string(chatMessageBuf)
     historyPos = -1
     ffi.copy(chatMessageBuf, "")
 end
 
+
+--- Adds a chat message to the chat history and the chat window.
+--- @param username string The username of the sender.
+--- @param message string The message content.
+--- @param id number The ID of the message.
+--- @param color string The color of the message.
 local function addMessage(username, message, id, color)
     if(username == "Server") then
         message = formatTextWithColor(message, false)
@@ -202,14 +241,15 @@ local function addMessage(username, message, id, color)
         UI.bringToFront()
     end
 
-    --local name = messageTable.message:sub(1, messageTable.message:find(':')-1)
     if not forceBottom and username ~= MPConfig:getNickname() then
         M.newMessageCount = M.newMessageCount + 1
     end
 end
 
+
 local scrollbarVisible = false
 
+--- Render the IMGUI windows on each frame.
 local function render()
     local scrollbarSize = imgui.GetStyle().ScrollbarSize
 

@@ -5,9 +5,18 @@
 -- Debug menus for monitoring BeamMP performance and more
 --====================================================================================
 
+--- MPDebug API.
+--- Author of this documentation is Titch
+--- @module MPDebug
+--- @usage getPlayerNames() -- internal access
+--- @usage MPDebug.tpPlayerToPos(...) -- external access
+
+
 local M = {}
 
 
+--- Teleports the players vehicle to a specified position.
+--- @param targetPos vec3 The target position to teleport the player to. Format: {x, y, z}
 local function tpPlayerToPos(targetPos)
 	local activeVehicle = be:getPlayerVehicle(0)
 
@@ -25,7 +34,9 @@ local function tpPlayerToPos(targetPos)
 end
 
 
-local function getPlayerNames() --returns a table where the key is username, value is an owned vehid (can be ignored)
+--- Returns the names of all players in the current session.
+--- @return table names A table where the key is the username and the value is an owned vehicle ID (can be ignored).
+local function getPlayerNames()
 	if not MPVehicleGE then return {} end
 
 	local names = {}
@@ -45,6 +56,9 @@ local im = ui_imgui
 
 local ui_strings = {}
 
+--- Retrieves translations from a JSON file and caches them?
+--- @param _ any Unused parameter.
+--- @param content string The content of the JSON file.
 local function getTranslations(_, content)
 	local data = jsonDecode(content)
 	if data and data[1] and data[1] == "translationFileUpdate" then
@@ -56,6 +70,8 @@ local function getTranslations(_, content)
 	end
 end
 
+--- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+--- We use this to register our IMGUI windows.
 local function onExtensionLoaded()
 	gui_module.initialize(gui)
 	gui.registerWindow("MPplayerList", im.ImVec2(256, 256))
@@ -69,7 +85,7 @@ local function onExtensionLoaded()
 end
 
 
-
+--- Draws the IMGUI player list.
 local function drawPlayerList()
 	if not gui.isWindowVisible("MPplayerList") then return end
 	local players = MPVehicleGE.getPlayers()
@@ -115,7 +131,7 @@ local function drawPlayerList()
 	im.End()
 end
 
-
+--- Draws the IMGUI Teleport / Spawning Menu
 local function drawSpawnTeleport()
 	if not gui.isWindowVisible("MPspawnTeleport") then return end
 	if getMissionFilename() == "" then return end
@@ -219,12 +235,15 @@ local function drawNetworkPerf()
 	im.End()
 end
 
-
+--- Used to call the UI to show itself.
+---@usage MPDebug.showUI()
 local function showUI()
 	gui.showWindow("MPplayerList")
 	gui.showWindow("MPspawnTeleport")
 	gui.showWindow("MPnetworkPerf")
 end
+--- Used to call the UI to hide itself.
+---@usage MPDebug.hideUI()
 local function hideUI()
 	gui.hideWindow("MPplayerList")
 	gui.hideWindow("MPspawnTeleport")
@@ -239,6 +258,9 @@ function MP_Console(show)
 	end
 end
 
+--- Draws Imgui playerlist, spawnTeleport and NetworkPerf.
+--- This is the main processing thread of BeamMP in the game
+--- @param dt float
 local function onUpdate()
 	drawPlayerList()
 	drawSpawnTeleport()
@@ -246,10 +268,14 @@ local function onUpdate()
 end
 
 
+--- Updates the count and size of sent packets.
+--- @param[opt] bytes number The size of the packet in bytes.
 local function packetSent(bytes)
 	sentPacketCount = sentPacketCount+1
 	sentPacketSize = sentPacketSize + (bytes or 0)
 end
+--- Updates the count and size of received packets.
+--- @param[opt] bytes number The size of the packet in bytes.
 local function packetReceived(bytes)
 	receivedPacketCount = receivedPacketCount+1
 	receivedPacketSize = receivedPacketSize + (bytes or 0)

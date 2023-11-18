@@ -2,6 +2,7 @@ var highlightedServer;
 var servers = [];
 var official = [];
 var featured = [];
+var partner = [];
 var favorites = [];
 var recents = [];
 var mdDialog;
@@ -173,8 +174,8 @@ function($scope, $state, $timeout, $mdDialog) {
 		switch(data.dialogtype) {
 			case "alert":
 				if (mdDialogVisible) { return; }
-				console.log(data);
-				console.log(mdDialogVisible);
+				//console.log(data);
+				//console.log(mdDialogVisible);
 				mdDialogVisible = true;
 				mdDialog.show(
 					mdDialog.alert().title(data.title).content(data.text).ok(data.okText)
@@ -198,7 +199,7 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	vm.modelChanged = function($event) {
 		var src = event.srcElement;
-		console.log(src.value);
+		//console.log(src.value);
 	}
 
 	vm.refreshList = function() {
@@ -525,6 +526,7 @@ function($scope, $state, $timeout) {
 	$scope.$on('onServerListReceived', async function (event, data) {
 		servers = await receiveServers(data);
 		featured = await getFeatured();
+		//console.log(featured)
 		vm.repopulate();
 	});
 	
@@ -538,6 +540,94 @@ function($scope, $state, $timeout) {
 			document.getElementById("serversTableBody"),
 			featured,
 			3, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3
+			vm.searchText,
+			vm.checkIsEmpty,
+			vm.checkIsNotEmpty,
+			vm.checkIsNotFull,
+			vm.checkModSlider,
+			vm.sliderMaxModSize,
+			vm.selectMap,
+			bngApi
+		);
+		serverListOptions = {
+			checkIsEmpty : vm.checkIsEmpty,
+			checkIsNotEmpty : vm.checkIsNotEmpty,
+			checkIsNotFull : vm.checkIsNotFull,
+			checkModSlider : vm.checkModSlider,
+			sliderMaxModSize : vm.sliderMaxModSize,
+			selectMap : vm.selectMap,
+		};
+		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
+	};
+}])
+
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	PARTNER TAB
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerPartnerController', ['$scope', '$state', '$timeout', 
+function($scope, $state, $timeout) {
+
+	var vm = this;
+	let serverListOptions = JSON.parse(localStorage.getItem("serverListOptions"))
+
+	if (serverListOptions != null) {
+		vm.checkIsEmpty = serverListOptions.checkIsEmpty
+		vm.checkIsNotEmpty = serverListOptions.checkIsNotEmpty
+		vm.checkIsNotFull = serverListOptions.checkIsNotFull
+		vm.checkModSlider = serverListOptions.checkModSlider
+		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
+		vm.selectMap = serverListOptions.selectMap
+		vm.searchText = ""
+	} else {
+		vm.checkIsEmpty = false
+		vm.checkIsNotEmpty = false
+		vm.checkIsNotFull = false
+		vm.checkModSlider = false
+		vm.sliderMaxModSize = 500 // in MB
+		vm.selectMap = "Any"
+		vm.searchText = ""
+	}
+
+	bngApi.engineLua('MPCoreNetwork.requestServerList()');
+
+	// Go back to the main menu on exit
+	vm.exit = function ($event) {
+		if ($event) console.log('[MultiplayerPartnerController] exiting by keypress event %o', $event);
+		$state.go('menu.mainmenu');
+	};
+
+	// Page loading timeout
+	var timeOut = $timeout(function() {
+		if (vm.loadingPage === true) {
+			vm.loadTimeout = true;
+		}
+	}, 10000);
+
+	// Called when the page is left
+	$scope.$on('$destroy', function () {
+		$timeout.cancel(timeOut);
+		//console.log('[MultiplayerPartnerController] destroyed.');
+	});
+	
+	$scope.$on('onServerListReceived', async function (event, data) {
+		servers = await receiveServers(data);
+		partner = await getPartner();
+		//console.log(partner)
+		vm.repopulate();
+	});
+	
+	vm.repopulate = async function() {
+		if (serverListOptions != null) {
+			if (serverListOptions.checkIsEmpty && vm.checkIsNotEmpty) vm.checkIsEmpty = false;
+			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
+		}
+
+		vm.availableMaps = await populateTable(
+			document.getElementById("serversTableBody"),
+			partner,
+			4, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3, Partner = 4
 			vm.searchText,
 			vm.checkIsEmpty,
 			vm.checkIsNotEmpty,
@@ -1020,6 +1110,7 @@ async function getFeatured() {
 	return new Promise(function(resolve, reject) {
 		var feat = []
 		servers.forEach(server => {
+			//console.log(server)
 			if (server.featured === true) {
 				feat.push(server)
 			}
@@ -1028,6 +1119,21 @@ async function getFeatured() {
 		featured = feat
 		
 		resolve(feat || []);
+	});
+}
+
+async function getPartner() {
+	return new Promise(function(resolve, reject) {
+		var part = []
+		servers.forEach(server => {
+			if (server.partner === true) {
+				part.push(server)
+			}
+		});
+		
+		partner = part
+		
+		resolve(part || []);
 	});
 }
 
@@ -1187,7 +1293,8 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 
 		// If the server passed the filter
 		// Set the color relative to either favorite, featured, official or normal
-		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : 'rgba(0, 0, 0, 0)!important';
+		var bgcolor = isFavorite && type == 0 ? 'rgba(255, 215, 0, 0.35)!important' : server.featured ? 'rgba(0, 128, 0, 0.25)!important' : server.official ? 'rgba(255, 106, 0, 0.25)!important' : server.partner ? 'rgba(0, 123, 195, 0.3)!important' : 'rgba(0, 0, 0, 0)!important';
+
 
 		createRow(newTbody, server, bgcolor, bngApi, isFavorite, isRecent, server.sname);
 		if (isFavorite) addFav(server, true);

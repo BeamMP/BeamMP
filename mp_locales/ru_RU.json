@@ -75,6 +75,7 @@
     "ui.multiplayer.recent": "Последние",
     "ui.multiplayer.favorites": "Избранное",
     "ui.multiplayer.featured": "Избранные серверы",
+    "ui.multiplayer.partner": "Партнерские серверы",
     "ui.multiplayer.direct_connect": "Прямое подключение",
     "ui.multiplayer.refresh": "Обновить",
     "ui.multiplayer.connect": "Подключиться",

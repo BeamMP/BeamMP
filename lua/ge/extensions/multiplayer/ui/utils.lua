@@ -1,7 +1,25 @@
+--====================================================================================
+-- All work by Vulcan-dev.
+-- You have no permission to redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+--- multiplayer_ui_utils API.
+--- Author of this documentation is Titch
+--- @module multiplayer_ui_utils
+--- @usage copyTable(t) -- internal access
+--- @usage multiplayer_ui_utils.imageButton(texID, size, color, activeColor, hoveredColor) -- external access
+
 local M = {}
 
 local imgui = ui_imgui
 
+--- Creates an image button with the specified texture ID, size, and colors using IMGUI.
+--- @param texID number The ID of the texture to use for the button.
+--- @param size number The size of the button.
+--- @param color table (optional) The color of the button. Defaults to the ImGui button color.
+--- @param activeColor table (optional) The color of the button when active. Defaults to the ImGui active button color.
+--- @param hoveredColor table (optional) The color of the button when hovered. Defaults to the ImGui hovered button color.
+--- @return boolean Returns true if the button was clicked, false otherwise.
 M.imageButton = function(texID, size, color, activeColor, hoveredColor)
     local colors = imgui.GetStyle().Colors
     color = color or colors[imgui.Col_Button]
@@ -20,6 +38,9 @@ M.imageButton = function(texID, size, color, activeColor, hoveredColor)
     return false
 end
 
+--- Creates a deep copy of the provided table.
+--- @param t table The table to copy.
+--- @return table copy new table that is a deep copy of the original table.
 M.copyTable = function(t)
     local copy = {}
     for k, v in pairs(t) do
@@ -30,5 +51,6 @@ M.copyTable = function(t)
     end
     return copy
 end
+
 
 return M

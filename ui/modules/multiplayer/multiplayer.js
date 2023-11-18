@@ -1167,7 +1167,7 @@ function removeFav(server) {
 }
 
 function saveFav() {
-	bngApi.engineLua('MPConfig.setFavorites(\'' + JSON.stringify(favorites) + '\')');
+	bngApi.engineLua(`MPConfig.setFavorites(\'${JSON.stringify(favorites).replace(/'/g, "\\'")}\')`);
 }
 
 function getRecents() {

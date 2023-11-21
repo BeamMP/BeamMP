@@ -1,6 +1,6 @@
 Custom ISC License
 
-Copyright (c) 2021, BeamMP Mod Team
+Copyright (c) 2023, BeamMP Mod Team
 
 Permission to use and modify (providing any work is committed upstream) 
 without fee is hereby granted, provided that the above

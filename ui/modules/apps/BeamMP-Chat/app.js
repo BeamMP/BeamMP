@@ -1,10 +1,7 @@
 var app = angular.module('beamng.apps');
-
 let lastSentMessage = "";
-
 let lastMsgId = 0;
 let newChatMenu = false;
-
 app.directive('multiplayerchat', [function () {
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-Chat/app.html',
@@ -14,7 +11,6 @@ app.directive('multiplayerchat', [function () {
 		controllerAs: 'ctrl'
 	}
 }]); 
-
 
 app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 	$scope.init = function() {
@@ -62,6 +58,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		bngApi.engineLua('setCEFFocus(true)');
 	};
 
+	// Set chat direction.
 	function setChatDirection(direction) {
 		const chatbox = document.getElementById("chatbox");
 		const chatwindow = document.getElementById("chat-window");
@@ -100,6 +97,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		}
 	}
 
+	// Swap chat direction. (left/middle/right)
 	$scope.chatSwapHorizontal = function() {
 		const chatHorizontal = localStorage.getItem('chatHorizontal') || "middle";
 		if (chatHorizontal == "left") setChatDirection("middle");
@@ -107,12 +105,14 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		else setChatDirection("left");
 	}
 
+	// Swap chat direction. (top/bottom)
 	$scope.chatSwapVertical = function() {
 		const chatVertical = localStorage.getItem('chatVertical');
 		if (chatVertical != "top") setChatDirection("top");
 		else setChatDirection("bottom");
 	}
 
+	//Chat message function.
 	$scope.$on('chatMessage', function (event, data) {
 		if (data.id > lastMsgId) {
 			lastMsgId = data.id;
@@ -132,10 +132,12 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		}
 	});
 
+	// Clear chat history
 	$scope.$on('clearChatHistory', function (event, data) {
 		localStorage.removeItem('chatMessages');
 	})
 
+	//Settings changed function.
 	$scope.$on('SettingsChanged', function (event, data) {
 		Settings.values = data.values;
 		const chatbox = document.getElementById("chat-window");
@@ -146,6 +148,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		}
 	})
 
+	//Chat send function.
 	$scope.chatSend = function() {
 		let chatinput = document.getElementById("chat-input");
 		const text = chatinput.value
@@ -160,9 +163,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 	};
 }]);
 
-
-
-// -------------------------------------------- CHAT FADING -------------------------------------------- //
+// --CHAT FADING --//
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -170,7 +171,9 @@ function sleep(ms) {
 var chatShown = false;
 var chatShowTime = 3500; // 5000ms
 var chatFadeSteps = 1/30; // 60 steps
-var chatFadeSpeed = 1000 / (1/chatFadeSteps); // 1000ms
+var chatFadeSpeed = 1000 / (1 / chatFadeSteps); // 1000ms
+
+// Fade a node.
 async function fadeNode(node) {
 	// Set the node opacity to 1.0
 	node.style.opacity = 1.0;
@@ -192,6 +195,7 @@ async function fadeNode(node) {
 	}
 }
 
+// Show the chat.
 async function showChat() {
 	if (newChatMenu) return;
 
@@ -224,9 +228,8 @@ async function showChat() {
 		await sleep(chatFadeSpeed);
 	}
 }
-// -------------------------------------------- CHAT FADING -------------------------------------------- //
 
-// -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //
+//Apply codes to string.
 function applyCode(string, codes) {
 	var elem = document.createElement("span");
 	elem.style.fontSize = "initial";
@@ -238,6 +241,7 @@ function applyCode(string, codes) {
 	return elem;
 }
 
+// Map of codes to CSS styles.
 function formatRichString(string) {
 	let tempAreaElement = document.createElement('div');
 	tempAreaElement.setAttribute("id", "TEMPAREA");
@@ -285,25 +289,27 @@ function formatRichString(string) {
 
   return innerHTML;
 }
-// -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //
 
+//Store chat messages.
 function storeChatMessage(message) {
-  // Check if localStorage is available
-  if (typeof(Storage) !== "undefined") {
-    // Get the existing chat messages from localStorage (if any)
+
+  // Check if localStorage is available.
+	if (typeof (Storage) !== "undefined") {
+
+    // Get the existing chat messages from localStorage (if any).
     let chatMessages = JSON.parse(localStorage.getItem("chatMessages")) || [];
 
-    // Add the new message to the chatMessages array
+    // Add the new message to the chatMessages array.
     chatMessages.push(message);
 
-		if (chatMessages.length > 70) {
+		if (chatMessages.length > 100) {
 			chatMessages.shift()
 		}
 
-    // Store the updated chatMessages array back in localStorage
+    // Store the updated chatMessages array back in localStorage.
     localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
 
-    // You can optionally return the updated chatMessages array or perform other actions
+    // You can optionally return the updated chatMessages array or perform other actions.
     return chatMessages;
   } else {
     console.error("localStorage is not available in this browser.");
@@ -311,55 +317,56 @@ function storeChatMessage(message) {
   }
 }
 
+//Retrieve chat messages.
 function retrieveChatMessages() {
-	// Check if localStorage is available
+
+	// Check if localStorage is available.
 	if (typeof localStorage !== 'undefined') {
-		// Get the chat messages from localStorage
+
+		// Get the chat messages from localStorage.
 		const storedMessages = localStorage.getItem('chatMessages');
 
-		// Parse the stored data if it exists
+		// Parse the stored data if it exists.
 		if (storedMessages) {
 			return JSON.parse(storedMessages);
 		}
 	}
 }
 
+// Max number of messages to display in the chat window.
+const MAX_MESSAGES = 100;
+
+//Add a message to the chat window.
 function addMessage(msg, time = null) {
-	//getting current time and adding it to the message before displaying
-	if (time == null) {
-		var now = new Date();
-		var hour    = now.getHours();
-		var minute  = now.getMinutes();
-		var second  = now.getSeconds();
-		if(hour < 10) hour = '0'+hour;
-		if(minute < 10) minute = '0'+minute;
-		if(second < 10) second = '0'+second;
 
-		time = hour + ":" + minute + ":" + second;
-	}
+	//Get user's time and format it to HH:MM:SS using the user's timezone and locale. Then add it to the message.
+	const currentTime = time || new Date();
+	const formattedTime = new Intl.DateTimeFormat(undefined, {
+		hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false,
+	}).format(currentTime);
 
-  const msgText = "" + msg
-	msg = time + " " + msg;
+	const msgText = "" + msg;
+	const messageWithTime = formattedTime + "" + msg;
 
-	// Create the message node
+	// Create the message node.
 	const chatMessageNode = document.createElement("li");
 	chatMessageNode.className = "chat-message";
 	fadeNode(chatMessageNode);
 
-	// create node for the timestamp
+	// Create node for the timestamp.
 	const messageTimestampNode = document.createElement("span");
 	messageTimestampNode.className = "chat-message-timestamp";
-
-	const timestampTextNode = document.createTextNode(time);
+	const timestampTextNode = document.createTextNode(formattedTime);
 	messageTimestampNode.appendChild(timestampTextNode);
-
 	chatMessageNode.appendChild(messageTimestampNode)
 
 	// create text for the message itself, add it to chat message list
 	const chatList = document.getElementById("chat-list");
 
-	// check if this message is a server message before
-	// doing rich formatting
+	// Check if this message is a server message before doing rich formatting.
 	if (msgText.startsWith("Server: ")) {
 		const formattedInnerHtml = formatRichString(msgText);
 		chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
@@ -370,20 +377,25 @@ function addMessage(msg, time = null) {
 
 	chatList.appendChild(chatMessageNode);
 
-	// Delete oldest chat message if more than 70 messages exist
-	if (chatList.children.length > 70) {
+	// Delete oldest chat message if more than 100 messages exist.
+	if (chatList.children.length > MAX_MESSAGES) {
 		chatList.removeChild(chatList.children[0]);
 	}
 
-	// Scroll the chat depending on its direction
-	const chatwindow = document.getElementById("chat-window");
-	if (chatwindow.style.flexDirection != "column-reverse") {
-		chatList.scrollTop = chatList.scrollHeight
-	} else {
-		chatList.scrollTop = 0
-	};
+	scrollChat(chatList);
 }
 
+//Scroll chat window to bottom.
+function scrollChat(chatList) {
+	const chatWindow = document.getElementById("chat-window");
+	if (chatWindow.style.flexDirection !== "column-reverse") {
+		chatList.scrollTop = chatList.scrollHeight;
+	} else {
+		chatList.scrollTop = 0;
+	}
+}
+    
+// --KEYBOARD SHORTCUTS --//
 function onKeyDown(e) {
 	if (e.key == "ArrowUp") {
 		console.log(e);

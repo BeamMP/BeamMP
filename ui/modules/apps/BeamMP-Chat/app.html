@@ -1,174 +1,254 @@
+
 <div ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
-    
-    <style>
-        /*Error Message*/
-        .error {
-            border-radius: 10px;
-            background-color: #f44336; /* Red */
-            color: white;
-        }
 
-        /*Chat Window*/
-        #chat-window {
-            width: 100%;
-            max-width: fit-content;
-            height: 80%;
-            overflow-y: auto;
-            display: flex; /* Use Flexbox */
-            flex-direction: column; /* Column layout */
-            top: 0;
-            position: sticky;
-            margin-bottom: 10px;
-            background: rgba(54, 57, 63, 0.0); /* Discord dark theme with alpha adjustments. */
-            border-radius: 10px;
-        }
+        <style>
 
-        /* Chat Input */
-        #chat-input {
-            width: 100px;
-            height: 40px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            text-align: left;
-            background-color: #40444b;
-            color: #ffffff;
-            z-index: 1;
-            transition: width 0.25s ease-in-out; /* Transition only on focus */
-        }
+            /*Error Styling*/
+            .error {
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+                background-color: #f44336; /* Red */
+                color: white;
+                border-radius: 5px;
+                font-size: 1.0em; /* 14px/16=0.875em */
+            }
 
-        /* Chat Input Expanded */
-        #chat-input[type="text"]:focus {
-           /* Expand when focused */
-           width: calc(100% - 175px);
-        }
+            /*Multiplayer Chat Styling */
+            .multiplayerChat {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+            }
 
-        /* Chat Input Text Placeholder */
-        #chat-input::placeholder {
-           color: #72767d;
-           text-align: center;
-        }
+            /*Chat Window Styling*/
+            #chat-window {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                width: 100%;
+                font-family: Arial, sans-serif;
+            }
 
-        /* Swap Buttons */
-        .buttons {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-            background-color: #7289da; /* Discord brand color */
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.25s ease-in-out;
-            margin-right: 5px;
-            margin-left: 5px;
-            border: none;
-            border-radius: 10px;
-        }
+            /*Chat Input Styling*/
+            #chat-input {
+                width: 100px;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.10);
+                border: none;
+                border-radius: 5px;
+                padding: 2px;
+                margin: 2px;
+                color: white;
+                transition: 0.25s ease-in-out;
+            }
 
-        /* Swap Buttons Hover */
-        .buttons:hover {
-            background-color: #677bc4; /* Darker shade */
-            transform: scale(1.1);
-            transition: 0.25s ease-in-out;
-        }
+            /*Chat Input Placeholder Styling*/
+            #chat-input::placeholder {
+                margin: 2px;
+                padding: 2px;
+                color: white;
+                text-align: center;
+            }
 
-        /* Send Button */
-        #send-button {
-            width: 50px;
-            border: none;
-            border-radius: 10px;
-            height: 40px;
-            margin-right: 5px;
-            margin-left: 5px;
-            background-color: #7289da; /* Discord brand color */
-            color: #ffffff;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.25s ease-in-out;
-        }
+            /*Chat Input Hover Styling*/
+            #chat-input:hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
 
-       /* Send Button Hover */
-       #send-button:hover {
-            background-color: #677bc4;
-            transform: scale(1.1);
-            transition: 0.25s ease-in-out;
-       }
+            /*Chat Input Focus Styling*/
+            #chat-input:focus {
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.50);
+            }
 
-        /* Chatbox */
-        #chatbox {
-            width: 100%;
-            max-width: 100%;
-            position: sticky;
-            bottom: 0;
-        }
+            /*Buttons Styling*/
+            .buttons {
+                color: #ffffff;
+                border: none;
+                border-radius: 5px;
+                margin: 2px;
+                padding: 2px;
+                transition: 0.25s;
+                background-color: rgba(0, 0, 0, 0.10);
+                height: 100%;
+            }
 
-        /* Chat List Unordered List */
-        ul#chat-list {
-            overflow-wrap: break-word;
-            width: 100%;
-            max-width: fit-content;
-            height: auto;
-        }
+            /*Buttons Hover Styling*/
+            .buttons:hover {
+                background-color: rgb(212, 100, 26, 1.0); /*BeamNG Orange */
+            }
 
-        /* Chat List */
-        #chat-list {
-            max-width: fit-content;
-            height: auto;
-            width: 100%;
-        }
+            /*Swap Button Styling*/
+            .swap-buttons {
+                color: #ffffff;
+                width: 25px;
+                height: contain;
+                text-align: center;
+            }
 
-        /* Chat Message */
-        .chat-message {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width:fit-content;
-            padding: 5px 5px 5px 5px;
-            border-radius: 10px;
-            word-wrap: break-word;
-            white-space: normal;
-            color: #ffffff;
-            overflow-wrap: break-word;
-            background-color: #40444b;
-            margin-top: 10px; /* Adjust spacing between messages */
-            margin-bottom: 10px; /* Adjust spacing between messages */
-            position: relative; /* Enable positioning of children */
-        }
+            /*Chatbox Styling*/
+            #chatbox {
+                display: flex;
+                width: 100%;
+                min-height: 40px;
+                height: contain;
+            }
 
-        /* Chat Message Alternating Rows */
-        .chat-message:nth-child(2n+1) {
-            border-radius: 10px;
-            background-color: #36393f; /* Darker shade for alternate messages */
-         }
+            /*Chatbox Focus Styling*/
+            #chatbox:focus-within {
+                width: 100%;
+                transition: 0.25s ease-in-out;
+            }
 
-        /* Chat Message Timestamp */
-        .chat-message-timestamp {
-            display: inline;
-            width:fit-content;
-            max-width:fit-content;
-            left: 0;
-            font-size: 0.75em;
-            line-height: 0.75em;
-            padding: 5px 5px 5px 5px;
-            border-radius: 10px;
-            background-color: #40444b; /* Discord message background */
-            color: #b9bbbe; /* Timestamp color */
-            z-index: 1; /* Ensure visibility */
-        }
+            /*Unordered List Chat List Styling*/
+            ul#chat-list {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow-y: scroll;
+                overflow-wrap: break-word;
+            }
 
-        /*Hide Scrollbars*/
-        ::-webkit-scrollbar {
-            display: none;
-        }
+            /*Chat List Styling*/
+            #chat-list {
+                display: flex;
+                flex-direction: column;
+                padding-inline: 0px;
+                margin-top: auto;
+                margin-bottom: auto;
+                width: 100%;
+            }
 
-    </style>
+            /*Chat Message Styling*/
+            .chat-message {
+                border-radius: 5px;
+                font-size: 1em;
+                width: contain;
+                height: contain;
+                margin-top: 2px;
+                margin-bottom: 2px;
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                transition: 0.25s ease-in-out;
+            }
 
-    <div id="chat-window">
-        <ul id="chat-list" class="message-list"></ul>
-    </div>
-        <form id="chatbox" style="position: sticky;">
-            <button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
-            <input id="chat-input" type="text" ng-click="select()" placeholder="Chat Here">
-            <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
-            <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
-        </form>
+            /*Chat Message Hover Styling*/
+            .chat-message:hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            /*Chat Message Alternating Rows Styling*/
+            .chat-message:nth-child(2n+1) {
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                width: contain;
+                height: fit-content;
+            }
+
+            /*Chat Message Alternating Rows Hover Styling*/
+            .chat-message:nth-child(2n+1):hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            /*Chat Message Timestamp Styling*/
+            .chat-message-timestamp {
+                font-size: 1em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Chat Message Username Styling*/
+            .chat-message-username {
+                font-size: 1.0em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Chat Message Text Styling*/
+            .chat-message-text {
+                font-size: 1.0em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Scrollbar Styling*/
+            ::-webkit-scrollbar {
+                margin-left: 5px;
+                width: 5px;
+                height: contain;
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Track Styling*/
+            ::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.10);
+                width: 5px;
+                height: contain;
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Styling*/
+            ::-webkit-scrollbar-thumb {
+                background: rgba(212, 100, 26, 0.10);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Hover Styling*/
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(212, 100, 26, 0.25);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Active Styling*/
+            ::-webkit-scrollbar-thumb:active {
+                background: rgba(212, 100, 26, 1.0);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Corner Styling*/
+            ::-webkit-scrollbar-corner {
+                background: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+            }
+        </style>
+
+        <div id="chat-window">
+            <ul id="chat-list">
+                <li class="chat-message" ng-repeat="message in chatList track by $index">
+                    <span class="chat-message-timestamp">{{message.timestamp}}</span>
+                    <span class="chat-message-username">{{message.username}}</span>
+                    <span class="error" ng-if="message.error">{{message.error}}</span>
+                    <span class="chat-message-text">{{message.text}}</span>
+                </li>
+            </ul>
+
+            <form id="chatbox">
+                <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
+                <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
+                <input id="chat-input" type="text" ng-click="select()" placeholder="Chat Here" ng-keydown="onEnterKeyPress($event)">
+                <button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
+            </form>
+
+        </div>
+
 </div>

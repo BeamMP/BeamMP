@@ -13,7 +13,7 @@ jobs:
         ref: 'development'
     - name: Zip specific files and folders
       run: |
-        zip -r beammp.zip icons lua mp_locales scripts settings ui vehicles CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE.md README.md
+        zip -r BeamMP.zip icons lua mp_locales scripts settings ui vehicles CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE.md README.md
       working-directory: ${{ github.workspace }}
     - name: Generate SHA-256 hash
       id: sha256
@@ -24,7 +24,7 @@ jobs:
       run: |
         curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
-          --data-binary "@beammp.zip" \
+          --data-binary "@BeamMP.zip" \
           --url "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=beammp.zip"
         curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: text/plain" \

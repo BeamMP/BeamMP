@@ -17,6 +17,26 @@ local M = {}
 local Nickname = ""
 local PlayerServerID = -1
 
+local function getUnicycleConfigs()
+	-- Load the unicycle configurations:
+	local pcfiles = FS:findFiles("/vehicles/unicycle/", "*.pc", 0, true, false)
+	local pcFileRegex = "^/vehicles/unicycle/(.*)%.pc"
+	local tmp = {
+		--['default.pc'] = 'default.pc'
+	}
+
+	for _, filename in ipairs(pcfiles) do
+		local file = filename:match(pcFileRegex)
+		print('Found unicycle config: '..file)
+		--defaultSettings.unicycleConfigs[file] = file..'.pc'
+		tmp[file] = file..'.pc'
+	end
+
+	settings.setValue('unicycleConfigs', tmp)
+
+	return tmp
+end
+
 local defaultSettings = {
 	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
@@ -30,6 +50,10 @@ local defaultSettings = {
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
 
+	-- unicycle configurations
+
+	unicycleConfigs = getUnicycleConfigs(),
+
 	disableInstabilityPausing = true,
 
 	launcherPort = 4444
@@ -39,10 +63,11 @@ local defaultSettings = {
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onExtensionLoaded()
 	for k,v in pairs(defaultSettings) do
-		if settings.getValue(k) == nil then settings.setValue(k, v) end
+		if settings.getValue(k) == nil or k == 'unicycleConfigs' then settings.setValue(k, v) end
 		--settings.impl.defaults[k] = { 'local', v }
 		--settings.impl.defaultValues[k] = v
 	end
+	dump(defaultSettings)
 	settings.impl.invalidateCache()
 end
 

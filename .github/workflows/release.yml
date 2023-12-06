@@ -1,0 +1,33 @@
+name: Create Release Zip and SHA-256
+on:
+  release:
+    types:
+      - created
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v2
+      with:
+        ref: 'development'
+    - name: Zip specific files and folders
+      run: |
+        zip -r beammp.zip icons lua mp_locales scripts settings ui vehicles CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE.md README.md
+      working-directory: ${{ github.workspace }}
+    - name: Generate SHA-256 hash
+      id: sha256
+      run: |
+        sha256sum BeamMP.zip | awk '{print $1}' > beammp.zip.sha256
+      working-directory: ${{ github.workspace }}
+    - name: Upload artifacts
+      run: |
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary "@beammp.zip" \
+          --url "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=beammp.zip"
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: text/plain" \
+          --data-binary "@beammp.zip.sha256" \
+          --url "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}/assets?name=beammp.zip.sha256"
+      working-directory: ${{ github.workspace }}

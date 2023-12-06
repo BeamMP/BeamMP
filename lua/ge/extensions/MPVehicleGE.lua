@@ -3,7 +3,7 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
---- MPVehicleGE API.
+--- MPVehicleGE API - This is responsible for all Vehicle related controlling within BeamMP for the Game Engine (GE).
 -- Author of this documentation is Neverless
 -- @module MPVehicleGE
 -- @usage local gameVehicleID = getGameVehicleID("0-0") -- internal access
@@ -256,7 +256,7 @@ function getGameVehicleID(serverVehicleID)
 end
 
 
---- Reolves a gameVehicleID into the serverVehicleID
+--- Resolves a gameVehicleID into the serverVehicleID
 -- @tparam integer gameVehicleID
 -- @treturn[1] string If success. serverVehicleID eg. "0-0"
 -- @treturn[2] nil If either the gameVehicleID is unknown or invalid
@@ -1987,8 +1987,8 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
-M.getPlayers               = getPlayers
-M.getVehicles              = getVehicles
+M.getPlayers               = getPlayers               -- takes: -
+M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle
 M.getVehicleByServerID     = getVehicleByServerID     -- takes: string serverVehicleID, returns Vehicle
 M.getPlayerByName          = getPlayerByName          -- takes: string name, returns Player
@@ -2022,6 +2022,6 @@ M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetNam
 M.queryRoadNodeToPosition  = queryRoadNodeToPosition  -- takes: vec3 target position, optional string targetname
 M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
-M.onSettingsChanged        = onSettingsChanged
+M.onSettingsChanged        = onSettingsChanged        -- takes: -
 
 return M

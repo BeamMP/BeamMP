@@ -3,6 +3,11 @@
 -- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
 --====================================================================================
 
+--- MPUpdatesGE API.
+--- Author of this documentation is Titch
+--- @module MPUpdatesGE
+--- @usage onPlayerConnect() -- internal access
+--- @usage MPUpdatesGE.onPlayerConnect() -- external access
 
 
 local M = {}
@@ -35,7 +40,9 @@ local function onPlayerConnect()
 end
 
 
-
+--- onUpdate is a game eventloop function. It is called each frame by the game engine.
+-- This is the main processing thread of BeamMP in the game
+-- @param dt float
 local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		nodesTimer = nodesTimer + dt

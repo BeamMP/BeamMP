@@ -75,6 +75,7 @@
     "ui.multiplayer.recent": "Verlauf",
     "ui.multiplayer.favorites": "Favoriten",
     "ui.multiplayer.featured": "Ausgewählte Server",
+    "ui.multiplayer.partner": "Partnerserver",
     "ui.multiplayer.direct_connect": "Direkt-Verbindung",
     "ui.multiplayer.refresh": "Erneuern",
     "ui.multiplayer.connect": "Verbinden",

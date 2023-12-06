@@ -1,8 +1,21 @@
+--====================================================================================
+-- All work by Vulcan-dev.
+-- You have no permission to redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+--- multiplayer_ui_playerList API.
+--- Author of this documentation is Titch
+--- @module multiplayer_ui_playerList
+--- @usage updatePlayerList(jsonData) -- internal access
+--- @usage multiplayer_ui_playerList.updatePlayerList(jsonData) -- external access
+
 local M = {}
 
 local imgui = ui_imgui
 local players = {} -- contains name and ping for each entry
 
+--- Updates the player list based on the provided JSON data.
+--- @param jsonData table The JSON data containing player information.
 local function updatePlayerList(jsonData)
     local playerList = {}
     for k, v in pairs(jsonData) do
@@ -14,6 +27,7 @@ local function updatePlayerList(jsonData)
     players = playerList
 end
 
+--- Renders the player list UI.
 local function render()
     local hw = imgui.GetWindowWidth() / 2
 
@@ -36,6 +50,7 @@ local function render()
         end
     end
 end
+
 
 M.render = render
 M.updatePlayerList = updatePlayerList

@@ -1,15 +1,20 @@
 --====================================================================================
 -- All work by Titch2000, jojos38 & 20dka.
--- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
+-- You have no permission to edit, redistribute or upload other than for the purposes of contributing. 
+-- Contact BeamMP for more info!
 --====================================================================================
 
+--- MPCoreNetwork API. Handles Main Launcher <-> Game Network. Version Check, Server list transfer, login, connect to X server, quiting a server etc.
+--- Author of this documentation is Titch
+--- @module MPCoreNetwork
+--- @usage connectToLauncher() -- internal access
+--- @usage MPCoreNetwork.connectToLauncher() -- external access
 
 
 local M = {}
 
 
-
--- ============= VARIABLES =============
+-- VV============= VARIABLES =============VV
 -- launcher
 local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
@@ -18,14 +23,19 @@ local isConnecting = false
 local launcherVersion = "" -- used only for the server list
 local modVersion = "4.9.5" -- the mod version
 -- server
+
 local serverList -- server list JSON
 local currentServer = nil -- Table containing the current server IP, port and name
 local isMpSession = false
 local isGoingMpSession = false
 local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap", "LoadingMapNow", "Playing"
+
 -- auth
+
 local loggedIn = false
+
 -- event functions
+
 local onLauncherConnected = nop
 local runPostJoin = nop
 local originalFreeroamOnPlayerCameraReady
@@ -37,13 +47,13 @@ B  -> The client asks the launcher for the servers list
 QG -> The client tells the launcher that it's is leaving
 C  -> The client asks for the server's mods
 --]]
--- ============= VARIABLES =============
+-- AA============= VARIABLES =============AA
 
 
+-- VV============= LAUNCHER RELATED =============VV
 
--- ============= LAUNCHER RELATED =============
 
--- Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.
+--- Sends data through a TCP socket or IPC to the launcher depending on if the launcher is V2 or V2.1 Networking.
 -- If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
 -- @param s string containing the data to send to the launcher
 local function send(s)
@@ -81,7 +91,7 @@ local function send(s)
 	end
 end
 
--- Connects to the V2 Launcher using V2 Networking.
+--- Connects to the Launcher.
 -- @param silent boolean determines if the connection request should be done silently
 local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
@@ -108,7 +118,11 @@ local function connectToLauncher(silent)
 	end
 end
 
-local function disconnectLauncher(reconnect) --unused, for debug purposes
+--- Disconnect from the Launcher --unused, for debug purposes
+-- @param reconnect boolean Should Lua reconnect to the launcher after disconnecting?
+-- @usage MPCoreNetwork.disconnectLauncher(true)
+-- @return nil
+local function disconnectLauncher(reconnect) 
 	log('W', 'disconnectLauncher', 'Launcher disconnect called! reconnect: '..tostring(reconnect))
 	if launcherConnected then
 		log('W', 'disconnectLauncher', "Disconnecting from launcher")
@@ -124,37 +138,54 @@ end
 local function receiveLauncherHeartbeat() -- TODO: add some purpose to this function or remove it
 
 end
--- ============= LAUNCHER RELATED =============
+-- AA============= LAUNCHER RELATED =============AA
 
 
 
 -- ================ UI ================
--- Called from multiplayer.js UI
+--- Called from multiplayer.js UI
+-- Returns the version of the launcher.
+-- @return string version The version of the launcher.
 local function getLauncherVersion()
 	return "2.0" --launcherVersion
 end
+
+--- Returns true or false if the user is logged in.
+-- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
 	return loggedIn
 end
+
+--- Returns true or false if the launcher is connected.
+-- @return boolean launcherConnected True if the launcher is connected, false otherwise.
 local function isLauncherConnected()
 	return launcherConnected
 end
+
+--- Logs in the user with the given identifiers by sending the request to the launcher
+-- @param identifiers table The identifiers used for login.
 local function login(identifiers)
 	log('M', 'login', 'Attempting login...')
 	identifiers = identifiers and jsonEncode(identifiers) or ""
 	send('N:'..identifiers)
 end
+
+--- Automatically logs in the user.
+-- @usage autoLogin() -- Tells the launcher to attempt to auto authenticate with BeamMP Services
 local function autoLogin()
 	send('Nc')
 end
+
+--- Tells the launcher to log out the user.
+-- @usage logout() -- Tells the launcher to logout from BeamMP Services
 local function logout()
 	log('M', 'logout', 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
 end
 
-
--- sends the current player and server count plus the mod and launcher version.
+--- Sends the current player and server count plus the mod and launcher version to the CEF UI.
+-- @usage MPCoreNetwork.sendBeamMPInfo()
 local function sendBeamMPInfo()
 	local servers = jsonDecode(serverList)
 	if not servers or tableIsEmpty(servers) then return log('M', 'No server list.') end
@@ -173,6 +204,8 @@ local function sendBeamMPInfo()
 	})
 end
 
+--- Request the server list data from the launcher.
+-- @usage MPCoreNetwork.requestServerList()
 local function requestServerList()
 	if not launcherConnected then return end
 	if isMpSession then
@@ -183,26 +216,40 @@ local function requestServerList()
 	send('B') -- Request server list
 end
 
+--- Request the UI counts and other metrics by calling `sendBeamMPInfo()`
+-- @usage `MPCoreNetwork.requestPlayers()`
+-- @see sendBeamMPInfo
 local function requestPlayers()
 	--log('M', 'requestPlayers', 'Requesting players.')
 	sendBeamMPInfo()
 end
--- ================ UI ================
+-- AA================ UI ================AA
 
 
 
 -- ============= SERVER RELATED =============
+--- Set the mods for the server you are joining
+-- @param receivedMods string The mods from the server in string form.
+-- @usage setMods(`<modsstring>`)
 local function setMods(receivedMods) -- receiving mods means that the client authenticated with the server successfully
 	isMpSession = true
 	isGoingMpSession = true
 	MPModManager.setServerMods(receivedMods)
 end
 
+--- Returns the current server information
+-- @return currentServer table
+-- @usage MPCoreNetwork.getCurrentServer()
 local function getCurrentServer()
 	--dump(currentServer)
   return currentServer
 end
 
+--- Set the current server information for later use
+-- @param ip string The IP/URL of the server
+-- @param port number The Port of the server
+-- @param name string The Name of the server (Used at the top of the screen when in session)
+-- @usage MPCoreNetwork.setCurrentServer('localhost', 30814, 'Test Server')
 local function setCurrentServer(ip, port, name)
 	-- If the server is different then lets also clear the existing chat data as this does not always done on leaving
 	if currentServer ~= nil then
@@ -221,7 +268,11 @@ local function setCurrentServer(ip, port, name)
 	}
 end
 
--- Tell the launcher to open the connection to the server so the MPMPGameNetwork can connect to the launcher once ready
+-- Tell the launcher to open the connection to the server so the MPGameNetwork can connect to the launcher once ready. This starts the setup and download of mods and other session related data.
+-- @param ip string The IP/URL of the server
+-- @param port number The Port of the server
+-- @param name string The Name of the server (Used at the top of the screen when in session)
+-- @usage MPCoreNetwork.connectToServer('localhost', 30814, 'Test Server')
 local function connectToServer(ip, port, name)
 	if isMpSession then log('W', 'connectToServer', 'Already in an MP Session! Leaving server!') M.leaveServer() end
 
@@ -238,8 +289,15 @@ local function connectToServer(ip, port, name)
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
+	
+	guihooks.trigger('clearChatHistory')
 end
 
+--- Parse the map file name into its loadable string form and return it.
+--- @param string The Map file
+--- @treturn string the maps misFilePath
+--- @usage `MPCoreNetwork.parseMapName(<map>)`
+--- @todo this needs finishing and using.
 local function parseMapName(map) -- TODO: finish
 	local mapName = string.lower(map)
 	if string.match(mapName, '/(.*).mis') then
@@ -259,6 +317,9 @@ local function parseMapName(map) -- TODO: finish
 	end
 end
 
+--- Load the desired map/level by name.
+-- @param map string The Map String
+-- @usage MPCoreNetwork.loadLevel('/levels/gridmap_v2/info.json')
 local function loadLevel(map)
 	if getMissionFilename() ~= "" then log("W","loadLevel", "REMOVING ALL VEHICLES") core_vehicles.removeAll() end -- remove old vehicles if joining a server with the same map
 
@@ -295,8 +356,10 @@ local function loadLevel(map)
 	status = "LoadingMapNow"
 end
 
--- ============= OTHERS =============
+-- VV============= OTHERS =============VV
 
+--- Handles the login result received from the launcher.
+-- @param params string The JSON-encoded login results.
 local function loginReceived(params)
 	--log('M', 'loginReceived', 'Logging result received')
 	local result = jsonDecode(params)
@@ -311,6 +374,10 @@ local function loginReceived(params)
 	end
 end
 
+
+--- Leaves the server and performs necessary cleanup.
+-- @param goBack boolean Whether to go back to the previous screen after leaving the server.
+-- @usage MPCoreNetwork.leaveServer(true)
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
@@ -329,15 +396,24 @@ local function leaveServer(goBack)
 end
 
 
+--- Returns if the current session is a multiplayer session / if we expect to be in one.
+-- @return boolean isMpSession True if it is a multiplayer session, false otherwise.
+-- @usage if MPCoreNetwork.isMPSession() then `code` end
 local function isMPSession()
 	return isMpSession
 end
 
+--- Returns if the game is currently transitioning to a multiplayer session.
+-- @return boolean isGoingMpSession True if transitioning to a multiplayer session, false otherwise.
+-- @usage if MPCoreNetwork.isGoingMPSession() then `code` end
 local function isGoingMPSession()
 	return isGoingMpSession
 end
 
--- ============= OTHERS =============
+-- AA============= OTHERS =============AA
+
+--- Requests the map from the launcher
+-- @usage MPCoreNetwork.requestMap()
 local function requestMap()
 	log('M', 'requestMap', 'Requesting map!')
 	send('M') -- request map string from launcher 
@@ -345,6 +421,9 @@ local function requestMap()
 	loadMods = false
 end
 
+--- Handles the update of the loading UI and performs necessary actions based on the received parameters.
+-- @param params string The parameters received for updating the loading UI.
+-- @usage MPCoreNetwork.handleU('lstart')
 local function handleU(params)
 	UI.updateLoading(params)
 	local code = string.sub(params, 1, 1)
@@ -366,11 +445,19 @@ local function handleU(params)
 	end
 end
 
+--- Prompts the user for auto join confirmation.
+-- @param params string The parameters received for auto join confirmation.
+-- @usage MPCoreNetwork.promptAutoJoin(`...`)
 local function promptAutoJoin(params)
 	UI.promptAutoJoinConfirmation(params)
 end
 
--- ============= EVENTS =============
+-- VV============= EVENTS =============VV
+
+--- Handle network message events.
+--- @param code string The network message code
+--- @param params string The network message content/parameters
+--- @usage `HandleNetwork[<code>]('<params>')`
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
@@ -389,6 +476,10 @@ local heartbeatTimer = 0
 local reconnectTimer = 0
 local reconnectAttempt = 0
 
+
+--- onUpdate is a game eventloop function. It is called each frame by the game engine.
+-- This is the main processing thread of BeamMP in the game
+-- @param dt float
 local function onUpdate(dt)
 	pingTimer = pingTimer + dt
 	reconnectTimer = reconnectTimer + dt
@@ -467,6 +558,8 @@ end
 
 -- EVENTS
 
+--- onLauncherConnected is an event which is called by internal scripts. This one is called when connection to the launcher is established
+--- @usage INTERNAL ONLY / GAME SPECIFIC
 onLauncherConnected = function()
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
@@ -480,7 +573,8 @@ onLauncherConnected = function()
 	end
 end
 
-
+--- runPostJoin is an event which is called by internal scripts. This one is called when the game has finishing loading into a map as part of loading into a session
+--- @usage INTERNAL ONLY / GAME SPECIFIC
 runPostJoin = function() -- gets called once loaded into a map
 	log('W', 'runPostJoin', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'runPostJoin', 'isMpSession: '..tostring(isMpSession))
@@ -502,10 +596,14 @@ runPostJoin = function() -- gets called once loaded into a map
 	end
 end
 
+--- This event is called as part of the games level loading process. It also works as the start event which can be paired with the end event onClientEndMission
+--- @usage `extensions.hook('onClientStartMission')`
 local function onClientStartMission()
 	if isMpSession and isGoingMpSession then runPostJoin() end
 end
 
+--- Executes when the user or mod ends a mission/session (map) .
+-- @param mission table The mission object.
 local function onClientEndMission(mission)
 	log('W', 'onClientEndMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'onClientEndMission', 'isMpSession: '..tostring(isMpSession))
@@ -514,16 +612,24 @@ local function onClientEndMission(mission)
 	end
 end
 
+--- Executes when the UI state changes.
+-- @param curUIState string The current UI state.
+-- @param prevUIState string The previous UI state.
 local function onUiChangedState (curUIState, prevUIState)
 	if curUIState == 'menu' and getMissionFilename() == "" then -- required due to game bug that happens if UI is reloaded on the main menu
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
 	end
 end
 
+--- Serializes data for saving to be loaded on lua reload. Allows for lua state memory persistence between reloads
+-- @return table The serialized data.
 local function onSerialize()
 	return {currentServer = currentServer,
 			isMpSession = isMpSession}
 end
+
+--- Deserializes data after loading lua state. Allows for lua state memory persistence between reloads
+-- @param data table The deserialized data.
 local function onDeserialized(data)
 	log('M', 'onDeserialized', dumps(data))
 
@@ -535,6 +641,8 @@ local function onDeserialized(data)
 	end
 end
 
+--- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
+-- We use this to load our UI info and connect to the launcher
 local function onExtensionLoaded()
 	if mp_core then
 		onLauncherConnected()
@@ -580,7 +688,7 @@ M.onSerialize          = onSerialize
 M.onDeserialized       = onDeserialized
 
 M.requestMap           = requestMap
-M.send = send
+M.send                 = send
 
 
 -- TODO: finish all this

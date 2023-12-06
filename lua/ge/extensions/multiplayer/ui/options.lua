@@ -1,3 +1,14 @@
+--====================================================================================
+-- All work by Vulcan-dev.
+-- You have no permission to redistribute or upload. Contact BeamMP for more info!
+--====================================================================================
+
+--- multiplayer_ui_options API.
+--- Author of this documentation is Titch
+--- @module multiplayer_ui_options
+--- @usage saveConfig(settings) -- internal access
+--- @usage multiplayer_ui_options.saveConfig(settings) -- external access
+
 local M = {}
 
 local utils = require("multiplayer.ui.utils")
@@ -6,13 +17,19 @@ local imgui = ui_imgui
 local longestSettingName = 0
 local sortedSettings = {}
 
+--- Converts a string to title case.
+--- @param str string The input string.
+--- @return string str The converted string in title case.
 local function toTitleCase(str)
     return str:gsub("%u", function(c) return " " .. c end):gsub("^%l", string.upper)
 end
 
---------------------------------
------[ Utility Functions ]------
---------------------------------
+-- ------------------------------
+-- ---[ Utility Functions ]------
+-- ------------------------------
+
+--- Saves the configuration settings to file.
+--- @param settings table The settings to be saved. If not provided, UI.settings will be used.
 local function saveConfig(settings)
     local jsonData = jsonEncode(settings or UI.settings)
     local config = io.open("./settings/BeamMP/chat.json", "w")
@@ -20,9 +37,11 @@ local function saveConfig(settings)
     config:close()
 end
 
---------------------------------
------[       Tabs        ]------
---------------------------------
+
+-- ------------------------------
+-- ---[       Tabs        ]------
+-- ------------------------------
+--- Renders the theming section of the UI.
 local function renderTheming()
     if imgui.BeginChild1("Colors", imgui.ImVec2(0, imgui.GetWindowHeight() - 100), false) then
         for _, setting in pairs(sortedSettings.colors) do
@@ -66,6 +85,7 @@ local function renderTheming()
     end
 end
 
+--- Renders the general section of the UI.
 local function renderGeneral()
     if imgui.BeginChild1("General", imgui.ImVec2(0, imgui.GetWindowHeight() - 100), false) then
         local posx = longestSettingName * 8 + 10
@@ -136,6 +156,7 @@ local function renderGeneral()
     end
 end
 
+
 local tabs = {
     theming = {
         name = "Theming",
@@ -151,6 +172,7 @@ local tabs = {
 
 local renderTab = renderTheming
 
+--- Render the IMGUI elements
 local function render()
     imgui.PushStyleVar1(imgui.StyleVar_FrameRounding, 0)
     imgui.Separator()
@@ -169,6 +191,7 @@ local function render()
     renderTab()
 end
 
+--- Initial call when the mod/module is loaded 
 local function onInit(settings)
     sortedSettings = {} -- for reloading
 

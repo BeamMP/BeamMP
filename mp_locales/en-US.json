@@ -79,6 +79,7 @@
     "ui.multiplayer.servers": "Public Servers",
     "ui.multiplayer.favorites": "Favorites",
     "ui.multiplayer.featured": "Featured Servers",
+    "ui.multiplayer.partner": "Partner Servers",
     "ui.multiplayer.recent": "Recent",
     "ui.multiplayer.direct_connect": "Direct connect",
     "ui.multiplayer.refresh": "Refresh",

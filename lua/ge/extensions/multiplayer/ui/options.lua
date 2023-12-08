@@ -130,7 +130,7 @@ local function renderGeneral()
             UI.settings.window.showOnMessage = pShowOnMessage[0]
         end
 
-		--Keep active on Enter
+	--Keep active on Enter
         imgui.Text("Keep active on Enter")
         imgui.SameLine()
         imgui.SetCursorPosX(posx)

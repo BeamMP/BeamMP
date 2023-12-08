@@ -224,7 +224,8 @@ function($scope, $state, $timeout, $mdDialog) {
 		document.getElementById('addCustomFav').style.display = 'none';
 	};
 	vm.closeLoadingPopup =  function() {
-		document.getElementById('LoadingStatus').textContent = 'Connecting to server...'; // TODO - There should be "{{:: 'ui.multiplayer.connectingToServer' | translate}}" here so that Vue/Angular can translate it, but I don't know how to do it.
+		document.getElementById('OriginalLoadingStatus').removeAttribute("hidden");
+		document.getElementById('LoadingStatus').setAttribute("hidden", "hidden");
 		document.getElementById('LoadingServer').style.display = 'none';
 		bngApi.engineLua('MPCoreNetwork.leaveServer()');
 	};
@@ -274,8 +275,15 @@ function($scope, $state, $timeout, $mdDialog) {
 
 	$scope.$on('LoadingInfo', function (event, data) {
 		if (document.getElementById('LoadingStatus').innerText != data.message) console.log(data.message)
-		if (data.message == "done") document.getElementById('LoadingStatus').innerText = "Done";
-		else document.getElementById('LoadingStatus').innerText = data.message;
+		if (data.message == "done") {
+			document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
+			document.getElementById('LoadingStatus').removeAttribute("hidden");
+			document.getElementById('LoadingStatus').innerText = "Done";
+		} else {
+			document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
+			document.getElementById('LoadingStatus').removeAttribute("hidden");
+			document.getElementById('LoadingStatus').innerText = data.message;
+		}
 	});
 
 	vm.exit = function ($event) {

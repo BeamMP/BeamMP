@@ -1,0 +1,49 @@
+.multiplayer-pause-container {
+  display: flex;
+  flex-direction: column;
+  margin: 1em;
+  width: 75%;
+}
+
+.multiplayerPauseBoxStyle {
+  background-color: var(--bng-black-6);
+  color: white;
+  align-items: flex-start;
+  width: 25vw;
+  max-width: 300px;
+  height: 32vh;
+  max-height: 26rem;
+  border-radius: 0.25em;
+  margin: 0 0.5em;
+  position: relative;
+}
+
+.mainContent {
+  min-width: 70%;
+}
+
+.sideContent {
+  min-width: 30%;
+}
+
+.bodyContainer {
+  display: flex;
+}
+
+.sideContentTop {
+  min-height: 70%;
+  max-height: 70%;
+  overflow-y: scroll;
+  border: solid 2px #ff660099;
+  margin: 5px;
+  border-radius: 4px;
+}
+
+.sideContentBottom {
+  min-height: 30%;
+  max-height: 30%;
+  overflow-y: scroll;
+  border: solid 2px #ff660099;
+  margin: 5px;
+  border-radius: 4px;
+}

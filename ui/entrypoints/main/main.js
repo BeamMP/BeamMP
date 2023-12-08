@@ -230,6 +230,14 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     })
 	
     // -------------------------------------- BEAMMP -------------------------------------- //
+    .state('menu.multiplayerPause', {
+      url: '/multiplayerPause',
+      templateUrl: '/ui/modules/multiplayerPause/pause.html',
+      controller: 'MultiplayerPauseController',
+      backState: 'BACK_TO_MENU',
+      uiAppsShown: false,
+    })
+
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',

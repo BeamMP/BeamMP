@@ -149,6 +149,7 @@ export default [
     '/atom/card/card.js',
     '/atom/tabs/tabs.js',
     '/multiplayer/multiplayer.js',
+    '/multiplayerPause/pause.js',
 
     '/mainmenu/mainmenu.css',
     '/menu/menu.css',

@@ -816,6 +816,42 @@ function($scope, $state, $timeout) {
 	};
 }])
 
+.directive("bngMultiplayerBanner", function () {
+  return {
+    template: `
+    <div ng-if="show" style="
+      display: inline-block;
+      position: absolute; top: 0; left: 0; right: 0px;
+      width: 20%;
+      min-width: 30em;
+      margin: 0 auto;
+      padding: 0.1em 1em 0.1em 1em;
+      background-image: -webkit-linear-gradient(-23deg, rgba(180,0,0, 0.8) 0em 0.9em,  rgba(220,0,0, 0.8) 1em 1.9em, rgba(180,0,0, 0.8) 2em 2.9em);
+      /*background-image: repeating-linear-gradient(50deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.3), 10px, red 10px, red 20px);*/
+      /*background-color: rgba(250,0,0,0.7);*/
+      background-size: 2.1em 100%;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-style: italic;
+      font-weight: 700;
+      text-shadow: 0em 0em 0.2em black;
+      text-align:center;
+      pointer-events: none;
+      z-index: 2022;
+    ">
+      {{:: "ui.career.experimentalWarning" | translate }}
+    </div>
+    `,
+    scope: true,
+    link($scope, elems, attrs) {
+      $scope.$on("$stateChangeSuccess",
+        () => bngApi.engineLua("MPCoreNetwork.isMPSession()", data => $scope.show = !!data)
+      );
+    },
+  }
+})
+
+
 
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////

@@ -86,7 +86,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 		let playersList = document.getElementById("players-table");
 		let parsedList = JSON.parse(data);
 		
-		if(players != null && playersList != null){
+		if(players != null && playersList != null && players != parsedList){
 			//get differences between playernames and send them as messages
 			var left = players.filter((item) => { return !parsedList.includes(item) });
 			var joined = parsedList.filter((item) => { return !players.includes(item) });

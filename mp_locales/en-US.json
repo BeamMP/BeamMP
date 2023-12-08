@@ -124,5 +124,11 @@
     "ui.multiplayertos.info2": "You can also find more information on our ",
     "ui.common.multiplayer.sync": "Sync",
     "ui.apps.categories.multiplayer": "Multiplayer",
-    "ui.camera.mode.passenger": "Passenger"
+    "ui.camera.mode.passenger": "Passenger",
+
+    "ui.multiplayer.prompts.disconnect.title": "Server Disconnected",
+    "ui.multiplayer.prompts.disconnect.body": "You seem to have been disconnected from the server.",
+    "ui.multiplayer.prompts.disconnect.okButton": "Return to server list",
+    "ui.multiplayer.prompts.disconnect.cancelButton": "Continue in Freeroam"
+
 }

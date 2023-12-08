@@ -130,6 +130,15 @@ local function renderGeneral()
             UI.settings.window.showOnMessage = pShowOnMessage[0]
         end
 
+		--Keep active on Enter
+        imgui.Text("Keep active on Enter")
+        imgui.SameLine()
+        imgui.SetCursorPosX(posx)
+        local pKeepActive = imgui.BoolPtr(UI.settings.window.keepActive)
+        if imgui.Checkbox("##Keep active on Enter", pKeepActive) then
+            UI.settings.window.keepActive = pKeepActive[0]
+        end
+        
         -- Bottom Buttons
         imgui.EndChild()
 

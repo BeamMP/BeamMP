@@ -20,24 +20,35 @@
       </div>
       <div class="sideContent multiplayerPauseBoxStyle">
         <div class="sideContentTop">
-          <div ng-repeat="player in playersList">
-            <md-list-item layout="row" layout-align="start start" style="border: solid 3px;margin: 0.5rem;padding: 0.5rem;" bng-nav-scroll bng-nav-scroll-force>
-              <div>
-                <h3>{{player.name}}</h3>
-              </div>
-              <div>
-                <md-button
-                  ng-class="md-primary md-raised"
-                  ui-sref="menu.options.controls.bindings" style="text-align:left; margin-top: 1em;" bng-sound-class="bng_click_generic_small">
-                  <md-icon class="material-icons">gamepad</md-icon>
-                  {{:: 'ui.options.controls' | translate}}
-                </md-button>
-              </div>
-            </md-list-item>            
+          <div ng-repeat="player in playersList" class="player-row" bng-nav-scroll bng-nav-scroll-force>
+            <span class="player-name">{{ player.name }}</span>
+            <div class="button-group">
+              <md-button class="md-primary md-raised md-icon" ng-click="reportPlayer(player)">
+                <md-icon class="material-icons">report</md-icon>
+                {{:: 'ui.multiplayer.controls.report' | translate}}
+              </md-button>
+              <md-button class="md-primary md-raised md-icon" ng-click="hidePlayer(player)">
+                <md-icon ng-if="player.hidden" class="material-icons">visibility_off</md-icon>
+                <md-icon ng-if="!player.hidden" class="material-icons">visibility</md-icon>
+                {{:: 'ui.multiplayer.controls.hide' | translate}}
+              </md-button>
+              <md-button class="md-primary md-raised md-icon" ng-click="mutePlayer(player)">
+                <md-icon ng-if="player.muted" class="material-icons">mic_off</md-icon>
+                <md-icon ng-if="!player.muted" class="material-icons">mic</md-icon>
+                {{:: 'ui.multiplayer.controls.mute' | translate}}
+              </md-button>
+            </div>
           </div>
         </div>
         <div class="sideContentBottom">
-
+          <md-button class="md-danger md-raised md-icon" ng-click="exit()">
+            <md-icon class="material-icons" md-svg-src="/ui/modules/mainmenu/drive/icons/quit.svg"></md-icon>
+            {{:: 'ui.career.exitToMenu' | translate}}
+          </md-button>
+          <md-button class="md-danger md-raised md-icon" ng-click="exitToDesktop()">
+            <md-icon class="material-icons" md-svg-src="/ui/modules/mainmenu/drive/icons/quit.svg"></md-icon>
+            {{:: 'ui.career.exitToDesktop' | translate}}
+          </md-button>
         </div>
       </div>
     </div>

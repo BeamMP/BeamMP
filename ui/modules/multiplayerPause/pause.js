@@ -11,74 +11,29 @@ angular.module('beamng.stuff')
     $scope.exitingMultiplayer = !$scope.exitingMultiplayer
   }
 
-  $scope.goToLogbook = function(entryId) {
-    if(entryId !== undefined)
-      $state.go("logbook",{id: (''+entryId).replace(/\//g, '%')})  // forward slashes breaking routing (angular?) - a bit of a hack to fix it
-    else
-      $state.go("logbook")
-  }
-
-  $scope.resume = function() {
-    $state.go("play");
-  }
-
-  $scope.load = function() {
-    if ($scope.tutorialActive) {
-      $state.go("menu.career");
-      return;
-    }
-    ConfirmationDialog.open(
-      "Your progress will be lost", "Make sure to save before loading",
-      [
-        { label: "Continue", key: true, default: true },
-        { label: "Cancel", key: false, isCancel: true }
-      ]
-    ).then(res => {
-      if (!res) {
-        return;
-      }
-      $state.go("menu.career");
-    });
-  }
-
   function infoToast(str) {
     toastr['info'](translateService.contextTranslate(str, true), "", messageToasterService.toastOptions)
   }
 
   $scope.exit = function() {
-    if ($scope.tutorialActive) {
-      bngApi.engineLua("career_career.deactivateCareer()");
-      bngApi.engineLua("endActiveGameMode()");
-      $state.go("menu.mainmenu");
-      return;
-    }
-    //Maybe there is a mistake here? Discuss with les seniors
     ConfirmationDialog.open(
-      null, "ui.career.exitPrompt",
+      "ui.multiplayer.exitToMainMenuTitle", "ui.multiplayer.exitToMainMenuPrompt",
       [
         { label: "ui.common.yes", key: 1, default: true },
-        { label: "ui.common.no", key: 2, isCancel: false },
-        { label: "ui.common.cancel", key: 0, isCancel: true }
+        { label: "ui.common.no", key: 0, isCancel: true },
       ], {lastSave: $scope.lastSave}
     ).then(res => {
       if (!res) {
         $scope.exitingMultiplayer = false
         return;
       }
-      else if (res === 2) {
-        bngApi.engineLua("career_career.deactivateCareer()");
-        bngApi.engineLua("endActiveGameMode()");
-        $state.go("menu.mainmenu");
-      }
       else {
-        bngApi.engineLua("career_saveSystem.saveCurrent()", () => {
-          $scope.exitCareerTo = "mainMenu"
-        });
+        bngApi.engineLua('MPCoreNetwork.leaveServer(true)');
       }
     });
   }
 
-  $scope.exitToFreeroam = function() {
+  /*$scope.exitToFreeroam = function() {
     if ($scope.tutorialActive) {
       bngApi.engineLua("career_career.deactivateCareerAndReloadLevel()");
       $state.go("play");
@@ -106,7 +61,7 @@ angular.module('beamng.stuff')
         });
       }
     });
-  }
+  }*/
 
   $scope.exitToDesktop = function() {
     if ($scope.tutorialActive) {
@@ -114,26 +69,45 @@ angular.module('beamng.stuff')
       return;
     }
     ConfirmationDialog.open(
-      null, "ui.career.exitPrompt",
+      "ui.multiplayer.exitToDesktopTitle", "ui.multiplayer.exitToDesktopPrompt",
       [
         { label: "ui.common.yes", key: 1, default: true },
-        { label: "ui.common.no", key: 2, isCancel: false },
-        { label: "ui.common.cancel", key: 0, isCancel: true }
-      ], {lastSave: $scope.lastSave}
+        { label: "ui.common.no", key: 2, isCancel: true },
+      ]
     ).then(res => {
       if (!res) {
         $scope.exitingMultiplayer = false
         return;
       }
-      else if (res === 2) {
+      else {
         bngApi.engineLua("quit()");
       }
-      else {
-        bngApi.engineLua("career_saveSystem.saveCurrent()", () => {
-          $scope.exitCareerTo = "quit"
-        });
-      }
     });
+  }
+
+  $scope.reportPlayer = function(player) {
+    console.log(player)
+    ConfirmationDialog.open(
+      "ui.multiplayer.reportTitle", "ui.multiplayer.reportPrompt",
+      [
+        { label: "ui.common.cancel", key: false, isCancel: true },
+        // { label: "Enter and don't show this again", key: true },
+        { label: "ui.common.submit", key: true, default: true },
+      ],
+      { class: "experimental" }
+    ).then(res => {
+      if (!res)
+        return;
+      $state.go("menu.career");
+    });
+  }
+
+  $scope.hidePlayer = function(player) {
+
+  }
+
+  $scope.mutePlayer = function(player) {
+
   }
 
   $scope.$on('playerList', function(event, data) {

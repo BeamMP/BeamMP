@@ -21,19 +21,16 @@ local function getUnicycleConfigs()
 	-- Load the unicycle configurations:
 	local pcfiles = FS:findFiles("/vehicles/unicycle/", "*.pc", 0, true, false)
 	local pcFileRegex = "^/vehicles/unicycle/(.*)%.pc"
-	local tmp = {
-		--['default.pc'] = 'default.pc'
-	}
+	local tmp = {}
 
 	for _, filename in ipairs(pcfiles) do
 		local file = filename:match(pcFileRegex)
-		print('Found unicycle config: '..file)
-		--defaultSettings.unicycleConfigs[file] = file..'.pc'
-		tmp[file] = file..'.pc'
+		if file ~= "beammp_default" then
+			tmp[file] = file..'.pc'
+		end
 	end
 
-	settings.setValue('unicycleConfigs', tmp)
-
+	settings.setValue('unicycleConfigs', tmp) -- multiplayer.partial ui will read this value
 	return tmp
 end
 

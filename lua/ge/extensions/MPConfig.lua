@@ -68,7 +68,7 @@ local defaultSettings = {
 
 	-- unicycle configurations
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = false,
-	--unicycle_pc = nil, -- introduced by the multiplayer.partial ui to share the selected default unicycle for setDefaultUnicycle()
+	--unicycle_pc = nil, -- temp value introduced to share the user selected default unicycle config from the multiplayer.partial ui to MPConfig.setDefaultUnicycle()
 
 	disableInstabilityPausing = true,
 

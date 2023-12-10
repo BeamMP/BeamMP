@@ -37,6 +37,25 @@ local function getUnicycleConfigs()
 	return tmp
 end
 
+local function setDefaultUnicycle(configFileName) -- ./userdir/vehicles/unicycle/*
+	print("======================================== 123 test")
+	local handle = io.open("vehicles/unicycle/" .. tostring(configFileName), "r")
+	if handle == nil then
+		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/' .. tostring(configFileName) .. '" in read mode.')
+		return nil
+	end
+	local newconfig = handle:read("*all")
+	handle:close()
+	
+	local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
+	if handle == nil then
+		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
+		return nil
+	end
+	handle:write(newconfig)
+	handle:close()
+end
+
 local defaultSettings = {
 	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
@@ -51,8 +70,7 @@ local defaultSettings = {
 	showPcs = true,
 
 	-- unicycle configurations
-
-	unicycleConfigs = getUnicycleConfigs(),
+	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = false,
 
 	disableInstabilityPausing = true,
 
@@ -266,6 +284,7 @@ M.onExtensionLoaded = onExtensionLoaded
 -- Functions
 M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
+M.setDefaultUnicycle = setDefaultUnicycle
 
 M.getNickname = getNickname
 M.setNickname = setNickname

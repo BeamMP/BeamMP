@@ -1005,7 +1005,7 @@ local function onVehicleDestroyed(gameVehicleID)
 		vehicle.isDeleted = true
 		
 		local veh = be:getObjectByID(gameVehicleID)
-		if veh:getJBeamFilename() == "unicycle" then -- if the player destroyed their unicycle
+		if veh:getJBeamFilename() == "unicycle" and settings.getValue("unicycleAutoSave") == true then -- if the player destroyed their unicycle
 			local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
 			--[[ Contains as of 0.30
 				[parts] = table
@@ -1023,7 +1023,7 @@ local function onVehicleDestroyed(gameVehicleID)
 				[licenseName] = string
 				[model] = string
 				
-				the .pc format v2 contains all the same data.. just with "format" and not with "partConfigFilename"
+				the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
 			]]
 			vehicleConfig.format = 2
 			vehicleConfig.partConfigFilename = nil

@@ -127,6 +127,12 @@
   </md-select>
 </md-list-item>
 
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.unicycleAutoSave' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.unicycleAutoSave.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.unicycleAutoSave" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
 <md-divider></md-divider>
 <md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.blobsTitle' | translate }}</h3></p></md-list-item>
 

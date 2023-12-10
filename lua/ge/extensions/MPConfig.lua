@@ -37,11 +37,11 @@ local function getUnicycleConfigs()
 	return tmp
 end
 
-local function setDefaultUnicycle(configFileName) -- ./userdir/vehicles/unicycle/*
-	print("======================================== 123 test")
-	local handle = io.open("vehicles/unicycle/" .. tostring(configFileName), "r")
+local function setDefaultUnicycle(configFileName)
+	local configFileName = configFileName .. ".pc"
+	local handle = io.open("vehicles/unicycle/" .. configFileName, "r")
 	if handle == nil then
-		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/' .. tostring(configFileName) .. '" in read mode.')
+		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/' .. configFileName .. '" in read mode.')
 		return nil
 	end
 	local newconfig = handle:read("*all")
@@ -71,6 +71,7 @@ local defaultSettings = {
 
 	-- unicycle configurations
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = false,
+	--unicycle_pc = nil, -- introduced by the multiplayer.partial ui to share the selected default unicycle for setDefaultUnicycle()
 
 	disableInstabilityPausing = true,
 
@@ -276,10 +277,20 @@ local function onDeserialized(data)
 	PlayerServerID = data.PlayerServerID
 end
 
+local function onSettingsChanged()
+	local unicycle_pc = settings.getValue("unicycle_pc")
+	if unicycle_pc ~= nil then
+		setDefaultUnicycle(unicycle_pc)
+		settings.setValue("unicycle_pc", nil) -- reset to prevent reapply on every setting change
+		guihooks.trigger('toastrMsg', {type="info", title = "Unicycle", msg = "Default set to " .. unicycle_pc, config = {timeOut = 3000}})
+	end
+end
+
 -- Events
 M.onSerialize = onSerialize
 M.onDeserialized = onDeserialized
 M.onExtensionLoaded = onExtensionLoaded
+M.onSettingsChanged = onSettingsChanged
 
 -- Functions
 M.getPlayerServerID = getPlayerServerID

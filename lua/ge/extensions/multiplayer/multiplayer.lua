@@ -60,15 +60,15 @@ end
 --- A custom function overwrite for if the map should be allowed to open.
 --- @return boolean True if the the map should be allowed to open?
 local function modified_bigMapMode()
-	bullettime.pause = nop
+	simTimeAuthority.pause = nop
 	return true --TODO: maybe add a check to stop map opening if no vehicle is present
 end
 
-original_bullettime = bullettime.pause
+original_bullettime = simTimeAuthority.pause
 
 --- Called when the Big Map is loaded by the user. 
 local function onBigMapActivated()
-	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
+	simTimeAuthority.pause = original_bullettime -- re-enable pausing function after map has been opened
 end
 
 

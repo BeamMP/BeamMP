@@ -44,13 +44,12 @@ function MPTranslate(which, useifnotpresent) -- global! translate() was a global
 	-- if lang table not loaded or lang changed, load
 	if LOCALISATION == nil or LOCALISATION.lang ~= settings.getValue("userLanguage") then
 		LOCALISATION = {}
-		LOCALISATION.lang = settings.getValue("userLanguage")
+		LOCALISATION.lang = settings.getValue("userLanguage") or "en-US"
 		LOCALISATION.translate = getLang(LOCALISATION.lang)
 	end
-	if LOCALISATION.translate == nil then return useifnotpresent or which end
 	
-	-- entry unknown
-	if LOCALISATION.translate[which] == nil then
+	-- entry unknown or localisation not found
+	if LOCALISATION.translate == nil or LOCALISATION.translate[which] == nil then
 		if LOCALISATION.lang ~= "en-US" then -- try eng variant
 			local translate = getLang("en-US")
 			if translate == nil or translate[which] == nil then -- if not present here either

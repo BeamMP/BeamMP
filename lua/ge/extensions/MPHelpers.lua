@@ -17,7 +17,7 @@ local LOCAL = nil
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
 --- Returns the decoded lang table from disk
--- @tparam[opt] string Language code
+-- @tparam[opt] string lang Language code
 -- @usage getLang(en-US)
 -- @treturn[1] table if Success
 -- @treturn[2] nil if failure

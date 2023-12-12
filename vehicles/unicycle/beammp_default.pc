@@ -1,6 +1,6 @@
 {
   "format":2,
-  "licenseName":"YDH-5398",
+  "licenseName":"Merry Christmas",
   "mainPartName":"unicycle",
   "model":"unicycle",
   "paints":[

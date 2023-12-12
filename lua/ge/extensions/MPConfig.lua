@@ -30,7 +30,7 @@ local function getUnicycleConfigs()
 		end
 	end
 
-	settings.setValue('unicycleConfigs', tmp) -- multiplayer.partial ui will read this value
+	if tmp ~= settings.getValue('unicycleConfigs') then settings.setValue('unicycleConfigs', tmp) end -- multiplayer.partial ui will read this value
 	return tmp
 end
 
@@ -279,8 +279,9 @@ local function onSettingsChanged()
 	if unicycle_pc ~= nil then
 		setDefaultUnicycle(unicycle_pc)
 		settings.setValue("unicycle_pc", nil) -- reset to prevent reapply on every setting change
-		guihooks.trigger('toastrMsg', {type="info", title = "Unicycle", msg = "Default set to " .. unicycle_pc, config = {timeOut = 3000}})
+		guihooks.trigger('toastrMsg', {type="info", title = "Unicycle", msg = MPTranslate("ui.options.multiplayer.unicycleOnSwitch") .. " " .. unicycle_pc, config = {timeOut = 3000}})
 	end
+	getUnicycleConfigs()
 end
 
 -- Events

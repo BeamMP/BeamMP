@@ -68,6 +68,7 @@
     "ui.options.multiplayer.unicycleDefault": "Which unicycle config to use",
     "ui.options.multiplayer.unicycleAutoSave": "Auto Save your last used Unicycle",
     "ui.options.multiplayer.unicycleAutoSave.tooltip": "When you despawn your Unicycle, it is saved and reused next time you spawn it",
+    "ui.options.multiplayer.unicycleOnSwitch": "Default set to",
     "ui.options.multiplayer.blobsTitle": "Blobs",
     "ui.options.multiplayer.nameTagTitle": "Nametags",
     "ui.options.multiplayer.others": "Others",

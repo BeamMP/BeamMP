@@ -12,8 +12,56 @@
 
 
 local M = {}
+local LOCAL = nil
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
+
+--- Returns the decoded lang table from disk
+-- @tparam[opt] string Language code
+-- @usage getLang(en-US)
+-- @treturn[1] table if Success
+-- @treturn[2] nil if failure
+local function getLang(lang)
+	local lang = lang or settings.getValue("userLanguage") or "en-US"
+	local langpath = "/locales/" .. lang .. ".json"
+	local handle = io.open(langpath, "r")
+	if handle == nil then return nil end -- shouldnt happen
+	local data = handle:read("*all")
+	handle:close()
+	return jsonDecode(data)
+end
+
+--- Turns translation code into language string
+-- Returns the translation for the lang the player is using. Will alternatively try the en-US lang. If both not present returns the text given in useifnotpresent and if that is not given, returns which.
+-- @tparam string which Give translation string
+-- @tparam[opt] string useifnotpresent Used if which cannot be found
+-- @usage MPTranslate("ui.options.multiplayer.fadeVehicles", "Fade out vehicles as they get closer")
+-- @usage MPTranslate("ui.options.multiplayer.fadeVehicles")
+-- @treturn[1] string if success. Translation string
+-- @treturn[2] string if failure but useifnotpresent is given. useifnotpresent string
+-- @treturn[3] string if failure. which string
+function MPTranslate(which, useifnotpresent)
+	-- if lang table not loaded or lang changed, load
+	if LOCAL == nil or LOCAL.lang ~= settings.getValue("userLanguage") then
+		LOCAL = {}
+		LOCAL.lang = settings.getValue("userLanguage")
+		LOCAL.translate = getLang(LOCAL.lang)
+	end
+	if LOCAL.translate == nil then return useifnotpresent or which end
+	
+	-- entry unknown
+	if LOCAL.translate[which] == nil then
+		if LOCAL.lang ~= "en-US" then -- try eng variant
+			local translate = getLang("en-US")
+			if translate == nil or translate[which] == nil then -- if not present here either
+				return useifnotpresent or which
+			end
+			return translate[which]
+		end
+		return useifnotpresent or which
+	end
+	return LOCAL.translate[which]
+end
 
 --- Checks if two colors match by comparing their serialized values.
 -- @param old table The first color to compare.

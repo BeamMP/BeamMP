@@ -12,13 +12,13 @@
 
 
 local M = {}
-local LOCAL = nil
+local LOCALISATION = nil
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
 --- Returns the decoded lang table from disk
 -- @tparam[opt] string lang Language code
--- @usage getLang(en-US)
+-- @usage getLang("en-US")
 -- @treturn[1] table if Success
 -- @treturn[2] nil if failure
 local function getLang(lang)
@@ -40,18 +40,18 @@ end
 -- @treturn[1] string if success. Translation string
 -- @treturn[2] string if failure but useifnotpresent is given. useifnotpresent string
 -- @treturn[3] string if failure. which string
-function MPTranslate(which, useifnotpresent)
+function MPTranslate(which, useifnotpresent) -- global! translate() was a global func in earlier beamng builds. so we wont take that, in case it comes back
 	-- if lang table not loaded or lang changed, load
-	if LOCAL == nil or LOCAL.lang ~= settings.getValue("userLanguage") then
-		LOCAL = {}
-		LOCAL.lang = settings.getValue("userLanguage")
-		LOCAL.translate = getLang(LOCAL.lang)
+	if LOCALISATION == nil or LOCALISATION.lang ~= settings.getValue("userLanguage") then
+		LOCALISATION = {}
+		LOCALISATION.lang = settings.getValue("userLanguage")
+		LOCALISATION.translate = getLang(LOCALISATION.lang)
 	end
-	if LOCAL.translate == nil then return useifnotpresent or which end
+	if LOCALISATION.translate == nil then return useifnotpresent or which end
 	
 	-- entry unknown
-	if LOCAL.translate[which] == nil then
-		if LOCAL.lang ~= "en-US" then -- try eng variant
+	if LOCALISATION.translate[which] == nil then
+		if LOCALISATION.lang ~= "en-US" then -- try eng variant
 			local translate = getLang("en-US")
 			if translate == nil or translate[which] == nil then -- if not present here either
 				return useifnotpresent or which
@@ -60,7 +60,7 @@ function MPTranslate(which, useifnotpresent)
 		end
 		return useifnotpresent or which
 	end
-	return LOCAL.translate[which]
+	return LOCALISATION.translate[which]
 end
 
 --- Checks if two colors match by comparing their serialized values.
@@ -181,6 +181,8 @@ local function onExtensionLoaded()
 	--MPGameNetwork
 	--M.addKeyEventListener = MPGameNetwork.addKeyEventListener -- takes: string keyName, function listenerFunction
 	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
+	
+	M.translate                = MPTranslate
 end
 
 M.onExtensionLoaded = onExtensionLoaded

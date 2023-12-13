@@ -42,7 +42,7 @@ end
 -- @treturn[3] string if failure. which string
 function MPTranslate(which, useifnotpresent) -- global! translate() was a global func in earlier beamng builds. so we wont take that, in case it comes back
 	-- if lang table not loaded or lang changed, load
-	local lang = settings.getValue("userLanguage") or "en-US" -- can be nil if the user never switch the main language. main language is en-US
+	local lang = settings.getValue("userLanguage") or "en-US" -- can be nil if the user never switched the main language. main language is en-US
 	if LOCALISATION == nil or LOCALISATION.lang ~= lang then
 		LOCALISATION = {}
 		LOCALISATION.lang = lang

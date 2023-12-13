@@ -6,3 +6,7 @@ New-Launcher-Server/node_modules/
 beamng-mp.rar
 old/*
 BeamMP.zip
+vehicles/unicycle/*.dae
+vehicles/unicycle/*.png
+vehicles/unicycle/unicycle_beamling.jbeam
+vehicles/unicycle/main.materials.json

@@ -276,14 +276,13 @@ function($scope, $state, $timeout, $mdDialog) {
 	$scope.$on('LoadingInfo', function (event, data) {
 		if (document.getElementById('LoadingStatus').innerText != data.message) console.log(data.message)
 		if (data.message == "done") {
-			document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
-			document.getElementById('LoadingStatus').removeAttribute("hidden");
 			document.getElementById('LoadingStatus').innerText = "Done";
 		} else {
-			document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
-			document.getElementById('LoadingStatus').removeAttribute("hidden");
 			document.getElementById('LoadingStatus').innerText = data.message;
 		}
+		
+		document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
+		document.getElementById('LoadingStatus').removeAttribute("hidden");
 	});
 
 	vm.exit = function ($event) {
@@ -1345,6 +1344,9 @@ function connect(ip, port, name) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
+	// Make sure the right content is displayed
+	document.getElementById('OriginalLoadingStatus').removeAttribute("hidden");
+	document.getElementById('LoadingStatus').setAttribute("hidden", "hidden");
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'block'
 	// Connect with ids

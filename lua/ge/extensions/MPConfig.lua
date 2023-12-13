@@ -282,6 +282,8 @@ local function onDeserialized(data)
 	PlayerServerID = data.PlayerServerID
 end
 
+--- Multiplayer Options <-> Lua data bridge
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onSettingsChanged()
 	local unicycle_pc = settings.getValue("unicycle_pc")
 	if unicycle_pc ~= nil then

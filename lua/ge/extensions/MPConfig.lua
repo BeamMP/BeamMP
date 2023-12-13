@@ -17,6 +17,9 @@ local M = {}
 local Nickname = ""
 local PlayerServerID = -1
 
+--- Returns a table of all to the disk saved unicycle configs
+-- @treturn[1] table eg. {"MyFavConfig": "MyFavConfig.pc"}
+-- @usage INTERNAL ONLY / GAME SPECIFIC
 local function getUnicycleConfigs()
 	-- Load the unicycle configurations:
 	local pcfiles = FS:findFiles("/vehicles/unicycle/", "*.pc", 0, true, false)
@@ -34,6 +37,10 @@ local function getUnicycleConfigs()
 	return tmp
 end
 
+--- Sets a new default Unicycle
+-- @tparam string configFileName eg. "MyFavConfig" not "MyFavConfig.pc"
+-- @treturn[1] true if Success
+-- @treturn[2] nil if Failure
 local function setDefaultUnicycle(configFileName)
 	local configFileName = configFileName .. ".pc"
 	local handle = io.open("vehicles/unicycle/" .. configFileName, "r")
@@ -51,6 +58,7 @@ local function setDefaultUnicycle(configFileName)
 	end
 	handle:write(newconfig)
 	handle:close()
+	return true
 end
 
 local defaultSettings = {

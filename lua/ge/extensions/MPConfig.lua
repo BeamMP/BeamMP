@@ -204,7 +204,7 @@ local function getFavorites()
 end
 
 --- Set the favorites in the favorites.json file.
--- @tparam table favstr The favorites data as a table.
+-- @tparam string favstr The favorites data as a base64 encoded string.
 -- @usage MPConfig.setFavorites(`<favorites table>`)
 local function setFavorites(favstr)
 	local favstr = MPHelpers.b64decode(favstr)

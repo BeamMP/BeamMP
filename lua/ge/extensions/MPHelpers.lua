@@ -79,7 +79,7 @@ local function b64encode(string)
 	return mime.b64(string)
 end
 
--- Decodes a base64 string (RFC 2045)
+--- Decodes a base64 string (RFC 2045)
 -- @tparam string string The base64 string
 -- @treturn[1] string Decoded string
 local function b64decode(string)

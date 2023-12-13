@@ -207,6 +207,7 @@ end
 -- @tparam table favstr The favorites data as a table.
 -- @usage MPConfig.setFavorites(`<favorites table>`)
 local function setFavorites(favstr)
+	local favstr = MPHelpers.b64decode(favstr)
 	if not FS:directoryExists("settings/BeamMP") then
 		FS:directoryCreate("settings/BeamMP")
 	end

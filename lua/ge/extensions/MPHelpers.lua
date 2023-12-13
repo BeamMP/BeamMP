@@ -13,6 +13,7 @@
 
 local M = {}
 local LOCALISATION = nil
+local mime = require'mime' -- Game libary. Used in BeamNG.drive\lua\common\libs\luasocket\socket\mime.lua. We only use it for b64
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
@@ -69,6 +70,20 @@ end
 -- @return boolean True if the colors match, false otherwise.
 local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
+end
+
+--- Base64 encodes a string (RFC 2045)
+-- @tparam string string The string to be encoded
+-- @treturn[1] string Base64
+local function b64encode(string)
+	return mime.b64(string)
+end
+
+-- Decodes a base64 string (RFC 2045)
+-- @tparam string string The base64 string
+-- @treturn[1] string Decoded string
+local function b64decode(string)
+	return mime.unb64(string)
 end
 
 --- Converts a hexadecimal color code to RGB values.
@@ -183,6 +198,8 @@ local function onExtensionLoaded()
 	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
 	
 	M.translate                = MPTranslate
+	M.b64encode                = b64encode
+	M.b64decode                = b64decode
 end
 
 M.onExtensionLoaded = onExtensionLoaded

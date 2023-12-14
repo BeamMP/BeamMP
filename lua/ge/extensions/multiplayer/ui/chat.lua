@@ -325,13 +325,21 @@ local function render()
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
         if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, inputCallbackC) then
             sendChatMessage(chatMessageBuf)
-            imgui.SetKeyboardFocusHere(1)
+            if UI.settings.window.keepActive then
+                imgui.SetKeyboardFocusHere(-1)
+            else
+                imgui.SetKeyboardFocusHere(1)
+            end
         end
 
         imgui.SameLine()
         if utils.imageButton(UI.uiIcons.send.texId, 20) then
             sendChatMessage(chatMessageBuf)
-            imgui.SetKeyboardFocusHere(1)
+            if UI.settings.window.keepActive then
+                imgui.SetKeyboardFocusHere(-1)
+            else
+                imgui.SetKeyboardFocusHere(1)
+            end
         end
 
         imgui.EndChild()

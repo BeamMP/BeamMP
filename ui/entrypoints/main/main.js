@@ -228,8 +228,8 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       controller: 'VehicleDetailsController as vehicle',
       backState: 'menu.vehicles',
     })
-	
-    // -------------------------------------- BEAMMP -------------------------------------- //
+
+// -------------------------------------- BEAMMP -------------------------------------- //
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',
@@ -307,7 +307,7 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
-	// -------------------------------------- BEAMMP -------------------------------------- //
+// -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
         url: '/multiplayer',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
@@ -904,7 +904,6 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: "menu.mainmenu",
     })
 
-
     .state('menu.career', {
       url: '/career',
       templateUrl: '/ui/modules/career/career.html',
@@ -1493,6 +1492,7 @@ angular.module('beamng.stuff')
       // TODO - Find out what these are???
       registerActions: assignNavFunc,
       unregisterActions: unregisterActions,
+
       provideScope: scope => scope = scope,
       prefix: val => prefix[val] || val,
     }
@@ -1696,6 +1696,9 @@ angular.module('beamng.stuff')
     let menuActionMapEnabled = typeof $state.current.menuActionMapEnabled === "boolean" ? $state.current.menuActionMapEnabled : true; // true by default
     // bngApi.engineLua(`extensions.core_input_bindings.setMenuActionMapEnabled(${menuActionMapEnabled})`)
     captureInput(menuActionMapEnabled);
+    if (menuActionMapEnabled) window.bridge && window.bridge.uiNavEvents.clearFilteredEvents() // risky?
+
+
     bngApi.engineLua(`extensions.hook("onUiChangedState", "${toState.name}", "${fromState.name}")`)
 
     // bngApi.engineLua("career_career.isActive()", data => {
@@ -1729,11 +1732,13 @@ angular.module('beamng.stuff')
           } else if ($state.current.uiLayout === undefined) {
             // no particular ui layout defined, ensure we are in the default/previous one (whichever that may have been)
             // console.log(`No layout defined - using previous (${vm.uiLayoutPrevious})`)
+
             if (!(vm.playmodeState && (vm.playmodeState.state || vm.playmodeState.appLayout)) ||
               // ignore menu.appselect from emitting layout to prevent issue menu.appedit
               // selected layout will always be current game layout
               vm.currentStateName === "menu.appselect")
               return
+
             if (typeof vm.playmodeState.appLayout == "string") {
               $scope.$emit('appContainer:loadLayoutByType', vm.playmodeState.appLayout)
             } else if (typeof vm.playmodeState.appLayout == "object") {
@@ -1748,6 +1753,7 @@ angular.module('beamng.stuff')
             // }
           } else {
             // console.log(`Layout defined (${$state.current.uiLayout})`)
+
             // this state requires a particular ui layout, set
             // vm.uiLayoutPrevious = UiAppsService.getLayout()
             $scope.$emit('appContainer:loadLayoutByType', $state.current.uiLayout)
@@ -1843,7 +1849,6 @@ angular.module('beamng.stuff')
     vm.transitionAnimation = toState.transitionAnimation || fromState.transitionAnimation // prefer the animation of the target state, otherwise use the state we came from
   })
 
-
   $scope.$on('ChangeState', function (event, target, ifCurrent) {
     let targetName = typeof target === "string" ? target : target.state;
     let current = $state.current.name;
@@ -1862,6 +1867,7 @@ angular.module('beamng.stuff')
     if (!ifCurrent || ifCurrent.includes(current)) {
       // console.log(`switching to state: ${targetName}`);
       let params = target.params || {};
+
       let stateTransitioning = $state.go(targetName, params, { reload: true });
       // console.log("switched:", stateTransitioning);
     }
@@ -2305,6 +2311,7 @@ angular.module('beamng.stuff')
 .service('BlurGame', [function () {
 
   return window.bridge.gameBlurrer
+
 }])
 
 .directive('bngBlur', ['BlurGame', 'RateLimiter', function (BlurGame, RateLimiter) {

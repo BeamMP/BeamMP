@@ -22,7 +22,7 @@ local function applyLivePowertrain(data)
 	for k, v in pairs(decodedData) do -- For each device	
 		--k = "gearbox"
 		--v.mode = "auto"
-		if v.mode then
+		if v.mode and devices[k] and devices[k].setMode then
 			powertrain.setDeviceMode(k, v.mode)
 			local gearIndex = v.gearIndex
 		end
@@ -35,7 +35,7 @@ local function check()
 	local devicesToSend = {}
 	local devices = powertrain.getDevices() -- Get all devices
 	for k, v in pairs(devices) do -- For each device
-		if v.mode then -- If it's something that interests us
+		if v.mode and v.setMode then -- If it's something that interests us
 			local currDevice = { type = v.type, mode = v.mode, gearIndex = v.gearIndex }
 			local lastDevice = lastDevices[k] or { type = "", mode = "" }
 			-- If it has changed

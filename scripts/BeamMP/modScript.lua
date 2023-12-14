@@ -23,47 +23,47 @@ else
 end
 
 load("multiplayer/multiplayer")
-setExtensionUnloadMode("multiplayer/multiplayer", "manual")
+registerCoreModule("multiplayer/multiplayer")
 
 load("MPDebug")
-setExtensionUnloadMode("MPDebug", "manual")
+registerCoreModule("MPDebug")
 
 load("UI")
-setExtensionUnloadMode("UI", "manual")
+registerCoreModule("UI")
 
 load("MPModManager")
-setExtensionUnloadMode("MPModManager", "manual")
+registerCoreModule("MPModManager")
 
 load("MPCoreNetwork")
-setExtensionUnloadMode("MPCoreNetwork", "manual")
+registerCoreModule("MPCoreNetwork")
 
 load("MPConfig")
-setExtensionUnloadMode("MPConfig", "manual")
+registerCoreModule("MPConfig")
 
 load("MPGameNetwork")
-setExtensionUnloadMode("MPGameNetwork", "manual")
+registerCoreModule("MPGameNetwork")
 
 load("MPVehicleGE")
-setExtensionUnloadMode("MPVehicleGE", "manual")
+registerCoreModule("MPVehicleGE")
 
 load("MPInputsGE")
-setExtensionUnloadMode("MPInputsGE", "manual")
+registerCoreModule("MPInputsGE")
 
 load("MPElectricsGE")
-setExtensionUnloadMode("MPElectricsGE", "manual")
+registerCoreModule("MPElectricsGE")
 
 load("positionGE")
-setExtensionUnloadMode("positionGE", "manual")
+registerCoreModule("positionGE")
 
 load("MPPowertrainGE")
-setExtensionUnloadMode("MPPowertrainGE", "manual")
+registerCoreModule("MPPowertrainGE")
 
 load("MPUpdatesGE")
-setExtensionUnloadMode("MPUpdatesGE", "manual")
+registerCoreModule("MPUpdatesGE")
 
 load("nodesGE")
-setExtensionUnloadMode("nodesGE", "manual")
+registerCoreModule("nodesGE")
 
 -- load this file last so it can reference the others
 load("MPHelpers")
-setExtensionUnloadMode("MPHelpers", "manual")
+registerCoreModule("MPHelpers")

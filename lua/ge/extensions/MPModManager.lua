@@ -16,6 +16,13 @@ local hasMods = false
 
 --TODO: build handler for repo mod downloads
 
+function queueExtensionToLoad(extension)  -- temporary workaround for mods still using that function
+	guihooks.trigger("toastrMsg", {type="error", title="queueExtensionToLoad", msg="This function is deprecated, please use setExtensionUnloadMode(extension, \"auto\") instead."})
+	log('E','queueExtensionToLoad', 'This function is deprecated, please use setExtensionUnloadMode(extension, \"auto\") instead.')
+	setExtensionUnloadMode(extension, 'auto')
+end
+
+
 local function unloadLocales()
 	FS:unmount('/temp/beammp/beammp_locales.zip')
 	FS:directoryRemove('/temp/beammp')

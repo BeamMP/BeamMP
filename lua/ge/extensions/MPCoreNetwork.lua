@@ -391,7 +391,8 @@ local function leaveServer(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	local callback = nop
-	if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
+	--if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
+	callback = function() MPModManager.reloadLuaReloadWithDelay() end -- force lua reload every time until a proper fix is introduced
 	if goBack then endActiveGameMode(callback) end
 end
 

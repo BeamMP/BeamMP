@@ -227,7 +227,8 @@ local function extensionLoader()
 		original_registerCoreModule(modulePath)
 		elseif string.match(debug, "modscript") then
 			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to setExtensionUnloadMode(arg, \"auto\") " .. debug)
-			setExtensionUnloadMode(modulePath, "auto")
+			extensionName = extensions.luaPathToExtName(modulePath)
+			setExtensionUnloadMode(extensionName, "auto")
 		else
 			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! " .. debug)
 			original_registerCoreModule(modulePath)
@@ -262,7 +263,7 @@ end
 local function onExtensionLoaded()
 	loadLocales()
 	cleanUpSessionMods()
-	extensionLoader()
+	--extensionLoader()
 	--M.replaceStuff()
 end
 
@@ -270,7 +271,7 @@ end
 -- We use this to cleanup our locales and restore core module defintions
 local function onExtensionUnloaded() -- restore functions back to their default values
 	unloadLocales()
-	registerCoreModule = original_registerCoreModule and original_registerCoreModule
+	--registerCoreModule = original_registerCoreModule and original_registerCoreModule
 	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
 end
 

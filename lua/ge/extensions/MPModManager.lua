@@ -227,7 +227,8 @@ local function extensionLoader()
 		original_registerCoreModule(modulePath)
 		elseif string.match(debug, "modscript") then
 			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to setExtensionUnloadMode(arg, \"auto\") " .. debug)
-			setExtensionUnloadMode(modulePath, "auto")
+			extensionName = extensions.luaPathToExtName(modulePath)
+			setExtensionUnloadMode(extensionName, "auto")
 		else
 			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! " .. debug)
 			original_registerCoreModule(modulePath)

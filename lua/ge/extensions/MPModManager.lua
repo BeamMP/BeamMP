@@ -169,7 +169,9 @@ local function cleanUpSessionMods()
 	end
 	log('M', "cleanUpSessionMods", count.." Mods cleaned up")
 	log('M', "cleanUpSessionMods", "Unloading extensions...")
-	unloadGameModules()
+	--dump(getModList())
+	-- TODO: Need to find an alternative for this...
+	--unloadGameModules()
 end
 
 --- Set the servers mods as a string in Lua for loading and checking

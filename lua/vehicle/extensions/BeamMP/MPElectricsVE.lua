@@ -437,6 +437,11 @@ local function applyElectrics(data)
 		if decodedData.absMode and wheels then
 			wheels.setABSBehavior(decodedData.absMode)
 		end
+
+		if decodedData.mainEngine_compressionBrake_setting then
+			controller.getControllerSafe('compressionBrake').setCompressionBrakeCoef(decodedData.mainEngine_compressionBrake_setting)
+		end
+
 		-- ME262 missile sync
 		if decodedData.missile4_motor == 1 or decodedData.missile3_motor == 1 or decodedData.missile2_motor == 1 or decodedData.missile1_motor == 1 then
 			if controller.getController('missiles') then

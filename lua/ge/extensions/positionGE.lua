@@ -37,11 +37,11 @@ local function sendVehiclePosRot(data, gameVehicleID)
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			local decoded = jsonDecode(data)
-			local simspeedReal = bullettime.getReal()
+			local simspeedReal = simTimeAuthority.getReal()
 
-			decoded.isTransitioning = (bullettime.get() ~= simspeedReal) or nil
+			decoded.isTransitioning = (simTimeAuthority.get() ~= simspeedReal) or nil
 
-			simspeedReal = bullettime.getPause() and 0 or simspeedReal -- set velocities to 0 if game is paused
+			simspeedReal = simTimeAuthority.getPause() and 0 or simspeedReal -- set velocities to 0 if game is paused
 
 			for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedReal end
 			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
@@ -63,7 +63,7 @@ local function applyPos(data, serverVehicleID)
 
 	local decoded = jsonDecode(data)
 
-	local simspeedFraction = 1/bullettime.getReal()
+	local simspeedFraction = 1/simTimeAuthority.getReal()
 
 	for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedFraction end
 	for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedFraction end
@@ -132,7 +132,7 @@ end
 --- This function is used for setting the simulation speed 
 --- @param speed number
 local function setActualSimSpeed(speed)
-	actualSimSpeed = speed*(1/bullettime.getReal())
+	actualSimSpeed = speed*(1/simTimeAuthority.getReal())
 end
 
 --- This function is used for getting the simulation speed 
@@ -149,5 +149,6 @@ M.setPosition       = setPosition
 M.setPing           = setPing
 M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

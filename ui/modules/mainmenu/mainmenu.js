@@ -422,8 +422,7 @@ angular.module('beamng.stuff')
       // targetState: 'menu.career'
       action: () => {
         if (!$scope.inCareer) {
-          if (!clicky(6)) // how many clicks should it take to enter
-            return;
+
           ConfirmationDialog.open(
             "ui.career.experimentalTitle", "ui.career.experimentalPrompt",
             [

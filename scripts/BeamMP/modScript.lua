@@ -4,7 +4,7 @@
 --====================================================================================
 local ver = split(beamng_versionb, ".")
 local majorVer = tonumber(ver[2])
-local compatibleVersion = 30
+local compatibleVersion = 31
 if majorVer ~= compatibleVersion then
 	log('W', 'versionCheck', 'BeamMP is incompatible with BeamNG.drive version '..beamng_versionb)
 	log('M', 'versionCheck', 'Deactivating BeamMP mod.')
@@ -23,47 +23,47 @@ else
 end
 
 load("multiplayer/multiplayer")
-registerCoreModule("multiplayer/multiplayer")
+setExtensionUnloadMode("multiplayer/multiplayer", "manual")
 
 load("MPDebug")
-registerCoreModule("MPDebug")
+setExtensionUnloadMode("MPDebug", "manual")
 
 load("UI")
-registerCoreModule("UI")
+setExtensionUnloadMode("UI", "manual")
 
 load("MPModManager")
-registerCoreModule("MPModManager")
+setExtensionUnloadMode("MPModManager", "manual")
 
 load("MPCoreNetwork")
-registerCoreModule("MPCoreNetwork")
+setExtensionUnloadMode("MPCoreNetwork", "manual")
 
 load("MPConfig")
-registerCoreModule("MPConfig")
+setExtensionUnloadMode("MPConfig", "manual")
 
 load("MPGameNetwork")
-registerCoreModule("MPGameNetwork")
+setExtensionUnloadMode("MPGameNetwork", "manual")
 
 load("MPVehicleGE")
-registerCoreModule("MPVehicleGE")
+setExtensionUnloadMode("MPVehicleGE", "manual")
 
 load("MPInputsGE")
-registerCoreModule("MPInputsGE")
+setExtensionUnloadMode("MPInputsGE", "manual")
 
 load("MPElectricsGE")
-registerCoreModule("MPElectricsGE")
+setExtensionUnloadMode("MPElectricsGE", "manual")
 
 load("positionGE")
-registerCoreModule("positionGE")
+setExtensionUnloadMode("positionGE", "manual")
 
 load("MPPowertrainGE")
-registerCoreModule("MPPowertrainGE")
+setExtensionUnloadMode("MPPowertrainGE", "manual")
 
 load("MPUpdatesGE")
-registerCoreModule("MPUpdatesGE")
+setExtensionUnloadMode("MPUpdatesGE", "manual")
 
 load("nodesGE")
-registerCoreModule("nodesGE")
+setExtensionUnloadMode("nodesGE", "manual")
 
 -- load this file last so it can reference the others
 load("MPHelpers")
-registerCoreModule("MPHelpers")
+setExtensionUnloadMode("MPHelpers", "manual")

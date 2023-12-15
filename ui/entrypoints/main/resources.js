@@ -28,7 +28,8 @@ export default [
     ])
   ),
   ...onCondition(conditions.VUE_DEV,
-    {src:'http://localhost:9000/src/main.js', type: 'module'}
+    // main entrypoint from Vite
+    {src:'http://localhost:9000/src/main.js', type: 'module'},
   ),
   {src: `${paths.EXTERNAL_LIBS}/vue-i18n-next/vue-i18n.global.prod.js`}, // , defer: true},
   {src: `${paths.EXTERNAL_LIBS}/tiny-emitter/tinyemitter.js`, defer: true},

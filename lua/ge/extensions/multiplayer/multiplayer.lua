@@ -16,8 +16,6 @@ local M = {state={}}
 local originalGetDriverData
 local originalToggleWalkingMode
 local original_onInstabilityDetected
-local original_bigMapMode
-local original_bullettime
 
 
 --- Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.
@@ -60,15 +58,16 @@ end
 --- A custom function overwrite for if the map should be allowed to open.
 --- @return boolean True if the the map should be allowed to open?
 local function modified_bigMapMode()
-	bullettime.pause = nop
+	simTimeAuthority.pause = nop
 	return true --TODO: maybe add a check to stop map opening if no vehicle is present
 end
 
-original_bullettime = bullettime.pause
 
 --- Called when the Big Map is loaded by the user. 
-local function onBigMapActivated()
-	bullettime.pause = original_bullettime -- re-enable pausing function after map has been opened
+local function onBigMapActivated() -- don't pause the game when opening the Big Map
+	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
+		simTimeAuthority.pause(false)
+	end
 end
 
 
@@ -112,14 +111,12 @@ local function runPostJoin()
 		onInstabilityDetected = modified_onInstabilityDetected
 	end
 	onInstabilityDetected = modified_onInstabilityDetected
-	freeroam_bigMapMode.canBeActivated = modified_bigMapMode
 end
 
 
 --- This function is called when the user leaves a server as part of cleanup 
 local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
-	if original_bigMapMode then freeroam_bigMapMode.canBeActivated = original_bigMapMode end
 	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
 	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
 end
@@ -172,4 +169,6 @@ M.onBigMapActivated = onBigMapActivated
 
 M.runPostJoin = runPostJoin
 M.onServerLeave = onServerLeave
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
+
 return M

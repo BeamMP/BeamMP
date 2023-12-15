@@ -484,6 +484,7 @@ end
 --- Executes when the user or mod ends a mission/session (map) .
 -- @param mission table The mission object.
 local function onClientEndMission(mission)
+    pings = {}
     chatWindow.chatMessages = {}
     chatWindow.clearHistory()
 end

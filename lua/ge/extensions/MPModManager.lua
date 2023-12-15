@@ -319,5 +319,6 @@ M.onModActivated = onModActivated
 M.onServerLeave = onServerLeave
 M.onExit = cleanUpSessionMods
 M.onUpdate = onUpdate
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

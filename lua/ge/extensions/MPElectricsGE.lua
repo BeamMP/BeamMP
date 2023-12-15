@@ -77,6 +77,6 @@ end
 M.tick 			 = tick
 M.handle     	 = handle
 M.sendElectrics  = sendElectrics
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

@@ -352,5 +352,6 @@ M.quitMP              = quitMP
 M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
 M.getKeyState         = getKeyState         -- takes: string keyName
 M.onVehicleReady      = onVehicleReady
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

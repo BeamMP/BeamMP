@@ -290,6 +290,6 @@ M.hideUI				= hideUI
 
 M.packetSent = packetSent
 M.packetReceived = packetReceived
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

@@ -21,7 +21,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.9.6" -- the mod version
+local modVersion = "4.9.7" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -391,7 +391,8 @@ local function leaveServer(goBack)
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	local callback = nop
-	if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
+	--if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
+	callback = function() MPModManager.reloadLuaReloadWithDelay() end -- force lua reload every time until a proper fix is introduced
 	if goBack then endActiveGameMode(callback) end
 end
 
@@ -689,7 +690,7 @@ M.onDeserialized       = onDeserialized
 
 M.requestMap           = requestMap
 M.send                 = send
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 -- TODO: finish all this
 

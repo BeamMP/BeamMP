@@ -314,5 +314,6 @@ M.getConfig = getConfig
 M.setConfig = setConfig
 
 M.acceptTos = acceptTos
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

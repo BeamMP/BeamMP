@@ -149,5 +149,6 @@ M.setPosition       = setPosition
 M.setPing           = setPing
 M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

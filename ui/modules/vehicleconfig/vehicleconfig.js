@@ -12,52 +12,68 @@ angular.module('beamng.stuff')
     var res = []
     if(depth>200) return
 
-    for (var slotId in part.slots) {
-      var slot = part.slots[slotId]
-      var slotType = slot.type
-      var isHighlighted = true
-      var chosenPart = data.chosenParts[slotId]
+    var defaultHighlight = !data.partsHighlighted
 
-      if (data.partsHighlighted && data.partsHighlighted[chosenPart] !== undefined) {
-        isHighlighted = data.partsHighlighted[chosenPart]
+    for (var slotName in part.slotInfoUi) {
+      var slotInfo = part.slotInfoUi[slotName]
+      var isHighlighted = defaultHighlight
+      var chosenPart = data.chosenParts[slotName]
+
+      if (chosenPart === ''){
+        isHighlighted = false
+      }
+      else {
+        if (data.partsHighlighted && data.partsHighlighted[chosenPart] !== undefined) {
+          isHighlighted = data.partsHighlighted[chosenPart]
+        }
       }
 
       var element = {
-        type: slotType,
-        name: slot.description,
-        slot: slotId,
+        name: slotName,
+        description: slotInfo.description,
+
+        type: slotInfo.type, // slots1
+        allowTypes: slotInfo.allowTypes, // slots2
+        denyTypes: slotInfo.denyTypes, // slots2
+
         val: '',
         options: [],
         highlight: isHighlighted
       }
       var elOptions = element.options
       var optionCount = 0
-      if(data.slotMap[slotType] !== undefined) {
-        for (var i=0; i < data.slotMap[slotType].length; i++) {
-          var slotPartName = data.slotMap[slotType][i]
-          var slotPart = data.availableParts[slotPartName]
-          if(slotPart === undefined) {
-            console.error('slot part not found: ', slotPartName)
-          } else {
-            elOptions[elOptions.length] = {
-              name: slotPart.description,
-              isAuxiliary: slotPart.isAuxiliary,
-              val: slotPartName,
-              value: slotPart.value
-            }
-            optionCount++
-            if (data.chosenParts[slotId] == slotPartName || data.chosenParts[slotType] == slotPartName) {
-              element.val = slotPartName
-              if (slotPart.slots)
-                element.parts = _generateTreeBranch(data, slotPart, simple, depth + 1)
-              if (simple && element.parts !== undefined && element.parts.length === 0)
-                delete element.parts
+      let slotAllowedTypes = slotInfo.allowTypes || [slotInfo.type]
+      for (let st of slotAllowedTypes) {
+        if(data.slotMap[st] !== undefined) {
+          for (var i=0; i < data.slotMap[st].length; i++) {
+            var slotPartName = data.slotMap[st][i]
+            var slotPart = data.availableParts[slotPartName]
+            if(slotPart === undefined) {
+              console.error('slot part not found: ', slotPartName)
+            } else {
+              elOptions[elOptions.length] = {
+                name: slotPartName,
+                description: slotPart.description,
+                isAuxiliary: slotPart.isAuxiliary,
+                val: slotPartName,
+                value: slotPart.value
+              }
+              optionCount++
+              if (data.chosenParts[slotName] == slotPartName || data.chosenParts[st] == slotPartName) {
+                element.val = slotPartName
+                if (slotPart.slotInfoUi) {
+                  element.parts = _generateTreeBranch(data, slotPart, simple, depth + 1)
+                }
+                if (element.parts !== undefined && element.parts.length === 0) {
+                  delete element.parts
+                }
+              }
             }
           }
         }
       }
-      if(slot.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: 'Empty', val: '', value:'0'})
+      if(slotInfo.coreSlot === undefined && optionCount > 0) {
+        element.options.unshift({name: '<empty>', description: 'Empty', val: '', value:'0'})
       } else {
         element.open = true
       }
@@ -80,16 +96,28 @@ angular.module('beamng.stuff')
       if (!d) return res
 
       d.map((x) => {
-        res[x.slot] = x.val
+        res[x.name] = x.val
         if (x.parts) this.generateConfig(x.parts, res)
       })
 
       return res
     },
 
-    varValToDisVal: function (v) {
-      var vData = (v.val - v.min) / (v.max - v.min); //lua ratio
-      return Utils.roundDec( Utils.round(vData * (v.maxDis - v.minDis), v.stepDis) + v.minDis, v.stepDis.countDecimals() )
+    defaultVarValToDisVal: function (v) {
+      var valClamped = Utils.clamp(v.default, Math.min(v.min, v.max), Math.max(v.min, v.max))
+      var vData = (valClamped - v.min) / (v.max - v.min); //lua ratio
+      return Utils.roundDec(vData * (v.maxDis - v.minDis) + v.minDis, 7)
+    },
+
+    varValToDisVal: function (v, val) {
+      val = val === undefined ? v.val : val
+      var valClamped = Utils.clamp(val, Math.min(v.min, v.max), Math.max(v.min, v.max))
+      var vData = (valClamped - v.min) / (v.max - v.min); //lua ratio
+      return Utils.roundDec(vData * (v.maxDis - v.minDis) + v.minDis, 7)
+    },
+
+    isDisValDefault: function (v) {
+      return Math.abs(v.valDis - v.defaultValDis) <= 0.000001
     },
 
     getVariablesConfig: function (variables) {
@@ -97,7 +125,21 @@ angular.module('beamng.stuff')
       for (var i in variables) {
         var v = variables[i]
         var vDis = (v.valDis - v.minDis) / (v.maxDis - v.minDis)
-        v.val = Utils.roundDec( Utils.round(vDis * (v.max - v.min), v.step) + v.min, v.step.countDecimals() )
+        v.val = Utils.roundDec(vDis * (v.max - v.min) + v.min, 7)
+        configObj[v.name] = v.val
+      }
+      return configObj
+    },
+
+    getVariablesWithNonDefaultValuesConfig: function (variables) {
+      var configObj = {}
+      for (var i in variables) {
+        var v = variables[i]
+        if (!v.configDefaultDefined && this.isDisValDefault(v)) {
+          continue
+        }
+        var vDis = (v.valDis - v.minDis) / (v.maxDis - v.minDis)
+        v.val = Utils.roundDec(vDis * (v.max - v.min) + v.min, 7)
         configObj[v.name] = v.val
       }
       return configObj
@@ -108,7 +150,7 @@ angular.module('beamng.stuff')
 
       bngApi.engineLua('extensions.core_vehicle_partmgmt.getConfigList()', (configs) => {
         //var list = configs.map((elem) => elem.slice(0, -3))
-
+        configs = Array.isArray(configs) ? configs : []
         d.resolve(configs)
       })
 
@@ -126,7 +168,7 @@ angular.module('beamng.stuff')
         if (!a.parts) return -1
       }
 
-      return a.slot.localeCompare(b.slot)
+      return a.name.localeCompare(b.name)
     }
   }
 
@@ -160,11 +202,11 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // Multi Part Highlighting
 
   // function used to flatten objects
-  function processPart (obj, func) {
+  function iterateParts (obj, func) {
     func(obj)
     if (obj.parts) {
       obj.parts.forEach(function (parts) {
-        processPart(parts, func)
+        iterateParts(parts, func)
       })
     }
   }
@@ -172,7 +214,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // Highlights the selected part and its subparts
   vm.highlightParts = function(selectedPart) {
     // Highlight part and subparts
-    processPart(selectedPart, function (obj) {
+    iterateParts(selectedPart, function (obj) {
       obj.highlight = selectedPart.highlight
     })
 
@@ -181,10 +223,13 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     for (var key in vm.d.data) {
       var part = vm.d.data[key]
 
-      processPart(part, function(obj) {
-        flattenedParts[obj.val] = obj.highlight
+      iterateParts(part, function(obj) {
+        if (obj.val !== '') {
+          flattenedParts[obj.val] = obj.highlight
+        }
       })
     }
+    //console.log("highlightparts: ", flattenedParts)
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`)
   }
 
@@ -240,6 +285,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.selectSubParts = true
   vm.applyPartChangesAutomatically = true
   vm.simple = false
+  vm.displayNames = false
   vm.showAuxiliary = !beamng.shipping
   vm.partSearchString = ''
   vm.partSearchQuery = {}
@@ -253,11 +299,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.searchHistoryPosition = 0
   vm.searchHistoryBrowsing = false
 
-  var initConfig = null
-    , loadedConfig = null
-    , init = true
-
-
+  var currentConfig = null
 
   vm.emptyFront = function (option) {
     if (option.name === 'Empty') {
@@ -271,12 +313,13 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
     // Little hacky way to prevent the UI from automatically selecting a slot and thus highlighting a part, after the user selects a part
     // relatedTarget and sourceCapabilities will be null when the UI automatically selects the slot as the FocusEvent wasn't generated by user input
+    // In case this stops working, try using "event.currentTarget"
     if (event instanceof FocusEvent && event.relatedTarget === null && event.sourceCapabilities === null) return
 
     var flattenedParts = {}
 
     if (vm.selectSubParts) {
-      processPart(selectedPart, function (obj) {
+      iterateParts(selectedPart, function (obj) {
         flattenedParts[obj.val] = true
       })
     }
@@ -284,7 +327,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       flattenedParts[selectedPart.val] = true
     }
 
-    // console.debug(`Selecting part ${element} (subparts: ${vm.selectSubParts})`)
+    //console.log('selectParts: ', selectedPart, flattenedParts)
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.selectParts(${bngApi.serializeToLua(flattenedParts)})`)
   }
 
@@ -309,7 +352,6 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   $scope.settingsChanged = function() {
     bngApi.engineLua('settings.getValue("SkipGenerateLicencePlate")', (data) => {
       vm.skipLicGen = data
-      console.log("SkipGenerateLicencePlate="+ data)
     })
   }
   $scope.settingsChanged()
@@ -329,16 +371,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   vm.reset = function () {
-    if (loadedConfig && typeof(loadedConfig) == 'string') {
-      // console.debug(`Resetting to loaded configuration`, data)
-      vm.load(loadedConfig)
-    } else {
-      $scope.$evalAsync(function () {
-        calcTreesync(initConfig)
-        var newConfig = VehicleConfig.generateConfig(vm.d.data)
-        bngApi.engineLua(`extensions.core_vehicle_partmgmt.setPartsConfig(${bngApi.serializeToLua(newConfig)})`)
-      })
-    }
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.resetPartsToLoadedConfig()`)
   }
   // --------------------------------------- BEAMMP --------------------------------------- //
 
@@ -348,10 +381,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   // --------------------------------------- BEAMMP --------------------------------------- //
 
   function calcTreesync (config) {
-    if (init) {
-      init = false
-      initConfig = config
-    }
+    currentConfig = config
     vm.partsChanged = false
     //console.log("config = ", config)
 
@@ -364,6 +394,16 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       var v = config.variables[o]
       if (!variable_categories[v.category])
         variable_categories[v.category] = true
+      //v.defaultValDis = VehicleConfig.defaultVarValToDisVal(v)
+      var defaultVal = config.defaults.vars[o]
+      if (defaultVal === undefined) {
+        defaultVal = v.default
+        v.configDefaultDefined = false
+      }
+      else {
+        v.configDefaultDefined = true
+      }
+      v.defaultValDis = VehicleConfig.varValToDisVal(v, defaultVal)
       v.valDis = VehicleConfig.varValToDisVal(v)
       configArray.push(v)
     }
@@ -394,7 +434,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
   // applies filters against mod info
   function filterPartByName(partName, queryArgs) {
-    var part = initConfig.availableParts[partName]
+    var part = currentConfig.availableParts[partName]
     if(!part) return
 
     var modMatch = false
@@ -419,12 +459,14 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     else if(queryArgs['mode'] == 'and') matched = true
 
     if(queryArgs['name'] && treeNode.name !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.name.toLowerCase().indexOf(queryArgs['name']) != -1)
-    if(queryArgs['slot'] && treeNode.slot !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.slot.toLowerCase().indexOf(queryArgs['slot']) != -1)
-    //if(!matched && treeNode.slot !== undefined) matched = matched || treeNode.slot.toLowerCase().indexOf(queryArgs) != -1
+    if(queryArgs['description'] && treeNode.description !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.description.toLowerCase().indexOf(queryArgs['description']) != -1)
+    if(queryArgs['slot'] && treeNode.name !== undefined) matched = queryModes[queryArgs['mode']](matched, treeNode.name.toLowerCase().indexOf(queryArgs['slot']) != -1)
+    //if(!matched && treeNode.name !== undefined) matched = matched || treeNode.name.toLowerCase().indexOf(queryArgs) != -1
     if(queryArgs['name'] && !matched) {
       for (var optIdx in treeNode.options) {
         var option = treeNode.options[optIdx]
         if(option.name !== undefined) matched = queryModes[queryArgs['mode']](matched, option.name.toLowerCase().indexOf(queryArgs['name']) != -1)
+        if(option.description !== undefined) matched = queryModes[queryArgs['mode']](matched, option.description.toLowerCase().indexOf(queryArgs['name']) != -1)
       }
     }
     if(queryArgs['partname'] && !matched) {
@@ -529,7 +571,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   }
 
   vm.recalcTree = function () {
-    calcTree(initConfig)
+    calcTree(currentConfig)
   }
   vm.startSearch = function() {
     vm.searchMode = true
@@ -636,7 +678,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.write = function () {
     setTimeout(() => {
       // make async so html has more time to update render parts
-      var vars = VehicleConfig.getVariablesConfig(vm.d.variables)
+      var vars = VehicleConfig.getVariablesWithNonDefaultValuesConfig(vm.d.variables)
       bngApi.engineLua(`extensions.core_vehicle_partmgmt.setConfigVars(${bngApi.serializeToLua(vars)})`)
     })
   }
@@ -646,10 +688,18 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       autoUpdateVariables()
   }
 
+  vm.isDisValDefault = function(v) {
+    return VehicleConfig.isDisValDefault(v)
+  }
+
+  vm.resetVar = function (v) {
+    v.valDis = v.defaultValDis
+    vm.tuningVariablesChanged(); // got to call this, since the change didn't come from the inputs.
+  }
+
   vm.resetVars = function () {
     vm.d.variables.forEach((x) => {
-      x.val = x.default
-      x.valDis = VehicleConfig.varValToDisVal(x)
+      x.valDis = x.defaultValDis
     })
     vm.tuningVariablesChanged(); // got to call this, since the change didn't come from the inputs.
   }
@@ -663,8 +713,21 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
       for (var o in config.variables) {
         var v = config.variables[o]
+        //if the variable wants to be hidden in the UI, skip it
+        if (v.hideInUI === true)
+           continue;
         if (!variable_categories[v.category])
           variable_categories[v.category] = true
+        //v.defaultValDis = VehicleConfig.defaultVarValToDisVal(v)
+        var defaultVal = config.defaults.vars[o]
+        if (defaultVal === undefined) {
+          defaultVal = v.default
+          v.configDefaultDefined = false
+        }
+        else {
+          v.configDefaultDefined = true
+        }
+        v.defaultValDis = VehicleConfig.varValToDisVal(v, defaultVal)
         v.valDis = VehicleConfig.varValToDisVal(v)
         configArray.push(v)
       }
@@ -678,6 +741,36 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 
   $scope.$on('VehicleFocusChanged', () => bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()'))
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
+
+  // advanced wheel debug
+  vm.awdData = null
+  vm.awdShow = false
+
+  var streamsList = ['advancedWheelDebugData']
+  StreamsManager.add(streamsList)
+
+  function register() {
+    bngApi.activeObjectLua('extensions.advancedwheeldebug.registerDebugUser("advancedWheelDebugApp", true)')
+  }
+
+  register()
+
+  $scope.$on('streamsUpdate', function (event, data) {
+    $scope.$evalAsync(function () {
+      vm.awdData = data.advancedWheelDebugData && data.advancedWheelDebugData.length > 0 ? data.advancedWheelDebugData : null
+      if (vm.awdShow && !vm.awdData)
+        vm.awdShow = false
+    })
+  })
+
+  $scope.$on('VehicleReset', register)
+  $scope.$on('VehicleChange', register)
+
+  $scope.$on('$destroy', function () {
+    StreamsManager.remove(streamsList)
+    bngApi.activeObjectLua('extensions.advancedwheeldebug.registerDebugUser("advancedWheelDebugApp", false)')
+  })
+  // /advanced wheel debug
 }])
 
 .controller('Vehicleconfig_color', ["$scope", function ($scope) {
@@ -826,8 +919,17 @@ function ($scope) {
   let vm = this
 
   vm.state = {}
+  vm.geState = {physicsEnabled: true, debugSpawnEnabled: false}
   vm.cameraSpeed = 0
   vm.canApplyState = true
+
+  bngApi.engineLua("simTimeAuthority.getPause()", (state) => {
+    vm.geState.physicsEnabled = !state
+  })
+
+  bngApi.engineLua("core_vehicle_manager.getDebug()", (state) => {
+    vm.geState.debugSpawnEnabled = !!state
+  })
 
   vm.update = () => {
     bngApi.engineLua("core_camera.getSpeed()", (speed) => {
@@ -846,8 +948,12 @@ function ($scope) {
     }
   }
 
-  vm.showSelectedPartMesh = () => {
-    bngApi.activeObjectLua(`bdebug.showSelectedPartMesh()`)
+  vm.partSelectedChanged = () => {
+    bngApi.activeObjectLua(`bdebug.partSelectedChanged()`)
+  }
+
+  vm.showOnlySelectedPartMeshChanged = () => {
+    bngApi.activeObjectLua(`bdebug.showOnlySelectedPartMeshChanged()`)
   }
 
   vm.setMeshVisibility = (vis) => {
@@ -876,7 +982,11 @@ function ($scope) {
   bngApi.activeObjectLua(`bdebug.requestState()`)
 
   $scope.$on('physicsStateChanged',  (_, state) => {
-    vm.state.physicsEnabled = !!state
+    vm.geState.physicsEnabled = !!state
+  })
+
+  $scope.$on('debugSpawnChanged',  (_, state) => {
+    vm.geState.debugSpawnEnabled = !!state
   })
 
   vm.setCameraFov = () => {
@@ -897,7 +1007,8 @@ function ($scope) {
       ],
 
       toggleGroup_1: [
-        { label: 'ui.debug.activatePhysics', key: 'physicsEnabled', onChange: () => { bngApi.engineLua(`simTimeAuthority.togglePause()`) } }
+        { label: 'ui.debug.activatePhysics', key: 'physicsEnabled', onChange: () => { bngApi.engineLua(`simTimeAuthority.togglePause()`) } },
+        { label: 'ui.debug.debugSpawnEnabled', key: 'debugSpawnEnabled', onChange: () => { bngApi.engineLua(`core_vehicle_manager.toggleDebug()`) } }
       ],
     },
 

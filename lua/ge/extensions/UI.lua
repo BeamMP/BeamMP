@@ -535,5 +535,6 @@ M.toggleChat = toggleChat
 M.onClientEndMission = onClientEndMission
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

@@ -16,6 +16,13 @@ local hasMods = false
 
 --TODO: build handler for repo mod downloads
 
+function queueExtensionToLoad(extension)  -- temporary workaround for mods still using that function
+	guihooks.trigger("toastrMsg", {type="error", title="queueExtensionToLoad", msg="This function is deprecated, please use setExtensionUnloadMode() instead."})
+	log('E','queueExtensionToLoad', 'This function is deprecated, please use setExtensionUnloadMode() instead.')
+	setExtensionUnloadMode(extension, 'manual')
+end
+
+
 local function unloadLocales()
 	FS:unmount('/temp/beammp/beammp_locales.zip')
 	FS:directoryRemove('/temp/beammp')
@@ -169,7 +176,9 @@ local function cleanUpSessionMods()
 	end
 	log('M', "cleanUpSessionMods", count.." Mods cleaned up")
 	log('M', "cleanUpSessionMods", "Unloading extensions...")
-	unloadGameModules()
+	--dump(getModList())
+	-- TODO: Need to find an alternative for this...
+	--unloadGameModules()
 end
 
 --- Set the servers mods as a string in Lua for loading and checking
@@ -217,8 +226,9 @@ local function extensionLoader()
 			--log('W', 'extensionLoader', "Source is BeamMP! ".. debug)
 		original_registerCoreModule(modulePath)
 		elseif string.match(debug, "modscript") then
-			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to queueExtensionToLoad " .. debug)
-			queueExtensionToLoad(modulePath)
+			log('W', 'extensionLoader', "Modscript attempting to register a core module! Falling back to setExtensionUnloadMode(arg, \"auto\") " .. debug)
+			extensionName = extensions.luaPathToExtName(modulePath)
+			setExtensionUnloadMode(extensionName, "auto")
 		else
 			log('W', 'extensionLoader', "Source is not BeamMP or a modscript, running original function! " .. debug)
 			original_registerCoreModule(modulePath)
@@ -253,7 +263,7 @@ end
 local function onExtensionLoaded()
 	loadLocales()
 	cleanUpSessionMods()
-	extensionLoader()
+	--extensionLoader()
 	--M.replaceStuff()
 end
 
@@ -261,7 +271,7 @@ end
 -- We use this to cleanup our locales and restore core module defintions
 local function onExtensionUnloaded() -- restore functions back to their default values
 	unloadLocales()
-	registerCoreModule = original_registerCoreModule and original_registerCoreModule
+	--registerCoreModule = original_registerCoreModule and original_registerCoreModule
 	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
 end
 
@@ -309,5 +319,6 @@ M.onModActivated = onModActivated
 M.onServerLeave = onServerLeave
 M.onExit = cleanUpSessionMods
 M.onUpdate = onUpdate
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

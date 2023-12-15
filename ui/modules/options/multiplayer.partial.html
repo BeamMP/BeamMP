@@ -12,12 +12,14 @@
   <md-checkbox ng-model="options.data.values.showAdvancedMPOptions" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
+<!--
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
 <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableLuaReload' |
     translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableLuaReload.tooltip' | translate }}</md-tooltip>
   <md-checkbox ng-model="options.data.values.disableLuaReload" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
+-->
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
   <p><span class="mp-setting-highlight">{{:: 'ui.options.multiplayer.experimental' | translate }}</span> {{:: 'ui.options.multiplayer.disableInstabilityPausing' |

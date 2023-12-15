@@ -186,5 +186,6 @@ local function onExtensionLoaded()
 end
 
 M.onExtensionLoaded = onExtensionLoaded
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

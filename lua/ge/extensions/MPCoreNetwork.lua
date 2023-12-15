@@ -690,7 +690,7 @@ M.onDeserialized       = onDeserialized
 
 M.requestMap           = requestMap
 M.send                 = send
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 -- TODO: finish all this
 

@@ -97,6 +97,7 @@ M.tick       = tick
 M.handle     = handle
 M.sendNodes  = sendNodes
 M.applyNodes = applyNodes
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 M.sendBreakGroups  = sendBreakGroups
 

@@ -1990,5 +1990,6 @@ M.queryRoadNodeToPosition  = queryRoadNodeToPosition  -- takes: vec3 target posi
 M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

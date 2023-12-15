@@ -69,6 +69,6 @@ M.tick        = tick
 M.handle      = handle
 M.sendInputs  = sendInputs
 M.applyInputs = applyInputs
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

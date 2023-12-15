@@ -81,7 +81,7 @@ end
 
 M.onPlayerConnect = onPlayerConnect
 M.onUpdate        = onUpdate
-
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 
 return M

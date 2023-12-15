@@ -16,6 +16,8 @@ local chatWindow = require("multiplayer.ui.chat")
 local optionsWindow = require("multiplayer.ui.options")
 local playerListWindow = require("multiplayer.ui.playerList")
 require('/common/extensions/ui/flowgraph/editor_api')(M)
+local gui_module = require("ge/extensions/editor/api/gui")
+local gui = {setupEditorGuiTheme = nop}
 local imgui = ui_imgui
 local imu = require('ui/imguiUtils')
 local utils = require("multiplayer.ui.utils")
@@ -228,6 +230,8 @@ end
 --- Render the IMGUI chat window and playerlist windows + the settings for them.
 local function renderWindow()
     if not configLoaded then return end
+
+    gui.setupWindow("BeamMP Chat")
 
     imgui.PushStyleVar2(imgui.StyleVar_WindowMinSize, (collapsed and imgui.ImVec2(lastSize.x, 20)) or M.windowMinSize)
 
@@ -486,6 +490,10 @@ end
 -- We use this to load our UI and config
 local function onExtensionLoaded()
     log("D", "MPInterface", "Loaded")
+
+	gui_module.initialize(gui)
+	gui.registerWindow("BeamMP Chat", imgui.ImVec2(333, 266))
+	gui.showWindow("BeamMP Chat")
 
     loadConfig()
     optionsWindow.onInit(M.settings)

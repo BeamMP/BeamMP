@@ -35,7 +35,7 @@ function($scope, $state, $timeout, $document) {
 	};
 
 	$scope.openExternalLink = function(url) {
-		bngApi.engineLua(`openWebBrowser("`+url+`")`);
+		bngApi.engineLua(`MPCoreNetwork.mpOpenUrl("`+url+`")`);
 	}
 
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
@@ -1223,10 +1223,6 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 
 function openExternalLink(url){
 	bngApi.engineLua(`mp_open_url("`+url+`")`);
-}
-
-function openForumLink(){
-	openExternalLink("http://forum.beammp.com");
 }
 
 function getServerInfoHTML(d) {

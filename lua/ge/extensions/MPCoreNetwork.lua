@@ -22,6 +22,7 @@ local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
 local modVersion = "4.9.7" -- the mod version
+local proxyPort = ""
 -- server
 
 local serverList -- server list JSON
@@ -150,6 +151,12 @@ local function getLauncherVersion()
 	return "2.0" --launcherVersion
 end
 
+-- Returns the port for the launcher proxy
+-- @return string port The port number of proxy created by the launcher.
+local function getProxyPort()
+	return proxyPort
+end
+
 --- Returns true or false if the user is logged in.
 -- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
@@ -182,6 +189,12 @@ local function logout()
 	log('M', 'logout', 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
+end
+
+--- Tells the Launcher to open a link in the web browser. This is restricted to beammp.com and discord.gg only domains
+-- @param link string The the link in question to open. Note: Must be https.
+local function mpOpenUrl(link)
+	send('O:'..link)
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
@@ -466,6 +479,7 @@ local HandleNetwork = {
 	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
+	['P'] = function(params) proxyPort = params end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['Z'] = function(params) launcherVersion = params; end,
 }
@@ -678,6 +692,8 @@ M.onClientStartMission = onClientStartMission
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList
+M.mpOpenUrl            = mpOpenUrl
+M.getProxyPort         = getProxyPort
 -- server
 M.connectToServer      = connectToServer
 M.leaveServer          = leaveServer

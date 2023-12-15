@@ -104,6 +104,7 @@ local function renderGeneral()
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pFadeTime = imgui.FloatPtr(UI.settings.window.fadeTime)
+        imgui.PushItemWidth(120)
         if imgui.InputFloat("##Fade time", pFadeTime, 0.1, 1, "%.1f") then
             if pFadeTime[0] < 0.1 then
                 pFadeTime[0] = 0.1
@@ -111,6 +112,7 @@ local function renderGeneral()
 
             UI.settings.window.fadeTime = pFadeTime[0]
         end
+        imgui.PopItemWidth()
 
         -- Fade when collapsed
         imgui.Text("Fade when collapsed")

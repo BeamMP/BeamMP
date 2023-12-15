@@ -55,14 +55,6 @@ local function modified_onInstabilityDetected(jbeamFilename)
 end
 
 
---- A custom function overwrite for if the map should be allowed to open.
---- @return boolean True if the the map should be allowed to open?
-local function modified_bigMapMode()
-	simTimeAuthority.pause = nop
-	return true --TODO: maybe add a check to stop map opening if no vehicle is present
-end
-
-
 --- Called when the Big Map is loaded by the user. 
 local function onBigMapActivated() -- don't pause the game when opening the Big Map
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
@@ -104,7 +96,6 @@ end
 local function runPostJoin()
 	--save the original functions so they can be restored after leaving an mp session
 	original_onInstabilityDetected = onInstabilityDetected
-	original_bigMapMode = freeroam_bigMapMode.canBeActivated
 
 	--replace the functions
 	if settings.getValue("disableInstabilityPausing") then
@@ -166,7 +157,6 @@ end
 M.onUpdate          = onUpdate
 M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
-
 M.runPostJoin = runPostJoin
 M.onServerLeave = onServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

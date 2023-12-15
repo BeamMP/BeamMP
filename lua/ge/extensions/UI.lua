@@ -370,10 +370,12 @@ local function loadConfig()
         config:write(jsonData)
 
         log("I", "chat", "Default config created")
+		config:close()
     end
 
     -- Read config
-    local jsonData = config:read("*all")
+	config = io.open("./settings/BeamMP/chat.json", "r")
+    local jsonData = config:read("*a")
     config:close()
 
     local settings = jsonDecode(jsonData)
@@ -490,7 +492,6 @@ end
 -- We use this to load our UI and config
 local function onExtensionLoaded()
     log("D", "MPInterface", "Loaded")
-
 	gui_module.initialize(gui)
 	gui.registerWindow("BeamMP Chat", imgui.ImVec2(333, 266))
 	gui.showWindow("BeamMP Chat")

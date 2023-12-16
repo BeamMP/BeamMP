@@ -122,6 +122,24 @@
   <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
+<md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.unicycleTitle' | translate }}</h3></p></md-list-item>
+
+<md-list-item layout class="bng-short-select-item">
+  <p flex="60">{{:: 'ui.options.multiplayer.unicycleDefault' | translate}}</p>
+  <md-select aria-label="_" flex ng-model="options.data.values.unicycle_pc" ng-change="options.applyState()">
+    <md-select-label style="width:100%;"></md-select-label>
+    <md-option md-no-ink ng-repeat="(key, value) in options.data.values.unicycleConfigs" ng-value="key">
+      {{key}}
+    </md-option>
+  </md-select>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.unicycleAutoSave' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.unicycleAutoSave.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.unicycleAutoSave" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
 
 <md-divider></md-divider>
 <md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.blobsTitle' | translate }}</h3></p></md-list-item>

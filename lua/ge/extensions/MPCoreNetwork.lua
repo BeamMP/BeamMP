@@ -194,7 +194,7 @@ end
 --- Tells the Launcher to open a link in the web browser. This is restricted to beammp.com and discord.gg only domains
 -- @param link string The the link in question to open. Note: Must be https.
 local function mpOpenUrl(link)
-	send('O:'..link)
+	send('O'..link)
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
@@ -579,6 +579,7 @@ onLauncherConnected = function()
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version
+	send('P') -- resquest the proxy port
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')

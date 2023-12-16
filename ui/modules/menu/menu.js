@@ -142,7 +142,7 @@ angular.module('beamng.stuff')
   $scope.inCareer = false;
   $scope.isMPSession = false;
   bngApi.engineLua(`{
-    gameContext = core_gameContext.getGameContext(),
+    gameContext = core_gameContext and core_gameContext.getGameContext(),
     isCareerActive = career_career.isActive(),
     isMPSession = MPCoreNetwork.isMPSession()
   }`, data => {

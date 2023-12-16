@@ -46,6 +46,14 @@
   <md-checkbox ng-model="options.data.values.enableNewChatMenu" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.enablePosSmoother' |
+    translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.enablePosSmoother.tooltip' | translate }}
+  </md-tooltip>
+  <md-checkbox ng-model="options.data.values.enablePosSmoother" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
 <md-list-item md-no-ink>
   <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>

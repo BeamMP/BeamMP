@@ -198,9 +198,10 @@ local function onExtensionLoaded()
 	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
 	
 	M.translate                = MPTranslate
-	M.b64encode                = b64encode
-	M.b64decode                = b64decode
 end
+
+M.b64encode                = b64encode
+M.b64decode                = b64decode
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

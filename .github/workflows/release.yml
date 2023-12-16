@@ -24,7 +24,7 @@ jobs:
       working-directory: ${{ github.workspace }}
     - name: Zip specific files and folders
       run: |
-        zip -r BeamMP.zip icons lua mp_locales scripts settings ui vehicles CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE.md README.md
+        zip -r BeamMP.zip icons lua mp_locales scripts settings ui vehicles CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE.md README.md NOTICES.md
       working-directory: ${{ github.workspace }}
     - name: Generate SHA-256 hash
       id: sha256

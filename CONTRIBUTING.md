@@ -6,11 +6,14 @@ Reading and following these guidelines will help us make the contribution proces
 
 ## Quicklinks
 
-* [Code of Conduct](#code-of-conduct)
-* [Getting Started](#getting-started)
-    * [Issues](#issues)
-    * [Pull Requests](#pull-requests)
-* [Getting Help](#getting-help)
+- [Contributing to BeamMP projects](#contributing-to-beammp-projects)
+  - [Quicklinks](#quicklinks)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+    - [External Requirements](#external-requirements)
+    - [Issues](#issues)
+    - [Pull Requests](#pull-requests)
+  - [Getting Help](#getting-help)
 
 ## Code of Conduct
 
@@ -24,6 +27,11 @@ Contributions are made to this repo via Issues and Pull Requests (PRs). A few ge
 - Search for existing Issues and PRs before creating your own.
 - We work hard to makes sure issues are handled in a timely manner but, depending on the impact, it could take a while to investigate the root cause. A friendly ping in the comment thread to the submitter or a contributor can help draw attention if your issue is blocking.
 - If you've never contributed before, see [the first timer's guide on our wiki]() for resources and tips on how to get started.
+
+### External Requirements
+
+The BeamMP Mod ships with the Beamlings content produced by @VanilleVaschnille. This content is under its own licensing and as such is not included as part of this repository.
+You will need to add this content to the mod source code for development OR simply not include it if you are not going to be affected by the unicycle not showing up.
 
 ### Issues
 

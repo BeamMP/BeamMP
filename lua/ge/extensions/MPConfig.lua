@@ -17,6 +17,50 @@ local M = {}
 local Nickname = ""
 local PlayerServerID = -1
 
+--- Returns a table of all to the disk saved unicycle configs
+-- @treturn[1] table eg. {"MyFavConfig": "MyFavConfig.pc"}
+-- @usage INTERNAL ONLY / GAME SPECIFIC
+local function getUnicycleConfigs()
+	-- Load the unicycle configurations:
+	local pcfiles = FS:findFiles("/vehicles/unicycle/", "*.pc", 0, true, false)
+	local pcFileRegex = "^/vehicles/unicycle/(.*)%.pc"
+	local tmp = {}
+
+	for _, filename in ipairs(pcfiles) do
+		local file = filename:match(pcFileRegex)
+		if file ~= "beammp_default" then
+			tmp[file] = file..'.pc'
+		end
+	end
+
+	if tmp ~= settings.getValue('unicycleConfigs') then settings.setValue('unicycleConfigs', tmp) end -- multiplayer.partial ui will read this value
+	return tmp
+end
+
+--- Sets a new default Unicycle
+-- @tparam string configFileName eg. "MyFavConfig" not "MyFavConfig.pc"
+-- @treturn[1] true if Success
+-- @treturn[2] nil if Failure
+local function setDefaultUnicycle(configFileName)
+	local configFileName = configFileName .. ".pc"
+	local handle = io.open("vehicles/unicycle/" .. configFileName, "r")
+	if handle == nil then
+		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/' .. configFileName .. '" in read mode.')
+		return nil
+	end
+	local newconfig = handle:read("*all")
+	handle:close()
+	
+	local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
+	if handle == nil then
+		log('I', "setDefaultUnicycle", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
+		return nil
+	end
+	handle:write(newconfig)
+	handle:close()
+	return true
+end
+
 local defaultSettings = {
 	autoSyncVehicles = true, nameTagShowDistance = true, enableBlobs = true, showSpectators = true, nametagCharLimit = 32,
 	-- queue system
@@ -30,6 +74,10 @@ local defaultSettings = {
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
 
+	-- unicycle configurations
+	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = false,
+	--unicycle_pc = nil, -- temp value introduced to share the user selected default unicycle config from the multiplayer.partial ui to MPConfig.setDefaultUnicycle()
+
 	disableInstabilityPausing = true,
 
 	launcherPort = 4444
@@ -39,10 +87,11 @@ local defaultSettings = {
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onExtensionLoaded()
 	for k,v in pairs(defaultSettings) do
-		if settings.getValue(k) == nil then settings.setValue(k, v) end
+		if settings.getValue(k) == nil or k == 'unicycleConfigs' then settings.setValue(k, v) end
 		--settings.impl.defaults[k] = { 'local', v }
 		--settings.impl.defaultValues[k] = v
 	end
+	dump(defaultSettings)
 	settings.impl.invalidateCache()
 end
 
@@ -233,14 +282,28 @@ local function onDeserialized(data)
 	PlayerServerID = data.PlayerServerID
 end
 
+--- Multiplayer Options <-> Lua data bridge
+-- @usage INTERNAL ONLY / GAME SPECIFIC
+local function onSettingsChanged()
+	local unicycle_pc = settings.getValue("unicycle_pc")
+	if unicycle_pc ~= nil then
+		setDefaultUnicycle(unicycle_pc)
+		settings.setValue("unicycle_pc", nil) -- reset to prevent reapply on every setting change
+		guihooks.trigger('toastrMsg', {type="info", title = "Unicycle", msg = MPTranslate("ui.options.multiplayer.unicycleOnSwitch") .. " " .. unicycle_pc, config = {timeOut = 3000}})
+	end
+	getUnicycleConfigs()
+end
+
 -- Events
 M.onSerialize = onSerialize
 M.onDeserialized = onDeserialized
 M.onExtensionLoaded = onExtensionLoaded
+M.onSettingsChanged = onSettingsChanged
 
 -- Functions
 M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
+M.setDefaultUnicycle = setDefaultUnicycle
 
 M.getNickname = getNickname
 M.setNickname = setNickname

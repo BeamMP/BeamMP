@@ -3,6 +3,8 @@
     "ui.options.multiplayer": "Multiplayer",
     "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
     "ui.options.multiplayer.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
+    "ui.options.multiplayer.enablePosSmoother": "Enable pos update smoother",
+    "ui.options.multiplayer.enablePosSmoother.tooltip": "Tries to buffout pos updates from players with unstable connections",
     "ui.options.multiplayer.autoSyncVehicles": "Enable auto part sync",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "If enabled, your vehicle parts will automatically be synced to other players after a few seconds",
     "ui.options.multiplayer.queueSpawnEdit": "Enable player vehicle update/edit queuing",

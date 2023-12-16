@@ -73,6 +73,8 @@ local defaultSettings = {
 
 	-- show custom vehicles in vehicle selector
 	showPcs = true,
+	
+	enablePosSmoother = false, -- experimental
 
 	-- unicycle configurations
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = true,

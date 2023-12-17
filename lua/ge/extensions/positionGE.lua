@@ -29,6 +29,7 @@ local actualSimSpeed = 1
 			[1] = next index
 			[2] = max array buffer size
 			[3..[2] + 2] = float
+		[median_timer] = hptimerstruct
 		[executed] = bool
 ]]
 local POSSMOOTHER = {}
@@ -171,6 +172,7 @@ local function handle(rawData)
 				new.executed = false
 				new.median = 32
 				new.median_array = {3,10,32,32,32,32,32,32,32,32,32,32}
+				new.median_timer = TIMER()
 				POSSMOOTHER[serverVehicleID] = new
 				
 			elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
@@ -181,14 +183,14 @@ local function handle(rawData)
 				POSSMOOTHER[serverVehicleID].executed = false
 				
 			else
-				local executed_last = POSSMOOTHER[serverVehicleID].executed_last:stop()
+				local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
 				POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
-				if executed_last > 30 then
+				if median_time > 15 then -- there can be lower intervals then 32ms, so we cover that
 					POSSMOOTHER[serverVehicleID].executed = false
-					if executed_last < 80 then
+					if median_time < 80 then
 						local median_array = POSSMOOTHER[serverVehicleID].median_array
 						local next_index = median_array[1]
-						median_array[next_index] = executed_last
+						median_array[next_index] = median_time
 						median_array[1] = next_index + 1
 						if next_index == median_array[2] + 2 then
 							median_array[1] = 3

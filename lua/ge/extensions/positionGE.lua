@@ -122,7 +122,7 @@ local function applyPos(decoded, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 	
-	toCsv(serverVehicleID) -- debug
+	--toCsv(serverVehicleID) -- debug
 
 	local simspeedFraction = 1/simTimeAuthority.getReal()
 
@@ -272,7 +272,7 @@ end
 local function onSettingsChanged()
 	if not settings.getValue("enablePosSmoother") then -- nil/false
 		for serverVehicleID, _ in pairs(POSSMOOTHER) do
-			POSSMOOTHER[serverVehicleID] = {}
+			POSSMOOTHER[serverVehicleID] = nil
 		end
 	end
 end

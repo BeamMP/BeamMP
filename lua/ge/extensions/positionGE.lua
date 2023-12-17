@@ -15,6 +15,7 @@ local M = {}
 local actualSimSpeed = 1
 
 local postick = {} -- serverVehicleID|tobedocumented
+local TIMER = (HighPerfTimer or hptimer) -- game own
 
 local DEBUG_TO_CSV = nil
 local DEBUG_TABLE = {}
@@ -149,7 +150,7 @@ local function handle(rawData)
 			if postick[serverVehicleID] == nil then
 				postick[serverVehicleID] = {}
 				postick[serverVehicleID].data = decoded
-				postick[serverVehicleID].executed_last = os.clock()
+				postick[serverVehicleID].executed_last = TIMER()
 			elseif postick[serverVehicleID].data.tim > decoded.tim then
 				-- nothing, outdated data
 			elseif decoded.tim < 1 then -- vehicle may have been reloaded
@@ -204,13 +205,12 @@ local function getActualSimSpeed()
 end
 
 local function onPreRender(dt)
-	local current_time = os.clock()
 	-- ensuring that there is atleast a difference of 37ms between each pos packet execution
 	for serverVehicleID, data in pairs(postick) do
-		local timedif = (current_time - data.executed_last) * 1000
+		local timedif = data.executed_last:stop()
 		if not data.executed and timedif >= 32 then
 			applyPos(data.data, serverVehicleID)
-			postick[serverVehicleID].executed_last = current_time
+			postick[serverVehicleID].executed_last = TIMER()
 			postick[serverVehicleID].executed = true
 			
 		elseif timedif > 60000 then -- vehicle potentially removed. rem entry

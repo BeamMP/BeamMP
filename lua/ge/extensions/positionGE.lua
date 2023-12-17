@@ -193,7 +193,8 @@ local function smoothPosExec(serverVehicleID, decoded)
 					for i = 3, median_array[2] + 2 do
 						median = median + median_array[i]
 					end
-					POSSMOOTHER[serverVehicleID].median = median / median_array[2]
+					-- median + X to artificially count in fluctuations
+					POSSMOOTHER[serverVehicleID].median = (median / median_array[2]) + 3
 				end
 				POSSMOOTHER[serverVehicleID].median_array = median_array
 			end

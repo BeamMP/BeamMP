@@ -25,6 +25,10 @@ local actualSimSpeed = 1
 			[ping] = float
 		[executed_last] = hptimerstruct
 		[median] = float
+		[median_array] = array
+			[1] = next index
+			[2] = max array buffer size
+			[3..[2] + 2] = float
 		[executed] = bool
 ]]
 local POSSMOOTHER = {}
@@ -166,6 +170,7 @@ local function handle(rawData)
 				new.executed_last = TIMER()
 				new.executed = false
 				new.median = 32
+				new.median_array = {3,10,32,32,32,32,32,32,32,32,32,32}
 				POSSMOOTHER[serverVehicleID] = new
 				
 			elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
@@ -179,8 +184,22 @@ local function handle(rawData)
 				POSSMOOTHER[serverVehicleID].data = decoded
 				POSSMOOTHER[serverVehicleID].executed = false
 				
-				if POSSMOOTHER[serverVehicleID].executed_last:stop() < 80 then
-					POSSMOOTHER[serverVehicleID].median = (POSSMOOTHER[serverVehicleID].median + POSSMOOTHER[serverVehicleID].executed_last:stop()) / 2
+				local executed_last = POSSMOOTHER[serverVehicleID].executed_last:stop()
+				if executed_last > 30 and executed_last < 80 then
+					local median_array = POSSMOOTHER[serverVehicleID].median_array
+					local next_index = median_array[1]
+					median_array[next_index] = executed_last
+					median_array[1] = next_index + 1
+					if next_index == median_array[2] + 2 then
+						median_array[1] = 3
+					end
+					
+					local median = 0
+					for i = 3, median_array[2] + 2 do
+						median = median + median_array[i]
+					end
+					POSSMOOTHER[serverVehicleID].median = median / median_array[2]
+					POSSMOOTHER[serverVehicleID].median_array = median_array
 				end
 			end
 		else

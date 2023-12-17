@@ -14,7 +14,20 @@ local M = {}
 
 local actualSimSpeed = 1
 
-local postick = {} -- serverVehicleID|tobedocumented
+--[[
+	["X-Y"] = table
+		[data] = table
+			[pos] = array[3]
+			[rot] = array[4]
+			[vel] = array[3]
+			[rvel] = array[4]
+			[tim] = float
+			[ping] = float
+		[executed_last] = hptimerstruct
+		[median] = float
+		[executed] = bool
+]]
+local POSSMOOTHER = {}
 local TIMER = (HighPerfTimer or hptimer) -- game own
 
 local DEBUG_TO_CSV = nil
@@ -147,18 +160,28 @@ local function handle(rawData)
 	if code == 'p' then
 		local decoded = jsonDecode(data)
 		if settings.getValue("enablePosSmoother") then
-			if postick[serverVehicleID] == nil then
-				postick[serverVehicleID] = {}
-				postick[serverVehicleID].data = decoded
-				postick[serverVehicleID].executed_last = TIMER()
-			elseif postick[serverVehicleID].data.tim > decoded.tim then
+			if POSSMOOTHER[serverVehicleID] == nil then
+				local new = {}
+				new.data = decoded
+				new.executed_last = TIMER()
+				new.executed = false
+				new.median = 32
+				POSSMOOTHER[serverVehicleID] = new
+				
+			elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
 				-- nothing, outdated data
+				
 			elseif decoded.tim < 1 then -- vehicle may have been reloaded
-				postick[serverVehicleID].data = decoded
-				postick[serverVehicleID].executed = false
+				POSSMOOTHER[serverVehicleID].data = decoded
+				POSSMOOTHER[serverVehicleID].executed = false
+				
 			else
-				postick[serverVehicleID].data = decoded
-				postick[serverVehicleID].executed = false
+				POSSMOOTHER[serverVehicleID].data = decoded
+				POSSMOOTHER[serverVehicleID].executed = false
+				
+				if POSSMOOTHER[serverVehicleID].executed_last:stop() < 80 then
+					POSSMOOTHER[serverVehicleID].median = (POSSMOOTHER[serverVehicleID].median + POSSMOOTHER[serverVehicleID].executed_last:stop()) / 2
+				end
 			end
 		else
 			applyPos(decoded, serverVehicleID)
@@ -206,22 +229,22 @@ end
 
 local function onPreRender(dt)
 	-- ensuring that there is atleast a difference of 37ms between each pos packet execution
-	for serverVehicleID, data in pairs(postick) do
+	for serverVehicleID, data in pairs(POSSMOOTHER) do
 		local timedif = data.executed_last:stop()
-		if not data.executed and timedif >= 32 then
+		if not data.executed and timedif >= data.median then
 			applyPos(data.data, serverVehicleID)
-			postick[serverVehicleID].executed_last = TIMER()
-			postick[serverVehicleID].executed = true
+			POSSMOOTHER[serverVehicleID].executed_last = TIMER()
+			POSSMOOTHER[serverVehicleID].executed = true
 			
 		elseif timedif > 60000 then -- vehicle potentially removed. rem entry
-			postick[serverVehicleID] = nil
+			POSSMOOTHER[serverVehicleID] = nil
 		end
 	end
 end
 
 local function onSettingsChanged()
 	if not settings.getValue("enablePosSmoother") then -- nil/false
-		postick = {}
+		POSSMOOTHER = {}
 	end
 end
 
@@ -235,6 +258,7 @@ M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
 M.onPreRender       = onPreRender
 M.onSettingsChanged = onSettingsChanged
+M.debug             = POSSMOOTHER
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

@@ -181,25 +181,26 @@ local function handle(rawData)
 				POSSMOOTHER[serverVehicleID].executed = false
 				
 			else
-				POSSMOOTHER[serverVehicleID].data = decoded
-				POSSMOOTHER[serverVehicleID].executed = false
-				
 				local executed_last = POSSMOOTHER[serverVehicleID].executed_last:stop()
-				if executed_last > 30 and executed_last < 80 then
-					local median_array = POSSMOOTHER[serverVehicleID].median_array
-					local next_index = median_array[1]
-					median_array[next_index] = executed_last
-					median_array[1] = next_index + 1
-					if next_index == median_array[2] + 2 then
-						median_array[1] = 3
+				POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
+				if executed_last > 30 then
+					POSSMOOTHER[serverVehicleID].executed = false
+					if executed_last < 80 then
+						local median_array = POSSMOOTHER[serverVehicleID].median_array
+						local next_index = median_array[1]
+						median_array[next_index] = executed_last
+						median_array[1] = next_index + 1
+						if next_index == median_array[2] + 2 then
+							median_array[1] = 3
+						end
+						
+						local median = 0
+						for i = 3, median_array[2] + 2 do
+							median = median + median_array[i]
+						end
+						POSSMOOTHER[serverVehicleID].median = median / median_array[2]
+						POSSMOOTHER[serverVehicleID].median_array = median_array
 					end
-					
-					local median = 0
-					for i = 3, median_array[2] + 2 do
-						median = median + median_array[i]
-					end
-					POSSMOOTHER[serverVehicleID].median = median / median_array[2]
-					POSSMOOTHER[serverVehicleID].median_array = median_array
 				end
 			end
 		else
@@ -247,13 +248,13 @@ local function getActualSimSpeed()
 end
 
 local function onPreRender(dt)
-	-- ensuring that there is atleast a difference of 37ms between each pos packet execution
+	-- tick pos updates per vehicle based on their median pos update interval
 	for serverVehicleID, data in pairs(POSSMOOTHER) do
 		local timedif = data.executed_last:stop()
 		if not data.executed and timedif >= data.median then
-			applyPos(data.data, serverVehicleID)
 			POSSMOOTHER[serverVehicleID].executed_last = TIMER()
 			POSSMOOTHER[serverVehicleID].executed = true
+			applyPos(data.data, serverVehicleID)
 			
 		elseif timedif > 60000 then -- vehicle potentially removed. rem entry
 			POSSMOOTHER[serverVehicleID] = nil

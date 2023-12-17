@@ -58,9 +58,8 @@ local function toCsv(serverVehicleID) -- temp code
 	if playerid > 20 then return nil end
 	if tonumber(split[2]) > 0 then return nil end -- only care for vid 0
 	
-	local current_time = os.clock()
 	if DEBUG_TABLE[playerid] == nil then
-		DEBUG_TABLE[playerid] = current_time
+		DEBUG_TABLE[playerid] = TIMER()
 		return nil
 	end
 	
@@ -68,14 +67,14 @@ local function toCsv(serverVehicleID) -- temp code
 	for i = 0, playerid - 1 do
 		tmp = tmp .. ","
 	end
-	tmp = tmp .. tostring(round((current_time - DEBUG_TABLE[playerid]) * 1000)) .. ","
+	tmp = tmp .. tostring(round(DEBUG_TABLE[playerid]:stop())) .. ","
 	for i = playerid - 1, 20 do
 		tmp = tmp .. ","
 	end
 	tmp = string.sub(tmp, 1, string.len(tmp) - 1)
 	DEBUG_TO_CSV:write(tmp .. "\n")
 	
-	DEBUG_TABLE[playerid] = current_time
+	DEBUG_TABLE[playerid] = TIMER()
 end
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
@@ -172,6 +171,7 @@ local function handle(rawData)
 				new.executed = false
 				new.median = 32
 				new.median_array = {3,10,32,32,32,32,32,32,32,32,32,32}
+				--new.median_array = {3,20,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32}
 				new.median_timer = TIMER()
 				POSSMOOTHER[serverVehicleID] = new
 				

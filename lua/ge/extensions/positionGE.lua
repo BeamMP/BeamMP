@@ -194,13 +194,12 @@ local function handle(rawData)
 						median_array[1] = next_index + 1
 						if next_index == median_array[2] + 2 then
 							median_array[1] = 3
+							local median = 0
+							for i = 3, median_array[2] + 2 do
+								median = median + median_array[i]
+							end
+							POSSMOOTHER[serverVehicleID].median = median / median_array[2]
 						end
-						
-						local median = 0
-						for i = 3, median_array[2] + 2 do
-							median = median + median_array[i]
-						end
-						POSSMOOTHER[serverVehicleID].median = median / median_array[2]
 						POSSMOOTHER[serverVehicleID].median_array = median_array
 					end
 				end

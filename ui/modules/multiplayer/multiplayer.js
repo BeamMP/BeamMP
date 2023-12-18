@@ -34,9 +34,7 @@ function($scope, $state, $timeout, $document) {
 		$state.go('menu.multiplayer.servers');
 	};
 
-	$scope.openExternalLink = function(url) {
-		bngApi.engineLua(`MPCoreNetwork.mpOpenUrl("`+url+`")`);
-	}
+	$scope.openExternalLink = openExternalLink
 
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
 		if (data != null) {
@@ -853,7 +851,7 @@ function($scope, $state, $timeout) {
     scope: true,
     link($scope, elems, attrs) {
       $scope.$on("$stateChangeSuccess",
-        () => bngApi.engineLua("MPCoreNetwork.isMPSession()", data => $scope.show = !!data)
+        () => bngApi.engineLua("MPCoreNetwork.isMPSession()", data => $scope.show = true)//!!data)
       );
     },
   }
@@ -1233,8 +1231,14 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
+/**
+ * This function is designed for opening http based links in the web browser using the BeamMP Launcher.
+ * Note: The URLs are scoped to BeamMP related domains only & Discord invite links (discord.gg)
+ * @param {string} url 
+ */
+
 function openExternalLink(url){
-	bngApi.engineLua(`mp_open_url("`+url+`")`);
+	bngApi.engineLua(`MPCoreNetwork.mpOpenUrl("`+url+`")`);
 }
 
 function getServerInfoHTML(d) {
@@ -1442,6 +1446,47 @@ async function receiveServers(data) {
 	});
 	return serversArray;
 };
+
+/**
+ * Below is a sample of how to load the server list info from the backend using JS/CEF
+ * Rather than through Lua.
+ */
+
+/* 
+async function receiveServers() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua(`{ 
+			port = MPCoreNetwork.getProxyPort(),
+			launcherVersion = MPCoreNetwork.getLauncherVersion()
+		}`, async data => {
+			console.log(data)
+			var proxy = data.port;
+			var launcherVersion = data.launcherVersion
+			var response = await fetch(`http://localhost:${proxy}/servers-info?apiv=2`)
+			const rawdata = await response.json();
+			// Process the responseData here
+			//console.log(responseData);
+			var serversArray = new Array();
+			// Parse the data to a nice looking Array
+			for (var i = 0; i < rawdata.length; i++) {
+				var v = rawdata[i]
+				if(v.cversion == launcherVersion){
+					v.strippedName = stripCustomFormatting(v.sname);
+					serversArray.push(v);
+				}
+			}
+			// Sort the servers to display official servers first
+			serversArray.sort(function(a, b) {
+				if (a.official && b.official) return a.strippedName.localeCompare(b.strippedName)
+				else if (a.official) return -1;
+				else if (b.official) return 1;
+				return 0;
+			});
+			resolve(serversArray);
+		})
+	});
+};
+*/
 
 // Used to deselect a row
 function deselect(row) {

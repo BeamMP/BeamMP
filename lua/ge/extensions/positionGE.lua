@@ -173,7 +173,7 @@ local function smoothPosExec(serverVehicleID, decoded)
 	elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
 		-- nothing, outdated data
 				
-	elseif decoded.tim < 1 or (decoded.tim - POSSMOOTHER[serverVehicleID].data.tim) > 10 then -- vehicle may have been reloaded
+	elseif decoded.tim < 1 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- vehicle may have been reloaded or "tim" value may gone bonkers for other reasons
 		POSSMOOTHER[serverVehicleID].data = decoded
 		POSSMOOTHER[serverVehicleID].executed = false
 				

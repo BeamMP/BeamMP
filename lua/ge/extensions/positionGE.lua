@@ -170,13 +170,13 @@ local function smoothPosExec(serverVehicleID, decoded)
 		new.median_timer = TIMER()
 		POSSMOOTHER[serverVehicleID] = new
 				
-	elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
-		-- nothing, outdated data
-				
 	elseif decoded.tim < 1 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- vehicle may have been reloaded or "tim" value may gone bonkers for other reasons
 		POSSMOOTHER[serverVehicleID].data = decoded
 		POSSMOOTHER[serverVehicleID].executed = false
 				
+	elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
+		-- nothing, outdated data
+		
 	else
 		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
 		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets

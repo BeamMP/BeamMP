@@ -12,8 +12,57 @@
 
 
 local M = {}
+local LOCALISATION = nil
+local mime = require'mime' -- Game libary. Used in BeamNG.drive\lua\common\libs\luasocket\socket\mime.lua. We only use it for b64
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
+
+--- Returns the decoded lang table from disk
+-- @tparam[opt] string lang Language code
+-- @usage getLang("en-US")
+-- @treturn[1] table if Success
+-- @treturn[2] nil if failure
+local function getLang(lang)
+	local lang = lang or settings.getValue("userLanguage") or "en-US"
+	local langpath = "/locales/" .. lang .. ".json"
+	local handle = io.open(langpath, "r")
+	if handle == nil then return nil end -- shouldnt happen
+	local data = handle:read("*all")
+	handle:close()
+	return jsonDecode(data)
+end
+
+--- Turns translation code into language string
+-- Returns the translation for the lang the player is using. Will alternatively try the en-US lang. If both not present returns the text given in useifnotpresent and if that is not given, returns which.
+-- @tparam string which Give translation string
+-- @tparam[opt] string useifnotpresent Used if which cannot be found
+-- @usage MPTranslate("ui.options.multiplayer.fadeVehicles", "Fade out vehicles as they get closer")
+-- @usage MPTranslate("ui.options.multiplayer.fadeVehicles")
+-- @treturn[1] string if success. Translation string
+-- @treturn[2] string if failure but useifnotpresent is given. useifnotpresent string
+-- @treturn[3] string if failure. which string
+function MPTranslate(which, useifnotpresent) -- global! translate() was a global func in earlier beamng builds. so we wont take that, in case it comes back
+	-- if lang table not loaded or lang changed, load
+	local lang = settings.getValue("userLanguage") or "en-US" -- can be nil if the user never switched the main language. main language is en-US
+	if LOCALISATION == nil or LOCALISATION.lang ~= lang then
+		LOCALISATION = {}
+		LOCALISATION.lang = lang
+		LOCALISATION.translate = getLang(lang)
+	end
+	
+	-- entry unknown or localisation not found
+	if LOCALISATION.translate == nil or LOCALISATION.translate[which] == nil then
+		if LOCALISATION.lang ~= "en-US" then -- try eng variant
+			local translate = getLang("en-US")
+			if translate == nil or translate[which] == nil then -- not present here either
+				return useifnotpresent or which
+			end
+			return translate[which]
+		end
+		return useifnotpresent or which
+	end
+	return LOCALISATION.translate[which]
+end
 
 --- Checks if two colors match by comparing their serialized values.
 -- @param old table The first color to compare.
@@ -21,6 +70,20 @@ setmetatable(_G,{}) -- temporarily disable global write notifications
 -- @return boolean True if the colors match, false otherwise.
 local function colorMatch(old, new)
 	return serialize(old) == serialize(new)
+end
+
+--- Base64 encodes a string (RFC 2045)
+-- @tparam string string The string to be encoded
+-- @treturn[1] string Base64
+local function b64encode(string)
+	return mime.b64(string)
+end
+
+--- Decodes a base64 string (RFC 2045)
+-- @tparam string string The base64 string
+-- @treturn[1] string Decoded string
+local function b64decode(string)
+	return mime.unb64(string)
 end
 
 --- Converts a hexadecimal color code to RGB values.
@@ -133,7 +196,12 @@ local function onExtensionLoaded()
 	--MPGameNetwork
 	--M.addKeyEventListener = MPGameNetwork.addKeyEventListener -- takes: string keyName, function listenerFunction
 	--M.getKeyState         = MPGameNetwork.getKeyState         -- takes: string keyName
+	
+	M.translate                = MPTranslate
 end
+
+M.b64encode                = b64encode
+M.b64decode                = b64decode
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

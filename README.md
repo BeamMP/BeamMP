@@ -11,12 +11,16 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 - `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp))
 
 # Contents
- - [Installation](#installation)
- - [Servers](#servers)
- - [How does it work?](#how-does-it-work)
- - [Roadmap](#roadmap)
- - [Troubleshooting](#troubleshooting)
- - [Supporting The Project](#support)
+- [BeamMP](#beammp)
+- [Important Links](#important-links)
+- [Contents](#contents)
+- [Installation](#installation)
+- [Servers](#servers)
+- [How does it work?](#how-does-it-work)
+- [Roadmap](#roadmap)
+- [Troubleshooting](#troubleshooting)
+- [Support](#support)
+- [Translations](#translations)
 
 
 # Installation
@@ -63,3 +67,19 @@ If none of these fix your issue, we have a dedicated support team on our [Discor
 # Support
 The BeamMP project is supported by community donations via our [Patreon](https://www.patreon.com/BeamMP) This brings perks such as Patreon-only channels on our Discord, Early access to new updates, and more server keys. 
 
+# Translations
+BeamMP makes an effort to be maintained for multiple languages. 
+The current progress of this sits at: 
+[![gitlocalized ](https://gitlocalize.com/repo/9181/whole_project/badge.svg)](https://gitlocalize.com/repo/9181?utm_source=badge) 
+We use [GitLocalize](https://gitlocalize.com/) for managing this. You can contribute if you wish here: https://gitlocalize.com/repo/9181.
+
+The individual language progress is as follows:
+- German: [![gitlocalized ](https://gitlocalize.com/repo/9181/de-DE/badge.svg)](https://gitlocalize.com/repo/9181/de-DE?utm_source=badge) 
+- Spanish: [![gitlocalized ](https://gitlocalize.com/repo/9181/es-ES/badge.svg)](https://gitlocalize.com/repo/9181/es-ES?utm_source=badge) 
+- French: [![gitlocalized ](https://gitlocalize.com/repo/9181/fr-FR/badge.svg)](https://gitlocalize.com/repo/9181/fr-FR?utm_source=badge) 
+- Japanese: [![gitlocalized ](https://gitlocalize.com/repo/9181/ja-JP/badge.svg)](https://gitlocalize.com/repo/9181/ja-JP?utm_source=badge) 
+- Korean (South Korea): [![gitlocalized ](https://gitlocalize.com/repo/9181/ko-KR/badge.svg)](https://gitlocalize.com/repo/9181/ko-KR?utm_source=badge)
+- Polish: [![gitlocalized ](https://gitlocalize.com/repo/9181/pl/badge.svg)](https://gitlocalize.com/repo/9181/pl?utm_source=badge) 
+- Portuguese (Brazil): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) 
+- Portuguese (Portugal): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) 
+- Russian: [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)

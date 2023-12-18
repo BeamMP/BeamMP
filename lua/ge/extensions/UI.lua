@@ -16,6 +16,8 @@ local chatWindow = require("multiplayer.ui.chat")
 local optionsWindow = require("multiplayer.ui.options")
 local playerListWindow = require("multiplayer.ui.playerList")
 require('/common/extensions/ui/flowgraph/editor_api')(M)
+local gui_module = require("ge/extensions/editor/api/gui")
+local gui = {setupEditorGuiTheme = nop}
 local imgui = ui_imgui
 local imu = require('ui/imguiUtils')
 local utils = require("multiplayer.ui.utils")
@@ -229,6 +231,8 @@ end
 local function renderWindow()
     if not configLoaded then return end
 
+    gui.setupWindow("BeamMP Chat")
+
     imgui.PushStyleVar2(imgui.StyleVar_WindowMinSize, (collapsed and imgui.ImVec2(lastSize.x, 20)) or M.windowMinSize)
 
     imgui.PushStyleVar2(imgui.StyleVar_WindowPadding, M.windowPadding)
@@ -366,10 +370,12 @@ local function loadConfig()
         config:write(jsonData)
 
         log("I", "chat", "Default config created")
+		config:close()
     end
 
     -- Read config
-    local jsonData = config:read("*all")
+	config = io.open("./settings/BeamMP/chat.json", "r")
+    local jsonData = config:read("*a")
     config:close()
 
     local settings = jsonDecode(jsonData)
@@ -478,6 +484,7 @@ end
 --- Executes when the user or mod ends a mission/session (map) .
 -- @param mission table The mission object.
 local function onClientEndMission(mission)
+    pings = {}
     chatWindow.chatMessages = {}
     chatWindow.clearHistory()
 end
@@ -486,6 +493,9 @@ end
 -- We use this to load our UI and config
 local function onExtensionLoaded()
     log("D", "MPInterface", "Loaded")
+	gui_module.initialize(gui)
+	gui.registerWindow("BeamMP Chat", imgui.ImVec2(333, 266))
+	gui.showWindow("BeamMP Chat")
 
     loadConfig()
     optionsWindow.onInit(M.settings)

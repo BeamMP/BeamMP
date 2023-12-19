@@ -1,0 +1,94 @@
+<link rel="stylesheet" type="text/css" href="/ui/modules/vehicleselect/vehicleselect.css" />
+
+<md-content style="height: 100%" layout="column" class="VehicleSelect">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <span flex> {{ ::vehicle.model['Brand'] }} {{ ::vehicle.model['Name'] }} </span>
+    </div>
+  </md-toolbar>
+
+  <div class="container veh-list" bng-nav-scroll>
+    <div ng-repeat="config in vehicle.shownData | orderObjectBy:'orderKey'">
+      <div class="veh-item" ng-class="{ selected: vehicle.selectedConfig && vehicle.selectedConfig.key === config.key }"
+        bng-sound-class="bng_click_hover_generic"
+        bng-nav-item nav-item-enter-focus="{{ :: 0 === $index }}"
+        bng-all-clicks-no-nav single="vehicle.selectAction(config.key)" double="vehicle.launchConfig(false)"
+        ng-focus="vehicle.selectConfig(config.key, false)"
+      >
+        <bng-box>
+          <imageslider imageurls="config.preview" class="veh-image"></imageslider>
+          <!-- <img ng-if="config.preview" src="{{ config.preview }}" class="veh-image" /> -->
+          <div class="veh-label">
+            <bng-icon ng-if=":: !config.isAuxiliary && config.Source === 'BeamNG - Official'" type="sprite" src="'general_beamng_logo_w'"></bng-icon>
+            <bng-icon ng-if=":: !config.isAuxiliary && config.Type === 'Automation'" type="img" src="'/ui/assets/Original/camshaft_automation_logo.svg'"></bng-icon>
+            <md-icon ng-if="config.isAuxiliary" class="material-icons">report</md-icon>
+            <div class="veh-label-main">
+              {{ ::config.Configuration || config.Name || 'Default' }}
+            </div>
+          </div>
+        </bng-box>
+      </div>
+    </div>
+  </div>
+</md-content>
+
+
+<md-content id="vehcfg-details" flex="35" ng-show="vehicle.selectedConfig" layout="column" style="max-width: 400px; height: 100%;">
+  <md-toolbar class="md-primary md-hue-1">
+    <div class="md-toolbar-tools">
+      <span flex>{{ vehicle.selectedConfig.Name || 'Default' }}</span>
+    </div>
+  </md-toolbar>
+
+  <imageslider imageurls="vehicle.selectedConfig.preview" style="width: 100%;min-height:200px; opacity: 1"></imageslider>
+
+  <md-tabs flex md-stretch-tabs="always" md-no-ink style="overflow-y:auto" md-selected="vehicle.openTab" class="transparency" bng-blur="true">
+    <md-tab label="Overview">
+      <md-tab-content style="overflow:hidden; overflow-y:scroll;" bng-nav-scroll>
+      <div style="margin-top: 20px">
+        <ng-color flex show-main="false" show-alpha="false" ng-model="vehicle.selectedColor" pre-col="{{ ::vehicle.model.paints }}"></ng-color>
+        <table class="bng-list-table" style="width: 100%">
+          <tr><td colspan="3" ng-if="vehicle.selectedConfig['Description']" style="border-bottom: solid 2px whitesmoke"> <p bng-nav-item> {{ vehicle.selectedConfig['Description'] }}</p></td></tr>
+          <tr ng-repeat="key in vehicle.overviewKeylist" ng-if="vehicle.showData(key, false)">
+            <td class="md-body-1" style="font-weight: bold; min-width: 30%">{{ ::key }}</td>
+            <td class="md-body-1" ng-if=":: !vehicle.isRealRange(key)" >{{ vehicle.considerUnit(key, vehicle.selectedConfig[key]) }}</td>
+            <td class="md-body-1" ng-if=":: vehicle.isRealRange(key)" >{{ vehicle.considerUnit(key, vehicle.selectedConfig[key].min) }} - {{ vehicle.considerUnit(key, vehicle.selectedConfig[key].max) }}</td>
+          </tr>
+        </table>
+      </div>
+      </md-tab-content>
+    </md-tab>
+    <md-tab label="Performance" ng-if="vehicle.showPerf">
+      <md-list style="padding-top:20px">
+        <md-list-item>
+        <table class="bng-list-table" style="width: 100%">
+          <tr ng-if=" vehicle.selectedConfig['Torque'] !== undefined && vehicle.selectedConfig['TorquePeakRPM'] !== undefined">
+            <td class="md-body-1" style="font-weight: bold; min-width: 30%">{{:: "ui.options.units.torque" | translate}}</td>
+            <td class="md-body-1">{{ vehicle.considerUnit('Torque', vehicle.selectedConfig['Torque']) }} @ {{ vehicle.selectedConfig['TorquePeakRPM']}} rpm</td>
+         </tr>
+         <tr ng-if="vehicle.selectedConfig['Power'] !== undefined && vehicle.selectedConfig['PowerPeakRPM'] !== undefined">
+            <td class="md-body-1" style="font-weight: bold; min-width: 30%">{{:: "ui.options.units.power" | translate}}</td>
+            <td class="md-body-1">{{ vehicle.considerUnit('Power', vehicle.selectedConfig['Power']) }} @ {{ vehicle.selectedConfig['PowerPeakRPM']}} rpm</td>
+         </tr>
+          <tr ng-repeat="key in vehicle.perfKeyList" ng-if="vehicle.showData(key, true)">
+            <td class="md-body-1" style="font-weight: bold; min-width: 30%">{{ ::key }}</td>
+            <td class="md-body-1" ng-if=":: !vehicle.isRealRange(key)" >{{ vehicle.considerUnit(key, vehicle.selectedConfig[key]) }}</td>
+            <td class="md-body-1" ng-if=":: vehicle.isRealRange(key)" >{{ vehicle.considerUnit(key, vehicle.selectedConfig[key].min) }} - {{ vehicle.considerUnit(key, vehicle.selectedConfig[key].max) }}</td>
+          </tr>
+        </table>
+        </md-list-item>
+      </md-list>
+    </md-tab>
+  </md-tabs>
+
+  <div layout-md="column">
+    <md-list-item md-no-ink>
+      <p>{{:: "ui.options.gameplay.protectConfig" | translate}}</p>
+      <md-checkbox ng-model="vehicle.protectConfig" ng-change="vehicles.switchProtection()" bng-sound-class="bng_checkbox_generic"></md-checkbox>
+    </md-list-item>
+  </div>
+  <div layout-md="column" layout="row">
+    <md-button flex bng-sound-class="bng_click_generic" class="md-raised md-primary" ng-click="vehicle.launchConfig(true)" ng-if="!vehicle.mode.hide.spawnNew" ng-disabled="vehicle.disableSpawnNew(app.gameState)">{{:: "ui.debug.vehicle.spawnNew" | translate}}</md-button>
+    <md-button flex bng-sound-class="bng_click_generic" class="md-raised md-accent" ng-click="vehicle.launchConfig(false)" id="vehcfg-default">{{vehicle.mode.selectButton ? (vehicle.mode.selectButton | translate ) : ("ui.debug.vehicle.replaceCurrent" | translate)}}</md-button>
+  </div>
+</md-content>

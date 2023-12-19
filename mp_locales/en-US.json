@@ -129,5 +129,7 @@
     "ui.multiplayertos.info2": "You can also find more information on our ",
     "ui.common.multiplayer.sync": "Sync",
     "ui.apps.categories.multiplayer": "Multiplayer",
-    "ui.camera.mode.passenger": "Passenger"
+    "ui.camera.mode.passenger": "Passenger",
+    "ui.vehicleconfig.protectConfig": "Protect from cloning",
+    "ui.options.gameplay.protectConfig": "Protect spawned vehicle from cloning"
 }

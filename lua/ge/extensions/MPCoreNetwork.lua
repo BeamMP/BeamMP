@@ -655,6 +655,9 @@ local function onExtensionLoaded()
 		FS:removeFile('settings/BeamMP/ui_info.json')
 	end
 	reloadUI() -- required to show modified mainmenu
+
+	local overrides = require('modules.overrides')
+	overrides.onExtensionLoaded()
 end
 
 -- TODO: remove functions that shouldnt be public

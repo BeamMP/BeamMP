@@ -283,6 +283,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   vm.d = {}
   vm.stickyPartSelection = false
   vm.selectSubParts = true
+  vm.protectConfig = false
   vm.applyPartChangesAutomatically = true
   vm.simple = false
   vm.displayNames = false

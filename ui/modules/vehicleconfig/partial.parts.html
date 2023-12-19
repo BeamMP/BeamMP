@@ -128,6 +128,9 @@
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
           {{:: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>
+        <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.protectConfig" md-no-ink flex>
+          {{:: 'ui.vehicleconfig.protectConfig' | translate}}
+        </md-checkbox>
       </div>
 
       <form novalidate ng-submit="vehConf_parts.applyLicensePlate()" layout="row" layout-align="start center" style="position: relative; flex: 0 0 auto;" ng-disabled="vehConf_parts.skipLicGen">

@@ -21,7 +21,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.9.8" -- the mod version
+local modVersion = "4.9.9" -- the mod version
 local proxyPort = ""
 -- server
 

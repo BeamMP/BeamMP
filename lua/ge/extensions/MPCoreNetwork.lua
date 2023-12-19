@@ -21,7 +21,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.9.7" -- the mod version
+local modVersion = "4.9.8" -- the mod version
 local proxyPort = ""
 -- server
 
@@ -603,7 +603,7 @@ runPostJoin = function() -- gets called once loaded into a map
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
-		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+		--core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
 		if mp_core then

@@ -38,7 +38,7 @@ M.uiIcons = {
 local profanityFilter = nil
 local hateFilter = nil
 local inappropriateContentFilter = nil
-local customFilter = nil
+local customFilter = {}
 
 local windowOpacity = 0.9
 
@@ -461,7 +461,7 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 
     -- Custom Filter
     if settings.getValue("filterCustomWords") then
-        --msg = MPHelpers.filterString(msg, customFilter)
+        msg = MPHelpers.filterString(msg, customFilter)
     end
 
 	if player then

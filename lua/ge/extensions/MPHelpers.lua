@@ -162,13 +162,14 @@ end
 end
 
 local function filterString(inputString, filterArray)
-	dump(filterArray)
 	local filteredString = inputString
 
 	for _, word in ipairs(filterArray) do
-			-- You may want to customize the replacement string based on your requirements
-			local replacement = string.rep("*", string.len(word))
-			filteredString = string.gsub(filteredString, "(?i)"..word, replacement)
+		local pattern = word:gsub(".", function(char)
+			return "[" .. char:lower() .. char:upper() .. "]"
+		end)
+		local replacement = string.rep("*", string.len(word))
+		filteredString = string.gsub(filteredString, pattern, replacement)
 	end
 
 	return filteredString

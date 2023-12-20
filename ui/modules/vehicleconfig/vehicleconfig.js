@@ -864,7 +864,8 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     loadedConfig = config
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.removeLocal("${config}")`)
     getConfigList()
-    $event.stopPropagation()
+    if ($event)
+      $event.stopPropagation()
 
 
     // showConfirm()

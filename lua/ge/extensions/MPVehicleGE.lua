@@ -1431,10 +1431,6 @@ local function spawnDefaultRequest()
 end
 
 local function spawnRequest(model, config, colors)
-	local currentVehicle = be:getPlayerVehicle(0)
-	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
-	local vehicle = getVehicleByGameID(gameVehicleID)
-
 	return original_spawnNewVehicle(model, config or {})
 	--extensions.hook("trackNewVeh")
 end
@@ -1444,7 +1440,7 @@ local function replaceRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle and vehicle.isLocal then
+	if currentVehicle and vehicle and vehicle.isLocal then
 		vehicle.jbeam = '-'
 		return original_replaceVehicle(model, config or {})
 	else
@@ -1458,7 +1454,7 @@ M.runPostJoin = function()
 	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
 	original_replaceVehicle = core_vehicles.replaceVehicle
 	original_spawnDefault = core_vehicles.spawnDefault
-	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') return end
+	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') end
 	core_vehicles.spawnNewVehicle = MPVehicleGE.spawnRequest
 	core_vehicles.replaceVehicle = MPVehicleGE.replaceRequest
 	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest

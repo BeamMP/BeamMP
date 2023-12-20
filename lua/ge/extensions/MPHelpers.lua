@@ -14,6 +14,8 @@
 local M = {}
 local LOCALISATION = nil
 local mime = require'mime' -- Game libary. Used in BeamNG.drive\lua\common\libs\luasocket\socket\mime.lua. We only use it for b64
+local lastLang = ""
+local lastLangData = nil
 
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
@@ -24,11 +26,17 @@ setmetatable(_G,{}) -- temporarily disable global write notifications
 -- @treturn[2] nil if failure
 local function getLang(lang)
 	local lang = lang or settings.getValue("userLanguage") or "en-US"
-	local langpath = "/locales/" .. lang .. ".json"
-	local handle = io.open(langpath, "r")
-	if handle == nil then return nil end -- shouldnt happen
-	local data = handle:read("*all")
-	handle:close()
+	local data = nil
+	if lang ~= lastLang then
+		local langpath = "/locales/" .. lang .. ".json"
+		local handle = io.open(langpath, "r")
+		if handle == nil then return nil end -- shouldnt happen
+		data = handle:read("*all")
+		lastLangData = data
+		handle:close()
+	else
+		data = lastLangData
+	end
 	return jsonDecode(data)
 end
 

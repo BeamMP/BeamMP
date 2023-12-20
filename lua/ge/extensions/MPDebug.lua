@@ -15,6 +15,9 @@
 local M = {}
 
 
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
+
 --- Teleports the players vehicle to a specified position.
 --- @param targetPos vec3 The target position to teleport the player to. Format: {x, y, z}
 local function tpPlayerToPos(targetPos)
@@ -280,6 +283,8 @@ local function packetReceived(bytes)
 	receivedPacketCount = receivedPacketCount+1
 	receivedPacketSize = receivedPacketSize + (bytes or 0)
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 
 M.onExtensionLoaded		= onExtensionLoaded

@@ -14,6 +14,9 @@ local serverMods = {} -- multiplayerModName1, multiplayerModName2
 local whitelist = {"multiplayerbeammp", "beammp", "translations"} -- these mods won't be activated or deactivated
 local hasMods = false
 
+
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
 --TODO: build handler for repo mod downloads
 
 function queueExtensionToLoad(extension)  -- temporary workaround for mods still using that function
@@ -302,6 +305,8 @@ local function onUpdate(dt)
 		if reloadTimer >= 0.5 then Lua:requestReload() end
 	end
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 M.reloadLuaReloadWithDelay = reloadLuaReloadWithDelay
 M.cleanUpSessionMods = cleanUpSessionMods

@@ -32,6 +32,8 @@ local original_spawnNewVehicle
 local original_replaceVehicle
 local original_spawnDefault
 
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
 
 --- Contains Information about Backend authorized Roles
 -- @table roleToInfo
@@ -1967,6 +1969,8 @@ local function onSettingsChanged()
 	--	settingsCache[k]  = ColorF(table.unpack(p))
 	--end
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 -- Functions
 M.onSerialize = onSerialize

@@ -1,0 +1,40 @@
+// format of this table: name: [ type, default ]
+//
+// where type can be:
+//   - discard: won't be stored in permanent storage, it's a memory-only setting. Should be avoided, it's abusing the settings system as globals.
+//   - cloud: will be synchronized with steam cloud. Use only for settings that are NOT computer-dependent
+//   - local: will not be synchronized with steam cloud. Use only for settings that are computer-dependent (such as graphics detail)
+
+{
+  "filterCustomWords"           : [ "cloud" ],
+  "enableQueueAuto"             : [ "local" ],
+  "queueApplyTimeout"           : [ "cloud" ],
+  "showBlobQueued"              : [ "cloud" ],
+  "nametagShowDistance"         : [ "cloud" ],
+  "nametagCharLimit"            : [ "cloud" ],
+  "showPcs"                     : [ "cloud" ],
+  "queueSkipUnicycle"           : [ "local" ],
+  "blobColorQueued"             : [ "cloud" ],
+  "filteredWords"               : [ "cloud" ],
+  "unicycleConfigs"             : [ "cloud" ],
+  "showBlobDeleted"             : [ "cloud" ],
+  "autoSyncVehicles"            : [ "local" ],
+  "simplifyRemoteVehicles"      : [ "local" ],
+  "disableInstabilityPausing"   : [ "cloud" ],
+  "showSpectators"              : [ "cloud" ],
+  "showDebugOutput"             : [ "local" ],
+  "enableNewChatMenu"           : [ "cloud" ],
+  "showAdvancedMPOptions"       : [ "cloud" ],
+  "launcherPort"                : [ "local" ],
+  "queueApplySpeed"             : [ "cloud" ],
+  "filterInappropriateContent"  : [ "cloud" ],
+  "filterHate"                  : [ "cloud" ],
+  "blobColorDeleted"            : [ "cloud" ],
+  "filterProfanity"             : [ "cloud" ],
+  "enableSpawnQueue"            : [ "local" ],
+  "unicycleAutoSave"            : [ "cloud" ],
+  "enableBlobs"                 : [ "cloud" ],
+  "blobColorIllegal"            : [ "cloud" ],
+  "nameTagShowDistance"         : [ "cloud" ],
+  "showBlobIllegal"             : [ "cloud" ]
+}

@@ -53,6 +53,7 @@ M.canRender = true
 local initialized = false
 local fadeTimer = 0
 local collapsed = false
+local wasCollapsed = false
 
 M.settings = {}
 M.defaultSettings = {
@@ -277,8 +278,14 @@ local function renderWindow()
     imgui.PushStyleColor2(imgui.Col_ScrollbarGrabHovered, imgui.ImVec4(M.settings.colors.secondaryColor.x, M.settings.colors.secondaryColor.y, M.settings.colors.secondaryColor.z, windowOpacity))
     imgui.PushStyleColor2(imgui.Col_ScrollbarGrabActive, imgui.ImVec4(M.settings.colors.secondaryColor.x, M.settings.colors.secondaryColor.y, M.settings.colors.secondaryColor.z, windowOpacity))
 
+    
     if collapsed then
         imgui.SetNextWindowSize(imgui.ImVec2(lastSize.x, 30))
+    end
+
+    if not collapsed and wasCollapsed then
+        imgui.SetNextWindowSize(imgui.ImVec2(lastSize.x, lastSize.y))
+        wasCollapsed = false
     end
 
     if imgui.Begin("BeamMP Chat", M.windowOpen, (collapsed and M.windowCollapsedFlags or M.windowFlags)) then
@@ -333,7 +340,7 @@ local function renderWindow()
 
             imgui.Text(windowTitle)
 
-            -- Collapsed
+            -- Collapse Button
             imgui.SameLine()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 60)
             if not collapsed then
@@ -343,6 +350,7 @@ local function renderWindow()
             else
                 if utils.imageButton(M.uiIcons.down.texId, 16) then
                     collapsed = false
+                    wasCollapsed = true
                 end
             end
 

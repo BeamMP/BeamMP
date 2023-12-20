@@ -51,7 +51,7 @@ local function renderTheming()
             -- All are colors, create text and then 3 sliders
             local color = ffi.new("float[4]", setting.tab.x, setting.tab.y, setting.tab.z, 1)
 
-            imgui.Text(toTitleCase(setting.name))
+            imgui.Text(MPHelpers.translate(setting.translation))
             imgui.SameLine()
             imgui.SetCursorPosX(longestSettingName * 8 + 10)
             if imgui.ColorEdit3("##" .. setting.name, color, imgui.ColorEditFlags_NoInputs) then
@@ -64,7 +64,7 @@ local function renderTheming()
     end
 
     imgui.SetCursorPosY(imgui.GetWindowHeight() - 32)
-    if imgui.Button("Reset to default") then
+    if imgui.Button(MPHelpers.translate("ui.multiplayer.imgui.button.resetToDefault")) then
         UI.settings = utils.copyTable(UI.defaultSettings)
         sortedSettings = {}
         local newSortedSettings = {}
@@ -80,7 +80,7 @@ local function renderTheming()
 
     imgui.SameLine()
 
-    if imgui.Button("Save") then
+    if imgui.Button(MPHelpers.translate("ui.multiplayer.imgui.button.save")) then
         saveConfig()
     end
 end
@@ -91,7 +91,7 @@ local function renderGeneral()
         local posx = longestSettingName * 8 + 10
 
         -- Inactive Fade
-        imgui.Text("Inactive fade")
+        imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.options.inactiveFade"))
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pInactiveFade = imgui.BoolPtr(UI.settings.window.inactiveFade)
@@ -100,7 +100,7 @@ local function renderGeneral()
         end
 
         -- Fade Time
-        imgui.Text("Fade time")
+        imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.options.fadeTime"))
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pFadeTime = imgui.FloatPtr(UI.settings.window.fadeTime)
@@ -115,7 +115,7 @@ local function renderGeneral()
         imgui.PopItemWidth()
 
         -- Fade when collapsed
-        imgui.Text("Fade when collapsed")
+        imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.options.fadeWhenCollapsed"))
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pFadeWhenCollapsed = imgui.BoolPtr(UI.settings.window.fadeWhenCollapsed)
@@ -124,7 +124,7 @@ local function renderGeneral()
         end
 
         -- Show on message
-        imgui.Text("Show on message")
+        imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.options.showOnMessage"))
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pShowOnMessage = imgui.BoolPtr(UI.settings.window.showOnMessage)
@@ -132,8 +132,8 @@ local function renderGeneral()
             UI.settings.window.showOnMessage = pShowOnMessage[0]
         end
 
-	--Keep active on Enter
-        imgui.Text("Keep active on Enter")
+	    --Keep active on Enter
+        imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.options.keepActiveOnEnter"))
         imgui.SameLine()
         imgui.SetCursorPosX(posx)
         local pKeepActive = imgui.BoolPtr(UI.settings.window.keepActive)
@@ -145,7 +145,7 @@ local function renderGeneral()
         imgui.EndChild()
 
         imgui.SetCursorPosY(imgui.GetWindowHeight() - 32)
-        if imgui.Button("Reset to default") then
+        if imgui.Button(MPHelpers.translate("ui.multiplayer.imgui.button.resetToDefault")) then
             UI.settings = utils.copyTable(UI.defaultSettings)
             sortedSettings = {}
             local newSortedSettings = {}
@@ -161,7 +161,7 @@ local function renderGeneral()
 
         imgui.SameLine()
 
-        if imgui.Button("Save") then
+        if imgui.Button(MPHelpers.translate("ui.multiplayer.imgui.button.save")) then
             saveConfig()
         end
     end
@@ -219,7 +219,7 @@ local function onInit(settings)
     for name, category in pairs(settings) do
         newSortedSettings[name] = {}
         for settingName, setting in pairs(category) do
-            table.insert(newSortedSettings[name], {name = settingName, tab = setting})
+            table.insert(newSortedSettings[name], {name = settingName, tab = setting, translation = "ui.multiplayer.imgui.options."..settingName})
         end
         table.sort(newSortedSettings[name], function(a, b) return a.name < b.name end)
     end

@@ -316,10 +316,9 @@ local function renderWindow()
         -- local mainWindowTitle = "BeamMP Chat"
         if currentWindow == windows.chat then
             local msgCount = windows.chat.newMessageCount
+            windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title")
             if msgCount > 0 then
-                windowTitle = "BeamMP Chat (" .. tostring(msgCount) .. ')'
-            else
-                windowTitle = "BeamMP Chat"
+                windowTitle = windowTitle .. " (" .. tostring(msgCount) .. ')'
             end
         end
 
@@ -359,7 +358,7 @@ local function renderWindow()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 40)
             if utils.imageButton(M.uiIcons.user.texId, 16) then
                 currentWindow = windows.playerList
-                windowTitle = "BeamMP Chat (Player List)"
+                windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title.playerList")
             end
 
             -- Settings
@@ -367,7 +366,7 @@ local function renderWindow()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 20)
             if utils.imageButton(M.uiIcons.settings.texId, 16) then
                 currentWindow = windows.options
-                windowTitle = "BeamMP Chat (Options)"
+                windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title.options")
             end
             imgui.EndChild()
 

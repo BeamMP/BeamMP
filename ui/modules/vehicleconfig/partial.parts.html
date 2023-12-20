@@ -41,7 +41,7 @@
               <md-select ng-model="entry.val" ng-change="vehConf_parts.partConfigChanged(entry)" aria-label="_"
                 ng-click="vehConf_parts.stopPropagation($event);" style="width:50%;">
                 <md-option md-no-ink
-                  ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'name'] track by $index"
+                  ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'description', 'name'] track by $index"
                   ng-value="opt.val"
                   ng-bind-html="((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.description | highlightResults: vehConf_parts.partSearchQuery['name'])"
                   style="white-space:nowrap">

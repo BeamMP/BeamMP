@@ -161,6 +161,19 @@ function pairs (value)
 end 
 end
 
+local function filterString(inputString, filterArray)
+	dump(filterArray)
+	local filteredString = inputString
+
+	for _, word in ipairs(filterArray) do
+			-- You may want to customize the replacement string based on your requirements
+			local replacement = string.rep("*", string.len(word))
+			filteredString = string.gsub(filteredString, "(?i)"..word, replacement)
+	end
+
+	return filteredString
+end
+
 --generic
 M.tableLength  = tableSize
 
@@ -200,10 +213,10 @@ local function onExtensionLoaded()
 	M.translate                = MPTranslate
 end
 
-M.b64encode                = b64encode
-M.b64decode                = b64decode
-
+M.filterString      = filterString
+M.b64encode         = b64encode
+M.b64decode         = b64decode
 M.onExtensionLoaded = onExtensionLoaded
-M.onInit = function() setExtensionUnloadMode(M, "manual") end
+M.onInit            = function() setExtensionUnloadMode(M, "manual") end
 
 return M

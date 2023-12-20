@@ -34,6 +34,12 @@ M.uiIcons = {
     user = 0,
 }
 
+
+local profanityFilter = nil
+local hateFilter = nil
+local inappropriateContentFilter = nil
+local customFilter = nil
+
 local windowOpacity = 0.9
 
 M.windowOpen = imgui.BoolPtr(true)
@@ -85,6 +91,17 @@ local UIqueue = {} -- { editCount = x, show = bool, spawnCount = x }
 local playersString = "" -- "player1,player2,player3"
 
 local chatcounter = 0
+
+--- Read the contents of a file into an array by line
+-- @param file_path string The path including the file to read line by line.
+local function readFileToArray(file_path)
+	local lines = {}
+	for line in io.lines(file_path) do
+		table.insert(lines, line)
+	end
+
+    return lines
+end
 
 --- Updates the loading information/message based on the provided data.
 -- @param data string The raw data message containing the code and message.
@@ -425,6 +442,28 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	parts[1] = ''
 	local msg = string.gsub(message, username..': ', '')
 	local player = MPVehicleGE.getPlayerByName(username)
+
+    -- Apply chat filtering
+    -- Basic Profanity
+    if settings.getValue("filterProfanity") then
+        msg = MPHelpers.filterString(msg, profanityFilter)
+    end
+
+    -- Hate Speech
+    if settings.getValue("filterHate") then
+        msg = MPHelpers.filterString(msg, hateFilter)
+    end
+
+    -- Inappropriate Filter
+    if settings.getValue("filterInappropriateContent") then
+        msg = MPHelpers.filterString(msg, inappropriateContentFilter)
+    end
+
+    -- Custom Filter
+    if settings.getValue("filterCustomWords") then
+        --msg = MPHelpers.filterString(msg, customFilter)
+    end
+
 	if player then
 		local prefix = ""
 		for source, tag in pairs(player.nickPrefixes)
@@ -499,6 +538,15 @@ local function onExtensionLoaded()
 
     loadConfig()
     optionsWindow.onInit(M.settings)
+
+    
+    profanityFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/profanity.txt")
+    hateFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/hate.txt")
+    inappropriateContentFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/inappropriate.txt")
+
+    for word in settings.getValue("filteredWords"):gmatch("[^\r\n]+") do
+        table.insert(customFilter, word)
+    end
 
     for k, _ in pairs(M.uiIcons) do
         local path = "./icons/" .. k .. ".png"

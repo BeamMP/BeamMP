@@ -244,6 +244,12 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'BACK_TO_MENU',
       abstract: true
     })
+      .state('menu.multiplayer.home', {
+        url: '/mphome',
+        templateUrl: '/ui/modules/multiplayer/home.partial.html',
+        controller: 'MultiplayerController as multiplayer',
+        backState: 'BACK_TO_MENU'
+      })
       .state('menu.multiplayer.tos', {
         url: '/mptos',
         templateUrl: '/ui/modules/multiplayer/tos.partial.html',
@@ -316,8 +322,13 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     })
 // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
-        url: '/multiplayer',
+        url: '/mpoptions',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
+        backState: 'BACK_TO_MENU',
+      })
+      .state('menu.options.mpsafety', {
+        url: '/mpsafety',
+        templateUrl: '/ui/modules/options/mpsafety.partial.html',
         backState: 'BACK_TO_MENU',
       })
     // -------------------------------------- BEAMMP -------------------------------------- //

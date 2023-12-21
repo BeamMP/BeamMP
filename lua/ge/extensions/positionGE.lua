@@ -33,49 +33,9 @@ local actualSimSpeed = 1
 		[executed] = bool
 ]]
 local POSSMOOTHER = {}
-local TIMER = (HighPerfTimer or hptimer) -- game own
+local TIMER = (HighPerfTimer or hptimer) -- game own timer that is much more accurate then os.clock()
 
-local DEBUG_TO_CSV = nil
-local DEBUG_TABLE = {}
-local function round(x)
-  return x>=0 and math.floor(x+0.5) or math.ceil(x-0.5)
-end
-local function toCsv(serverVehicleID) -- temp code
-	if DEBUG_TO_CSV == nil then
-		DEBUG_TO_CSV = io.open("test.csv", "w")
-		if DEBUG_TO_CSV == nil then return nil end
-		
-		local tmp = ""
-		for i = 0, 20 do
-			tmp = tmp .. i .. ","
-		end
-		tmp = string.sub(tmp, 1, string.len(tmp) - 1)
-		DEBUG_TO_CSV:write(tmp .. "\n")
-	end
-	
-	local split = split(serverVehicleID, "-")
-	local playerid = tonumber(split[1])
-	if playerid > 20 then return nil end
-	if tonumber(split[2]) > 0 then return nil end -- only care for vid 0
-	
-	if DEBUG_TABLE[playerid] == nil then
-		DEBUG_TABLE[playerid] = TIMER()
-		return nil
-	end
-	
-	local tmp = ""
-	for i = 0, playerid - 1 do
-		tmp = tmp .. ","
-	end
-	tmp = tmp .. tostring(round(DEBUG_TABLE[playerid]:stop())) .. ","
-	for i = playerid - 1, 20 do
-		tmp = tmp .. ","
-	end
-	tmp = string.sub(tmp, 1, string.len(tmp) - 1)
-	DEBUG_TO_CSV:write(tmp .. "\n")
-	
-	DEBUG_TABLE[playerid] = TIMER()
-end
+
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
 local function tick()
@@ -87,8 +47,6 @@ local function tick()
 		end
 	end
 end
-
-
 
 --- Wraps vehicle position, rotation etc. data from player own vehicles and sends it to the server.
 -- INTERNAL USE
@@ -121,8 +79,6 @@ end
 local function applyPos(decoded, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
-	
-	--toCsv(serverVehicleID) -- debug
 
 	local simspeedFraction = 1/simTimeAuthority.getReal()
 
@@ -287,7 +243,7 @@ M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
 M.onPreRender       = onPreRender
 M.onSettingsChanged = onSettingsChanged
-M.debug             = POSSMOOTHER
+M.posSmoother       = POSSMOOTHER -- debug entry
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

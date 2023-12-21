@@ -214,7 +214,7 @@ local function onPreRender(dt)
 	for serverVehicleID, data in pairs(POSSMOOTHER) do
 		local timedif = data.executed_last:stop()
 		if not data.executed and timedif >= data.median then
-			POSSMOOTHER[serverVehicleID].executed_last = TIMER()
+			POSSMOOTHER[serverVehicleID].executed_last:stopAndReset()
 			POSSMOOTHER[serverVehicleID].executed = true
 			applyPos(data.data, serverVehicleID)
 			

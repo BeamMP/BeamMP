@@ -142,6 +142,7 @@ end
 --- Update the players string used to create the player list in the UI when in a session.
 -- @param data string
 local function updatePlayersList(data)
+    local my_nick = MPConfig.getNickname()
 	playersString = data or playersString
 	local players = split(playersString, ",")
 	local playerListData = {}
@@ -150,6 +151,8 @@ local function updatePlayersList(data)
 		local username = p
 		local color = {}
 		local id = '?'
+        local muted = false
+        local hidden = false
 		if player then
 			local prefix = ""
 			for source, tag in pairs(player.nickPrefixes)
@@ -163,8 +166,10 @@ local function updatePlayersList(data)
 			local c = player.role.forecolor
 			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 			id = player.playerID
+            muted = player.muted
+            hidden = player.hidden
 		end
-		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id})
+		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id, self = p == my_nick, muted = muted, hidden = hidden})
 	end
 	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
 	guihooks.trigger("playerList", jsonEncode(playerListData))
@@ -448,7 +453,13 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	local username = parts[1]
 	parts[1] = ''
 	local msg = string.gsub(message, username..': ', '')
-	local player = MPVehicleGE.getPlayerByName(username)
+	local player = getPlayerByName(username)
+
+    if player then
+        if player.muted then
+            return
+        end
+    end
 
     -- Apply chat filtering
     -- Basic Profanity

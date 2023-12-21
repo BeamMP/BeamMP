@@ -20,19 +20,19 @@
       </div>
       <div class="sideContent multiplayerPauseBoxStyle">
         <div class="sideContentTop">
-          <div ng-repeat="player in playersList" class="player-row" bng-nav-scroll bng-nav-scroll-force>
+          <div ng-repeat="player in playersList" class="player-row" bng-nav-scroll bng-nav-scroll-force ng-if="!player.self">
             <span class="player-name">{{ player.name }}</span>
             <div class="button-group">
-              <md-button class="md-primary md-raised md-icon" ng-click="reportPlayer(player)">
+              <md-button class="md-primary md-raised md-icon" ng-click="reportPlayer(player)" ng-if="!player.self">
                 <md-icon class="material-icons">report</md-icon>
                 {{:: 'ui.multiplayer.controls.report' | translate}}
               </md-button>
-              <md-button class="md-primary md-raised md-icon" ng-click="hidePlayer(player)">
+              <md-button class="md-primary md-raised md-icon" ng-click="hidePlayer(player)" ng-if="!player.self">
                 <md-icon ng-if="player.hidden" class="material-icons">visibility_off</md-icon>
                 <md-icon ng-if="!player.hidden" class="material-icons">visibility</md-icon>
                 {{:: 'ui.multiplayer.controls.hide' | translate}}
               </md-button>
-              <md-button class="md-primary md-raised md-icon" ng-click="mutePlayer(player)">
+              <md-button class="md-primary md-raised md-icon" ng-click="mutePlayer(player)" ng-if="!player.self">
                 <md-icon ng-if="player.muted" class="material-icons">mic_off</md-icon>
                 <md-icon ng-if="!player.muted" class="material-icons">mic</md-icon>
                 {{:: 'ui.multiplayer.controls.mute' | translate}}

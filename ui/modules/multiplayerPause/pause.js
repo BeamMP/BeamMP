@@ -94,7 +94,8 @@ angular.module('beamng.stuff')
         // { label: "Enter and don't show this again", key: true },
         { label: "ui.common.submit", key: true, default: true },
       ],
-      { class: "experimental" }
+      { class: "experimental" },
+      `You are currently reporting ${player.name}`
     ).then(res => {
       if (!res)
         return;
@@ -103,11 +104,11 @@ angular.module('beamng.stuff')
   }
 
   $scope.hidePlayer = function(player) {
-
+    bngApi.engineLua('MPVehicleGE.togglePlayerHidden("'+player.name+'")')
   }
 
   $scope.mutePlayer = function(player) {
-
+    bngApi.engineLua('MPVehicleGE.togglePlayerMuted("'+player.name+'")')
   }
 
   $scope.$on('playerList', function(event, data) {

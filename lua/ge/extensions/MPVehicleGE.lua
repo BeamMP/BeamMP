@@ -785,9 +785,6 @@ local function sendVehicleEdit(gameVehicleID)
 	local vehicleTable = {} -- Vehicle table
 	local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 	local veh          = be:getObjectByID(gameVehicleID)
-	local c            = veh.color
-	local p0           = veh.colorPalette0
-	local p1           = veh.colorPalette1
 
 	if not isOwn(veh:getID()) then return end
 
@@ -1189,6 +1186,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 
+		-- Now send the vehicle again but as an edit so that the other players actually have the colors and stuff.
+		sendVehicleEdit(gameVehicleID)
+
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
 
 		log("I", "onServerVehicleSpawned", "This ID already exists, syncing vehicles")
@@ -1226,6 +1226,7 @@ end
 
 --============================ ON VEHICLE EDITED (SERVER) ============================
 local function onServerVehicleEdited(serverID, data)
+	local decodedData     = jsonDecode(data) -- Decode the data
 	log('I', 'onServerVehicleEdited', "Edit received for "..serverID)
 
 	if not vehicles[serverID] then
@@ -1234,7 +1235,7 @@ local function onServerVehicleEdited(serverID, data)
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
 
-	if settings.getValue("enableSpawnQueue") then
+	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
 
 		log('I', 'onServerVehicleEdited', "edit "..serverID.." queued")

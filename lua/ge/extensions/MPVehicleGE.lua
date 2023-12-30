@@ -1226,6 +1226,7 @@ end
 
 --============================ ON VEHICLE EDITED (SERVER) ============================
 local function onServerVehicleEdited(serverID, data)
+	local decodedData = jsonDecode(data)
 	log('I', 'onServerVehicleEdited', "Edit received for "..serverID)
 
 	if not vehicles[serverID] then
@@ -1234,7 +1235,7 @@ local function onServerVehicleEdited(serverID, data)
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
 
-	if settings.getValue("enableSpawnQueue") then
+	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
 
 		log('I', 'onServerVehicleEdited', "edit "..serverID.." queued")

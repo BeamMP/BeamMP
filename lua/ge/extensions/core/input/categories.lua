@@ -17,5 +17,6 @@ return {
     vehicle_debug    = { order =12, icon = "settings",       title = "ui.options.controls.bindings.VehicleDebug",    desc="Controls that help vehicle creators"},
     
     controllerui    = { order =13, icon = "web",       title = "ui.options.controls.bindings.MenuNavigationNew",    desc="[WIP] Menu/UI navigation controls"},
+  -- Added BeamMP Input Category
     beammp           = { order =13, icon = "settings",       title = "BeamMP",                                       desc="Controls that are used in BeamMP"},
 }

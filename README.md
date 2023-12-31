@@ -83,3 +83,4 @@ The individual language progress is as follows:
 - Portuguese (Brazil): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) 
 - Portuguese (Portugal): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) 
 - Russian: [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)
+- Chinese: [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)

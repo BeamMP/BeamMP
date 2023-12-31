@@ -14,6 +14,28 @@ local M = {}
 
 local actualSimSpeed = 1
 
+--[[
+	["X-Y"] = table
+		[data] = table
+			[pos] = array[3]
+			[rot] = array[4]
+			[vel] = array[3]
+			[rvel] = array[4]
+			[tim] = float
+			[ping] = float
+		[executed_last] = hptimerstruct
+		[median] = float
+		[median_array] = array
+			[1] = next index
+			[2] = max array buffer size
+			[3..[2] + 2] = float
+		[median_timer] = hptimerstruct
+		[executed] = bool
+]]
+local POSSMOOTHER = {}
+local TIMER = (HighPerfTimer or hptimer) -- game own timer that is much more accurate then os.clock()
+
+
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
 local function tick()
@@ -25,8 +47,6 @@ local function tick()
 		end
 	end
 end
-
-
 
 --- Wraps vehicle position, rotation etc. data from player own vehicles and sends it to the server.
 -- INTERNAL USE
@@ -54,14 +74,11 @@ end
 
 
 --- This function serves to send the position data received for another players vehicle from GE to VE, where it is handled.
--- @param data table The data to be applied as position and rotation
+-- @param decoded table The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
 -- @param serverVehicleID string The VehicleID according to the server.
-local function applyPos(data, serverVehicleID)
+local function applyPos(decoded, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
-
-
-	local decoded = jsonDecode(data)
 
 	local simspeedFraction = 1/simTimeAuthority.getReal()
 
@@ -93,18 +110,69 @@ local function applyPos(data, serverVehicleID)
 	if owner then UI.setPlayerPing(owner.name, ping) end-- Send ping to UI
 end
 
+--- Tries to delay the positional update execution to match the average update interval from this vehicle
+-- Reduces vehicle warping
+-- @tparam serverVehicleID string X-Y
+-- @tparam decoded table The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
+local function smoothPosExec(serverVehicleID, decoded)
+	if POSSMOOTHER[serverVehicleID] == nil then
+		local new = {}
+		new.data = decoded
+		new.executed_last = TIMER()
+		new.executed = false
+		new.median = 32
+		new.median_array = {3,10,32,32,32,32,32,32,32,32,32,32}
+		--new.median_array = {3,20,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32}
+		new.median_timer = TIMER()
+		POSSMOOTHER[serverVehicleID] = new
+				
+	elseif decoded.tim < 1 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- vehicle may have been reloaded or "tim" value may gone bonkers for other reasons
+		POSSMOOTHER[serverVehicleID].data = decoded
+		POSSMOOTHER[serverVehicleID].executed = false
+				
+	elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
+		-- nothing, outdated data
+		
+	else
+		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
+		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
+		if median_time > 15 then -- there can be lower intervals then 32ms, so we cover that
+			POSSMOOTHER[serverVehicleID].executed = false
+			if median_time < 80 then
+				local median_array = POSSMOOTHER[serverVehicleID].median_array
+				local next_index = median_array[1]
+				median_array[next_index] = median_time
+				median_array[1] = next_index + 1
+				if next_index == median_array[2] + 2 then
+					median_array[1] = 3
+					local median = 0
+					for i = 3, median_array[2] + 2 do
+						median = median + median_array[i]
+					end
+					-- median + X to artificially count in fluctuations
+					POSSMOOTHER[serverVehicleID].median = (median / median_array[2]) + 3
+				end
+				POSSMOOTHER[serverVehicleID].median_array = median_array
+			end
+		end
+	end
+end
 
---- The raw message from the server. This is unpacked first and then sent to applyPos()
+--- The raw message from the server. This is unpacked first and then sent to applyPos() or smoothPosExec()
 -- @param rawData string The raw message data.
 local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
 	if code == 'p' then
-		applyPos(data, serverVehicleID)
+		local decoded = jsonDecode(data)
+		if settings.getValue("enablePosSmoother") then
+			smoothPosExec(serverVehicleID, decoded)
+		else
+			applyPos(decoded, serverVehicleID)
+		end
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
 end
-
 
 --- This function is for setting a ping value for use in the math of predition of the positions 
 -- @param ping number The Ping value
@@ -117,7 +185,6 @@ local function setPing(ping)
 		end
 	end
 end
-
 
 --- This function is to allow for the setting of the vehicle/objects position.
 -- @param gameVehicleID number The local game vehicle / object ID
@@ -141,6 +208,31 @@ local function getActualSimSpeed()
 	return actualSimSpeed
 end
 
+--- This function is used to execute smoothed positional updates if enabled
+local function onPreRender(dt)
+	-- tick pos updates per vehicle based on their median pos update interval
+	for serverVehicleID, data in pairs(POSSMOOTHER) do
+		local timedif = data.executed_last:stop()
+		if not data.executed and timedif >= data.median then
+			POSSMOOTHER[serverVehicleID].executed_last:stopAndReset()
+			POSSMOOTHER[serverVehicleID].executed = true
+			applyPos(data.data, serverVehicleID)
+			
+		elseif timedif > 60000 then -- seconds. vehicle potentially removed. rem entry
+			POSSMOOTHER[serverVehicleID] = nil
+		end
+	end
+end
+
+--- This function is used to reset the positional update smoother when it is disabled
+local function onSettingsChanged()
+	if not settings.getValue("enablePosSmoother") then -- nil/false
+		for serverVehicleID, _ in pairs(POSSMOOTHER) do
+			POSSMOOTHER[serverVehicleID] = nil
+		end
+	end
+end
+
 M.applyPos          = applyPos
 M.tick              = tick
 M.handle            = handle
@@ -149,6 +241,9 @@ M.setPosition       = setPosition
 M.setPing           = setPing
 M.setActualSimSpeed = setActualSimSpeed
 M.getActualSimSpeed = getActualSimSpeed
+M.onPreRender       = onPreRender
+M.onSettingsChanged = onSettingsChanged
+M.posSmoother       = POSSMOOTHER -- debug entry
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

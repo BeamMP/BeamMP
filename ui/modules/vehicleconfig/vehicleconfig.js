@@ -55,8 +55,7 @@ angular.module('beamng.stuff')
                 name: slotPartName,
                 description: slotPart.description,
                 isAuxiliary: slotPart.isAuxiliary,
-                val: slotPartName,
-                value: slotPart.value
+                val: slotPartName
               }
               optionCount++
               if (data.chosenParts[slotName] == slotPartName || data.chosenParts[st] == slotPartName) {
@@ -73,7 +72,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slotInfo.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: '<empty>', description: 'Empty', val: '', value:'0'})
+        element.options.unshift({name: '<empty>', description: 'Empty', val: ''})
       } else {
         element.open = true
       }
@@ -99,7 +98,6 @@ angular.module('beamng.stuff')
         res[x.name] = x.val
         if (x.parts) this.generateConfig(x.parts, res)
       })
-
       return res
     },
 
@@ -302,7 +300,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   var currentConfig = null
 
   vm.emptyFront = function (option) {
-    if (option.name === 'Empty') {
+    if (option.description === 'Empty') {
       return 0
     }
   }
@@ -384,7 +382,6 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     currentConfig = config
     vm.partsChanged = false
     //console.log("config = ", config)
-
     var tree = VehicleConfig.generateTree(config, vm.simple)
     tree.sort(VehicleConfig.treeSort)
     var configArray = []
@@ -864,7 +861,8 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     loadedConfig = config
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.removeLocal("${config}")`)
     getConfigList()
-    $event.stopPropagation()
+    if ($event)
+      $event.stopPropagation()
 
 
     // showConfirm()

@@ -52,7 +52,7 @@ For more information on how the launcher and server operate, you can read the so
 - [Server](https://github.com/BeamMP/BeamMP-Server)
 
 # Roadmap
-You can see and keep track of development, planned features, etc. on the GitHub Issues section on each repository.
+You can see and keep track of development, planned features, etc. [Here](https://github.com/orgs/BeamMP/projects/4) or on the GitHub Issues section of each repository.
 
 Additionally, you can join the [Discord](https://discord.gg/BeamMP), where regular updates are posted!
 

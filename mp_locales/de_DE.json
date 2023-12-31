@@ -2,6 +2,7 @@
   "ui.playmodes.multiplayer": "Mehrspieler",
   "ui.options.multiplayer": "Mehrspieler",
   "ui.options.multiplayer.enableNewChatMenu": "Neues Chat Menü",
+  "ui.options.multiplayer.enableNewChatMenu.tooltip": "Das neue Chat Menü verwendet ImGui. Es ist anpassbar, schlicht und fantastisch.",
   "ui.options.multiplayer.autoSyncVehicles.tooltip": "Wenn aktiviert, werden die Fahrzeugteile nach einigen Sekunden automatisch mit anderen Spielern synchronisiert",
   "ui.options.multiplayer.queueSpawnEdit.tooltip": "Wenn aktiviert, werden Fahrzeug-Spawns und Bearbeitungen von anderen Spielern in eine Warteschlange gestellt, anstatt sofort angewendet zu werden",
   "ui.options.multiplayer.queueAuto": "Automatisch Modifikationen/Änderungen von Fahrzeugen in der Warteschlange anwenden",

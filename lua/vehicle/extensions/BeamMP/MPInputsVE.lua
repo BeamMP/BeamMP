@@ -17,6 +17,8 @@ local lastInputs = {
 	c = 0,
 }
 local remoteGear
+local unsupportedPowertrainDevice = false
+local unsupportedPowertrainGearbox = false
 -- ============= VARIABLES =============
 
 local translationTable = {
@@ -41,7 +43,14 @@ local gearBoxHandler = {
 
 local function applyGear(data) --TODO: add handling for mismatched gearbox types between local and remote vehicle
 	if not electrics.values.gearIndex or electrics.values.gear == data then return end
-	local powertrainDevice = powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor") or "none"
+	local powertrainDevice = powertrain.getDevice("gearbox") or powertrain.getDevice("frontMotor") or powertrain.getDevice("rearMotor") or powertrain.getDevice("mainMotor")
+	if powertrainDevice == nil then -- mods that introduce custom powertrains can trigger this
+		if not unsupportedPowertrainDevice then
+			unsupportedPowertrainDevice = true -- prevent spamming the log
+			print('MPInputsVE Error in "applyGear()". Unsupported powertrain')
+		end
+		return nil
+	end 
 	
 	-- certain gearbox need to be shifted with setGearIndex() while others need to be shifted with shiftXOnY()
 	if gearBoxHandler[powertrainDevice.type] == 1 then
@@ -65,7 +74,10 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 		end
 		
 	else
-		print('MPInputsVE Error in "applyGear()" unknown GearBoxType "' .. powertrainDevice.type .. '"')
+		if not unsupportedPowertrainGearbox then
+			unsupportedPowertrainGearbox = true -- prevent spamming the log
+			print('MPInputsVE Error in "applyGear()" unknown GearBoxType "' .. powertrainDevice.type .. '"')
+		end
 	end
 end
 

@@ -1059,44 +1059,43 @@ local function onVehicleDestroyed(gameVehicleID)
 
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
-		
-		local veh = be:getObjectByID(gameVehicleID)
-		if veh:getJBeamFilename() == "unicycle" and settings.getValue("unicycleAutoSave") == true then -- if the player destroyed their unicycle
-			local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
-			--[[ Contains as of 0.30
-				[parts] = table
-					["slot_part_n"] = "plug_part_n"
-				[paints] = array[3]
-					[n] = table
-						[metallic] = float
-						[roughness] = float
-						[clearcoat] = float
-						[clearcoatRoughness] = float
-						[baseColor] = array[4]
-							[n] = float
-				[partConfigFilename] = string
-				[mainPartName] = string
-				[licenseName] = string
-				[model] = string
-				
-				the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
-			]]
-			vehicleConfig.format = 2
-			vehicleConfig.partConfigFilename = nil
-			
-			local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
-			if handle == nil then
-				log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
-			else
-				handle:write(jsonEncode(vehicleConfig))
-				handle:close()
-			end
-		end
 
 		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if vehicle.isLocal then
 				if serverVehicleID then
+					local veh = be:getObjectByID(gameVehicleID)
+					if veh:getJBeamFilename() == "unicycle" and settings.getValue("unicycleAutoSave") == true then -- if the player destroyed their unicycle
+						local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
+						--[[ Contains as of 0.30
+							[parts] = table
+								["slot_part_n"] = "plug_part_n"
+							[paints] = array[3]
+								[n] = table
+									[metallic] = float
+									[roughness] = float
+									[clearcoat] = float
+									[clearcoatRoughness] = float
+									[baseColor] = array[4]
+										[n] = float
+							[partConfigFilename] = string
+							[mainPartName] = string
+							[licenseName] = string
+							[model] = string
+							
+							the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
+						]]
+						vehicleConfig.format = 2
+						vehicleConfig.partConfigFilename = nil
+						
+						local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
+						if handle == nil then
+							log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
+						else
+							handle:write(jsonEncode(vehicleConfig))
+							handle:close()
+						end
+					end
 					MPGameNetwork.send('Od:'..serverVehicleID)
 					vehicles[serverVehicleID]:delete()
 				end
@@ -1291,6 +1290,7 @@ end
 
 --============================ ON VEHICLE EDITED (SERVER) ============================
 local function onServerVehicleEdited(serverID, data)
+	local decodedData = jsonDecode(data)
 	log('I', 'onServerVehicleEdited', "Edit received for "..serverID)
 
 	if not vehicles[serverID] then
@@ -1304,7 +1304,7 @@ local function onServerVehicleEdited(serverID, data)
 		return
 	end
 
-	if settings.getValue("enableSpawnQueue") then
+	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
 
 		log('I', 'onServerVehicleEdited', "edit "..serverID.." queued")
@@ -1500,10 +1500,6 @@ local function spawnDefaultRequest()
 end
 
 local function spawnRequest(model, config, colors)
-	local currentVehicle = be:getPlayerVehicle(0)
-	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
-	local vehicle = getVehicleByGameID(gameVehicleID)
-
 	return original_spawnNewVehicle(model, config or {})
 	--extensions.hook("trackNewVeh")
 end
@@ -1513,7 +1509,7 @@ local function replaceRequest(model, config, colors)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
-	if currentVehicle and vehicle.isLocal then
+	if currentVehicle and vehicle and vehicle.isLocal then
 		vehicle.jbeam = '-'
 		return original_replaceVehicle(model, config or {})
 	else
@@ -1527,7 +1523,7 @@ M.runPostJoin = function()
 	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
 	original_replaceVehicle = core_vehicles.replaceVehicle
 	original_spawnDefault = core_vehicles.spawnDefault
-	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') return end
+	core_vehicles.removeAllExceptCurrent = function() log('W', 'removeAllExceptCurrentVehicle', 'You cannot remove other vehicles in a Multiplayer session!') end
 	core_vehicles.spawnNewVehicle = MPVehicleGE.spawnRequest
 	core_vehicles.replaceVehicle = MPVehicleGE.replaceRequest
 	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest

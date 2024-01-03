@@ -52,9 +52,10 @@ For more information on how the launcher and server operate, you can read the so
 - [Server](https://github.com/BeamMP/BeamMP-Server)
 
 # Roadmap
-You can see and keep track of development, planned features, etc. on the GitHub Issues section on each repository.
+You can see and keep track of development, planned features, etc. [Here](https://github.com/orgs/BeamMP/projects/4) or on the GitHub Issues section of each repository.
 
 Additionally, you can join the [Discord](https://discord.gg/BeamMP), where regular updates are posted!
+Also there is our community [Forum](https://forum.beammp.com/), where we post additional details.
 
 # Troubleshooting
 
@@ -83,3 +84,4 @@ The individual language progress is as follows:
 - Portuguese (Brazil): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) 
 - Portuguese (Portugal): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) 
 - Russian: [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)
+- Chinese: [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)

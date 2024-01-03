@@ -417,6 +417,17 @@ local function isMPSession()
 	return isMpSession
 end
 
+--- Returns true if the current session is a multiplayer session and world ready state == 2.
+-- @return boolean True if it is a multiplayer session and world ready state == 2, false otherwise.
+-- @usage if MPCoreNetwork.isMPSessionActive() then `code` end
+local function isMPSessionActive()
+	if worldReadyState == 2 and isMpSession then
+		return true
+	else
+		return false
+	end
+end
+
 --- Returns if the game is currently transitioning to a multiplayer session.
 -- @return boolean isGoingMpSession True if transitioning to a multiplayer session, false otherwise.
 -- @usage if MPCoreNetwork.isGoingMPSession() then `code` end
@@ -700,6 +711,7 @@ M.connectToServer      = connectToServer
 M.leaveServer          = leaveServer
 M.getCurrentServer     = getCurrentServer
 M.isMPSession          = isMPSession
+M.isMPSessionActive    = isMPSessionActive
 M.isGoingMPSession     = isGoingMPSession
 
 M.onSerialize          = onSerialize

@@ -828,13 +828,10 @@ function($scope, $state, $timeout) {
     <div ng-if="show" style="
       display: inline-block;
       position: absolute; top: 0; left: 0; right: 0px;
-      width: 20%;
+      width: 30%;
       min-width: 30em;
       margin: 0 auto;
       padding: 0.1em 1em 0.1em 1em;
-      background-image: -webkit-linear-gradient(-23deg, rgba(180,0,0, 0.8) 0em 0.9em,  rgba(220,0,0, 0.8) 1em 1.9em, rgba(180,0,0, 0.8) 2em 2.9em);
-      /*background-image: repeating-linear-gradient(50deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.3), 10px, red 10px, red 20px);*/
-      /*background-color: rgba(250,0,0,0.7);*/
       background-size: 2.1em 100%;
       color: #ffffff;
       font-size: 0.8rem;
@@ -842,17 +839,149 @@ function($scope, $state, $timeout) {
       font-weight: 700;
       text-shadow: 0em 0em 0.2em black;
       text-align:center;
-      pointer-events: none;
-      z-index: 2022;
+      z-index: 2024;
+			pointer-events: all;
     ">
-      {{:: "ui.career.experimentalWarning" | translate }}
+			<style>
+			div#Session {
+				display: -webkit-box;
+				height: 30px;
+			}
+			#quit-button {
+				width: 55px;
+				height: 100%;
+				background-color: rgba(255,0,0, 0.6) !important;
+			}
+			.outerDiv {
+				display: flex;
+				width: 100%;
+				justify-content: center;
+				flex-flow: row nowrap;
+			}
+			.block {
+				min-height: 100%;
+				border: 2px solid rgba(175, 175, 175, 0.45);
+				background-color: rgba(0, 0, 0, 0.25);
+				display: flex;
+				align-items: center;
+				padding: 0px 10px 0px 10px;
+				white-space: nowrap;
+				overflow: hidden;
+				min-width: auto;
+			}
+			#server-name-block {
+				flex: 1 auto 0;
+			}
+			.others-block {
+				flex: 0 0 auto;
+			}
+			#button-block: {
+				padding: 0px;
+				margin: 0px;
+			}
+			.buttons {
+				color: #DDDDDD;
+				border: none;
+				transition: 0.20s;
+				background-color: rgba(0, 0, 0, 0.45);
+				height: 100%;
+			}
+			.buttons:hover {
+				background-color:rgba(0, 0, 0, 0.65);
+				color: #FFFFFF;
+			}
+			#queue-block {
+				display:inline-block;
+				background-size: 200% 100%;
+				background-image: linear-gradient(to right, rgba(255, 100, 0, 0.8) 50%, transparent 0);
+				background-position: left;
+			}
+			</style>
+			<div class="outerDiv">
+				<div>
+					<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">{{:: "ui.common.quit" | translate }}</button>
+				</div>
+				<div class="block" id="server-name-block" ng-if="show_session_status">
+					<span id="Session-Status"> {{:: session_status }} </span>
+				</div>
+				<div class="block others-block">
+					<span>Players: <span id="Session-PlayerCount">{{:: players }}</span></span>
+				</div>
+				<div class="block others-block">
+					<span>Ping: <span id="Session-Ping">{{:: ping }}</span></span>
+				</div>
+				<div class="block others-block" id="queue-block" padding: 0px" >
+					<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">{{:: queue_data }}</span></button>
+				</div>
+			</div>
     </div>
     `,
     scope: true,
     link($scope, elems, attrs) {
-      $scope.$on("$stateChangeSuccess",
-        () => bngApi.engineLua("MPCoreNetwork.isMPSession()", data => $scope.show = true)//!!data)
-      );
+      $scope.$on("$stateChangeSuccess", () => {
+				bngApi.engineLua("MPCoreNetwork.isMPSession()", data => $scope.show = data)
+				bngApi.engineLua('UI.setServerName()'); // request server name
+				bngApi.engineLua('UI.sendQueue()'); // request queue data
+			});
+			$scope.init = function() {
+				bngApi.engineLua('UI.setServerName()'); // request server name
+				bngApi.engineLua('UI.sendQueue()'); // request queue data
+				//TODO: ping request to instantly populate the player count
+			};
+			$scope.mpquit = function() {
+				bngApi.engineLua('MPCoreNetwork.leaveServer(true)');
+			};
+		
+			$scope.applyQueue = function() {
+				bngApi.engineLua('MPVehicleGE.applyQueuedEvents()');
+			};
+		
+			$scope.reset = function() {
+				$scope.init();
+			};
+			$scope.$on('setPing', function (event, ping) {
+				var sessionPing = document.getElementById("Session-Ping")
+				// To ensure that the element exists
+				if (sessionPing) {
+					$scope.ping = ping;
+				}
+			});
+		
+			$scope.$on('setQueue', function (event, queue) {
+				var queueBlock = document.getElementById("queue-block");
+				// To ensure that the element exists
+				if (queueBlock) {
+					if (queue.show) {
+						queueBlock.style["background-position"] = "0%";
+						queueBlock.style.display = "";
+					} else {
+						queueBlock.style.display = "none";
+						return;
+					}
+				}
+		
+				var queueCount = queue.editCount + queue.spawnCount;
+				$scope.queue_data = `${queue.spawnCount}|${queue.editCount}`;
+		
+			});
+		
+			$scope.$on('setAutoQueueProgress', function (event, progress) {
+				document.getElementById('queue-block').style["background-position"] = progress + "%";
+			});
+		
+			$scope.$on('setServerName', function (event, data) {
+				//console.log('Setting status to: ' + sanitizeString(data))
+				if (!data) $scope.show_session_status = false;
+				else {
+					$scope.show_session_status = true
+					$scope.session_status = sanitizeString(data); // DISPLAY SERVER NAME FORMATTING
+				}
+			});
+		
+			$scope.$on('setPlayerCount', function (event, count) {
+				//document.getElementById("Session-PlayerCount").innerHTML = count;
+				$scope.players = count;
+			});
     },
   }
 })
@@ -863,6 +992,13 @@ function($scope, $state, $timeout) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FUNCTIONS
 */ //////////////////////////////////////////////////////////////////////////////////////////////
+function sanitizeString(str) {  // VERY basic sanitization.
+	str = str.replace(/<script.*?<\/script>/g, '');
+	str = str.replace(/<button.*?<\/button>/g, '');
+	str = str.replace(/<iframe.*?<\/iframe>/g, '');
+	str = str.replace(/<a.*?<\/a>/g, '');
+    return str
+}
 // Set the first letter of each word upper case
 function toTitleCase(str) {
 	return str.replace(/\w\S*/g, function(txt){

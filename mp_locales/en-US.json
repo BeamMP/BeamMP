@@ -186,5 +186,6 @@
     "ui.multiplayer.reportTitle": "BeamMP - Player & Content Report",
     "ui.multiplayer.reportPrompt": "<div style=\"text-align:center;vertical-align:top\"><div style=\"display:flex;flex-flow: row;flex-wrap: wrap;align-items: stretch;justify-content: space-around; margin-bottom:2em\"><div style=\"flex: 0 0 30%;margin:0em 0.5em;\"><div style=\"background-image:url('/ui/modules/career/warnSave.png'); background-size: contain; height:8em;background-repeat: no-repeat;\"></div><span>Profile saves will not work between releases</span></div><div style=\"flex: 0 0 30%;margin:0em 0.5em;\"><div style=\"background-image:url('/ui/modules/career/warnWip.png'); background-size: contain; height:8em;background-repeat: no-repeat;\"></div><span>Gameplay balancing is Work in Progress (WIP)</span></div><div style=\"flex: 0 0 30%;margin:0em 0.5em;\"><div style=\"background-image:url('/ui/modules/career/warnGamepad.png'); background-size: contain; height:8em;background-repeat: no-repeat;\"></div><span>Limited gamepad and peripheral support</span></div></div><span style=\"width:100%;font-weight:800;\">Are you ready to continue?<span><div>",
     
-    "ui.common.submit": "Submit"
+    "ui.common.submit": "Submit",
+    "ui.common.quit": "Quit"
 }

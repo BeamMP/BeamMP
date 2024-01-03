@@ -895,8 +895,12 @@ local function applyVehEdit(serverID, data)
 
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
-	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
-		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	if settings.getValue("simplifyRemoteVehicles") then
+		local vehicleDir=string.format("/vehicles/%s/",vehicleName)
+		local ioCtx={preloadedDirs={vehicleDir,"/vehicles/common/"}} -- Fake
+		if jbeamIO.getPart(ioCtx,simplified_vehicles[vehicleName]) then -- Throws nil if the partID is nil or if the partID is not real
+			vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+		end
 	end
 
 	if vehicleName == veh:getJBeamFilename() then

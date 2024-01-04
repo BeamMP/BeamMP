@@ -126,7 +126,7 @@ local function smoothPosExec(serverVehicleID, decoded)
 		new.median_timer = TIMER()
 		POSSMOOTHER[serverVehicleID] = new
 				
-	elseif decoded.tim < 1 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- vehicle may have been reloaded or "tim" value may gone bonkers for other reasons
+	elseif decoded.tim < 3 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- if remote timer got reset or if new data is 3 seconds earlier then the known, expect that the remote vehicle got reset.
 		POSSMOOTHER[serverVehicleID].data = decoded
 		POSSMOOTHER[serverVehicleID].executed = false
 				
@@ -134,10 +134,13 @@ local function smoothPosExec(serverVehicleID, decoded)
 		-- nothing, outdated data
 		
 	else
+		-- ensure that there is a min age distance between the remote packages of 15ms
+		if (decoded.tim - POSSMOOTHER[serverVehicleID].data.tim) < 15 then return nil end
+		
 		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
 		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
-		if median_time > 15 then -- there can be lower intervals then 32ms, so we cover that
-			POSSMOOTHER[serverVehicleID].executed = false
+		POSSMOOTHER[serverVehicleID].executed = false
+		if median_time > 14 then -- there can be lower intervals then 32ms, so we cover that
 			if median_time < 80 then
 				local median_array = POSSMOOTHER[serverVehicleID].median_array
 				local next_index = median_array[1]
@@ -149,7 +152,7 @@ local function smoothPosExec(serverVehicleID, decoded)
 					for i = 3, median_array[2] + 2 do
 						median = median + median_array[i]
 					end
-					-- median + X to artificially count in fluctuations
+					-- median + X to artificially count in small fluctuations
 					POSSMOOTHER[serverVehicleID].median = (median / median_array[2]) + 3
 				end
 				POSSMOOTHER[serverVehicleID].median_array = median_array

@@ -135,7 +135,7 @@ local function smoothPosExec(serverVehicleID, decoded)
 		
 	else
 		-- ensure that there is a min age distance between the remote packages of 15ms
-		if (decoded.tim - POSSMOOTHER[serverVehicleID].data.tim) < 15 then return nil end
+		if (decoded.tim - POSSMOOTHER[serverVehicleID].data.tim) < 0.015 then return nil end
 		
 		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
 		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets

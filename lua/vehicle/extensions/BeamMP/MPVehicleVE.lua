@@ -58,7 +58,7 @@ end
 
 local function setVehicleType(x)
 	v.mpVehicleType = x
-	if settings.getValue("enableLowerCollisionAccuracy") and x ~= "L" then
+	if settings.getValue("enableLowerDamageAccuracy") and x ~= "L" then
 		nodesVE.disableCollisions()
 	end
 end

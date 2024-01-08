@@ -76,7 +76,7 @@ local defaultSettings = {
 	
 	-- experimentals
 	enablePosSmoother = false,
-	enableLowerCollisionAccuracy = false,
+	enableLowerDamageAccuracy = false,
 
 	-- unicycle configurations
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = true,

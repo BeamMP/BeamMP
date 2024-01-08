@@ -55,11 +55,11 @@
 </md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
-  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.enableLowerCollisionAccuracy' |
+  <p><span class="mp-setting-highlight">EXPERIMENTAL</span> {{:: 'ui.options.multiplayer.enableLowerDamageAccuracy' |
     translate }}</p>
-  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.enableLowerCollisionAccuracy.tooltip' | translate }}
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.enableLowerDamageAccuracy.tooltip' | translate }}
   </md-tooltip>
-  <md-checkbox ng-model="options.data.values.enableLowerCollisionAccuracy" ng-change="options.applyState()"></md-checkbox>
+  <md-checkbox ng-model="options.data.values.enableLowerDamageAccuracy" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
 <md-list-item md-no-ink>

@@ -845,8 +845,15 @@ local function applyVehSpawn(event)
 
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
-	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
-		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	if settings.getValue("simplifyRemoteVehicles") then
+		local vehicleDir=string.format("/vehicles/%s/",vehicleName)
+		local ioCtx={preloadedDirs={vehicleDir,"/vehicles/common/"}} -- Fake io context
+		local partID=simplified_vehicles[vehicleName]
+		local part=jbeamIO.getPart(ioCtx,partID) -- Returns nil if the partID is nil or if the part with given id doesnt exist
+		local expectedSlotName=vehicleName..'_body'
+		if part and (part.slotType==expectedSlotName or tableContains(part.slotType,expectedSlotName)) then -- THIS CHECK IS NOT SLOTS2 COMPATIBLE
+			vehicleConfig.parts[expectedSlotName]=partID
+		end
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -897,9 +904,12 @@ local function applyVehEdit(serverID, data)
 
 	if settings.getValue("simplifyRemoteVehicles") then
 		local vehicleDir=string.format("/vehicles/%s/",vehicleName)
-		local ioCtx={preloadedDirs={vehicleDir,"/vehicles/common/"}} -- Fake
-		if jbeamIO.getPart(ioCtx,simplified_vehicles[vehicleName]) then -- Throws nil if the partID is nil or if the partID is not real
-			vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+		local ioCtx={preloadedDirs={vehicleDir,"/vehicles/common/"}} -- Fake io context
+		local partID=simplified_vehicles[vehicleName]
+		local part=jbeamIO.getPart(ioCtx,partID) -- Returns nil if the partID is nil or if the part with given id doesnt exist
+		local expectedSlotName=vehicleName..'_body'
+		if part and (part.slotType==expectedSlotName or tableContains(part.slotType,expectedSlotName)) then -- THIS CHECK IS NOT SLOTS2 COMPATIBLE
+			vehicleConfig.parts[expectedSlotName]=partID
 		end
 	end
 

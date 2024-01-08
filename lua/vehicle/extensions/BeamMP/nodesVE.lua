@@ -11,6 +11,10 @@ local M = {}
 
 -- ============= VARIABLES =============
 local lastPos = vec3(0,0,0)
+local abs = math.abs
+local NORMALTYPE = 0
+local NODE_FIXED = 1
+local wheelNodes = {}
 -- ============= VARIABLES =============
 
 
@@ -237,13 +241,6 @@ local function onReset()
 	end
 end
 
---------- start of disableCollision modification
-
-local abs = math.abs
-local NORMALTYPE = 0
-local NODE_FIXED = 1
-local wheelNodes = {}
-
 local function nodeCheck(nodeID)
 	local connectedNodes = {}
 	for _, beam in pairs(v.data.beams) do
@@ -275,11 +272,8 @@ local function nodeCheck(nodeID)
 end
 
 local function disableCollisions()
-	print("disableCollision has been called")
-
-	print(tostring(obj:getID()).." collision have been set to false")
-
 	if v.data.nodes == nil then return end
+	print("LowerCollisionAccuracy has been enabled for this Vehicle " .. tostring(obj:getID()))
 
 	for _, node in pairs(v.data.nodes) do -- For each node
 
@@ -357,9 +351,6 @@ local function disableCollisions()
 
 		::continue::
 	end
-
-	print(tostring(obj:getID()).." state set successfully")
-
 	obj:requestReset(RESET_PHYSICS)
 end
 

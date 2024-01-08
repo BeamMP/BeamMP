@@ -65,7 +65,7 @@ local roleToInfo = {
 --- Contains the known simplified Vehicle versions.
 -- JBeamNames are Strings eg. "moonhawk", "unicycle"
 -- @table simplified_vehicles
--- @tfield string JBeamName_1 eg. "simple_traffic_coupe"
+-- @tfield string JBeamName_1 eg. "simple_traffic_body_5door_wagon"
 -- @tfield string JBeamName_N
 -- @usage local simplified = simplified_vehicles["coupe"]
 local simplified_vehicles = {
@@ -77,20 +77,20 @@ local simplified_vehicles = {
 	bolide = "simple_traffic_bolide",
 	burnside = "simple_traffic_burnside",
 	citybus = "simple_traffic_citybus",
-	coupe = "simple_traffic_coupe",
-	covet = "simple_covet",
-	etk800 = "simple_traffic_etk800",
-	etkc = "simple_traffic_etkc",
-	etki = "simple_traffic_etki",
+	coupe = "simple_traffic_body_2door_coupe",
+	covet = "simple_traffic_body_3door_hatch",
+	etk800 = "simple_traffic_body_5door_wagon",
+	etkc = "simple_traffic_body_2door_coupe",
+	etki = "simple_traffic_body_4door_sedan",
 	fullsize = "simple_traffic_fullsize",
 	hopper = "simple_traffic_hopper",
-	lansdale = "simple_traffic_lansdale",
-	legran = "simple_traffic_legran",
-	midsize = "simple_traffic_midsize",
+	lansdale = "simple_traffic_body_5door_wagon",
+	legran = "simple_traffic_body_4door_sedan",
+	midsize = "simple_traffic_body_4door_sedan",
 	midtruck = "simple_traffic_midtruck",
 	miramar = "simple_traffic_miramar",
 	moonhawk = "simple_traffic_moonhawk",
-	pessima = "simple_traffic_pessima",
+	pessima = "simple_traffic_body_4door_sedan",
 	pickup = "simple_traffic_pickup",
 	pigeon = "simple_traffic_pigeon",
 	racetruck = "simple_traffic_racetruck",
@@ -98,11 +98,12 @@ local simplified_vehicles = {
 	rockbouncer = "simple_traffic_rockbouncer",
 	sbr = "simple_traffic_sbr",
 	scintilla = "simple_traffic_scintilla",
-	semi = "simple_traffic_semi",
-	sunburst = "simple_traffic_sunburst",
+	--semi = "simple_traffic_semi",
+	sunburst = "simple_traffic_body_4door_sedan",
+	us_semi = "simple_traffic_us_semi",
 	utv = "simple_traffic_utv",
 	van = "simple_traffic_van",
-	vivace = "simple_vivace_slothub",
+	vivace = "simple_traffic_vivace",
 	wendover = "simple_traffic_wendover",
 	wigeon = "simple_traffic_wigeon"
 }

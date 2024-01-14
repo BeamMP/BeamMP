@@ -25,7 +25,6 @@
   "ui.options.multiplayer.nameTagAlternate": "Alternative Farben für Spielernamen Anzeigen ",
   "ui.options.multiplayer.nameTagShowDistance": "Zeige Distanz zum Spieler",
   "ui.options.multiplayer.debugOutput": "Debug-Ausgabe in der Konsole anzeigen",
-  "ui.options.multiplayer.launcherPort": "Launcher port:[br]Änderung auf eigene Gefahr",
   "ui.options.multiplayer.launcherPortWarn": "Änderung auf eigene Gefahr",
   "ui.options.multiplayer.launcherPortDefaultPort": "Standart ist 4444",
   "ui.options.multiplayer.launcherPort.tooltip": "Den benutzerdefinierten Port, den der Launcher verwendet",

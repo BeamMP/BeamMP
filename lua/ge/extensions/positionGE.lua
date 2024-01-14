@@ -137,10 +137,12 @@ local function smoothPosExec(serverVehicleID, decoded)
 		-- nothing, outdated data
 		
 	else
-		-- ensure that there is a min age distance between the remote packages of 15ms.
+		-- notes
 		-- right order 0.022 -- 0.044 -- 0.066
 		-- wrong order 0.022 -- 0.066 -- 0.044 (if 0.066 is received first, we overwrite it with 0.044 -> if 0.066 wasnt executed yet. otherwise this wouldnt be reached)
-		-- Todo: try to calc a median packet between the two for all relevant data. eg. (decoded.pos + POSSMOOTHER[serverVehicleID].data.pos) / 2
+		-- Todo: When this happens, try to calc a median packet between the two for all relevant data. eg. (decoded.pos + POSSMOOTHER[serverVehicleID].data.pos) / 2
+		
+		-- ensure that there is a min age distance between the remote packages of 15ms.
 		if (decoded.tim - POSSMOOTHER[serverVehicleID].last_executed_tim) < 0.015 then return nil end
 		
 		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()

@@ -23,6 +23,7 @@ local actualSimSpeed = 1
 			[rvel] = array[4]
 			[tim] = float
 			[ping] = float
+		[last_executed_tim] = float
 		[executed_last] = hptimerstruct
 		[median] = float
 		[median_array] = array
@@ -118,6 +119,7 @@ local function smoothPosExec(serverVehicleID, decoded)
 	if POSSMOOTHER[serverVehicleID] == nil then
 		local new = {}
 		new.data = decoded
+		new.last_executed_tim = decoded.tim
 		new.executed_last = TIMER()
 		new.executed = false
 		new.median = 32
@@ -126,16 +128,20 @@ local function smoothPosExec(serverVehicleID, decoded)
 		new.median_timer = TIMER()
 		POSSMOOTHER[serverVehicleID] = new
 				
-	elseif decoded.tim < 3 or (POSSMOOTHER[serverVehicleID].data.tim - decoded.tim) > 3 then -- if remote timer got reset or if new data is 3 seconds earlier then the known, expect that the remote vehicle got reset.
+	elseif decoded.tim < 3 or (POSSMOOTHER[serverVehicleID].last_executed_tim - decoded.tim) > 3 then -- if remote timer got reset or if new data is 3 seconds earlier then the known, expect that the remote vehicle got reset.
 		POSSMOOTHER[serverVehicleID].data = decoded
+		POSSMOOTHER[serverVehicleID].last_executed_tim = decoded.tim
 		POSSMOOTHER[serverVehicleID].executed = false
 				
-	elseif POSSMOOTHER[serverVehicleID].data.tim > decoded.tim then
+	elseif POSSMOOTHER[serverVehicleID].last_executed_tim > decoded.tim then
 		-- nothing, outdated data
 		
 	else
-		-- ensure that there is a min age distance between the remote packages of 15ms
-		if (decoded.tim - POSSMOOTHER[serverVehicleID].data.tim) < 0.015 then return nil end
+		-- ensure that there is a min age distance between the remote packages of 15ms.
+		-- right order 0.022 -- 0.044 -- 0.066
+		-- wrong order 0.022 -- 0.066 -- 0.044 (if 0.066 is received first, we overwrite it with 0.044 -> if 0.066 wasnt executed yet. otherwise this wouldnt be reached)
+		-- Todo: try to calc a median packet between the two for all relevant data. eg. (decoded.pos + POSSMOOTHER[serverVehicleID].data.pos) / 2
+		if (decoded.tim - POSSMOOTHER[serverVehicleID].last_executed_tim) < 0.015 then return nil end
 		
 		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
 		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
@@ -219,6 +225,7 @@ local function onPreRender(dt)
 		if not data.executed and timedif >= data.median then
 			POSSMOOTHER[serverVehicleID].executed_last:stopAndReset()
 			POSSMOOTHER[serverVehicleID].executed = true
+			POSSMOOTHER[serverVehicleID].last_executed_tim = data.data.tim
 			applyPos(data.data, serverVehicleID)
 			
 		elseif timedif > 60000 then -- seconds. vehicle potentially removed. rem entry

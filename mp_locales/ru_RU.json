@@ -1,6 +1,6 @@
 {
-    "ui.playmodes.multiplayer": "Мультиплеер",
-    "ui.options.multiplayer": "Мультиплеер",
+    "ui.playmodes.multiplayer": "Мультиплеер (BeamMP)",
+    "ui.options.multiplayer": "Мультиплеер (BeamMP)",
     "ui.options.multiplayer.autoSyncVehicles": "Автоматическая синхронизация деталей",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "Детали вашего авто будут автоматически синхронизированы у других игроков через некоторое время",
     "ui.options.multiplayer.queueSpawnEdit": "Использовать очередь обновлений",
@@ -120,6 +120,6 @@
     "ui.multiplayertos.info1": "Дополнительная информация в нашем ",
     "ui.multiplayertos.info2": "Вы можете найти больше информации в нашем ",
     "ui.common.multiplayer.sync": "Синхронизация",
-    "ui.apps.categories.multiplayer": "Мультиплеер",
+    "ui.apps.categories.multiplayer": "Мультиплеер (BeamMP)",
     "ui.camera.mode.passenger": "Пассажир"
 }

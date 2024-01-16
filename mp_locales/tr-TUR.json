@@ -1,6 +1,6 @@
 {
-    "ui.playmodes.multiplayer": "Çok Oyunculu",
-    "ui.options.multiplayer": "Çok Oyunculu",
+    "ui.playmodes.multiplayer": "Çok Oyunculu (BeamMP)",
+    "ui.options.multiplayer": "Çok Oyunculu (BeamMP)",
     "ui.options.multiplayer.autoSyncVehicles": "Otomatik parça senkronizasyonunu etkinleştir",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "Etkinleştirilirse, araç parçalarınız birkaç saniye sonra otomatik olarak diğer oyuncularla senkronize edilecektir",
     "ui.options.multiplayer.queueSpawnEdit": "Oyuncu güncellemelerini sıraya alın",
@@ -120,6 +120,6 @@
     "ui.multiplayertos.info1": "Daha fazla bilgi için, mutlaka",
     "ui.multiplayertos.info2": "Ayrıca daha fazla bilgi için",
     "ui.common.multiplayer.sync": "Eşitle",
-    "ui.apps.categories.multiplayer": "Çok Oyunculu",
+    "ui.apps.categories.multiplayer": "Çok Oyunculu (BeamMP)",
     "ui.camera.mode.passenger": "Yolcu"
 }

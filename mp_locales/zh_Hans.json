@@ -1,6 +1,6 @@
 {
-  "ui.playmodes.multiplayer": "多人模式",
-  "ui.options.multiplayer": "多人模式",
+  "ui.playmodes.multiplayer": "多人模式 (BeamMP)",
+  "ui.options.multiplayer": "多人模式 (BeamMP)",
   "ui.options.multiplayer.enableNewChatMenu": "全新聊天菜单",
   "ui.options.multiplayer.enableNewChatMenu.tooltip": "此聊天菜单使用了ImGui。其支持自定义，时尚又整洁，非常的棒棒！",
   "ui.options.multiplayer.enablePosSmoother": "启用位置平滑",
@@ -129,6 +129,6 @@
   "ui.multiplayertos.info1": "更多信息可查看我们的 ",
   "ui.multiplayertos.info2": "您也可以在此找到更多信息 ",
   "ui.common.multiplayer.sync": "同步",
-  "ui.apps.categories.multiplayer": "多人模式",
+  "ui.apps.categories.multiplayer": "多人模式 (BeamMP)",
   "ui.camera.mode.passenger": "乘客"
 }

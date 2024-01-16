@@ -1,6 +1,6 @@
 {
-  "ui.playmodes.multiplayer": "Mehrspieler",
-  "ui.options.multiplayer": "Mehrspieler",
+  "ui.playmodes.multiplayer": "Mehrspieler (BeamMP)",
+  "ui.options.multiplayer": "Mehrspieler (BeamMP)",
   "ui.options.multiplayer.enableNewChatMenu": "Neues Chat Menü",
   "ui.options.multiplayer.enableNewChatMenu.tooltip": "Das neue Chat Menü verwendet ImGui. Es ist anpassbar, schlicht und fantastisch.",
   "ui.options.multiplayer.enablePosSmoother": "Aktiviere reibungslosere Positions updates",
@@ -128,6 +128,6 @@
   "ui.multiplayertos.info1": "Für weitere Informationen, besuche unser ",
   "ui.multiplayertos.info2": "Ausserdem findest du weitere Informationen unter ",
   "ui.common.multiplayer.sync": "Sync",
-  "ui.apps.categories.multiplayer": "Mehrspieler",
+  "ui.apps.categories.multiplayer": "Mehrspieler (BeamMP)",
   "ui.camera.mode.passenger": "Passagier"
 }

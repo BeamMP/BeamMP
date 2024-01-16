@@ -1,6 +1,6 @@
 {
-    "ui.playmodes.multiplayer": "Tryb Wieloosobowy",
-    "ui.options.multiplayer": "Tryb Wieloosobowy",
+    "ui.playmodes.multiplayer": "Tryb Wieloosobowy (BeamMP)",
+    "ui.options.multiplayer": "Tryb Wieloosobowy (BeamMP)",
     "ui.options.multiplayer.autoSyncVehicles": "Synchronizacja Auta włączona",
     "ui.options.multiplayer.autoSyncVehicles.tooltip": "Jeśli włączone za chwile częsci twojego pojazdu zostaną zsynchronizowane z innymi graczami",
     "ui.options.multiplayer.queueSpawnEdit": "Aktualizacja kolejki",
@@ -100,6 +100,6 @@
     "ui.multiplayertos.info1": "Aby uzyskać więcej informacji luknij tutaj",
     "ui.multiplayertos.info2": "Więcej informacji znajdziesz na naszej stronie ",
     "ui.common.multiplayer.sync": "Sync",
-    "ui.apps.categories.multiplayer": "Multiplayer",
+    "ui.apps.categories.multiplayer": "Tryb Wieloosobowy (BeamMP)",
     "ui.camera.mode.passenger": "Pasażer"
 }

@@ -1,5 +1,5 @@
 {
-    "ui.options.multiplayer": "Többjátékos",
+    "ui.options.multiplayer": "Többjátékos (BeamMP)",
 
     "ui.options.multiplayer.nameTagTitle": "Játékosnevek",
     "ui.options.multiplayer.nameTags": "Játékosok neveinek mutatása",

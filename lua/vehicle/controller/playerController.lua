@@ -27,7 +27,8 @@ local yawMaxForce = 200
 local movementSpeedNormal = 1.8
 local movementSpeedSprint = 5
 
-local maxAllowedBallAV = 14
+local maxAllowedBallAVNormal = 4.5 --14
+local maxAllowedBallAVSprint = 13 --14
 local maxBallTorque = 500
 
 local ballPressureNormal = 1.0
@@ -73,6 +74,10 @@ local jumpForceTime = 0.01
 
 local lockBeams = {}
 local isBallLocked = false
+local ballLockStates = {unlocked = "unlocked", locking = "locking", locked = "locked"}
+local ballLockState = ballLockStates.unlocked
+local previousBallLockState = ballLockStates.unlocked
+local ballLockRampTimer = 0
 
 M.engineInfo = {
   0,
@@ -133,6 +138,8 @@ local forceVectorLeft = vec3()
 local yawLeftForce = 0
 local yawRightForce = 0
 
+local particleRate = 0
+
 local function debugDraw(focusPos)
   for _, v in pairs(debugVectors) do
     obj.debugDrawProxy:drawNodeVector3d(v.thickness or 0.05, v.cid, v.vector, v.color)
@@ -147,6 +154,7 @@ local function nodeCollision(p)
   local nodeVelocity = vec3(p.nodeVel)
   ballBasedPlayerVelocity = ballCenterVelocity - nodeVelocity + (slipVelocity * slipUsageCoef)
   table.insert(ballGroundContactNodesNew, p.id1)
+  particleRate = particleRate + 1
 end
 
 local function applyTorque(axis, node1, node2, node3, torque)
@@ -182,15 +190,17 @@ local function update(dt)
   if jumpForceTimer > 0 then
     jumpForceTimer = jumpForceTimer - dt
 
+    --jump by "extending" the uniycycle in such a way that it propels away from the ground
     local vectorUp = obj:getBeamVectorFromNode(stabilizationBeams.bottomTop, stabilizationNodes.bottomCenter):normalized()
+    --pull top of the unicycle up with a given force
     obj:applyForceVector(stabilizationNodes.topCenter, (vectorUp * jumpForce))
+
+    --push down the ground-touching ball nodes with the overall same force, spread across all touching nodes
     local ballNodeForce = jumpForce / #ballGroundContactNodesPast
     local ballNodeForceVector = (-vectorUp * ballNodeForce)
     for _, cid in ipairs(ballGroundContactNodesPast) do
       obj:applyForceVector(cid, ballNodeForceVector)
     end
-  else
-    jumpForceTimer = 0
   end
 end
 
@@ -198,13 +208,44 @@ local function setBallLock(locked)
   if locked == isBallLocked then
     return
   end
+  isBallLocked = locked
 
-  for _, cid in ipairs(lockBeams) do
-    obj:setBeamLength(cid, obj:getBeamLength(cid))
-    obj:setBeamSpringDamp(cid, locked and 100000 or 0, locked and 50 or 0, -1, -1)
+  previousBallLockState = ballLockState
+  ballLockState = locked and ballLockStates.locking or ballLockStates.unlocked
+  if not locked then
+    ballLockRampTimer = 0
+  end
+end
+
+local function updateBallLock(dt)
+  if ballLockState == previousBallLockState then
+    return
   end
 
-  isBallLocked = locked
+  local spring
+  local damp
+  if ballLockState == ballLockStates.locking then
+    spring = 0
+    damp = 400
+    ballLockRampTimer = ballLockRampTimer + dt
+    local rampTime = 0.4 + movementSpeedCoef * 0.3 -- 400ms when walking, 700ms when sprinting
+    if ballLockRampTimer >= rampTime then
+      previousBallLockState = ballLockStates.locking
+      ballLockState = ballLockStates.locked
+    end
+  elseif ballLockState == ballLockStates.locked then
+    spring = 100000
+    damp = 100
+    previousBallLockState = ballLockStates.locked
+  else
+    spring = 0
+    damp = 0
+    previousBallLockState = ballLockStates.unlocked
+  end
+  for _, cid in ipairs(lockBeams) do
+    obj:setBeamLength(cid, obj:getBeamLength(cid))
+    obj:setBeamSpringDamp(cid, spring, damp, -1, -1)
+  end
 end
 
 local function updateFixedStep(dt)
@@ -257,7 +298,7 @@ local function updateFixedStep(dt)
 
   if guardedWalkVector:length() > 0 then
     ballTorqueAxis = (desiredMovementVector + movementVectorDifference):z0():cross(vectorUp)
-    ballDesiredTorque = speedError * maxBallTorque
+    ballDesiredTorque = speedError * maxBallTorque * guardedWalkVector:length()
     setBallLock(false)
   else
     ballTorqueAxis = (cameraRotation * cameraRotationStandardVector):z0():cross(vectorUp)
@@ -273,14 +314,14 @@ local function updateFixedStep(dt)
     ballAV = ballAVSmoother:get(ballAV)
   end
 
-  local ballAVTorqueCoef = linearScale(abs(ballAV), maxAllowedBallAV, maxAllowedBallAV + 1, 1, 0)
+  local maxBallAVAdjusted = linearScale(movementSpeedCoef, 0, 1, maxAllowedBallAVNormal, maxAllowedBallAVSprint)
+  local ballAVTorqueCoef = linearScale(abs(ballAV), maxBallAVAdjusted, maxBallAVAdjusted + 1, 1, 0)
   ballDesiredTorque = ballDesiredTorque * ballAVTorqueCoef
 
   --yaw
   local cameraDirection = (cameraRotation * cameraRotationStandardVector):z0():normalized()
-
   local meshDirection = obj:getBeamVectorFromNode(stabilizationBeams.centerFront, stabilizationNodes.topCenter):z0():normalized()
-	--calculate angle between the two vectors
+  --calculate angle between the two vectors
   local angleError = atan2(cameraDirection.y, cameraDirection.x) - atan2(meshDirection.y, meshDirection.x)
   --fix up the range to be [-pi, +pi]
   if angleError > pi then
@@ -296,6 +337,8 @@ local function updateFixedStep(dt)
   yawLeftForce = (yawLeftForceCoef + linearScale(yawRightForceCoef, 0, 0.01, 0.1, 0)) * yawForceMultiplier
   yawRightForce = (yawRightForceCoef + linearScale(yawLeftForceCoef, 0, 0.01, 0.1, 0)) * yawForceMultiplier
 
+  updateBallLock(dt)
+
   --table.insert(debugVectors, {cid = stabilizationNodes.topLeft, vector = vectorTopFrontLeft * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopRearRight * yawLeftForce * 0.001, color = color(244, 93, 1, 255)})
   --table.insert(debugVectors, {cid = stabilizationNodes.topRight, vector = vectorTopFrontRight * yawRightForce * 0.001, color = color(175, 18, 90, 255)})
@@ -310,7 +353,6 @@ local function updateFixedStep(dt)
 	  electrics.values.unicycle_crouch = (isCrouching and -1 or 1)
 	  electrics.values.unicycle_speed = movementSpeedCoef
   end
-
 end
 
 local function updateGFX(dt)
@@ -333,9 +375,12 @@ local function updateGFX(dt)
     isTouchingGround = isTouchingGround or obj:isNodeColliding(nodeCid)
   end
 
-  if isTouchingWater then
+  particleRate = particleRate / dt
+
+  if not isTouchingGround or particleRate < 100 then
     ballBasedPlayerVelocity = vec3(0, 0, 0) --ball based AV doesn't work in water, make sure to reset the measured value to 0
   end
+  particleRate = 0
 
   jumpCooldown = max(jumpCooldown - dt, 0)
 
@@ -478,6 +523,9 @@ end
 local function reset()
   isFrozen = false
   isBallLocked = false
+  ballLockState = ballLockStates.unlocked
+  previousBallLockState = ballLockStates.unlocked
+  ballLockRampTimer = 0
   isTouchingGround = false
   isTouchingWater = false
   isCrouching = false

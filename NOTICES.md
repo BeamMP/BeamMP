@@ -16,12 +16,24 @@ All code, assets or works not specified in this document which do not have a dif
     - `vehicles/unicycle/unicycle_beamling.jbeam`
 
 ## Third-Party Dependencies, Libraries & Works
-- bCDDL: By BeamNG Gmbh
-  - **Version:** 1.1
-  - **License:** bCDDL
-  - **Location:** https://beamng.com/bCDDL-1.1.txt
-  - **Files:** 
-    - ``
+- GameAssets: By BeamNG GmbH
+  - **License:** Common Development and Distribution License
+  - **Location 1:** `./BeamNG.drive/lua/bCDDL-1.1.txt`
+  - **Location 2:** https://beamng.com/bCDDL-1.1.txt
+  - **Files:**
+    - `lua/ge/extensions/core/cameraModes/passenger.lua`
+	- `lua/ge/extensions/core/input/categories.lua`
+	- `lua/vehicle/controller/playerController.lua`
+  - **License:** The MIT License
+  - **Location:** `./BeamNG.drive/ui/LICENSE`
+  - **Limited to:** All html, image, js and css files of that directory and its subdirectories
+  - **Files:**
+    - `ui/entrypoints/main.js`
+	- `ui/entrypoints/resources.js`
+	- `ui/modules/mainmenu/mainmenu.js`
+	- `ui/modules/options/options.html`
+	- `ui/modules/vehicleconfig/partial.part.html`
+	- `ui/modules/vehicleconfig/vehicleconfig.js`
 
 ## Contact Information
 For questions or more information, please contact [BeamMP](mailto:admin@beammp.com).

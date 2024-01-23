@@ -26,7 +26,7 @@ All code, assets or works not specified in this document which do not have a dif
     - `lua/vehicle/controller/playerController.lua`
   - **License:** The MIT License
   - **Location:** `./BeamNG.drive/ui/LICENSE`
-  - **Limited to:** All html, image, js and css files of that directory and its subdirectories
+  - **Limited to:** All html, image, js and css files of the games installation `ui` directory and its subdirectories
   - **Files:**
     - `ui/entrypoints/main.js`
     - `ui/entrypoints/resources.js`

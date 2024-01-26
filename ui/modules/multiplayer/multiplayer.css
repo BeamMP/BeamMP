@@ -30,42 +30,28 @@
   height: 100%;
 }
 
-/*
-Correct way, but breaks  table formatting badly
-*/
-/*
-table#serversTable {
-  width: 100%;
-  color: white;
-  margin-top: 75px;
+#serversTableContainer {
+	margin-top: 75px;
+	overflow-x: hidden;
 }
-
-table#serversTable tbody {
-	display: block;
-	overflow: auto;
-	height: 700px;
-}
-
-#serversTableHead, #serversTableBody tr {
-	display: table;
-	width: 100%;
-}
-*/
-
-/*
-Not as good but does not break the table formatting
-*/
 
 table#serversTable {
   width: 100%;
   color: white;
-  margin-top: 75px;
-  display: block;
-  overflow: auto;
-  height: 700px;
+  position: relative;
 }
 
-/* Both previous solutions are not that great though as the table is not flexible. It does not fill the visible area. */
+#serversTable th {
+	/*
+	position: sticky;
+	top: 0;
+	*/
+	z-index: 150;
+}
+
+#serversTableBody {
+	z-index: 140;
+}
 
 #serversTable th {
   background-color: rgba(0, 0, 0, 0);

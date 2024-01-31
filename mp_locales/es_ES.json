@@ -3,6 +3,8 @@
   "ui.options.multiplayer": "Multiplayer",
   "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
   "ui.options.multiplayer.enableNewChatMenu.tooltip": "El nuevo menú de chat usa ImGui. Es personalizable, elegante e increíble!",
+  "ui.options.multiplayer.enablePosSmoother": "Activar suavizante de ejecucíon posicional",
+  "ui.options.multiplayer.enablePosSmoother.tooltip": "Intenta suavizar los datos de posición de los jugadores con conexiones inestables, reudciendo así el \"warping\" y \"rubber banding\" de vehículos",
   "ui.options.multiplayer.autoSyncVehicles": "Activar sincronización de piezas automática",
   "ui.options.multiplayer.autoSyncVehicles.tooltip": "Si se activa, las piezas de tu vehículo serán sincronizadas automáticamente con los demás jugadores tras unos segundos",
   "ui.options.multiplayer.queueSpawnEdit": "Activar colas de espera de modificaciones vehiculares",

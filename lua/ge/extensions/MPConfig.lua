@@ -183,7 +183,12 @@ local function getFavorites()
 	end
 
 	-- Sort the data table using the comparison function
-	table.sort(favs, sortByAgeDesc)
+	if favs then
+		table.sort(favs, sortByAgeDesc)
+	else
+		log('E', 'getFavorites', 'Unable to read favorites from file or file is empty')
+		favs = {} -- Initialize favs to an empty table to avoid further errors
+	end
 
 	local cleanedServers = {}
 

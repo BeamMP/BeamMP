@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
 // If a copy of the MIT license was not distributed with this
-// file, You can obtain one at https://mit-license.org
+// file, You can obtain one from the NOTICES.md
 
 'use strict'
 

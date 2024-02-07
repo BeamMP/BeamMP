@@ -16,17 +16,19 @@ All code, assets or works not specified in this document which do not have a dif
     - `vehicles/unicycle/unicycle_beamling.jbeam`
 
 ## Third-Party Dependencies, Libraries & Works
-- GameAssets: By BeamNG GmbH
-  - **License:** Common Development and Distribution License
-  - **Location 1:** `./BeamNG.drive/lua/bCDDL-1.1.txt`
-  - **Location 2:** https://beamng.com/bCDDL-1.1.txt
+- GameAssets and Code: By BeamNG GmbH
+  - **License:** beamNG COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (bCDDL) Version 1.1
+  - **Location 1:** `./3rd_party_licenses/BeamNG-bCDDL-1.1`
+  - **Location 2:** In the Game installation: `./BeamNG.drive/lua/bCDDL-1.1.txt`
+  - **Location 3:** https://beamng.com/bCDDL-1.1.txt
   - **Files:**
     - `lua/ge/extensions/core/cameraModes/passenger.lua`
     - `lua/ge/extensions/core/input/categories.lua`
     - `lua/vehicle/controller/playerController.lua`
   - **License:** The MIT License
-  - **Location:** `./BeamNG.drive/ui/LICENSE`
-  - **Limited to:** All html, image, js and css files of the games installation `ui` directory and its subdirectories
+  - **Location 1:** `./3rd_party_licenses/BeamNG-MIT`
+  - **Location 2:** In the Game installation: `./BeamNG.drive/ui/LICENSE`
+  - **Note:** The License specifies that it is limited to all html, image, js and css files of the games installation `ui` folder and its subfolders
   - **Files:**
     - `ui/entrypoints/main.js`
     - `ui/entrypoints/resources.js`

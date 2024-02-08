@@ -1,9 +1,6 @@
---====================================================================================
--- All work by 20dka.
--- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
---====================================================================================
--- Helper functions for use in BeamMP and its extensions
---====================================================================================
+-- Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+-- Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
+-- SPDX-License-Identifier: AGPL-3.0-or-later
 
 --- MPHelpers API.
 --- Author of this documentation is Titch

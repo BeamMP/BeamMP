@@ -1,7 +1,7 @@
---====================================================================================
--- All work by Titch2000 and jojos38.
--- You have no permission to edit, redistribute or upload. Contact us for more info!
---====================================================================================
+-- Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+-- Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 local ver = split(beamng_versionb, ".")
 local majorVer = tonumber(ver[2])
 local compatibleVersion = 31

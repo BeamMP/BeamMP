@@ -53,33 +53,5 @@ All code, assets or works not specified in this document which do not have a dif
   - **Files:**
     - All flag .png files within `ui/modules/multiplayer/flags/*`
 
-- Assets: By Font Awesome
-  - **License:** The MIT License
-  - **Location:** `3rd_party_licenses/Font-Awesome-MIT`
-  - **Origin:** https://github.com/FortAwesome/Font-Awesome/tree/4.x
-  - **Files:**
-    - `ui/modules/multiplayer/css/font-awesome.min.css`
-
-- Assets: By Osman Nuri Okumus
-  - **License:** The MIT License
-  - **Location:** `3rd_party_licenses/metisMenu-MIT`
-  - **Origin:** https://github.com/onokumus/metisMenu
-  - **Files:**
-    - `ui/modules/multiplayer/css/metisMenu.min.css`
-
-- Assets: By morrisjs
-  - **License:** Simplified BSD License
-  - **Location:** `3rd_party_licenses/morrisjs-BSD`
-  - **Origin:** https://morrisjs.github.io/morris.js
-  - **Files:**
-    - `ui/modules/multiplayer/css/morris.css`
-
-- Assets: By Start Bootstrap
-  - **License:** Apache License v2.0
-  - **Location:** `3rd_party_licenses/StartBootstrap-Apache-2.0`
-  - **Origin:** http://startbootstrap.com
-  - **Files:**
-    - `ui/modules/multiplayer/css/startmin.css`
-
 ## Contact Information
 For questions or more information, please contact [BeamMP](mailto:admin@beammp.com).

@@ -213,7 +213,8 @@ local function sendBeamMPInfo()
 		players = ''..p,
 		servers = ''..s,
 		beammpGameVer = ''..modVersion,
-		beammpLauncherVer = ''..launcherVersion
+		beammpLauncherVer = ''..launcherVersion,
+		username = ''..MPConfig.getNickname()
 	})
 end
 

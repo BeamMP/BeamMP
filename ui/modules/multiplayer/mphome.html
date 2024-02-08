@@ -1,6 +1,6 @@
 <!-- Icons can be found here: https://fonts.google.com/icons?selected=Material+Icons -->
 
-<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayerHome/mphome.css">
+<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayer/mphome.css">
 
 <div style="margin: 2em;">
   <div class="flex-container">
@@ -12,11 +12,12 @@
               <h1>Server Browser</h1>
             </div>
             <div class="menu-card-content" ng-controller="MultiplayerHomeController">
+              <p>{{::}}</p>
               <h3>Welcome back, <b>{{::steamData.playerName}}</b>!</h3>
             </div>
           </div>
 
-          <div class="clickable flex-button" ui-sref="BACK_TO_MAIN">
+          <div class="clickable flex-button" ui-sref="menu.multiplayerCareer">
             <span class="menu-button-text">
               <div class="menu-card-title">
                 <h1>CareerMP <span class="new-badge">New</span></h1>
@@ -30,7 +31,7 @@
           <div class="clickable flex-button" ui-sref="BACK_TO_MAIN">
             <span class="menu-button-text">
               <div class="menu-card-title">
-                <h1>Scenarios <span class="coming-soon-badge">Coming Soon</span></h1>
+                <h1>Scenarios & Gamemodes <span class="coming-soon-badge">Coming Soon</span></h1>
               </div>
               <div class="menu-card-content">
                 <h3>Play custom preset scenarios and game modes in multiplayer</h3>
@@ -39,7 +40,7 @@
           </div>
         </div>
         <div class="flex-server-buttons">
-          <div class="clickable server-button flex-full-width" ui-sref="menu.multiplayer.direct">
+          <div class="clickable server-button flex-full-width" ng-click="multiplayer.gotoCreateServer()">
             <h1>Private Servers <span class="ea-badge">Early Access Only</span></h1>
             <h3>Create a private server for you and your friends only.</h3>
           </div>

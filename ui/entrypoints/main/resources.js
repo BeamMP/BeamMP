@@ -150,7 +150,6 @@ export default [
     '/atom/card/card.js',
     '/atom/tabs/tabs.js',
     '/multiplayer/multiplayer.js',
-    '/multiplayerHome/mphome.js',
     '/multiplayerPause/pause.js',
 
     '/mainmenu/mainmenu.css',

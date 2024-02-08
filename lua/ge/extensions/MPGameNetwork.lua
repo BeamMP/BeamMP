@@ -135,10 +135,20 @@ local function quitMP(reason)
 	local text = reason~="" and ("Reason: ".. reason) or ""
 	log('M','quitMP',"Quit MP Called! reason: "..tostring(reason))
 
-	UI.showMdDialog({
-		dialogtype="alert", title="You have been disconnected from the server", text=text, okText="Return to menu",
-		okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
-	})
+	--guihooks.trigger('ConfirmationDialogOpen', welcomeTitle, welcomeBody, buttonOkText, buttonOkLua, buttonCancelText, buttonCancelLua)
+	guihooks.trigger(
+		'ConfirmationDialogOpen', 
+		"ui.multiplayer.prompts.disconnect.title", 
+		"ui.multiplayer.prompts.disconnect.body",
+		"ui.multiplayer.prompts.disconnect.okButton",
+		"MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
+		--"ui.multiplayer.prompts.disconnect.cancelButton",
+	)
+
+	--UI.showMdDialog({
+	--	dialogtype="alert", title="You have been disconnected from the server", text=text, okText="Return to menu",
+	--	okLua="MPCoreNetwork.leaveServer(true)" -- return to main menu when clicking OK
+	--})
 end
 
 -- -----------------------------------------------------------------------------

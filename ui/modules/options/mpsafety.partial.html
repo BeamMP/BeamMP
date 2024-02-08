@@ -1,0 +1,44 @@
+<link rel="stylesheet" type="text/css" href="/ui/modules/options/multiplayer.partial.css" />
+
+<md-list-item layout="column" layout-align="start start">
+  <p>
+    <h3>{{:: 'ui.options.chatFilter' | translate}}</h3>
+  </p>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em;">
+  <p>{{:: 'ui.options.multiplayer.safety.filterProfanity' | translate }}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.filterProfanityDescription' | translate }}</span>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.safety.filterProfanity.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.filterProfanity" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em;">
+  <p>{{:: 'ui.options.multiplayer.safety.filterHate' | translate }}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.filterHateDescription' | translate }}</span>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.safety.filterHate.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.filterHate" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em;">
+  <p>{{:: 'ui.options.multiplayer.safety.filterInappropriateContent' | translate }}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.filterInappropriateContentDescription' | translate }}</span>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.safety.filterInappropriateContent.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.filterInappropriateContent" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em;">
+  <p>{{:: 'ui.options.multiplayer.safety.filterCustomWords' | translate }}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.filterCustomWordsDescription' | translate }}</span>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.safety.filterCustomWords.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.filterCustomWords" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em;">
+  <md-input-container style="width: 100%">
+    <textarea id="filteredWords" flex ng-model="options.data.values.filteredWords"
+      ng-change="options.applyState()"></textarea>
+      <label>{{:: 'ui.options.multiplayer.safety.filterCustomWords.helper' | translate }}</label>
+  </md-input-container>
+</md-list-item>
+

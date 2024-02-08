@@ -32,6 +32,8 @@ local original_spawnNewVehicle
 local original_replaceVehicle
 local original_spawnDefault
 
+setmetatable(_G,{}) -- temporarily disable global write notifications
+
 
 --- Contains Information about Backend authorized Roles
 -- @table roleToInfo
@@ -240,6 +242,50 @@ local distanceMap = {}
 
 
 -- VV============== FUNCTIONS USEABLE BY SCRIPTERS ==============VV
+
+--- Updates the players table for the specific players muted status
+-- @tparam string name The Players Name
+-- @usage togglePlayerMuted("Titch")
+local function togglePlayerMuted(name)
+	dump('togglePlayerMuted', name)
+	for playerID, player in pairs(players) do
+		if player.name == name then
+			dump(player)
+			player.muted = not player.muted
+			
+			dump(player)
+		end
+	end
+end
+
+--- Updates the players table for the specific players muted status
+-- @tparam string name The Players Name
+-- @usage togglePlayerMuted("Titch")
+local function togglePlayerHidden(name)
+	dump('togglePlayerHidden', name)
+	for playerID, player in pairs(players) do
+		if player.name == name then
+			player.hidden = not player.hidden
+			-- Now remove the players exisiting vehicles
+			dump(player)
+			for k, v in pairs(player.vehicles) do
+				v:delete()
+			end
+		end
+	end
+end
+
+--- Updates the players table for the specific players ping
+-- @tparam string name The Players Name
+-- @tparam string ping The Players Ping
+-- @usage updatePlayerPing("Titch", 27)
+function updatePlayerPing(name, ping)
+	for playerID, player in pairs(players) do
+		if player.name == name then
+			player.ping = ping
+		end
+	end
+end
 
 --- Resolves a serverVehicleID into the gameVehicleID
 -- @tparam string serverVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
@@ -593,6 +639,8 @@ function Player:new(data)
 	setmetatable(o.vehicles, mt)
 
 	o.ping = -1
+	o.muted = false
+	o.hidden = false
 	o.activeVehicleID = nil
 
 	o:onSettingsChanged()
@@ -829,6 +877,14 @@ local function applyVehSpawn(event)
 	if not decodedData then --JSON decode failed
 		log("E", "applyVehSpawn", "Failed to spawn vehicle from "..event.playerNickname.."!")
 		return
+	end
+
+	local _player = getPlayerByName(event.playerNickname)
+	if _player then
+		if _player.hidden then
+			log('I', 'applyVehSpawn', "Attempt to spawn a vehicle for "..event.playerNickname.."was halted. The serverVehicleID was: "..event.serverVehicleID)
+			return
+		end
 	end
 
 	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
@@ -1208,6 +1264,14 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			data = data
 		}
 
+		local _player = getPlayerByName(playerNickname)
+		if _player then
+			if _player.hidden then
+				log('I', 'onServerVehicleSpawned', "Attempt to spawn a vehicle for "..playerNickname.."was halted. The serverVehicleID was: "..serverVehicleID)
+				return
+			end
+		end
+
 		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
 
@@ -1234,6 +1298,11 @@ local function onServerVehicleEdited(serverID, data)
 	end
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
+
+	if owner.hidden then
+		log('I', 'onServerVehicleEdited', "Attempt to edit a vehicle for "..owner.name.."was halted. The serverVehicleID was: "..serverID)
+		return
+	end
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
@@ -1964,6 +2033,8 @@ local function onSettingsChanged()
 	--end
 end
 
+detectGlobalWrites() -- reenable global write notifications
+
 -- Functions
 M.onSerialize = onSerialize
 M.onDeserialized = onDeserialized
@@ -1983,6 +2054,8 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
+M.togglePlayerMuted				 = togglePlayerMuted        -- takes: string playerName
+M.togglePlayerHidden       = togglePlayerHidden       -- takes: string playerName
 M.getPlayers               = getPlayers               -- takes: -
 M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle

@@ -1,0 +1,33 @@
+<link type="text/css" rel="stylesheet" href="/ui/modules/multiplayer/mpcareer.css">
+
+<div style="margin: 2em;">
+  <h2>Welcome to BeamMP Career</h2>
+  <span>
+    Please note that this is a multiplayer enabled version of BeamNG's career. 
+    Please select a server from the below list.
+  </span>
+
+  <div class="careerServerSettingsBar">
+    <p>Server Location:</p>
+    <p>Max Players:</p>
+    <p>Traffic Enabled:</p>
+  </div>
+
+  <div class="careerServersList">
+    <div ng-repeat="server in serversList" class="server-row" bng-nav-scroll bng-nav-scroll-force>
+      <div class="server-row-left">
+        <img src="local://local/ui/modules/multiplayer/flags/{{server.location.toLowerCase()}}.png" class="flag flag-{{server.location}}"></img> {{server.location}}
+      </div>
+      <div class="server-row-center">
+        <span class="server-name">{{server.name}}</span>
+        <span class="server-name">{{server.desc}}</span>
+      </div>
+      <div class="server-row-right">
+        <span class="server-players">{{server.players}}</span>
+      </div>
+      <div class="server-row-button">
+        <md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="multiplayer.connect(` + server.ip + `, ` + server.port + `)" style="margin-left: 10px;">Connect</md-button>
+      </div>
+    </div>
+  </div>
+</div>

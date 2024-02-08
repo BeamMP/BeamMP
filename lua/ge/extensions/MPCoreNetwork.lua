@@ -22,6 +22,7 @@ local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
 local modVersion = "4.10.0" -- the mod version
+local proxyPort = ""
 -- server
 
 local serverList -- server list JSON
@@ -150,6 +151,12 @@ local function getLauncherVersion()
 	return "2.0" --launcherVersion
 end
 
+-- Returns the port for the launcher proxy
+-- @return string port The port number of proxy created by the launcher.
+local function getProxyPort()
+	return proxyPort
+end
+
 --- Returns true or false if the user is logged in.
 -- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
@@ -184,6 +191,12 @@ local function logout()
 	loggedIn = false
 end
 
+--- Tells the Launcher to open a link in the web browser. This is restricted to beammp.com and discord.gg only domains
+-- @param link string The the link in question to open. Note: Must be https.
+local function mpOpenUrl(link)
+	send('O'..link)
+end
+
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
 -- @usage MPCoreNetwork.sendBeamMPInfo()
 local function sendBeamMPInfo()
@@ -200,7 +213,8 @@ local function sendBeamMPInfo()
 		players = ''..p,
 		servers = ''..s,
 		beammpGameVer = ''..modVersion,
-		beammpLauncherVer = ''..launcherVersion
+		beammpLauncherVer = ''..launcherVersion,
+		username = ''..MPConfig.getNickname()
 	})
 end
 
@@ -404,6 +418,17 @@ local function isMPSession()
 	return isMpSession
 end
 
+--- Returns true if the current session is a multiplayer session and world ready state == 2.
+-- @return boolean True if it is a multiplayer session and world ready state == 2, false otherwise.
+-- @usage if MPCoreNetwork.isMPSessionActive() then `code` end
+local function isMPSessionActive()
+	if worldReadyState == 2 and isMpSession then
+		return true
+	else
+		return false
+	end
+end
+
 --- Returns if the game is currently transitioning to a multiplayer session.
 -- @return boolean isGoingMpSession True if transitioning to a multiplayer session, false otherwise.
 -- @usage if MPCoreNetwork.isGoingMPSession() then `code` end
@@ -466,6 +491,7 @@ local HandleNetwork = {
 	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
+	['P'] = function(params) proxyPort = params end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['Z'] = function(params) launcherVersion = params; end,
 }
@@ -565,6 +591,7 @@ onLauncherConnected = function()
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version
+	send('P') -- resquest the proxy port
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
@@ -678,11 +705,14 @@ M.onClientStartMission = onClientStartMission
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList
+M.mpOpenUrl            = mpOpenUrl
+M.getProxyPort         = getProxyPort
 -- server
 M.connectToServer      = connectToServer
 M.leaveServer          = leaveServer
 M.getCurrentServer     = getCurrentServer
 M.isMPSession          = isMPSession
+M.isMPSessionActive    = isMPSessionActive
 M.isGoingMPSession     = isGoingMPSession
 
 M.onSerialize          = onSerialize

@@ -78,7 +78,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyPos(decoded, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
-	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
+	if not vehicle and settings.getValue("showDebugOutput") then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 
 	local simspeedFraction = 1/simTimeAuthority.getReal()
 
@@ -107,7 +107,7 @@ local function applyPos(decoded, serverVehicleID)
 	vehicle.position = Point3F(decoded.pos[1],decoded.pos[2],decoded.pos[3])
 
 	local owner = vehicle:getOwner()
-	if owner then UI.setPlayerPing(owner.name, ping) end-- Send ping to UI
+	if owner then UI.setPlayerPing(owner.name, ping) updatePlayerPing(owner.name, ping) end-- Send ping to UI
 end
 
 --- Tries to delay the positional update execution to match the average update interval from this vehicle

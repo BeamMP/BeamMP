@@ -229,73 +229,98 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
       backState: 'menu.vehicles',
     })
 
-// -------------------------------------- BEAMMP -------------------------------------- //
+    // -------------------------------------- BEAMMP -------------------------------------- //
+    .state('menu.multiplayerHome', {
+      url: '/mphome',
+      templateUrl: '/ui/modules/multiplayer/mphome.html',
+      controller: 'MultiplayerHomeController as multiplayer',
+      backState: 'BACK_TO_MENU'
+    })
+    .state('menu.multiplayerCreateServer', {
+      url: '/mpcreateserver',
+      templateUrl: '/ui/modules/multiplayer/mpcreateserver.html',
+      controller: 'MultiplayerCreateServerController as multiplayer',
+      backState: 'menu.multiplayerHome'
+    })
+    .state('menu.multiplayerCareer', {
+      url: '/mpcareer',
+      templateUrl: '/ui/modules/multiplayer/mpcareer.html',
+      controller: 'MultiplayerCareerController as multiplayer',
+      backState: 'menu.multiplayerHome'
+    })
+    .state('menu.multiplayerPause', {
+      url: '/multiplayerPause',
+      templateUrl: '/ui/modules/multiplayerPause/pause.html',
+      controller: 'MultiplayerPauseController',
+      backState: 'BACK_TO_MENU',
+      uiAppsShown: false,
+    })
     .state('menu.multiplayer', {
       url: '/multiplayer',
       templateUrl: '/ui/modules/multiplayer/multiplayer.html',
       controller: 'MultiplayerController as multiplayer',
-      backState: 'BACK_TO_MENU',
+      backState: 'menu.multiplayerHome',
       abstract: true
     })
       .state('menu.multiplayer.tos', {
         url: '/mptos',
-        templateUrl: '/ui/modules/multiplayer/tos.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/tos.html',
         controller: 'MultiplayerTOSController as multiplayertos',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.launcher', {
         url: '/mplauncher',
-        templateUrl: '/ui/modules/multiplayer/launcher.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/launcher.html',
         controller: 'MultiplayerLauncherController as multiplayerlauncher',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.login', {
         url: '/mplogin',
-        templateUrl: '/ui/modules/multiplayer/login.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/login.html',
         controller: 'MultiplayerLoginController as multiplayerlogin',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.servers', {
         url: '/mpservers',
-        templateUrl: '/ui/modules/multiplayer/servers.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/servers.html',
         controller: 'MultiplayerServersController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.official', {
         url: '/mpofficial',
-        templateUrl: '/ui/modules/multiplayer/official.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/official.html',
         controller: 'MultiplayerOfficialController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.featured', {
         url: '/mpfeatured',
-        templateUrl: '/ui/modules/multiplayer/featured.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/featured.html',
         controller: 'MultiplayerFeaturedController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.partner', {
         url: '/mppartner',
-        templateUrl: '/ui/modules/multiplayer/partner.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/partner.html',
         controller: 'MultiplayerPartnerController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.recent', {
         url: '/mprecent',
-        templateUrl: '/ui/modules/multiplayer/recent.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/recent.html',
         controller: 'MultiplayerRecentController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.favorites', {
         url: '/mpfavorites',
-        templateUrl: '/ui/modules/multiplayer/favorites.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/favorites.html',
         controller: 'MultiplayerFavoritesController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
       .state('menu.multiplayer.direct', {
         url: '/mpdirect',
-        templateUrl: '/ui/modules/multiplayer/direct.partial.html',
+        templateUrl: '/ui/modules/multiplayer/partials/direct.html',
         controller: 'MultiplayerDirectController as multiplayermenu',
-        backState: 'BACK_TO_MENU'
+        backState: 'menu.multiplayerHome'
       })
     // -------------------------------------- BEAMMP -------------------------------------- //
 
@@ -309,8 +334,13 @@ angular.module('BeamNG.ui', ['beamng.core', 'beamng.components', 'beamng.data', 
     })
 // -------------------------------------- BEAMMP -------------------------------------- //
       .state('menu.options.multiplayer', {
-        url: '/multiplayer',
+        url: '/mpoptions',
         templateUrl: '/ui/modules/options/multiplayer.partial.html',
+        backState: 'BACK_TO_MENU',
+      })
+      .state('menu.options.mpsafety', {
+        url: '/mpsafety',
+        templateUrl: '/ui/modules/options/mpsafety.partial.html',
         backState: 'BACK_TO_MENU',
       })
     // -------------------------------------- BEAMMP -------------------------------------- //
@@ -1233,6 +1263,9 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
   } else {
     $state.go('menu.mainmenu')
   }
+
+  const game_ui = document.querySelector('body > div.UI-Flex-Wrapper > div.fullscreencontent')
+  game_ui.insertBefore(document.createElement('bng-multiplayer-banner'), game_ui.firstChild)
 
 }])
 

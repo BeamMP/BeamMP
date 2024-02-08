@@ -93,7 +93,7 @@ local function onExtensionLoaded()
 		--settings.impl.defaults[k] = { 'local', v }
 		--settings.impl.defaultValues[k] = v
 	end
-	dump(defaultSettings)
+	--dump(defaultSettings)
 	settings.impl.invalidateCache()
 end
 

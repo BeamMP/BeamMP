@@ -1,0 +1,133 @@
+<style>.multiplayer-pause { display: none; }</style><!-- hides content until styles are loaded -->
+<link rel="stylesheet" type="text/css" href="/ui/modules/multiplayerPause/pause.css" />
+<link rel="stylesheet" type="text/css" href="/ui/modules/career/career.css" />
+<link rel="stylesheet" type="text/css" href="/ui/modules/careerPause/careerPause.css" />
+
+<div bng-blur="true" class="career-pause career-pause-size">
+  <div class="multiplayer-pause-container">
+    <!-- Header -->
+    <div class="headingContainer">
+      <div>
+        <h4>{{:: "ui.playmodes.multiplayer" | translate}} (BeamMP)</h4>
+      </div>
+      <h2>
+        {{:: serverName}}
+      </h2>
+    </div>
+    <div class="bodyContainer">
+      <div class="mainContent multiplayerPauseBoxStyle">
+
+      </div>
+      <div class="sideContent multiplayerPauseBoxStyle">
+        <div class="sideContentTop">
+          <div ng-repeat="player in playersList" class="player-row" bng-nav-scroll bng-nav-scroll-force ng-if="!player.self">
+            <span class="player-name">{{ player.name }}</span>
+            <div class="button-group">
+              <md-button class="md-primary md-raised md-icon" ng-click="reportPlayer(player)" ng-if="!player.self">
+                <md-icon class="material-icons">report</md-icon>
+                {{:: 'ui.multiplayer.controls.report' | translate}}
+              </md-button>
+              <md-button class="md-primary md-raised md-icon" ng-click="hidePlayer(player)" ng-if="!player.self">
+                <md-icon ng-if="player.hidden" class="material-icons">visibility_off</md-icon>
+                <md-icon ng-if="!player.hidden" class="material-icons">visibility</md-icon>
+                {{:: 'ui.multiplayer.controls.hide' | translate}}
+              </md-button>
+              <md-button class="md-primary md-raised md-icon" ng-click="mutePlayer(player)" ng-if="!player.self">
+                <md-icon ng-if="player.muted" class="material-icons">mic_off</md-icon>
+                <md-icon ng-if="!player.muted" class="material-icons">mic</md-icon>
+                {{:: 'ui.multiplayer.controls.mute' | translate}}
+              </md-button>
+            </div>
+          </div>
+        </div>
+        <div class="sideContentBottom">
+          <md-button class="md-danger md-raised md-icon" ng-click="exit()">
+            <md-icon class="material-icons" md-svg-src="/ui/modules/mainmenu/drive/icons/quit.svg"></md-icon>
+            {{:: 'ui.career.exitToMenu' | translate}}
+          </md-button>
+          <md-button class="md-danger md-raised md-icon" ng-click="exitToDesktop()">
+            <md-icon class="material-icons" md-svg-src="/ui/modules/mainmenu/drive/icons/quit.svg"></md-icon>
+            {{:: 'ui.career.exitToDesktop' | translate}}
+          </md-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bng-blur="true" class="career-pause career-pause-size" ng-if="isSlotLoaded && isVehicleNameLoaded && isLogbookLoaded">
+
+
+  <div class="info-container">
+    <!-- current profile -->
+    <div
+      class="career-cardholder career-pause-profile-card"
+    >
+      <div></div>
+      <!-- title -->
+      <div class="career-pause-card-title">
+        <img
+          class="dashBrdSvgIcon"
+          ng-src="/ui/modules/menu/icon-gamemodes.svg"
+          src="/ui/modules/menu/icon-gamemodes.svg"
+        />
+        <span>{{::saveName}}</span>
+      </div>
+      <!-- save file info -->
+      <bng-career-status
+        class="career-content"
+        profile="slot"
+        expanded="true"
+        style="padding: 1em 1em 1em; margin: 0 0 0.5em 0"
+      ></bng-career-status>
+
+      <!-- vehicle -->
+      <div class="career-pause-card-vehicle">
+        <!-- <img class="dashBrdSvgIcon" ng-src="/ui/modules/menu/icon-gamemodes.svg" src="/ui/modules/menu/icon-gamemodes.svg"> -->
+        <span>{{vehicleName}}</span>
+      </div>
+    </div>
+
+    <!-- buttons container -->
+    <div class="career-pause-manage-bg">
+      <div ng-if="!exitingMultiplayer" class="career-pause-manage career-pause-buttons">
+        <button class="bng-button-main" ng-click="resume()" bng-sound-class="bng_back_hover_generic">
+          {{:: "ui.common.action.resume" | translate}}
+        </button>
+        <button class="bng-button-outline" ng-click="goToLogbook()" ng-hide="tutorialActive" bng-sound-class="bng_back_hover_generic">
+          Logbook
+        </button>
+
+        <div class="career-pause-buttons career-pause-manage-two-buttons">
+          <button class="bng-button-outline" ng-click="save()" ng-disabled="tutorialActive" bng-sound-class="bng_click_hover_generic">
+            {{:: "ui.common.save" | translate}}
+          </button>
+          <button class="bng-button-outline" ng-click="load()" bng-sound-class="bng_click_hover_generic">
+            {{:: "ui.common.load" | translate}}
+          </button>
+        </div>
+        <button class="bng-button-outline" ng-click="exitingMultiplayerSwitch()" bng-sound-class="bng_click_hover_generic">
+          {{:: "Exit Career" | translate}}
+        </button>
+      </div>
+      <div ng-if="exitingMultiplayer" class="career-pause-manage career-pause-buttons">
+        <button class="bng-button-outline" ng-click="exit()" bng-sound-class="bng_click_hover_generic">
+          {{:: "ui.career.exitToMenu" | translate}}
+        </button>
+        <button class="bng-button-outline" ng-click="exitToFreeroam()" bng-sound-class="bng_click_hover_generic">
+          {{:: "ui.career.exitToFreeroam" | translate}}
+        </button>
+        <button class="bng-button-outline" ng-click="exitToDesktop()" bng-sound-class="bng_click_hover_generic">
+          {{:: "ui.career.exitToDesktop" | translate}}
+        </button>
+        <button class="bng-button-outline" ng-click="exitingMultiplayerSwitch()" bng-sound-class="bng_click_hover_generic">
+          {{:: "Cancel" | translate}}
+        </button>
+      </div>
+    </div>
+
+  </div>
+  <!-- current profile -->
+
+  <!-- buttons container -->
+</div>

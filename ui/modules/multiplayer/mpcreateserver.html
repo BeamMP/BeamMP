@@ -1,0 +1,22 @@
+<div ng-controller="MultiplayerCreateServerController">
+  <h1>BeamMP Server Configuration</h1>
+
+  <div>
+    <label for="location">Location:</label>
+    <div ng-repeat="location in locations">
+      <input type="radio" id="{{location.value}}" name="location" ng-model="selectedLocation" ng-value="location.value">
+      <label for="{{location.value}}">{{location.flag}} {{location.label}}</label>
+    </div>
+  </div>
+
+  <div>
+    <label for="map">Map:</label>
+    <select id="map" ng-model="selectedMap" ng-options="map.value as map.label for map in maps">
+      <option value="">Select Map</option>
+    </select>
+  </div>
+
+  <div>
+    <button ng-click="createServer()">Submit</button>
+  </div>
+</div>

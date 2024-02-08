@@ -31,12 +31,12 @@ end
 local function render()
     local hw = imgui.GetWindowWidth() / 2
 
-    imgui.SetCursorPosX((imgui.GetWindowWidth() - imgui.CalcTextSize("Name").x) / 4)
-    imgui.Text("Name")
+    imgui.SetCursorPosX((imgui.GetWindowWidth() - imgui.CalcTextSize(MPHelpers.translate("ui.multiplayer.imgui.playerlist.name")).x) / 4)
+    imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.playerlist.name"))
     imgui.SameLine()
 
-    imgui.SetCursorPosX((hw + hw / 2) - imgui.CalcTextSize("Ping").x)
-    imgui.Text("Ping")
+    imgui.SetCursorPosX((hw + hw / 2) - imgui.CalcTextSize(MPHelpers.translate("ui.multiplayer.imgui.playerlist.ping")).x)
+    imgui.Text(MPHelpers.translate("ui.multiplayer.imgui.playerlist.ping"))
 
     imgui.Separator()
 

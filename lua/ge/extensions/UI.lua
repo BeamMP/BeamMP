@@ -34,6 +34,12 @@ M.uiIcons = {
     user = 0,
 }
 
+
+local profanityFilter = nil
+local hateFilter = nil
+local inappropriateContentFilter = nil
+local customFilter = {}
+
 local windowOpacity = 0.9
 
 M.windowOpen = imgui.BoolPtr(true)
@@ -47,6 +53,7 @@ M.canRender = true
 local initialized = false
 local fadeTimer = 0
 local collapsed = false
+local wasCollapsed = false
 
 M.settings = {}
 M.defaultSettings = {
@@ -86,6 +93,17 @@ local playersString = "" -- "player1,player2,player3"
 
 local chatcounter = 0
 
+--- Read the contents of a file into an array by line
+-- @param file_path string The path including the file to read line by line.
+local function readFileToArray(file_path)
+	local lines = {}
+	for line in io.lines(file_path) do
+		table.insert(lines, line)
+	end
+
+    return lines
+end
+
 --- Updates the loading information/message based on the provided data.
 -- @param data string The raw data message containing the code and message.
 local function updateLoading(data)
@@ -124,6 +142,7 @@ end
 --- Update the players string used to create the player list in the UI when in a session.
 -- @param data string
 local function updatePlayersList(data)
+    local my_nick = MPConfig.getNickname()
 	playersString = data or playersString
 	local players = split(playersString, ",")
 	local playerListData = {}
@@ -132,6 +151,8 @@ local function updatePlayersList(data)
 		local username = p
 		local color = {}
 		local id = '?'
+        local muted = false
+        local hidden = false
 		if player then
 			local prefix = ""
 			for source, tag in pairs(player.nickPrefixes)
@@ -145,8 +166,10 @@ local function updatePlayersList(data)
 			local c = player.role.forecolor
 			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 			id = player.playerID
+            muted = player.muted
+            hidden = player.hidden
 		end
-		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id})
+		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id, self = p == my_nick, muted = muted, hidden = hidden})
 	end
 	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
 	guihooks.trigger("playerList", jsonEncode(playerListData))
@@ -260,8 +283,14 @@ local function renderWindow()
     imgui.PushStyleColor2(imgui.Col_ScrollbarGrabHovered, imgui.ImVec4(M.settings.colors.secondaryColor.x, M.settings.colors.secondaryColor.y, M.settings.colors.secondaryColor.z, windowOpacity))
     imgui.PushStyleColor2(imgui.Col_ScrollbarGrabActive, imgui.ImVec4(M.settings.colors.secondaryColor.x, M.settings.colors.secondaryColor.y, M.settings.colors.secondaryColor.z, windowOpacity))
 
+    
     if collapsed then
         imgui.SetNextWindowSize(imgui.ImVec2(lastSize.x, 30))
+    end
+
+    if not collapsed and wasCollapsed then
+        imgui.SetNextWindowSize(imgui.ImVec2(lastSize.x, lastSize.y))
+        wasCollapsed = false
     end
 
     if imgui.Begin("BeamMP Chat", M.windowOpen, (collapsed and M.windowCollapsedFlags or M.windowFlags)) then
@@ -292,10 +321,9 @@ local function renderWindow()
         -- local mainWindowTitle = "BeamMP Chat"
         if currentWindow == windows.chat then
             local msgCount = windows.chat.newMessageCount
+            windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title")
             if msgCount > 0 then
-                windowTitle = "BeamMP Chat (" .. tostring(msgCount) .. ')'
-            else
-                windowTitle = "BeamMP Chat"
+                windowTitle = windowTitle .. " (" .. tostring(msgCount) .. ')'
             end
         end
 
@@ -316,7 +344,7 @@ local function renderWindow()
 
             imgui.Text(windowTitle)
 
-            -- Collapsed
+            -- Collapse Button
             imgui.SameLine()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 60)
             if not collapsed then
@@ -326,6 +354,7 @@ local function renderWindow()
             else
                 if utils.imageButton(M.uiIcons.down.texId, 16) then
                     collapsed = false
+                    wasCollapsed = true
                 end
             end
 
@@ -334,7 +363,7 @@ local function renderWindow()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 40)
             if utils.imageButton(M.uiIcons.user.texId, 16) then
                 currentWindow = windows.playerList
-                windowTitle = "BeamMP Chat (Player List)"
+                windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title.playerList")
             end
 
             -- Settings
@@ -342,7 +371,7 @@ local function renderWindow()
             imgui.SetCursorPosX(imgui.GetWindowWidth() - 20)
             if utils.imageButton(M.uiIcons.settings.texId, 16) then
                 currentWindow = windows.options
-                windowTitle = "BeamMP Chat (Options)"
+                windowTitle = MPHelpers.translate("ui.multiplayer.imgui.chat.title.options")
             end
             imgui.EndChild()
 
@@ -424,7 +453,35 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	local username = parts[1]
 	parts[1] = ''
 	local msg = string.gsub(message, username..': ', '')
-	local player = MPVehicleGE.getPlayerByName(username)
+	local player = getPlayerByName(username)
+
+    if player then
+        if player.muted then
+            return
+        end
+    end
+
+    -- Apply chat filtering
+    -- Basic Profanity
+    if settings.getValue("filterProfanity") then
+        msg = MPHelpers.filterString(msg, profanityFilter)
+    end
+
+    -- Hate Speech
+    if settings.getValue("filterHate") then
+        msg = MPHelpers.filterString(msg, hateFilter)
+    end
+
+    -- Inappropriate Filter
+    if settings.getValue("filterInappropriateContent") then
+        msg = MPHelpers.filterString(msg, inappropriateContentFilter)
+    end
+
+    -- Custom Filter
+    if settings.getValue("filterCustomWords") then
+        msg = MPHelpers.filterString(msg, customFilter)
+    end
+
 	if player then
 		local prefix = ""
 		for source, tag in pairs(player.nickPrefixes)
@@ -499,6 +556,15 @@ local function onExtensionLoaded()
 
     loadConfig()
     optionsWindow.onInit(M.settings)
+
+    
+    profanityFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/profanity.txt")
+    hateFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/hate.txt")
+    inappropriateContentFilter = readFileToArray("lua/ge/extensions/multiplayer/filters/inappropriate.txt")
+
+    for word in settings.getValue("filteredWords"):gmatch("[^\r\n]+") do
+        table.insert(customFilter, word)
+    end
 
     for k, _ in pairs(M.uiIcons) do
         local path = "./icons/" .. k .. ".png"

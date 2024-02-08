@@ -1,0 +1,43 @@
+:root {
+  --bg-main: rgba(26, 23, 23, 0.636);
+}
+
+.careerServerSettingsBar {
+  background-color: var(--bg-main);
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.server-row {
+  margin: 0.5em 2em;
+  padding: 1em;
+  background-color: var(--bg-main);
+  color: white;
+}
+
+.server-row-left {
+  width: 10%;
+}
+
+.server-row-center {
+  width: 70%;
+  display: flow-root;
+}
+
+.server-row-right {
+  top: -40px;
+  float: right;
+  position: relative;
+}
+
+.server-row-button {
+  width: 10%;
+}
+
+span.server-name {
+  display: block;
+}
+
+span.server-players {
+  font-size: x-large;
+}

@@ -10,6 +10,265 @@ var mdDialogVisible = false;
 
 angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
+*	UI ELEMENT ITEMS
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.directive("bngMultiplayerBanner", function () {
+  return {
+    template: `
+    <div ng-if="show" style="
+      display: inline-block;
+      position: absolute; top: 0; left: 0; right: 0px;
+      width: 30%;
+      min-width: 30em;
+      margin: 0 auto;
+      padding: 0.1em 1em 0.1em 1em;
+      background-size: 2.1em 100%;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-style: italic;
+      font-weight: 700;
+      text-shadow: 0em 0em 0.2em black;
+      text-align:center;
+      z-index: 2024;
+			pointer-events: all;
+    ">
+			<style>
+			div#Session {
+				display: -webkit-box;
+				height: 30px;
+			}
+			#quit-button {
+				width: 55px;
+				height: 100%;
+				background-color: rgba(255,0,0, 0.6) !important;
+			}
+			.outerDiv {
+				display: flex;
+				width: 100%;
+				justify-content: center;
+				flex-flow: row nowrap;
+			}
+			.block {
+				min-height: 100%;
+				border: 2px solid rgba(175, 175, 175, 0.45);
+				background-color: rgba(0, 0, 0, 0.25);
+				display: flex;
+				align-items: center;
+				padding: 0px 10px 0px 10px;
+				white-space: nowrap;
+				overflow: hidden;
+				min-width: auto;
+			}
+			#server-name-block {
+				flex: 1 auto 0;
+			}
+			.others-block {
+				flex: 0 0 auto;
+			}
+			#button-block: {
+				padding: 0px;
+				margin: 0px;
+			}
+			.buttons {
+				color: #DDDDDD;
+				border: none;
+				transition: 0.20s;
+				background-color: rgba(0, 0, 0, 0.45);
+				height: 100%;
+			}
+			.buttons:hover {
+				background-color:rgba(0, 0, 0, 0.65);
+				color: #FFFFFF;
+			}
+			#queue-block {
+				display:inline-block;
+				background-size: 200% 100%;
+				background-image: linear-gradient(to right, rgba(255, 100, 0, 0.8) 50%, transparent 0);
+				background-position: left;
+			}
+			</style>
+			<div class="outerDiv">
+				<div>
+					<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">{{:: "ui.common.quit" | translate }}</button>
+				</div>
+				<div class="block" id="server-name-block" ng-if="show_session_status">
+					<span id="Session-Status"> {{:: session_status }} </span>
+				</div>
+				<div class="block others-block">
+					<span>Players: <span id="Session-PlayerCount">{{:: players }}</span></span>
+				</div>
+				<div class="block others-block">
+					<span>Ping: <span id="Session-Ping">{{:: ping }}</span></span>
+				</div>
+				<div class="block others-block" id="queue-block" padding: 0px" >
+					<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">{{:: queue_data }}</span></button>
+				</div>
+			</div>
+    </div>
+    `,
+    scope: true,
+    link($scope, elems, attrs) {
+      $scope.$on("$stateChangeSuccess", () => {
+				bngApi.engineLua("MPCoreNetwork.isMPSessionActive()", data => $scope.show = data)
+				bngApi.engineLua('UI.setServerName()'); // request server name
+				bngApi.engineLua('UI.sendQueue()'); // request queue data
+			});
+			$scope.init = function() {
+				bngApi.engineLua('UI.setServerName()'); // request server name
+				bngApi.engineLua('UI.sendQueue()'); // request queue data
+				//TODO: ping request to instantly populate the player count
+			};
+			$scope.mpquit = function() {
+				bngApi.engineLua('MPCoreNetwork.leaveServer(true)');
+			};
+		
+			$scope.applyQueue = function() {
+				bngApi.engineLua('MPVehicleGE.applyQueuedEvents()');
+			};
+		
+			$scope.reset = function() {
+				$scope.init();
+			};
+			$scope.$on('setPing', function (event, ping) {
+				var sessionPing = document.getElementById("Session-Ping")
+				// To ensure that the element exists
+				if (sessionPing) {
+					$scope.ping = ping;
+				}
+			});
+		
+			$scope.$on('setQueue', function (event, queue) {
+				var queueBlock = document.getElementById("queue-block");
+				// To ensure that the element exists
+				if (queueBlock) {
+					if (queue.show) {
+						queueBlock.style["background-position"] = "0%";
+						queueBlock.style.display = "";
+					} else {
+						queueBlock.style.display = "none";
+						return;
+					}
+				}
+		
+				var queueCount = queue.editCount + queue.spawnCount;
+				$scope.queue_data = `${queue.spawnCount}|${queue.editCount}`;
+		
+			});
+		
+			$scope.$on('setAutoQueueProgress', function (event, progress) {
+				document.getElementById('queue-block').style["background-position"] = progress + "%";
+			});
+		
+			$scope.$on('setServerName', function (event, data) {
+				//console.log('Setting status to: ' + sanitizeString(data))
+				if (!data) $scope.show_session_status = false;
+				else {
+					$scope.show_session_status = true
+					$scope.session_status = sanitizeString(data); // DISPLAY SERVER NAME FORMATTING
+				}
+			});
+		
+			$scope.$on('setPlayerCount', function (event, count) {
+				//document.getElementById("Session-PlayerCount").innerHTML = count;
+				$scope.players = count;
+			});
+    },
+  }
+})
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	HOME CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerHomeController', ['$scope', '$state', '$timeout', '$document', 'ConfirmationDialog',
+function($scope, $state, $timeout, $document, ConfirmationDialog) {
+	'use strict';
+	var vm = this;
+
+  // account info
+  $scope.$on('ServiceProviderInfo', function (event, data) {
+    $scope.$apply(function () {
+      $scope.steamData = data.steam
+    })
+  })
+  beamng.requestServiceProviderInfo()
+  bngApi.engineLua('core_online.requestState()')
+
+  // beammp info
+  $scope.$on('BeamMPInfo', function (event, data) {
+    $scope.$apply(function () {
+      $scope.beammpData = data
+    })
+  })
+  bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()');
+
+  vm.gotoCreateServer = () => {
+    console.log('Create private server warning')
+    ConfirmationDialog.open(
+      "ui.multiplayer.createserver.experimentalTitle", "ui.multiplayer.createserver.experimentalPrompt",
+      [
+        { label: "ui.common.no", key: false, isCancel: true },
+        // { label: "Enter and don't show this again", key: true },
+        { label: "ui.multiplayer.createserver.experimentalAgree", key: true, default: true },
+      ],
+      { class: "experimental" }
+    ).then(res => {
+      if (!res)
+        return;
+      $state.go("menu.multiplayerCreateServer");
+    });
+  }
+  
+}])
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	CREATE SERVER CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerCreateServerController', ['$scope', '$state', '$timeout', '$document', 'ConfirmationDialog',
+function($scope, $state, $timeout, $document, ConfirmationDialog) {
+	'use strict';
+	var vm = this;
+  
+	$scope.locations = [
+		{ value: 'us', flag: '🇺🇸', label: 'US' },
+		{ value: 'de', flag: '🇩🇪', label: 'DE' }
+	];
+
+	$scope.maps = [
+		{ value: 'east_coast_usa', label: 'East Coast USA' },
+		{ value: 'west_coast_usa', label: 'West Coast USA' },
+		{ value: 'industrial', label: 'Industrial' },
+		{ value: 'derby', label: 'Derby' },
+		{ value: 'gridmap_v2', label: 'Gridmap V2' },
+		{ value: 'cliff', label: 'Cliff' },
+		{ value: 'johnson_valley', label: 'Johnson Valley' }
+	];
+
+	$scope.createServer = function() {
+		// Handle form submission logic here
+		console.log("Selected Location: " + $scope.selectedLocation);
+		console.log("Selected Map: " + $scope.selectedMap);
+	};
+}])
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
+*	CAREER CONTROLLER
+*/ //////////////////////////////////////////////////////////////////////////////////////////////
+.controller('MultiplayerCareerController', ['$scope', '$state', '$timeout', '$document', 'ConfirmationDialog',
+function($scope, $state, $timeout, $document, ConfirmationDialog) {
+	'use strict';
+	var vm = this;
+
+	$scope.serversList = [
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - DE Server. Version 0.9.1', players: '3/6', location: "DE", ip: "127.0.0.1", port: 30814 },
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - DE Server. Version 0.9.1', players: '4/8', location: "DE", ip: "127.0.0.1", port: 30814 },
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - US Server. Version 0.9.1', players: '3/6', location: "US", ip: "127.0.0.1", port: 30814 },
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - US Server. Version 0.9.1', players: '4/8', location: "US", ip: "127.0.0.1", port: 30814 },
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - AU Server. Version 0.9.1', players: '3/6', location: "AU", ip: "127.0.0.1", port: 30814 },
+		{ name: 'CareerMP - BeamNG.drive Career in BeamMP!', description: 'BeamNG.drive Career now with your friends! CareerMP by Dudekahedron - AU Server. Version 0.9.1', players: '4/8', location: "AU", ip: "127.0.0.1", port: 30814 },
+	];
+}])
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////
 *	TOS CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
 .controller('MultiplayerTOSController', ['$scope', '$state', '$timeout', '$document', 
@@ -34,9 +293,7 @@ function($scope, $state, $timeout, $document) {
 		$state.go('menu.multiplayer.servers');
 	};
 
-	$scope.openExternalLink = function(url) {
-		bngApi.engineLua(`openWebBrowser("`+url+`")`);
-	}
+	$scope.openExternalLink = openExternalLink
 
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
 		if (data != null) {
@@ -829,6 +1086,13 @@ function($scope, $state, $timeout) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	FUNCTIONS
 */ //////////////////////////////////////////////////////////////////////////////////////////////
+function sanitizeString(str) {  // VERY basic sanitization.
+	str = str.replace(/<script.*?<\/script>/g, '');
+	str = str.replace(/<button.*?<\/button>/g, '');
+	str = str.replace(/<iframe.*?<\/iframe>/g, '');
+	str = str.replace(/<a.*?<\/a>/g, '');
+    return str
+}
 // Set the first letter of each word upper case
 function toTitleCase(str) {
 	return str.replace(/\w\S*/g, function(txt){
@@ -1197,12 +1461,14 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
-function openExternalLink(url){
-	bngApi.engineLua(`mp_open_url("`+url+`")`);
-}
+/**
+ * This function is designed for opening http based links in the web browser using the BeamMP Launcher.
+ * Note: The URLs are scoped to BeamMP related domains only & Discord invite links (discord.gg)
+ * @param {string} url 
+ */
 
-function openForumLink(){
-	openExternalLink("http://forum.beammp.com");
+function openExternalLink(url){
+	bngApi.engineLua(`MPCoreNetwork.mpOpenUrl("`+url+`")`);
 }
 
 function getServerInfoHTML(d) {
@@ -1410,6 +1676,47 @@ async function receiveServers(data) {
 	});
 	return serversArray;
 };
+
+/**
+ * Below is a sample of how to load the server list info from the backend using JS/CEF
+ * Rather than through Lua.
+ */
+
+/* 
+async function receiveServers() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua(`{ 
+			port = MPCoreNetwork.getProxyPort(),
+			launcherVersion = MPCoreNetwork.getLauncherVersion()
+		}`, async data => {
+			console.log(data)
+			var proxy = data.port;
+			var launcherVersion = data.launcherVersion
+			var response = await fetch(`http://localhost:${proxy}/servers-info?apiv=2`)
+			const rawdata = await response.json();
+			// Process the responseData here
+			//console.log(responseData);
+			var serversArray = new Array();
+			// Parse the data to a nice looking Array
+			for (var i = 0; i < rawdata.length; i++) {
+				var v = rawdata[i]
+				if(v.cversion == launcherVersion){
+					v.strippedName = stripCustomFormatting(v.sname);
+					serversArray.push(v);
+				}
+			}
+			// Sort the servers to display official servers first
+			serversArray.sort(function(a, b) {
+				if (a.official && b.official) return a.strippedName.localeCompare(b.strippedName)
+				else if (a.official) return -1;
+				else if (b.official) return 1;
+				return 0;
+			});
+			resolve(serversArray);
+		})
+	});
+};
+*/
 
 // Used to deselect a row
 function deselect(row) {

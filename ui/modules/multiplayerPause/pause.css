@@ -1,0 +1,81 @@
+.md-danger {
+  background-color: rgba(255,0,0, 0.6) !important;
+  padding: 0px 8px !important;
+}
+
+.multiplayer-pause-container {
+  display: flex;
+  flex-direction: column;
+  margin: 1em;
+  width: 75%;
+}
+
+.multiplayerPauseBoxStyle {
+  background-color: var(--bng-black-6);
+  color: white;
+  align-items: flex-start;
+  width: 25vw;
+  max-width: 300px;
+  height: 32vh;
+  max-height: 26rem;
+  border-radius: 0.25em;
+  margin: 0 0.5em;
+  position: relative;
+}
+
+.mainContent {
+  min-width: 70%;
+}
+
+.sideContent {
+  min-width: 30%;
+}
+
+.bodyContainer {
+  display: flex;
+}
+
+.sideContentTop {
+  min-height: 70%;
+  max-height: 70%;
+  overflow-y: scroll;
+  border: solid 2px #ff660099;
+  margin: 5px;
+  border-radius: 0.25em;
+}
+
+.sideContentTop::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 0.25em;
+  background-clip: padding-box;  
+}
+
+.sideContentTop::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sideContentBottom {
+  min-height: 24.5%;
+  max-height: 30%;
+  overflow-y: scroll;
+  border: solid 2px #ff660099;
+  margin: 5px;
+  border-radius: 0.25em;
+}
+
+.player-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding: 8px;
+}
+
+.player-name {
+  flex-grow: 1;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}

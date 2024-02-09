@@ -204,7 +204,7 @@ local function sendChatMessage(message)
     --     id = #M.chatMessages + 1
     -- }
 
-    local c = 'C:'..MPConfig.getNickname()..": "..message
+    local c = 'C:'..MPConfig.getAccountNickname()..": "..message
     MPGameNetwork.send(c)
     TriggerClientEvent("ChatMessageSent", c)
 
@@ -241,7 +241,7 @@ local function addMessage(username, message, id, color)
         UI.bringToFront()
     end
 
-    if not forceBottom and username ~= MPConfig:getNickname() then
+    if not forceBottom and username ~= MPConfig:getAccountNickname() then
         M.newMessageCount = M.newMessageCount + 1
     end
 end

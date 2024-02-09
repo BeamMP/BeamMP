@@ -7,14 +7,17 @@
 --- MPConfig API - This script sets Default settings if not present and handles session specific data.
 -- Author of this documentation is Titch2000
 -- @module MPConfig
--- @usage local nickname = getNickname() -- internal access
--- @usage local nickname = MPConfig.getNickname() -- external access
+-- @usage local nickname = getAccountNickname() -- internal access
+-- @usage local nickname = MPConfig.getAccountNickname() -- external access
 
 
 local M = {}
 
 -- MP VARIABLES
-local Nickname = ""
+local Account = {
+	Nickname = "",
+	Role = ""
+}
 local PlayerServerID = -1
 
 --- Returns a table of all to the disk saved unicycle configs
@@ -99,17 +102,41 @@ end
 
 --- Set the users Nickname variable for use by other aspects of the mod.
 -- @tparam string x The users nickname that we have received.
--- @usage MPConfig.setNickname(`<nickname>`)
-local function setNickname(x)
-	log('M', 'setNickname', 'Nickname Set To: '..x)
-	Nickname = x
+-- @usage MPConfig.setAccountNickname(`<nickname>`)
+local function setAccountNickname(x)
+	log('M', 'setAccountNickname', 'Account Nickname Set To: '..x)
+	Account.Nickname = x
 end
 
---- Get the users Nickname.
--- @treturn string The users nickname.
--- @usage local nickname = MPConfig.getNickname()
-local function getNickname()
-	return Nickname
+--- Get the users Account Nickname.
+-- @treturn string The users account nickname.
+-- @usage local nickname = MPConfig.getAccountNickname()
+local function getAccountNickname()
+	return Account.Nickname
+end
+
+--- Set the users role variable for use by other aspects of the mod.
+-- @tparam string x The users role that we have received.
+-- @usage MPConfig.setAccountRole(`<role>`)
+local function setAccountRole(x)
+	if x then
+		log('M', 'setAccountRole', 'Account Role Set To: '..x)
+		Account.Role = x
+	end
+end
+
+--- Get the users Account Role.
+-- @treturn string The users account role.
+-- @usage local role = MPConfig.getAccountRole()
+local function getAccountRole()
+	return Account.Role
+end
+
+--- Get the users Account Data.
+-- @treturn object The users account data.
+-- @usage local role = MPConfig.getAccountData()
+local function getAccountData()
+	return Account
 end
 
 --- Sets the ID the server gave this Client, for use by other aspects of the mod.
@@ -271,7 +298,7 @@ end
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onSerialize()
 	local data = {
-		Nickname = Nickname,
+		Account = Account,
 		PlayerServerID = PlayerServerID
 	}
 	return data
@@ -281,7 +308,7 @@ end
 -- @tparam table data The deserialized data.
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onDeserialized(data)
-	Nickname = data.Nickname
+	Account = data.Account
 	PlayerServerID = data.PlayerServerID
 end
 
@@ -308,8 +335,11 @@ M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
 M.setDefaultUnicycle = setDefaultUnicycle
 
-M.getNickname = getNickname
-M.setNickname = setNickname
+M.getAccountNickname = getAccountNickname
+M.setAccountNickname = setAccountNickname
+M.getAccountRole = getAccountRole
+M.setAccountRole = setAccountRole
+M.getAccountData = getAccountData
 
 M.getFavorites = getFavorites
 M.setFavorites = setFavorites

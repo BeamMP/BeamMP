@@ -817,10 +817,10 @@ local function sendVehicleSpawn(gameVehicleID)
 		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
 		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 
-		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
+		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getAccountNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
 
-		if not players[vehicleTable.pid] or players[vehicleTable.pid].name ~= MPConfig.getNickname() then
-			players[vehicleTable.pid] = Player:new({name=MPConfig.getNickname(), playerID=vehicleTable.pid, isLocal=true })
+		if not players[vehicleTable.pid] or players[vehicleTable.pid].name ~= MPConfig.getAccountNickname() then
+			players[vehicleTable.pid] = Player:new({name=MPConfig.getAccountNickname(), playerID=vehicleTable.pid, isLocal=true })
 		end
 
 		--vehicles[gameVehicleID] = vehObj

@@ -214,7 +214,7 @@ local function sendBeamMPInfo()
 		servers = ''..s,
 		beammpGameVer = ''..modVersion,
 		beammpLauncherVer = ''..launcherVersion,
-		username = ''..MPConfig.getNickname()
+		username = ''..MPConfig.getAccountNickname()
 	})
 end
 
@@ -381,6 +381,12 @@ local function loginReceived(params)
 		log('M', 'loginReceived', 'Login successful.')
 		loggedIn = true
 		guihooks.trigger('LoggedIn', result.message or '')
+		if (result.role) then
+			MPConfig.setAccountRole(result.role)
+		end
+		if (result.username) then
+			MPConfig.setAccountNickname(result.username)
+		end
 	else
 		log('M', 'loginReceived', 'Login failed.')
 		loggedIn = false

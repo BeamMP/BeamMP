@@ -142,7 +142,7 @@ end
 --- Update the players string used to create the player list in the UI when in a session.
 -- @param data string
 local function updatePlayersList(data)
-    local my_nick = MPConfig.getNickname()
+    local my_nick = MPConfig.getAccountNickname()
 	playersString = data or playersString
 	local players = split(playersString, ",")
 	local playerListData = {}
@@ -196,7 +196,7 @@ end
 local function setPing(ping)
 	if tonumber(ping) < 0 then return end -- not connected
 	guihooks.trigger("setPing", ""..ping.." ms")
-	pings[MPConfig.getNickname()] = ping
+	pings[MPConfig.getAccountNickname()] = ping
 end
 
 
@@ -510,7 +510,7 @@ end
 --- Sends a chat message to the server for viewing by other players.
 -- @param msg string The chat message typed by the user
 local function chatSend(msg)
-	local c = 'C:'..MPConfig.getNickname()..": "..msg
+	local c = 'C:'..MPConfig.getAccountNickname()..": "..msg
 	MPGameNetwork.send(c)
 	TriggerClientEvent("ChatMessageSent", c)
 end

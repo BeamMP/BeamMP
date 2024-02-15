@@ -26,10 +26,6 @@
   height: 100%;
 }
 
-#serverListHeader {
-	overflow: hidden;
-}
-
 #serversTableContainer {
 	overflow-x: hidden;
 }

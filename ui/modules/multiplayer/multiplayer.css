@@ -10,10 +10,6 @@
   background: #404040b8;
 }
 
-#serverListHeader {
-	position: fixed;
-}
-
 #left-menu {
   color: white;
   background-color: #404040b8;
@@ -30,8 +26,11 @@
   height: 100%;
 }
 
+#serverListHeader {
+	overflow: hidden;
+}
+
 #serversTableContainer {
-	margin-top: 75px;
 	overflow-x: hidden;
 }
 

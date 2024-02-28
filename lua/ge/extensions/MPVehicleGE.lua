@@ -242,6 +242,8 @@ local vehiclesMap = {}
 -- @usage local distanceTo = distanceMap[11171]
 local distanceMap = {}
 
+-- decoded vehicle data of all players
+local players_vehicle_configs = {}
 
 -- VV============== FUNCTIONS USEABLE BY SCRIPTERS ==============VV
 
@@ -724,7 +726,10 @@ function Vehicle:delete()
 	end
 	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
-	self = nil
+	
+    players_vehicle_configs[self.serverVehicleString] = nil
+
+    self = nil
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1022,6 +1027,70 @@ local function onVehicleSpawned(gameVehicleID)
 end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
+
+local function spawnDestroyedVehicles(serverVehID)
+
+    local vehdata = players_vehicle_configs[serverVehID]
+    if vehdata == nil then
+        
+        log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
+        return
+    end
+
+    if vehicles[serverVehID].isDeleted == false then
+        UI.showNotification('This vehicle hasnt been deleted yet?')
+        log("I", "restorePlayerVehicle", "This vehicle hasnt been deleted yet")
+        return
+    end
+
+    vehicles[serverVehID].isSpawned = true
+    vehicles[serverVehID].isDeleted = false
+		-- queue system
+--		local eventdata = {
+--			playerNickname = playerNickname,  -- same as owner name??? we shall find out
+--			serverVehicleID = serverVehicleID,
+--			data = data
+--		}
+
+    local playerOwnerName = vehicles[serverVehID].ownerName
+
+    local encodedVehicleData = jsonEncode(vehdata)
+
+    local eventdata = {
+        playerNickname = playerOwnerName,  --- mabye a issue?
+        serverVehicleID = serverVehID,
+        data = encodedVehicleData
+    }
+    UI.showNotification('Trying to respawn '..playerOwnerName)
+    if settings.getValue("enableSpawnQueue") then
+        vehicles[serverVehID].spawnQueue = eventdata
+        UI.updateQueue(getQueueCounts())
+    else
+        log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
+        applyVehSpawn(eventdata)
+        UI.updateQueue(0, 0)
+    end
+end
+
+local function restorePlayerVehicle(playerName)
+    --  not a properproper wayyy of doing this
+
+    local player =  getPlayerByName(playerName)
+    if player == nil then
+        log("E", "restorePlayerVehicle", "Couldnt find player??")
+
+    end
+
+    -- its a table of ids
+    local vehicles_ServerIDs = player.vehicles.IDs
+
+    for x,y in pairs(vehicles_ServerIDs)do
+        spawnDestroyedVehicles(y)
+        log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
+    end
+end
+
+
 local function onVehicleDestroyed(gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
@@ -1244,6 +1313,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			data = data
 		}
 
+        players_vehicle_configs[serverVehicleID] = decodedData
+
 		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
 
@@ -1270,6 +1341,14 @@ local function onServerVehicleEdited(serverID, data)
 	end
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
+
+    local saveVehicleRot =  players_vehicle_configs[serverID].rot
+    local saveVehiclePos =  players_vehicle_configs[serverID].pos
+
+    players_vehicle_configs[serverID] = decodedData
+    players_vehicle_configs[serverID].pos = saveVehiclePos
+    players_vehicle_configs[serverID].rot = saveVehicleRot
+
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
@@ -2021,6 +2100,7 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
+M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4 
 M.getPlayers               = getPlayers               -- takes: -
 M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle
@@ -2058,5 +2138,7 @@ M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
+
+
 
 return M

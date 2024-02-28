@@ -115,7 +115,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				// Insert a cell containing the player server id
 				var idCell = row.insertCell(0);
 				idCell.textContent = parsedList[i].id;
-				idCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i].name+"')");
+				idCell.setAttribute("onclick", "restorePlayerVehicle('"+parsedList[i].name+"')");
 				idCell.setAttribute("class", "player-id");
 
 
@@ -177,6 +177,10 @@ function teleportToPlayer(targetPlayerName) {
 
 function viewPlayer(targetPlayerName) {
 	openExternalLink(`https://forum.beammp.com/u/${targetPlayerName}/summary`)
+}
+
+function restorePlayerVehicle(targetPlayerName){
+    	bngApi.engineLua('MPVehicleGE.restorePlayerVehicle("'+targetPlayerName+'")')
 }
 
 function showPlayerInfo(targetPlayerName) {

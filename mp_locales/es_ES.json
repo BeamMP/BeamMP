@@ -1,7 +1,7 @@
 {
-  "ui.playmodes.multiplayer": "Multiplayer",
-  "ui.options.multiplayer": "Multiplayer",
-  "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
+  "ui.playmodes.multiplayer": "Multijugador",
+  "ui.options.multiplayer": "Multijugador",
+  "ui.options.multiplayer.enableNewChatMenu": "Nuevo Menú de Chat",
   "ui.options.multiplayer.enableNewChatMenu.tooltip": "El nuevo menú de chat usa ImGui. Es personalizable, elegante e increíble!",
   "ui.options.multiplayer.enablePosSmoother": "Activar suavizante de ejecucíon posicional",
   "ui.options.multiplayer.enablePosSmoother.tooltip": "Intenta suavizar los datos de posición de los jugadores con conexiones inestables, reudciendo así el \"warping\" y \"rubber banding\" de vehículos",

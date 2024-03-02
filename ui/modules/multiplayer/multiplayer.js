@@ -15,7 +15,9 @@ angular.module('beamng.stuff')
 .directive("bngMultiplayerBanner", function () {
   return {
     template: `
-    <div ng-if="show" style="
+    <div class="bmp-ui-directive-element" ng-if="show" style="
+			focus:box-shadow:none;
+			focus:before:border:none;
       display: inline-block;
       position: absolute; top: 0; left: 0; right: 0px;
       width: 30%;
@@ -33,6 +35,12 @@ angular.module('beamng.stuff')
 			pointer-events: all;
     ">
 			<style>
+			.bmp-ui-directive-element::before {
+				border: none;
+			}
+			.bmp-ui-directive-element:focus {
+				box-shadow: none;
+			}
 			div#Session {
 				display: -webkit-box;
 				height: 30px;
@@ -42,11 +50,23 @@ angular.module('beamng.stuff')
 				height: 100%;
 				background-color: rgba(255,0,0, 0.6) !important;
 			}
+			#quit-button::before {
+				border: none;
+			}
+			#quit-button:focus {
+				box-shadow: none;
+			}
 			.outerDiv {
 				display: flex;
 				width: 100%;
 				justify-content: center;
 				flex-flow: row nowrap;
+			}
+			.outerDiv::before {
+				border: none;
+			}
+			.outerDiv:focus {
+				box-shadow: none;
 			}
 			.block {
 				min-height: 100%;

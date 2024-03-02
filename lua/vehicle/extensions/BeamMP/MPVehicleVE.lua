@@ -54,7 +54,10 @@ end
 
 
 local function setVehicleType(x)
-  v.mpVehicleType = x
+	v.mpVehicleType = x
+	if settings.getValue("enableLowerDamageAccuracy") and x ~= "L" then
+		nodesVE.disableCollisions()
+	end
 end
 
 local function updateGFX(dtReal)

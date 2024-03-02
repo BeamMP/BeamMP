@@ -1265,7 +1265,7 @@ function ($animate, $http, $rootScope, $templateCache, $window, $translate,  UIA
   }
 
   const game_ui = document.querySelector('body > div.UI-Flex-Wrapper > div.fullscreencontent')
-  game_ui.insertBefore(document.createElement('bng-multiplayer-banner'), game_ui.firstChild)
+  game_ui.insertBefore(document.createElement('bmp-active-session-bar'), game_ui.firstChild)
 
 }])
 

@@ -12,7 +12,7 @@ angular.module('beamng.stuff')
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	UI ELEMENT ITEMS
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.directive("bngMultiplayerBanner", function () {
+.directive("bmpActiveSessionBar", function () {
   return {
     template: `
     <div class="bmp-ui-directive-element" ng-if="show" style="
@@ -222,20 +222,24 @@ function($scope, $state, $timeout, $document, ConfirmationDialog) {
   bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()');
 
   vm.gotoCreateServer = () => {
-    console.log('Create private server warning')
-    ConfirmationDialog.open(
-      "ui.multiplayer.createserver.experimentalTitle", "ui.multiplayer.createserver.experimentalPrompt",
-      [
-        { label: "ui.common.no", key: false, isCancel: true },
-        // { label: "Enter and don't show this again", key: true },
-        { label: "ui.multiplayer.createserver.experimentalAgree", key: true, default: true },
-      ],
-      { class: "experimental" }
-    ).then(res => {
-      if (!res)
-        return;
-      $state.go("menu.multiplayerCreateServer");
-    });
+		if ($scope.beammpData.role == 'MDEV') {
+			console.log('Private Server Hosting is NOT available to you. Sorry <3')
+		} else {
+			console.log('Create private server warning')
+			ConfirmationDialog.open(
+				"ui.multiplayer.createserver.experimentalTitle", "ui.multiplayer.createserver.experimentalPrompt",
+				[
+					{ label: "ui.common.no", key: false, isCancel: true },
+					// { label: "Enter and don't show this again", key: true },
+					{ label: "ui.multiplayer.createserver.experimentalAgree", key: true, default: true },
+				],
+				{ class: "experimental" }
+			).then(res => {
+				if (!res)
+					return;
+				$state.go("menu.multiplayerCreateServer");
+			});
+		}
   }
   
 }])

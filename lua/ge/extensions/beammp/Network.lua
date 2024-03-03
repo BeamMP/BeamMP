@@ -66,6 +66,7 @@ local packetType = {
     --Playing
 
     -- main codes
+    game_ping = 0x00,
     game_vehicle = 0x01,
     game_input = 0x02,
     game_electrics = 0x03,
@@ -99,17 +100,16 @@ local config = {
 
 -- cached launcher information
 local launcherInfo = {
-    name = "No",
-    protocol_version = "No",
-
+    implementation = nil,
+    version = nil,
+    mod_cache_path = nil,
 }
 
 local modIdentity = {
-    purpose = "identification",
-    who = "Official BeamMP Mod",
-    mod_version = "123123123",
-    game_version = "",
-    network_version = "0.1",
+    implementation = "Official BeamMP Mod",
+    mod_version = {10, 20, 30},
+    game_version = {10, 20, 30},
+    protocol_version = {1, 0, 0},
 }
 
 local currentState = nil --[[    
@@ -140,75 +140,78 @@ local function disconnectSocket()
     if launcherSocket ~= nil then
         log("I", "disconnectSocket", "Closing socket.")
         launcherSocket:close()
+        launcherSocket = nil
     end
 end
 
-local function send(data)
-    if data == nil then return end
+local function send(flags, purpose, pid, vid, data)
     if launcherSocket ~= nil then
-        -- add packet headers etc
-        local index, errorMsg, byte = launcherSocket:send(ffi.new("uint32_t[1]", #data) .. data)
+        print("sending: " .. data)
+        if pid == nil then pid = 0xFFFFFFFF end
+        if vid == nil then vid = 0xFFFF end
+
+        flags = 0x00 -- does nothing for now
+
+        flags = ffi.string(ffi.new("char[?]", 1, flags), 1)
+        purpose = ffi.string(ffi.new("uint16_t[?]", 2, purpose), 2)
+        pid = ffi.string(ffi.new("uint32_t[?]", 4, pid), 4)
+        vid = ffi.string(ffi.new("uint16_t[?]", 2, vid), 2)
+
+        local dataSize = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
+        local header = flags .. purpose .. pid .. vid .. dataSize
+        local index, errorMsg, byte = launcherSocket:send(header .. data)
         if index == nil then
             log("E", "beammp_network.send", "Stopped at byte " .. tostring(byte) .. " out of" .. #data .. ". Error message: " .. errorMsg)
             return
         end
+        return
     end
+    return "Socket closed."
 end
 
--- receive identification packet from server
 local function identifyMod()
     return jsonEncode(modIdentity)
 end
 
 local function receiveLauncherInfo(data)
-    data = jsonDecode(data)
-    log("I", "receiveLauncherInfo", data)
+    launcherInfo = jsonDecode(data)
+    log("I", "receiveLauncherInfo", dumps(data))
+    log("I", "receiveLauncherInfo", dumps(launcherInfo))
+    send(nil, packetType.GameInfo, nil, nil, identifyMod())
 end
 
-local function ReceiveAuth(data)
+local function receiveLoginResult(data)
     local authData = jsonDecode(data)
-    dump(data)
+    dump(authData)
     -- switch state to Browsing
-end
-
-
-
-
-local function parseLauncherIdentity(data)
-    data = jsonDecode(data)
-    if data and data.network_version ~= "1.0" then
-        return true
-    end
 end
 
 
 -- parses header into individual chunks
 local function ParseHeader(header)
-    local target = string.sub(header, 1, 1)
     local flags = string.sub(header, 1, 1)
-    local packetType = string.sub(header, 2, 2)
-    local packetSubType = string.sub(header, 3, 3)
+    local purpose = string.sub(header, 2, 3)
     local rawpid = string.sub(header, 4, 7)
     local rawvid = string.sub(header, 8, 9)
     local rawsize = string.sub(header, 10, 13)
 
+    local flags = ffi.cast("uint16_t*", ffi.new("char[?]", 1, flags))[0]
+    local purpose = ffi.cast("uint16_t*", ffi.new("char[?]", 2, purpose))[0]
     local pid = ffi.cast("uint32_t*", ffi.new("char[?]", 4, rawpid))[0]
     local vid = ffi.cast("uint16_t*", ffi.new("char[?]", 2, rawvid))[0]
     local dataSize = ffi.cast("uint32_t*", ffi.new("char[?]", 4, rawsize))[0]
+    log("I", "ParseHeader", "purpose: " .. purpose)
+    log("I", "ParseHeader", "pid: " .. pid)
+    log("I", "ParseHeader", "vid: " .. vid)
+    log("I", "ParseHeader", "dataSize: " .. dataSize)
 
-    return target, packetType, packetSubType, pid, vid, dataSize
+    return flags, purpose, pid, vid, dataSize
 end
-
 
 
 local function SendCoreMsg(data)
     if data == nil then return end
     send('C' .. data)
-end
-
-local function SendGameMsg(data)
-    if data == nil then return end
-    send('G' .. data)
 end
 
 local function SendCredentials(username, password)
@@ -249,90 +252,70 @@ end
 
 
 local function promptAutoJoin(params) -- TODO
-    jsonDecode()
+    jsonDecode(params)
 	UI.promptAutoJoinConfirmation(params)
 end
 
-local HandleNetworkCore = {
+local HandleNetwork = {
     --ClientIdentification
-    [packetType.LauncherInfo] = function(data) parseLauncherIdentity() end,
-    [packetType.Error] = function(data) end, --ERROR
+    [packetType.LauncherInfo]                       = function(data) receiveLauncherInfo(data) end,
+    [packetType.Error]                              = function(data) log("E", "HandleNetwork", "Error: " .. tostring(data)) end, --ERROR
     --Login
-    [packetType.AskForCredentials] = function(data) end, --AskForCredentials
-    [packetType.LoginResult] = function(data) end, --LoginResult
+    [packetType.AskForCredentials]                  = function(data) end, --TODO: Prompt user for credentials
+    [packetType.LoginResult]                        = function(data) receiveLoginResult(data) end, --LoginResult
     --QuickJoin
-    [packetType.DoJoin] = function(data) end, --DoJoin
+    [packetType.DoJoin]                             = function(data) promptAutoJoin(data) end, --DoJoin
     --Browsing
-    [packetType.ServerListRequest] = function(data) end, -- ServerListRequest  
-    [packetType.ServerListResponse] = function(data) serverList = data; sendBeamMPInfo() end, -- ServerListResponse 
-    [packetType.Connect] = function(data) end, -- Connect            
-    [packetType.Logout] = function(data) end, -- Logout             
+    [packetType.ServerListRequest]                  = function(data) end, -- ServerListRequest
+    [packetType.ServerListResponse]                 = function(data) end,--serverList = data; sendBeamMPInfo() end, -- ServerListResponse
+    [packetType.Connect]                            = function(data) end, -- Connect
+    [packetType.Logout]                             = function(data) end, -- Logout
     --ServerAuthentication
-    [packetType.AuthenticationError] = function() end, -- AuthenticationError 
-    [packetType.AuthenticationOk] = function() end, -- AuthenticationOk    
-    [packetType.PlayerRejected] = function() end, -- PlayerRejected
+    [packetType.AuthenticationError]                = function(data) end, -- AuthenticationError 
+    [packetType.AuthenticationOk]                   = function(data) end, -- AuthenticationOk
+    [packetType.PlayerRejected]                     = function(data) end, -- PlayerRejected
     
     --ServerIdentification
-    [packetType.ConnectError] = function() end, -- ConnectError
+    [packetType.ConnectError]                       = function(data) end, -- ConnectError
 
     --ServerModDownload
-    [packetType.ModSyncStatus] = function() end, -- ModSyncStatus
-    [packetType.MapInfo] = function() end, -- MapInfo      
-    [packetType.Disconnect] = function() end, -- Disconnect   
+    [packetType.ModSyncStatus]                      = function(data) end, -- ModSyncStatus
+    [packetType.MapInfo]                            = function(data) end, -- MapInfo
+    [packetType.Disconnect]                         = function(data) end, -- Disconnect
     
     --ServerSessionSetup
-    [packetType.playerVehInfo] = function() end,
-    [packetType.Ready] = function() end,
+    [packetType.playerVehInfo]                      = function(data) end,
+    [packetType.Ready]                              = function(data) end,
     --Playing
 
 
-    ['session_setup'] = function(data)    end,
-    ['mod_info'] = function(data) end,
-	['auto_join'] = function(data) promptAutoJoin(data) end, -- Automatic Server Joining
-	['set_mods'] = function(data) setMods(params) status = "LoadingResources" end, -- should be in session setup or whatever?
-	['map'] = function(data) log('W', 'HandleNetwork', 'Received Map! '..data) loadLevel(data) end, -- should just be handled in session setup?
-	['login_info'] = function(data) loginReceived(data) end, -- should update login information, is the user logged in, their username, roles?
-	['update_ui'] = function(data) UI.updateLoading(data) end,
-	['quick_join'] = function(data) promptAutoJoin(data) end,
+
+    -- Ingame packet handling
+    --[packetType.game_ping]          = function(...) UI.setPing(...) positionGE.setPing(...) end,
+    --[packetType.game_vehicle]       = function(...) MPVehicleGE.handle(...) end, -- all vehicle spawn, modification and delete events, couplers
+	--[packetType.game_input]         = function(...) MPInputsGE.handle(...) end, -- inputs and gears
+	--[packetType.game_electrics]     = function(...) MPElectricsGE.handle(...) end,
+	--[packetType.game_nodes]         = function(...) nodesGE.handle(...) end, -- currently disabled
+	--[packetType.game_powertrain]    = function(...) MPPowertrainGE.handle(...) end, -- powertrain related things like diff locks and transfercases
+	--[packetType.game_pos]           = function(...) positionGE.handle(...) end, -- position and velocity
+    --[packetType.game_chat]          = function(...) UI.chatMessage(...) end,
+    --[packetType.game_event]         = function(...) handleEvents(...) end, -- Event For another Resource
+    --[packetType.game_player]        = function(...) end, -- player join, leave, pings
+    --[packetType.game_kicked]        = function(...) quitMP(...) end, -- Player Kicked Event (new, contains reason)
+	--[packetType.game_notification]  = function(...) UI.showNotification(...) end, -- Display custom notification
+    [packetType.goto_identification] =          function(data) end,
+    [packetType.goto_login] =                   function(data) end,
+    [packetType.goto_quickJoin] =               function(data) end,
+    [packetType.goto_browsing] =                function(data) end,
+    [packetType.goto_serverIdentification] =    function(data) end,
+    [packetType.goto_serverAuthentication] =    function(data) end,
+    [packetType.goto_serverModDownload] =       function(data) end,
+    [packetType.goto_serverSessionSetup] =      function(data) end,
+    [packetType.goto_serverPlaying] =           function(data) end,
+    [packetType.goto_serverLeaving    ] =       function(data) end,
+
 }
 
-local function CoreStuff(data)
-    local jsonData = jsonDecode(data)
-    if not jsonData then return end
-    HandleNetworkCore[jsonData.purpose](jsonData)
-end
-
-
-local OldCore = {
-	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
-	['J'] = function(params) promptAutoJoin(params) end, -- Automatic Server Joining
-	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
-	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
-	['N'] = function(params) loginReceived(params) end,
-	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
-	['Z'] = function(params) launcherVersion = params; end,
-}
-
-
-
-local HandleNetworkGame = {
-    [0x00] = function(...) UI.setPing(...) positionGE.setPing(...) end,
-    [0x01] = function(...) MPVehicleGE.handle(...) end, -- all vehicle spawn, modification and delete events, couplers
-	[0x02] = function(...) MPInputsGE.handle(...) end, -- inputs and gears
-	[0x03] = function(...) MPElectricsGE.handle(...) end,
-	[0x04] = function(...) nodesGE.handle(...) end, -- currently disabled
-	[0x05] = function(...) MPPowertrainGE.handle(...) end, -- powertrain related things like diff locks and transfercases
-	[0x06] = function(...) positionGE.handle(...) end, -- position and velocity
-    [0x07] = function(...) UI.chatMessage(...) end,
-    [0x08] = function(...) handleEvents(...) end, -- Event For another Resource
-    [0x09] = function(...) end, -- player join, leave, pings
-    [0x0a] = function(...) handleEvents(...) end,
-    [0x0b] = function(...) quitMP(...) end, -- Player Kicked Event (new, contains reason)
-	['P'] =  function(...) MPConfig.setPlayerServerID(...) end, -- should be done in session setup
-	['J'] =  function(...) MPUpdatesGE.onPlayerConnect() UI.showNotification(...) end, -- A player joined
-	['L'] =  function(...) UI.showNotification(...) end, -- Display custom notification
-	['S'] =  function(...) sessionData(...) end, -- Update Session Data
-}
 
 local function LeaveServer()
 
@@ -369,17 +352,17 @@ local function GetState()
     return currentState
 end
 
-local headerLen = 12
+local headerLen = 13
 
 local function receive()
     if launcherSocket ~= nil then
         while (true) do
             -- header receive
             local rawHeader, err, partial = launcherSocket:receive(headerLen)
-            if err ~= nil then
+            if err ~= nil and err~= "timeout" and err~= "closed" then
                 log("E", "receive", "header receive failure, socket error: " .. err)
                 log("E", "receive", "header receive failure, partial: " .. partial)
-                disconnectSocket() -- retry?
+                --disconnectSocket() -- retry?
                 return
             end
 
@@ -393,22 +376,14 @@ local function receive()
                 break
             end
 
-            local target, packetType, packetSubType, pid, vid, dataSize = ParseHeader(rawHeader)
-            local data, erorr, partial = launcherSocket:receive(dataSize)
-            if erorr ~= nil then
-                log("E", "receive", "data receive failure, socket error: " .. erorr)
+            local flags, purpose, pid, vid, dataSize = ParseHeader(rawHeader)
+            local data, error, partial = launcherSocket:receive(dataSize)
+            if error ~= nil then
+                log("E", "receive", "data receive failure, socket error: " .. error)
                 log("E", "receive", "data receive failure, partial: " .. partial)
-            end
-
-            if target == 'C' then
-                HandleNetworkCore(jsonDecode(data))
                 return
             end
-
-            if target == 'G' then
-                HandleNetworkGame[packetType](packetSubType, pid, vid, data)
-                return
-            end
+            HandleNetwork[purpose](data)
         end
     end
 end

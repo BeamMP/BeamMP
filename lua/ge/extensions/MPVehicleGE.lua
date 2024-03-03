@@ -541,6 +541,25 @@ local function localVehiclesExist()
 	return false
 end
 
+--- make sure and get the part slot for simplified body, its part id, for the given vehicles
+-- @tparam string vehicleName, eg covet, midsize
+-- @treturn bool canSimplify does vehicle have simplified body
+-- @treturn string slotName the slot that needs to be changed
+-- @treturn string partName the part that needs to go in
+-- @usage local canSimplify, slotName, partName = vehicleGetSimplified("vivace")
+local function getVehicleSimplified(vehicleName)
+	local expectedPartID = simplified_vehicles[vehicleName]
+	if expectedPartID then
+		local ioCtx = {preloadedDirs = {string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}} -- Fake io context for jbeamIO
+		local slotMap = jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
+		local expectedSlotName = vehicleName..'_body' -- guess the slot that takes in the simplified body, for now
+		if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName], expectedPartID) then
+			return true, expectedSlotName, expectedPartID
+		end
+	end
+	return false
+end
+
 -- ============= OBJECTS =============
 local Player = {}
 Player.__index = Player
@@ -848,14 +867,9 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local expectedPartID=simplified_vehicles[vehicleName]
-		if expectedPartID then
-			local ioCtx={preloadedDirs={string.format("/vehicles/%s/",vehicleName),"/vehicles/common/"}} -- Fake io context for jbeamIO
-			local slotMap=jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
-			local expectedSlotName=vehicleName..'_body' -- guess the slot that takes in the simplified body
-			if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName],expectedPartID) then
-				vehicleConfig.parts[expectedSlotName]=expectedPartID
-			end
+		local canSimplify, slotName, partName = vehicleGetSimplified(vehicleName)
+		if canSimplify then
+			vehicleConfig.parts[slotName] = partName
 		end
 	end
 
@@ -906,14 +920,9 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local expectedPartID=simplified_vehicles[vehicleName]
-		if expectedPartID then
-			local ioCtx={preloadedDirs={string.format("/vehicles/%s/",vehicleName),"/vehicles/common/"}} -- Fake io context for jbeamIO
-			local slotMap=jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
-			local expectedSlotName=vehicleName..'_body' -- guess the slot that takes in the simplified body
-			if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName],expectedPartID) then
-				vehicleConfig.parts[expectedSlotName]=expectedPartID
-			end
+		local canSimplify, slotName, partName = vehicleGetSimplified(vehicleName)
+		if canSimplify then
+			vehicleConfig.parts[slotName] = partName
 		end
 	end
 

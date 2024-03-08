@@ -9,6 +9,7 @@ local launcherSocket = nil
 
 
 local state = {
+    stateless = 0,
     identification = 1,
     login = 2,
     quickJoin = 3,
@@ -112,7 +113,7 @@ local modIdentity = {
     protocol_version = {1, 0, 0},
 }
 
-local currentState = nil --[[    
+local currentState = 0 --[[    
     indicates the current state of the mod, following are the valid states
     1. Identification - right after connecting to the Launcher, we switch to an indefitication state
     2. Login - if identification succeeds, we switch to login, after successful credential login, or cached key, we switch to browsing
@@ -126,6 +127,33 @@ local currentState = nil --[[
     10. ServerLeaving          -    LeaveServer()
 ]]
 
+
+-- debug and helper functions
+function string.fromhex(str)
+    return (str:gsub('..', function (cc)
+        return string.char(tonumber(cc, 16))
+    end))
+end
+
+function string.tohex(str)
+    if type(str) == "number" then
+        str = tostring(str)
+    end
+    return (str:gsub('.', function (c)
+        return string.format('%02X', string.byte(c))
+    end))
+end
+
+local function stateChange(newState)
+    local previousState = currentState
+    log("I", "stateChange", "New state requested. Changing from ".. tostring(previousState) .. " to ".. tostring(newState))
+    currentState = newState
+    return newState, previousState
+end
+
+local function GetState()
+    return currentState
+end
 
 local launcherConnected = false
 
@@ -141,16 +169,21 @@ local function disconnectSocket()
         log("I", "disconnectSocket", "Closing socket.")
         launcherSocket:close()
         launcherSocket = nil
+        currentState = state.stateless
     end
 end
 
 local function send(flags, purpose, pid, vid, data)
+    if data == nil then data = "" end
     if launcherSocket ~= nil then
         print("sending: " .. data)
         if pid == nil then pid = 0xFFFFFFFF end
         if vid == nil then vid = 0xFFFF end
 
-        flags = 0x00 -- does nothing for now
+        -- flags don't do anything for now
+        if flags == nil then
+            flags = 0x00
+        end
 
         flags = ffi.string(ffi.new("char[?]", 1, flags), 1)
         purpose = ffi.string(ffi.new("uint16_t[?]", 2, purpose), 2)
@@ -195,11 +228,20 @@ local function ParseHeader(header)
     local rawvid = string.sub(header, 8, 9)
     local rawsize = string.sub(header, 10, 13)
 
-    local flags = ffi.cast("uint16_t*", ffi.new("char[?]", 1, flags))[0]
+
+    log("I", "ParseHeader", "-----------NEW PACKET--------------")
+    log("I", "ParseHeader", "purpose: " .. string.tohex(purpose))
+    log("I", "ParseHeader", "rawpid: " .. string.tohex(rawpid))
+    log("I", "ParseHeader", "rawvid: " .. string.tohex(rawvid))
+    log("I", "ParseHeader", "rawsize: " .. string.tohex(rawsize))
+    log("I", "ParseHeader", "-----------------------------------")
+
+    local flags = ffi.cast("uint8_t*", ffi.new("char[?]", 1, flags))[0]
     local purpose = ffi.cast("uint16_t*", ffi.new("char[?]", 2, purpose))[0]
     local pid = ffi.cast("uint32_t*", ffi.new("char[?]", 4, rawpid))[0]
     local vid = ffi.cast("uint16_t*", ffi.new("char[?]", 2, rawvid))[0]
     local dataSize = ffi.cast("uint32_t*", ffi.new("char[?]", 4, rawsize))[0]
+
     log("I", "ParseHeader", "purpose: " .. purpose)
     log("I", "ParseHeader", "pid: " .. pid)
     log("I", "ParseHeader", "vid: " .. vid)
@@ -208,30 +250,20 @@ local function ParseHeader(header)
     return flags, purpose, pid, vid, dataSize
 end
 
-
-local function SendCoreMsg(data)
-    if data == nil then return end
-    send('C' .. data)
-end
-
-local function SendCredentials(username, password)
+local function SendCredentials(username, password, remember)
+    log("I", "SendCredentials", "Sending credentials to launcher...")
     local msg = jsonEncode({
-        purpose = "login_request";
         username = username;
-        password = password
+        password = password;
+        remember = remember;
     })
-    SendCoreMsg(msg)
+    send(nil, packetType.Credentials, nil, nil, msg)
 end
 
---[[
-    {
-        purpose = "login_response";
-        success = true || false;
-        message = "Welcome Username, roles", "Welcome back x" on key login;
-        username = "player69";
-        role = "[Dev]", ["Mod"]
-    }
-]]
+local function Logout()
+    send(nil, packetType.Logout)
+end
+
 local function ParseLogin(data)
     if data.success == true then
         guihooks.trigger("login success!")
@@ -258,34 +290,33 @@ end
 
 local HandleNetwork = {
     --ClientIdentification
-    [packetType.LauncherInfo]                       = function(data) receiveLauncherInfo(data) end,
-    [packetType.Error]                              = function(data) log("E", "HandleNetwork", "Error: " .. tostring(data)) end, --ERROR
+    [packetType.LauncherInfo]                       = function(...) receiveLauncherInfo(...) end,
+    [packetType.Error]                              = function(...) log("E", "HandleNetwork", "Error: " .. tostring(...)) end, --ERROR
     --Login
-    [packetType.AskForCredentials]                  = function(data) end, --TODO: Prompt user for credentials
-    [packetType.LoginResult]                        = function(data) receiveLoginResult(data) end, --LoginResult
+    [packetType.AskForCredentials]                  = function(...) log("I", "HandleNetwork", "Prompting for credentials...") end, --TODO: Prompt user for credentials
+    [packetType.LoginResult]                        = function(...) receiveLoginResult(...) end, --LoginResult
     --QuickJoin
-    [packetType.DoJoin]                             = function(data) promptAutoJoin(data) end, --DoJoin
+    [packetType.DoJoin]                             = function(...) promptAutoJoin(...) end, --DoJoin
     --Browsing
-    [packetType.ServerListRequest]                  = function(data) end, -- ServerListRequest
-    [packetType.ServerListResponse]                 = function(data) end,--serverList = data; sendBeamMPInfo() end, -- ServerListResponse
-    [packetType.Connect]                            = function(data) end, -- Connect
-    [packetType.Logout]                             = function(data) end, -- Logout
+    [packetType.ServerListResponse]                 = function(...) end,--serverList = data; sendBeamMPInfo() end, -- ServerListResponse
+    [packetType.Connect]                            = function(...) end, -- Connect
+    [packetType.Logout]                             = function(...) end, -- Logout
     --ServerAuthentication
-    [packetType.AuthenticationError]                = function(data) end, -- AuthenticationError 
-    [packetType.AuthenticationOk]                   = function(data) end, -- AuthenticationOk
-    [packetType.PlayerRejected]                     = function(data) end, -- PlayerRejected
+    [packetType.AuthenticationError]                = function(...) end, -- AuthenticationError 
+    [packetType.AuthenticationOk]                   = function(...) end, -- AuthenticationOk
+    [packetType.PlayerRejected]                     = function(...) end, -- PlayerRejected
     
     --ServerIdentification
-    [packetType.ConnectError]                       = function(data) end, -- ConnectError
+    [packetType.ConnectError]                       = function(...) end, -- ConnectError
 
     --ServerModDownload
-    [packetType.ModSyncStatus]                      = function(data) end, -- ModSyncStatus
-    [packetType.MapInfo]                            = function(data) end, -- MapInfo
-    [packetType.Disconnect]                         = function(data) end, -- Disconnect
-    
+    [packetType.ModSyncStatus]                      = function(...) end, -- ModSyncStatus
+    [packetType.MapInfo]                            = function(...) end, -- MapInfo
+    [packetType.Disconnect]                         = function(...) end, -- Disconnect
+
     --ServerSessionSetup
-    [packetType.playerVehInfo]                      = function(data) end,
-    [packetType.Ready]                              = function(data) end,
+    [packetType.playerVehInfo]                      = function(...) end,
+    [packetType.Ready]                              = function(...) end,
     --Playing
 
 
@@ -293,26 +324,26 @@ local HandleNetwork = {
     -- Ingame packet handling
     --[packetType.game_ping]          = function(...) UI.setPing(...) positionGE.setPing(...) end,
     --[packetType.game_vehicle]       = function(...) MPVehicleGE.handle(...) end, -- all vehicle spawn, modification and delete events, couplers
-	--[packetType.game_input]         = function(...) MPInputsGE.handle(...) end, -- inputs and gears
-	--[packetType.game_electrics]     = function(...) MPElectricsGE.handle(...) end,
-	--[packetType.game_nodes]         = function(...) nodesGE.handle(...) end, -- currently disabled
-	--[packetType.game_powertrain]    = function(...) MPPowertrainGE.handle(...) end, -- powertrain related things like diff locks and transfercases
-	--[packetType.game_pos]           = function(...) positionGE.handle(...) end, -- position and velocity
+    --[packetType.game_input]         = function(...) MPInputsGE.handle(...) end, -- inputs and gears
+    --[packetType.game_electrics]     = function(...) MPElectricsGE.handle(...) end,
+    --[packetType.game_nodes]         = function(...) nodesGE.handle(...) end, -- currently disabled
+    --[packetType.game_powertrain]    = function(...) MPPowertrainGE.handle(...) end, -- powertrain related things like diff locks and transfercases
+    --[packetType.game_pos]           = function(...) positionGE.handle(...) end, -- position and velocity
     --[packetType.game_chat]          = function(...) UI.chatMessage(...) end,
     --[packetType.game_event]         = function(...) handleEvents(...) end, -- Event For another Resource
     --[packetType.game_player]        = function(...) end, -- player join, leave, pings
     --[packetType.game_kicked]        = function(...) quitMP(...) end, -- Player Kicked Event (new, contains reason)
-	--[packetType.game_notification]  = function(...) UI.showNotification(...) end, -- Display custom notification
-    [packetType.goto_identification] =          function(data) end,
-    [packetType.goto_login] =                   function(data) end,
-    [packetType.goto_quickJoin] =               function(data) end,
-    [packetType.goto_browsing] =                function(data) end,
-    [packetType.goto_serverIdentification] =    function(data) end,
-    [packetType.goto_serverAuthentication] =    function(data) end,
-    [packetType.goto_serverModDownload] =       function(data) end,
-    [packetType.goto_serverSessionSetup] =      function(data) end,
-    [packetType.goto_serverPlaying] =           function(data) end,
-    [packetType.goto_serverLeaving    ] =       function(data) end,
+    --[packetType.game_notification]  = function(...) UI.showNotification(...) end, -- Display custom notification
+    [packetType.goto_identification] =                  function() stateChange(state.identification) end,
+    [packetType.goto_login] =                           function() stateChange(state.login) end,
+    [packetType.goto_quickJoin] =                       function() stateChange(state.quickJoin) end,
+    [packetType.goto_browsing] =                        function() stateChange(state.browsing) end,
+    [packetType.goto_serverIdentification] =            function() stateChange(state.serverIdentification) end,
+    [packetType.goto_serverAuthentication] =            function() stateChange(state.serverAuthentication) end,
+    [packetType.goto_serverModDownload] =               function() stateChange(state.serverModDownload) end,
+    [packetType.goto_serverSessionSetup] =              function() stateChange(state.serverSessionSetup) end,
+    [packetType.goto_serverPlaying] =                   function() stateChange(state.serverPlaying) end,
+    [packetType.goto_serverLeaving    ] =               function() stateChange(state.serverLeaving) end,
 
 }
 
@@ -352,6 +383,10 @@ local function GetState()
     return currentState
 end
 
+local function requestServerList()
+    send(nil,packetType.ServerListRequest)
+end
+
 local headerLen = 13
 
 local function receive()
@@ -377,8 +412,9 @@ local function receive()
             end
 
             local flags, purpose, pid, vid, dataSize = ParseHeader(rawHeader)
+            -- data receive
             local data, error, partial = launcherSocket:receive(dataSize)
-            if error ~= nil then
+            if err ~= nil and err~= "timeout" and err~= "closed" then
                 log("E", "receive", "data receive failure, socket error: " .. error)
                 log("E", "receive", "data receive failure, partial: " .. partial)
                 return
@@ -386,16 +422,6 @@ local function receive()
             HandleNetwork[purpose](data)
         end
     end
-end
-
-local function progressState(newState)
-    log("I", "progressState", "New state requested: " .. newState)
-    local previousState = currentState
-    return newState, previousState
-end
-
-local function GetState()
-    return currentState
 end
 
 -- backwards compat stuff
@@ -426,8 +452,11 @@ M.send = send
 M.connect = connectSocket
 M.disconnect = disconnectSocket
 M.SendCredentials = SendCredentials
+M.Logout = Logout
 M.GetState = GetState
+M.requestServerList = requestServerList
 -- events
 M.onUpdate = receive
 
+M.onInit = function() setExtensionUnloadMode(M, "manual") end
 return M

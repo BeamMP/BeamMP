@@ -46,9 +46,15 @@ local function DrawDebugWindow()
     im.NextColumn()
 
     im.Text("BeamMP")
-    im.Text("Current state: ".. tostring(beammp_network.GetState()))
+    im.Text("Current state:")
+    im.Text(beammp_network.stateNames[beammp_network.GetState()])
     if im.Button("Req. server list") then
         beammp_network.requestServerList()
+    end
+    if im.Button("Reload MP ext") then
+        log("I", "DrawDebugWindow", "Requesting MP extensions reload")
+        extensions.reload("beammp_network")
+        extensions.reload("beammp_ui_debug")
     end
     im.NextColumn()
     im.Text("Network")

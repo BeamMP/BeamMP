@@ -22,48 +22,52 @@ else
 	log('M', 'versionCheck', 'BeamMP is compatible with the current version.')
 end
 
-load("multiplayer/multiplayer")
-setExtensionUnloadMode("multiplayer/multiplayer", "manual")
+--load("multiplayer/multiplayer")
+--setExtensionUnloadMode("multiplayer/multiplayer", "manual")
 
-load("MPDebug")
-setExtensionUnloadMode("MPDebug", "manual")
+--load("MPDebug")
+--setExtensionUnloadMode("MPDebug", "manual")
+--
+--load("UI")
+--setExtensionUnloadMode("UI", "manual")
 
-load("UI")
-setExtensionUnloadMode("UI", "manual")
+--load("MPModManager")
+--setExtensionUnloadMode("MPModManager", "manual")
 
-load("MPModManager")
-setExtensionUnloadMode("MPModManager", "manual")
+--load("MPCoreNetwork")
+--setExtensionUnloadMode("MPCoreNetwork", "manual")
 
-load("MPCoreNetwork")
-setExtensionUnloadMode("MPCoreNetwork", "manual")
+--load("MPConfig")
+--setExtensionUnloadMode("MPConfig", "manual")
 
-load("MPConfig")
-setExtensionUnloadMode("MPConfig", "manual")
+--load("MPGameNetwork")
+--setExtensionUnloadMode("MPGameNetwork", "manual")
 
-load("MPGameNetwork")
-setExtensionUnloadMode("MPGameNetwork", "manual")
-
-load("MPVehicleGE")
-setExtensionUnloadMode("MPVehicleGE", "manual")
-
-load("MPInputsGE")
-setExtensionUnloadMode("MPInputsGE", "manual")
-
-load("MPElectricsGE")
-setExtensionUnloadMode("MPElectricsGE", "manual")
-
-load("positionGE")
-setExtensionUnloadMode("positionGE", "manual")
-
-load("MPPowertrainGE")
-setExtensionUnloadMode("MPPowertrainGE", "manual")
-
-load("MPUpdatesGE")
-setExtensionUnloadMode("MPUpdatesGE", "manual")
-
-load("nodesGE")
-setExtensionUnloadMode("nodesGE", "manual")
-
--- load this file last so it can reference the others
-load("MPHelpers")
-setExtensionUnloadMode("MPHelpers", "manual")
+--load("MPVehicleGE")
+--setExtensionUnloadMode("MPVehicleGE", "manual")
+--
+--load("MPInputsGE")
+--setExtensionUnloadMode("MPInputsGE", "manual")
+--
+--load("MPElectricsGE")
+--setExtensionUnloadMode("MPElectricsGE", "manual")
+--
+--load("positionGE")
+--setExtensionUnloadMode("positionGE", "manual")
+--
+--load("MPPowertrainGE")
+--setExtensionUnloadMode("MPPowertrainGE", "manual")
+--
+--load("MPUpdatesGE")
+--setExtensionUnloadMode("MPUpdatesGE", "manual")
+--
+--load("nodesGE")
+--setExtensionUnloadMode("nodesGE", "manual")
+--
+---- load this file last so it can reference the others
+--load("MPHelpers")
+--setExtensionUnloadMode("MPHelpers", "manual")
+load("beammp/network")
+setExtensionUnloadMode("beammp/network", "manual")
+load("beammp/ui/debug")
+setExtensionUnloadMode("beammp/ui/debug", "manual")

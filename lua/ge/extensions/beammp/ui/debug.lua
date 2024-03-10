@@ -18,6 +18,8 @@ end
 
 local username = im.ArrayChar(128)
 local password = im.ArrayChar(128)
+local host = im.ArrayChar(128)
+local port = im.ArrayChar(32)
 local function DrawDebugWindow()
 
 
@@ -34,7 +36,7 @@ local function DrawDebugWindow()
         Lua:requestReload()
     end
     if im.Button("Main Menu") then
-        ReturnToMainMenu()
+        returnToMainMenu()
     end
     if im.Button("SmallGrid") then
         freeroam_freeroam.startFreeroam("levels/smallgrid/info.json")
@@ -51,11 +53,18 @@ local function DrawDebugWindow()
     if im.Button("Req. server list") then
         beammp_network.requestServerList()
     end
-    if im.Button("Reload MP ext") then
+    if im.Button("Reload MP extensions") then
         log("I", "DrawDebugWindow", "Requesting MP extensions reload")
         extensions.reload("beammp_network")
         extensions.reload("beammp_ui_debug")
     end
+    --im.SeparatorText()
+    im.InputText("IP", host)
+    im.InputText("PORT", port)
+    if im.Button("Join server") then
+        beammp_network.ConnectToServer(ffi.string(ffi.cast("char*", host)), ffi.string(ffi.cast("char*", port)))
+    end
+
     im.NextColumn()
     im.Text("Network")
     if im.Button("Connect") then
@@ -69,7 +78,7 @@ local function DrawDebugWindow()
     im.Text("Login")
     im.Separator()
     im.InputText("User", username)
-    im.InputText("Pass", password)
+    im.InputText("Pass", password, 128, im.flags(im.InputTextFlags_Password))
     if im.Button("Login") then
         beammp_network.SendCredentials(ffi.string(ffi.cast("char*", username)), ffi.string(ffi.cast("char*", password)), true)
     end

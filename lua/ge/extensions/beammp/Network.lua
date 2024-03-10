@@ -155,15 +155,6 @@ local function GetState()
     return currentState
 end
 
-local launcherConnected = false
-
-local function connectSocket()
-    launcherSocket = socket.tcp()
-    launcherSocket:setoption("keepalive", true)
-    launcherSocket:settimeout(0)
-    launcherSocket:connect(config.host, config.port)
-end
-
 local function disconnectSocket()
     if launcherSocket ~= nil then
         log("I", "disconnectSocket", "Closing socket.")
@@ -173,9 +164,20 @@ local function disconnectSocket()
     end
 end
 
+local function connectSocket()
+    if launcherSocket ~= nil then
+        log("W", "connectSocket", "Existing socket already exists.")
+        disconnectSocket()
+    end
+    log("I", "connectSocket", "Connecting...")
+    launcherSocket = socket.tcp()
+    launcherSocket:setoption("keepalive", true)
+    launcherSocket:settimeout(0)
+    launcherSocket:connect(config.host, config.port)
+end
+
 local function send(flags, purpose, pid, vid, data)
     if launcherSocket ~= nil then
-        print("sending: " .. data)
         data = data and data or ""
         if pid == nil then pid = 0xFFFFFFFF end
         if vid == nil then vid = 0xFFFF end
@@ -192,6 +194,8 @@ local function send(flags, purpose, pid, vid, data)
 
         local dataSize = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
         local header = flags .. purpose .. pid .. vid .. dataSize
+        log("I", "send", "header: " .. string.tohex(header))
+        log("I", "send", "data: " .. data)
         local index, errorMsg, byte = launcherSocket:send(header .. data)
         if index == nil then
             log("E", "beammp_network.send", "Stopped at byte " .. tostring(byte) .. " out of " .. #data .. ". Error message: " .. errorMsg)
@@ -218,9 +222,18 @@ local function receiveLauncherInfo(data)
 end
 
 local function receiveLoginResult(data)
-    local authData = jsonDecode(data)
-    dump(authData)
-    -- switch state to Browsing
+    local result = jsonDecode(data)
+    if result == nil then
+        log("E", "receiveLoginResult", "Login response is invalid. Raw data: " .. tostring(data))
+        return
+    end
+
+    if result.success == true then
+        return
+    end
+    if result.success == false then
+        return
+    end
 end
 
 
@@ -266,17 +279,6 @@ end
 
 local function Logout()
     send(nil, packetType.Logout)
-end
-
-local function ParseLogin(data)
-    if data.success == true then
-        guihooks.trigger("login success!")
-        -- switch state to browsing
-        return true
-    elseif data.success == false then
-        guihooks.trigger("login failure")
-        -- switch state to login
-    end
 end
 
 local function promptAutoJoin(params) -- TODO
@@ -388,6 +390,7 @@ local function GetState()
 end
 
 local function requestServerList()
+    log("D", "requestServerList", "Requesting server list.")
     send(nil, packetType.ServerListRequest)
 end
 

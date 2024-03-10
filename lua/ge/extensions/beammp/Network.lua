@@ -379,9 +379,8 @@ end
 
 local function ConnectToServer(host, port)
     local msg = jsonEncode({
-        purpose = "ConnectToServer";
         host = host;
-        port = port;
+        port = tonumber(port);
     })
     send(nil, packetType.Connect, nil, nil, msg)
 end
@@ -441,8 +440,9 @@ local function receive()
                 return
             end
             local handlePurpose = handleState[purpose]
-            if handlePurpose == nil then 
+            if handlePurpose == nil then
                 log("E", "receive", "Invalid purpose for state: " .. tostring(M.stateNames[currentState]))
+                log("I", "receive", "data:" .. tostring(data))
                 return
             end
             handlePurpose(data)

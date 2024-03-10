@@ -200,6 +200,7 @@ local function send(flags, purpose, pid, vid, data)
         if index == nil then
             log("E", "beammp_network.send", "Stopped at byte " .. tostring(byte) .. " out of " .. #data .. ". Error message: " .. errorMsg)
             if errorMsg == "closed" then
+                log("W", "send", "socket closed.")
                 launcherSocket = nil
                 currentState = state.identification
             end
@@ -227,6 +228,7 @@ local function receiveLoginResult(data)
         log("E", "receiveLoginResult", "Login response is invalid. Raw data: " .. tostring(data))
         return
     end
+    log("I", "receiveLoginResult", dumps(result))
 
     if result.success == true then
         return

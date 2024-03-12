@@ -117,12 +117,16 @@ local launcherInfo = {
     mod_cache_path = nil,
 }
 
+local ver = split(beamng_versiond, ".")
 local modIdentity = {
     implementation = "Official BeamMP Mod",
     mod_version = {10, 20, 30},
-    game_version = {10, 20, 30},
+    --game_version = {ver[1], ver[2], ver[3]},
+    game_version = {10,20,30},
     protocol_version = {1, 0, 0},
 }
+
+
 
 -- default state before connecting
 local currentState = state.identification
@@ -339,7 +343,7 @@ local HandleNetwork = {
         [packetType.Ready]         = function(...) end,
     },
     [state.serverPlaying] = {
-        --[packetType.game_ping]          = setPing,
+        [packetType.game_ping]          = setPing,
         --[packetType.game_vehicle]       = MPVehicleGE.handle, -- all vehicle spawn, modification and delete events, couplers
         --[packetType.game_input]         = MPInputsGE.handle, -- inputs and gears
         --[packetType.game_electrics]     = MPElectricsGE.handle,
@@ -385,6 +389,10 @@ local function ConnectToServer(host, port)
     send(nil, packetType.Connect, nil, nil, msg)
 end
 
+local function leaveServer()
+
+end
+
 
 local function GetState()
     return currentState
@@ -395,58 +403,90 @@ local function requestServerList()
     send(nil, packetType.ServerListRequest)
 end
 
-local headerLen = 13
+local function Handle(flags, purpose, pid, vid, dataSize, data)
+    --0xaa01 -> 0xC1
+    -- TODO: just make a map instead for readability reasons
+    if bit.rshift(purpose, 8) == 0xaa then
+        stateChange(bit.band(purpose, 0xFF) + 0xC0)
+        return
+    end
+    local handleState = HandleNetwork[currentState]
+    if handleState == nil then
+        log("E", "receive", "Invalid state.")
+        return
+    end
+    local handlePurpose = handleState[purpose]
+    if handlePurpose == nil then
+        log("E", "receive", "Invalid purpose for state: " .. tostring(M.stateNames[currentState]))
+        log("I", "receive", "data:" .. tostring(data))
+        return
+    end
+    handlePurpose(data)
+    --Handle[currentState][purpose](data)
+end
 
+local headerLen = 13
+local dataBuffer = ""
+local frameCounter = 0
+local flags, purpose, pid, vid, dataSize
 local function receive()
     if launcherSocket ~= nil then
+        frameCounter = frameCounter + 1
         while (true) do
+            -- data receive
+            if dataSize ~= nil and dataSize > #dataBuffer then
+                local data, dataError, dataPartial = launcherSocket:receive(dataSize - #dataBuffer)
+                if data ~= nil then
+                    log("I", "receive", "received: " .. tostring(#data) .. " bytes")
+                end
+
+                if dataError ~= nil then
+                    log("E", "receive", "data receive failure, socket error: " .. dataError)
+                    log("E", "receive", "data receive failure, partial: " .. dataPartial)
+                    if dataError == "timeout" then
+                        log("W", "receive", "Out of data to read. Delaying receive by 1 frame. Got " .. #dataPartial .. " out of " .. dataSize - #dataBuffer)
+                        dataBuffer = dataBuffer .. dataPartial
+                    end
+                    if dataError == "closed" then
+                        log("W", "receive", "Launcher socket closed.")
+                        disconnectSocket()
+                    end
+                    return
+                end
+                dataBuffer = dataBuffer .. data
+                --log("W", "dataSize: ".. dataSize)
+                --log("W", "dataBuffer: ".. #dataBuffer)
+            end
+
+            if dataSize ~= nil and dataSize == #dataBuffer then
+                Handle(flags, purpose, pid, vid, dataSize, dataBuffer)
+                flags, purpose, pid, vid, dataSize = nil,nil,nil,nil,nil
+                dataBuffer = ""
+                log("I", "receive", "Receive completed on frame ".. frameCounter .. ".")
+                log("I", "receive", "Data handled and cleared." )
+            end
+            
+
             -- header receive
-            local rawHeader, err, partial = launcherSocket:receive(headerLen)
-            if err ~= nil and err~= "timeout" and err~= "closed" then
-                log("E", "receive", "header receive failure, socket error: " .. err)
-                log("E", "receive", "header receive failure, partial: " .. partial)
-                --disconnectSocket() -- retry?
+            local rawHeader, headerError, headerPartial = launcherSocket:receive(headerLen)
+            if headerError ~= nil and headerError~= "timeout" and headerError~= "closed" then
+                log("E", "receive", "header receive failure, socket error: " .. headerError)
+                log("E", "receive", "header receive failure, partial: " .. headerPartial)
+                disconnectSocket()
                 return
             end
 
-            if rawHeader == nil or rawHeader == "" then
-                break
+            if rawHeader == nil then
+                return
             end
-            if #rawHeader ~= headerLen then
+            if #rawHeader < headerLen then
                 log("E", "receive", "Invalid header length.")
                 disconnectSocket()
                 --TODO: some error message, a toast or whatever
-                break
-            end
-
-            local flags, purpose, pid, vid, dataSize = ParseHeader(rawHeader)
-            -- data receive
-            local data, error, partial = launcherSocket:receive(dataSize)
-            if err ~= nil and err~= "timeout" and err~= "closed" then
-                log("E", "receive", "data receive failure, socket error: " .. error)
-                log("E", "receive", "data receive failure, partial: " .. partial)
                 return
             end
-
-            --0xaa01 -> 0xC1
-            -- TODO: just make a map instead for readability reasons
-            if bit.rshift(purpose, 8) == 0xaa then
-                stateChange(bit.band(purpose, 0xFF) + 0xC0)
-                return
-            end
-            local handleState = HandleNetwork[currentState]
-            if handleState == nil then 
-                log("E", "receive", "Invalid state.")
-                return
-            end
-            local handlePurpose = handleState[purpose]
-            if handlePurpose == nil then
-                log("E", "receive", "Invalid purpose for state: " .. tostring(M.stateNames[currentState]))
-                log("I", "receive", "data:" .. tostring(data))
-                return
-            end
-            handlePurpose(data)
-            --Handle[currentState][purpose](data)
+            flags, purpose, pid, vid, dataSize = ParseHeader(rawHeader)
+            frameCounter = 0
         end
     end
 end

@@ -250,10 +250,7 @@ local function togglePlayerMuted(name)
 	dump('togglePlayerMuted', name)
 	for playerID, player in pairs(players) do
 		if player.name == name then
-			dump(player)
 			player.muted = not player.muted
-			
-			dump(player)
 		end
 	end
 end
@@ -1228,6 +1225,11 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	if not players[playerServerID] or players[playerServerID].name ~= playerNickname then
 		players[playerServerID] =
 			Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
+	end
+
+	if players[playerServerID].hidden then
+		log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' However they are hidden so we will not be spawning it.')
+		return
 	end
 
 	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))

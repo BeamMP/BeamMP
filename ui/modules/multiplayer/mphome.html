@@ -13,7 +13,7 @@
             </div>
             <div class="menu-card-content" ng-controller="MultiplayerHomeController">
               <p>{{::}}</p>
-              <h3>Welcome back, <b>{{::steamData.playerName}}</b>!</h3>
+              <h3>Welcome back, <b>{{::beammpData.username}}</b>!</h3>
             </div>
           </div>
 
@@ -40,7 +40,7 @@
           </div>
         </div>
         <div class="flex-server-buttons">
-          <div class="clickable server-button flex-full-width" ng-click="multiplayer.gotoCreateServer()">
+          <div class="clickable server-button flex-full-width" ng-click="multiplayer.gotoCreateServer()" ng-disabled="beammpData.role == 'MDEV'">
             <h1>Private Servers <span class="ea-badge">Early Access Only</span></h1>
             <h3>Create a private server for you and your friends only.</h3>
           </div>

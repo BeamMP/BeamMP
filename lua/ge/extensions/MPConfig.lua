@@ -335,6 +335,7 @@ M.getPlayerServerID = getPlayerServerID
 M.setPlayerServerID = setPlayerServerID
 M.setDefaultUnicycle = setDefaultUnicycle
 
+M.getNickname = getAccountNickname
 M.getAccountNickname = getAccountNickname
 M.setAccountNickname = setAccountNickname
 M.getAccountRole = getAccountRole

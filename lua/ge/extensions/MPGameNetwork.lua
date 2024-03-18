@@ -124,7 +124,6 @@ local function sessionData(data)
 		UI.updatePlayersList(playerList)
 	elseif code == "n" then
 		UI.setNickname(data)
-		MPConfig.setNickname(data)
 	end
 end
 

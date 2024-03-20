@@ -1,72 +1,74 @@
 <md-content>
-	<div layout="row" layout-padding="">
+	<div id="serverListHeader" layout="row" layout-padding="">
 			<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
 			<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
 			<md-button id="clear-button" class="button servers-button" ng-class="" ng-click="multiplayer.clearRecents()">{{:: 'ui.multiplayer.clearRecent' | translate}}</md-button>
 
 		<md-divider></md-divider>
 	</div>
-
-	<table id="serversTable">
-		<thead>
-			<tr id="header">
-				<th onclick="sortTable('location', false)">{{:: 'ui.multiplayer.location' | translate}}</th>
-				<th onclick="sortTable('sname', false)">{{:: 'ui.multiplayer.description' | translate}}</th>
-				<th onclick="sortTable('map', false)">{{:: 'ui.multiplayer.map' | translate}}</th>
-				<th onclick="sortTable('players', true)">{{:: 'ui.multiplayer.players' | translate}}</th>
-			</tr>
-		</thead>
-		<tbody id="serversTableBody">
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-			<tr><td class="loading-shimmer" colspan="4"></td></tr>
-		</tbody>
-	</table>
+	
+	<div id="serversTableContainer">
+		<table id="serversTable">
+			<thead>
+				<tr id="header">
+					<th onclick="sortTable('location', false)">{{:: 'ui.multiplayer.location' | translate}}</th>
+					<th onclick="sortTable('sname', false)">{{:: 'ui.multiplayer.description' | translate}}</th>
+					<th onclick="sortTable('map', false)">{{:: 'ui.multiplayer.map' | translate}}</th>
+					<th onclick="sortTable('players', true)">{{:: 'ui.multiplayer.players' | translate}}</th>
+				</tr>
+			</thead>
+			<tbody id="serversTableBody">
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+				<tr><td class="loading-shimmer" colspan="4"></td></tr>
+			</tbody>
+		</table>
+	</div>
 
 	<div id="footer">
 		<span id="TEMPAREA" style="display:none;"></span>

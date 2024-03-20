@@ -545,7 +545,7 @@ end
 -- @treturn bool canSimplify does vehicle have simplified body
 -- @treturn string slotName the slot that needs to be changed
 -- @treturn string partName the part that needs to go in
--- @usage local canSimplify, slotName, partName = vehicleGetSimplified("vivace")
+-- @usage local canSimplify, slotName, partName = getVehicleSimplified("vivace")
 local function getVehicleSimplified(vehicleName)
 	local expectedPartID = simplified_vehicles[vehicleName]
 	if expectedPartID then
@@ -866,7 +866,7 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = vehicleGetSimplified(vehicleName)
+		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
 		if canSimplify then
 			vehicleConfig.parts[slotName] = partName
 		end
@@ -919,7 +919,7 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = vehicleGetSimplified(vehicleName)
+		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
 		if canSimplify then
 			vehicleConfig.parts[slotName] = partName
 		end
@@ -1214,6 +1214,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		players[playerServerID]:addVehicle(vehObject)
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
+
+		-- Hacky Fix - Lets now send the vehicle data again so that other players on the server actually have the paint data for this vehicle.
+		sendVehicleEdit(gameVehicleID)
 
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
 

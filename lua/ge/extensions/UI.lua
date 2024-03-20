@@ -132,15 +132,7 @@ local function updatePlayersList(data)
 		local color = {}
 		local id = '?'
 		if player then
-			local prefix = ""
-			for source, tag in pairs(player.nickPrefixes)
-				do prefix = prefix..tag.." " end
-
-			local suffix = ""
-			for source, tag in pairs(player.nickSuffixes)
-				do suffix = suffix..tag.." " end
-
-			username = prefix..''..username..''..suffix..''..player.role.shorttag
+			username = username..''..player.role.shorttag
 			local c = player.role.forecolor
 			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 			id = player.playerID
@@ -425,14 +417,7 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	local msg = string.gsub(message, username..': ', '')
 	local player = MPVehicleGE.getPlayerByName(username)
 	if player then
-		local prefix = ""
-		for source, tag in pairs(player.nickPrefixes)
-			do prefix = prefix..tag.." " end
-
-		local suffix = ""
-		for source, tag in pairs(player.nickSuffixes)
-			do suffix = suffix..tag.." " end
-		username = prefix..''..username..''..suffix..''..player.role.shorttag
+        username = username..''..player.role.shorttag
 		local c = player.role.forecolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE

@@ -1,17 +1,17 @@
 {
-  "domElement": "<multiplayerchat></multiplayerchat>",
-  "name": "Multiplayer Chat",
-  "types": [
-    "ui.apps.categories.multiplayer"
-  ],
-  "css": {
-  	"left": "180px",
-  	"bottom": "0px",
-  	"width": "550px",
-    "height": "170px"
-  },
-  "description": "Chat while in multiplayer servers",
-  "author": "BeamMP",
-  "version": "1.0",
-  "directive": "multiplayerchat"
+    "author": "BeamMP Team",
+    "css": {
+        "bottom": "0px",
+        "height": "250px",
+        "left": "180px",
+        "width": "700px"
+    },
+    "description": "Allows you to send chat messages while in a BeamMP server.",
+    "directive": "multiplayerchat",
+    "domElement": "<multiplayerchat></multiplayerchat>",
+    "name": "BeamMP Multiplayer Chat",
+    "types": [
+        "ui.apps.categories.multiplayer"
+    ],
+    "version": "1.1"
 }

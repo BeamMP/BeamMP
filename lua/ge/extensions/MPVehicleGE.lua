@@ -1179,6 +1179,24 @@ local function onVehicleResetted(gameVehicleID)
 	end
 end
 
+--============================ ON COUPLER ATTACHED (CLIENT) ============================
+local function onCouplerAttached(objId1, objId2, nodeId, obj2nodeId)
+  dump('COUPLER ATTACHED', objId1, objId2, nodeId, obj2nodeId)
+
+end
+
+--============================ ON COUPLER DETACHED (CLIENT) ============================
+local function onCouplerDetached(objId1, objId2, nodeId, obj2nodeId)
+  dump('COUPLER DETACHED', objId1, objId2, nodeId, obj2nodeId)
+
+end
+
+--============================ ON COUPLER DETACH (CLIENT) ============================
+local function onCouplerDetach(objId, nodeId)
+  dump('COUPLER DETACH', objId, nodeId)
+
+end
+
 
 
 -- server events
@@ -1338,6 +1356,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 	lastResetTime[serverVehicleID] = localCounter
 end
 
+--============================ ON VEHICLE COUPLED (SERVER) ============================
 local function onServerVehicleCoupled(serverVehicleID, data)
 	local vehicle = getVehicleByServerID(serverVehicleID) -- Get game ID
 	if not vehicle.isLocal then
@@ -2008,6 +2027,9 @@ M.onVehicleSpawned         = onVehicleSpawned
 M.onVehicleDestroyed       = onVehicleDestroyed
 M.onVehicleSwitched        = onVehicleSwitched
 M.onVehicleResetted        = onVehicleResetted
+M.onCouplerAttached        = onCouplerAttached
+M.onCouplerDetached        = onCouplerDetached
+M.onCouplerDetach          = onCouplerDetach
 M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised

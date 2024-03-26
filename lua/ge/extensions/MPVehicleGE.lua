@@ -700,20 +700,21 @@ function Vehicle:new(data)
 	o.isLocal = data.isLocal or false
 	o.isSpawned = data.isSpawned ~= false -- default to true
 	o.isDeleted = data.isDeleted or false
+	o.isActive = true
 
 	o.position = nil
 	o.rotation = nil
 
 	o.spectators = {}
 
-	log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	log('I', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
 	return o
 end
 function Vehicle:getOwner()
 	return players[self.ownerID], self.ownerID
 end
 function Vehicle:delete()
-	log('W', 'Vehicle:delete', string.format('Vehicle %s deleted! Source: %s Data: %s', self.serverVehicleString, simpletraces(), dumps(self)))
+	log('I', 'Vehicle:delete', string.format('Vehicle %s deleted! Source: %s Data: %s', self.serverVehicleString, simpletraces(), dumps(self)))
 	for playerID, v in pairs(self.spectators) do
 		if players[playerID] then players[playerID].activeVehicleID = nil end
 	end
@@ -721,6 +722,40 @@ function Vehicle:delete()
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 	self = nil
 end
+function Vehicle:activate()
+	if self.isActive then
+		log('W', 'Vehicle:activate', string.format("Vehicle %s (%s) is already active!", self.serverVehicleString, self.ownerName))
+		return
+	end
+	local veh = be:getObjectByID(self.gameVehicleID)
+	if not veh then
+		log('W', 'Vehicle:activate', string.format("Vehicle %s (%s) not veh!.", self.serverVehicleString, self.ownerName))
+		return
+	end
+
+	veh:setActive(1)
+	veh:setPositionNoPhysicsReset(Point3F(self.position.x, self.position.y, self.position.z))
+	--veh:setPositionRotation(self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
+
+	self.isActive = true
+	log('W', 'Vehicle:activate', string.format("Vehicle %s (%s) activated!", self.serverVehicleString, self.ownerName))
+end
+
+function Vehicle:deactivate()
+	if not self.isActive then
+		log('W', 'Vehicle:deactivate', string.format("Vehicle %s (%s) is already deactivated!", self.serverVehicleString, self.ownerName))
+		return
+	end
+	local veh = be:getObjectByID(self.gameVehicleID)
+	if not veh then
+		log('W', 'Vehicle:deactivate', string.format("Vehicle %s (%s) not veh!.", self.serverVehicleString, self.ownerName))
+		return
+	end
+	veh:setActive(0)
+	self.isActive = false
+	log('W', 'Vehicle:deactivate', string.format("Vehicle %s (%s) deactivated.", self.serverVehicleString, self.ownerName))
+end
+
 function Vehicle:onSerialized()
 	local t = {
 		jbeam = self.jbeam,
@@ -732,7 +767,8 @@ function Vehicle:onSerialized()
 		ownerName = self.ownerName,
 		isLocal = self.isLocal,
 		isSpawned = self.isSpawned,
-		isDeleted = self.isDeleted
+		isDeleted = self.isDeleted,
+		isActive = self.isActive
 	}
 	return t
 end
@@ -1734,7 +1770,7 @@ local function onPreRender(dt)
 			local gameVehicleID = v.gameVehicleID
 			local veh = be:getObjectByID(gameVehicleID)
 
-			if v.isSpawned and veh then -- update position if available
+			if v.isSpawned and veh and v.isActive then -- update position if available
 				v.position = veh:getPosition()
 			end
 
@@ -1771,6 +1807,17 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
+
+			if distfloat > 50 then
+				if v.isActive then
+					v:deactivate()
+				end
+				debugDrawer:drawSphere(v.position, 1, ColorF(100, 90, 0, 0.5))
+			elseif distfloat < 47 then
+				if not v.isActive then
+					v:activate()
+				end
+			end
 			
 			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 

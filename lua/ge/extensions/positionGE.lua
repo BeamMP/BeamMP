@@ -104,6 +104,7 @@ local function applyPos(decoded, serverVehicleID)
 	vehicle.ping = ping
 	vehicle.fps = 1/deltaDt
 	vehicle.position = Point3F(decoded.pos[1],decoded.pos[2],decoded.pos[3])
+	vehicle.rotation = quat(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
 
 	local owner = vehicle:getOwner()
 	if owner then UI.setPlayerPing(owner.name, ping) end-- Send ping to UI

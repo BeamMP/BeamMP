@@ -124,6 +124,8 @@ local modIdentity = {
     --game_version = {ver[1], ver[2], ver[3]},
     game_version = {10,20,30},
     protocol_version = {1, 0, 0},
+    game_path = FS:getGamePath(),
+    user_path = FS:getUserPath(),
 }
 
 
@@ -180,6 +182,7 @@ local function connectSocket()
     launcherSocket:connect(config.host, config.port)
 end
 
+--TODO: implement send retry
 local function send(flags, purpose, pid, vid, data)
     if launcherSocket ~= nil then
         data = data and data or ""
@@ -208,7 +211,6 @@ local function send(flags, purpose, pid, vid, data)
                 launcherSocket = nil
                 currentState = state.identification
             end
-            return
         end
         return
     end
@@ -220,8 +222,13 @@ local function identifyMod()
 end
 
 local function receiveLauncherInfo(data)
-    launcherInfo = jsonDecode(data)
-    log("I", "receiveLauncherInfo", dumps(data))
+    local info = jsonDecode(data)
+    if info == nil then
+        log("E", "receiveLauncherInfo", "Received invalid launcher identification. Raw data: ".. data)
+        disconnectSocket()
+        return
+    end
+    launcherInfo = info
     log("I", "receiveLauncherInfo", dumps(launcherInfo))
     send(nil, packetType.GameInfo, nil, nil, identifyMod())
 end
@@ -331,16 +338,16 @@ local HandleNetwork = {
     },
     [state.serverAuthentication] = {
         [packetType.AuthenticationError] = handleError, -- TODO: implement proper handler
-        [packetType.AuthenticationOk]    = function(...) end,
-        [packetType.PlayerRejected]      = function(...) end,
+        [packetType.AuthenticationOk]    = function(...) dump(...) end,
+        [packetType.PlayerRejected]      = function(...) dump(...) end,
     },
     [state.serverModDownload] = {
-        [packetType.ModSyncStatus] = function(...) end, -- UI hook something or the other
-        [packetType.MapInfo]       = function(...) end, -- TODO: set the mapp
+        [packetType.ModSyncStatus] = function(...) dump(...) end, -- UI hook something or the other
+        [packetType.MapInfo]       = function(...) dump(...) end, -- TODO: set the mapp
     },
     [state.serverSessionSetup] = {
-        [packetType.playerVehInfo] = function(...) end,
-        [packetType.Ready]         = function(...) end,
+        [packetType.playerVehInfo] = function(...) dump(...) end,
+        [packetType.Ready]         = function(...) dump(...) end,
     },
     [state.serverPlaying] = {
         [packetType.game_ping]          = setPing,
@@ -359,14 +366,6 @@ local HandleNetwork = {
     },
     [state.serverLeaving] = {},
 }
-
-local function LeaveServer()
-
-end
-
-local function QuickJoin()
-
-end
 
 local function IdentifyServer(host, port) -- TBD
     local msg = jsonEncode({
@@ -389,8 +388,8 @@ local function ConnectToServer(host, port)
     send(nil, packetType.Connect, nil, nil, msg)
 end
 
-local function leaveServer()
-
+local function LeaveServer()
+    log("I", "LeaveServer", "Leaving server...")
 end
 
 
@@ -437,12 +436,11 @@ local function receive()
             if dataSize ~= nil and dataSize > #dataBuffer then
                 local data, dataError, dataPartial = launcherSocket:receive(dataSize - #dataBuffer)
                 if data ~= nil then
-                    log("I", "receive", "received: " .. tostring(#data) .. " bytes")
+                    log("I", "receive", "Received: " .. tostring(#data) .. " bytes")
                 end
-
                 if dataError ~= nil then
-                    log("E", "receive", "data receive failure, socket error: " .. dataError)
-                    log("E", "receive", "data receive failure, partial: " .. dataPartial)
+                    log("E", "receive", "Data receive failure, socket error: " .. dataError)
+                    log("E", "receive", "Data receive failure, partial: " .. dataPartial)
                     if dataError == "timeout" then
                         log("W", "receive", "Out of data to read. Delaying receive by 1 frame. Got " .. #dataPartial .. " out of " .. dataSize - #dataBuffer)
                         dataBuffer = dataBuffer .. dataPartial
@@ -469,14 +467,17 @@ local function receive()
 
             -- header receive
             local rawHeader, headerError, headerPartial = launcherSocket:receive(headerLen)
-            if headerError ~= nil and headerError~= "timeout" and headerError~= "closed" then
+            if headerError == "timeout" then return end
+            if headerError == "closed" then disconnectSocket() return end
+            if headerError ~= nil and headerError~= "closed" then
                 log("E", "receive", "header receive failure, socket error: " .. headerError)
                 log("E", "receive", "header receive failure, partial: " .. headerPartial)
-                disconnectSocket()
+                --disconnectSocket()
                 return
             end
 
             if rawHeader == nil then
+                log("W", "Header is nil")
                 return
             end
             if #rawHeader < headerLen then
@@ -521,6 +522,7 @@ M.Logout = Logout
 M.GetState = GetState
 M.requestServerList = requestServerList
 M.ConnectToServer = ConnectToServer
+M.LeaveServer = LeaveServer
 -- events
 M.onUpdate = receive
 

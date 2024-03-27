@@ -27,6 +27,10 @@ local queueApplyTimer = 0
 local isAtSyncSpeed = true
 local hideNicknamesToggle = false
 
+-- pooling vars
+local poolingActivationCooldown = 2 -- time in seconds before a pooled vehicle can be unpooled or vice versa
+local poolingCutoffHysteresis = 5 -- distance in meters where vehicles are not yet unpooled
+
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
 local original_replaceVehicle
@@ -444,14 +448,14 @@ function setVehicleRole(playerIDVehicleID, roleName, displayName)
 	if roleName ~= "BLANK" then
 		if custom_roleToInfo[roleName] == nil then return -1 end
 	end
-	
+
 	if displayName == 0 then
 		local playerName = players[vehicles[playerIDVehicleID].ownerID].name
 		displayName = playerName
 	else
 		displayName = "*" .. displayName
 	end
-	
+
 	local contents = {}
 	contents["Role"] = roleName
 	contents["DisplayName"] = displayName
@@ -482,10 +486,10 @@ function createRole(roleName, tag, shorttag, red, green, blue)
 	if red < 0 then return false end
 	if green < 0 then return false end
 	if blue < 0 then return false end
-	
+
 	roleName = string.upper(roleName)
 	if roleName == "BLANK" then return false end
-	
+
 	local contents = {}
 	contents["backcolor"] = ColorI(red, green, blue, 127)
 	if tag == 0 then
@@ -511,13 +515,13 @@ end
 function removeRole(roleName)
 	roleName = string.upper(roleName)
 	if custom_roleToInfo[roleName] == nil then return false end
-	
+
 	for playerIDVehicleID, data in pairs(custom_vehicleRoles) do
 		if data.Role == roleName then
 			custom_vehicleRoles[playerIDVehicleID] = nil
 		end
 	end
-	
+
 	custom_roleToInfo[roleName] = nil
 	return true
 end
@@ -701,6 +705,7 @@ function Vehicle:new(data)
 	o.isSpawned = data.isSpawned ~= false -- default to true
 	o.isDeleted = data.isDeleted or false
 	o.isActive = true
+	o.lastActivationStatusChanged = 0
 
 	o.position = nil
 	o.rotation = nil
@@ -733,12 +738,19 @@ function Vehicle:activate()
 		return
 	end
 
+	if self.lastActivationStatusChanged > os.clock() - poolingActivationCooldown then
+		return false
+	else
+		self.lastActivationStatusChanged = os.clock()
+	end
+
 	veh:setActive(1)
 	veh:setPositionNoPhysicsReset(Point3F(self.position.x, self.position.y, self.position.z))
-	--veh:setPositionRotation(self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
 
 	self.isActive = true
 	log('W', 'Vehicle:activate', string.format("Vehicle %s (%s) activated!", self.serverVehicleString, self.ownerName))
+
+	return true
 end
 
 function Vehicle:deactivate()
@@ -751,9 +763,17 @@ function Vehicle:deactivate()
 		log('W', 'Vehicle:deactivate', string.format("Vehicle %s (%s) not veh!.", self.serverVehicleString, self.ownerName))
 		return
 	end
+
+	if self.lastActivationStatusChanged > os.clock() - poolingActivationCooldown then
+		return false
+	else
+		self.lastActivationStatusChanged = os.clock()
+	end
+
 	veh:setActive(0)
 	self.isActive = false
 	log('W', 'Vehicle:deactivate', string.format("Vehicle %s (%s) deactivated.", self.serverVehicleString, self.ownerName))
+	return true
 end
 
 function Vehicle:onSerialized()
@@ -1088,12 +1108,12 @@ local function onVehicleDestroyed(gameVehicleID)
 							[mainPartName] = string
 							[licenseName] = string
 							[model] = string
-							
+
 							the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
 						]]
 						vehicleConfig.format = 2
 						vehicleConfig.partConfigFilename = nil
-						
+
 						local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
 						if handle == nil then
 							log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
@@ -1680,6 +1700,7 @@ local function onUpdate(dt)
 	end
 end
 
+
 local function onPreRender(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 
@@ -1764,7 +1785,37 @@ local function onPreRender(dt)
 			editSyncTimer = 0
 		end
 
-		for serverVehicleID, v in pairs(vehicles) do
+
+		-- sort the vehicle list based on distance from camera/active vehicle (using serverside position)
+		local vehicleIDsSortedByDistance = {}
+		do
+			local vehicleIDDistancePairs = {}
+
+			for serverVehicleID, v in pairs(vehicles) do
+			local veh = be:getObjectByID(v.gameVehicleID)
+				if v.position then
+					local pos = Point3F(v.position.x, v.position.y, v.position.z)
+
+					local distfloat = cameraPos:distance(pos)
+					table.insert(vehicleIDDistancePairs, {serverVehicleID, distfloat})
+				end
+			end
+
+			local function compare(a,b)
+				return a[2] < b[2]
+			end
+
+			table.sort(vehicleIDDistancePairs, compare)
+
+			for k, v in pairs(vehicleIDDistancePairs) do
+				vehicleIDsSortedByDistance[k] = v[1]
+			end
+		end
+
+		local poolingCutoffDistance = settings.getValue("poolingCutoffDistance", 100)
+
+		for index, serverVehicleID in pairs(vehicleIDsSortedByDistance) do
+			local v = vehicles[serverVehicleID]
 			local owner = v:getOwner()
 			if v.isLocal or not owner then goto skip_vehicle end
 			local gameVehicleID = v.gameVehicleID
@@ -1804,21 +1855,24 @@ local function onPreRender(dt)
 			local nametagAlpha = 1
 			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance", 40)
 
-			local distfloat = (cameraPos or vec3()):distance(pos)
+			local distfloat = cameraPos:distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 
-			if distfloat > 50 then
-				if v.isActive then
-					v:deactivate()
-				end
-				debugDrawer:drawSphere(v.position, 1, ColorF(100, 90, 0, 0.5))
-			elseif distfloat < 47 then
-				if not v.isActive then
-					v:activate()
+			if settings.getValue("multiplayerPoolingEnabled") then
+				if distfloat > poolingCutoffDistance or index > settings.getValue("multiplayerPoolingMaxVehicleCount", 5) then
+					if v.isActive then
+						v:deactivate()
+					else
+						debugDrawer:drawSphere(v.position, 1, ColorF(100, 90, 0, 0.5))
+					end
+				elseif distfloat < poolingCutoffDistance - poolingCutoffHysteresis then
+					if not v.isActive then
+						v:activate()
+					end
 				end
 			end
-			
+
 			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
@@ -1860,7 +1914,7 @@ local function onPreRender(dt)
 
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
-				
+
 				local name = ""
 				local tag = ""
 				local backColor = 0

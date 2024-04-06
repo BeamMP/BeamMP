@@ -26,9 +26,26 @@
   height: 100%;
 }
 
+#serversTableContainer {
+	overflow-x: hidden;
+}
+
 table#serversTable {
   width: 100%;
   color: white;
+  position: relative;
+}
+
+#serversTable th {
+	/*
+	position: sticky;
+	top: 0;
+	*/
+	z-index: 150;
+}
+
+#serversTableBody {
+	z-index: 140;
 }
 
 #serversTable th {

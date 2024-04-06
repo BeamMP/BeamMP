@@ -1,6 +1,7 @@
 -- This Source Code Form is subject to the terms of the bCDDL, v. 1.1.
 -- If a copy of the bCDDL was not distributed with this
 -- file, You can obtain one at http://beamng.com/bCDDL-1.1.txt
+-- This code is a manipulated form of the games installation ./lua/ge/extensions/core/cameraModes/driver.lua to create a passenger camera.
 
 local function rotateEuler(x, y, z, q)
   q = q or quat()

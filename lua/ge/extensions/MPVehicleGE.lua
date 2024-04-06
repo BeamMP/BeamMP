@@ -1,7 +1,6 @@
---====================================================================================
--- All work by Titch2000, jojos38 and 20dka.
--- You have no permission to edit, redistribute or upload. Contact BeamMP for more info!
---====================================================================================
+-- Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+-- Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
+-- SPDX-License-Identifier: AGPL-3.0-or-later
 
 --- MPVehicleGE API - This is responsible for all Vehicle related controlling within BeamMP for the Game Engine (GE).
 -- Author of this documentation is Neverless
@@ -12,6 +11,7 @@
 
 local M = {}
 
+local jbeamIO = require('jbeam/io') -- to be used later for getting slotting information of parts
 
 -- ============= VARIABLES =============
 local lastResetTime = {}
@@ -65,7 +65,7 @@ local roleToInfo = {
 --- Contains the known simplified Vehicle versions.
 -- JBeamNames are Strings eg. "moonhawk", "unicycle"
 -- @table simplified_vehicles
--- @tfield string JBeamName_1 eg. "simple_traffic_coupe"
+-- @tfield string JBeamName_1 eg. "simple_traffic_body_5door_wagon"
 -- @tfield string JBeamName_N
 -- @usage local simplified = simplified_vehicles["coupe"]
 local simplified_vehicles = {
@@ -77,20 +77,20 @@ local simplified_vehicles = {
 	bolide = "simple_traffic_bolide",
 	burnside = "simple_traffic_burnside",
 	citybus = "simple_traffic_citybus",
-	coupe = "simple_traffic_coupe",
-	covet = "simple_covet",
-	etk800 = "simple_traffic_etk800",
-	etkc = "simple_traffic_etkc",
-	etki = "simple_traffic_etki",
+	coupe = "simple_traffic_body_2door_coupe",
+	covet = "simple_traffic_body_3door_hatch",
+	etk800 = "simple_traffic_body_5door_wagon",
+	etkc = "simple_traffic_body_2door_coupe",
+	etki = "simple_traffic_body_4door_sedan",
 	fullsize = "simple_traffic_fullsize",
 	hopper = "simple_traffic_hopper",
-	lansdale = "simple_traffic_lansdale",
-	legran = "simple_traffic_legran",
-	midsize = "simple_traffic_midsize",
+	lansdale = "simple_traffic_body_5door_wagon",
+	legran = "simple_traffic_body_4door_sedan",
+	midsize = "simple_traffic_body_4door_sedan",
 	midtruck = "simple_traffic_midtruck",
 	miramar = "simple_traffic_miramar",
 	moonhawk = "simple_traffic_moonhawk",
-	pessima = "simple_traffic_pessima",
+	pessima = "simple_traffic_body_4door_sedan",
 	pickup = "simple_traffic_pickup",
 	pigeon = "simple_traffic_pigeon",
 	racetruck = "simple_traffic_racetruck",
@@ -98,11 +98,12 @@ local simplified_vehicles = {
 	rockbouncer = "simple_traffic_rockbouncer",
 	sbr = "simple_traffic_sbr",
 	scintilla = "simple_traffic_scintilla",
-	semi = "simple_traffic_semi",
-	sunburst = "simple_traffic_sunburst",
+	--semi = "simple_traffic_semi",
+	sunburst = "simple_traffic_body_4door_sedan",
+	us_semi = "simple_traffic_us_semi",
 	utv = "simple_traffic_utv",
 	van = "simple_traffic_van",
-	vivace = "simple_vivace_slothub",
+	vivace = "simple_traffic_vivace",
 	wendover = "simple_traffic_wendover",
 	wigeon = "simple_traffic_wigeon"
 }
@@ -539,6 +540,25 @@ local function localVehiclesExist()
 	return false
 end
 
+--- make sure and get the part slot for simplified body, its part id, for the given vehicles
+-- @tparam string vehicleName, eg covet, midsize
+-- @treturn bool canSimplify does vehicle have simplified body
+-- @treturn string slotName the slot that needs to be changed
+-- @treturn string partName the part that needs to go in
+-- @usage local canSimplify, slotName, partName = getVehicleSimplified("vivace")
+local function getVehicleSimplified(vehicleName)
+	local expectedPartID = simplified_vehicles[vehicleName]
+	if expectedPartID then
+		local ioCtx = {preloadedDirs = {string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}} -- Fake io context for jbeamIO
+		local slotMap = jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
+		local expectedSlotName = vehicleName..'_body' -- guess the slot that takes in the simplified body, for now
+		if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName], expectedPartID) then
+			return true, expectedSlotName, expectedPartID
+		end
+	end
+	return false
+end
+
 -- ============= OBJECTS =============
 local Player = {}
 Player.__index = Player
@@ -845,8 +865,11 @@ local function applyVehSpawn(event)
 
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
-	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
-		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	if settings.getValue("simplifyRemoteVehicles") then
+		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
+		if canSimplify then
+			vehicleConfig.parts[slotName] = partName
+		end
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -895,8 +918,11 @@ local function applyVehEdit(serverID, data)
 
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
-	if settings.getValue("simplifyRemoteVehicles") and simplified_vehicles[vehicleName] then
-		vehicleConfig.parts[vehicleName..'_body'] = simplified_vehicles[vehicleName]
+	if settings.getValue("simplifyRemoteVehicles") then
+		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
+		if canSimplify then
+			vehicleConfig.parts[slotName] = partName
+		end
 	end
 
 	if vehicleName == veh:getJBeamFilename() then
@@ -1188,6 +1214,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		players[playerServerID]:addVehicle(vehObject)
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
+
+		-- Hacky Fix - Lets now send the vehicle data again so that other players on the server actually have the paint data for this vehicle.
+		sendVehicleEdit(gameVehicleID)
 
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
 

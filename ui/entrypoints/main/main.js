@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
+// If a copy of the MIT license was not distributed with this
+// file, You can obtain one from the NOTICES.md
+
 angular.module('beamng.stuff', ['ngAnimate', 'toastr'])
 angular.module('beamng.gameUI', ['ngAnimate', 'toastr'])
 angular.module('beamng.color', [])

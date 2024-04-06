@@ -1,8 +1,6 @@
---====================================================================================
--- All work by Titch2000, jojos38 & 20dka.
--- You have no permission to edit, redistribute or upload other than for the purposes of contributing. 
--- Contact BeamMP for more info!
---====================================================================================
+-- Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+-- Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
+-- SPDX-License-Identifier: AGPL-3.0-or-later
 
 --- MPGameNetwork API. Handles Proxy Launcher <-> Game Network. Vehicle Spawns, edits, chat, position updates etc. Everything session related.
 --- Author of this documentation is Titch2000

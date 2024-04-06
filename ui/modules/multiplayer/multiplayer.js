@@ -1,3 +1,7 @@
+// Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+// Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 var highlightedServer;
 var servers = [];
 var official = [];
@@ -331,6 +335,9 @@ function($scope, $state, $timeout) {
 		vm.selectMap = "Any"
 		vm.searchText = ""
 	}
+	
+	// Resize the server list
+	setServersTableHeight();
 
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
@@ -422,6 +429,9 @@ function($scope, $state, $timeout) {
 		vm.selectMap = "Any"
 		vm.searchText = ""
 	}
+	
+	// Resize the server list
+	setServersTableHeight();
 
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
@@ -509,6 +519,9 @@ function($scope, $state, $timeout) {
 		vm.selectMap = "Any"
 		vm.searchText = ""
 	}
+	
+	// Resize the server list
+	setServersTableHeight();
 
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
@@ -597,6 +610,9 @@ function($scope, $state, $timeout) {
 		vm.selectMap = "Any"
 		vm.searchText = ""
 	}
+	
+	// Resize the server list
+	setServersTableHeight();
 
 	bngApi.engineLua('MPCoreNetwork.requestServerList()');
 
@@ -666,6 +682,9 @@ function($scope, $state, $timeout) {
 function($scope, $state, $timeout) {
 	var vm = this;
 	
+	// Resize the server list
+	setServersTableHeight();
+	
 	vm.searchText = "";
 
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server lsit
@@ -729,6 +748,9 @@ function($scope, $state, $timeout) {
 	vm.selectMap = "Any";
 	vm.searchText = "";
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
+	
+	// Resize the server list
+	setServersTableHeight();
 
 	vm.exit = function ($event) {
 		if ($event)
@@ -1256,7 +1278,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;*/
 	newRow.innerHTML = `
-		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag flag-${server.location}"></img> ${server.location}</td>
+		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag"></img> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
@@ -1457,6 +1479,12 @@ function sortTable(sortType, isNumber, dir) {
     });
     for(var i = 0; i < tr.length; ++i) tb.appendChild(tr[i]); // append each row in order
 	reverse = -((+reverse) || -1);
+}
+
+function setServersTableHeight() {
+	let topDistance = document.getElementById("serversTableContainer").getBoundingClientRect().top;
+	let navBarHeight = document.querySelector(".menuNavbar").getBoundingClientRect().top;
+	document.getElementById("serversTableContainer").style.maxHeight = (window.innerHeight - topDistance - (window.innerHeight - navBarHeight)) + 'px';
 }
 
 

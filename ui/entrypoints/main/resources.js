@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
+// If a copy of the MIT license was not distributed with this
+// file, You can obtain one from the NOTICES.md
+
 import { onCondition, inPath } from "./resourceLoader.js"
 
 const paths = {

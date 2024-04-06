@@ -75,13 +75,16 @@ The current progress of this sits at:
 We use [GitLocalize](https://gitlocalize.com/) for managing this. You can contribute if you wish here: https://gitlocalize.com/repo/9181.
 
 The individual language progress is as follows:
-- German: [![gitlocalized ](https://gitlocalize.com/repo/9181/de-DE/badge.svg)](https://gitlocalize.com/repo/9181/de-DE?utm_source=badge) 
-- Spanish: [![gitlocalized ](https://gitlocalize.com/repo/9181/es-ES/badge.svg)](https://gitlocalize.com/repo/9181/es-ES?utm_source=badge) 
-- French: [![gitlocalized ](https://gitlocalize.com/repo/9181/fr-FR/badge.svg)](https://gitlocalize.com/repo/9181/fr-FR?utm_source=badge) 
-- Japanese: [![gitlocalized ](https://gitlocalize.com/repo/9181/ja-JP/badge.svg)](https://gitlocalize.com/repo/9181/ja-JP?utm_source=badge) 
-- Korean (South Korea): [![gitlocalized ](https://gitlocalize.com/repo/9181/ko-KR/badge.svg)](https://gitlocalize.com/repo/9181/ko-KR?utm_source=badge)
-- Polish: [![gitlocalized ](https://gitlocalize.com/repo/9181/pl/badge.svg)](https://gitlocalize.com/repo/9181/pl?utm_source=badge) 
-- Portuguese (Brazil): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) 
-- Portuguese (Portugal): [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) 
-- Russian: [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)
-- Chinese: [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)
+
+| Language              | Badge                                                                                                                           |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| German                | [![gitlocalized ](https://gitlocalize.com/repo/9181/de-DE/badge.svg)](https://gitlocalize.com/repo/9181/de-DE?utm_source=badge) |
+| Spanish               | [![gitlocalized ](https://gitlocalize.com/repo/9181/es-ES/badge.svg)](https://gitlocalize.com/repo/9181/es-ES?utm_source=badge) |
+| French                | [![gitlocalized ](https://gitlocalize.com/repo/9181/fr-FR/badge.svg)](https://gitlocalize.com/repo/9181/fr-FR?utm_source=badge) |
+| Japanese              | [![gitlocalized ](https://gitlocalize.com/repo/9181/ja-JP/badge.svg)](https://gitlocalize.com/repo/9181/ja-JP?utm_source=badge) |
+| Korean (South Korea)  | [![gitlocalized ](https://gitlocalize.com/repo/9181/ko-KR/badge.svg)](https://gitlocalize.com/repo/9181/ko-KR?utm_source=badge) |
+| Polish                | [![gitlocalized ](https://gitlocalize.com/repo/9181/pl/badge.svg)](https://gitlocalize.com/repo/9181/pl?utm_source=badge)       |
+| Portuguese (Brazil)   | [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) |
+| Portuguese (Portugal) | [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) |
+| Russian               | [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)       |
+| Chinese               | [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)       |

@@ -65,8 +65,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 			for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedReal end
 			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
 
-			data = jsonEncode(decoded)
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
+			MPGameNetwork.send('Zp:'..serverVehicleID..":"..jsonEncode(decoded))
 		end
 	end
 end
@@ -86,16 +85,13 @@ local function applyPos(decoded, serverVehicleID)
 
 	decoded.localSimspeed = simspeedFraction
 
-	data = jsonEncode(decoded)
-
-
 	local veh = be:getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..data.."')")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..jsonEncode(decoded).."')")
 	end
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim

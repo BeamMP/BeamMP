@@ -13,6 +13,8 @@ local M = {}
 
 local jbeamIO = require('jbeam/io') -- to be used later for getting slotting information of parts
 
+setmetatable(_G,{}) -- temporarily disable global notifications
+
 -- ============= VARIABLES =============
 local lastResetTime = {}
 local oneSecCounter = 0
@@ -706,7 +708,9 @@ function Vehicle:new(data)
 
 	o.spectators = {}
 
-	log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	if not settings.getValue("showDebugOutput") then
+		log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	end
 	return o
 end
 function Vehicle:getOwner()
@@ -1200,7 +1204,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
 	end
 
-	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	if not settings.getValue("showDebugOutput") then
+	  log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	end
 
 	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
 
@@ -1992,6 +1998,8 @@ local function onSettingsChanged()
 	--	settingsCache[k]  = ColorF(table.unpack(p))
 	--end
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 -- Functions
 M.onSerialize = onSerialize

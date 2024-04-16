@@ -708,7 +708,9 @@ function Vehicle:new(data)
 
 	o.spectators = {}
 
-	log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	if not settings.getValue("showDebugOutput") then
+		log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	end
 	return o
 end
 function Vehicle:getOwner()
@@ -1202,7 +1204,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
 	end
 
-	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	if not settings.getValue("showDebugOutput") then
+	  log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	end
 
 	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
 

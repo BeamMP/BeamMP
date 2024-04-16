@@ -23,7 +23,6 @@ export default [
   // for external clients: emulation over websocket
   `${paths.MAIN_ENTRYPOINT}/comms.js`,
 
-
   // Vue START
   ...onCondition(conditions.NOT_VUE_DEV,
     inPath(paths.VUE_DIST, [
@@ -91,6 +90,7 @@ export default [
 
     // TODO - remove when we're sure moved version is working OK and not needed to be included
     // '/crossfire-chrome.js',
+
   ]),
 
   // Controls

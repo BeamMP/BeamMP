@@ -16,11 +16,11 @@ jobs:
         PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
       run: |
         echo "$PRIVATE_REPO_TOKEN" | gh auth login --with-token
-        gh release download --pattern "beamlings.zip" --repo github.com/BeamMP/Beamlings
+        gh release download --pattern "Beamlings.zip" --repo github.com/BeamMP/Beamlings
       working-directory: ${{ github.workspace }}
     - name: Unpack beamlings.zip Content
       run: |
-        unzip -o beamlings.zip
+        unzip -o Beamlings.zip
       working-directory: ${{ github.workspace }}
     - name: Zip specific files and folders
       run: |

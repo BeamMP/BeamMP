@@ -149,6 +149,8 @@ angular.module('beamng.stuff')
       scope.$on('ServiceProviderInfo', function (event, data) {
         scope.$apply(function () {
           scope.serviceProviderInfo = data
+          //for new mainmenu TODO: move to vue
+          beamng.serviceProviderInfo = data
         })
       })
       beamng.requestServiceProviderInfo()
@@ -156,14 +158,21 @@ angular.module('beamng.stuff')
       scope.$on('OnlineStateChanged', function (event, data) {
         scope.$applyAsync(function () {
           scope.onlineState = data
+          //for new mainmenu TODO: move to vue
+          beamng.onlineState = data
         })
       })
       scope.$on('ShowEntertainingBackground', (ev, mainmenu) => {
         scope.$evalAsync(() => {
           scope.mainmenu = mainmenu
+          //for new mainmenu TODO: move to vue
+          beamng.mainmenu = mainmenu
         })
       })
       bngApi.engineLua('core_online.requestState()')
+
+      //for new mainmenu TODO: move to vue
+      beamng.versionSimpleStr = scope.versionSimpleStr
 
       // beammp info
       scope.$on('BeamMPInfo', function (event, data) {
@@ -285,6 +294,7 @@ angular.module('beamng.stuff')
     $state.go('menu.onlineFeatures')
   }
   bngApi.engineLua('core_online.requestState()')
+  bngApi.engineLua('checkFSErrors()')
 
   // hardwareinfo warnings, etc
   {

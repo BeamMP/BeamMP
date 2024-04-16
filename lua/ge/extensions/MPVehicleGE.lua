@@ -13,6 +13,8 @@ local M = {}
 
 local jbeamIO = require('jbeam/io') -- to be used later for getting slotting information of parts
 
+setmetatable(_G,{}) -- temporarily disable global notifications
+
 -- ============= VARIABLES =============
 local lastResetTime = {}
 local oneSecCounter = 0
@@ -1992,6 +1994,8 @@ local function onSettingsChanged()
 	--	settingsCache[k]  = ColorF(table.unpack(p))
 	--end
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 -- Functions
 M.onSerialize = onSerialize

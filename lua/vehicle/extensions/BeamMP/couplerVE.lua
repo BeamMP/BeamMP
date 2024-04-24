@@ -14,13 +14,6 @@ local lastNodeID2decoupled
 local function toggleCouplerState(data)
 	local decodedData = jsonDecode(data)
 	for k,v in pairs(decodedData) do
-		local couplerController = {}
-		if controllersVE.OGcontrollerFunctionsTable and controllersVE.OGcontrollerFunctionsTable[v.name] then -- for controller sync compatibility,
-			couplerController = controllersVE.OGcontrollerFunctionsTable[v.name]	-- the controller sync disables the functions for remote vehicles to prevent ghost controlling, so we need to call the original function instead
-		elseif controller.getControllerSafe(v.name) then
-			couplerController = controller.getControllerSafe(v.name)
-		end
-
 		if v.state == false or v.state == true then
 			if v._nodetag and not v.trailer then
 				if v.state then
@@ -36,6 +29,13 @@ local function toggleCouplerState(data)
 				obj:stopLatching()
 			end
 		elseif controller.getControllerSafe(v.name).getGroupState() ~= v.state then
+			local couplerController = {}
+			if controllerSyncVE.OGcontrollerFunctionsTable and controllerSyncVE.OGcontrollerFunctionsTable[v.name] then -- for controller sync compatibility,
+				couplerController = controllerSyncVE.OGcontrollerFunctionsTable[v.name]	-- the controller sync disables the functions for remote vehicles to prevent ghost controlling, so we need to call the original function instead
+			elseif controller.getControllerSafe(v.name) then
+				couplerController = controller.getControllerSafe(v.name)
+			end
+
 			if v.state == "detached" or v.state == "autoCoupling" or v.state == "broken" then
 				couplerController.detachGroup()
 			elseif v.state == "attached" then

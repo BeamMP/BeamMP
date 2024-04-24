@@ -356,6 +356,35 @@ local function applyElectrics(data)
 			controller.getControllerSafe("lineLock").setLineLock(decodedData.linelock)
 		end
 
+		-- Unicycle syncing -- for cross compatibility with non controller sync versions of beammp,
+		-- can be removed once controller sync is fully released
+		local playerController = controllerSyncVE.OGcontrollerFunctionsTable['playerController']
+		if playerController then
+			-- direction
+			if decodedData.unicycle_camera ~= nil then
+				playerController.setCameraControlData({cameraRotation = quatFromEuler(0, 0, -decodedData.unicycle_camera)})
+			end
+			-- walking left/right
+			if decodedData.unicycle_walk_x ~= nil then
+				playerController.walkLeftRightRaw(decodedData.unicycle_walk_x)
+			end
+			-- walking forward/backward
+			if decodedData.unicycle_walk_y ~= nil then
+				playerController.walkUpDownRaw(decodedData.unicycle_walk_y)
+			end
+			-- jump, check if boolean because there are sometimes 0s in the received values
+			if decodedData.unicycle_jump == true then
+				playerController.jump(1)
+			end
+			-- crouch
+			if decodedData.unicycle_crouch ~= nil then
+				playerController.crouch(decodedData.unicycle_crouch)
+			end
+			-- sprint
+			if decodedData.unicycle_speed ~= nil then
+				playerController.setSpeedCoef(decodedData.unicycle_speed)
+			end
+		end
 
 		-- ESC Mode syncing
 		if decodedData.escMode then

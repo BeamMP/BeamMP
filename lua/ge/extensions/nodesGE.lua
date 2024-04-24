@@ -57,6 +57,11 @@ local function sendControllerData(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
+			local decodedData = jsonDecode(data)
+			if decodedData.vehID then
+				decodedData.vehID = MPVehicleGE.getServerVehicleID(decodedData.vehID)
+			end
+			data = jsonEncode(decodedData)
 			MPGameNetwork.send('Xc:'..serverVehicleID..":"..data)
 		end
 	end
@@ -91,7 +96,12 @@ local function applyControllerData(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("controllersVE.applyControllerData(\'"..data.."\')")
+		local decodedData = jsonDecode(data)
+		if decodedData.vehID then
+			decodedData.vehID = MPVehicleGE.getGameVehicleID(decodedData.vehID)
+		end
+		data = jsonEncode(decodedData)
+		veh:queueLuaCommand("controllerSyncVE.applyControllerData(\'"..data.."\')")
 	end
 end
 

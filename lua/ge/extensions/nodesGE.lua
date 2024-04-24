@@ -53,6 +53,16 @@ local function sendBreakGroups(data, gameVehicleID)
 end
 
 
+local function sendControllerData(data, gameVehicleID)
+	if MPGameNetwork.launcherConnected() then
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
+			MPGameNetwork.send('Xc:'..serverVehicleID..":"..data)
+		end
+	end
+end
+
+
 --- This function serves to send the nodes data received for another players vehicle from GE to VE, where it is handled.
 -- @param data table The data to be applied as nodes
 -- @param serverVehicleID string The VehicleID according to the server.
@@ -77,6 +87,15 @@ local function applyBreakGroups(data, serverVehicleID)
 end
 
 
+local function applyControllerData(data, serverVehicleID)
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
+	local veh = be:getObjectByID(gameVehicleID)
+	if veh then
+		veh:queueLuaCommand("controllersVE.applyControllerData(\'"..data.."\')")
+	end
+end
+
+
 --- Handles raw node and break group packets received from other players vehicles. Disassembles and sends it to either applyNodes() or applyBreakGroups()
 -- @param rawData string The raw message data.
 local function handle(rawData)
@@ -85,6 +104,8 @@ local function handle(rawData)
 		applyNodes(data, serverVehicleID)
 	elseif code == "g" then
 		applyBreakGroups(data, serverVehicleID)
+	elseif code == "c" then
+		applyControllerData(data, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
@@ -99,5 +120,6 @@ M.applyNodes = applyNodes
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 M.sendBreakGroups  = sendBreakGroups
+M.sendControllerData  = sendControllerData
 
 return M

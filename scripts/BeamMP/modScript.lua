@@ -67,3 +67,5 @@ setExtensionUnloadMode("nodesGE", "manual")
 -- load this file last so it can reference the others
 load("MPHelpers")
 setExtensionUnloadMode("MPHelpers", "manual")
+
+extensions.core_input_categories.beammp = { order = 999, icon = "settings", title = "BeamMP", desc = "BeamMP Controls" } --inject BeamMP input category at bottom of input categories list

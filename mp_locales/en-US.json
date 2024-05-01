@@ -1,6 +1,8 @@
 {
     "ui.playmodes.multiplayer": "Multiplayer",
     "ui.options.multiplayer": "Multiplayer",
+    "ui.options.multiplayer.protectConfigFromClone": "Enable Config Protection from Cloning",
+    "ui.options.multiplayer.protectConfigFromClone.tooltip": "Protect this config from being cloned by other players.",
     "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
     "ui.options.multiplayer.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
     "ui.options.multiplayer.enablePosSmoother": "Enable vehicle position smoothing",

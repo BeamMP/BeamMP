@@ -928,6 +928,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.vcf = vehicleData.config -- Vehicle Config, contains paint data
 		vehicleTable.pos = {pos.x, pos.y, pos.z} -- Position
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
+		vehicleTable.pro = settings.getValue("protectConfigFromClone", false) -- Should the config be protected?
 		vehicleTable.ign = settings.getValue("spawnVehicleIgnitionLevel") or 3 -- Ingition state
 		-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
 		vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
@@ -961,6 +962,7 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
+	vehicleTable.pro = settings.getValue("protectConfigFromClone", false) -- Should the config be protected?
 	vehicleTable.ign = settings.getValue("spawnVehicleIgnitionLevel") or 3 -- Ingition state
 	-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
 	vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
@@ -973,6 +975,40 @@ end
 
 local function sendBeamstate(data, gameVehicleID)
 	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..data)
+end
+
+
+-- Patch Game Functions in relation to vehicle configs
+local core_vehicles_cloneCurrent = core_vehicles.cloneCurrent
+core_vehicles.cloneCurrent = function ()
+	local vehicle = be:getPlayerVehicle(0)
+	if vehicle:getField("protected", 0) == 1 then
+		guihooks.trigger("toastrMsg", {type="error", title="Vehicle Clone Error", msg="Sorry, you cannot clone this vehicle."})
+		return
+	else
+		core_vehicles_cloneCurrent()
+	end
+end
+
+local core_vehicle_partmgmt_saveLocal = extensions.core_vehicle_partmgmt.saveLocal
+extensions.core_vehicle_partmgmt.saveLocal = function (p1)
+	local vehicle = be:getPlayerVehicle(0)
+	if vehicle:getField("protected", 0) == 1 then
+		guihooks.trigger("toastrMsg", {type="error", title="Vehicle Clone Error", msg="Sorry, you cannot save this vehicle."})
+		return
+	else
+		core_vehicle_partmgmt_saveLocal(p1)
+		
+		local util_createThumbnails_startWork = util_createThumbnails.startWork
+		util_createThumbnails.startWork = function (p1)
+			local vehicle = be:getPlayerVehicle(0)
+			if vehicle:getField("protected", 0) == 1 then
+				return
+			else
+				util_createThumbnails_startWork(p1)
+			end
+		end
+	end
 end
 
 
@@ -1007,7 +1043,8 @@ local function applyVehSpawn(event)
 	local vehicleConfig  = decodedData.vcf -- Vehicle config, contains paint data
 	local pos            = vec3(decodedData.pos)
 	local rot            = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
-	local ignitionLevel   = (type(decodedData.ign) == "number") and decodedData.ign or 3
+	local ignitionLevel  = (type(decodedData.ign) == "number") and decodedData.ign or 3
+	local protected      = decodedData.pro -- Config Protected
 
 	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
 	log('I', 'applyVehSpawn', "It is for "..event.playerNickname)
@@ -1026,10 +1063,16 @@ local function applyVehSpawn(event)
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
 		spawn.setVehicleObject(spawnedVeh, {model=vehicleName, config=serialize(vehicleConfig), pos=pos, rot=rot, cling=true})
+		if (protected == true or protected == "true" or protected == 1) then
+			spawnedVeh:setField("protected", 0, 1)
+		end
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
 		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true})
 		spawnedVehID = spawnedVeh:getID()
+		if (protected == true or protected == "true" or protected == 1) then
+			spawnedVeh:setField("protected", 0, 1)
+		end
 		log('W', 'applyVehSpawn', "Spawned new vehicle "..vehicleName.." from server with id "..spawnedVehID)
 
 		if not vehicles[event.serverVehicleID] then
@@ -1042,6 +1085,7 @@ local function applyVehSpawn(event)
 		vehicle.gameVehicleID = spawnedVehID
 		vehicle.isSpawned = true
 		vehicle.jbeam = vehicleName
+		vehicle.protected = protected
 		vehiclesMap[spawnedVehID] = event.serverVehicleID
 
 		players[vehicle.ownerID]:addVehicle(vehicle)

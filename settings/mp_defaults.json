@@ -1,0 +1,40 @@
+// format of this table: name: [ type, default ]
+//
+// where type can be:
+//   - discard: won't be stored in permanent storage, it's a memory-only setting. Should be avoided, it's abusing the settings system as globals.
+//   - cloud: will be synchronized with steam cloud. Use only for settings that are NOT computer-dependent
+//   - local: will not be synchronized with steam cloud. Use only for settings that are computer-dependent (such as graphics detail)
+
+{
+  "filterCustomWords"           : [ "cloud" ],
+  "enableQueueAuto"             : [ "local", true ],
+  "queueApplyTimeout"           : [ "cloud", 3 ],
+  "showBlobQueued"              : [ "cloud", true ],
+  "nametagShowDistance"         : [ "cloud", true ],
+  "nametagCharLimit"            : [ "cloud", 32 ],
+  "showPcs"                     : [ "cloud", true ],
+  "queueSkipUnicycle"           : [ "local", true ],
+  "blobColorQueued"             : [ "cloud", "#FF6400" ],
+  "filteredWords"               : [ "cloud" ],
+  "unicycleConfigs"             : [ "discard" ],
+  "showBlobDeleted"             : [ "cloud", true ],
+  "autoSyncVehicles"            : [ "local", true ],
+  "simplifyRemoteVehicles"      : [ "local" ],
+  "disableInstabilityPausing"   : [ "cloud", true ],
+  "showSpectators"              : [ "cloud", true ],
+  "showDebugOutput"             : [ "local" ],
+  "enableNewChatMenu"           : [ "cloud", false ],
+  "showAdvancedMPOptions"       : [ "cloud" ],
+  "launcherPort"                : [ "local", 4444 ],
+  "queueApplySpeed"             : [ "cloud", 2 ],
+  "filterInappropriateContent"  : [ "cloud", false ],
+  "filterHate"                  : [ "cloud", false ],
+  "blobColorDeleted"            : [ "cloud", "#333333" ],
+  "filterProfanity"             : [ "cloud", false ],
+  "enableSpawnQueue"            : [ "local", true ],
+  "unicycleAutoSave"            : [ "cloud", true ],
+  "enableBlobs"                 : [ "cloud", true ],
+  "blobColorIllegal"            : [ "cloud", "#000000" ],
+  "nameTagShowDistance"         : [ "cloud" ],
+  "showBlobIllegal"             : [ "cloud", true ]
+}

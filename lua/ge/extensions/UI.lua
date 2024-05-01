@@ -33,6 +33,11 @@ M.uiIcons = {
     user = 0,
 }
 
+local profanityFilter = nil
+local hateFilter = nil
+local inappropriateContentFilter = nil
+local customFilter = {}
+
 local windowOpacity = 0.9
 
 M.windowOpen = imgui.BoolPtr(true)
@@ -416,6 +421,26 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	parts[1] = ''
 	local msg = string.gsub(message, username..': ', '')
 	local player = MPVehicleGE.getPlayerByName(username)
+
+    -- Apply chat filtering
+    -- Basic Profanity
+    if settings.getValue("filterProfanity") then
+        msg = MPHelpers.filterString(msg, profanityFilter)
+    end
+    -- Hate Speech
+    if settings.getValue("filterHate") then
+        msg = MPHelpers.filterString(msg, hateFilter)
+    end
+    -- Inappropriate Filter
+    if settings.getValue("filterInappropriateContent") then
+        msg = MPHelpers.filterString(msg, inappropriateContentFilter)
+    end
+
+    -- Custom Filter
+    if settings.getValue("filterCustomWords") then
+        msg = MPHelpers.filterString(msg, customFilter)
+    end
+
 	if player then
         username = username .. player.role.shorttag
 		local c = player.role.forecolor

@@ -158,8 +158,28 @@ function pairs (value)
 end 
 end
 
+
+--- Replaces a substring that exists in a string from an array of strings.
+-- @param inputString the string you want to filter.
+-- @param filterArray the string array you want to filter out.
+-- @usage MPHelpers.filterString("The Quick Brown Fox", ["The"])
+local function filterString(inputString, filterArray)
+	local filteredString = inputString
+
+	for _, word in ipairs(filterArray) do
+		local pattern = word:gsub(".", function(char)
+			return "[" .. char:lower() .. char:upper() .. "]"
+		end)
+		local replacement = string.rep("*", string.len(word))
+		filteredString = string.gsub(filteredString, pattern, replacement)
+	end
+
+	return filteredString
+end
+
 --generic
 M.tableLength  = tableSize
+M.filterString = filterString
 
 --local
 M.colorMatch   = colorMatch

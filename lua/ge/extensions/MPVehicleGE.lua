@@ -543,23 +543,104 @@ local function localVehiclesExist()
 	return false
 end
 
---- make sure and get the part slot for simplified body, its part id, for the given vehicles
+--- modify the given vehicleConfig so it as closely resembles the original config with simplified vehicle, or not touched if simplified vehicle not possible
 -- @tparam string vehicleName, eg covet, midsize
+-- @tparam table vehicleConfig, aka decodedData.vcf
 -- @treturn bool canSimplify does vehicle have simplified body
--- @treturn string slotName the slot that needs to be changed
--- @treturn string partName the part that needs to go in
--- @usage local canSimplify, slotName, partName = getVehicleSimplified("vivace")
-local function getVehicleSimplified(vehicleName)
+-- @usage local newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
+local function simplifyVehicle(vehicleName, vehicleConfig)
+	newVehicleConfig = deepcopy(vehicleConfig)
+	newVehicleParts = newVehicleConfig.parts -- quick lookup/cleaner code (questionalble statement)
+
+	-- complicated chaos, just looking at this put me in tears
+	if     vehicleName == "bastion"  then newVehicleParts["bastion_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig -- case 1, simple body replace
+	elseif vehicleName == "bx"       then -- case 2, correspond with what body is used
+		if newVehicleParts["bx_body"] == "bx_body_coupe" then
+			newVehicleParts["bx_body"] = "simple_traffic_body_2door_coupe"
+		else
+			-- correspond with the default part used for this slot
+			newVehicleParts["bx_body"] = "simple_traffic_body_2door_coupe_tuner" -- this is actually the 3 door liftback, beamng why do you do this
+		end
+		return newVehicleConfig
+	elseif vehicleName == "covet"    then newVehicleParts["covet_body"] = "simple_traffic_body_3door_hatch" return newVehicleConfig
+	elseif vehicleName == "etk800"   then
+		if newVehicleParts["etk800_body"] == "etk800_body_sedan" then
+			newVehicleParts["etk800_body"] = "simple_traffic_body_4door_sedan"
+		else
+			newVehicleParts["etk800_body"] = "simple_traffic_body_5door_wagon"
+		end
+		return newVehicleConfig
+	elseif vehicleName == "etkc"     then newVehicleParts["etkc_body"] = "simple_traffic_body_2door_coupe" return newVehicleConfig
+	elseif vehicleName == "etki"     then newVehicleParts["etki_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
+	elseif vehicleName == "fullsize" then newVehicleParts["fullsize_frame"] = "simple_traffic_body_4door_sedan" return newVehicleConfig -- case 1.5, frame replace
+	elseif vehicleName == "lansdale" then -- case 3, something thats not the body decides what body is used
+		if newVehicleParts["lansdale_radsupport"] == "lansdale_radsupport_late" then
+			newVehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon_facelift"
+		else
+			newVehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon"
+		end
+		return newVehicleConfig
+	elseif vehicleName == "legran"   then
+		if newVehicleParts["legran_body"] == "legran_body_wagon" then
+			newVehicleParts["legran_body"] = "simple_traffic_body_5door_wagon"
+		else
+			newVehicleParts["legran_body"] = "simple_traffic_body_4door_sedan"
+		end
+		return newVehicleConfig
+	elseif vehicleName == "midsize"  then newVehicleParts["midsize_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
+	elseif vehicleName == "pessima"  then newVehicleParts["pessima_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
+	elseif vehicleName == "pickup"   then -- case 4, chaos D:
+		if newVehicleParts["pickup_frame"] == "pickup_frame_upfit_heavy" then
+			newVehicleParts["pickup_frame"] = "simple_traffic_body_d45" -- boxtruck
+
+		elseif string.match(newVehicleParts["pickup_frame"], "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew cabin frames
+		string.match(newVehicleParts["pickup_frame"], "pickup_frame_extlongbed") then -- ingores heavy for ext cabin longbed frames
+			newVehicleParts["pickup_frame"] = "simple_traffic_body_d25" -- ext cab long bed
+			
+		elseif string.match(newVehicleParts["pickup_frame"], "pickup_frame_crew") or -- ingores heavy for (the rest of) crew cabin frames
+		string.match(newVehicleParts["pickup_frame"], "pickup_frame_ext") or -- ingores heavy for (the rest of) ext cabin frames
+		string.match(newVehicleParts["pickup_frame"], "pickup_frame_longbed") or -- ingores heavy for longbed frames
+		newVehicleParts["pickup_frame"] == "pickup_desert_frame_crew" or
+		newVehicleParts["pickup_frame"] == "pickup_desert_frame_ext" or
+		string.match(newVehicleParts["pickup_frame"], "pickup_frame_short_ext") then -- ingores heavy for short ext frames
+			newVehicleParts["pickup_frame"] = "simple_traffic_body_d15" -- crew cab short bed
+
+		else -- standard frame, offroad frame, short frame lands here
+			newVehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
+		end
+		return newVehicleConfig
+	elseif vehicleName == "roamer"   then newVehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon" return newVehicleConfig
+	elseif vehicleName == "sunburst" then newVehicleParts["sunburst_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
+	elseif vehicleName == "van"      then -- case 5 mltiple deciding factors
+		if newVehicleParts["van_frame"] == "van_frame_upfit_heavy" then
+			newVehicleParts["van_frame"] = "simple_traffic_body_2door_boxtruck"
+		elseif string.match(newVehicleParts["van_frame"], "van_frame_ext") then -- ingores heavy for frames
+			if newVehicleParts["van_body_ext"] == "van_body_passenger_ext" then
+				newVehicleParts["van_frame"] = "simple_traffic_body_6door_van_passenger"
+			else
+				newVehicleParts["van_frame"] = "simple_traffic_body_6door_van_ext"
+			end
+		else
+			newVehicleParts["van_frame"] = "simple_traffic_body_6door_van"
+		end
+		return newVehicleConfig
+	elseif vehicleName == "wendover" then newVehicleParts["wendover_body"] = "simple_traffic_body_2door_coupe" return newVehicleConfig
+	end -- is there a better way to implement this mess?
+
+	-- simple fallback logic
 	local expectedPartID = simplified_vehicles[vehicleName]
 	if expectedPartID then
 		local ioCtx = {preloadedDirs = {string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}} -- Fake io context for jbeamIO
 		local slotMap = jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
 		local expectedSlotName = vehicleName..'_body' -- guess the slot that takes in the simplified body, for now
 		if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName], expectedPartID) then
-			return true, expectedSlotName, expectedPartID
+			newVehicleParts[expectedSlotName] = expectedPartID
+			return newVehicleConfig
 		end
 	end
-	return false
+
+	table.clear(newVehicleConfig)
+	return vehicleConfig
 end
 
 -- ============= OBJECTS =============
@@ -880,10 +961,7 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
-		if canSimplify then
-			vehicleConfig.parts[slotName] = partName
-		end
+		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -933,10 +1011,7 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
-		if canSimplify then
-			vehicleConfig.parts[slotName] = partName
-		end
+		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	if vehicleName == veh:getJBeamFilename() then

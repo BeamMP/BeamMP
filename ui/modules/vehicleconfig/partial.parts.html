@@ -34,7 +34,9 @@
             <div layout="row" layout-align="space-between center" ng-class="{'highlightChanged': entry.changed}"
               ng-if="entry.options.length > 0">
 
-              <div flex class="inputName"
+              <div ng-if="vehConf_parts.displayNames" flex class="inputName"
+                ng-bind-html="entry.name | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
+              <div ng-if="!vehConf_parts.displayNames" flex class="inputName"
                 ng-bind-html="entry.description | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
               <div ng-if="vehConf_parts.partSearchQuery['slot']" flex class="inputName"
                 ng-bind-html="entry.slot | highlightResults: vehConf_parts.partSearchQuery['slot']"></div>
@@ -42,8 +44,9 @@
                 ng-click="vehConf_parts.stopPropagation($event);" style="width:50%;">
                 <md-option md-no-ink
                   ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'description', 'name'] track by $index"
+                  ng-if="!opt.isAuxiliary || vehConf_parts.showAuxiliary"
                   ng-value="opt.val"
-                  ng-bind-html="((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.description | highlightResults: vehConf_parts.partSearchQuery['name'])"
+                  ng-bind-html="(opt.isAuxiliary ? '[!] ' : '') + ((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.description | highlightResults: vehConf_parts.partSearchQuery['name']) + ((vehConf_parts.displayNames && opt.name != '' ? ' - [' + opt.name + ']' : '') | highlightResults: vehConf_parts.partSearchQuery['name'])"
                   style="white-space:nowrap">
                 </md-option>
               </md-select>
@@ -121,9 +124,11 @@
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.displayNames" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{:: 'ui.vehicleconfig.displayNames' | translate}}
         </md-checkbox>
+        <!--
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.simple" ng-change="vehConf_parts.recalcTree();" md-no-ink flex>
           {{:: 'ui.vehicleconfig.simpleTree' | translate}}
         </md-checkbox>
+        -->
         <md-checkbox bng-sound-class="bng_checkbox_generic" ng-model="vehConf_parts.selectSubParts" md-no-ink flex>
           {{:: 'ui.vehicleconfig.subparts' | translate}}
         </md-checkbox>

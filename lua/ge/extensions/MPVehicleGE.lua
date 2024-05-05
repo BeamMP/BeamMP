@@ -13,6 +13,8 @@ local M = {}
 
 local jbeamIO = require('jbeam/io') -- to be used later for getting slotting information of parts
 
+setmetatable(_G,{}) -- temporarily disable global notifications
+
 -- ============= VARIABLES =============
 local lastResetTime = {}
 local oneSecCounter = 0
@@ -72,17 +74,18 @@ local simplified_vehicles = {
 	atv = "simple_traffic_atv",
 	autobello = "simple_traffic_autobello",
 	barstow = "simple_traffic_barstow",
-	bastion = "simple_traffic_bastion",
+	bastion = "simple_traffic_body_4door_sedan",
 	bluebuck = "simple_traffic_bluebuck",
 	bolide = "simple_traffic_bolide",
 	burnside = "simple_traffic_burnside",
+	bx = "simple_traffic_body_2door_coupe_tuner",
 	citybus = "simple_traffic_citybus",
-	coupe = "simple_traffic_body_2door_coupe",
+	--coupe = "simple_traffic_body_2door_coupe",
 	covet = "simple_traffic_body_3door_hatch",
 	etk800 = "simple_traffic_body_5door_wagon",
 	etkc = "simple_traffic_body_2door_coupe",
 	etki = "simple_traffic_body_4door_sedan",
-	fullsize = "simple_traffic_fullsize",
+	fullsize = "simple_traffic_body_4door_sedan", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
 	hopper = "simple_traffic_hopper",
 	lansdale = "simple_traffic_body_5door_wagon",
 	legran = "simple_traffic_body_4door_sedan",
@@ -91,10 +94,10 @@ local simplified_vehicles = {
 	miramar = "simple_traffic_miramar",
 	moonhawk = "simple_traffic_moonhawk",
 	pessima = "simple_traffic_body_4door_sedan",
-	pickup = "simple_traffic_pickup",
+	pickup = "simple_traffic_body_d10", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
 	pigeon = "simple_traffic_pigeon",
 	racetruck = "simple_traffic_racetruck",
-	roamer = "simple_traffic_roamer",
+	roamer = "simple_traffic_body_5door_wagon", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
 	rockbouncer = "simple_traffic_rockbouncer",
 	sbr = "simple_traffic_sbr",
 	scintilla = "simple_traffic_scintilla",
@@ -102,9 +105,9 @@ local simplified_vehicles = {
 	sunburst = "simple_traffic_body_4door_sedan",
 	us_semi = "simple_traffic_us_semi",
 	utv = "simple_traffic_utv",
-	van = "simple_traffic_van",
+	van = "simple_traffic_body_6door_van", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
 	vivace = "simple_traffic_vivace",
-	wendover = "simple_traffic_wendover",
+	wendover = "simple_traffic_body_2door_coupe",
 	wigeon = "simple_traffic_wigeon"
 }
 
@@ -706,7 +709,9 @@ function Vehicle:new(data)
 
 	o.spectators = {}
 
-	log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	if not settings.getValue("showDebugOutput") then
+		log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
+	end
 	return o
 end
 function Vehicle:getOwner()
@@ -1200,7 +1205,9 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			Player:new({name=playerNickname, playerID=playerServerID, role=playerRole})
 	end
 
-	log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	if not settings.getValue("showDebugOutput") then
+	  log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+	end
 
 	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
 
@@ -1992,6 +1999,8 @@ local function onSettingsChanged()
 	--	settingsCache[k]  = ColorF(table.unpack(p))
 	--end
 end
+
+detectGlobalWrites() -- reenable global write notifications
 
 -- Functions
 M.onSerialize = onSerialize

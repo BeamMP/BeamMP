@@ -104,7 +104,7 @@ local simplified_vehicles = {
 	us_semi     = "simple_traffic_us_semi",
 	utv         = "simple_traffic_utv",
 	van         = "simple_traffic_body_6door_van", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	vivace      = "simple_traffic_vivace",
+	vivace      = "simple_traffic_vivace", -- why are you always the weird one
 	wendover    = "simple_traffic_body_2door_coupe",
 	wigeon      = "simple_traffic_wigeon"
 }
@@ -543,89 +543,131 @@ local function localVehiclesExist()
 	return false
 end
 
+local vehicleSimplifiers = {
+	-- complicated chaos, just looking at this put me in tears
+
+	bastion = function(vehicleParts) -- case 1, simple body replace
+		vehicleParts["bastion_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	bx = function(vehicleParts) -- case 2, correspond with what body is used -- nvm this is minor chaos
+		vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe"
+		if vehicleParts["bx_body"] == "bx_body_coupe" then
+			--vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_coupe" -- is default already
+		else
+			if vehicleParts["bx_fenderflare_RR"] == "bx_fenderflare_RR" and vehicleParts["bx_fenderflare_RL"] == "bx_fenderflare_RL"
+			and ((vehicleParts["bx_fenderflare_FR_popup"] == "bx_fenderflare_FR_popup" and vehicleParts["bx_fenderflare_FL_popup"] == "bx_fenderflare_FL_popup")
+			or (vehicleParts["bx_fenderflare_FR_fixed"] == "bx_fenderflare_FR_fixed" and vehicleParts["bx_fenderflare_FL_fixed"] == "bx_fenderflare_FL_fixed")) then
+				vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe_tuner" -- this gives widebody fenderflare bodystyle
+			else
+				vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_hatch"
+			end
+		end
+	end,
+	covet = function(vehicleParts)
+		vehicleParts["covet_body"] = "simple_traffic_body_3door_hatch"
+	end,
+	etk800 = function(vehicleParts)
+		if vehicleParts["etk800_body"] == "etk800_body_sedan" then
+			vehicleParts["etk800_body"] = "simple_traffic_body_4door_sedan"
+		else
+			vehicleParts["etk800_body"] = "simple_traffic_body_5door_wagon"
+		end
+	end,
+	etkc = function(vehicleParts)
+		vehicleParts["etkc_body"] = "simple_traffic_body_2door_coupe"
+	end,
+	etki = function(vehicleParts)
+		vehicleParts["etki_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	fullsize = function(vehicleParts) -- case 1.5, frame replace
+		vehicleParts["fullsize_frame"] = "simple_traffic_body_4door_sedan"
+	end,
+	lansdale = function(vehicleParts) -- case 3, something thats not the body decides what body is used
+		if vehicleParts["lansdale_radsupport"] == "lansdale_radsupport_late" then
+			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon_facelift"
+		else
+			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon"
+		end
+	end,
+	legran = function(vehicleParts)
+		if vehicleParts["legran_body"] == "legran_body_wagon" then
+			vehicleParts["legran_body"] = "simple_traffic_body_5door_wagon"
+		else
+			vehicleParts["legran_body"] = "simple_traffic_body_4door_sedan"
+		end
+	end,
+	midsize = function(vehicleParts)
+		vehicleParts["midsize_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	pessima = function(vehicleParts)
+		vehicleParts["pessima_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	pickup = function(vehicleParts) -- case 4, chaos D:
+		if vehicleParts["pickup_frame"] == "pickup_frame_upfit_heavy" then
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d45" -- boxtruck
+
+		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_extlongbed") then -- ingores heavy for ext cabin longbed frames
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d25" -- ext cab long bed
+
+		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crew") or -- ingores heavy for (the rest of) crew cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_ext") or -- ingores heavy for (the rest of) ext cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_longbed") or -- ingores heavy for longbed frames
+		vehicleParts["pickup_frame"] == "pickup_desert_frame_crew" or
+		vehicleParts["pickup_frame"] == "pickup_desert_frame_ext" or
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_short_ext") then -- ingores heavy for short ext frames
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d15" -- crew cab normal bed
+
+		else -- standard frame, offroad frame, short frame lands here
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
+		end
+		
+	end,
+	roamer = function(vehicleParts)
+		vehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon"
+	end,
+	sunburst = function(vehicleParts)
+		vehicleParts["sunburst_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	van = function(vehicleParts) -- case 5 mltiple deciding factors
+		if vehicleParts["van_frame"] == "van_frame_upfit_heavy" then
+			vehicleParts["van_frame"] = "simple_traffic_body_2door_boxtruck"
+		elseif string.match(vehicleParts["van_frame"], "van_frame_ext") then -- ingores heavy for frames
+			if vehicleParts["van_body_ext"] == "van_body_passenger_ext" then
+				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_passenger"
+			else
+				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_ext"
+			end
+		else
+			vehicleParts["van_frame"] = "simple_traffic_body_6door_van"
+		end
+	end,
+	vivace = function(vehicleParts)
+		if string.match(vehicleParts["vivace_fueltank"], "vivace_battery") then
+			vehicleParts["vivace_body"] = "simple_traffic_vivace_e"
+		else
+			vehicleParts["vivace_body"] = "simple_traffic_vivace"
+		end
+	end,
+	wendover = function(vehicleParts)
+		vehicleParts["wendover_body"] = "simple_traffic_body_2door_coupe"
+	end,
+	-- is there a better way to implement this mess?
+}
+
 --- modify the given vehicleConfig so it as closely resembles the original config with simplified vehicle, or not touched if simplified vehicle not possible
 -- @tparam string vehicleName, eg covet, midsize
 -- @tparam table vehicleConfig, aka decodedData.vcf
--- @treturn bool canSimplify does vehicle have simplified body
+-- @treturn table newVehicleConfig, that now contains the simplified body/parts, or the original table if no changes can be made
 -- @usage local newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
 local function simplifyVehicle(vehicleName, vehicleConfig)
 	newVehicleConfig = deepcopy(vehicleConfig)
-	newVehicleParts = newVehicleConfig.parts -- quick lookup/cleaner code (questionalble statement)
 
-	-- complicated chaos, just looking at this put me in tears
-	if     vehicleName == "bastion"  then newVehicleParts["bastion_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig -- case 1, simple body replace
-	elseif vehicleName == "bx"       then -- case 2, correspond with what body is used
-		if newVehicleParts["bx_body"] == "bx_body_coupe" then
-			newVehicleParts["bx_body"] = "simple_traffic_body_2door_coupe"
-		else
-			-- correspond with the default part used for this slot
-			newVehicleParts["bx_body"] = "simple_traffic_body_2door_coupe_tuner" -- this is actually the 3 door liftback, beamng why do you do this
-		end
+	-- this do not check for incomptable parts
+	if vehicleSimplifiers[vehicleName] then
+		vehicleSimplifiers[vehicleName](newVehicleConfig.parts)
 		return newVehicleConfig
-	elseif vehicleName == "covet"    then newVehicleParts["covet_body"] = "simple_traffic_body_3door_hatch" return newVehicleConfig
-	elseif vehicleName == "etk800"   then
-		if newVehicleParts["etk800_body"] == "etk800_body_sedan" then
-			newVehicleParts["etk800_body"] = "simple_traffic_body_4door_sedan"
-		else
-			newVehicleParts["etk800_body"] = "simple_traffic_body_5door_wagon"
-		end
-		return newVehicleConfig
-	elseif vehicleName == "etkc"     then newVehicleParts["etkc_body"] = "simple_traffic_body_2door_coupe" return newVehicleConfig
-	elseif vehicleName == "etki"     then newVehicleParts["etki_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
-	elseif vehicleName == "fullsize" then newVehicleParts["fullsize_frame"] = "simple_traffic_body_4door_sedan" return newVehicleConfig -- case 1.5, frame replace
-	elseif vehicleName == "lansdale" then -- case 3, something thats not the body decides what body is used
-		if newVehicleParts["lansdale_radsupport"] == "lansdale_radsupport_late" then
-			newVehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon_facelift"
-		else
-			newVehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon"
-		end
-		return newVehicleConfig
-	elseif vehicleName == "legran"   then
-		if newVehicleParts["legran_body"] == "legran_body_wagon" then
-			newVehicleParts["legran_body"] = "simple_traffic_body_5door_wagon"
-		else
-			newVehicleParts["legran_body"] = "simple_traffic_body_4door_sedan"
-		end
-		return newVehicleConfig
-	elseif vehicleName == "midsize"  then newVehicleParts["midsize_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
-	elseif vehicleName == "pessima"  then newVehicleParts["pessima_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
-	elseif vehicleName == "pickup"   then -- case 4, chaos D:
-		if newVehicleParts["pickup_frame"] == "pickup_frame_upfit_heavy" then
-			newVehicleParts["pickup_frame"] = "simple_traffic_body_d45" -- boxtruck
-
-		elseif string.match(newVehicleParts["pickup_frame"], "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew cabin frames
-		string.match(newVehicleParts["pickup_frame"], "pickup_frame_extlongbed") then -- ingores heavy for ext cabin longbed frames
-			newVehicleParts["pickup_frame"] = "simple_traffic_body_d25" -- ext cab long bed
-			
-		elseif string.match(newVehicleParts["pickup_frame"], "pickup_frame_crew") or -- ingores heavy for (the rest of) crew cabin frames
-		string.match(newVehicleParts["pickup_frame"], "pickup_frame_ext") or -- ingores heavy for (the rest of) ext cabin frames
-		string.match(newVehicleParts["pickup_frame"], "pickup_frame_longbed") or -- ingores heavy for longbed frames
-		newVehicleParts["pickup_frame"] == "pickup_desert_frame_crew" or
-		newVehicleParts["pickup_frame"] == "pickup_desert_frame_ext" or
-		string.match(newVehicleParts["pickup_frame"], "pickup_frame_short_ext") then -- ingores heavy for short ext frames
-			newVehicleParts["pickup_frame"] = "simple_traffic_body_d15" -- crew cab short bed
-
-		else -- standard frame, offroad frame, short frame lands here
-			newVehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
-		end
-		return newVehicleConfig
-	elseif vehicleName == "roamer"   then newVehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon" return newVehicleConfig
-	elseif vehicleName == "sunburst" then newVehicleParts["sunburst_body"] = "simple_traffic_body_4door_sedan" return newVehicleConfig
-	elseif vehicleName == "van"      then -- case 5 mltiple deciding factors
-		if newVehicleParts["van_frame"] == "van_frame_upfit_heavy" then
-			newVehicleParts["van_frame"] = "simple_traffic_body_2door_boxtruck"
-		elseif string.match(newVehicleParts["van_frame"], "van_frame_ext") then -- ingores heavy for frames
-			if newVehicleParts["van_body_ext"] == "van_body_passenger_ext" then
-				newVehicleParts["van_frame"] = "simple_traffic_body_6door_van_passenger"
-			else
-				newVehicleParts["van_frame"] = "simple_traffic_body_6door_van_ext"
-			end
-		else
-			newVehicleParts["van_frame"] = "simple_traffic_body_6door_van"
-		end
-		return newVehicleConfig
-	elseif vehicleName == "wendover" then newVehicleParts["wendover_body"] = "simple_traffic_body_2door_coupe" return newVehicleConfig
-	end -- is there a better way to implement this mess?
+	end
 
 	-- simple fallback logic
 	local expectedPartID = simplified_vehicles[vehicleName]

@@ -672,12 +672,19 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 	-- simple fallback logic
 	local expectedPartID = simplified_vehicles[vehicleName]
 	if expectedPartID then
-		local ioCtx = {preloadedDirs = {string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}} -- Fake io context for jbeamIO
-		local slotMap = jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
-		local expectedSlotName = vehicleName..'_body' -- guess the slot that takes in the simplified body, for now
-		if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName], expectedPartID) then
-			newVehicleParts[expectedSlotName] = expectedPartID
-			return newVehicleConfig
+		local ioCtx = startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
+		local part = jbeamIO.getPart(ioCtx, expectedPartID)
+		local slotTypes = {}
+		if type(part.slotType) == 'string' then
+		  table.insert(slotTypes, part.slotType)
+		elseif type(part.slotType) == 'table' then
+		  slotTypes = part.slotType
+		end
+		for _, slotType in ipairs(slotTypes) do
+			if newVehicleConfig.parts[slotType] then
+				newVehicleConfig.parts[slotType] = expectedPartID
+				return newVehicleConfig
+			end
 		end
 	end
 

@@ -45,6 +45,7 @@
   "ui.options.multiplayer.showSpectators": "在载具名牌下显示旁观者名牌",
   "ui.options.multiplayer.showSpectators.tooltip": "旁观其他载具的玩家将被列在载具名牌下方",
   "ui.options.multiplayer.spectatorUnifiedColors": "旁观者名牌颜色相同",
+  "ui.options.multiplayer.spectatorUnifiedColors.tooltip": "将所有旁观玩家以灰色显示，无论其身份",
   "ui.options.multiplayer.nametagFade": "淡出/淡入名牌",
   "ui.options.multiplayer.nametagFadeIn": "淡入",
   "ui.options.multiplayer.nametagFadeOut": "淡出",

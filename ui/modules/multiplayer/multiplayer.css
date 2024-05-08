@@ -128,6 +128,8 @@ md-content {
 }
 
 div#LoadingServer {
+  align-items: center;
+  justify-content: center;
   position: absolute;
   z-index: 100;
   width: 100vw;
@@ -139,7 +141,6 @@ div#LoadingServer {
 }
 
 div#LoadingBody {
-  margin: 20%;
   width: 60%;
   background-color: #848484;
   padding: 15px;

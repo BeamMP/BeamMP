@@ -1051,10 +1051,9 @@ function modList(s) {
 	var modarray = s.split(';');
 	
 	// Sort the mod array alphabetically
-  modarray.sort();
+  	modarray.sort();
 
 	s = "";
-	console.log(modarray)
 	for (var i=0; i<modarray.length-1; i++){
 		if (modarray[i] != '') {
 			var modName = modarray[i].split('/').pop();

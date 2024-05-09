@@ -220,7 +220,7 @@ function($scope, $state, $timeout, $mdDialog) {
 		//console.log('Clicked')
 		var ip = document.getElementById('directip').value.trim();
 		var port = document.getElementById('directport').value.trim();
-		document.getElementById('LoadingServer').style.display = 'block';
+		document.getElementById('LoadingServer').style.display = 'flex';
 		bngApi.engineLua(`MPCoreNetwork.connectToServer("${ip}","${port}")`);
 	};
 
@@ -1375,7 +1375,7 @@ function connect(ip, port, name) {
 	document.getElementById('OriginalLoadingStatus').removeAttribute("hidden");
 	document.getElementById('LoadingStatus').setAttribute("hidden", "hidden");
 	// Show the connecting screen
-	document.getElementById('LoadingServer').style.display = 'block'
+	document.getElementById('LoadingServer').style.display = 'flex'
 	// Connect with ids
 	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '")');
 }

@@ -727,9 +727,9 @@ function Vehicle:delete()
 	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 	
-    players_vehicle_configs[self.serverVehicleString] = nil
+    	players_vehicle_configs[self.serverVehicleString] = nil
 
-    self = nil
+    	self = nil
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1313,7 +1313,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			data = data
 		}
 
-        players_vehicle_configs[serverVehicleID] = decodedData
+        	players_vehicle_configs[serverVehicleID] = decodedData
 
 		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
@@ -1342,12 +1342,12 @@ local function onServerVehicleEdited(serverID, data)
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
 
-    local saveVehicleRot =  players_vehicle_configs[serverID].rot
-    local saveVehiclePos =  players_vehicle_configs[serverID].pos
+    	local saveVehicleRot =  players_vehicle_configs[serverID].rot
+    	local saveVehiclePos =  players_vehicle_configs[serverID].pos
 
-    players_vehicle_configs[serverID] = decodedData
-    players_vehicle_configs[serverID].pos = saveVehiclePos
-    players_vehicle_configs[serverID].rot = saveVehicleRot
+    	players_vehicle_configs[serverID] = decodedData
+    	players_vehicle_configs[serverID].pos = saveVehiclePos
+    	players_vehicle_configs[serverID].rot = saveVehicleRot
 
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then

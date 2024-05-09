@@ -19,6 +19,7 @@ app.directive('multiplayerplayerlist', [function () {
 app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.warnVis = false;
 	$scope.timer = null;
+	$scope.showPlayerIDs = true
 	$scope.init = function() {
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
@@ -26,10 +27,18 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 		if (localStorage.getItem('plShown') == 1) showList();
 	};
 
+	$scope.settingsChanged = function() {
+    bngApi.engineLua('settings.getValue("showPlayerIDs")', (data) => {
+      $scope.showPlayerIDs = data
+    })
+  }
+  $scope.settingsChanged()
+
 	$scope.reset = function() {
 		connected = false;
 		players = [];
 		$scope.init();
+		$scope.settingsChanged()
 	};
 
 	$scope.select = function() {
@@ -116,7 +125,12 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				var idCell = row.insertCell(0);
 				idCell.textContent = parsedList[i].id;
 				idCell.setAttribute("onclick", "restorePlayerVehicle('"+parsedList[i].name+"')");
-				idCell.setAttribute("class", "player-id");
+				if ($scope.showPlayerIDs) {
+					idCell.setAttribute("class", "player-id");
+				} else {
+					idCell.setAttribute("class", "player-id ng-hide");
+				}
+				
 
 
 				// Insert a cell containing the player name

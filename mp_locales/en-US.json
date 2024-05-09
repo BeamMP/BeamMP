@@ -34,6 +34,8 @@
     "ui.options.multiplayer.skipOtherPlayersVehicles": "Disable switching to other players vehicles",
     "ui.options.multiplayer.fadeVehicles": "Fade out vehicles as they get closer",
     "ui.options.multiplayer.fadeVehicles.tooltip": "Good when paired with disabled collisions",
+    "ui.options.multiplayer.showPlayerIDs": "Show the player ID's",
+    "ui.options.multiplayer.showPlayerIDs.tooltip": "Enable to show player ID's in the player list.",
     "ui.options.multiplayer.disableLuaReload": "Disable Lua reloading when quitting a multiplayer server.",
     "ui.options.multiplayer.disableLuaReload.tooltip": "Lua reloads are required to ensure that the game is put back to a working state if mods had replaced game functions. Can be disabled for a smoother experience at your own risk.",
     "ui.options.multiplayer.disableInstabilityPausing": "Disable pausing caused by instabilities",

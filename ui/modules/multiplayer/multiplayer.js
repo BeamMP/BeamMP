@@ -1049,15 +1049,20 @@ function modCount(s) {
 
 function modList(s) {
 	var modarray = s.split(';');
-	//console.log(modarray);
-	s = "";
+	
+	// Sort the mod array alphabetically
+  modarray.sort();
 
+	s = "";
+	console.log(modarray)
 	for (var i=0; i<modarray.length-1; i++){
-		var modName = modarray[i].split('/').pop();
-		modName = modName.replace(".zip","");
-		s += modName;
-		//if (i<modarray.length-2)
+		if (modarray[i] != '') {
+			var modName = modarray[i].split('/').pop();
+			modName = modName.replace(".zip","");
+			s += modName;
+			//if (i<modarray.length-2)
 			s += ", ";
+		}
 	}
 	//console.log(s);
 	s = s.substring(0, s.length -2);

@@ -73,7 +73,7 @@ end
 
 --M.onExtensionLoaded = function() addKeyEventListener('E') addKeyEventListener('G') end
 
-local function onExtensionLoaded()
+local function initLastStage()
 	obj:queueGameEngineLua("MPVehicleGE.onVehicleReady("..obj:getID()..")")
 end
 
@@ -81,7 +81,7 @@ setmetatable(input.keys, {}) -- disable deprecated warning
 detectGlobalWrites() -- reenable global write notifications
 
 M.updateGFX = updateGFX
-M.onExtensionLoaded    = onExtensionLoaded
+M.initLastStage    = initLastStage
 
 M.setVehicleType       = setVehicleType
 

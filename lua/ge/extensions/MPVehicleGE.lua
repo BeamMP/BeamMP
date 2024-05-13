@@ -1253,6 +1253,30 @@ local function onVehicleResetted(gameVehicleID)
 	end
 end
 
+--============================ ON VEHICLE COLOR CHANGED (CLIENT) ============================
+local function onVehicleColorChanged(gameVehicleID, index, paint)
+    if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+    local vehicle = getVehicleByGameID(gameVehicleID)
+    if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle
+        local vehicleTable = {}
+        local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
+        local veh          = be:getObjectByID(gameVehicleID)
+        local pos          = veh:getPosition()
+        local rot          = quat(veh:getRotation())
+        vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
+        vehicleTable.jbm = veh:getJBeamFilename() -- JBeam
+        vehicleTable.pos = {pos.x, pos.y, pos.z} -- Position
+        vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
+        vehicleTable.vcf = vehicleData.config -- Vehicle Config
+        for configData in pairs(vehicleTable.vcf) do --for all the data in the Config
+            if configData ~= "paints" then -- if the data is not paints
+                vehicleTable.vcf[configData] = nil -- remove it, we don't need it
+            end
+        end
+        vehicleTable.vcf.paints[index] = paint --insert new paint at index as chosen from color picker
+        MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..jsonEncode(vehicleTable)) --send it as an edit, if a player chooses lots of colors rapidly, only the last should sit in anyone's edit queue
+    end
+end
 
 
 -- server events
@@ -2093,6 +2117,7 @@ M.onVehicleSpawned         = onVehicleSpawned
 M.onVehicleDeleted       = onVehicleDeleted
 M.onVehicleSwitched        = onVehicleSwitched
 M.onVehicleResetted        = onVehicleResetted
+M.onVehicleColorChanged    = onVehicleColorChanged
 M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised

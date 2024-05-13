@@ -117,6 +117,58 @@ local function tableDiff(old, new)
 	return diff, o, n
 end
 
+--- Splits the given string by the given delimeter and optionally converts the slices into the desired type
+-- @param string string Some string to be split eg. "Hello World"
+-- @param delimeter string Delimeter to split by, eg. " "
+-- @param convert_into nil/number nil = string, 1 = number, 2 = bool
+-- @return table t [1..n] = string, number or bool
+local function splitStringToTable(string, delimeter, convert_into)
+	local t = {}
+	for str in string.gmatch(string, "([^"..delimeter.."]+)") do
+		if convert_into == 1 then -- number
+			table.insert(t, tonumber(str))
+			
+		elseif convert_into == 2 then -- bool
+			if str:lower() == "false" then
+				table.insert(t, false)
+			elseif str:lower() == "true" then
+				table.insert(t, false)
+			end
+			
+		else -- string
+			table.insert(t, str)
+		end
+	end
+	return t
+end
+
+--- Reads the vehicles color directly from the obj instead of from the vehicle_manager.lua
+-- @param veh object Vehicle object from eg. be:getObjectByID(gameVehicleID)
+-- @return table paints Same format as extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config.paints
+local function getColorsFromVehObj(veh)
+	local translate_metallic = function(raw_color_vars)
+		local t = {}
+		t.metallic = raw_color_vars[1]
+		t.roughness = raw_color_vars[2]
+		t.clearcoat = raw_color_vars[3]
+		t.clearcoatRoughness = raw_color_vars[4]
+		return t
+	end
+	
+	-- this getter method may break in future game updates
+	local paints = {}
+	paints[1] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 0), " ", 1))
+	paints[1].baseColor = splitStringToTable(veh:getField("color", 0), " ", 1)
+	
+	paints[2] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 1), " ", 1))
+	paints[2].baseColor = splitStringToTable(veh:getField("colorPalette0", 0), " ", 1)
+	
+	paints[3] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 2), " ", 1))
+	paints[3].baseColor = splitStringToTable(veh:getField("colorPalette1", 0), " ", 1)
+	
+	return paints
+end
+
 --- Returns a semi formatted string with information about the caller of this function.
 -- @param[opt] level number The level of the stack trace to retrieve.
 -- @return string A string containing the source file, line number, name type, and name of the caller.
@@ -199,6 +251,8 @@ end
 
 M.b64encode                = b64encode
 M.b64decode                = b64decode
+M.getColorsFromVehObj      = getColorsFromVehObj
+M.splitStringToTable       = splitStringToTable
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

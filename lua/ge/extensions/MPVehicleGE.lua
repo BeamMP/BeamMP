@@ -1291,9 +1291,6 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 
-		-- Hacky Fix - Lets now send the vehicle data again so that other players on the server actually have the paint data for this vehicle.
-		sendVehicleEdit(gameVehicleID)
-
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
 
 		log("I", "onServerVehicleSpawned", "This ID already exists, syncing vehicles")

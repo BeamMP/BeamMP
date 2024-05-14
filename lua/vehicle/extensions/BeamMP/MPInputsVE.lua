@@ -13,6 +13,10 @@ local lastInputs = {
 	p = 0,
 	c = 0,
 }
+
+local lastInputsTable = {}
+local inputCache = {}
+
 local remoteGear
 local unsupportedPowertrainDevice = false
 local unsupportedPowertrainGearbox = false
@@ -78,12 +82,32 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 	end
 end
 
-local function updateGFX()
-	if v.mpVehicleType == 'R' and remoteGear then applyGear(remoteGear) end
-end
-
-
 local function getInputs()
+	local inputTableToSend = {}
+	for input, _ in pairs(input.state) do
+		local state = electrics.values[input] -- the electric is the most accurate place to get the value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
+		if state then
+			if input == "steering" then
+				if v.data.input then
+					state = -state / v.data.input.steeringWheelLock or 1 -- converts steering wheel degrees to an input value
+				end
+			end
+			if math.abs(state) < 0.001 then -- prevent super small values to count as updates
+				state = 0
+			end
+			state = math.floor(state * 1000) / 1000
+			if lastInputsTable[input] ~= state then
+				inputTableToSend[input] = {state = state}
+				lastInputsTable[input] = state
+			end
+		end
+	end
+	if not tableIsEmpty(inputTableToSend) then
+		inputTableToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a vehicle is spawned after it's been put into gear
+		obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputTableToSend).."\', "..obj:getID()..")") -- Send it to GE lua
+	end
+
+	 -- Old sync, keeping for temporary cross compatibility --
 	local inputsToSend = {}
 	currentInputs = {
 		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
@@ -100,24 +124,60 @@ local function getInputs()
 		end
 	end
 	lastInputs = currentInputs
+
 	if tableIsEmpty(inputsToSend) then return end
+	inputsToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a vehicle is spawned after it's been put into gear
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
+local recievedNewData -- for temporary cross compatibility
 
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)
 	if not decodedData then return end
-	if decodedData.s then input.event("steering", decodedData.s, FILTER_PAD) end -- using gamepad filter for better smoothing
-	if decodedData.t then input.event("throttle", decodedData.t, FILTER_DIRECT) end
-	if decodedData.b then input.event("brake", decodedData.b, FILTER_DIRECT) end
-	if decodedData.p then input.event("parkingbrake", decodedData.p, FILTER_DIRECT) end
-	if decodedData.c then input.event("clutch", decodedData.c, FILTER_DIRECT) end
+	for inputName, inputData in pairs(decodedData) do
+		if inputName and inputData and type(inputData) == "table" then
+			if not inputCache[inputName] then
+				inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputData.state}
+			end
+			inputCache[inputName].state = inputData.state
+			inputCache[inputName].diffrence = math.abs(inputData.state-inputCache[inputName].currentValue)
+			recievedNewData = true
+		end
+	end
 	if decodedData.g then remoteGear = decodedData.g end
+
+	if not recievedNewData then -- Old sync, keeping for temporary cross compatibility
+		if decodedData.s then input.event("steering", decodedData.s, FILTER_PAD) end -- using gamepad filter for better smoothing
+		if decodedData.t then input.event("throttle", decodedData.t, FILTER_DIRECT) end
+		if decodedData.b then input.event("brake", decodedData.b, FILTER_DIRECT) end
+		if decodedData.p then input.event("parkingbrake", decodedData.p, FILTER_DIRECT) end
+		if decodedData.c then input.event("clutch", decodedData.c, FILTER_DIRECT) end
+	end
 end
 
+local GEtickrate = 30 -- match this to inputsTickrate in MPupdatesGE
+
+local function updateGFX(dt)
+	if v.mpVehicleType == 'R' then
+		if remoteGear then
+			applyGear(remoteGear)
+		end
+		for inputName, inputData in pairs(inputCache) do
+			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.diffrence*(dt*GEtickrate))
+			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT)
+		end
+	end
+end
+
+local function onReset()
+	for _, inputData in pairs(inputCache) do
+		inputData.smoother:reset()
+	end
+end
 
 M.updateGFX = updateGFX
+M.onReset = onReset
 M.getInputs   = getInputs
 M.applyInputs = applyInputs
 

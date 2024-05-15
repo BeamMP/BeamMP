@@ -84,10 +84,10 @@ end
 
 local function getInputs()
 	local inputTableToSend = {}
-	for input, _ in pairs(input.state) do
-		local state = electrics.values[input] -- the electric is the most accurate place to get the value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
+	for inputName, _ in pairs(input.state) do
+		local state = electrics.values[inputName] -- the electric is the most accurate place to get the value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
 		if state then
-			if input == "steering" then
+			if inputName == "steering" then
 				if v.data.input then
 					state = -state / v.data.input.steeringWheelLock or 1 -- converts steering wheel degrees to an input value
 				end
@@ -96,9 +96,9 @@ local function getInputs()
 				state = 0
 			end
 			state = math.floor(state * 1000) / 1000
-			if lastInputsTable[input] ~= state then
-				inputTableToSend[input] = {state = state}
-				lastInputsTable[input] = state
+			if lastInputsTable[inputName] ~= state then
+				inputTableToSend[inputName] = {state = state}
+				lastInputsTable[inputName] = state
 			end
 		end
 	end
@@ -132,31 +132,40 @@ end
 
 local recievedNewData -- for temporary cross compatibility
 
+local function setTargetValue(inputName,inputState)
+	if not inputCache[inputName] then
+		inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputState}
+		if v.mpVehicleType == "R" then -- non defined inputs don't exist on spawn so we add those here instead
+			input.setAllowedInputSource(inputName, "local", false)
+			input.setAllowedInputSource(inputName, "BeamMP", true)
+		end
+	end
+	inputCache[inputName].state = inputState
+	inputCache[inputName].diffrence = math.abs(inputState-inputCache[inputName].currentValue)
+end
+
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)
 	if not decodedData then return end
 	for inputName, inputData in pairs(decodedData) do
 		if inputName and inputData and type(inputData) == "table" then
-			if not inputCache[inputName] then
-				inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputData.state}
-			end
-			inputCache[inputName].state = inputData.state
-			inputCache[inputName].diffrence = math.abs(inputData.state-inputCache[inputName].currentValue)
+			setTargetValue(inputName,inputData.state)
 			recievedNewData = true
 		end
 	end
 	if decodedData.g then remoteGear = decodedData.g end
 
-	if not recievedNewData then -- Old sync, keeping for temporary cross compatibility
-		if decodedData.s then input.event("steering", decodedData.s, FILTER_PAD) end -- using gamepad filter for better smoothing
-		if decodedData.t then input.event("throttle", decodedData.t, FILTER_DIRECT) end
-		if decodedData.b then input.event("brake", decodedData.b, FILTER_DIRECT) end
-		if decodedData.p then input.event("parkingbrake", decodedData.p, FILTER_DIRECT) end
-		if decodedData.c then input.event("clutch", decodedData.c, FILTER_DIRECT) end
+	if not recievedNewData then -- temporary cross compatibility
+		if decodedData.s then setTargetValue("steering",decodedData.s) end
+		if decodedData.t then setTargetValue("throttle",decodedData.t) end
+		if decodedData.b then setTargetValue("brake",decodedData.b) end
+		if decodedData.p then setTargetValue("parkingbrake",decodedData.p) end
+		if decodedData.c then setTargetValue("clutch",decodedData.c) end
 	end
 end
 
-local GEtickrate = 30 -- match this to inputsTickrate in MPupdatesGE
+local GEtickrate = 15 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, mathing it jitters a bit
+local disableGhostInputs = false
 
 local function updateGFX(dt)
 	if v.mpVehicleType == 'R' then
@@ -165,14 +174,47 @@ local function updateGFX(dt)
 		end
 		for inputName, inputData in pairs(inputCache) do
 			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.diffrence*(dt*GEtickrate))
-			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT)
+			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
+		end
+		if not disableGhostInputs then
+			disableGhostInputs = true
+			for inputName, _ in pairs(input.state) do
+				dump(inputName)
+				input.setAllowedInputSource(inputName, "local", false)
+				input.setAllowedInputSource(inputName, "BeamMP", true)
+			end
+		end
+	elseif v.mpVehicleType == 'L' then
+		if disableGhostInputs then
+			disableGhostInputs = false
+			for inputName, _ in pairs(input.state) do
+				input.setAllowedInputSource(inputName, "local", true)
+			end
 		end
 	end
 end
 
 local function onReset()
+	lastInputsTable = {}
 	for _, inputData in pairs(inputCache) do
+		inputData.currentValue = 0
+		inputData.difference = 0
+		inputData.state = 0
 		inputData.smoother:reset()
+	end
+end
+
+local function onExtensionLoaded()
+	for inputName, inputData in pairs(input.state) do
+		if not inputCache[inputName] then
+			inputCache[inputName] = {
+				smoother = newTemporalSmoothing(1, 1, nil, 0),
+				currentValue = 0,
+				state = 0,
+				diffrence = 0,
+				disableLocal = false
+			}
+		end
 	end
 end
 
@@ -180,6 +222,7 @@ M.updateGFX = updateGFX
 M.onReset = onReset
 M.getInputs   = getInputs
 M.applyInputs = applyInputs
+M.onExtensionLoaded = onExtensionLoaded
 
 
 return M

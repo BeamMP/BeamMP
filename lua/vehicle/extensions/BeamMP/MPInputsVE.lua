@@ -205,8 +205,7 @@ local function onExtensionLoaded()
 				smoother = newTemporalSmoothing(1, 1, nil, 0),
 				currentValue = 0,
 				state = 0,
-				diffrence = 0,
-				disableLocal = false
+				diffrence = 0
 			}
 		end
 	end

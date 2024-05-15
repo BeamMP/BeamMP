@@ -85,7 +85,7 @@ end
 local function getInputs()
 	local inputTableToSend = {}
 	for inputName, _ in pairs(input.state) do
-		local state = electrics.values[inputName] -- the electric is the most accurate place to get the value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
+		local state = electrics.values[inputName] -- the electric is the most accurate place to get the input value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
 		if state then
 			if inputName == "steering" then
 				if v.data.input then
@@ -103,7 +103,7 @@ local function getInputs()
 		end
 	end
 	if not tableIsEmpty(inputTableToSend) then
-		inputTableToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a vehicle is spawned after it's been put into gear
+		inputTableToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a remote vehicle is spawned after it has been put into gear
 		obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputTableToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 	end
 
@@ -126,7 +126,7 @@ local function getInputs()
 	lastInputs = currentInputs
 
 	if tableIsEmpty(inputsToSend) then return end
-	inputsToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a vehicle is spawned after it's been put into gear
+	inputsToSend.g = electrics.values.gear -- if there is any input we also send the gear in case the remote vehicle is spawned after it's been put into gear
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
@@ -164,7 +164,7 @@ local function applyInputs(data)
 	end
 end
 
-local GEtickrate = 15 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, mathing it jitters a bit
+local GEtickrate = 15 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, matching it jitters at certian framerates
 local disableGhostInputs = false
 
 local function updateGFX(dt)
@@ -179,7 +179,6 @@ local function updateGFX(dt)
 		if not disableGhostInputs then
 			disableGhostInputs = true
 			for inputName, _ in pairs(input.state) do
-				dump(inputName)
 				input.setAllowedInputSource(inputName, "local", false)
 				input.setAllowedInputSource(inputName, "BeamMP", true)
 			end
@@ -205,7 +204,7 @@ local function onReset()
 end
 
 local function onExtensionLoaded()
-	for inputName, inputData in pairs(input.state) do
+	for inputName, _ in pairs(input.state) do
 		if not inputCache[inputName] then
 			inputCache[inputName] = {
 				smoother = newTemporalSmoothing(1, 1, nil, 0),

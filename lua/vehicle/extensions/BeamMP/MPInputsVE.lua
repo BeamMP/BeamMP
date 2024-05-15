@@ -89,7 +89,7 @@ local function getInputs()
 		if state then
 			if inputName == "steering" then
 				if v.data.input then
-					state = -state / v.data.input.steeringWheelLock or 1 -- converts steering wheel degrees to an input value
+					state = -state / (v.data.input.steeringWheelLock or 1) -- converts steering wheel degrees to an input value
 				end
 			end
 			if math.abs(state) < 0.001 then -- prevent super small values to count as updates
@@ -125,8 +125,6 @@ local function getInputs()
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
-local recievedNewData -- for temporary cross compatibility
-
 local function storeTargetValue(inputName,inputState)
 	if not inputCache[inputName] then
 		inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputState}
@@ -138,6 +136,8 @@ local function storeTargetValue(inputName,inputState)
 	inputCache[inputName].state = inputState
 	inputCache[inputName].diffrence = math.abs(inputState-inputCache[inputName].currentValue) -- storing and using the difference for the smoother makes the input more responsive on big/quick changes
 end
+
+local recievedNewData -- for temporary cross compatibility
 
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)

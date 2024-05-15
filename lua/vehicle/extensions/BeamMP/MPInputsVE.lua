@@ -127,16 +127,16 @@ end
 
 local recievedNewData -- for temporary cross compatibility
 
-local function setTargetValue(inputName,inputState)
+local function storeTargetValue(inputName,inputState)
 	if not inputCache[inputName] then
 		inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputState}
-		if v.mpVehicleType == "R" then -- non defined inputs don't exist on spawn so we add those here instead
+		if v.mpVehicleType == "R" then -- non defined inputs do not exist in input.state until they are pressed once so we have to add those here instead
 			input.setAllowedInputSource(inputName, "local", false)
 			input.setAllowedInputSource(inputName, "BeamMP", true)
 		end
 	end
 	inputCache[inputName].state = inputState
-	inputCache[inputName].diffrence = math.abs(inputState-inputCache[inputName].currentValue)
+	inputCache[inputName].diffrence = math.abs(inputState-inputCache[inputName].currentValue) -- storing and using the difference for the smoother makes the input more responsive on big/quick changes
 end
 
 local function applyInputs(data)
@@ -144,18 +144,18 @@ local function applyInputs(data)
 	if not decodedData then return end
 	for inputName, inputData in pairs(decodedData) do
 		if inputName and inputData and type(inputData) == "table" then
-			setTargetValue(inputName,inputData.state)
+			storeTargetValue(inputName,inputData.state)
 			recievedNewData = true
 		end
 	end
 	if decodedData.g then remoteGear = decodedData.g end
 
 	if not recievedNewData then -- temporary cross compatibility
-		if decodedData.s then setTargetValue("steering",decodedData.s) end
-		if decodedData.t then setTargetValue("throttle",decodedData.t) end
-		if decodedData.b then setTargetValue("brake",decodedData.b) end
-		if decodedData.p then setTargetValue("parkingbrake",decodedData.p) end
-		if decodedData.c then setTargetValue("clutch",decodedData.c) end
+		if decodedData.s then storeTargetValue("steering",decodedData.s) end
+		if decodedData.t then storeTargetValue("throttle",decodedData.t) end
+		if decodedData.b then storeTargetValue("brake",decodedData.b) end
+		if decodedData.p then storeTargetValue("parkingbrake",decodedData.p) end
+		if decodedData.c then storeTargetValue("clutch",decodedData.c) end
 	end
 end
 
@@ -167,19 +167,19 @@ local function updateGFX(dt)
 		if remoteGear then
 			applyGear(remoteGear)
 		end
-		for inputName, inputData in pairs(inputCache) do
+		for inputName, inputData in pairs(inputCache) do -- smoothing and applying the inputs
 			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.diffrence*(dt*GEtickrate))
 			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
 		end
 		if not disableGhostInputs then
 			disableGhostInputs = true
 			for inputName, _ in pairs(input.state) do
-				input.setAllowedInputSource(inputName, "local", false)
+				input.setAllowedInputSource(inputName, "local", false) -- disables local inputs, prevents ghost controlling
 				input.setAllowedInputSource(inputName, "BeamMP", true)
 			end
 		end
 	elseif v.mpVehicleType == 'L' then
-		if disableGhostInputs then
+		if disableGhostInputs then -- if we get vehicle owner change this will enable the inputs again when the vehicle is set to local
 			disableGhostInputs = false
 			for inputName, _ in pairs(input.state) do
 				input.setAllowedInputSource(inputName, "local", true)
@@ -189,7 +189,7 @@ local function updateGFX(dt)
 end
 
 local function onReset()
-	lastInputsTable = {}
+	lastInputsTable = {} -- clear the lastInputs table on reset so arcade auto brake, clutch and parking brake syncs correctly on reset
 	for _, inputData in pairs(inputCache) do
 		inputData.currentValue = 0
 		inputData.difference = 0

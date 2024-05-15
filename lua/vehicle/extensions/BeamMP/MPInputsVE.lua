@@ -83,7 +83,7 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 end
 
 local function getInputs()
-	local inputTableToSend = {}
+	local inputsToSend = {}
 	for inputName, _ in pairs(input.state) do
 		local state = electrics.values[inputName] -- the electric is the most accurate place to get the input value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
 		if state then
@@ -97,18 +97,13 @@ local function getInputs()
 			end
 			state = math.floor(state * 1000) / 1000
 			if lastInputsTable[inputName] ~= state then
-				inputTableToSend[inputName] = {state = state}
+				inputsToSend[inputName] = {state = state}
 				lastInputsTable[inputName] = state
 			end
 		end
 	end
-	if not tableIsEmpty(inputTableToSend) then
-		inputTableToSend.g = electrics.values.gear -- if there is any input we also send the gear in case a remote vehicle is spawned after it has been put into gear
-		obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputTableToSend).."\', "..obj:getID()..")") -- Send it to GE lua
-	end
 
 	 -- Old sync, keeping for temporary cross compatibility --
-	local inputsToSend = {}
 	currentInputs = {
 		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
 		t = electrics.values.throttle and math.floor(electrics.values.throttle * 100) / 100,

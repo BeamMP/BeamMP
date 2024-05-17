@@ -5,7 +5,6 @@
 local M = {}
 
 -- ============= VARIABLES =============
-local currentInputs = {}
 local lastInputs = {
 	s = 0,
 	t = 0,
@@ -14,9 +13,9 @@ local lastInputs = {
 	c = 0,
 }
 
-local lastInputsTable = {}
 local inputCache = {}
 
+local periodicGearSyncTimer = 0
 local remoteGear
 local unsupportedPowertrainDevice = false
 local unsupportedPowertrainGearbox = false
@@ -82,6 +81,14 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 	end
 end
 
+local shortName = {
+	steering = "s",
+	throttle = "t",
+	brake = "b",
+	parkingbrake = "p",
+	clutch = "c"
+}
+
 local function getInputs()
 	local inputsToSend = {}
 	for inputName, _ in pairs(input.state) do
@@ -96,32 +103,23 @@ local function getInputs()
 				state = 0
 			end
 			state = math.floor(state * 1000) / 1000
-			if lastInputsTable[inputName] ~= state then
-				inputsToSend[inputName] = {state = state}
-				lastInputsTable[inputName] = state
+			if shortName[inputName] then
+				inputName = shortName[inputName]
+			end
+			if lastInputs[inputName] ~= state then
+				inputsToSend[inputName] = state
+				lastInputs[inputName] = state
 			end
 		end
 	end
 
-	 -- Old sync, keeping for temporary cross compatibility --
-	currentInputs = {
-		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
-		t = electrics.values.throttle and math.floor(electrics.values.throttle * 100) / 100,
-		b = electrics.values.brake and math.floor(electrics.values.brake * 100) / 100,
-		p = electrics.values.parkingbrake and math.floor(electrics.values.parkingbrake * 100) / 100,
-		c = electrics.values.clutch and math.floor(electrics.values.clutch * 100) / 100,
-		g = electrics.values.gear
-	}
-	if lastInputs.s and currentInputs.s and math.abs(math.abs(lastInputs.s) - math.abs(currentInputs.s)) > 0.005 then inputsToSend.s = currentInputs.s end
-	for k,v in pairs(currentInputs) do
-		if currentInputs[k] ~= lastInputs[k] and k ~= "s" then
-			inputsToSend[k] = currentInputs[k]
-		end
+	if electrics.values.gear ~= lastInputs.g or periodicGearSyncTimer >= 5 then -- sending the gear every 5 seconds for when a car is spawned after it's been put into gear
+		periodicGearSyncTimer = 0
+		inputsToSend.g = electrics.values.gear
 	end
-	lastInputs = currentInputs
+	lastInputs.g = electrics.values.gear
 
 	if tableIsEmpty(inputsToSend) then return end
-	inputsToSend.g = electrics.values.gear -- if there is any input we also send the gear in case the remote vehicle is spawned after it's been put into gear
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
@@ -134,28 +132,22 @@ local function storeTargetValue(inputName,inputState)
 		end
 	end
 	inputCache[inputName].state = inputState
-	inputCache[inputName].diffrence = math.abs(inputState-inputCache[inputName].currentValue) -- storing and using the difference for the smoother makes the input more responsive on big/quick changes
+	inputCache[inputName].difference = math.abs(inputState-inputCache[inputName].currentValue) -- storing and using the difference for the smoother makes the input more responsive on big/quick changes
 end
-
-local recievedNewData -- for temporary cross compatibility
 
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)
 	if not decodedData then return end
-	for inputName, inputData in pairs(decodedData) do
-		if inputName and inputData and type(inputData) == "table" then
-			storeTargetValue(inputName,inputData.state)
-			recievedNewData = true
+	for inputName, inputState in pairs(decodedData) do
+		if inputName == "g" then remoteGear = decodedData.g
+		elseif inputName == "s" then storeTargetValue("steering",inputState)
+		elseif inputName == "t" then storeTargetValue("throttle",inputState)
+		elseif inputName == "b" then storeTargetValue("brake",inputState)
+		elseif inputName == "p" then storeTargetValue("parkingbrake",inputState)
+		elseif inputName == "c" then storeTargetValue("clutch",inputState)
+		else
+			storeTargetValue(inputName,inputState)
 		end
-	end
-	if decodedData.g then remoteGear = decodedData.g end
-
-	if not recievedNewData then -- temporary cross compatibility
-		if decodedData.s then storeTargetValue("steering",decodedData.s) end
-		if decodedData.t then storeTargetValue("throttle",decodedData.t) end
-		if decodedData.b then storeTargetValue("brake",decodedData.b) end
-		if decodedData.p then storeTargetValue("parkingbrake",decodedData.p) end
-		if decodedData.c then storeTargetValue("clutch",decodedData.c) end
 	end
 end
 
@@ -168,7 +160,7 @@ local function updateGFX(dt)
 			applyGear(remoteGear)
 		end
 		for inputName, inputData in pairs(inputCache) do -- smoothing and applying the inputs
-			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.diffrence*(dt*GEtickrate))
+			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.difference*(dt*GEtickrate))
 			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
 		end
 		if not disableGhostInputs then
@@ -179,6 +171,7 @@ local function updateGFX(dt)
 			end
 		end
 	elseif v.mpVehicleType == 'L' then
+		periodicGearSyncTimer = periodicGearSyncTimer + dt
 		if disableGhostInputs then -- if we get vehicle owner change this will enable the inputs again when the vehicle is set to local
 			disableGhostInputs = false
 			for inputName, _ in pairs(input.state) do
@@ -189,7 +182,7 @@ local function updateGFX(dt)
 end
 
 local function onReset()
-	lastInputsTable = {} -- clear the lastInputs table on reset so arcade auto brake, clutch and parking brake syncs correctly on reset
+	lastInputs = {} -- clear the lastInputs table on reset so arcade auto brake, clutch and parking brake syncs correctly on reset
 	for _, inputData in pairs(inputCache) do
 		inputData.currentValue = 0
 		inputData.difference = 0
@@ -205,7 +198,7 @@ local function onExtensionLoaded()
 				smoother = newTemporalSmoothing(1, 1, nil, 0),
 				currentValue = 0,
 				state = 0,
-				diffrence = 0
+				difference = 0
 			}
 		end
 	end

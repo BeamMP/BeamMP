@@ -5,7 +5,7 @@
 local M = {}
 
 -- ============= VARIABLES =============
-local smoothingRate = 30 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, matching it jitters at certian framerates
+local smoothingRate = 30 -- lower values makes the inputs more smooth but less responsive
 
 local lastInputs = {
 	s = 0,

@@ -5,6 +5,8 @@
 local M = {}
 
 -- ============= VARIABLES =============
+local smoothingRate = 30 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, matching it jitters at certian framerates
+
 local lastInputs = {
 	s = 0,
 	t = 0,
@@ -19,6 +21,7 @@ local periodicGearSyncTimer = 0
 local remoteGear
 local unsupportedPowertrainDevice = false
 local unsupportedPowertrainGearbox = false
+local disableGhostInputs = false
 -- ============= VARIABLES =============
 
 local translationTable = {
@@ -125,7 +128,7 @@ end
 
 local function storeTargetValue(inputName,inputState)
 	if not inputCache[inputName] then
-		inputCache[inputName] = {smoother = newTemporalSmoothing(1, 1, nil, 0), currentValue = 0, state = inputState}
+		inputCache[inputName] = {smoother = newTemporalSmoothingNonLinear(smoothingRate), currentValue = 0, state = inputState}
 		if v.mpVehicleType == "R" then -- non defined inputs do not exist in input.state until they are pressed once so we have to add those here instead
 			input.setAllowedInputSource(inputName, "local", false)
 			input.setAllowedInputSource(inputName, "BeamMP", true)
@@ -151,16 +154,13 @@ local function applyInputs(data)
 	end
 end
 
-local GEtickrate = 15 -- setting this to half inputsTickrate in MPupdatesGE seems to give smooth results, though with a bit higher latency, matching it jitters at certian framerates
-local disableGhostInputs = false
-
 local function updateGFX(dt)
 	if v.mpVehicleType == 'R' then
 		if remoteGear then
 			applyGear(remoteGear)
 		end
 		for inputName, inputData in pairs(inputCache) do -- smoothing and applying the inputs
-			inputData.currentValue = inputData.smoother:get(inputData.state,inputData.difference*(dt*GEtickrate))
+			inputData.currentValue = inputData.smoother:get(inputData.state,dt)
 			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
 		end
 		if not disableGhostInputs then
@@ -192,15 +192,8 @@ local function onReset()
 end
 
 local function onExtensionLoaded()
-	for inputName, _ in pairs(input.state) do
-		if not inputCache[inputName] then
-			inputCache[inputName] = {
-				smoother = newTemporalSmoothing(1, 1, nil, 0),
-				currentValue = 0,
-				state = 0,
-				difference = 0
-			}
-		end
+	for inputName, state in pairs(input.state) do
+		storeTargetValue(inputName, state.val or 0)
 	end
 end
 

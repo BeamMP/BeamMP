@@ -135,7 +135,6 @@ local function storeTargetValue(inputName,inputState)
 		end
 	end
 	inputCache[inputName].state = inputState
-	inputCache[inputName].difference = math.abs(inputState-inputCache[inputName].currentValue) -- storing and using the difference for the smoother makes the input more responsive on big/quick changes
 end
 
 local function applyInputs(data)
@@ -160,7 +159,12 @@ local function updateGFX(dt)
 			applyGear(remoteGear)
 		end
 		for inputName, inputData in pairs(inputCache) do -- smoothing and applying the inputs
-			inputData.currentValue = inputData.smoother:get(inputData.state,dt)
+			local differece = inputData.state - inputData.currentValue
+			if  math.abs(differece) < 0.0001 then -- because exponential smoothing never reaches the target value the brake/parking brake would never reach 0 causing automatics to never shift up
+				inputData.currentValue = inputData.state
+			else
+				inputData.currentValue = inputData.smoother:get(inputData.state,dt)
+			end
 			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
 		end
 		if not disableGhostInputs then
@@ -185,7 +189,6 @@ local function onReset()
 	lastInputs = {} -- clear the lastInputs table on reset so arcade auto brake, clutch and parking brake syncs correctly on reset
 	for _, inputData in pairs(inputCache) do
 		inputData.currentValue = 0
-		inputData.difference = 0
 		inputData.state = 0
 		inputData.smoother:reset()
 	end
@@ -193,7 +196,7 @@ end
 
 local function onExtensionLoaded()
 	for inputName, state in pairs(input.state) do
-		storeTargetValue(inputName, state.val or 0)
+		storeTargetValue(inputName, 0) -- sets all inputs to 0 on spawn so cars don't drive around with the parking brake stuck on
 	end
 end
 

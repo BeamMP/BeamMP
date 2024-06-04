@@ -133,11 +133,29 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 
-function($scope, $state, $timeout, $mdDialog) {
+.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 'ConfirmationDialog', 
+function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 	var vm = this;
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
+
+	// Trigger Warning Prompt
+	$scope.$on('DownloadSecurityPrompt', function (event, data) {
+		ConfirmationDialog.open(
+			"ui.multiplayer.security.title", "ui.multiplayer.security.prompt",
+			[
+				{ label: "ui.multiplayer.security.no_return", key: false, isCancel: true },
+				// { label: "Enter and don't show this again", key: true },
+				{ label: "ui.multiplayer.security.accept_proceed", key: true, default: true },
+			],
+			{ class: "experimental" }
+		).then(res => {
+			if (res)
+				bngApi.engineLua(`MPCoreNetwork.send("WY")`);
+			bngApi.engineLua(`MPCoreNetwork.send("WN")`);
+		});
+	})
+
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
 		//console.log(toState.url);

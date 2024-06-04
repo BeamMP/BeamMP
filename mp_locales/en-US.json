@@ -131,5 +131,9 @@
     "ui.multiplayertos.info2": "You can also find more information on our ",
     "ui.common.multiplayer.sync": "Sync",
     "ui.apps.categories.multiplayer": "Multiplayer",
-    "ui.camera.mode.passenger": "Passenger"
+    "ui.camera.mode.passenger": "Passenger",
+    "ui.multiplayer.security.no_return": "Cancel & Return",
+    "ui.multiplayer.security.accept_proceed": "Download & Join",
+    "ui.multiplayer.security.title": "Server Mods Detected",
+    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server."
 }

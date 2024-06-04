@@ -31,6 +31,7 @@ local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap"
 -- auth
 
 local loggedIn = false
+local user = nil
 
 -- event functions
 
@@ -180,6 +181,7 @@ local function logout()
 	log('M', 'logout', 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
+	user = nil
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
@@ -220,6 +222,13 @@ end
 local function requestPlayers()
 	--log('M', 'requestPlayers', 'Requesting players.')
 	sendBeamMPInfo()
+end
+
+--- Get the authenticated Users info `getUserData()`
+-- @usage `MPCoreNetwork.getUserData()`
+local function getUserData()
+	-- send player and server values to front end.
+	guihooks.trigger('UserInfo', user)
 end
 -- AA================ UI ================AA
 
@@ -364,6 +373,10 @@ local function loginReceived(params)
 	if (result.success == true or result.Auth == 1) then
 		log('M', 'loginReceived', 'Login successful.')
 		loggedIn = true
+		user = {
+			role = result.role,
+			username = result.username
+		}
 		guihooks.trigger('LoggedIn', result.message or '')
 	else
 		log('M', 'loginReceived', 'Login failed.')
@@ -676,6 +689,7 @@ M.onClientStartMission = onClientStartMission
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList
+M.getUserData          = getUserData
 -- server
 M.connectToServer      = connectToServer
 M.leaveServer          = leaveServer

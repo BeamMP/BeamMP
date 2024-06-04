@@ -141,6 +141,7 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 
 	// Trigger Warning Prompt
 	$scope.$on('DownloadSecurityPrompt', function (event, data) {
+		var o = true
 		ConfirmationDialog.open(
 			"ui.multiplayer.security.title", "ui.multiplayer.security.prompt",
 			[
@@ -150,9 +151,15 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 			],
 			{ class: "experimental" }
 		).then(res => {
-			if (res)
-				bngApi.engineLua(`MPCoreNetwork.send("WY")`);
-			bngApi.engineLua(`MPCoreNetwork.send("WN")`);
+			if (res) {
+				o = false
+				bngApi.engineLua(`MPCoreNetwork.approveModDownload()`);
+			}
+			if (o) {
+				o = false
+				bngApi.engineLua(`MPCoreNetwork.rejectModDownload()`);
+				vm.closeLoadingPopup()
+			}			
 		});
 	})
 

@@ -130,5 +130,9 @@
   "ui.multiplayertos.info2": "Ausserdem findest du weitere Informationen unter ",
   "ui.common.multiplayer.sync": "Sync",
   "ui.apps.categories.multiplayer": "Mehrspieler",
-  "ui.camera.mode.passenger": "Passagier"
+  "ui.camera.mode.passenger": "Passagier",
+  "ui.multiplayer.security.no_return": "Abbrechen & Zurück",
+  "ui.multiplayer.security.accept_proceed": "Herunterladen & Beitreten",
+  "ui.multiplayer.security.title": "Server-Mods Erkannt",
+  "ui.multiplayer.security.prompt": "Der Server, dem du beitrittst, hat Mods, die automatisch heruntergeladen und installiert werden. Diese Mods können Code enthalten, der auf deinem PC ausgeführt wird und bösartig sein könnte. Bitte vergewissere dich, dass du dem/den Serverbesitzer(n) vertraust, bevor du fortfährst. Wenn du darauf vertraust, dass die Mods nicht bösartig sind, fahre jetzt auf eigenes Risiko fort. BeamMP ist nicht verantwortlich für Inhalte, die von diesem Server heruntergeladen werden."
 }

@@ -19,7 +19,7 @@ setmetatable(_G,{}) -- temporarily disable global notifications
 local lastResetTime = {}
 local oneSecCounter = 0
 local nicknamesAllowed = true
-local onVehicleDeletedAllowed = true
+local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
 local editSyncTimer = 0
 local localCounter = 0
@@ -1034,7 +1034,7 @@ end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
 
-local function spawnDeletedVehicles(serverVehID)
+local function spawnDestroyedVehicles(serverVehID)
 
     local vehdata = players_vehicle_configs[serverVehID]
     if vehdata == nil then
@@ -1091,17 +1091,17 @@ local function restorePlayerVehicle(playerName)
     local vehicles_ServerIDs = player.vehicles.IDs
 
     for x,y in pairs(vehicles_ServerIDs)do
-        spawnDeletedVehicles(y)
+        spawnDestroyedVehicles(y)
         log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
     end
 end
 
 
-local function onVehicleDeleted(gameVehicleID)
+local function onVehicleDestroyed(gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
-		log('W', 'onVehicleDeleted', gameVehicleID .. ' ' )
+		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
 
 		if not vehicle then return end
 		local serverVehicleID = vehicle.serverVehicleString -- Get the serverVehicleID
@@ -1110,8 +1110,8 @@ local function onVehicleDeleted(gameVehicleID)
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
 
-		if onVehicleDeletedAllowed then -- If function is not coming from onServerVehicleRemoved then
-			log('I', "onVehicleDeleted", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
+		if onVehicleDestroyedAllowed then -- If function is not coming from onServerVehicleRemoved then
+			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if vehicle.isLocal then
 				if serverVehicleID then
 					local veh = be:getObjectByID(gameVehicleID)
@@ -1140,7 +1140,7 @@ local function onVehicleDeleted(gameVehicleID)
 						
 						local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
 						if handle == nil then
-							log('I', "onVehicleDeleted", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
+							log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
 						else
 							handle:write(jsonEncode(vehicleConfig))
 							handle:close()
@@ -1151,8 +1151,8 @@ local function onVehicleDeleted(gameVehicleID)
 				end
 			end
 		else
-			log('I', "onVehicleDeleted", string.format("Vehicle %i (%s) removed by server", gameVehicleID, serverVehicleID or "?"))
-			onVehicleDeletedAllowed = true
+			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by server", gameVehicleID, serverVehicleID or "?"))
+			onVehicleDestroyedAllowed = true
 			vehicles[serverVehicleID]:delete()
 		end
 
@@ -1390,7 +1390,7 @@ local function onServerVehicleRemoved(serverVehicleID)
 		log('I', "onServerVehicleRemoved", string.format("Vehicle %i (%s) removed by server ", gameVehicleID, serverVehicleID))
 		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
-			onVehicleDeletedAllowed = false
+			onVehicleDestroyedAllowed = false
 			local currveh = be:getPlayerVehicle(0)
 			local isCurrent = (currveh and currveh:getID() == gameVehicleID) or false
 			veh:delete() -- Remove it
@@ -2096,7 +2096,7 @@ M.onPreRender              = onPreRender
 M.onDisconnect             = onDisconnect
 M.handle                   = handle
 M.onVehicleSpawned         = onVehicleSpawned
-M.onVehicleDeleted       = onVehicleDeleted
+M.onVehicleDestroyed       = onVehicleDestroyed
 M.onVehicleSwitched        = onVehicleSwitched
 M.onVehicleResetted        = onVehicleResetted
 M.onPlayerLeft             = onPlayerLeft

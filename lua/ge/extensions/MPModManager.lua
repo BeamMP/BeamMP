@@ -22,14 +22,14 @@ function queueExtensionToLoad(extension)  -- temporary workaround for mods still
 end
 
 
-local function unloadLocales()
-	FS:unmount('/temp/beammp/beammp_locales.zip')
+local function unloadLocalesAndDefaults()
+	FS:unmount('/temp/beammp/beammp_locales_and_defaults.zip')
 	FS:directoryRemove('/temp/beammp')
 end
 
---- Load the BeamMP provided locales and merge them into a working set for BeamNG
-local function loadLocales() -- loads beammp locales without having to directly replace the game locales
-	unloadLocales()
+--- Load the BeamMP provided locales + defalts and merge them into a working set for BeamNG
+local function loadLocalesAndDefaults() -- loads beammp locales and default settings without having to directly replace the game locales and default settings
+	unloadLocalesAndDefaults()
 	local mp_locales = FS:findFiles('/mp_locales/', '*.json', 0)
 	local game_locales = FS:findFiles('/locales/', '*.json', 0)
 
@@ -37,22 +37,30 @@ local function loadLocales() -- loads beammp locales without having to directly 
 		for _, game_locale in pairs(game_locales) do
 			if game_locale:gsub('/locales/', '') == mp_locale:gsub('/mp_locales/', '') then
 				local merged_locale = tableMergeRecursive(jsonReadFile(game_locale), jsonReadFile(mp_locale))
-				log('M', 'loadLocales', 'Writing '..game_locale)
+				log('M', 'loadLocalesAndDefaults', 'Writing '..game_locale)
 				jsonWriteFile('/temp/beammp/'.. game_locale, merged_locale, true)
 			end
 		end
 	end
+
+	local merged_settings = tableMergeRecursive(jsonReadFile('/settings/defaults.json'), jsonReadFile('/settings/mp_defaults.json'))
+	log('M', 'loadLocalesAndDefaults', 'Writing /settings/defaults.json')
+	jsonWriteFile('/temp/beammp/settings/defaults.json', merged_settings, true)
+
 	if FS:directoryExists('/temp/beammp/locales/') then
 		local zip = ZipArchive()
 		local fileList = FS:findFiles('/temp/beammp/locales/', '*.json', 0)
-		zip:openArchiveName('temp/beammp/beammp_locales.zip', 'w')
+		zip:openArchiveName('temp/beammp/beammp_locales_and_defaults.zip', 'w')
 		for _, file in pairs(fileList) do
 			zip:addFile(file, 'locales/'..file:gsub('/temp/beammp/locales/', ''))
 		end
+		
+		zip:addFile('/temp/beammp/settings/defaults.json', 'settings/defaults.json')
 		zip:close()
 	end
-	FS:mount('/temp/beammp/beammp_locales.zip')
+	FS:mount('/temp/beammp/beammp_locales_and_defaults.zip')
 	FS:directoryRemove('/temp/beammp/locales')
+	FS:directoryRemove('/temp/beammp/settings')
 end
 
 --- Check if a mod is allowed according to the servers mods
@@ -260,7 +268,7 @@ end
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
 -- We use this to load our locales, cleanup the mods ahead of mp use and ensure our modloader is used
 local function onExtensionLoaded()
-	loadLocales()
+	loadLocalesAndDefaults()
 	cleanUpSessionMods()
 	--extensionLoader()
 	--M.replaceStuff()
@@ -269,7 +277,7 @@ end
 --- Triggered by BeamNG when the lua mod is unloaded by the modmanager system.
 -- We use this to cleanup our locales and restore core module defintions
 local function onExtensionUnloaded() -- restore functions back to their default values
-	unloadLocales()
+	unloadLocalesAndDefaults()
 	--registerCoreModule = original_registerCoreModule and original_registerCoreModule
 	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
 end

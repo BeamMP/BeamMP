@@ -71,44 +71,42 @@ local roleToInfo = {
 -- @tfield string JBeamName_N
 -- @usage local simplified = simplified_vehicles["coupe"]
 local simplified_vehicles = {
-	atv = "simple_traffic_atv",
-	autobello = "simple_traffic_autobello",
-	barstow = "simple_traffic_barstow",
-	bastion = "simple_traffic_body_4door_sedan",
-	bluebuck = "simple_traffic_bluebuck",
-	bolide = "simple_traffic_bolide",
-	burnside = "simple_traffic_burnside",
-	bx = "simple_traffic_body_2door_coupe_tuner",
-	citybus = "simple_traffic_citybus",
-	--coupe = "simple_traffic_body_2door_coupe",
-	covet = "simple_traffic_body_3door_hatch",
-	etk800 = "simple_traffic_body_5door_wagon",
-	etkc = "simple_traffic_body_2door_coupe",
-	etki = "simple_traffic_body_4door_sedan",
-	fullsize = "simple_traffic_body_4door_sedan", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	hopper = "simple_traffic_hopper",
-	lansdale = "simple_traffic_body_5door_wagon",
-	legran = "simple_traffic_body_4door_sedan",
-	midsize = "simple_traffic_body_4door_sedan",
-	midtruck = "simple_traffic_midtruck",
-	miramar = "simple_traffic_miramar",
-	moonhawk = "simple_traffic_moonhawk",
-	pessima = "simple_traffic_body_4door_sedan",
-	pickup = "simple_traffic_body_d10", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	pigeon = "simple_traffic_pigeon",
-	racetruck = "simple_traffic_racetruck",
-	roamer = "simple_traffic_body_5door_wagon", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
+	atv         = "simple_traffic_atv",
+	autobello   = "simple_traffic_autobello",
+	barstow     = "simple_traffic_body_2door_coupe",
+	bastion     = "simple_traffic_body_4door_sedan",
+	bluebuck    = "simple_traffic_body_4door_sedan",
+	bolide      = "simple_traffic_bolide",
+	burnside    = "simple_traffic_body_4door_sedan",
+	bx          = "simple_traffic_body_2door_coupe",
+	citybus     = "simple_traffic_citybus",
+	covet       = "simple_traffic_body_3door_hatch",
+	etk800      = "simple_traffic_body_5door_wagon",
+	etkc        = "simple_traffic_body_2door_coupe",
+	etki        = "simple_traffic_body_4door_sedan",
+	fullsize    = "simple_traffic_body_4door_sedan", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
+	hopper      = "simple_traffic_hopper",
+	lansdale    = "simple_traffic_body_5door_wagon",
+	legran      = "simple_traffic_body_4door_sedan",
+	midsize     = "simple_traffic_body_4door_sedan",
+	midtruck    = "simple_traffic_midtruck",
+	miramar     = "simple_traffic_body_4door_sedan",
+	moonhawk    = "simple_traffic_body_2door_coupe",
+	pessima     = "simple_traffic_body_4door_sedan",
+	pickup      = "simple_traffic_body_d10", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
+	pigeon      = "simple_traffic_pigeon",
+	racetruck   = "simple_traffic_racetruck",
+	roamer      = "simple_traffic_body_5door_wagon", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
 	rockbouncer = "simple_traffic_rockbouncer",
-	sbr = "simple_traffic_sbr",
-	scintilla = "simple_traffic_scintilla",
-	--semi = "simple_traffic_semi",
-	sunburst = "simple_traffic_body_4door_sedan",
-	us_semi = "simple_traffic_us_semi",
-	utv = "simple_traffic_utv",
-	van = "simple_traffic_body_6door_van", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	vivace = "simple_traffic_vivace",
-	wendover = "simple_traffic_body_2door_coupe",
-	wigeon = "simple_traffic_wigeon"
+	sbr         = "simple_traffic_body_2door_coupe",
+	scintilla   = "simple_traffic_scintilla",
+	sunburst    = "simple_traffic_body_4door_sedan",
+	us_semi     = "simple_traffic_us_semi",
+	utv         = "simple_traffic_utv",
+	van         = "simple_traffic_body_6door_van", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
+	vivace      = "simple_traffic_vivace", -- why are you always the weird one
+	wendover    = "simple_traffic_body_2door_coupe",
+	wigeon      = "simple_traffic_wigeon"
 }
 
 local settingsCache = {
@@ -545,23 +543,153 @@ local function localVehiclesExist()
 	return false
 end
 
---- make sure and get the part slot for simplified body, its part id, for the given vehicles
+local vehicleSimplifiers = {
+	-- complicated chaos, just looking at this put me in tears
+
+	bastion = function(vehicleParts) -- case 1, simple body replace
+		vehicleParts["bastion_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	bx = function(vehicleParts) -- case 2, correspond with what body is used -- nvm this is minor chaos
+		vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe"
+		if vehicleParts["bx_body"] == "bx_body_coupe" then
+			--vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_coupe" -- is default already
+		else
+			if vehicleParts["bx_fenderflare_RR"] == "bx_fenderflare_RR" and vehicleParts["bx_fenderflare_RL"] == "bx_fenderflare_RL"
+			and ((vehicleParts["bx_fenderflare_FR_popup"] == "bx_fenderflare_FR_popup" and vehicleParts["bx_fenderflare_FL_popup"] == "bx_fenderflare_FL_popup")
+			or (vehicleParts["bx_fenderflare_FR_fixed"] == "bx_fenderflare_FR_fixed" and vehicleParts["bx_fenderflare_FL_fixed"] == "bx_fenderflare_FL_fixed")) then
+				vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe_tuner" -- this gives widebody fenderflare bodystyle
+			else
+				vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_hatch"
+			end
+		end
+	end,
+	covet = function(vehicleParts)
+		vehicleParts["covet_body"] = "simple_traffic_body_3door_hatch"
+	end,
+	etk800 = function(vehicleParts)
+		if vehicleParts["etk800_body"] == "etk800_body_sedan" then
+			vehicleParts["etk800_body"] = "simple_traffic_body_4door_sedan"
+		else
+			vehicleParts["etk800_body"] = "simple_traffic_body_5door_wagon"
+		end
+	end,
+	etkc = function(vehicleParts)
+		vehicleParts["etkc_body"] = "simple_traffic_body_2door_coupe"
+	end,
+	etki = function(vehicleParts)
+		vehicleParts["etki_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	fullsize = function(vehicleParts) -- case 1.5, frame replace
+		vehicleParts["fullsize_frame"] = "simple_traffic_body_4door_sedan"
+	end,
+	lansdale = function(vehicleParts) -- case 3, something thats not the body decides what body is used
+		if vehicleParts["lansdale_radsupport"] == "lansdale_radsupport_late" then
+			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon_facelift"
+		else
+			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon"
+		end
+	end,
+	legran = function(vehicleParts)
+		if vehicleParts["legran_body"] == "legran_body_wagon" then
+			vehicleParts["legran_body"] = "simple_traffic_body_5door_wagon"
+		else
+			vehicleParts["legran_body"] = "simple_traffic_body_4door_sedan"
+		end
+	end,
+	midsize = function(vehicleParts)
+		vehicleParts["midsize_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	pessima = function(vehicleParts)
+		vehicleParts["pessima_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	pickup = function(vehicleParts) -- case 4, chaos D:
+		if vehicleParts["pickup_frame"] == "pickup_frame_upfit_heavy" then
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d45" -- boxtruck
+
+		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_extlongbed") then -- ingores heavy for ext cabin longbed frames
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d25" -- ext cab long bed
+
+		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crew") or -- ingores heavy for (the rest of) crew cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_ext") or -- ingores heavy for (the rest of) ext cabin frames
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_longbed") or -- ingores heavy for longbed frames
+		vehicleParts["pickup_frame"] == "pickup_desert_frame_crew" or
+		vehicleParts["pickup_frame"] == "pickup_desert_frame_ext" or
+		string.match(vehicleParts["pickup_frame"], "pickup_frame_short_ext") then -- ingores heavy for short ext frames
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d15" -- crew cab normal bed
+
+		else -- standard frame, offroad frame, short frame lands here
+			vehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
+		end
+		
+	end,
+	roamer = function(vehicleParts)
+		vehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon"
+	end,
+	sunburst = function(vehicleParts)
+		vehicleParts["sunburst_body"] = "simple_traffic_body_4door_sedan"
+	end,
+	van = function(vehicleParts) -- case 5 mltiple deciding factors
+		if vehicleParts["van_frame"] == "van_frame_upfit_heavy" then
+			vehicleParts["van_frame"] = "simple_traffic_body_2door_boxtruck"
+		elseif string.match(vehicleParts["van_frame"], "van_frame_ext") then -- ingores heavy for frames
+			if vehicleParts["van_body_ext"] == "van_body_passenger_ext" then
+				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_passenger"
+			else
+				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_ext"
+			end
+		else
+			vehicleParts["van_frame"] = "simple_traffic_body_6door_van"
+		end
+	end,
+	vivace = function(vehicleParts)
+		if string.match(vehicleParts["vivace_fueltank"], "vivace_battery") then
+			vehicleParts["vivace_body"] = "simple_traffic_vivace_e"
+		else
+			vehicleParts["vivace_body"] = "simple_traffic_vivace"
+		end
+	end,
+	wendover = function(vehicleParts)
+		vehicleParts["wendover_body"] = "simple_traffic_body_2door_coupe"
+	end,
+	-- is there a better way to implement this mess?
+}
+
+--- modify the given vehicleConfig so it as closely resembles the original config with simplified vehicle, or not touched if simplified vehicle not possible
 -- @tparam string vehicleName, eg covet, midsize
--- @treturn bool canSimplify does vehicle have simplified body
--- @treturn string slotName the slot that needs to be changed
--- @treturn string partName the part that needs to go in
--- @usage local canSimplify, slotName, partName = getVehicleSimplified("vivace")
-local function getVehicleSimplified(vehicleName)
+-- @tparam table vehicleConfig, aka decodedData.vcf
+-- @treturn table newVehicleConfig, that now contains the simplified body/parts, or the original table if no changes can be made
+-- @usage local newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
+local function simplifyVehicle(vehicleName, vehicleConfig)
+	newVehicleConfig = deepcopy(vehicleConfig)
+
+	-- this do not check for incomptable parts
+	if vehicleSimplifiers[vehicleName] then
+		vehicleSimplifiers[vehicleName](newVehicleConfig.parts)
+		return newVehicleConfig
+	end
+
+	-- simple fallback logic
 	local expectedPartID = simplified_vehicles[vehicleName]
 	if expectedPartID then
-		local ioCtx = {preloadedDirs = {string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}} -- Fake io context for jbeamIO
-		local slotMap = jbeamIO.getAvailableSlotMap(ioCtx) -- slots2 compatible, maybe theres better way then require jbeamio and let it load the files again...
-		local expectedSlotName = vehicleName..'_body' -- guess the slot that takes in the simplified body, for now
-		if slotMap and slotMap[expectedSlotName] and tableContains(slotMap[expectedSlotName], expectedPartID) then
-			return true, expectedSlotName, expectedPartID
+		local ioCtx = startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
+		local part = jbeamIO.getPart(ioCtx, expectedPartID)
+		local slotTypes = {}
+		if type(part.slotType) == 'string' then
+		  table.insert(slotTypes, part.slotType)
+		elseif type(part.slotType) == 'table' then
+		  slotTypes = part.slotType
+		end
+		for _, slotType in ipairs(slotTypes) do
+			if newVehicleConfig.parts[slotType] then
+				newVehicleConfig.parts[slotType] = expectedPartID
+				return newVehicleConfig
+			end
 		end
 	end
-	return false
+
+	table.clear(newVehicleConfig)
+	return vehicleConfig
 end
 
 -- ============= OBJECTS =============
@@ -882,10 +1010,7 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
-		if canSimplify then
-			vehicleConfig.parts[slotName] = partName
-		end
+		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -935,10 +1060,7 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		local canSimplify, slotName, partName = getVehicleSimplified(vehicleName)
-		if canSimplify then
-			vehicleConfig.parts[slotName] = partName
-		end
+		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	if vehicleName == veh:getJBeamFilename() then

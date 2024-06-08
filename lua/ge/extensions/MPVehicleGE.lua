@@ -999,9 +999,6 @@ local function onVehicleSpawned(gameVehicleID)
 		log("I", "onVehicleSpawned", "New Vehicle Spawned "..gameVehicleID)
 		--log('E', 'nextSpawnIsRemote', tostring(nextSpawnIsRemote))
 
-		veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
-		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
-
 		if not nextSpawnIsRemote then
 			sendVehicleSpawn(gameVehicleID) -- Send it to the server
 			commands.setGameCamera() -- Force switch from freecam to vehicle camera
@@ -1012,9 +1009,6 @@ local function onVehicleSpawned(gameVehicleID)
 	else
 		if vehicle.jbeam ~= newJbeamName then
 			log("I", "onVehicleSpawned", string.format("Vehicle %i updated from %s to %s", gameVehicleID, vehicle.jbeam, newJbeamName))
-
-			veh:queueLuaCommand("extensions.addModulePath('lua/vehicle/extensions/BeamMP')") -- Load lua files
-			veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
 
 			if not nextSpawnIsRemote then
 				sendVehicleEdit(gameVehicleID) -- Send it to the server (as an edit)
@@ -1028,6 +1022,8 @@ local function onVehicleSpawned(gameVehicleID)
 			vehiclesToSync[gameVehicleID] = 1.
 		end
 	end
+
+	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')") -- Load VE lua extensions
 
 	if vehicle then vehicle.jbeam = newJbeamName end
 end

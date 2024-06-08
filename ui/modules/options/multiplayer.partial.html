@@ -55,6 +55,12 @@
 </md-list-item>
 
 <md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.skipModSecurityWarning' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.skipModSecurityWarning.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.skipModSecurityWarning" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+<md-list-item md-no-ink>
   <p>{{:: 'ui.options.multiplayer.queueSpawnEdit' | translate }}</p>
   <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueSpawnEdit.tooltip' | translate }}</md-tooltip>
   <md-checkbox ng-model="options.data.values.enableSpawnQueue" ng-change="options.applyState()"></md-checkbox>

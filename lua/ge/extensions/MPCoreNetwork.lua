@@ -498,7 +498,7 @@ local HandleNetwork = {
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
-	['W'] = function(params) if params == 'MODS_FOUND' then guihooks.trigger('DownloadSecurityPrompt', params) end end,
+	['W'] = function(params) if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false then guihooks.trigger('DownloadSecurityPrompt', params) else send('WY') end end,
 	['Z'] = function(params) launcherVersion = params; end,
 }
 

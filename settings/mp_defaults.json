@@ -10,8 +10,8 @@
   "enableQueueAuto"             : [ "local", true ],
   "queueApplyTimeout"           : [ "cloud", 3 ],
   "showBlobQueued"              : [ "cloud", true ],
-  "nametagShowDistance"         : [ "cloud", true ],
   "nametagCharLimit"            : [ "cloud", 32 ],
+  "nameTagShowDistance"         : [ "cloud", true ],
   "showPcs"                     : [ "cloud", true ],
   "queueSkipUnicycle"           : [ "local", true ],
   "blobColorQueued"             : [ "cloud", "#FF6400" ],
@@ -35,6 +35,6 @@
   "unicycleAutoSave"            : [ "cloud", true ],
   "enableBlobs"                 : [ "cloud", true ],
   "blobColorIllegal"            : [ "cloud", "#000000" ],
-  "nameTagShowDistance"         : [ "cloud" ],
-  "showBlobIllegal"             : [ "cloud", true ]
+  "showBlobIllegal"             : [ "cloud", true ],
+  "enablePosSmoother"           : [ "cloud", true ] 
 }

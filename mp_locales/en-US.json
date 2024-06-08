@@ -71,6 +71,8 @@
     "ui.options.multiplayer.unicycleAutoSave": "Automatically save your last used Unicycle",
     "ui.options.multiplayer.unicycleAutoSave.tooltip": "When you despawn your Unicycle, it is saved and reused next time you spawn it",
     "ui.options.multiplayer.unicycleOnSwitch": "Default set to",
+    "ui.options.multiplayer.skipModSecurityWarning": "Skip the mod security warning popup",
+    "ui.options.multiplayer.skipModSecurityWarning.tooltip": "Disable the security popup when joining modded servers.",
     "ui.options.multiplayer.blobsTitle": "Blobs",
     "ui.options.multiplayer.nameTagTitle": "Nametags",
     "ui.options.multiplayer.others": "Others",
@@ -131,5 +133,9 @@
     "ui.multiplayertos.info2": "You can also find more information on our ",
     "ui.common.multiplayer.sync": "Sync",
     "ui.apps.categories.multiplayer": "Multiplayer",
-    "ui.camera.mode.passenger": "Passenger"
+    "ui.camera.mode.passenger": "Passenger",
+    "ui.multiplayer.security.no_return": "Cancel & Return",
+    "ui.multiplayer.security.accept_proceed": "Download & Join",
+    "ui.multiplayer.security.title": "Server Mods Detected",
+    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings."
 }

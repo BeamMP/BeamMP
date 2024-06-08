@@ -45,6 +45,15 @@ B  -> The client asks the launcher for the servers list
 QG -> The client tells the launcher that it's is leaving
 C  -> The client asks for the server's mods
 --]]
+
+-- timer variables
+local pingTimer = 0
+local onUpdateTimer = 0
+local updateUiTimer = 0
+local heartbeatTimer = 0
+local reconnectTimer = 0
+local reconnectAttempt = 0
+
 -- AA============= VARIABLES =============AA
 
 
@@ -385,6 +394,7 @@ local function leaveServer(goBack)
 	loadMods = false
 	currentServer = nil
 	status = "" -- Reset status
+	updateUiTimer = 0
 	UI.updateLoading("")
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
@@ -392,6 +402,29 @@ local function leaveServer(goBack)
 	--if not settings.getValue("disableLuaReload") then callback = function() MPModManager.reloadLuaReloadWithDelay() end end
 	callback = function() MPModManager.reloadLuaReloadWithDelay() end -- force lua reload every time until a proper fix is introduced
 	if goBack then endActiveGameMode(callback) end
+end
+
+--- Informs the Launcher that we do not want to download the mods from this server.
+-- @usage MPCoreNetwork.rejectModDownload()
+local function rejectModDownload()
+	if status == "waitingForResources" then
+		send('WN') -- Inform the Launcher that we decline
+		isMpSession = false
+		isGoingMpSession = false
+		loadMods = false
+		currentServer = nil
+		status = "" -- Reset status
+		updateUiTimer = 0
+		UI.updateLoading("")
+	end
+end
+
+--- Informs the Launcher that we do not want to download the mods from this server.
+-- @usage MPCoreNetwork.approveModDownload()
+local function approveModDownload()
+	if status == "waitingForResources" then
+		send('WY') -- Inform the Launcher that we accept the risk
+	end
 end
 
 
@@ -465,16 +498,9 @@ local HandleNetwork = {
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
+	['W'] = function(params) if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false then guihooks.trigger('DownloadSecurityPrompt', params) else send('WY') end end,
 	['Z'] = function(params) launcherVersion = params; end,
 }
-
-local pingTimer = 0
-local onUpdateTimer = 0
-local updateUiTimer = 0
-local heartbeatTimer = 0
-local reconnectTimer = 0
-local reconnectAttempt = 0
-
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
 -- This is the main processing thread of BeamMP in the game
@@ -661,6 +687,9 @@ M.connectToLauncher    = connectToLauncher
 M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
+-- security
+M.rejectModDownload    = rejectModDownload
+M.approveModDownload   = approveModDownload
 -- auth
 M.login                = login
 M.autoLogin            = autoLogin

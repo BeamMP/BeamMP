@@ -128,6 +128,12 @@
   <md-checkbox ng-model="options.data.values.fadeVehicles" ng-change="options.applyState()"></md-checkbox>
 </md-list-item>
 
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <p>{{:: 'ui.options.multiplayer.showPlayerIDs' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.showPlayerIDs.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.showPlayerIDs" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
 <md-divider></md-divider>
 <md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.unicycleTitle' | translate }}</h3></p></md-list-item>
 

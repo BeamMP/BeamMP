@@ -159,12 +159,21 @@ local function getColorsFromVehObj(veh)
 	local paints = {}
 	paints[1] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 0), " ", 1))
 	paints[1].baseColor = splitStringToTable(veh:getField("color", 0), " ", 1)
-	
+	if tableIsEmpty(paints[1].baseColor) then -- making sure baseColor isn't empty causing failed spawn on recieving end
+		paints[1].baseColor = {1,1,1,1}
+	end
+
 	paints[2] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 1), " ", 1))
 	paints[2].baseColor = splitStringToTable(veh:getField("colorPalette0", 0), " ", 1)
-	
+	if tableIsEmpty(paints[2].baseColor) then
+		paints[2].baseColor = {1,1,1,1}
+	end
+
 	paints[3] = translate_metallic(splitStringToTable(veh:getField("metallicPaintData", 2), " ", 1))
 	paints[3].baseColor = splitStringToTable(veh:getField("colorPalette1", 0), " ", 1)
+	if tableIsEmpty(paints[3].baseColor) then
+		paints[3].baseColor = {1,1,1,1}
+	end
 	
 	return paints
 end

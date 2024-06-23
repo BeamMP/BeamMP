@@ -287,6 +287,15 @@ local HandleNetwork = {
 
 local heartbeatTimer = 0
 
+local recvState = {
+	-- 'ready': ready to receive a new packet, data is contained within `data` if any
+	-- 'partial': `partialData` contains data, we're missing `missing` bytes
+	-- 'error': errorneous state
+	state = 'ready',
+	data = "",
+	missing = 0,
+}
+
 --- Tries to receive data from the Launcher every tick from the gameengine and handles the launcher <-> game heartbeat.
 -- @tparam integer dt delta time
 -- @usage INTERNAL ONLY / GAME SPECIFIC
@@ -295,8 +304,24 @@ local function onUpdate(dt)
 	if launcherConnected then
 		if TCPLauncherSocket ~= nop then
 			while(true) do
-				local received, status, partial = TCPLauncherSocket:receive() -- Receive data
-				if received == nil or received == "" then break end
+				-- log('M', 'onUpdate', 'State before receive: ')
+				-- dump(recvState)
+				recvState = MPNetworkHelpers.receive(TCPLauncherSocket, recvState)
+				-- log('M', 'onUpdate', 'State after receive: ')
+				-- dump(recvState)
+				if recvState.state == 'error' then
+					-- error! :(
+					break
+				end
+				if recvState.state ~= 'ready' then
+					-- full packet NOT received, retry
+					break
+				end
+				if recvState.data == "" then
+					break
+				end
+
+				local received = recvState.data
 
 				if settings.getValue("showDebugOutput") == true then
 					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)

@@ -116,6 +116,7 @@ local function connectToLauncher(silent)
 	if not launcherConnected and not mp_core then
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
+		TCPLauncherSocket:setoption("tcp-nodelay", true) -- disables Nagle's algorithm
 		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
 		TCPLauncherSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444))
 		send('A') -- immediately heartbeat to check if connection was established
@@ -521,6 +522,130 @@ local HandleNetwork = {
 	['Z'] = function(params) launcherVersion = params; end,
 }
 
+local recvState = {
+	-- 'ready': ready to receive a new packet, data is contained within `data` if any
+	-- 'partial': `partialData` contains data, we're missing `missing` bytes
+	-- 'error': errorneous state
+	state = 'ready',
+	data = "",
+	missing = 0,
+	nextPartial = ""
+}
+
+local function extractLenAndData(packet)
+	local lenEnd = packet:find(">")
+	if not lenEnd then
+		return nil, nil
+	end
+	local data = packet:sub(lenEnd+1)
+	local len = tonumber(packet:sub(1, lenEnd-1))
+	return data, len
+end
+
+local function receive(sock, rs)
+	if rs.state == 'ready' then
+		local header = ""
+		-- check the case in which we read too much the last time and accidentally read the beginning
+		-- of the next packet. We dont actually know if it's enough, but we can't ignore it
+		if rs.nextPartial ~= nil then
+			header = rs.nextPartial
+			rs.nextPartial = nil
+		end
+		-- assuming we didn't get anything, or not enough for a full size header, receive the rest
+		if #header < 10 then
+			local tempHeader, _, _ = sock:receive(10 - #header)
+			header = header..(tempHeader or "")
+		end
+		if header == "" then
+			-- assume its ok?
+			rs.data = ""
+			return rs
+		end
+		if not header then
+			-- error, either we failed to receive (lost connection), or we received a partial that was too
+			-- small to be useful
+			log('E', 'receive', 'Error: Failed to receive data')
+			rs.state = 'error'
+			return rs
+		end
+		-- receive enough bytes for the header, which is at most '999999999>'
+		local headerData, len = extractLenAndData(header)
+		log('D', 'receive', 'Got header: "'..header..'", extracted header data "'..(headerData or 'nil')..'" length '..tostring(len or -1))
+		if not headerData or not len then
+			log('E', 'receive', 'Error: Failed to read header')
+			rs.state = 'error'
+			return rs
+		end
+		-- case where the packet was smaller than 10 bytes and we actually got the start of the next packet, for example
+		-- 1>A4>Z2.0
+		--    ^^^^^^ next packet
+		-- ^^^ current packet
+		if #headerData > len then
+			-- this case is kinda weird. we need to cache the start for next time!
+			rs.state = 'ready'
+			rs.data = headerData:sub(1, len)
+			rs.nextPartial = headerData:sub(len+1)
+			return rs
+		end
+		-- subtract the received partial
+		len = len - #headerData
+
+		local fullBody, recvStatus, partialBody = sock:receive(len)
+		if not fullBody then
+			if recvStatus == 'timeout' then
+				-- combine the previously received partial (if any) with this partial
+				rs.data = headerData..partialBody
+				rs.state = 'partial'
+				rs.missing = len - #partialBody
+				log('W', 'receive', 'Partial receive, missing '..tostring(rs.missing)..' bytes')
+				dump(rs)
+				return rs
+			end
+
+			-- error, either we failed to receive (lost connection), or we received a partial that was too
+			-- small to be useful
+			log('E', 'receive', 'Error: Failed to receive')
+			rs.state = 'error'
+			return rs
+		end
+		-- set ready again
+		rs.state = 'ready'
+		rs.data = headerData..fullBody
+		rs.missing = 0
+	elseif rs.state == 'partial' then
+		-- in case of a partial receive previously, the state holds the previously received data.
+		-- it also contains the expected number of bytes to read
+		local fullBody, recvStatus, partialBody = sock:receive(rs.missing)
+		-- AGAIN partial, or just an error
+		if not fullBody then
+			if recvStatus == 'timeout' then
+				-- combine the previously received partial (if any) with this partial
+				rs.data = rs.data..partialBody
+				rs.state = 'partial'
+				-- subtract what we've received now
+				rs.missing = rs.missing - #partialBody
+				log('W', 'receive', 'Partial receive AGAIN, missing '..tostring(rs.missing)..' bytes')
+				dump(rs)
+				return rs
+			end
+
+			-- error, either we failed to receive (lost connection), or we received a partial that was too
+			-- small to be useful
+			log('E', 'receive', 'Error: Failed to receive')
+			rs.state = 'error'
+			return rs
+		end
+		-- finally received everything
+		rs.data = rs.data..partialBody
+		rs.missing = 0
+		rs.state = 'ready'
+	end
+	if rs.state ~= 'error' then
+		log('M', 'receive', 'Received: "'..rs.data..'"')
+	end
+	return rs
+end
+
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
 -- This is the main processing thread of BeamMP in the game
 -- @param dt float
@@ -564,10 +689,25 @@ local function onUpdate(dt)
 
 		if TCPLauncherSocket ~= nop then
 			while(true) do
-				local received, stat, partial = TCPLauncherSocket:receive()
-				if not received or received == "" then
+				-- log('M', 'onUpdate', 'State before receive: ')
+				-- dump(recvState)
+				recvState = receive(TCPLauncherSocket, recvState)
+				-- log('M', 'onUpdate', 'State after receive: ')
+				-- dump(recvState)
+				if recvState.state == 'error' then
+					-- error! :(
 					break
 				end
+				if recvState.state ~= 'ready' then
+					-- full packet NOT received, retry
+					break
+				end
+				if recvState.data == "" then
+					break
+				end
+
+				local received = recvState.data
+
 				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
 					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
 				end

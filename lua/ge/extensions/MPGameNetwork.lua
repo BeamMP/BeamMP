@@ -304,11 +304,7 @@ local function onUpdate(dt)
 	if launcherConnected then
 		if TCPLauncherSocket ~= nop then
 			while(true) do
-				-- log('M', 'onUpdate', 'State before receive: ')
-				-- dump(recvState)
 				recvState = MPNetworkHelpers.receive(TCPLauncherSocket, recvState)
-				-- log('M', 'onUpdate', 'State after receive: ')
-				-- dump(recvState)
 				if recvState.state == 'error' then
 					-- error! :(
 					break

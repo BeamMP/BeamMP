@@ -65,7 +65,7 @@ M.receive = function(launcherSocket, recvState)
 		if not fullBody then
 			if recvStatus == 'timeout' then
 				-- combine the previously received partial (if any) with this partial
-				recvState.data = recvState.data..partialBody
+				recvState.data = recvState.data..(partialBody or "")
 				recvState.state = 'partial'
 				-- subtract what we've received now
 				recvState.missing = recvState.missing - #partialBody
@@ -81,7 +81,7 @@ M.receive = function(launcherSocket, recvState)
 			return recvState
 		end
 		-- finally received everything
-		recvState.data = recvState.data..partialBody
+		recvState.data = recvState.data..(partialBody or "")
 		recvState.missing = 0
 		recvState.state = 'ready'
 	end

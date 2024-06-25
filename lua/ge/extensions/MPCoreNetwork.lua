@@ -11,6 +11,8 @@
 
 local M = {}
 
+local ffi = require("ffi")
+
 
 -- VV============= VARIABLES =============VV
 -- launcher
@@ -64,20 +66,10 @@ local reconnectAttempt = 0
 -- If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
 -- @param s string containing the data to send to the launcher
 local function send(s)
-	-- First check if we are V2.1 Networking or not
-	if mp_core then
-		mp_core(s)
-		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
-
-		if not settings.getValue("showDebugOutput") then return end
-		log('M', 'send', 'Sending Data ('..#s..'): '..s)
-		return
-	
-	end
-	-- Else we now will use the V2 Networking
 	if TCPLauncherSocket == nop then return end
 
-	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
+	local header = ffi.string(ffi.new("uint32_t[?]", 4, #s), 4)
+	local bytes, error, index = TCPLauncherSocket:send(header .. s)
 	if error then
 		isConnecting = false
 		log('E', 'send', 'Socket error: '..error)

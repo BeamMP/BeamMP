@@ -66,7 +66,25 @@ local function sendData(data)
 	-- if not connected return
 	if not TCPLauncherSocket then return end
 	local header = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
-	local bytes, error, index = TCPLauncherSocket:send(header .. data)
+	local packet = header .. data
+
+	local retries = 1
+
+	local bytes, error, index = TCPLauncherSocket:send(packet)
+
+	if error == 'timeout' then
+		while (retries > 0 and error) do
+			isConnecting = false
+			log('E', 'sendData', 'Socket error: '..error)
+			if error == "timeout" then
+				log('W', 'sendData', 'Stopped at index: '..index..' while trying to send '..#packet..' bytes of data. retries:' .. retries)
+				packet = string.sub(packet, index + 1)
+
+				bytes, error, index = TCPLauncherSocket:send(packet)
+			end
+		end
+	end
+
 	if error then
 		isConnecting = false
 		log('E', 'sendData', 'Socket error: '..error)
@@ -76,13 +94,13 @@ local function sendData(data)
 		elseif error == "Socket is not connected" then
 
 		else
-			log('E', 'sendData', 'Stopped at index: '..index..' while trying to send '..#data..' bytes of data.')
+			log('W', 'sendData', 'Stopped at index: '..index..' while trying to send '..#packet..' bytes of data.')
 		end
 		return
 	else
 		if not launcherConnected then launcherConnected = true isConnecting = false end
 		if settings.getValue("showDebugOutput") then
-			log('M', 'sendData', 'Sending Data ('..bytes..'): '..s)
+			log('M', 'sendData', 'Sending Data ('..bytes..'): '..data)
 		end
 		if MPDebug then MPDebug.packetSent(bytes) end
 	end

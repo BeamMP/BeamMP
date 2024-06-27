@@ -1331,8 +1331,18 @@ local function onServerCameraSwitched(playerID, serverVehicleID)
 end
 
 
+local subcode = {
+	spawn = 0x01,
+	delete = 0x02,
+	reset = 0x03,
+	edited = 0x04,
+	coupler = 0x05,
+	spectator = 0x06,
+}
+
+
 local HandleNetwork = {
-	['s'] = function(rawData) -- spawn
+	[subcode.spawn] = function(rawData) -- spawn
 		if not sentPastVehiclesYet then
 			sentPastVehiclesYet = true
 			M.sendPastVehicles()
@@ -1348,7 +1358,7 @@ local HandleNetwork = {
 			log('M', 'HandleNetwork', rawData)
 		end
 	end,
-	['r'] = function(rawData) -- reset
+	[subcode.reset] = function(rawData) -- reset
 		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
 
 		if serverVehicleID ~= nil then
@@ -1357,7 +1367,7 @@ local HandleNetwork = {
 			log('E', "HandleNetwork", "Reset pattern match failed")
 		end
 	end,
-	['c'] = function(rawData) -- config sync
+	[subcode.edited] = function(rawData) -- config sync
 		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
 
 		if serverVehicleID ~= nil then
@@ -1366,10 +1376,10 @@ local HandleNetwork = {
 			log('E', "HandleNetwork", "Config pattern match failed")
 		end
 	end,
-	['d'] = function(rawData) -- remove
+	[subcode.delete] = function(rawData) -- remove
 		onServerVehicleRemoved(rawData)
 	end,
-	['t'] = function(rawData) -- coupler
+	[subcode.coupler] = function(rawData) -- coupler
 		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%[.+%])") -- '0-0:[jsonstring]'
 
 		if serverVehicleID ~= nil then
@@ -1378,7 +1388,7 @@ local HandleNetwork = {
 			log('E', "HandleNetwork", "Coupler pattern match failed")
 		end
 	end,
-	['m'] = function(rawData) -- camera switched
+	[subcode.spectator] = function(rawData) -- camera switched
 		local playerID, serverVehicleID = string.match(rawData,"^(%d+)%:(%d+%-%d+)") -- '0:0-0'
 		playerID = tonumber(playerID)
 		if playerID and serverVehicleID then

@@ -52,8 +52,59 @@ end
 
 
 
+local function getEngineData() --TODO add difference check and auto apply on recieving end
+	local data = {}
+	data["ignLvl"] = electrics.values.ignitionLevel
+
+	local combustionEngines = powertrain.getDevicesByType("combustionEngine")
+	if next(combustionEngines) then
+		data["combustionEngines"] = {}
+		for k,v in pairs(powertrain.getDevicesByType("combustionEngine")) do
+			data["combustionEngines"][v.name] = {
+				ign = v.ignitionCoef,
+				isStalled = v.isStalled
+			}
+			if v.starterEngagedCoef == 1 then
+				data["combustionEngines"][v.name].starter = v.starterEngagedCoef
+			end
+		end
+	end
+
+	obj:queueGameEngineLua("MPPowertrainGE.sendEngineData(\'"..jsonEncode(data).."\', "..obj:getID()..")")
+end
+
+
+
+local function applyEngineData(data)
+	data = jsonDecode(data)
+	if data.ignLvl then
+		if electrics.values.ignitionLevel ~= data.ignitionLevel then
+			electrics.setIgnitionLevel(data.ignitionLevel)
+		end
+	end
+	if data.combustionEngines then
+		for engineName,engineData in pairs(data.combustionEngines) do
+			local engine = powertrain.getDevice(engineName)
+			if engine then
+				if engineData.ign then
+					engine:setIgnition(engineData.ign)
+				end
+				if engineData.starter or not engineData.isStalled and engine.isStalled and engineData.ign then
+					engine:activateStarter()
+				end
+			end
+		end
+	end
+end
+
+
+
 M.check				  = check
+M.check				  = getEngineData
 M.applyLivePowertrain = applyLivePowertrain
+
+M.getEngineData = getEngineData
+M.applyEngineData = applyEngineData
 
 
 

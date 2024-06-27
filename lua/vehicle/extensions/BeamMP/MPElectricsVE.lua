@@ -214,6 +214,9 @@ local disallowedKeys = {
 	["accXSmooth"] = 1,
 	["accYSmooth"] = 1,
 	["accZSmooth"] = 1,
+	["engineRunning"] = 1, -- engine and ignition is synced in MPPowertrainVE
+	["ignition"] = 1,
+	["ignitionLevel"] = 1,
 	---modded vehicles --
 	-- me262 plane ------
 	["inst_pitch"] = 1,
@@ -351,35 +354,6 @@ local function applyElectrics(data)
 		-- LineLock syncing
 		if decodedData.linelock and electrics.values.linelock ~= decodedData.linelock then
 			controller.getControllerSafe("lineLock").setLineLock(decodedData.linelock)
-		end
-
-		-- Ignition syncing
-		if decodedData.ignition ~= nil then
-			remoteignition = decodedData.ignition
-		end
-		if decodedData.engineRunning then
-			remoteengineRunning = decodedData.engineRunning
-		end
-		if electrics.values.ignition ~= (remoteignition and 1 or 0) or electrics.values.engineRunning ~= remoteengineRunning then
-			local engine = powertrain.getDevice("mainEngine")
-			if engine then
-				if remoteengineRunning ~= electrics.values.engineRunning then
-					if remoteengineRunning == 1 then
-						if engine.starterEngagedCoef == 0 then
-							engine:activateStarter()
-						end
-					elseif remoteengineRunning == 0 and engine.starterEngagedCoef == 0 then
-						engine:deactivateStarter()
-						engine:cutIgnition(1)
-					end
-				end
-				if electrics.values.ignition ~= (remoteignition and 1 or 0) then
-					controller.mainController.setEngineIgnition(remoteignition)
-				end
-				if not remoteignition and remoteengineRunning == 0 then
-					engine:deactivateStarter()
-				end
-			end
 		end
 
 		-- Unicycle syncing

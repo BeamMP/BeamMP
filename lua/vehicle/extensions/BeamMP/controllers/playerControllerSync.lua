@@ -25,7 +25,7 @@ end
 --storeState(controllerName, funcName, ...)
 --	electrics.values.unicycle_speed = movementSpeedCoef
 local function setSpeedCoef(controllerName, funcName, tempTable, ...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	movementSpeedCoef = ...
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 
@@ -35,29 +35,30 @@ end
 -- the functions below are for cross compatibility, remove when controller sync is out for everyone --
 -- electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
 local function unicycle_camera(controllerName, funcName, tempTable, ...)
-	if controllerSyncVE.universalCompare(funcName, ...) == true then
-		obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
-	end
+	--if 
+	controllerSyncVE.cacheState(tempTable)-- == true then
+	--	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	--end
 	electrics.values.unicycle_camera = -tempTable.variables[1].cameraRotation:toEulerYXZ().x
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
 --	electrics.values.unicycle_walk_x = guardedWalkVector.x
 local function unicycle_walk_x(controllerName, funcName, tempTable, ...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	electrics.values.unicycle_walk_x = ...
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 --	electrics.values.unicycle_walk_y = guardedWalkVector.y
 local function unicycle_walk_y(controllerName, funcName, tempTable, ...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	electrics.values.unicycle_walk_y = ...
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
 --	electrics.values.unicycle_jump = jumpCooldown > 0.1
 local function unicycle_jump(controllerName, funcName, tempTable, ...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	electrics.values.unicycle_jump = true
 
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
@@ -65,7 +66,7 @@ end
 --	electrics.values.unicycle_crouch = (isCrouching and -1 or 1)
 
 local function crouch(controllerName, funcName, tempTable, ...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	electrics.values.unicycle_crouch = ...
 
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
@@ -121,10 +122,6 @@ local includedControllerTypes = {
 	},
 }
 
-if controllerSyncVE ~= nil then
-	controllerSyncVE.addControllerTypes(includedControllerTypes)
-end
-
 local function onReset()
 	isCrouching = false
 	electrics.values.unicycle_crouch = 0 -- for cross compatibility, remove when controller sync is out for everyone
@@ -146,6 +143,15 @@ local function updateGFX(dt) -- this is all super wacky but it was the only way 
 	end
 end --TODO definetly remove all this once controller sync is released to everyone
 
+local function loadFunctions()
+	if controllerSyncVE ~= nil then
+		controllerSyncVE.addControllerTypes(includedControllerTypes)
+	else
+		dump("controllerSyncVE not found")
+	end
+end
+
+M.loadFunctions = loadFunctions
 M.onReset = onReset
 M.updateGFX = updateGFX
 

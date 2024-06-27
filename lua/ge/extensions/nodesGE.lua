@@ -92,20 +92,6 @@ local function applyBreakGroups(data, serverVehicleID)
 end
 
 
-local function applyControllerData(data, serverVehicleID)
-	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
-	if veh then
-		local decodedData = jsonDecode(data)
-		if decodedData.vehID then
-			decodedData.vehID = MPVehicleGE.getGameVehicleID(decodedData.vehID)
-		end
-		data = jsonEncode(decodedData)
-		veh:queueLuaCommand("controllerSyncVE.applyControllerData(\'"..data.."\')")
-	end
-end
-
-
 --- Handles raw node and break group packets received from other players vehicles. Disassembles and sends it to either applyNodes() or applyBreakGroups()
 -- @param rawData string The raw message data.
 local function handle(rawData)
@@ -115,7 +101,7 @@ local function handle(rawData)
 	elseif code == "g" then
 		applyBreakGroups(data, serverVehicleID)
 	elseif code == "c" then
-		applyControllerData(data, serverVehicleID)
+		MPControllerGE.applyControllerData(data, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end

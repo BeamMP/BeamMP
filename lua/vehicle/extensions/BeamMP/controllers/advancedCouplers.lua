@@ -11,7 +11,7 @@ local M = {}
 local function couplerToggleCheck(controllerName, funcName, tempTable, ...)
 	local groupState = controller.getControllerSafe(controllerName).getGroupState()
 	tempTable.variables = {groupState = groupState}
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
@@ -57,7 +57,7 @@ local function customToggleGroupConditional(controllerName, funcName, tempTable,
 	local groupState = controller.getControllerSafe(controllerName).getGroupState()
 	tempTable.variables = { groupState = groupState, conditions = ... }
 
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 	--dump((...))
 	----(...)[1][2] = "test"
 	--dump(controller.getControllerSafe((...)[1][1]).getGroupState())
@@ -117,8 +117,14 @@ local includedControllerTypes = {
 	},
 }
 
-if controllerSyncVE ~= nil then
-	controllerSyncVE.addControllerTypes(includedControllerTypes)
+local function loadFunctions()
+	if controllerSyncVE ~= nil then
+		controllerSyncVE.addControllerTypes(includedControllerTypes)
+	else
+		dump("controllerSyncVE not found")
+	end
 end
+
+M.loadFunctions = loadFunctions
 
 return M

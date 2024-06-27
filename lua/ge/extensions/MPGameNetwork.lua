@@ -272,6 +272,7 @@ local HandleNetwork = {
 	['T'] = function(params) quitMP(params) end, -- Player Kicked Event (old, doesn't contain reason)
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
+	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
 }
 
 

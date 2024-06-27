@@ -14,6 +14,11 @@ local controllerState = {}
 
 local ownerReset
 
+local function sendControllerData(tempTable) -- using nodesGE temporarely until launcher and server supports the new packet
+	--obj:queueGameEngineLua("MPControllerGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+end
+
 local function storeState(controllerName, funcName, ...)
 	if not (controllerName or funcName) then return end
 	if not controllerState[controllerName] then
@@ -25,7 +30,7 @@ end
 local function applyControllerData(data)
 	local decodedData = jsonDecode(data)
 
-	dump("applyControllerData",decodedData) --TODO for debugging, remove when controllersync is getting released
+	--dump("applyControllerData",decodedData) --TODO for debugging, remove when controllersync is getting released
 
 	if decodedData.ownerReset then
 		ownerReset = true
@@ -70,7 +75,7 @@ local function toggleDirection(controllerName, funcName, tempTable, ...)
 		storeState(controllerName, funcName, motor.motorDirection)
 	end
 	tempTable.variables = {motorDirection = motor.motorDirection}
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() .. ")") -- Send it to GE lua
+	sendControllerData(tempTable)
 end
 
 local function recieveToggleDirection(data)
@@ -90,7 +95,7 @@ end
 local function setIdleRaise(controllerName, funcName, tempTable, ...)
 	manualIdleRaise = ...
 	OGcontrollerFunctionsTable[controllerName][funcName](...)
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() .. ")") -- Send it to GE lua
+	sendControllerData(tempTable)
 end
 
 local function setIdleRaiseRecieve(data)
@@ -238,6 +243,20 @@ local includedControllerTypes = {
 }
 
 local lastData = {}
+local cachedData = {}
+
+local function cacheState(tempTable)
+	if not (tempTable.controllerName or tempTable.functionName) then return end
+	if not cachedData[tempTable.controllerName] then
+		cachedData[tempTable.controllerName] = {}
+	end
+	if not cachedData[tempTable.controllerName][tempTable.functionName] then
+		cachedData[tempTable.controllerName][tempTable.functionName] = {}
+	end
+	cachedData[tempTable.controllerName][tempTable.functionName]["variables"] = tempTable.variables
+	cachedData[tempTable.controllerName][tempTable.functionName]["storeState"] = tempTable.storeState
+	cachedData[tempTable.controllerName][tempTable.functionName]["customFunction"] = tempTable.customFunction
+end
 
 local function compareTable(table, gamestateTable)
 	for variableName, value in pairs(table) do
@@ -318,19 +337,17 @@ local function replaceFunctions(controllerName, functions)
 					if data.ownerFunction or data.remoteFunction then
 						return data.ownerFunction(controllerName, funcName, tempTable, ...)
 					elseif data.compare then
-						if universalCompare(funcName, ...) == true then
-							if data.storeState then
-								storeState(controllerName, funcName, ...)
-							end
-							obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+						if data.storeState then
+							storeState(controllerName, funcName, ...)
 						end
+						cacheState(tempTable)
 						return OGcontrollerFunctionsTable[controllerName][funcName](...)
 
 					elseif not data.compare then
 						if data.storeState then
 							storeState(controllerName, funcName, ...)
 						end
-						obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+						sendControllerData(tempTable)
 						return OGcontrollerFunctionsTable[controllerName][funcName](...)
 					end
 				end
@@ -342,7 +359,7 @@ local function replaceFunctions(controllerName, functions)
 		ownerFunctionsTable[controllerName] = tempOwnerController
 		remoteFunctionsTable[controllerName] = tempRemoteController
 	end
-	dump("replaceFunctions",controllerName,OGcontrollerFunctionsTable[controllerName]) --TODO for debugging, remove when controllersync is getting released
+	--dump("replaceFunctions",controllerName,OGcontrollerFunctionsTable[controllerName]) --TODO for debugging, remove when controllersync is getting released
 end
 
 local function checkIncludedControllers()
@@ -360,7 +377,7 @@ local function addControllerTypes(controllerTypes) -- allows modders to add thei
 		for _, data in pairs(controller.getControllersByType(controllerType)) do
 			if not OGcontrollerFunctionsTable[data.name] then
 				replaceFunctions(data.name, functions)
-				dump(controller.getControllersByType(controllerType),functions)  --TODO for debugging, remove when controllersync is getting released
+				--dump(controller.getControllersByType(controllerType),functions)  --TODO for debugging, remove when controllersync is getting released
 			end
 		end
 	end
@@ -375,9 +392,8 @@ local function onReset()
 	manualIdleRaise = false
 
 	if v.mpVehicleType == "L" then
-		--controller.getControllerSafe("hydraulicsControl").setIdleRaise(manualIdleRaise) -- reset state on remote vehicle
 		local tempTable = {ownerReset = true}
-		obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+		sendControllerData(tempTable) -- Send it to GE lua
 	end
 
 	framesSinceReset = 0
@@ -400,7 +416,30 @@ local function applyLastState()
 	end
 end
 
+local function getControllerData()
+	if not cachedData then return end
+	for controllerName, controllers in pairs(cachedData) do
+		for functionName , functionData in pairs(controllers) do
+			if universalCompare(functionName, functionData.variables[1]) == true then
+				local tempTable = {
+					controllerName = controllerName,
+					functionName = functionName,
+					customFunction = functionData.customFunction,
+					storeState = functionData.storeState,
+					variables = functionData.variables
+				}
+				sendControllerData(tempTable)
+			end
+		end
+	end
+end
+
+local hookExstensions
+
 local function updateGFX(dt)
+	if not hookExstensions then
+		extensions.hook("loadFunctions") -- for some reason controllerSyncVE.lua doesn't exist for the other extensions when calling the hook with onExtensionLoaded
+	end
 	-- here im resyncing function states after the remote vehicle was reset
 	if framesSinceReset == 1 then -- we have to wait one frame so the controller's reset function don't override the state again
 		if v.mpVehicleType == "R" then
@@ -417,6 +456,9 @@ end
 
 M.OGcontrollerFunctionsTable = OGcontrollerFunctionsTable
 M.universalCompare = universalCompare
+M.cacheState = cacheState
+M.getControllerData = getControllerData
+M.sendControllerData = sendControllerData
 M.applyControllerData = applyControllerData
 M.addControllerTypes = addControllerTypes
 M.storeState = storeState

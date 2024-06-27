@@ -14,7 +14,7 @@ local M = {}
 local function couplerToggleCheck(controllerName, funcName, tempTable, ...)
 	local groupState = controller.getControllerSafe(controllerName).getGroupState()
 	tempTable.variables = {groupState = groupState}
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() .. ")") -- Send it to GE lua
+	controllerSyncVE.sendControllerData(tempTable)
 
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
@@ -63,7 +63,7 @@ local function prepairID(controllerName, funcName, tempTable, ...)
 			end
 		end
 		tempTable["vehID"] = tempTable.variables[1] -- store vehicleID separately so we can convert it to serverVehID in GE
-		obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
+		controllerSyncVE.sendControllerData(tempTable)
 	end
 	lastvehID = tempTable.variables[1]
 	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
@@ -190,14 +190,19 @@ local includedControllerTypes = {
 	},
 }
 
-if controllerSyncVE ~= nil then
-	controllerSyncVE.addControllerTypes(includedControllerTypes)
-end
-
 local function onReset()
 
 end
 
+local function loadFunctions()
+	if controllerSyncVE ~= nil then
+		controllerSyncVE.addControllerTypes(includedControllerTypes)
+	else
+		dump("controllerSyncVE not found")
+	end
+end
+
+M.loadFunctions = loadFunctions
 M.onReset = onReset
 
 return M

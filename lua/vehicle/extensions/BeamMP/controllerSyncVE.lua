@@ -11,24 +11,49 @@ local ownerFunctionsTable = {}
 local remoteFunctionsTable = {}
 
 local controllerState = {}
-
 local ownerReset
+
+local framesSinceReset = 0
+local hookExstensions
 
 local function sendControllerData(tempTable) -- using nodesGE temporarely until launcher and server supports the new packet
 	--obj:queueGameEngineLua("MPControllerGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
 	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
 end
 
-local function storeState(controllerName, funcName, ...)
-	if not (controllerName or funcName) then return end
-	if not controllerState[controllerName] then
-		controllerState[controllerName] = {}
+local lastData = {}
+local cachedData = {}
+
+local function cacheState(tempTable)
+	if not (tempTable.controllerName or tempTable.functionName) then return end
+	if not cachedData[tempTable.controllerName] then
+		cachedData[tempTable.controllerName] = {}
 	end
-	controllerState[controllerName][funcName] = ...
+	if not cachedData[tempTable.controllerName][tempTable.functionName] then
+		cachedData[tempTable.controllerName][tempTable.functionName] = {}
+	end
+	cachedData[tempTable.controllerName][tempTable.functionName]["variables"] = tempTable.variables
+	cachedData[tempTable.controllerName][tempTable.functionName]["storeState"] = tempTable.storeState
+	cachedData[tempTable.controllerName][tempTable.functionName]["customFunction"] = tempTable.customFunction
 end
 
-local function applyControllerData(data)
-	local decodedData = jsonDecode(data)
+local function storeState(tempTable)
+	if not (tempTable.controllerName or tempTable.functionName) then return end
+	if not controllerState[tempTable.controllerName] then
+		controllerState[tempTable.controllerName] = {}
+	end
+	if not controllerState[tempTable.controllerName][tempTable.functionName] then
+		controllerState[tempTable.controllerName][tempTable.functionName] = {}
+	end
+	controllerState[tempTable.controllerName][tempTable.functionName]["variables"] = tempTable.variables
+	controllerState[tempTable.controllerName][tempTable.functionName]["customFunction"] = tempTable.customFunction
+end
+
+local function applyControllerData(data,isDecoded)
+	local decodedData = data
+	if not isDecoded then
+		decodedData = jsonDecode(data)
+	end
 
 	--dump("applyControllerData",decodedData) --TODO for debugging, remove when controllersync is getting released
 
@@ -55,207 +80,9 @@ local function applyControllerData(data)
 			end
 		end
 		if decodedData.storeState then
-			if unpack(decodedData.variables) ~= nil then
-				storeState(decodedData.controllerName, decodedData.functionName, unpack(decodedData.variables))
-			else
-				storeState(decodedData.controllerName, decodedData.functionName, decodedData.variables)
-			end
+			storeState(decodedData)
 		end
 	end
-end
-
--- Custom functions
-
---spinner
-
-local function toggleDirection(controllerName, funcName, tempTable, ...)
-	local motor = powertrain.getDevice("motor")
-	motor.motorDirection = motor.motorDirection * -1
-	if tempTable.storeState then
-		storeState(controllerName, funcName, motor.motorDirection)
-	end
-	tempTable.variables = {motorDirection = motor.motorDirection}
-	sendControllerData(tempTable)
-end
-
-local function recieveToggleDirection(data)
-	local motor = powertrain.getDevice("motor")
-	motor.motorDirection = data.variables.motorDirection
-end
-
---hydraulics/hydraulicsCombustionEngineControl
-local manualIdleRaise = false
-
--- using the global function instead of the local one so we can send it's state rather than just the toggle
-local function toggleIdleRaise(controllerName, funcName, tempTable, ...)
-	controller.getControllerSafe(controllerName).setIdleRaise(not manualIdleRaise)
-end
-
--- these are needed to keep track of the manualIdleRaise state because it's only a local in the controller
-local function setIdleRaise(controllerName, funcName, tempTable, ...)
-	manualIdleRaise = ...
-	OGcontrollerFunctionsTable[controllerName][funcName](...)
-	sendControllerData(tempTable)
-end
-
-local function setIdleRaiseRecieve(data)
-	manualIdleRaise = unpack(data.variables)
-	OGcontrollerFunctionsTable[data.controllerName][data.functionName](manualIdleRaise)
-end
-
--- compare set to true only sends data when there is a change
--- compare set to false sends the data every time the function is called
--- adding ownerFunction and/or remoteFunction can set custom functions to read or change data before sending or on recieveing
---["controllerFunctionName"] = {
---  ownerFunction = customFunctionOnSend,
---  remoteFunction = customFunctionOnRecieve
---},
--- storeState stores the incoming data and then if the remote car was reset for whatever reason it reapplies the state
-
-local includedControllerTypes = {
-
-	["rollover"] = {
-		["cycle"] = {
-			compare = false
-			},
-		["prepare"] = {
-			compare = false
-			}
-	},
-
-	["spinner"] = {
-		["toggleDirection"] = {
-			ownerFunction = toggleDirection,
-			remoteFunction = recieveToggleDirection,
-			storeState = true
-		}
-	},
-
-	["pneumatics"] = {
-		["setBeamMin"] = {
-			compare = false
-			},
-		["setBeamMax"] = {
-			compare = false
-			},
-		["setBeamPressure"] = {
-			compare = false
-			},
-		["setBeamPressureLevel"] = {
-			compare = false
-			},
-		["toggleBeamMinMax"] = {
-			compare = false
-			},
-		["setBeamMomentaryIncrease"] = {
-			compare = false
-			},
-		["setBeamMomentaryDecrease"] = {
-			compare = false
-			},
-		["setBeamDefault"] = {
-			compare = false
-			}
-	},
-
-	["pneumatics/autoLevelSuspension"] = {
-		["toggleDump"] = {
-			compare = false
-			},
-		["setDump"] = {
-			compare = false
-			},
-		["toggleMaxHeight"] = {
-			compare = false
-			},
-		["setMaxHeight"] = {
-			compare = false
-			},
-		["setMomentaryIncrease"] = {
-			compare = false
-			},
-		["setMomentaryDecrease"] = {
-			compare = false
-			}
-	},
-
-	["hydraulicSuspension"] = {
-		["setGroupsPosition"] = {
-			compare = false
-			},
-		["setGroupsBleed"] = {
-			compare = false
-			},
-		["setGroupsMomentaryIncrease"] = {
-			compare = false
-			}
-	},
-
-	["tirePressureControl"] = {
-		["toggleGroupState"] = {
-			compare = false
-			},
-		["startInflateActiveGroups"] = {
-			compare = false
-			},
-		["startDeflateActiveGroups"] = {
-			compare = false
-			},
-		["setGroupsMomentaryIncrease"] = {
-			compare = false
-			},
-		["stopActiveGroups"] = {
-			compare = false
-			},
-	},
-
-	["hydraulics/hydraulicsCombustionEngineControl"] = {
-		["toggleIdleRaise"] = {
-			ownerFunction = toggleIdleRaise
-		},
-		["setIdleRaise"] = {
-			ownerFunction = setIdleRaise,
-			remoteFunction = setIdleRaiseRecieve,
-			storeState = true
-		}
-	},
-
-	["hydraulics/hydraulicTrailerFeet"] = {
-		["moveFeet"] = {
-			compare = false
-			}
-	},
-
-	["twoStepLaunch"] = {
-		["setTwoStep"] = {
-			compare = false
-			},
-		["toggleTwoStep"] = {
-			compare = false
-			},
-		["changeTwoStepRPM"] = {
-			compare = false
-			},
-		["setParameters"] = {
-			compare = true
-			}
-	},
-}
-
-local lastData = {}
-local cachedData = {}
-
-local function cacheState(tempTable)
-	if not (tempTable.controllerName or tempTable.functionName) then return end
-	if not cachedData[tempTable.controllerName] then
-		cachedData[tempTable.controllerName] = {}
-	end
-	if not cachedData[tempTable.controllerName][tempTable.functionName] then
-		cachedData[tempTable.controllerName][tempTable.functionName] = {}
-	end
-	cachedData[tempTable.controllerName][tempTable.functionName]["variables"] = tempTable.variables
-	cachedData[tempTable.controllerName][tempTable.functionName]["storeState"] = tempTable.storeState
-	cachedData[tempTable.controllerName][tempTable.functionName]["customFunction"] = tempTable.customFunction
 end
 
 local function compareTable(table, gamestateTable)
@@ -338,14 +165,14 @@ local function replaceFunctions(controllerName, functions)
 						return data.ownerFunction(controllerName, funcName, tempTable, ...)
 					elseif data.compare then
 						if data.storeState then
-							storeState(controllerName, funcName, ...)
+							storeState(tempTable)
 						end
 						cacheState(tempTable)
 						return OGcontrollerFunctionsTable[controllerName][funcName](...)
 
 					elseif not data.compare then
 						if data.storeState then
-							storeState(controllerName, funcName, ...)
+							storeState(tempTable)
 						end
 						sendControllerData(tempTable)
 						return OGcontrollerFunctionsTable[controllerName][funcName](...)
@@ -362,16 +189,6 @@ local function replaceFunctions(controllerName, functions)
 	--dump("replaceFunctions",controllerName,OGcontrollerFunctionsTable[controllerName]) --TODO for debugging, remove when controllersync is getting released
 end
 
-local function checkIncludedControllers()
-	for controllerType, functions in pairs(includedControllerTypes) do
-		for _, data in pairs(controller.getControllersByType(controllerType)) do
-			replaceFunctions(data.name, functions)
-		end
-	end
-end
-
-checkIncludedControllers()
-
 local function addControllerTypes(controllerTypes) -- allows modders to add their own controller functions
 	for controllerType, functions in pairs(controllerTypes) do
 		for _, data in pairs(controller.getControllersByType(controllerType)) do
@@ -383,35 +200,16 @@ local function addControllerTypes(controllerTypes) -- allows modders to add thei
 	end
 end
 
-local framesSinceReset = 0
-
-local function onReset()
-	lastData = {}
-
-	-- "hydraulics/hydraulicsCombustionEngineControl" --
-	manualIdleRaise = false
-
-	if v.mpVehicleType == "L" then
-		local tempTable = {ownerReset = true}
-		sendControllerData(tempTable) -- Send it to GE lua
-	end
-
-	framesSinceReset = 0
-end
-
 local function applyLastState()
-	for controllerName,data in pairs(controllerState) do
-		for funcName,var in pairs(data) do
-			if remoteFunctionsTable[controllerName] and remoteFunctionsTable[controllerName][funcName] then
-				local tempTable = {
-					controllerName = controllerName,
-					functionName = funcName,
-					variables = {var}
-				}
-				remoteFunctionsTable[controllerName][funcName](tempTable)
-			else
-				OGcontrollerFunctionsTable[controllerName][funcName](var)
-			end
+	for controllerName,functions in pairs(controllerState) do
+		for functionName,functionData in pairs(functions) do
+			local tempTable = {
+				controllerName = controllerName,
+				functionName = functionName,
+				customFunction = functionData.customFunction,
+				variables = functionData.variables
+			}
+			applyControllerData(tempTable,true)
 		end
 	end
 end
@@ -434,8 +232,6 @@ local function getControllerData()
 	end
 end
 
-local hookExstensions
-
 local function updateGFX(dt)
 	if not hookExstensions then
 		extensions.hook("loadFunctions") -- for some reason controllerSyncVE.lua doesn't exist for the other extensions when calling the hook with onExtensionLoaded
@@ -452,6 +248,17 @@ local function updateGFX(dt)
 		end
 	end
 	framesSinceReset = framesSinceReset + 1
+end
+
+local function onReset()
+	lastData = {}
+
+	if v.mpVehicleType == "L" then
+		local tempTable = {ownerReset = true}
+		sendControllerData(tempTable)
+	end
+
+	framesSinceReset = 0
 end
 
 M.OGcontrollerFunctionsTable = OGcontrollerFunctionsTable

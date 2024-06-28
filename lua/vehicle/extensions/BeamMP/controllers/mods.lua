@@ -9,7 +9,7 @@ local M = {}
 -- storeState stores the incoming data and then if the remote car was reset for whatever reason it reapplies the state
 -- adding ownerFunction and/or remoteFunction can set custom functions to read or change data before sending or on recieveing
 
---example from controllerSyncVE.lua
+--example
 --[[
 local function couplerToggleCheck(controllerName, funcName, tempTable, ...)
 	local groupState = controller.getControllerSafe(controllerName).getGroupState()

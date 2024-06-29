@@ -1249,7 +1249,7 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 }
 
 function openExternalLink(url){
-	bngApi.engineLua(`mp_open_url("`+url+`")`);
+	bngApi.engineLua(`MPCoreNetwork.openURL("`+url+`")`);
 }
 
 function openForumLink(){

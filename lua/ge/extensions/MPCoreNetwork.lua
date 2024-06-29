@@ -18,8 +18,10 @@ local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
+local proxyPort = "" -- reference point for where the proxy is located at.
 local launcherVersion = "" -- used only for the server list
 local modVersion = "4.11.0" -- the mod version
+
 -- server
 
 local serverList -- server list JSON
@@ -230,6 +232,13 @@ local function requestPlayers()
 	--log('M', 'requestPlayers', 'Requesting players.')
 	sendBeamMPInfo()
 end
+
+--- Request the launcher opens the url in the users web browser
+-- @usage `MPCoreNetwork.openURL("<url>")`
+local function openURL(url)
+	send("O"..url)
+	log('M', 'openURL', 'Requesting the BeamMP Launcher to open url: '..url)
+end
 -- AA================ UI ================AA
 
 
@@ -365,6 +374,18 @@ end
 
 -- VV============= OTHERS =============VV
 
+--- Handles the storing of the port received from the launcher that is where the http proxy is located on.
+-- @param port number the port number received from the launcher.
+local function setProxyPort(port)
+	log('M', 'setProxyPort', 'HTTP Proxy Port Received: '+port)
+	proxyPort = port
+end
+
+--- Handles the returning of the port received from the launcher that is where the http proxy is located on.
+local function getProxyPort()
+	return proxyPort
+end
+
 --- Handles the login result received from the launcher.
 -- @param params string The JSON-encoded login results.
 local function loginReceived(params)
@@ -497,6 +518,7 @@ local HandleNetwork = {
 	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
+	['P'] = function(params) setProxyPort(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['W'] = function(params) if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false then guihooks.trigger('DownloadSecurityPrompt', params) else send('WY') end end,
 	['Z'] = function(params) launcherVersion = params; end,
@@ -589,6 +611,7 @@ onLauncherConnected = function()
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version
+	send('P') -- request launcher proxy port
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
@@ -687,6 +710,7 @@ M.connectToLauncher    = connectToLauncher
 M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
+M.getProxyPort         = getProxyPort
 -- security
 M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload
@@ -702,6 +726,7 @@ M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
 -- UI
+M.openURL              = openURL
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList

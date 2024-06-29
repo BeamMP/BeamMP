@@ -5,7 +5,8 @@
 local M = {}
 
 -- ============= VARIABLES =============
-local currentInputs = {}
+local smoothingRate = 30 -- lower values makes the inputs more smooth but less responsive
+
 local lastInputs = {
 	s = 0,
 	t = 0,
@@ -13,9 +14,14 @@ local lastInputs = {
 	p = 0,
 	c = 0,
 }
+
+local inputCache = {}
+
+local periodicGearSyncTimer = 0
 local remoteGear
 local unsupportedPowertrainDevice = false
 local unsupportedPowertrainGearbox = false
+local disableGhostInputs = false
 -- ============= VARIABLES =============
 
 local translationTable = {
@@ -78,48 +84,127 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 	end
 end
 
-local function updateGFX()
-	if v.mpVehicleType == 'R' and remoteGear then applyGear(remoteGear) end
-end
-
+local shortName = {
+	steering = "s",
+	throttle = "t",
+	brake = "b",
+	parkingbrake = "p",
+	clutch = "c"
+}
 
 local function getInputs()
 	local inputsToSend = {}
-	currentInputs = {
-		s = electrics.values.steering_input and math.floor(electrics.values.steering_input * 1000) / 1000,
-		t = electrics.values.throttle and math.floor(electrics.values.throttle * 100) / 100,
-		b = electrics.values.brake and math.floor(electrics.values.brake * 100) / 100,
-		p = electrics.values.parkingbrake and math.floor(electrics.values.parkingbrake * 100) / 100,
-		c = electrics.values.clutch and math.floor(electrics.values.clutch * 100) / 100,
-		g = electrics.values.gear
-	}
-	if lastInputs.s and currentInputs.s and math.abs(math.abs(lastInputs.s) - math.abs(currentInputs.s)) > 0.005 then inputsToSend.s = currentInputs.s end
-	for k,v in pairs(currentInputs) do
-		if currentInputs[k] ~= lastInputs[k] and k ~= "s" then
-			inputsToSend[k] = currentInputs[k]
+	for inputName, _ in pairs(input.state) do
+		local state = electrics.values[inputName] -- the electric is the most accurate place to get the input value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
+		if state then
+			if inputName == "steering" then
+				if v.data.input then
+					state = -state / (v.data.input.steeringWheelLock or 1) -- converts steering wheel degrees to an input value
+				end
+			end
+			if math.abs(state) < 0.001 then -- prevent super small values to count as updates
+				state = 0
+			end
+			state = math.floor(state * 1000) / 1000
+			if shortName[inputName] then
+				inputName = shortName[inputName]
+			end
+			if lastInputs[inputName] ~= state then
+				inputsToSend[inputName] = state
+				lastInputs[inputName] = state
+			end
 		end
 	end
-	lastInputs = currentInputs
+
+	if electrics.values.gear ~= lastInputs.g or periodicGearSyncTimer >= 5 then -- sending the gear every 5 seconds for when a car is spawned after it's been put into gear
+		periodicGearSyncTimer = 0
+		inputsToSend.g = electrics.values.gear
+	end
+	lastInputs.g = electrics.values.gear
+
 	if tableIsEmpty(inputsToSend) then return end
 	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
 end
 
+local function storeTargetValue(inputName,inputState)
+	if not inputCache[inputName] then
+		inputCache[inputName] = {smoother = newTemporalSmoothingNonLinear(smoothingRate), currentValue = 0, state = inputState}
+		if v.mpVehicleType == "R" then -- non defined inputs do not exist in input.state until they are pressed once so we have to add those here instead
+			input.setAllowedInputSource(inputName, "local", false)
+			input.setAllowedInputSource(inputName, "BeamMP", true)
+		end
+	end
+	inputCache[inputName].state = inputState
+end
 
 local function applyInputs(data)
 	local decodedData = jsonDecode(data)
 	if not decodedData then return end
-	if decodedData.s then input.event("steering", decodedData.s, FILTER_PAD) end -- using gamepad filter for better smoothing
-	if decodedData.t then input.event("throttle", decodedData.t, FILTER_DIRECT) end
-	if decodedData.b then input.event("brake", decodedData.b, FILTER_DIRECT) end
-	if decodedData.p then input.event("parkingbrake", decodedData.p, FILTER_DIRECT) end
-	if decodedData.c then input.event("clutch", decodedData.c, FILTER_DIRECT) end
-	if decodedData.g then remoteGear = decodedData.g end
+	for inputName, inputState in pairs(decodedData) do
+		if inputName == "g" then remoteGear = decodedData.g
+		elseif inputName == "s" then storeTargetValue("steering",inputState)
+		elseif inputName == "t" then storeTargetValue("throttle",inputState)
+		elseif inputName == "b" then storeTargetValue("brake",inputState)
+		elseif inputName == "p" then storeTargetValue("parkingbrake",inputState)
+		elseif inputName == "c" then storeTargetValue("clutch",inputState)
+		else
+			storeTargetValue(inputName,inputState)
+		end
+	end
 end
 
+local function updateGFX(dt)
+	if v.mpVehicleType == 'R' then
+		if remoteGear then
+			applyGear(remoteGear)
+		end
+		for inputName, inputData in pairs(inputCache) do -- smoothing and applying the inputs
+			local differece = inputData.state - inputData.currentValue
+			if  math.abs(differece) < 0.0001 then -- because exponential smoothing never reaches the target value the brake/parking brake would never reach 0 causing automatics to never shift up
+				inputData.currentValue = inputData.state
+			else
+				inputData.currentValue = inputData.smoother:get(inputData.state,dt)
+			end
+			input.event(inputName, inputData.currentValue or 0, FILTER_DIRECT,nil,nil,nil,"BeamMP")
+		end
+		if not disableGhostInputs then
+			disableGhostInputs = true
+			for inputName, _ in pairs(input.state) do
+				input.setAllowedInputSource(inputName, "local", false) -- disables local inputs, prevents ghost controlling
+				input.setAllowedInputSource(inputName, "BeamMP", true)
+			end
+		end
+	elseif v.mpVehicleType == 'L' then
+		periodicGearSyncTimer = periodicGearSyncTimer + dt
+		if disableGhostInputs then -- if we get vehicle owner change this will enable the inputs again when the vehicle is set to local
+			disableGhostInputs = false
+			for inputName, _ in pairs(input.state) do
+				input.setAllowedInputSource(inputName, "local", true)
+			end
+		end
+	end
+end
+
+local function onReset()
+	lastInputs = {} -- clear the lastInputs table on reset so arcade auto brake, clutch and parking brake syncs correctly on reset
+	for _, inputData in pairs(inputCache) do
+		inputData.currentValue = 0
+		inputData.state = 0
+		inputData.smoother:reset()
+	end
+end
+
+local function onExtensionLoaded()
+	for inputName, state in pairs(input.state) do
+		storeTargetValue(inputName, 0) -- sets all inputs to 0 on spawn so cars don't drive around with the parking brake stuck on
+	end
+end
 
 M.updateGFX = updateGFX
+M.onReset = onReset
 M.getInputs   = getInputs
 M.applyInputs = applyInputs
+M.onExtensionLoaded = onExtensionLoaded
 
 
 return M

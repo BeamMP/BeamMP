@@ -912,7 +912,6 @@ local function sendVehicleSpawn(gameVehicleID)
 	if veh then -- In case of bug
 		local vehicleTable = {}
 		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
-		local veh          = be:getObjectByID(gameVehicleID)
 		local pos          = veh:getPosition()
 		local rot          = quat(veh:getRotation())
 
@@ -924,7 +923,10 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
 		
 		-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
-		vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
+		local metallicPaintData = veh:getMetallicPaintData()
+		vehicleTable.vcf.paints[1] = createVehiclePaint(veh.color, metallicPaintData[1])
+		vehicleTable.vcf.paints[2] = createVehiclePaint(veh.colorPalette0, metallicPaintData[2])
+		vehicleTable.vcf.paints[3] = createVehiclePaint(veh.colorPalette1, metallicPaintData[3])
 
 		local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
@@ -957,7 +959,10 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.vcf = vehicleData.config
 	
 	-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
-	vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
+	local metallicPaintData = veh:getMetallicPaintData()
+	vehicleTable.vcf.paints[1] = createVehiclePaint(veh.color, metallicPaintData[1])
+	vehicleTable.vcf.paints[2] = createVehiclePaint(veh.colorPalette0, metallicPaintData[2])
+	vehicleTable.vcf.paints[3] = createVehiclePaint(veh.colorPalette1, metallicPaintData[3])
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
 	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle

@@ -912,7 +912,6 @@ local function sendVehicleSpawn(gameVehicleID)
 	if veh then -- In case of bug
 		local vehicleTable = {}
 		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
-		local veh          = be:getObjectByID(gameVehicleID)
 		local pos          = veh:getPosition()
 		local rot          = quat(veh:getRotation())
 

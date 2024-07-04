@@ -5,7 +5,7 @@
 local M = {}
 
 -- playeController
--- the regular toggle will desync if player is crouching as the unicycle is spawned,
+-- the regular toggle will desync if the player is crouching as the unicycle is spawned,
 -- this fixes that by using the global crouch function instead of the local one
 
 local isCrouching = false
@@ -22,11 +22,11 @@ local function customtoggleSpeed()
 	movementSpeedCoef = 1 - movementSpeedCoef
 	controller.getControllerSafe("playerController").setSpeed(movementSpeedCoef)
 end
---storeState(controllerName, funcName, ...)
+
 --	electrics.values.unicycle_speed = movementSpeedCoef
 local function setSpeedCoef(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.sendControllerData(tempTable)
-	movementSpeedCoef = ...
+	movementSpeedCoef = ... --keeping track of the movementSpeedCoef state so the toggle function works properly
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 
 	electrics.values.unicycle_speed = ... -- for cross compatibility, remove when controller sync is out for everyone
@@ -35,10 +35,8 @@ end
 -- the functions below are for cross compatibility, remove when controller sync is out for everyone --
 -- electrics.values.unicycle_camera = -cameraRotation:toEulerYXZ().x
 local function unicycle_camera(controllerName, funcName, tempTable, ...)
-	--if 
-	controllerSyncVE.cacheState(tempTable)-- == true then
-	--	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " ..obj:getID() .. ")") -- Send it to GE lua
-	--end
+	controllerSyncVE.cacheState(tempTable)
+
 	electrics.values.unicycle_camera = -tempTable.variables[1].cameraRotation:toEulerYXZ().x
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
@@ -151,7 +149,7 @@ local function loadFunctions()
 	end
 end
 
-M.loadFunctions = loadFunctions
+M.loadControllerSyncFunctions = loadFunctions
 M.onReset = onReset
 M.updateGFX = updateGFX
 

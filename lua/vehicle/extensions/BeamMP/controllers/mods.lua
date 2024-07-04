@@ -7,7 +7,7 @@ local M = {}
 -- compare set to true only sends data when there is a change
 -- compare set to false sends the data every time the function is called
 -- storeState stores the incoming data and then if the remote car was reset for whatever reason it reapplies the state
--- adding ownerFunction and/or remoteFunction can set custom functions to read or change data before sending or on recieveing
+-- adding ownerFunction and/or recieveFunction can set custom functions to read or change data before sending or on recieveing
 
 --example
 --[[
@@ -29,55 +29,125 @@ end
 
 ["controllerFunctionName"] = {
   ownerFunction = couplerToggleCheck,
-  remoteFunction = couplerToggleRecieve
+  recieveFunction = couplerToggleRecieve
 },
 ]]
 
 local lastvehID = 0
 
+local aimMode = "auto"
+
 local function prepairID(controllerName, funcName, tempTable, ...)
-	if tempTable.variables[1] or lastvehID then -- the Phulcan spams the setTargetID in auto mode, but just comparing to last can break normal targeting, and we still need to send an empty table once, so instead I'm checking if either is true
-		if tempTable.variables[1] then
+	local vehID = tempTable.variables[1]
+	if vehID or lastvehID then -- the Phulcan spams the setTargetID in auto mode, but just comparing to last can break normal targeting, and we still need to send an empty table once, so instead I'm checking if either is true
+		if vehID then
 			-- syncing targeting missiles, missiles have the vehicleID of the original vehicle but with it's own id added at the end
 			-- this system checks if removing two numbers make it match with a vehicle, if it does then we know that this is the vehicle it belongs too,
 			-- if not then we try removing just one number and check again, it has to be done in this order or id 11 will mistake the missile with id 1 as being it's vehicle
 			-- thanks Stefan750 for helping me figure out this system
 			local mapObjects = mapmgr.getObjects() or {}
-			local flooredID100 = math.floor((tempTable.variables[1]/100))
+			local flooredID100 = math.floor((vehID/100))
 			local found = false
 			for k,_ in pairs(mapObjects) do
 				if k == flooredID100 then
-					tempTable.variables[2] = tempTable.variables[1] - (k*100)
-					tempTable.variables[1] = flooredID100
+					tempTable.missileID = vehID - (k*100)
+					vehID = flooredID100
 					found = true
 				end
 			end
-			local flooredID10 = math.floor((tempTable.variables[1]/10))
+			local flooredID10 = math.floor((vehID/10))
 			if not found then -- if we already found a matching id we skip this loop
 				for k,_ in pairs(mapObjects) do
 					if k == flooredID10 then
-						tempTable.variables[2] = tempTable.variables[1] - (k*10)
-						tempTable.variables[1] = flooredID10
+						tempTable.missileID = vehID - (k*10)
+						vehID = flooredID10
 					end
 				end
 			end
 		end
-		tempTable["vehID"] = tempTable.variables[1] -- store vehicleID separately so we can convert it to serverVehID in GE
+		tempTable["vehID"] = vehID -- store vehicleID separately so we can convert it to serverVehID in GE
 		controllerSyncVE.sendControllerData(tempTable)
 	end
-	lastvehID = tempTable.variables[1]
+	lastvehID = vehID
 	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
 local function recieveID(data)
-	if data.variables[2] and data.vehID then
-		if data.variables[2] >= 10 then
-			data.vehID = (data.vehID*100)+data.variables[2]
+	if data.missileID and data.vehID then
+		if data.missileID >= 10 then
+			data.vehID = (data.vehID*100)+data.missileID
 		else
-			data.vehID = (data.vehID*10)+data.variables[2]
+			data.vehID = (data.vehID*10)+data.missileID
 		end
 	end
 	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName](data.vehID)
+end
+
+local function setAimMode(controllerName, funcName, tempTable, ...)
+	aimMode = ...
+	controllerSyncVE.sendControllerData(tempTable)
+	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
+end
+
+local function setAimModeRecieve(data)
+	aimMode = data.variables[1]
+	if controllerSyncVE.OGcontrollerFunctionsTable["ciws"] then
+		controllerSyncVE.OGcontrollerFunctionsTable["ciws"]["setTargetMode"](aimMode)
+	end
+	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName](aimMode)
+end
+
+local lastElevationDirection = 0
+
+local function prepairSetElevationChange(controllerName, funcName, tempTable, ...)
+	local servo = powertrain.getDevice("elevationServo")
+	if aimMode == "manual" and servo then
+		local servoAngle = servo.currentAngle
+		if ... ~= 0 then
+			lastElevationDirection = ...
+			servoAngle = servoAngle + (...* 0.013) -- we have to add a bit extra rotation because servo.currentAngle is a frame behind
+		else
+			servoAngle = servoAngle + (lastElevationDirection* 0.013) -- we also need it for stopping so it doesn't stop short, but because stopping has an input of 0 we need to use the previous state
+		end
+		tempTable.servoAngle = servoAngle
+		controllerSyncVE.sendControllerData(tempTable)
+	end
+	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
+end
+
+local function recieveSetElevationChange(data)
+	local servo = powertrain.getDevice("elevationServo")
+	if aimMode == "manual" and servo then
+		servo:setTargetAngle(data.servoAngle)
+	end
+	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName](unpack(data.variables))
+end
+
+local lastRotationDirection = 0
+
+local function prepairSetRotationChange(controllerName, funcName, tempTable, ...)
+	local servo = powertrain.getDevice("rotationServo")
+	if aimMode == "manual" and servo then
+		local servoAngle = servo.currentAngle
+		if ... ~= 0 then
+			lastRotationDirection = ...
+			servoAngle = servoAngle + (...* 0.003)
+		else
+			servoAngle = servoAngle + (lastRotationDirection* 0.003)
+		end
+		tempTable.servoAngle = servoAngle
+		controllerSyncVE.sendControllerData(tempTable)
+	end
+	local returnData = controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
+	return returnData
+end
+
+local function recieveSetRotationChange(data)
+	local servo = powertrain.getDevice("rotationServo")
+	if aimMode == "manual" and servo then
+		servo:setTargetAngle(data.servoAngle)
+	end
+	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName](unpack(data.variables))
 end
 
 local includedControllerTypes = {
@@ -90,109 +160,76 @@ local includedControllerTypes = {
 
 	-- me262 and Phoulkon --
 	["bombs"] = {
-		["deployWeaponDown"] = {
-			compare = false
-			},
-		["deployWeaponUp"] = {
-			compare = false
-			},
+		["deployWeaponDown"] = {},
+		["deployWeaponUp"] = {},
 	},
 	["countermeasures"] = {
-		["activateCountermeasures"] = {
-			compare = false
-			}
+		["activateCountermeasures"] = {}
 	},
 	["missiles"] = {
-		["deployWeaponDown"] = {
-			compare = false
-			},
+		["deployWeaponDown"] = {},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			remoteFunction = recieveID
+			recieveFunction = recieveID,
+			storeState = true,
 		},
-		["deployWeaponUp"] = {
-			compare = false
-			}
+		["deployWeaponUp"] = {}
 	},
 	["rockets"] = {
-		["deployWeaponDown"] = {
-			compare = false
-			},
+		["deployWeaponDown"] = {},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			remoteFunction = recieveID
+			recieveFunction = recieveID,
+			storeState = true,
 		},
-		["deployWeaponUp"] = {
-			compare = false
-			}
+		["deployWeaponUp"] = {}
 	},
 	["targetAim"] = {
+		["setAimMode"] = {
+			ownerFunction = setAimMode,
+			recieveFunction = setAimModeRecieve,
+			storeState = true
+		},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			remoteFunction = recieveID
+			recieveFunction = recieveID,
+			storeState = true, -- restoring the states happens in the wrong order for this and setAimMode causing it not to aim on local reset
 		},
-		["setAimMode"] = {
-			compare = false
-			},
 		["setElevationChange"] = {
-			compare = false
-			},
+			ownerFunction = prepairSetElevationChange,
+			recieveFunction = recieveSetElevationChange,
+			storeState = true
+		},
 		["setRotationChange"] = {
-			compare = false
-			},
-		["killSystem"] = {
-			compare = false
-			}
+			ownerFunction = prepairSetRotationChange,
+			recieveFunction = recieveSetRotationChange,
+			storeState = true
+		},
+		["killSystem"] = {}
 	},
 	["missileTargetSelector"] = {
-		["toggleTargetMode"] = {
-			compare = false
-			}
+		["toggleTargetMode"] = {}
 	},
 	-- Phulcan specific --
 	["ciws"] = {
-		["setTargetMode"] = {
-			compare = false
-			},
-		["fireWeapon"] = {
-			compare = false
-			},
-		["stopWeapon"] = {
-			compare = false
-			},
+		["setTargetMode"] = {storeState = true},
+		["fireWeapon"] = {storeState = true},
+		["stopWeapon"] = {storeState = true},
 	},
 	["ram"] = {
-		["setTargetMode"] = {
-			compare = false
-			},
-		["fireWeapon"] = {
-			compare = false
-			},
-		["stopWeapon"] = {
-			compare = false
-			},
+		["setTargetMode"] = {storeState = true},
+		["fireWeapon"] = {storeState = true},
+		["stopWeapon"] = {storeState = true},
 	},
 
 	-- Javielucho Mad Mod --
 	["madmod_missles"] = {
-		["checkMissleLL"] = {
-			compare = false
-			},
-		["checkMissleL"] = {
-			compare = false
-			},
-		["checkMissleR"] = {
-			compare = false
-			},
-		["checkMissleRR"] = {
-			compare = false
-			},
+		["checkMissleLL"] = {},
+		["checkMissleL"] = {},
+		["checkMissleR"] = {},
+		["checkMissleRR"] = {},
 	},
 }
-
-local function onReset()
-
-end
 
 local function loadFunctions()
 	if controllerSyncVE ~= nil then
@@ -202,7 +239,11 @@ local function loadFunctions()
 	end
 end
 
-M.loadFunctions = loadFunctions
+local function onReset()
+	aimMode = "auto"
+end
+
+M.loadControllerSyncFunctions = loadFunctions
 M.onReset = onReset
 
 return M

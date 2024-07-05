@@ -1540,9 +1540,11 @@ local function onServerVehicleRemoved(serverVehicleID)
 			--vehicle:delete()
 		else
 			log('W', "onServerVehicleRemoved", "Failed removing vehicle "..serverVehicleID..", Vehicle can't be found")
+			vehicle:delete()
 		end
 	else
 		log('W', "onServerVehicleRemoved", "Failed removing vehicle "..serverVehicleID..", ID is unknown")
+		vehicle:delete()
 	end
 end
 

@@ -182,7 +182,7 @@ local function setIgnitionState(remoteignitionLevel)
 	cacheEngines()
 end
 
-local function onReset()
+local function onExtensionLoaded()
 	cacheEngines()
 end
 
@@ -194,8 +194,7 @@ M.getEngineData = getEngineData
 M.applyEngineData = applyEngineData
 M.setIgnitionState = setIgnitionState
 M.updateGFX = updateGFX
-M.onExtensionLoaded = onReset
-M.onReset = onReset
+M.onExtensionLoaded = onExtensionLoaded
 
 
 

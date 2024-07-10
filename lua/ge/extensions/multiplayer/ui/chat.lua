@@ -136,7 +136,8 @@ end
 --- Callback function for ImGui input text.
 --- @param data table The input text data.
 --- @return number Returns 0 to prevent further processing or 1 to allow further processing.
-function ConsoleInputCallback(data)
+--function ConsoleInputCallback(data)
+local function ChatInputCallback(data)
     data = ffi.cast("ImGuiInputTextCallbackData*", data);
     --log('D', 'console', '>>> inputCallback 1 - ' .. dumps(data) .. ' / ' .. tostring(#history))
     if data.EventFlag == im.InputTextFlags_CallbackHistory then
@@ -328,7 +329,8 @@ local function render()
 
     if imgui.BeginChild1("ChatInput", imgui.ImVec2(0, 30), false) then
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
-        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
+        --if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
+        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue)then-- + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
             sendChatMessage(chatMessageBuf)
             if UI.settings.window.keepActive then
                 imgui.SetKeyboardFocusHere(-1)

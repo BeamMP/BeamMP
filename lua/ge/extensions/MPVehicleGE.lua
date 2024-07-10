@@ -925,7 +925,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.vcf = vehicleData.config -- Vehicle Config, contains paint data
 		vehicleTable.pos = {pos.x, pos.y, pos.z} -- Position
 		vehicleTable.rot = {rot.x, rot.y, rot.z, rot.w} -- Rotation
-		
+		vehicleTable.ign = settings.getValue("spawnVehicleIgnitionLevel") or 3 -- Ingition state
 		-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
 		vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
 
@@ -958,7 +958,7 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.pid = MPConfig.getPlayerServerID()
 	vehicleTable.jbm = veh:getJBeamFilename()
 	vehicleTable.vcf = vehicleData.config
-	
+	vehicleTable.ign = settings.getValue("spawnVehicleIgnitionLevel") or 3 -- Ingition state
 	-- The vehicle_manager.lua may not contain the correct color values, since v0.31, when we read them from that lua, so we read those from the object itself
 	vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh)
 
@@ -1004,6 +1004,7 @@ local function applyVehSpawn(event)
 	local vehicleConfig   = decodedData.vcf -- Vehicle config, contains paint data
 	local pos             = vec3(decodedData.pos)
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
+	local ignitionLevel	  = decodedData.ign or 3
 
 	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
 	log('I', 'applyVehSpawn', "It is for "..event.playerNickname)
@@ -1045,6 +1046,7 @@ local function applyVehSpawn(event)
 
 	core_vehicles.setPlateText(event.playerNickname, spawnedVehID)
 	spawnedVeh:queueLuaCommand("hydros.onFFBConfigChanged(nil)")
+	spawnedVeh:queueLuaCommand("MPPowertrainVE.setIgnitionState("..ignitionLevel..")")
 end
 
 local function applyVehEdit(serverID, data)

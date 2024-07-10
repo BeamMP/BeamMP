@@ -136,7 +136,7 @@ end
 --- Callback function for ImGui input text.
 --- @param data table The input text data.
 --- @return number Returns 0 to prevent further processing or 1 to allow further processing.
-local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
+--[[local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
     if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
         local prevHistoryPos = historyPos
         if data.EventKey == imgui.Key_UpArrow then
@@ -182,7 +182,7 @@ local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
         return imgui.Int(1)
     end
     return imgui.Int(0)
-end)
+end)]]
 
 --- Clears the chat history.
 local function clearHistory()

@@ -136,7 +136,7 @@ end
 --- Callback function for ImGui input text.
 --- @param data table The input text data.
 --- @return number Returns 0 to prevent further processing or 1 to allow further processing.
-local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
+--[[local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
     if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
         local prevHistoryPos = historyPos
         if data.EventKey == imgui.Key_UpArrow then
@@ -182,7 +182,7 @@ local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
         return imgui.Int(1)
     end
     return imgui.Int(0)
-end)
+end)]]
 
 --- Clears the chat history.
 local function clearHistory()
@@ -322,7 +322,7 @@ local function render()
 
     if imgui.BeginChild1("ChatInput", imgui.ImVec2(0, 30), false) then
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
-        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, inputCallbackC) then
+        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue) then-- + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
             sendChatMessage(chatMessageBuf)
             if UI.settings.window.keepActive then
                 imgui.SetKeyboardFocusHere(-1)

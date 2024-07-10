@@ -136,53 +136,59 @@ end
 --- Callback function for ImGui input text.
 --- @param data table The input text data.
 --- @return number Returns 0 to prevent further processing or 1 to allow further processing.
-local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
-    if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
-        local prevHistoryPos = historyPos
-        if data.EventKey == imgui.Key_UpArrow then
-            historyPos = historyPos - 1
-            if historyPos < 1 then
-                if historyPos < 0 then
-                    historyPos = #history
-                else
-                    historyPos = 1
-                end
-            end
-        elseif data.EventKey == imgui.Key_DownArrow then
-            if #history > 0 and historyPos == #history then
-                ffi.fill(data.Buf, data.BufSize, 0)  -- Clear the buffer
-                data.CursorPos = 0
-                data.SelectionStart = 0
-                data.SelectionEnd = 0
-                data.BufTextLen = 0
-                data.BufDirty = imgui.Bool(true)
-                historyPos = -1
-                return imgui.Int(0)  -- Return 0 to prevent further processing
-            elseif historyPos == -1 then -- Empty, not on any history
-                return imgui.Int(0)
-            end
-
-            historyPos = historyPos + 1
+function ConsoleInputCallback(data)
+    data = ffi.cast("ImGuiInputTextCallbackData*", data);
+    --log('D', 'console', '>>> inputCallback 1 - ' .. dumps(data) .. ' / ' .. tostring(#history))
+    if data.EventFlag == im.InputTextFlags_CallbackHistory then
+      local prevHistoryPos = historyPos
+      if data.EventKey == im.Key_UpArrow then
+        --print("UP")
+        historyPos = historyPos - 1
+        if historyPos < 1 then
+          if loopHistory[0] or historyPos<0 then
+            historyPos = #history
+          else
+            historyPos = 1
+          end
         end
-
-        if #history > 0 and prevHistoryPos ~= historyPos then
-            local t = history[historyPos]
-            if type(t) ~= "string" then return imgui.Int(0) end
-            local inplen = string.len(t)
-            local inplenInt = imgui.Int(inplen)
-            ffi.copy(data.Buf, t, math.min(data.BufSize - 1, inplen + 1))
-            data.CursorPos = inplenInt
-            data.SelectionStart = inplenInt
-            data.SelectionEnd = inplenInt
-            data.BufTextLen = inplenInt
-            data.BufDirty = imgui.Bool(true);
+        --log('D', 'console', 'up prev=' .. dumps(prevHistoryPos) .. ' pos=' .. dumps(historyPos))
+      elseif data.EventKey == im.Key_DownArrow then
+        --print("DOWN")
+        historyPos = historyPos + 1
+        if historyPos > #history then
+          if loopHistory[0] then
+            historyPos = 1
+          else
+            historyPos = #history
+          end
         end
-    elseif data.EventFlag == imgui.InputTextFlags_CallbackCharFilter and
-        data.EventChar == 96 then -- 96 = '`'
-        return imgui.Int(1)
+        if prevHistoryPos == -1 then historyPos = 1 end
+        --log('D', 'console', 'dw prev=' .. dumps(prevHistoryPos) .. ' pos=' .. dumps(historyPos))
+      end
+  
+      if #history > 0 and prevHistoryPos ~= historyPos then
+        local t = history[historyPos]
+        if type(t) ~= "string" then
+          log("E","inputCallback", "history is corrupted (not str)")
+          return 0 -- im.Int(0)
+        end
+        local inplen = string.len(t)
+        local inplenInt = im.Int(inplen)
+        ffi.copy(data.Buf, t, math.min(data.BufSize-1, inplen+1))
+        --data.Buf = ffi.string(t, math.min(data.BufSize-1, inplen+1))
+        data.CursorPos = inplenInt
+        data.SelectionStart = inplenInt
+        data.SelectionEnd = inplenInt
+        data.BufTextLen = inplenInt
+        data.BufDirty = im.Bool(true);
+      end
+    -- elseif data.EventFlag == im.InputTextFlags_CallbackCharFilter then
+    --   print(data.EventChar)
+    elseif data.EventFlag == im.InputTextFlags_CallbackCharFilter and data.EventChar == 96 then --96 = '`'
+      return 1 --im.Int(1)
     end
-    return imgui.Int(0)
-end)
+    return 0 --im.Int(0)
+end
 
 --- Clears the chat history.
 local function clearHistory()
@@ -322,7 +328,7 @@ local function render()
 
     if imgui.BeginChild1("ChatInput", imgui.ImVec2(0, 30), false) then
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
-        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, inputCallbackC) then
+        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
             sendChatMessage(chatMessageBuf)
             if UI.settings.window.keepActive then
                 imgui.SetKeyboardFocusHere(-1)

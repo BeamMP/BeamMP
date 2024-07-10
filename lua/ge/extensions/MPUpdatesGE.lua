@@ -77,7 +77,7 @@ local function onUpdate(dt)
 		end
 		
 		controllerTimer = controllerTimer + dt
-		if controllerTimer >= powertrainTickrate then
+		if controllerTimer >= controllerTickrate then
 			controllerTimer = 0
 			MPControllerGE.tick() -- Comment this line to disable controller synchronization
 		end

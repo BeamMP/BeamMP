@@ -167,18 +167,10 @@ local function cacheEngines()
 	local combustionEngines = powertrain.getDevicesByType("combustionEngine")
 	if next(combustionEngines) then
 		for engineName,engine in pairs(combustionEngines) do
-			local recievedEngineData = cachedCombustionEngineData[engineName] or {}
-			if ignitionLevel then
-				if ignitionLevel > 1 then
-					recievedEngineData.ignitionCoef = 1
-				else
-					recievedEngineData.ignitionCoef = 0
-				end
-			else
-				recievedEngineData.ignitionCoef = engine.ignitionCoef
-			end
 			engine.spawnVehicleIgnitionLevel = spawnVehicleIgnitionLevel or engine.spawnVehicleIgnitionLevel
-			recievedEngineData.isStalled = engine.isStalled
+			local recievedEngineData = cachedCombustionEngineData[engineName] or {}
+			recievedEngineData.ignitionCoef = 1
+			recievedEngineData.isStalled = false
 			recievedEngineData.starterEngagedCoef = engine.starterEngagedCoef
 			cachedCombustionEngineData[engine.name] = recievedEngineData
 		end
@@ -187,11 +179,6 @@ end
 
 local function setIgnitionState(remoteignitionLevel)
 	spawnVehicleIgnitionLevel = remoteignitionLevel
-	if remoteignitionLevel > 0 then
-		ignitionLevel = 2
-	else
-		ignitionLevel = 0
-	end
 	cacheEngines()
 end
 

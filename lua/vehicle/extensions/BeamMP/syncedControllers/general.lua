@@ -94,7 +94,7 @@ end
 
 --postCrashBrake
 local postCrashBrakeTriggered = 0
-local function postCrashBrakeRemoteUpdateGFX(controllerName, funcName, tempTable, ...) -- this only works once because postCrashBrake sets the electrics to nil on reset which the electrics check doesn't pick up
+local function postCrashBrakeRemoteUpdateGFX(controllerName, funcName, tempTable, ...)
 	if postCrashBrakeTriggered ~= electrics.values.postCrashBrakeTriggered then
 		postCrashBrakeTriggered = electrics.values.postCrashBrakeTriggered
 		if electrics.values.postCrashBrakeTriggered == 1 then
@@ -105,7 +105,7 @@ end
 
 local function postCrashBrakeinit(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
-	electrics.values.postCrashBrakeTriggered = 0
+	electrics.values.postCrashBrakeTriggered = 0 -- postCrashBrakeinit set's the electric to nil which beamMP doesn't detect, so to fix that i set it to 0
 end
 
 -- jato

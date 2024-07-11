@@ -135,6 +135,11 @@ local function replaceFunctions(controllerName, functions)
 			end
 
 			local function newfunction(...)
+				local tempTable = {
+					controllerName = controllerName,
+					functionName = funcName,
+					variables = { ... }
+				}
 				if v.mpVehicleType == "R" then
 					-- leaving this blank disables the functions on the remote car which will prevent ghost controlling,
 					-- this could also be used for requesting actions if we can send data back to the vehicle owner in the future,
@@ -144,11 +149,6 @@ local function replaceFunctions(controllerName, functions)
 						return data.remoteFunction(controllerName, funcName, tempTable, ...)
 					end
 				else
-					local tempTable = {
-						controllerName = controllerName,
-						functionName = funcName,
-						variables = { ... }
-					}
 					if data.ownerFunction then
 						return data.ownerFunction(controllerName, funcName, tempTable, ...)
 					else

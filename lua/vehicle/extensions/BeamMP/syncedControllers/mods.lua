@@ -7,7 +7,7 @@ local M = {}
 -- compare set to true only sends data when there is a change
 -- compare set to false sends the data every time the function is called
 -- storeState stores the incoming data and then if the remote car was reset for whatever reason it reapplies the state
--- adding ownerFunction and/or recieveFunction can set custom functions to read or change data before sending or on recieveing
+-- adding ownerFunction and/or receiveFunction can set custom functions to read or change data before sending or on receiveing
 
 --example
 --[[
@@ -19,7 +19,7 @@ local function couplerToggleCheck(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
-local function couplerToggleRecieve(data)
+local function couplerToggleReceive(data)
 	if v.mpVehicleType == "R" then
 		if controller.getControllerSafe(data.controllerName).getGroupState() == data.variables.groupState then
 			controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName]()
@@ -29,7 +29,7 @@ end
 
 ["controllerFunctionName"] = {
   ownerFunction = couplerToggleCheck,
-  recieveFunction = couplerToggleRecieve
+  receiveFunction = couplerToggleReceive
 },
 ]]
 
@@ -72,7 +72,7 @@ local function prepairID(controllerName, funcName, tempTable, ...)
 	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
-local function recieveID(data)
+local function receiveID(data)
 	if data.missileID and data.vehID then
 		if data.missileID >= 10 then
 			data.vehID = (data.vehID*100)+data.missileID
@@ -89,7 +89,7 @@ local function setAimMode(controllerName, funcName, tempTable, ...)
 	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
-local function setAimModeRecieve(data)
+local function setAimModeReceive(data)
 	aimMode = data.variables[1]
 	if controllerSyncVE.OGcontrollerFunctionsTable["ciws"] then
 		controllerSyncVE.OGcontrollerFunctionsTable["ciws"]["setTargetMode"](aimMode)
@@ -115,7 +115,7 @@ local function prepairSetElevationChange(controllerName, funcName, tempTable, ..
 	return controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
-local function recieveSetElevationChange(data)
+local function receiveSetElevationChange(data)
 	local servo = powertrain.getDevice("elevationServo")
 	if aimMode == "manual" and servo then
 		servo:setTargetAngle(data.servoAngle)
@@ -142,7 +142,7 @@ local function prepairSetRotationChange(controllerName, funcName, tempTable, ...
 	return returnData
 end
 
-local function recieveSetRotationChange(data)
+local function receiveSetRotationChange(data)
 	local servo = powertrain.getDevice("rotationServo")
 	if aimMode == "manual" and servo then
 		servo:setTargetAngle(data.servoAngle)
@@ -170,7 +170,7 @@ local includedControllerTypes = {
 		["deployWeaponDown"] = {},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			recieveFunction = recieveID,
+			receiveFunction = receiveID,
 			storeState = true,
 		},
 		["deployWeaponUp"] = {}
@@ -179,7 +179,7 @@ local includedControllerTypes = {
 		["deployWeaponDown"] = {},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			recieveFunction = recieveID,
+			receiveFunction = receiveID,
 			storeState = true,
 		},
 		["deployWeaponUp"] = {}
@@ -187,22 +187,22 @@ local includedControllerTypes = {
 	["targetAim"] = {
 		["setAimMode"] = {
 			ownerFunction = setAimMode,
-			recieveFunction = setAimModeRecieve,
+			receiveFunction = setAimModeReceive,
 			storeState = true
 		},
 		["setTargetID"] = {
 			ownerFunction = prepairID,
-			recieveFunction = recieveID,
+			receiveFunction = receiveID,
 			storeState = true, -- restoring the states happens in the wrong order for this and setAimMode causing it not to aim on local reset
 		},
 		["setElevationChange"] = {
 			ownerFunction = prepairSetElevationChange,
-			recieveFunction = recieveSetElevationChange,
+			receiveFunction = receiveSetElevationChange,
 			storeState = true
 		},
 		["setRotationChange"] = {
 			ownerFunction = prepairSetRotationChange,
-			recieveFunction = recieveSetRotationChange,
+			receiveFunction = receiveSetRotationChange,
 			storeState = true
 		},
 		["killSystem"] = {}

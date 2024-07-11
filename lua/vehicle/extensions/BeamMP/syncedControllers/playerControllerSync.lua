@@ -137,7 +137,7 @@ local function updateGFX(dt) -- this is all super wacky but it was the only way 
 		lastunicycle_jump = electrics.values.unicycle_jump
 	end
 	if electrics.values.unicycle_jump == 1 then
-		electrics.values.unicycle_jump = true --  it would only send 1s and 0s, electricsVE checks for true on recieve, but for whatever reason setting it to true for multiple frames works
+		electrics.values.unicycle_jump = true --  it would only send 1s and 0s, electricsVE checks for true on receive, but for whatever reason setting it to true for multiple frames works
 	end
 end --TODO definetly remove all this once controller sync is released to everyone
 

@@ -14,7 +14,7 @@ local function couplerToggleCheck(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
 end
 
-local function couplerToggleRecieve(data)
+local function couplerToggleReceive(data)
 	if v.mpVehicleType == "R" then
 		if controller.getControllerSafe(data.controllerName).getGroupState() == data.variables.groupState then
 			controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName]()
@@ -26,7 +26,7 @@ local includedControllerTypes = {
 	["advancedCouplerControl"] = {
 		["toggleGroup"] = {
 			ownerFunction = couplerToggleCheck,
-			recieveFunction = couplerToggleRecieve,
+			receiveFunction = couplerToggleReceive,
 		},
 		["toggleGroupConditional"] = {},
 		["tryAttachGroupImpulse"] = {},

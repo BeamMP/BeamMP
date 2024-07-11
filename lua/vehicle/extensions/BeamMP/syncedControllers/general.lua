@@ -16,7 +16,7 @@ local function toggleDirection(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.sendControllerData(tempTable)
 end
 
-local function recieveToggleDirection(data)
+local function receiveToggleDirection(data)
 	local motor = powertrain.getDevice("motor")
 	motor.motorDirection = data.variables
 end
@@ -36,7 +36,7 @@ local function setIdleRaise(controllerName, funcName, tempTable, ...)
 	controllerSyncVE.sendControllerData(tempTable)
 end
 
-local function setIdleRaiseRecieve(data)
+local function setIdleRaiseReceive(data)
 	manualIdleRaise = data.variables[1]
 	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName][data.functionName](manualIdleRaise)
 end
@@ -85,7 +85,7 @@ local function TwoStep(controllerName, funcName, tempTable, ...)
 	return returnData
 end
 
-local function recieveTwoStep(data)
+local function receiveTwoStep(data)
 	local twoStepData = data.twoStepData
 	if twoStepData then
 		controller.getControllerSafe(data.controllerName).deserialize(data.twoStepData) -- applies the two step data
@@ -131,10 +131,10 @@ end
 
 -- compare set to true only sends data when there is a change
 -- compare set to false sends the data every time the function is called
--- adding ownerFunction and/or recieveFunction can set custom functions to read or change data before sending or on recieveing
+-- adding ownerFunction and/or receiveFunction can set custom functions to read or change data before sending or on receiveing
 --["controllerFunctionName"] = {
 --  ownerFunction = customFunctionOnSend,
---  recieveFunction = customFunctionOnRecieve
+--  receiveFunction = customFunctionOnReceive
 --},
 -- storeState stores the incoming data and then if the remote car was reset locally for whatever reason it reapplies the state
 
@@ -148,7 +148,7 @@ local includedControllerTypes = {
 	["spinner"] = {
 		["toggleDirection"] = {
 			ownerFunction = toggleDirection,
-			recieveFunction = recieveToggleDirection,
+			receiveFunction = receiveToggleDirection,
 			storeState = true
 		}
 	},
@@ -176,7 +176,7 @@ local includedControllerTypes = {
 		},
 		["setIdleRaise"] = {
 			ownerFunction = setIdleRaise,
-			recieveFunction = setIdleRaiseRecieve,
+			receiveFunction = setIdleRaiseReceive,
 			storeState = true
 		}
 	},
@@ -188,15 +188,15 @@ local includedControllerTypes = {
 	["twoStepLaunch"] = {
 		["setTwoStep"] = {
 			ownerFunction = TwoStep,
-			recieveFunction = recieveTwoStep
+			receiveFunction = receiveTwoStep
 		},
 		["toggleTwoStep"] = {
 			ownerFunction = TwoStep,
-			recieveFunction = recieveTwoStep
+			receiveFunction = receiveTwoStep
 		},
 		["changeTwoStepRPM"] = {
 			ownerFunction = TwoStep,
-			recieveFunction = recieveTwoStep
+			receiveFunction = receiveTwoStep
 		}
 	},
 

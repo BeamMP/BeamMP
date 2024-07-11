@@ -7,7 +7,7 @@ local M = {}
 local controllers = controller:getAllControllers()
 
 local OGcontrollerFunctionsTable = {}
-local recieveFunctionsTable = {}
+local receiveFunctionsTable = {}
 
 local includedControllers =  {}
 
@@ -65,8 +65,8 @@ local function applyControllerData(data,isDecoded)
 				variables[1].cameraRotation.w
 			)
 		end
-		if recieveFunctionsTable[decodedData.controllerName] and recieveFunctionsTable[decodedData.controllerName][decodedData.functionName] then
-			recieveFunctionsTable[decodedData.controllerName][decodedData.functionName](decodedData)
+		if receiveFunctionsTable[decodedData.controllerName] and receiveFunctionsTable[decodedData.controllerName][decodedData.functionName] then
+			receiveFunctionsTable[decodedData.controllerName][decodedData.functionName](decodedData)
 
 		elseif OGcontrollerFunctionsTable[decodedData.controllerName] and OGcontrollerFunctionsTable[decodedData.controllerName][decodedData.functionName] then
 			if shouldBeUnpacked then
@@ -130,8 +130,8 @@ local function replaceFunctions(controllerName, functions)
 		local tempRemoteController = {}
 		for funcName, data in pairs(functions) do
 			tempOGcontrollerFunctions[funcName] = tempController[funcName]
-			if data.recieveFunction then
-				tempRemoteController[funcName] = data.recieveFunction
+			if data.receiveFunction then
+				tempRemoteController[funcName] = data.receiveFunction
 			end
 
 			local function newfunction(...)
@@ -166,7 +166,7 @@ local function replaceFunctions(controllerName, functions)
 			end
 		end
 		OGcontrollerFunctionsTable[controllerName] = tempOGcontrollerFunctions
-		recieveFunctionsTable[controllerName] = tempRemoteController
+		receiveFunctionsTable[controllerName] = tempRemoteController
 	end
 	--dump("replaceFunctions",controllerName,OGcontrollerFunctionsTable[controllerName]) --TODO for debugging, remove when controllersync is getting released
 end

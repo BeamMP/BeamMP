@@ -6,7 +6,7 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 - [Documentation](https://beammp.github.io/BeamMP/)
 - [Discord](https://discord.gg/BeamMP)
 - [Website](https://beammp.com)
-- [Wiki](https://wiki.beammp.com)
+- [Docs](https://docs.beammp.com)
 - [Forum](https://forum.beammp.com)
 - `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp))
 
@@ -25,7 +25,7 @@ A Lua mod bringing online multiplayer to [BeamNG.drive](https://beamng.com)!
 
 # Installation
 
-**[Click here for a step-by-step guide](https://wiki.beammp.com/en/home/installation-guide) on how to install the mod on Windows.**
+**[Click here for a step-by-step guide](https://docs.beammp.com/game/getting-started/) on how to install the mod on Windows.**
 
 The BeamMP mod has been made as simple as it gets. Just head over to [our website (BeamMP.com)](https://beammp.com) and click download. This will download a zip file which contains the installer exe. Just run that exe and follow the instructions. Once this completes all you need to do is double click the shortcut on your desktop. 
 
@@ -36,11 +36,11 @@ If you need help at any point, see the [troubleshooting](#troubleshooting) secti
 
 # Servers
 
-[Click here for a step-by-step guide](https://wiki.beammp.com/en/home/server-installation) on how to set up and run a server for you & your friends.
+[Click here for a step-by-step guide](https://docs.beammp.com/server/create-a-server/) on how to set up and run a server for you & your friends.
 
 The server is usable free of charge for non-commercial use, and the source code is available on [GitHub](https://github.com/BeamMP/BeamMP-Server).
 
-Please check out [wiki.beammp.com](https://Wiki.beammp.com) for a guide on how to setup your own server. If you run into issues, join the official [Discord](https://discord.gg/BeamMP) or join us via IRC in `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp)).
+Please check out [docs.beammp.com](https://docs.beammp.com) for a guide on how to setup your own server. If you run into issues, join the official [Discord](https://discord.gg/BeamMP) or join us via IRC in `#beammp` on `irc.libera.chat` ([webchat link](https://web.libera.chat/#beammp)).
 
 # How does it work?
 *This section is a technical explanation of the inner workings of the project and is not relevant for most players.*
@@ -60,7 +60,7 @@ Also there is our community [Forum](https://forum.beammp.com/), where we post ad
 # Troubleshooting
 
 - [Frequently Asked Questions/Common Issues](https://forum.beammp.com/c/faq/35)
-- [Error Codes](https://wiki.beammp.com/en/error-codes)
+- [Error Codes](https://docs.beammp.com/server/error-codes/)
 - [Server Auth Key](https://www.beammp.com/keymaster)
 
 If none of these fix your issue, we have a dedicated support team on our [Discord](https://discord.gg/BeamMP), and our [Forum](https://forum.beammp.com/c/support/33)

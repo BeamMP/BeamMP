@@ -109,17 +109,17 @@ local function applyEngineData(data)
 	end
 	if data.ICE then
 		for engineName,engineData in pairs(data.ICE) do
-			local recievedEngineData = cachedCombustionEngineData[engineName] or {}
+			local receivedEngineData = cachedCombustionEngineData[engineName] or {}
 			if engineData.ign ~= nil then
-				recievedEngineData.ignitionCoef = engineData.ign
+				receivedEngineData.ignitionCoef = engineData.ign
 			end
 			if engineData.starter ~= nil then
-				recievedEngineData.starterEngagedCoef = engineData.starter
+				receivedEngineData.starterEngagedCoef = engineData.starter
 			end
 			if engineData.isStalled ~= nil then
-				recievedEngineData.isStalled = engineData.isStalled
+				receivedEngineData.isStalled = engineData.isStalled
 			end
-			cachedCombustionEngineData[engineName] = recievedEngineData
+			cachedCombustionEngineData[engineName] = receivedEngineData
 		end
 	end
 end
@@ -168,11 +168,11 @@ local function cacheEngines()
 	if next(combustionEngines) then
 		for engineName,engine in pairs(combustionEngines) do
 			engine.spawnVehicleIgnitionLevel = spawnVehicleIgnitionLevel or engine.spawnVehicleIgnitionLevel
-			local recievedEngineData = cachedCombustionEngineData[engineName] or {}
-			recievedEngineData.ignitionCoef = 1
-			recievedEngineData.isStalled = false
-			recievedEngineData.starterEngagedCoef = engine.starterEngagedCoef
-			cachedCombustionEngineData[engine.name] = recievedEngineData
+			local receivedEngineData = cachedCombustionEngineData[engineName] or {}
+			receivedEngineData.ignitionCoef = 1
+			receivedEngineData.isStalled = false
+			receivedEngineData.starterEngagedCoef = engine.starterEngagedCoef
+			cachedCombustionEngineData[engine.name] = receivedEngineData
 		end
 	end
 end

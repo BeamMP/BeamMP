@@ -672,8 +672,12 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 	-- simple fallback logic
 	local expectedPartID = simplified_vehicles[vehicleName]
 	if expectedPartID then
-		local ioCtx = startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
+		local ioCtx = jbeamIO.startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
 		local part = jbeamIO.getPart(ioCtx, expectedPartID)
+		if not part then
+			log('W', 'simplifyVehicle fallback logic', "part "..expectedPartID.." not found for "..vehicleName.."")
+			return vehicleConfig
+		end
 		local slotTypes = {}
 		if type(part.slotType) == 'string' then
 		  table.insert(slotTypes, part.slotType)

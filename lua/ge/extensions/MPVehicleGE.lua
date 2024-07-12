@@ -661,7 +661,7 @@ local vehicleSimplifiers = {
 -- @treturn table newVehicleConfig, that now contains the simplified body/parts, or the original table if no changes can be made
 -- @usage local newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
 local function simplifyVehicle(vehicleName, vehicleConfig)
-	newVehicleConfig = deepcopy(vehicleConfig)
+	local newVehicleConfig = deepcopy(vehicleConfig)
 
 	-- this do not check for incomptable parts
 	if vehicleSimplifiers[vehicleName] then
@@ -675,7 +675,7 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 		local ioCtx = jbeamIO.startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
 		local part = jbeamIO.getPart(ioCtx, expectedPartID)
 		if not part then
-			log('W', 'simplifyVehicle fallback logic', "part "..expectedPartID.." not found for "..vehicleName.."")
+			log('W', 'simplifyVehicle fallback logic', "part "..expectedPartID.." was not found for "..vehicleName.."")
 			return vehicleConfig
 		end
 		local slotTypes = {}

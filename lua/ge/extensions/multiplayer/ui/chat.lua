@@ -15,6 +15,7 @@ local M = {
 
 local utils = require("multiplayer.ui.utils")
 local ffi = require('ffi')
+ffi.cdef("int ImGuiInputTextCallbackLua(ImGuiInputTextCallbackData* data);")
 
 local imgui = ui_imgui
 local heightOffset = 20
@@ -136,8 +137,9 @@ end
 --- Callback function for ImGui input text.
 --- @param data table The input text data.
 --- @return number Returns 0 to prevent further processing or 1 to allow further processing.
---[[local inputCallbackC = ffi.cast("ImGuiInputTextCallback", function(data)
-    if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
+function ChatInputMessageCallback(data)
+    data = ffi.cast("ImGuiInputTextCallbackData*", data);
+     if data.EventFlag == imgui.InputTextFlags_CallbackHistory then
         local prevHistoryPos = historyPos
         if data.EventKey == imgui.Key_UpArrow then
             historyPos = historyPos - 1
@@ -157,9 +159,9 @@ end
                 data.BufTextLen = 0
                 data.BufDirty = imgui.Bool(true)
                 historyPos = -1
-                return imgui.Int(0)  -- Return 0 to prevent further processing
+                return 0  -- Return 0 to prevent further processing
             elseif historyPos == -1 then -- Empty, not on any history
-                return imgui.Int(0)
+                return 0
             end
 
             historyPos = historyPos + 1
@@ -167,7 +169,7 @@ end
 
         if #history > 0 and prevHistoryPos ~= historyPos then
             local t = history[historyPos]
-            if type(t) ~= "string" then return imgui.Int(0) end
+            if type(t) ~= "string" then return 0 end
             local inplen = string.len(t)
             local inplenInt = imgui.Int(inplen)
             ffi.copy(data.Buf, t, math.min(data.BufSize - 1, inplen + 1))
@@ -179,10 +181,10 @@ end
         end
     elseif data.EventFlag == imgui.InputTextFlags_CallbackCharFilter and
         data.EventChar == 96 then -- 96 = '`'
-        return imgui.Int(1)
+        return 1
     end
-    return imgui.Int(0)
-end)]]
+    return 0
+end
 
 --- Clears the chat history.
 local function clearHistory()
@@ -322,7 +324,12 @@ local function render()
 
     if imgui.BeginChild1("ChatInput", imgui.ImVec2(0, 30), false) then
         imgui.SetNextItemWidth(imgui.GetWindowWidth() - 25)
-        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, imgui.InputTextFlags_EnterReturnsTrue) then-- + imgui.InputTextFlags_CallbackHistory, ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ConsoleInputCallback")) then
+        local flags = 0
+        flags = flags + imgui.InputTextFlags_EnterReturnsTrue
+        flags = flags + imgui.InputTextFlags_CallbackCompletion
+        flags = flags + imgui.InputTextFlags_CallbackHistory
+        flags = flags + imgui.InputTextFlags_CallbackCharFilter
+        if imgui.InputText("##ChatInputMessage", chatMessageBuf, 256, flags,  ffi.C.ImGuiInputTextCallbackLua, ffi.cast("void*","ChatInputMessageCallback")) then
             sendChatMessage(chatMessageBuf)
             if UI.settings.window.keepActive then
                 imgui.SetKeyboardFocusHere(-1)

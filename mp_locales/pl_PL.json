@@ -28,6 +28,7 @@
   "ui.options.multiplayer.launcherPort": "Launcher port:[br]Nie zmieniaj, chyba że musisz",
   "ui.options.multiplayer.launcherPortWarn": "Nie zmieniaj, jeśli nie musisz",
   "ui.options.multiplayer.launcherPortDefaultPort": "Wartość domyślna to 4444",
+  "ui.options.multiplayer.launcherPort.tooltip": "Ustaw to na niestandardowy port, z którego korzystał program uruchamiający.",
   "ui.options.multiplayer.clearLauncherCache": "Wyczyść pamięć podręczną modów launchera",
   "ui.options.multiplayer.clearLauncherCache.tooltip": "Włączenie tej opcji wyczyści pamięć podręczną aktualnie pobieranych modów w launcherze. Spowoduje to konieczność ponownego pobrania wszystkich modów dla każdego serwera, do którego dołączysz.",
   "ui.options.multiplayer.skipOtherPlayersVehicles": "Wyłącz możliwość przełączania się na pojazdy innych graczy",

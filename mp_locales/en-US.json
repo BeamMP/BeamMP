@@ -11,6 +11,8 @@
     "ui.options.multiplayer.queueSpawnEdit.tooltip": "If enabled, remote vehicle spawns and edits will be put in a queue, instead of applying instantly",
     "ui.options.multiplayer.queueAuto": "Automatically apply queued vehicle changes",
     "ui.options.multiplayer.queueAuto.tooltip": "If enabled, you will only spawn queued vehicles once you come to a stop based on the settings below",
+    "ui.options.multiplayer.highlightQueuedPlayers": "Highlight queued players",
+    "ui.options.multiplayer.highlightQueuedPlayers.tooltip": "Highlight players who have queued events in the playerlist",
     "ui.options.multiplayer.queueApplySpeed": "Queue apply speed threshold",
     "ui.options.multiplayer.queueApplySpeed.tooltip": "Queues apply if your vehicle moves slower than this speed",
     "ui.options.multiplayer.queueApplyTimeout": "Queue apply timeout",

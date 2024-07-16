@@ -1150,15 +1150,9 @@ local function onVehicleSpawned(gameVehicleID)
 
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')") -- Load VE lua extensions
 
-	if vehicle then 
+	if vehicle then
 		vehicle.jbeam = newJbeamName
-
-		-- update nametag offset
-		local serverVehID = getServerVehicleID(gameVehicleID)
-		if serverVehID then
-			vehicles[serverVehID].nameTagPosOffset = veh:getInitialNodePosition(veh:getRefNodeId()) - veh.initialNodePosBB:getCenter()
-			vehicles[serverVehID].vehicleHeight = veh:getInitialHeight()
-		end
+		vehicle.vehicleHeight = veh:getInitialHeight()
 	end
 
 end
@@ -1969,13 +1963,11 @@ local function onPreRender(dt)
 			local veh = be:getObjectByID(gameVehicleID)
 
 			if v.isSpawned and veh then -- update position if available
-				if not v.nameTagPosOffset then
-					v.nameTagPosOffset = veh:getInitialNodePosition(veh:getRefNodeId()) - veh.initialNodePosBB:getCenter()
+				if not v.vehicleHeight then
 					v.vehicleHeight = veh:getInitialHeight()
 				end
-
-				local rot = quatFromDir(-vec3(veh:getDirectionVector()):normalized(), vec3(veh:getDirectionVectorUp()):normalized())
-				v.position = veh:getPosition() - v.nameTagPosOffset:rotated(rot)
+				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
+        		v.position = vec3(tempPosx,tempPosy,tempPosz)
 				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
 			end
 

@@ -1967,7 +1967,7 @@ local function onPreRender(dt)
 					v.vehicleHeight = veh:getInitialHeight()
 				end
 				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
-        		v.position = vec3(tempPosx,tempPosy,tempPosz)
+				v.position = vec3(tempPosx,tempPosy,tempPosz)
 				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
 			end
 

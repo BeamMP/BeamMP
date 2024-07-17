@@ -349,14 +349,6 @@ local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
 end
 
-M.receiveIPCGameData = function(code, data)
-	local received = code..data
-	HandleNetwork[code](data)
-	if settings.getValue("showDebugOutput") == true then
-		log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-	end
-	if MPDebug then MPDebug.packetReceived(#received) end
-end
 
 detectGlobalWrites() -- reenable global write notifications
 

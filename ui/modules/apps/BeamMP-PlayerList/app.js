@@ -184,11 +184,13 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 
 	$scope.queuedPlayers = []
 
-	$scope.$on('setQueueState', function(event, data) {
-		$scope.queuedPlayers[data.playerID] = data.state
-		var playerrow = document.getElementById("playerlist-row-" + data.playerID)
-		if (playerrow) {
-			playerrow.style.setProperty('background-color', data.state ? 'var(--bng-orange-shade1)' : 'transparent')
+	$scope.$on('setQueue', function(event, data) {
+		for (var key in data.queuedPlayers) {
+			$scope.queuedPlayers[key] = data.queuedPlayers[key]
+			var playerrow = document.getElementById("playerlist-row-" + key)
+			if (playerrow) {
+				playerrow.style.setProperty('background-color', data.queuedPlayers[key] ? 'var(--bng-orange-shade1)' : 'transparent')
+			}
 		}
 	})
 
@@ -200,7 +202,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 		}
 	})
 
-	bngApi.engineLua('UI.updatePlayersList(); MPVehicleGE.onUIInitialised()'); // instantly populate the playerlist and their queues
+	bngApi.engineLua('UI.updatePlayersList(); UI.sendQueue()'); // instantly populate the playerlist and their queues
 }]);
 
 

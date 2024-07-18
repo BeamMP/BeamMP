@@ -905,13 +905,13 @@ local function getQueueCounts()
 		if vehicle.spawnQueue then 
 			spawns = spawns + 1 
 			if highlightQueuedPlayers then
-				table.insert(queuedPlayers, vehicle.ownerID)
+				queuedPlayers[vehicle.ownerID] = true
 			end
 		end
 		if vehicle.editQueue then 
 			edits = edits + 1 
 			if highlightQueuedPlayers then
-				table.insert(queuedPlayers, vehicle.ownerID)
+				queuedPlayers[vehicle.ownerID] = true
 			end
 		end
 	end

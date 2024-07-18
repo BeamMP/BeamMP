@@ -155,22 +155,19 @@ end
 -- @param editCount number
 -- @param queuedPlayers table
 local function updateQueue( spawnCount, editCount, queuedPlayers)
-	UIqueue = {spawnCount = spawnCount, editCount = editCount}
-	UIqueue.show = spawnCount+editCount > 0
-	sendQueue()
-
-    
-    if queuedPlayers ~= nil and queuedPlayers ~= {} then 
-        for key, player in pairs(MPVehicleGE.getPlayers()) do
-            if tableContains(queuedPlayers, key) then
-                guihooks.trigger("setQueueState", {playerID = key, state = true})
-            else
-                guihooks.trigger("setQueueState", {playerID = key, state = false})
+    if (queuedPlayers ~= nil and queuedPlayers ~= {}) then
+        for key, player in pairs(MPVehicleGE.getPlayers()) do 
+            if queuedPlayers[key] == nil then 
+                queuedPlayers[key] = false
             end
         end
     else 
         guihooks.trigger("resetQueueState")
     end
+
+	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayers}
+	UIqueue.show = spawnCount+editCount > 0
+	sendQueue()
 end
 
 --- Used to set our ping in the top status bar. It also is used in the math for position prediction

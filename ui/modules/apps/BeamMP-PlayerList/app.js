@@ -185,20 +185,21 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.queuedPlayers = []
 
 	$scope.$on('setQueue', function(event, data) {
+		if (!data.queuedPlayers) {
+			$scope.queuedPlayers = []
+			var rows = document.querySelectorAll('[id^="playerlist-row-"]');
+			for (let i = 0; i < rows.length; i++) {
+				rows[i].style.setProperty('background-color', 'transparent');
+			}
+			return
+		}
+
 		for (var key in data.queuedPlayers) {
 			$scope.queuedPlayers[key] = data.queuedPlayers[key]
 			var playerrow = document.getElementById("playerlist-row-" + key)
 			if (playerrow) {
 				playerrow.style.setProperty('background-color', data.queuedPlayers[key] ? 'var(--bng-orange-shade1)' : 'transparent')
 			}
-		}
-	})
-
-	$scope.$on('resetQueueState', function(event, data) {
-		$scope.queuedPlayers = []
-		var rows = document.querySelectorAll('[id^="playerlist-row-"]');
-		for (let i = 0; i < rows.length; i++) {
-			rows[i].style.setProperty('background-color', 'transparent');
 		}
 	})
 

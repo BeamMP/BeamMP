@@ -155,14 +155,14 @@ end
 -- @param editCount number
 -- @param queuedPlayers table
 local function updateQueue( spawnCount, editCount, queuedPlayers)
-    if (queuedPlayers ~= nil and queuedPlayers ~= {}) then
+    if (queuedPlayers ~= nil and next(queuedPlayers) ~= nil) then
         for key, player in pairs(MPVehicleGE.getPlayers()) do 
             if queuedPlayers[key] == nil then 
                 queuedPlayers[key] = false
             end
         end
-    else 
-        guihooks.trigger("resetQueueState")
+    else
+        queuedPlayers = nil
     end
 
 	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayers}

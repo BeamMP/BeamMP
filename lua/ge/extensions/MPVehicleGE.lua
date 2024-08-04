@@ -114,25 +114,11 @@ local settingsCache = {
 -- ============= VARIABLES =============
 
 --- Contains the Custom Roles created with createRole
--- @table custom_roleToInfo
+-- @table customRoleToInfo
 -- @tfield roleToInfo_subtable RoleName_1 Contains the Role Specific Data
 -- @tfield roleToInfo_subtable RoleName_N ..
--- @usage local roleInfo = custom_roleToInfo["CUSTOMROLE"]
-local custom_roleToInfo = {}
-
-
---- Contains only the Vehicles that have set Custom roles to it with setVehicleRole
--- @table custom_vehicleRoles
--- @tfield custom_vehicleRoles_subtable serverVehicleID_1 Contains Role and DisplayName of that Vehicle
--- @tfield custom_vehicleRoles_subtable serverVehicleID_N ..
--- @usage local roleInfo = custom_vehicleRoles["0-0"]
-local custom_vehicleRoles = {}
-
---- (in table) Specifies the table in custom_vehicleRoles
--- @table custom_vehicleRoles_subtable
--- @tfield string Role Contains the RoleName for this Vehicle
--- @tfield string DisplayName Contains the custom Displayname for this Vehicle
--- @usage local displayName = custom_roleToInfo["0-0"].DisplayName
+-- @usage local roleInfo = customRoleToInfo["CUSTOMROLE"]
+local customRoleToInfo = {}
 
 --- Contains all known Players.
 -- PlayerID's are integers starting at 0
@@ -433,6 +419,26 @@ function getPlayers() return players end
 -- @usage local vehicles = getVehicles()
 function getVehicles() return vehicles end
 
+function setPlayerRole(playerID, roleName, displayName)
+	local p = players[playerID]
+
+	if not p then return 0 end
+
+	p.hidden = roleName == "BLANK"
+
+	p:setCustomRole(roleName)
+
+	if displayName and displayName ~= 0 then
+		p:setDisplayName(displayName)
+	end
+
+	return 1
+end
+
+function removePlayerRole(playerID)
+	return players[playerID] and players[playerID]:clearCustomRole() or false
+end
+
 --- Sets a custom role and name to a vehicle
 -- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
 -- @tparam string roleName The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
@@ -442,23 +448,18 @@ function getVehicles() return vehicles end
 -- @treturn[3] -1 roleName does not exist
 -- @usage setVehicleRole("0-0", "MYROLE", "Unknown")
 function setVehicleRole(playerIDVehicleID, roleName, displayName)
-	if vehicles[playerIDVehicleID] == nil then return 0 end
-	roleName = string.upper(roleName)
-	if roleName ~= "BLANK" then
-		if custom_roleToInfo[roleName] == nil then return -1 end
+	local v = vehicles[playerIDVehicleID]
+
+	if not v then return 0 end
+
+	v.hidden = roleName == "BLANK"
+
+	v:setCustomRole(roleName)
+
+	if displayName and displayName ~= 0 then
+		v:setDisplayName(displayName)
 	end
 
-	if displayName == 0 then
-		local playerName = players[vehicles[playerIDVehicleID].ownerID].name
-		displayName = playerName
-	else
-		displayName = "*" .. displayName
-	end
-
-	local contents = {}
-	contents["Role"] = roleName
-	contents["DisplayName"] = displayName
-	custom_vehicleRoles[playerIDVehicleID] = contents
 	return 1
 end
 
@@ -467,7 +468,7 @@ end
 -- @treturn nil
 -- @usage removeVehicleRole("0-0")
 function removeVehicleRole(playerIDVehicleID)
-	custom_vehicleRoles[playerIDVehicleID] = nil
+	return vehicles[playerIDVehicleID] and vehicles[playerIDVehicleID]:clearCustomRole() or false
 end
 
 --- Creates a custom role to be used with setVehicleRole.
@@ -482,46 +483,51 @@ end
 -- @treturn[2] false When a color value is below 0 or when the roleName == "BLANK"
 -- @usage createRole("MYROLE", "Custom", "Ctm", 252, 107, 3)
 function createRole(roleName, tag, shorttag, red, green, blue)
-	if red < 0 then return false end
-	if green < 0 then return false end
-	if blue < 0 then return false end
+	if red < 0 or red > 255 then return false end
+	if green < 0 or green > 255 then return false end
+	if blue < 0 or blue > 255 then return false end
 
 	roleName = string.upper(roleName)
 	if roleName == "BLANK" then return false end
 
-	local contents = {}
-	contents["backcolor"] = ColorI(red, green, blue, 127)
-	if tag == 0 then
+	local contents = { backcolor = ColorI(red, green, blue, 127) }
+	if not tag or tag == 0 then
 		contents["tag"] = ""
 	else
 		contents["tag"] = " [" .. tag .. "]"
 	end
-	if shorttag == 0 then
+	if not shorttag or shorttag == 0 then
 		contents["shorttag"] = ""
 	else
 		contents["shorttag"] = " [" .. shorttag .. "]"
 	end
-	custom_roleToInfo[roleName] = contents
+	customRoleToInfo[roleName] = contents
 	return true
 end
 
 --- Removes a custom role.
--- All vehicles with that role will also loose it.
+-- All vehicles with that role will also lose it
 -- @tparam string roleName
 -- @treturn true If success
 -- @treturn false When the Role doesnt exists
 -- @usage removeRole("MYROLE")
 function removeRole(roleName)
 	roleName = string.upper(roleName)
-	if custom_roleToInfo[roleName] == nil then return false end
+	if customRoleToInfo[roleName] == nil then return false end
 
-	for playerIDVehicleID, data in pairs(custom_vehicleRoles) do
-		if data.Role == roleName then
-			custom_vehicleRoles[playerIDVehicleID] = nil
+	for playerIDVehicleID, vehicle in pairs(vehicles) do
+		if vehicle.customRole == customRoleToInfo[roleName] then
+			vehicle:clearCustomRole()
 		end
 	end
 
-	custom_roleToInfo[roleName] = nil
+	for playerID, player in pairs(players) do
+		if player.customRole == customRoleToInfo[roleName] then
+			player:clearCustomRole()
+		end
+	end
+
+	customRoleToInfo[roleName] = nil
 	return true
 end
 
@@ -710,13 +716,21 @@ function Player:new(data)
 	o.shortname = data.name
 	o.playerID = tonumber(data.playerID)
 
-	local roleName = data.role or 'USER'
-	o.role = roleToInfo[roleName] or {}
-	o.role.name = roleName
+	if data.role then
+		o.role = roleToInfo[data.role]
+		o.role.name = data.role
+	end
+	if not o.role then
+		o.role = roleToInfo['USER']
+		o.role.name = 'USER'
+	end
+
 	o.isLocal = data.isLocal or false
 
 	o.nickPrefixes = {}
 	o.nickSuffixes = {}
+
+	o.customRole = nil
 
 	o.vehicles = {IDs = data.vehicleIDs or {}}
 
@@ -772,6 +786,14 @@ function Player:setNickSuffix(tagSource, text)
 	--setPlayerNickSuffix(self.name, tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
 	self.nickSuffixes[tagSource] = text
+end
+function Player:setCustomRole(roleName)
+	roleName = string.upper(roleName)
+
+	self.customRole = customRoleToInfo[roleName]
+end
+function Player:clearCustomRole(roleName)
+	self.customRole = nil
 end
 function Player:delete()
 	log('W', 'Player:delete', string.format('Removing player %s (%i)! Data: %s', self.name, self.playerID, dumps(self)))
@@ -863,6 +885,17 @@ function Vehicle:delete()
 	players_vehicle_configs[self.serverVehicleString] = nil
 
 	self = nil
+end
+function Vehicle:setCustomRole(roleName)
+	roleName = string.upper(roleName)
+
+	self.customRole = customRoleToInfo[roleName]
+end
+function Vehicle:clearCustomRole(roleName)
+	self.customRole = nil
+end
+function Vehicle:setDisplayName(displayName)
+	self.customName = displayName
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1244,7 +1277,6 @@ local function onVehicleDestroyed(gameVehicleID)
 
 		if not vehicle then return end
 		local serverVehicleID = vehicle.serverVehicleString -- Get the serverVehicleID
-		removeVehicleRole(serverVehicleID) -- remove possible custom role for that vehicle
 
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
@@ -2082,23 +2114,15 @@ local function onPreRender(dt)
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
-				local name = ""
-				local tag = ""
-				local backColor = 0
-				local roleInfo = custom_vehicleRoles[serverVehicleID]
-				if roleInfo == nil then -- if default role
-					roleInfo = owner.role
-					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-					name = settings.getValue("shortenNametags") and owner.shortname or owner.name
-					tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
-				else -- if custom role
-					if roleInfo.Role == "BLANK" then goto skip_vehicle end -- we dont draw hidden player tags
-					name = roleInfo.DisplayName -- found in the custom_vehicleRoles table
-					roleInfo = custom_roleToInfo[roleInfo.Role] -- the rest of the information is in the custom_roleToInfo table
-					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-					tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
-				end
+				local roleInfo = v.customRole or owner.customRole or owner.role
 
+				if v.hidden then goto skip_vehicle end
+
+				local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
+				local name = v.customName or ownerName
+
+				local tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
+				local backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
 				local prefix = ""
 				for source, tag in pairs(owner.nickPrefixes)

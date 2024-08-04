@@ -447,14 +447,14 @@ function setVehicleRole(playerIDVehicleID, roleName, displayName)
 	if roleName ~= "BLANK" then
 		if custom_roleToInfo[roleName] == nil then return -1 end
 	end
-	
+
 	if displayName == 0 then
 		local playerName = players[vehicles[playerIDVehicleID].ownerID].name
 		displayName = playerName
 	else
 		displayName = "*" .. displayName
 	end
-	
+
 	local contents = {}
 	contents["Role"] = roleName
 	contents["DisplayName"] = displayName
@@ -485,10 +485,10 @@ function createRole(roleName, tag, shorttag, red, green, blue)
 	if red < 0 then return false end
 	if green < 0 then return false end
 	if blue < 0 then return false end
-	
+
 	roleName = string.upper(roleName)
 	if roleName == "BLANK" then return false end
-	
+
 	local contents = {}
 	contents["backcolor"] = ColorI(red, green, blue, 127)
 	if tag == 0 then
@@ -514,13 +514,13 @@ end
 function removeRole(roleName)
 	roleName = string.upper(roleName)
 	if custom_roleToInfo[roleName] == nil then return false end
-	
+
 	for playerIDVehicleID, data in pairs(custom_vehicleRoles) do
 		if data.Role == roleName then
 			custom_vehicleRoles[playerIDVehicleID] = nil
 		end
 	end
-	
+
 	custom_roleToInfo[roleName] = nil
 	return true
 end
@@ -621,7 +621,7 @@ local vehicleSimplifiers = {
 		else -- standard frame, offroad frame, short frame lands here
 			vehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
 		end
-		
+
 	end,
 	roamer = function(vehicleParts)
 		vehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon"
@@ -858,7 +858,7 @@ function Vehicle:delete()
 	end
 	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
-	
+
     	players_vehicle_configs[self.serverVehicleString] = nil
 
     	self = nil
@@ -1178,7 +1178,7 @@ local function spawnDestroyedVehicles(serverVehID)
 
     local vehdata = players_vehicle_configs[serverVehID]
     if vehdata == nil then
-        
+
         log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
         return
     end
@@ -1272,12 +1272,12 @@ local function onVehicleDestroyed(gameVehicleID)
 							[mainPartName] = string
 							[licenseName] = string
 							[model] = string
-							
+
 							the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
 						]]
 						vehicleConfig.format = 2
 						vehicleConfig.partConfigFilename = nil
-						
+
 						local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
 						if handle == nil then
 							log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
@@ -2040,7 +2040,7 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-			
+
 			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
@@ -2082,7 +2082,7 @@ local function onPreRender(dt)
 
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
-				
+
 				local name = ""
 				local tag = ""
 				local backColor = 0
@@ -2282,7 +2282,7 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
-M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4 
+M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4
 M.getPlayers               = getPlayers               -- takes: -
 M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle

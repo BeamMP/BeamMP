@@ -680,9 +680,9 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 		end
 		local slotTypes = {}
 		if type(part.slotType) == 'string' then
-		  table.insert(slotTypes, part.slotType)
+			table.insert(slotTypes, part.slotType)
 		elseif type(part.slotType) == 'table' then
-		  slotTypes = part.slotType
+			slotTypes = part.slotType
 		end
 		for _, slotType in ipairs(slotTypes) do
 			if newVehicleConfig.parts[slotType] then
@@ -780,6 +780,7 @@ function Player:delete()
 	end
 	if self.activeVehicleID then vehicles[self.activeVehicleID].spectators[self.playerID] = nil end
 	players[self.playerID] = nil
+
 	self = nil
 end
 function Player:onSerialized()
@@ -859,9 +860,9 @@ function Vehicle:delete()
 	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 
-    	players_vehicle_configs[self.serverVehicleString] = nil
+	players_vehicle_configs[self.serverVehicleString] = nil
 
-    	self = nil
+	self = nil
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1005,18 +1006,18 @@ end
 
 
 local function applyVehSpawn(event)
-	local decodedData     = jsonDecode(event.data)
+	local decodedData = jsonDecode(event.data)
 	if not decodedData then --JSON decode failed
 		log("E", "applyVehSpawn", "Failed to spawn vehicle from "..event.playerNickname.."!")
 		return
 	end
 
-	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
-	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
-	local vehicleName     = decodedData.jbm -- Vehicle name
-	local vehicleConfig   = decodedData.vcf -- Vehicle config, contains paint data
-	local pos             = vec3(decodedData.pos)
-	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
+	local playerServerID = decodedData.pid -- Server ID of the player that sent the vehicle
+	local gameVehicleID  = decodedData.vid -- gameVehicleID of the player that sent the vehicle
+	local vehicleName    = decodedData.jbm -- Vehicle name
+	local vehicleConfig  = decodedData.vcf -- Vehicle config, contains paint data
+	local pos            = vec3(decodedData.pos)
+	local rot            = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 	local ignitionLevel   = (type(decodedData.ign) == "number") and decodedData.ign or 3
 
 	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
@@ -1069,9 +1070,9 @@ local function applyVehEdit(serverID, data)
 	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then log('E','applyVehEdit',"Vehicle "..gameVehicleID.." not found") return end
 
-	local decodedData     = jsonDecode(data) -- Decode the data
-	local vehicleName     = decodedData.jbm -- Vehicle name
-	local vehicleConfig   = decodedData.vcf -- Vehicle config
+	local decodedData   = jsonDecode(data) -- Decode the data
+	local vehicleName   = decodedData.jbm -- Vehicle name
+	local vehicleConfig = decodedData.vcf -- Vehicle config
 
 	local playerName = players[decodedData.pid] and players[decodedData.pid].name or 'Unknown'
 
@@ -1176,21 +1177,20 @@ end
 
 local function spawnDestroyedVehicles(serverVehID)
 
-    local vehdata = players_vehicle_configs[serverVehID]
-    if vehdata == nil then
+	local vehdata = players_vehicle_configs[serverVehID]
+	if vehdata == nil then
+		log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
+		return
+	end
 
-        log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
-        return
-    end
+	if vehicles[serverVehID].isDeleted == false then
+		UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
+		log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
+		return
+	end
 
-    if vehicles[serverVehID].isDeleted == false then
-        UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
-        log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
-        return
-    end
-
-    vehicles[serverVehID].isSpawned = true
-    vehicles[serverVehID].isDeleted = false
+	vehicles[serverVehID].isSpawned = true
+	vehicles[serverVehID].isDeleted = false
 		-- queue system
 --		local eventdata = {
 --			playerNickname = playerNickname,  -- same as owner name??? we shall find out
@@ -1198,42 +1198,41 @@ local function spawnDestroyedVehicles(serverVehID)
 --			data = data
 --		}
 
-    local playerOwnerName = vehicles[serverVehID].ownerName
+	local playerOwnerName = vehicles[serverVehID].ownerName
 
-    local encodedVehicleData = jsonEncode(vehdata)
+	local encodedVehicleData = jsonEncode(vehdata)
 
-    local eventdata = {
-        playerNickname = playerOwnerName,  --- mabye a issue?
-        serverVehicleID = serverVehID,
-        data = encodedVehicleData
-    }
-    UI.showNotification('Trying to respawn '..playerOwnerName.."'s "..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
-    if settings.getValue("enableSpawnQueue") then
-        vehicles[serverVehID].spawnQueue = eventdata
-        UI.updateQueue(getQueueCounts())
-    else
-        log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
-        applyVehSpawn(eventdata)
-        UI.updateQueue(0, 0)
-    end
+	local eventdata = {
+		playerNickname = playerOwnerName,  --- mabye a issue?
+		serverVehicleID = serverVehID,
+		data = encodedVehicleData
+	}
+	UI.showNotification('Trying to respawn '..playerOwnerName.."'s "..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
+	if settings.getValue("enableSpawnQueue") then
+		vehicles[serverVehID].spawnQueue = eventdata
+		UI.updateQueue(getQueueCounts())
+	else
+		log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
+		applyVehSpawn(eventdata)
+		UI.updateQueue(0, 0)
+	end
 end
 
 local function restorePlayerVehicle(playerName)
-    --  not a properproper wayyy of doing this
+	-- not a properproper wayyy of doing this
 
-    local player =  getPlayerByName(playerName)
-    if player == nil then
-        log("E", "restorePlayerVehicle", "Couldnt find player??")
+	local player = getPlayerByName(playerName)
+	if player == nil then
+		log("E", "restorePlayerVehicle", "Couldnt find player??")
+	end
 
-    end
+	-- its a table of ids
+	local vehicles_ServerIDs = player.vehicles.IDs
 
-    -- its a table of ids
-    local vehicles_ServerIDs = player.vehicles.IDs
-
-    for x,y in pairs(vehicles_ServerIDs)do
-        spawnDestroyedVehicles(y)
-        log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
-    end
+	for x,y in pairs(vehicles_ServerIDs)do
+		spawnDestroyedVehicles(y)
+		log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
+	end
 end
 
 
@@ -1418,8 +1417,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		return
 	end
 
-	local playerServerID   = tonumber(decodedData.pid) -- Server ID of the owner
-	local gameVehicleID    = tonumber(decodedData.vid) -- remote gameVehicleID
+	local playerServerID = tonumber(decodedData.pid) -- Server ID of the owner
+	local gameVehicleID  = tonumber(decodedData.vid) -- remote gameVehicleID
 
 	--create player object if this is their first vehicle
 	if not players[playerServerID] or players[playerServerID].name ~= playerNickname then
@@ -1428,7 +1427,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	end
 
 	if not settings.getValue("showDebugOutput") then
-	  log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+		log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
 	end
 
 	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
@@ -1467,7 +1466,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			data = data
 		}
 
-        	players_vehicle_configs[serverVehicleID] = decodedData
+		players_vehicle_configs[serverVehicleID] = decodedData
 
 		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
@@ -1501,12 +1500,12 @@ local function onServerVehicleEdited(serverID, data)
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
 
-    	local saveVehicleRot =  players_vehicle_configs[serverID].rot
-    	local saveVehiclePos =  players_vehicle_configs[serverID].pos
+	local saveVehicleRot = players_vehicle_configs[serverID].rot
+	local saveVehiclePos = players_vehicle_configs[serverID].pos
 
-    	players_vehicle_configs[serverID] = decodedData
-    	players_vehicle_configs[serverID].pos = saveVehiclePos
-    	players_vehicle_configs[serverID].rot = saveVehicleRot
+	players_vehicle_configs[serverID] = decodedData
+	players_vehicle_configs[serverID].pos = saveVehiclePos
+	players_vehicle_configs[serverID].rot = saveVehicleRot
 
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
@@ -2310,7 +2309,7 @@ M.spawnRequest             = spawnRequest             -- takes: jbeamName, confi
 M.replaceRequest           = replaceRequest           -- takes: jbeamName, config, colors
 M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
-M.applyPlayerQueues 	   = applyPlayerQueues 	      -- takes: playerID
+M.applyPlayerQueues        = applyPlayerQueues        -- takes: playerID
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
 M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
 M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName

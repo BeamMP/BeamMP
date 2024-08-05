@@ -41,19 +41,19 @@ local original_spawnDefault
 -- @tfield roleToInfo_subtable RoleName_N ..
 -- @usage local roleInfo = roleToInfo["USER"]
 local roleToInfo = {
-	['USER']	= { backcolor = ColorI(000, 000, 000, 127), forecolor = ColorI(255, 255, 255, 127), tag = "", shorttag = "" },
-	['EA']		= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Early Access]", shorttag = " [EA]" },
-	['CONT']	= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Contributor]", shorttag = " [CO]" },
-	['YT']		= { backcolor = ColorI(200, 000, 000, 127), forecolor = ColorI(255, 000, 000, 127), tag = " [Content Creator]", shorttag = " [CC]" },
-	['ET']		= { backcolor = ColorI(210, 214, 109, 127), forecolor = ColorI(210, 214, 109, 127), tag = " [Events Team]", shorttag = " [Events]" },
-	['SUPPORT']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Support]", shorttag = " [Staff]" },
-	['STAFF']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [BeamMP Staff]", shorttag = " [Staff]" },
-	['MOD']		= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Moderator]", shorttag = " [Mod]" },
-	['ADM']		= { backcolor = ColorI(218, 000, 078, 127), forecolor = ColorI(255, 000, 089, 127), tag = " [Admin]", shorttag = " [Adm]" },
-	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), forecolor = ColorI(255, 070, 101, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" },
-	['NGDEV']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Developer]", shorttag = " [BNG]" },
-	['NGSTAFF']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
-	['NGAFFIL']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
+	['USER']	= { backcolor = { r = 000, g = 000, b = 000 }, forecolor = { r = 255, g = 255, b = 255 }, tag = "", shorttag = "" },
+	['EA']		= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Early Access]", shorttag = " [EA]" },
+	['CONT']	= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Contributor]", shorttag = " [CO]" },
+	['YT']		= { backcolor = { r = 200, g = 000, b = 000 }, forecolor = { r = 255, g = 000, b = 000 }, tag = " [Content Creator]", shorttag = " [CC]" },
+	['ET']		= { backcolor = { r = 210, g = 214, b = 109 }, forecolor = { r = 210, g = 214, b = 109 }, tag = " [Events Team]", shorttag = " [Events]" },
+	['SUPPORT']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Support]", shorttag = " [Staff]" },
+	['STAFF']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [BeamMP Staff]", shorttag = " [Staff]" },
+	['MOD']		= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Moderator]", shorttag = " [Mod]" },
+	['ADM']		= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [Admin]", shorttag = " [Adm]" },
+	['MDEV']	= { backcolor = { r = 194, g = 055, b = 055 }, forecolor = { r = 255, g = 070, b = 101 }, tag = " [BeamMP Dev]", shorttag = " [Dev]" },
+	['NGDEV']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Developer]", shorttag = " [BNG]" },
+	['NGSTAFF']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Staff]", shorttag = " [BNG]" },
+	['NGAFFIL']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
 }
 
 --- (in table) Specifies the table in roleToInfo
@@ -490,7 +490,7 @@ function createRole(roleName, tag, shorttag, red, green, blue)
 	roleName = string.upper(roleName)
 	if roleName == "BLANK" then return false end
 
-	local contents = { backcolor = ColorI(red, green, blue, 127) }
+	local contents = { backcolor = { r = red, g = green, b = blue} }
 	if not tag or tag == 0 then
 		contents["tag"] = ""
 	else

@@ -1003,7 +1003,7 @@ core_vehicles.cloneCurrent = function ()
 end
 
 local core_vehicle_partmgmt_saveLocal = extensions.core_vehicle_partmgmt.saveLocal
-extensions.core_vehicle_partmgmt.saveLocal = function (p1)
+local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
 	local vehicle = be:getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
 		guihooks.trigger("toastrMsg", {type="error", title="Vehicle Clone Error", msg="Sorry, you cannot save this vehicle."})
@@ -1356,6 +1356,7 @@ end
 
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
+	extensions.core_vehicle_partmgmt.saveLocal = core_vehicle_partmgmt_saveLocal_overwrite
 	if MPCoreNetwork.isMPSession() then
 		log('I', "onVehicleSwitched", "Vehicle switched from "..oldGameVehicleID or "unknown".." to "..newGameVehicleID or "unknown")
 

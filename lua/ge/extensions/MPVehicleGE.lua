@@ -1150,7 +1150,11 @@ local function onVehicleSpawned(gameVehicleID)
 
 	veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')") -- Load VE lua extensions
 
-	if vehicle then vehicle.jbeam = newJbeamName end
+	if vehicle then
+		vehicle.jbeam = newJbeamName
+		vehicle.vehicleHeight = veh:getInitialHeight()
+	end
+
 end
 
 --============================ ON VEHICLE REMOVED (CLIENT) ============================
@@ -1280,6 +1284,19 @@ local function onVehicleDestroyed(gameVehicleID)
 	end
 end
 
+local function sendActiveVehicleID(newVehObj)
+	local newServerVehicleID = newVehObj.serverVehicleString -- Get serverVehicleID of the vehicle the player switched to
+	if not newServerVehicleID then
+		newServerVehicleID = tostring(MPConfig.getPlayerServerID()) .. '-' .. -1 -- if the vehicle doesn't exist we still want to send that it changed to remove the spectator nametag
+	end
+	if newServerVehicleID then
+		local playerID = MPConfig.getPlayerServerID()
+		local s = tostring(playerID) .. ':' .. newServerVehicleID
+
+		MPGameNetwork.send('Om:'.. s)
+	end
+end
+
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	if MPCoreNetwork.isMPSession() then
@@ -1341,13 +1358,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 					log('E', "onVehicleSwitched", "Could not find a suitable vehicle to switch to, exiting current veh")
 				end
 			else
-				local newServerVehicleID = newVehObj.serverVehicleString -- Get serverVehicleID of the vehicle the player switched to
-				if newServerVehicleID then
-					local playerID, serverVehicleID = MPConfig.getPlayerServerID(), newServerVehicleID
-					local s = tostring(playerID) .. ':' .. newServerVehicleID
-
-					MPGameNetwork.send('Om:'.. s)
-				end
+				sendActiveVehicleID(newVehObj)
 			end
 		end
 	end
@@ -1415,6 +1426,10 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		vehiclesMap[gameVehicleID] = serverVehicleID
 
 		players[playerServerID]:addVehicle(vehObject)
+
+		if be:getPlayerVehicleID(0) == gameVehicleID then
+			sendActiveVehicleID(vehObject)
+		end
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 
@@ -1519,9 +1534,11 @@ local function onServerVehicleRemoved(serverVehicleID)
 			--vehicle:delete()
 		else
 			log('W', "onServerVehicleRemoved", "Failed removing vehicle "..serverVehicleID..", Vehicle can't be found")
+			vehicle:delete()
 		end
 	else
 		log('W', "onServerVehicleRemoved", "Failed removing vehicle "..serverVehicleID..", ID is unknown")
+		vehicle:delete()
 	end
 end
 
@@ -1560,12 +1577,13 @@ end
 
 local function onServerCameraSwitched(playerID, serverVehicleID)
 	if not players[playerID] then return end -- TODO: better fix?
-	if not vehicles[serverVehicleID] then return end
 	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
 		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
 	end
 
 	players[playerID].activeVehicleID = serverVehicleID
+
+	if not vehicles[serverVehicleID] then return end
 	vehicles[serverVehicleID].spectators[playerID] = true
 end
 
@@ -1945,7 +1963,12 @@ local function onPreRender(dt)
 			local veh = be:getObjectByID(gameVehicleID)
 
 			if v.isSpawned and veh then -- update position if available
-				v.position = veh:getPosition()
+				if not v.vehicleHeight then
+					v.vehicleHeight = veh:getInitialHeight()
+				end
+				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
+				v.position = vec3(tempPosx,tempPosy,tempPosz)
+				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet
@@ -1972,6 +1995,7 @@ local function onPreRender(dt)
 
 				if colors then
 					debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
+					pos.z = pos.z + 1
 				end
 			end
 
@@ -2050,7 +2074,6 @@ local function onPreRender(dt)
 				for source, tag in pairs(owner.nickSuffixes)
 					do suffix = suffix..tag.." " end
 
-				pos.z = pos.z + 2.0 -- Offset nametag so it appears above the vehicle, not inside
 
 				-- draw spectators
 				if settings.getValue("showSpectators") then

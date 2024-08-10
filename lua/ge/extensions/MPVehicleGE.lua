@@ -113,13 +113,6 @@ local settingsCache = {
 }
 -- ============= VARIABLES =============
 
---- Contains the Custom Roles created with createRole
--- @table customRoleToInfo
--- @tfield roleToInfo_subtable RoleName_1 Contains the Role Specific Data
--- @tfield roleToInfo_subtable RoleName_N ..
--- @usage local roleInfo = customRoleToInfo["CUSTOMROLE"]
-local customRoleToInfo = {}
-
 --- Contains all known Players.
 -- PlayerID's are integers starting at 0
 -- @table players
@@ -419,116 +412,83 @@ function getPlayers() return players end
 -- @usage local vehicles = getVehicles()
 function getVehicles() return vehicles end
 
-function setPlayerRole(playerID, roleName, displayName)
-	local p = players[playerID]
+local function createRoleHelper(tag, shorttag, red, green, blue)
+	if type(red) ~= "number" then return nil, "invalid red channel data" end
+	if type(green) ~= "number" then return nil, "invalid green channel data" end
+	if type(blue) ~= "number" then return nil, "invalid blue channel data" end
 
-	if not p then return 0 end
-
-	p.hidden = roleName == "BLANK"
-
-	p:setCustomRole(roleName)
-
-	if displayName and displayName ~= 0 then
-		p:setDisplayName(displayName)
+	local contents = { backcolor = { r = clamp(red, 0, 255), g = clamp(green, 0, 255), b = clamp(blue, 0, 255)}, tag = "", shorttag = "" }
+	if type(tag) == "string" then
+		contents.tag = " [" .. tag .. "]"
 	end
 
-	return 1
+	if type(shorttag) == "string" then
+		contents.shorttag = " [" .. shorttag .. "]"
+	end
+
+	return contents
 end
 
-function removePlayerRole(playerID)
+--- Sets a custom role for a player
+-- @tparam int playerID ID of the player
+-- @tparam string tag normal version of the role tag
+-- @tparam string shorttag shortened version of the role tag
+-- @tparam int red red channel of the role's color
+-- @tparam int green green channel of the role's color
+-- @tparam int blue blue channel of the role's color
+-- @treturn bool true in case of success, false in case of error
+-- @treturn nil, string error message
+-- @usage local success, error = setPlayerRole(0, "Example", "EX", 0, 127, 255)
+function setPlayerRole(playerID, ...)
+	local p = players[playerID]
+	if not p then return false, "player not found" end
+
+	local role, err = createRoleHelper(...)
+	if not role then
+		log('E', 'setPlayerRole', 'Function called with invalid arguments: ' .. tostring(err))
+		return false, err
+	end
+
+	p:setCustomRole(role)
+end
+
+--- Clears a custom role for a player
+-- @tparam int playerID ID of the player
+-- @treturn bool true in case of success, false in case of error
+-- @usage local success, error = clearPlayerRole(0)
+function clearPlayerRole(playerID)
 	return players[playerID] and players[playerID]:clearCustomRole() or false
 end
 
---- Sets a custom role and name to a vehicle
--- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
--- @tparam string roleName The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
--- @tparam[opt] string displayName sets a Custom name to this Vehicle. Give 0 to not set a custom name
--- @treturn[1] 1 If success
--- @treturn[2] 0 playerIDVehicleID is invalid. Vehicle or Player might not exists
--- @treturn[3] -1 roleName does not exist
--- @usage setVehicleRole("0-0", "MYROLE", "Unknown")
-function setVehicleRole(playerIDVehicleID, roleName, displayName)
+--- Sets a custom role for a vehicle
+-- @tparam string playerIDVehicleID ID of the vehicle
+-- @tparam string tag normal version of the role tag
+-- @tparam string shorttag shortened version of the role tag
+-- @tparam int red red channel of the role's color
+-- @tparam int green green channel of the role's color
+-- @tparam int blue blue channel of the role's color
+-- @treturn bool true in case of success, false in case of error
+-- @treturn nil, string error message
+-- @usage local success, error = setVehicleRole("0-0", "Example", "EX", 0, 127, 255)
+function setVehicleRole(playerIDVehicleID, ...)
 	local v = vehicles[playerIDVehicleID]
+	if not v then return false, "vehicle not found" end
 
-	if not v then return 0 end
-
-	v.hidden = roleName == "BLANK"
-
-	v:setCustomRole(roleName)
-
-	if displayName and displayName ~= 0 then
-		v:setDisplayName(displayName)
+	local role, err = createRoleHelper(...)
+	if not role then
+		log('E', 'setVehicleRole', 'Function called with invalid arguments: ' .. tostring(err))
+		return false, err
 	end
 
-	return 1
+	v:setCustomRole(role)
 end
 
---- Removes a custom Role and Name from a Vehicle
--- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
--- @treturn nil
--- @usage removeVehicleRole("0-0")
-function removeVehicleRole(playerIDVehicleID)
+--- Clears a custom role for a vehicle
+-- @tparam string playerIDVehicleID ID of the vehicle
+-- @treturn bool true in case of success, false in case of error
+-- @usage local success, error = clearVehicleRole("0-0")
+function clearVehicleRole(playerIDVehicleID)
 	return vehicles[playerIDVehicleID] and vehicles[playerIDVehicleID]:clearCustomRole() or false
-end
-
---- Creates a custom role to be used with setVehicleRole.
--- Give 0 to not use a Optional param.
--- @tparam string roleName Name of the Role
--- @tparam[opt] string tag Sets a optional tag. Playername [Long tag]
--- @tparam[opt] string shorttag Sets a optional shorttag: Playername [Short Tag]
--- @tparam[opt] integer red 0 to 255
--- @tparam[opt] integer green 0 to 255
--- @tparam[opt] integer blue 0 to 255
--- @treturn[1] true If success
--- @treturn[2] false When a color value is below 0 or when the roleName == "BLANK"
--- @usage createRole("MYROLE", "Custom", "Ctm", 252, 107, 3)
-function createRole(roleName, tag, shorttag, red, green, blue)
-	if red < 0 or red > 255 then return false end
-	if green < 0 or green > 255 then return false end
-	if blue < 0 or blue > 255 then return false end
-
-	roleName = string.upper(roleName)
-	if roleName == "BLANK" then return false end
-
-	local contents = { backcolor = { r = red, g = green, b = blue} }
-	if not tag or tag == 0 then
-		contents["tag"] = ""
-	else
-		contents["tag"] = " [" .. tag .. "]"
-	end
-	if not shorttag or shorttag == 0 then
-		contents["shorttag"] = ""
-	else
-		contents["shorttag"] = " [" .. shorttag .. "]"
-	end
-	customRoleToInfo[roleName] = contents
-	return true
-end
-
---- Removes a custom role.
--- All vehicles with that role will also lose it
--- @tparam string roleName
--- @treturn true If success
--- @treturn false When the Role doesnt exists
--- @usage removeRole("MYROLE")
-function removeRole(roleName)
-	roleName = string.upper(roleName)
-	if customRoleToInfo[roleName] == nil then return false end
-
-	for playerIDVehicleID, vehicle in pairs(vehicles) do
-		if vehicle.customRole == customRoleToInfo[roleName] then
-			vehicle:clearCustomRole()
-		end
-	end
-
-	for playerID, player in pairs(players) do
-		if player.customRole == customRoleToInfo[roleName] then
-			player:clearCustomRole()
-		end
-	end
-
-	customRoleToInfo[roleName] = nil
-	return true
 end
 
 -- ============== INTERNAL FUNCTIONS ==============
@@ -716,11 +676,11 @@ function Player:new(data)
 	o.shortname = data.name
 	o.playerID = tonumber(data.playerID)
 
-	if data.role then
+	if data.role then -- try to apply role received from the server
 		o.role = roleToInfo[data.role]
 		o.role.name = data.role
 	end
-	if not o.role then
+	if not o.role then -- fallback to user
 		o.role = roleToInfo['USER']
 		o.role.name = 'USER'
 	end
@@ -787,10 +747,8 @@ function Player:setNickSuffix(tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
 	self.nickSuffixes[tagSource] = text
 end
-function Player:setCustomRole(roleName)
-	roleName = string.upper(roleName)
-
-	self.customRole = customRoleToInfo[roleName]
+function Player:setCustomRole(role)
+	self.customRole = role
 end
 function Player:clearCustomRole(roleName)
 	self.customRole = nil
@@ -886,10 +844,8 @@ function Vehicle:delete()
 
 	self = nil
 end
-function Vehicle:setCustomRole(roleName)
-	roleName = string.upper(roleName)
-
-	self.customRole = customRoleToInfo[roleName]
+function Vehicle:setCustomRole(role)
+	self.customRole = role
 end
 function Vehicle:clearCustomRole(roleName)
 	self.customRole = nil
@@ -2105,6 +2061,8 @@ local function onPreRender(dt)
 					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
+				if v.hideNametag or owner.hideNametag then goto skip_vehicle end
+
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
 					if settings.getValue("nameTagFadeInvert") then
 						nametagAlpha = 1 - nametagAlpha
@@ -2114,9 +2072,8 @@ local function onPreRender(dt)
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
-				local roleInfo = v.customRole or owner.customRole or owner.role
 
-				if v.hidden then goto skip_vehicle end
+				local roleInfo = v.customRole or owner.customRole or owner.role
 
 				local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
 				local name = v.customName or ownerName
@@ -2321,10 +2278,10 @@ M.hideNicknames            = hideNicknames            -- takes: bool   returns: 
 M.toggleNicknames          = toggleNicknames          -- takes: -
 M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
-M.createRole               = createRole               -- takes: string roleName, string tag, string shorttag, int red, int green, int blue
-M.removeRole               = removeRole               -- takes: string roleName
-M.setVehicleRole           = setVehicleRole           -- takes: string playerIDvehicleID, string roleName, string displayName
-M.removeVehicleRole        = removeVehicleRole        -- takes: string playerIDVehicleID
+M.setVehicleRole           = setVehicleRole           -- takes: string playerIDvehicleID, string tag, string shorttag, number red, number green, number blue
+M.clearVehicleRole         = clearVehicleRole         -- takes: string playerIDVehicleID
+M.setPlayerRole            = setPlayerRole            -- takes: string playerID, string tag, string shorttag, number red, number green, number blue
+M.clearPlayerRole          = clearPlayerRole          -- takes: string playerID
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
@@ -2335,7 +2292,6 @@ M.sendBeamstate            = sendBeamstate            -- takes: string state, nu
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
 M.applyPlayerQueues        = applyPlayerQueues        -- takes: playerID
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
-M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
 M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName
 M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
 M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
@@ -2345,6 +2301,20 @@ M.onVehicleReady           = onVehicleReady           -- Called when our VE file
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
+local function depricationWarning(oldFnName, replacementName)
+	local msg = "Deprecated function! Please update your code to use " .. tostring(replacementName)
+	log('E', oldFnName, debug.traceback(msg))
+	guihooks.trigger("toastrMsg", {type="warning", title="Deprecated BeamMP function used", msg=msg})
 
+	return nil, msg
+end
+
+function createRole() depricationWarning('createRole', 'MPVehicleGE.setVehicleRole/setPlayerRole') end
+function removeRole() depricationWarning('removeRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
+function removeVehicleRole() depricationWarning('removeVehicleRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
+
+M.createRole = createRole
+M.removeRole = removeRole
+M.removeVehicleRole = removeVehicleRole
 
 return M

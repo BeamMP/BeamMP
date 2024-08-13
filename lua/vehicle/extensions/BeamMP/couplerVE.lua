@@ -15,14 +15,17 @@ local function toggleCouplerState(data)
 	local decodedData = jsonDecode(data)
 	for k,v in pairs(decodedData) do
 		if v.state == false or v.state == true then
-			if v._nodetag and not v.trailer then
+			if v._nodetag then
 				if v.state then
-					beamstate.attachCouplers(v._nodetag)
+					local coupler = beamstate.couplerCache[v._nodetag]
+					if coupler then
+						obj:attachCoupler(coupler.cid, coupler.couplerTag or "", coupler.couplerStrength or 1000000, 2, coupler.couplerLockRadius or 0.025, 0.3, coupler.couplerTargets or 0)
+					else
+						dump("no cached coupler")
+					end
 				else
 					obj:detachCoupler(v._nodetag, 0)
 				end
-			elseif v.state == true then
-				beamstate.activateAutoCoupling()
 			elseif v.state == false then
 				beamstate.disableAutoCoupling()
 				beamstate.detachCouplers()
@@ -52,7 +55,7 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
-		if timer <= 0 and ID == obj2id then
+		if ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then
@@ -71,12 +74,6 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 			local MPcouplers = {}
 			MPcouplers.state = true
 			MPcouplers._nodetag = nodeId
-			if ID == obj2id then -- checking if coupler is connecting to another vehicle
-				MPcouplers.trailer = false
-			else
-				MPcouplers.trailer = true
-			end
-			MPcouplers.obj2id = obj2id
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 
@@ -94,7 +91,7 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
-		if timer <= 0 and ID == obj2id then
+		if ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then
@@ -113,12 +110,6 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 			local MPcouplers = {}
 			MPcouplers.state = false
 			MPcouplers._nodetag = nodeId
-			if ID == obj2id then -- checking if coupler is connecting to another vehicle
-				MPcouplers.trailer = false
-			else
-				MPcouplers.trailer = true
-			end
-			MPcouplers.obj2id = obj2id
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 

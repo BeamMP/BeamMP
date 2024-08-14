@@ -44,6 +44,7 @@ local function cacheState(tempTable)
 end
 
 local function applyControllerData(data,isDecoded)
+	M.isOnControllerSync = true
 	local decodedData = data
 	if not isDecoded then
 		decodedData = jsonDecode(data)

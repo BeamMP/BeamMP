@@ -356,33 +356,69 @@ local function applyElectrics(data)
 			controller.getControllerSafe("lineLock").setLineLock(decodedData.linelock)
 		end
 
-		-- Unicycle syncing -- for cross compatibility with non controller sync versions of beammp,
-		-- can be removed once controller sync is fully released
-		local playerController = controllerSyncVE.OGcontrollerFunctionsTable['playerController']
-		if playerController then
-			-- direction
-			if decodedData.unicycle_camera ~= nil then
-				playerController.setCameraControlData({cameraRotation = quatFromEuler(0, 0, -decodedData.unicycle_camera)})
+		if not controllerSyncVE.isOnControllerSync then
+			-- Unicycle syncing -- for cross compatibility with non controller sync versions of beammp,
+			-- can be removed once controller sync is fully released
+			local playerController = controllerSyncVE.OGcontrollerFunctionsTable['playerController']
+			if playerController then
+				-- direction
+				if decodedData.unicycle_camera ~= nil then
+					playerController.setCameraControlData({cameraRotation = quatFromEuler(0, 0, -decodedData.unicycle_camera)})
+				end
+				-- walking left/right
+				if decodedData.unicycle_walk_x ~= nil then
+					playerController.walkLeftRightRaw(decodedData.unicycle_walk_x)
+				end
+				-- walking forward/backward
+				if decodedData.unicycle_walk_y ~= nil then
+					playerController.walkUpDownRaw(decodedData.unicycle_walk_y)
+				end
+				-- jump, check if boolean because there are sometimes 0s in the received values
+				if decodedData.unicycle_jump == true then
+					playerController.jump(1)
+				end
+				-- crouch
+				if decodedData.unicycle_crouch ~= nil then
+					playerController.crouch(decodedData.unicycle_crouch)
+				end
+				-- sprint
+				if decodedData.unicycle_speed ~= nil then
+					playerController.setSpeedCoef(decodedData.unicycle_speed)
+				end
 			end
-			-- walking left/right
-			if decodedData.unicycle_walk_x ~= nil then
-				playerController.walkLeftRightRaw(decodedData.unicycle_walk_x)
+			-- Bus door syncing
+			if decodedData.dooropen then
+				local doorController = controllerSyncVE.OGcontrollerFunctionsTable['doors']
+				if doorController then
+					if decodedData.dooropen == 1 then
+						doorController.setBeamMin({'frontDoors', 'rearDoors'}) -- open doors
+					else
+						doorController.setBeamMax({'frontDoors', 'rearDoors'}) -- close doors
+					end
+				end
 			end
-			-- walking forward/backward
-			if decodedData.unicycle_walk_y ~= nil then
-				playerController.walkUpDownRaw(decodedData.unicycle_walk_y)
+			-- Bus suspension height syncing
+			local airbagsController = controllerSyncVE.OGcontrollerFunctionsTable['airbags']
+			if airbagsController then
+				if decodedData.kneel == 1 then
+					airbagsController.setBeamPressureLevel({'rightAxle'}, 'kneelPressure') -- sets bus to kneel height
+				elseif decodedData.rideheight == 1 then
+					airbagsController.setBeamPressureLevel({'rightAxle'}, 'maxPressure') -- sets bus to max height
+				elseif decodedData.rideheight == 0 then
+					airbagsController.setBeamDefault({'rightAxle', 'leftAxle'})	-- sets bus to default height
+				end
 			end
-			-- jump, check if boolean because there are sometimes 0s in the received values
-			if decodedData.unicycle_jump == true then
-				playerController.jump(1)
-			end
-			-- crouch
-			if decodedData.unicycle_crouch ~= nil then
-				playerController.crouch(decodedData.unicycle_crouch)
-			end
-			-- sprint
-			if decodedData.unicycle_speed ~= nil then
-				playerController.setSpeedCoef(decodedData.unicycle_speed)
+			
+			-- ME262 missile sync
+			local missilesController = controllerSyncVE.OGcontrollerFunctionsTable['missiles']
+			if missilesController then
+				local missleID = 0
+				for i=1,11 do -- Phulcan has 11 missiles
+					if decodedData["missile"..i.."_motor"] == 1 then
+						missilesController.deployWeaponDown(i,false)
+						missilesController.deployWeaponUp()
+					end
+				end
 			end
 		end
 

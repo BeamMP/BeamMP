@@ -1004,7 +1004,7 @@ local function applyVehSpawn(event)
 	local vehicleConfig   = decodedData.vcf -- Vehicle config, contains paint data
 	local pos             = vec3(decodedData.pos)
 	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
-	local ignitionLevel   = decodedData.ign or 3
+	local ignitionLevel = (type(decodedData.ign) == "number") and decodedData.ign or 3
 
 	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
 	log('I', 'applyVehSpawn', "It is for "..event.playerNickname)
@@ -1572,7 +1572,7 @@ local function onServerVehicleCoupled(serverVehicleID, data)
 	if not vehicle.isLocal then
 		local veh = be:getObjectByID(vehicle.gameVehicleID)
 		if veh then
-			veh:queueLuaCommand("couplerVE.toggleCouplerState('"..data.."')")
+			veh:queueLuaCommand("couplerVE.toggleCouplerState(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 		end
 	end
 end
@@ -2194,7 +2194,7 @@ local function onVehicleReady(gameVehicleID)
 	end
 
 	if veh.mpVehicleType then
-		veh:queueLuaCommand("MPVehicleVE.setVehicleType('".. veh.mpVehicleType .."')")
+		veh:queueLuaCommand("MPVehicleVE.setVehicleType(mime.unb64(\'".. MPHelpers.b64encode(veh.mpVehicleType) .."\'))")
 	end
 	MPGameNetwork.onVehicleReady(gameVehicleID)
 end

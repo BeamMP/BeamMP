@@ -91,7 +91,7 @@ local function applyPos(decoded, serverVehicleID)
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		veh:queueLuaCommand("positionVE.setVehiclePosRot('"..jsonEncode(decoded).."')")
+		veh:queueLuaCommand("positionVE.setVehiclePosRot(mime.unb64(\'".. MPHelpers.b64encode(jsonEncode(decoded)) .."\'))")
 	end
 	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 	vehicle.lastDt = decoded.tim

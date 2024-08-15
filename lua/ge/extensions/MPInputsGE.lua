@@ -46,7 +46,7 @@ local function applyInputs(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = be:getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("MPInputsVE.applyInputs(\'"..data.."\')")
+		veh:queueLuaCommand("MPInputsVE.applyInputs(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 	end
 end
 

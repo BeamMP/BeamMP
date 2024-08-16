@@ -1972,6 +1972,8 @@ local function onPreRender(dt)
 				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
 				v.position = vec3(tempPosx,tempPosy,tempPosz)
 				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
+
+				v.rotation = quat(veh:getRotation())
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet

@@ -1079,7 +1079,7 @@ function modList(s) {
   	modarray.sort();
 
 	s = "";
-	for (var i=0; i<modarray.length-1; i++){
+	for (var i=0; i<modarray.length; i++){
 		if (modarray[i] != '') {
 			var modName = modarray[i].split('/').pop();
 			modName = modName.replace(".zip","");

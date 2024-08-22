@@ -147,7 +147,12 @@ local function receiveLauncherHeartbeat() -- TODO: add some purpose to this func
 end
 -- AA============= LAUNCHER RELATED =============AA
 
-
+--- Request the launcher opens the url in the users web browser
+-- @usage `MPCoreNetwork.openURL("<url>")`
+local function openURL(url)
+	send("O"..url)
+	log('M', 'openURL', 'Requesting the BeamMP Launcher to open url: '..url)
+end
 
 -- ================ UI ================
 --- Called from multiplayer.js UI
@@ -702,6 +707,7 @@ M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
 -- UI
+M.openURL              = openURL
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList

@@ -18,6 +18,7 @@ local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
+local proxyPort = ""
 local launcherVersion = "" -- used only for the server list
 local modVersion = "4.13.4" -- the mod version
 -- server
@@ -376,6 +377,18 @@ end
 
 -- VV============= OTHERS =============VV
 
+--- Handles the storing of the port received from the launcher that is where the http proxy is located on.
+-- @param port number the port number received from the launcher.
+local function setProxyPort(port)
+	log('M', 'setProxyPort', 'HTTP Proxy Port Received: ' .. port)
+	proxyPort = port
+end
+
+--- Handles the returning of the port received from the launcher that is where the http proxy is located on.
+local function getProxyPort()
+	return proxyPort
+end
+
 --- Handles the login result received from the launcher.
 -- @param params string The JSON-encoded login results.
 local function loginReceived(params)
@@ -516,6 +529,7 @@ local HandleNetwork = {
 	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
+	['P'] = function(params) setProxyPort(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['W'] = function(params) handleModWarning(params) end,
 	['Z'] = function(params) launcherVersion = params; end,
@@ -609,6 +623,7 @@ onLauncherConnected = function()
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version
+	send('P') -- request launcher proxy port
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
@@ -707,6 +722,7 @@ M.connectToLauncher    = connectToLauncher
 M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
+M.getProxyPort         = getProxyPort
 -- security
 M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload

@@ -141,5 +141,11 @@
     "ui.multiplayer.security.no_return": "Cancel & Return",
     "ui.multiplayer.security.accept_proceed": "Download & Join",
     "ui.multiplayer.security.title": "Server Mods Detected",
-    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings."
+    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings.",
+    "ui.multiplayer.patreon.message.user": "Enjoying BeamMP? Consider helping to support our work on Patreon",
+    "ui.multiplayer.patreon.button.user": "Read more",
+    "ui.multiplayer.patreon.message.ea": "Thank you for supporting BeamMP!",
+    "ui.multiplayer.patreon.button.ea": "Perks",
+    "ui.multiplayer.patreon.popup.user": "Support BeamMP on Patreon",
+    "ui.multiplayer.patreon.popup.ea": "Thank you for supporting BeamMP!"
 }

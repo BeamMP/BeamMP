@@ -29,13 +29,14 @@
     <md-toolbar class="md-primary" id="top-bar">
         <md-list-item layout="row" class="">
             <h1 class="md-toolbar-tools" style="width:auto;">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
-            <p id="topRightStatus" style="text-align: center;margin: 0 auto;position: absolute;width: 100%;color: white;">Enjoying BeamMP? Consider helping to support our work on Patreon<md-button class="" style="
+            <p id="topRightStatus" style="text-align: center;margin: 0 auto;position: absolute;width: 100%;color: white;">{{:: 'ui.multiplayer.patreon.message.user' | translate}}
+              <md-button class="" style="
               margin: 5px;
               border: 2px solid;
               border-radius: 5px;
               padding: 2px 5px;
-              color: dodgerblue;
-          ">Read more</md-button></p>
+              color: var(--bng-orange);
+          " ng-click="multiplayer.showMessage()"><span>{{:: 'ui.multiplayer.patreon.button.user' | translate}}</span></md-button></p>
 			<!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
         </md-list-item>
     </md-toolbar>
@@ -79,7 +80,7 @@
 
         <md-divider></md-divider>
 
-        <md-button id="forum-btn" onclick="openExternalLink(`https://docs.beammp.com`)" ng-class="" style="text-align:left;">
+        <md-button onclick="openExternalLink(`https://docs.beammp.com`)" ng-class="" style="text-align:left;">
           <md-icon class="material-icons">description</md-icon>
           {{:: 'ui.multiplayer.docs' | translate}}
         </md-button>
@@ -89,12 +90,12 @@
 				  {{:: 'ui.multiplayer.forum' | translate}}
         </md-button>
 
-        <md-button id="forum-btn" onclick="openExternalLink(`https://discord.gg/BeamMP`)" ng-class="" style="text-align:left;">
+        <md-button onclick="openExternalLink(`https://discord.gg/BeamMP`)" ng-class="" style="text-align:left;">
           <md-icon md-svg-src="local://local/ui/modules/multiplayer/icons/icon_clyde_white_RGB.svg"></md-icon>
           {{:: 'ui.multiplayer.discord' | translate}}
         </md-button>
 
-        <md-button id="forum-btn" onclick="openExternalLink(`https://www.patreon.com/BeamMP`)" ng-class="" style="text-align:left;">
+        <md-button onclick="openExternalLink(`https://www.patreon.com/BeamMP`)" ng-class="" style="text-align:left;">
           <img src="local://local/ui/modules/multiplayer/icons/Digital-Patreon-Logo_White.png" style="width: 25px;vertical-align: middle;"></img>
           {{:: 'ui.multiplayer.patreon' | translate}}
         </md-button>
@@ -102,8 +103,12 @@
 	    <md-divider></md-divider>
 	    
 	    <div flex="" style="max-height: none;"></div>
-	    
-        <md-button id="direct-connect-btn" ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
+      
+        <img id="serverlist-profile-avatar" style="width: 100px; border-radius: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+        <span id="serverlist-profile-name" style="text-align: center; background-color: rgba(0, 0, 0, 0); border-radius: 10px; margin-left: 15px; margin-right: 15px; margin-top: 10px; padding: 2px;"></span>
+        <span id="serverlist-profile-id" style="text-align: center;font-size: 0.8em; line-height: 1.5em; opacity: 0.8; "></span>
+
+        <md-button ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
           <md-icon class="material-icons">exit_to_app</md-icon>
 				  {{:: 'ui.multiplayer.logout' | translate}}
         </md-button>

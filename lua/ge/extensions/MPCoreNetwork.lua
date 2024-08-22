@@ -32,6 +32,7 @@ local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap"
 -- auth
 
 local loggedIn = false
+local authResult = {}
 
 -- event functions
 
@@ -86,6 +87,8 @@ local function send(s)
 			log('W', 'send', 'Lost launcher connection!')
 			if launcherConnected then guihooks.trigger('LauncherConnectionLost') end
 			launcherConnected = false
+			authResult = {}
+			guihooks.trigger("authReceived", authResult)
 		elseif error == "Socket is not connected" then
 
 		else
@@ -198,6 +201,8 @@ local function logout()
 	log('M', 'logout', 'Attempting logout')
 	send('N:LO')
 	loggedIn = false
+	authResult = {}
+	guihooks.trigger("authReceived", authResult)
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
@@ -403,6 +408,18 @@ local function loginReceived(params)
 		loggedIn = false
 		guihooks.trigger('LoginError', result.message or '')
 	end
+
+	authResult = result
+	if authResult.username then
+		authResult.avatar = "http://localhost:".. proxyPort .."/avatar/"..authResult.username
+
+		if authResult.role and authResult.role ~= "USER" then
+			local roleColor = MPVehicleGE.getRoleInfoTable()[authResult.role].backcolor
+			authResult.color = "rgba(" .. roleColor.r .. "," .. roleColor.g .. "," .. roleColor.b .. "," .. roleColor.a .. ")"
+		end
+	end
+
+	guihooks.trigger('authReceived', authResult)
 end
 
 
@@ -678,6 +695,9 @@ end
 local function onUiChangedState (curUIState, prevUIState)
 	if curUIState == 'menu' and getMissionFilename() == "" then -- required due to game bug that happens if UI is reloaded on the main menu
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
+	end
+	if (curUIState == 'menu.multiplayer.servers') then
+		guihooks.trigger('authReceived', authResult)
 	end
 end
 

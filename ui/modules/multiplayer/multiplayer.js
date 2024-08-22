@@ -137,8 +137,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 'ConfirmationDialog', 
-function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
+.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 'ConfirmationDialog', '$filter', 'toastr', 
+function($scope, $state, $timeout, $mdDialog, ConfirmationDialog, $filter, toastr) {
 	var vm = this;
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
@@ -316,6 +316,77 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 		
 		document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");
 		document.getElementById('LoadingStatus').removeAttribute("hidden");
+	});
+
+	let isEA = false;
+
+	vm.showMessage = function() {
+		if (isEA)
+			ConfirmationDialog.open("ui.multiplayer.patreon.button.ea", "ui.multiplayer.patreon.popup.ea", [
+				{ label: "ui.inputActions.menu.menu_item_back.title", key: 0, isCancel: true },
+				{ label: "ui.multiplayer.patreon", key: 1 },
+				{ label: "Discord", key: 2 },
+				]
+			).then(res => {
+				if (res == 1)
+					openExternalLink("https://www.patreon.com/BeamMP");
+				else if (res == 2)
+					openExternalLink("https://discord.gg/beammp");
+		});
+		else 
+			ConfirmationDialog.open("ui.multiplayer.patreon.button.user", "ui.multiplayer.patreon.popup.user", [
+				{ label: "ui.inputActions.menu.menu_item_back.title", key: false, isCancel: true },
+				{ label: "ui.multiplayer.patreon", key: true, default: true },
+			]
+			).then(res => {
+				if (res)
+					openExternalLink("https://www.patreon.com/BeamMP");
+			});
+	}
+
+	$scope.$on('authReceived', function (event, data) {
+		let nameElement = document.getElementById("serverlist-profile-name")
+		let idElement = document.getElementById("serverlist-profile-id")
+		let avatarElement = document.getElementById("serverlist-profile-avatar")
+
+		if (Object.keys(data).length > 1) {
+			let patreonText = $filter('translate')('ui.multiplayer.patreon.message.user')
+			let buttonText = $filter('translate')('ui.multiplayer.patreon.button.user')
+
+			let buttonColor = "var(--bng-orange)"
+
+			let banner = document.getElementById("topRightStatus")
+
+			if (data.role == "EA") {
+				patreonText = $filter('translate')('ui.multiplayer.patreon.message.ea')
+				buttonText = $filter('translate')('ui.multiplayer.patreon.button.ea')
+				buttonColor = "rgba(193, 139, 255, 1)"
+				isEA = true;
+			} else
+				isEA = false;
+
+			banner.firstChild.nodeValue = patreonText
+			banner.children[0].style.color = buttonColor
+			banner.children[0].children[0].innerText = buttonText
+
+			if (data.color != null)
+				nameElement.style.backgroundColor = data.color
+
+			nameElement.textContent = data.username;
+			avatarElement.src = data.avatar;
+
+			if (data.id != null) {
+				idElement.textContent = "ID: " + data.id
+				idElement.onclick = function() {
+					bngApi.engineLua(`setClipboard("`+data.id+`")`);
+					toastr.info("Copied ID to clipboard")
+				}
+			}
+		} else {
+			nameElement.textContent = "";
+			idElement.textContent = "";
+			avatarElement.removeAttribute("src");
+		}
 	});
 
 	vm.exit = function ($event) {

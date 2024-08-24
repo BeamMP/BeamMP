@@ -1861,20 +1861,22 @@ local function focusCameraOnPlayer(targetName)
 	end
 end
 
-local function applyQueuedEvents()
-	UI.updateQueue(getQueueCounts())
+local function applyVehicleQueues(serverVehicleID, vehicle) 
+	if vehicle.spawnQueue then
+		local data = vehicle.spawnQueue
+		vehicle.spawnQueue = nil
+		applyVehSpawn(data)
+	end
+	if vehicle.editQueue then
+		local data = vehicle.editQueue
+		vehicle.editQueue = nil
+		applyVehEdit(serverVehicleID, data)
+	end
+end
 
+local function applyQueuedEvents()
 	for serverVehicleID, vehicle in pairs(vehicles) do
-		if vehicle.spawnQueue then
-			local data = vehicle.spawnQueue
-			vehicle.spawnQueue = nil
-			applyVehSpawn(data)
-		end
-		if vehicle.editQueue then
-			local data = vehicle.editQueue
-			vehicle.editQueue = nil
-			applyVehEdit(serverVehicleID, data)
-		end
+		applyVehicleQueues(serverVehicleID, vehicle)
 	end
 
 	UI.updateQueue(getQueueCounts())
@@ -1882,20 +1884,9 @@ local function applyQueuedEvents()
 end
 
 local function applyPlayerQueues(playerID)
-	UI.updateQueue(getQueueCounts())
-	
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		if vehicle.ownerID == playerID then
-			if vehicle.spawnQueue then
-				local data = vehicle.spawnQueue
-				vehicle.spawnQueue = nil
-				applyVehSpawn(data)
-			end
-			if vehicle.editQueue then
-				local data = vehicle.editQueue
-				vehicle.editQueue = nil
-				applyVehEdit(serverVehicleID, data)
-			end 
+			applyVehicleQueues(serverVehicleID, vehicle)
 		end
 	end
 

@@ -999,7 +999,7 @@ local function checkIfVehiclenameInvalid(vehicleName, playerName, v) -- TODO: fi
 	end
 
 	log('W', 'applyVehSpawn', "The received vehicle "..vehicleName.." is not valid, cancelling the spawn (likely a missing mod)")
-	if playerName then UI.showNotification("Player "..playerName.." spawned an illegal vehicle ("..vehicleName.."), it was skipped") end
+	if playerName then UI.showNotification("Player "..playerName.." spawned an illegal vehicle ("..vehicleName.."), it was skipped", nil, ""..playerName..""..vehicleName.."illegal", "cancel") end
 	return true
 end
 
@@ -1184,7 +1184,7 @@ local function spawnDestroyedVehicles(serverVehID)
     end
 
     if vehicles[serverVehID].isDeleted == false then
-        UI.showNotification('This vehicle hasnt been deleted yet?')
+        UI.showNotification(''..vehicles[serverVehID].ownerName..'\'s '..vehicles[serverVehID].jbeam..' hasnt been deleted yet?', nil, ''..serverVehID..'delete', 'warning')
         log("I", "restorePlayerVehicle", "This vehicle hasnt been deleted yet")
         return
     end
@@ -1207,7 +1207,7 @@ local function spawnDestroyedVehicles(serverVehID)
         serverVehicleID = serverVehID,
         data = encodedVehicleData
     }
-    UI.showNotification('Trying to respawn '..playerOwnerName)
+    UI.showNotification('Trying to respawn '..playerOwnerName..'\'s '..vehicles[serverVehID].jbeam, nil, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
     if settings.getValue("enableSpawnQueue") then
         vehicles[serverVehID].spawnQueue = eventdata
         UI.updateQueue(getQueueCounts())
@@ -1474,8 +1474,13 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 			vehicles[serverVehicleID].spawnQueue = eventdata
 
+			local icon = 'directions_car'
+			if decodedData.jbm == "unicycle" then
+				icon = "person"
+			end
+
 			UI.updateQueue(getQueueCounts())
-			UI.showNotification('Spawn received and queued for '..playerNickname)
+			UI.showNotification('Spawn received and queued for '..playerNickname, nil, ''..playerNickname..''..serverVehicleID..'spawn', icon)
 		else
 			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle now")
 
@@ -1510,7 +1515,7 @@ local function onServerVehicleEdited(serverID, data)
 		log('I', 'onServerVehicleEdited', "edit "..serverID.." queued")
 		local playerNickname = owner and owner.name or "unknown"
 		UI.updateQueue(getQueueCounts())
-		UI.showNotification('Edit received and queued for '..playerNickname)
+		UI.showNotification('Edit received and queued for '..playerNickname, nil, ''..playerNickname..''..serverID..'edit', 'build')
 	else
 		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
 

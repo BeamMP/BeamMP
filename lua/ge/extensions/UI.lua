@@ -215,7 +215,10 @@ local function showNotification(text, type, category, icon)
 	else
 		log('I', 'showNotification', "[Message] > "..tostring(text))
 		local leftName = string.match(text, "^(.+) left the server!$")
-		if leftName then MPVehicleGE.onPlayerLeft(leftName) end
+		if leftName then 
+			MPVehicleGE.onPlayerLeft(leftName)
+			icon = icon or "person"
+		end
 		--local joinedName = string.match(text, "^Welcome (.+)!$")
 		--if joinedName then MPVehicleGE.onPlayerJoined(joinedName) end
 	end

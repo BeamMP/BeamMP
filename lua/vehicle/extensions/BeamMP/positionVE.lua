@@ -86,6 +86,7 @@ local raccErrorSmoother = newVectorSmoothing(50)            -- Smoother for angu
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
+local framesSinceReset = 0
 local timer = 0
 local ownPing = 0
 local lastDT = 0
@@ -176,6 +177,7 @@ local function onReset()
 	remoteData.acc = vec3(0,0,0)
 	remoteData.racc = vec3(0,0,0)
 	remoteData.timer = 0
+	framesSinceReset = 0
 end
 
 local physcounter = 0
@@ -211,6 +213,7 @@ local function updateGFX(dt)
 	dt = dt * (remoteData.localSimspeed or 1)
 	timer = timer + dt
 	lastDT = dt
+	framesSinceReset = framesSinceReset + 1
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
@@ -298,32 +301,40 @@ local function updateGFX(dt)
 	end
 
 	-- If instant teleport distance or teleport timer exceeded, teleport
-	if tpTimer > (tpDelayAdd + abs(predictTime)) or posErrorLen > tpDist2 or rotErrorLen > tpRot2 then
-		-- Subtract COG offset because setPosition works relative to refNode
-		local tpPos = pos - velocityVE.cogRel:rotated(rot)
-		obj:queueGameEngineLua("positionGE.setPosition("..obj:getID()..","..tpPos.x..","..tpPos.y..","..tpPos.z..")")
-		
-		if rotErrorLen > tpRot1 or rotErrorLen > tpRot2 then
-			rotateVehicle(rotErrorQuat)
-			--print("Teleport Rotation "..obj:getID())
+	if framesSinceReset > 5 then -- wating 6 frames then always teleporting the 6th frame makes reseting/recovering a remote vehicle at speed teleport much more consistent, maybe the smoothers catching up?
+		if framesSinceReset == 6 or tpTimer > (tpDelayAdd + abs(predictTime)) or posErrorLen > tpDist2 or rotErrorLen > tpRot2 then
+			local predictTime = predictTime + dt -- add one frame so postion is correct when arriving in GE
+			-- Use received position, and smoothed velocity and acceleration to predict vehicle position
+			local pos = remoteData.pos + remoteVel*predictTime + 0.5*remoteAcc*predictTime*predictTime
+			local vel = remoteVel + remoteAcc*predictTime
+			local rotAdd = remoteRvel*predictTime + 0.5*remoteRacc*predictTime*predictTime
+			local rot = remoteData.rot * quatFromEuler(rotAdd.x, rotAdd.y, rotAdd.z)
+			-- Subtract COG offset because setPosition works relative to refNode
+			local tpPos = pos - velocityVE.cogRel:rotated(rot)
+
+			local noCounterVelocity = 0
+			if framesSinceReset == 6 then
+				noCounterVelocity = 1 -- logs on the t series count as not attached so they would fly backwards on spawn, this disables the counter velocity preventing that
+			end
+			local posData = {pos = tpPos, vel = vel, vehVel = vehVel, rot = rot,rvel = rvel , noCounter = noCounterVelocity}
+			
+			obj:queueGameEngineLua("positionGE.setPositionRotationVelocity("..obj:getID()..","..serialize(posData)..")")
+	
+			remoteVelSmoother:set(remoteData.vel)
+			remoteRvelSmoother:set(remoteData.rvel)
+	
+			remoteData.acc = vec3(0,0,0)
+			remoteData.racc = vec3(0,0,0)
+			remoteAccSmoother:reset()
+			remoteRaccSmoother:reset()
+	
+			lastAcc = nil
+	
+			accErrorSmoother:reset()
+			raccErrorSmoother:reset()
+	
+			return
 		end
-
-		velocityVE.setAngularVelocity(vel.x, vel.y, vel.z, rvel.x, rvel.y, rvel.z)
-
-		remoteVelSmoother:set(remoteData.vel)
-		remoteRvelSmoother:set(remoteData.rvel)
-
-		remoteData.acc = vec3(0,0,0)
-		remoteData.racc = vec3(0,0,0)
-		remoteAccSmoother:reset()
-		remoteRaccSmoother:reset()
-
-		lastAcc = nil
-
-		accErrorSmoother:reset()
-		raccErrorSmoother:reset()
-
-		return
 	end
 
 	local velError = vel - vehVel
@@ -347,10 +358,12 @@ local function updateGFX(dt)
 
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
-	if targetRacc:length() > minRotForce then
-		velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.x, targetRacc.y, targetRacc.z)
-	elseif targetAcc:length() > minPosForce then
-		velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
+	if framesSinceReset > 5 then
+		if targetRacc:length() > minRotForce then
+			velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.x, targetRacc.y, targetRacc.z)
+		elseif targetAcc:length() > minPosForce then
+			velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)
+		end
 	end
 
 	lastAcc = targetAcc

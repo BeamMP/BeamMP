@@ -259,10 +259,15 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 	end
 end
 
-local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
+local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity, noCounterVelocity)
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local cog = M.cogRel:rotated(rot)
 	local vel = vec3(x, y, z) - cog:cross(vec3(pitchAV, rollAV, yawAV))
+	local velMulti = 1
+
+	if onlyAngularVelocity then
+		velMulti = 0
+	end
 
 	local connectedNodeCount = #nodes
 	local disconnectedNodeCount = #disconnectedNodes
@@ -280,14 +285,14 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 			end
 		end
 	else
-		obj:applyClusterLinearAngularAccel(refNode,vel*physicsFPS, -vec3(pitchAV, rollAV, yawAV)*physicsFPS)
-
+		obj:applyClusterLinearAngularAccel(refNode,vel*physicsFPS*velMulti, -vec3(pitchAV, rollAV, yawAV)*physicsFPS)
+		if noCounterVelocity then return end -- used on spawn and reset to wait with the counter velocity for a bit so things like logs on the T-series don't slide off
 		addAngularForce(disconnectedNodes, -x, -y, -z, -pitchAV, -rollAV, -yawAV, true)
 	end
 end
 
 -- Instantly set vehicle angular velocity in rad/s
-local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
+local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity)
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local cog = M.cogRel:rotated(rot)
 	
@@ -299,7 +304,7 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV)
 	local vvel = vec3(obj:getVelocity()) + cog:cross(vrvel)
 	local velDiff = vel - vvel
 	
-	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z)
+	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z, onlyAngularVelocity)
 end
 
 local function updateGFX(dt)

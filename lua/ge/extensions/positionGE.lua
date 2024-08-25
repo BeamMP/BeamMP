@@ -210,14 +210,14 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 	local rot = vehRot:inversed() * newRot
 	veh:setClusterPosRelRot(refNodeID, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w)
 
-	vel = vel - localVel:rotated(rot) --TODO check if cluster rotation also rotates velocity
+	vel = vel - localVel:rotated(rot) -- setClusterPosRelRot also rotates the velocity so we have to do that as well
 	veh:applyClusterVelocityScaleAdd(refNodeID, 1, vel.x, vel.y, vel.z) -- setting velocity with the GE command doesn't destroy vehicles so we set most of the velocity here
 
 	local noCounterVelocity = positionData.noCounter or 0
 	local onlyAngularVelocity = 1
 
 	-- but since it doesn't do rotational velocity we still need to use VE
-	-- somehow GE tp VE queues are really fast, so we don't need any extra prediction with this queue
+	-- apparently GE to VE queues are really fast, so we don't need any extra prediction with this queue
 	veh:queueLuaCommand("velocityVE.setAngularVelocity("..vel.x..", "..vel.y..", "..vel.z..", "..rvel.x..", "..rvel.y..", "..rvel.z..","..onlyAngularVelocity..","..noCounterVelocity..")")
 end
 

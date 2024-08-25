@@ -292,7 +292,7 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 end
 
 -- Instantly set vehicle angular velocity in rad/s
-local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity)
+local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity, noCounterVelocity)
 	local rot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
 	local cog = M.cogRel:rotated(rot)
 	
@@ -304,7 +304,7 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 	local vvel = vec3(obj:getVelocity()) + cog:cross(vrvel)
 	local velDiff = vel - vvel
 	
-	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z, onlyAngularVelocity)
+	addAngularVelocity(velDiff.x, velDiff.y, velDiff.z, rvelDiff.x, rvelDiff.y, rvelDiff.z, onlyAngularVelocity, noCounterVelocity)
 end
 
 local function updateGFX(dt)

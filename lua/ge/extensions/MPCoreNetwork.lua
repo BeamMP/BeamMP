@@ -612,7 +612,7 @@ runPostJoin = function() -- gets called once loaded into a map
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
-		--core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
 		if mp_core then

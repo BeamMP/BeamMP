@@ -46,7 +46,7 @@ end
 -- Position
 local posCorrectMul = 5        -- How much velocity to use for correcting position error (m/s per m)
 local posForceMul = 5          -- How much acceleration is used to correct velocity
-local minPosForce = 0.07       -- If force is smaller than this, ignore to save performance
+local minPosForce = 0.04       -- If force is smaller than this, ignore to save performance
 local maxPosForce = 100        -- Maximum position correction force (m/s^2)
 local maxAcc = 100             -- Maximum acceleration in received data (m/s^2)
 local maxAccError = 3          -- If difference between target and actual acceleration larger than this, decrease force
@@ -54,7 +54,7 @@ local maxAccError = 3          -- If difference between target and actual accele
 -- Rotation
 local rotCorrectMul = 7        -- How much velocity to use for correcting angle error (rad/s per rad)
 local rotForceMul = 7          -- How much acceleration is used to correct angular velocity
-local minRotForce = 0.03       -- If force is smaller than this, ignore to save performance
+local minRotForce = 0.02       -- If force is smaller than this, ignore to save performance
 local maxRotForce = 50         -- Maximum rotation correction force (rad/s^2)
 local maxRacc = 50             -- Maximum angular acceleration in received data (rad/s^2)
 local maxRaccError = 3         -- If difference between target and actual angular acceleration larger than this, decrease force
@@ -359,7 +359,7 @@ local function updateGFX(dt)
 	--print("targetAcc: "..targetAcc:length())
 	--print("targetRacc: "..targetRacc:length())
 	if framesSinceReset > 5 then
-		if targetRacc:length() > minRotForce then
+		if targetRacc:length() > minRotForce or vehVel:length() > 1 then
 			velocityVE.addAngularVelocity(targetAcc.x, targetAcc.y, targetAcc.z, targetRacc.x, targetRacc.y, targetRacc.z)
 		elseif targetAcc:length() > minPosForce then
 			velocityVE.addVelocity(targetAcc.x, targetAcc.y, targetAcc.z)

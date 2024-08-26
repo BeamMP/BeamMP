@@ -34,6 +34,7 @@
   "ui.options.multiplayer.skipOtherPlayersVehicles": "Diğer oyunuların arabalarına geçiş yapmayı devre dışı bırak",
   "ui.options.multiplayer.fadeVehicles": "Yaklaştıkça araçları soldur",
   "ui.options.multiplayer.fadeVehicles.tooltip": "Çarpışma fizikleri devre dışı bırakıldığında birlikte iyi çalışır",
+  "ui.options.multiplayer.showPlayerIDs.tooltip": "Oyuncu listesinde oyuncu kimliklerininin görüntülenmesini etkinleştirin.",
   "ui.options.multiplayer.disableLuaReload": "Bir sunucudan çıkarken Lua'nın yeniden yüklenmesini devre dışı bırak",
   "ui.options.multiplayer.disableLuaReload.tooltip": "Lua'nın yeniden yüklenmesi modların oyun işlevlerini değiştirmesi durumunda oyunun yeniden çalışır hale gelmesi için gereklidir. Oyunun daha hızlı yüklenmesi için riski size ait olmak üzere devre dışı bırakılabilir.",
   "ui.options.multiplayer.disableInstabilityPausing": "Kararsızlıklardan kaynaklanan duraklatmayı devre dışı bırak",
@@ -71,6 +72,7 @@
   "ui.options.multiplayer.unicycleAutoSave": "Son kullandığın Unicycle'ı otomatik olarak kaydet",
   "ui.options.multiplayer.unicycleAutoSave.tooltip": "Unicycle'ını despawnladığınızda kaydedilir ve sonraki spawnlamanızda yeniden kullanılır",
   "ui.options.multiplayer.unicycleOnSwitch": "Varsayılan olarak şuna ayarlanmış",
+  "ui.options.multiplayer.skipModSecurityWarning": "Mod güvenlik uyarıs pencerisin atla",
   "ui.options.multiplayer.blobsTitle": "Bloblar",
   "ui.options.multiplayer.nameTagTitle": "İsim etiketleri",
   "ui.options.multiplayer.others": "Diğerler",
@@ -131,5 +133,7 @@
   "ui.multiplayertos.info2": "Ayrıca burada daha fazla bilgi bulabilirsiniz",
   "ui.common.multiplayer.sync": "Senkronize et",
   "ui.apps.categories.multiplayer": "Çok Oyunculu",
-  "ui.camera.mode.passenger": "Yolcu"
+  "ui.camera.mode.passenger": "Yolcu",
+  "ui.multiplayer.security.no_return": "İptal & Geri Dön",
+  "ui.multiplayer.security.prompt": "Katıldığınız sunucuda otomatik olarak indirilen ve yüklenen modlar vardır. Bu modlar bilgisayarınızda çalışacak kodlar içerebilir ve kötü amaçlı olabilir. Lütfen devam etmeden önce sunucu sahiplerine güvendiğinizden emin olun. Modların kötü amaçlı olmadığına güveniyorsanız, kendi sorumluluğunuzda devam edebilirsiniz. BeamMP bu sunucudan indirilen hiçbir içerikten sorumlu değildir. Bu uyarı ayarlardan devre dışı bırakılabilir."
 }

@@ -81,6 +81,12 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 			local MPcouplers = {}
 			MPcouplers.state = true
 			MPcouplers._nodetag = nodeId
+			if ID == obj2id then -- checking if coupler is connecting to another vehicle
+				MPcouplers.trailer = false
+			else
+				MPcouplers.trailer = true
+			end
+			MPcouplers.obj2id = obj2id
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 
@@ -117,6 +123,12 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 			local MPcouplers = {}
 			MPcouplers.state = false
 			MPcouplers._nodetag = nodeId
+			if ID == obj2id then -- checking if coupler is connecting to another vehicle
+				MPcouplers.trailer = false
+			else
+				MPcouplers.trailer = true
+			end
+			MPcouplers.obj2id = obj2id
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 

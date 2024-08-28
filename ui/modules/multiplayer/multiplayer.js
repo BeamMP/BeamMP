@@ -286,6 +286,21 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 		vm.refreshList();
 	};
 
+	vm.directConnectFavorite = async function() {
+		var ip = document.getElementById('directip').value.trim();
+		var port = document.getElementById('directport').value.trim();
+
+		var valid = (ip.length > 0) && (port.length > 0) && !isNaN(port)
+		if (!valid) return;
+		var name = ip + ":" + port;
+		var server = {
+			cversion: await getLauncherVersion(), ip: ip, location: "--", map: "", maxplayers: "0", players: "0",
+			owner: "", playersList: "", sdesc: "", sname: name, strippedName: name,
+			custom: true, port: port
+		}
+		addFav(server)
+	}
+
 	vm.stateName = $state.current.name;
 	bngApi.engineLua('settings.requestState()');
 	$scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {

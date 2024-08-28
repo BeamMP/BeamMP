@@ -11,6 +11,15 @@ local lastNodeID2coupled
 local lastNodeIDdecoupled
 local lastNodeID2decoupled
 
+local originalActivateAutoCoupling = beamstate.activateAutoCoupling
+
+local function activateAutoCoupling(...)
+	if v.mpVehicleType and v.mpVehicleType == "R" then return end
+	originalActivateAutoCoupling(...)
+end
+
+beamstate.activateAutoCoupling = activateAutoCoupling
+
 local function toggleCouplerState(data)
 	local decodedData = jsonDecode(data)
 	for k,v in pairs(decodedData) do
@@ -19,9 +28,9 @@ local function toggleCouplerState(data)
 				if v.state then
 					local coupler = beamstate.couplerCache[v._nodetag]
 					if coupler then
-						obj:attachCoupler(coupler.cid, coupler.couplerTag or "", coupler.couplerStrength or 1000000, 2, coupler.couplerLockRadius or 0.025, 0.3, coupler.couplerTargets or 0)
+						obj:attachCoupler(coupler.cid, coupler.couplerTag or "", coupler.couplerStrength or 1000000, 10, coupler.couplerLockRadius or 0.025, 0.3, coupler.couplerTargets or 0)
 					else
-						dump("no cached coupler")
+						dump("no cached coupler found with tag",v._nodetag)
 					end
 				else
 					obj:detachCoupler(v._nodetag, 0)

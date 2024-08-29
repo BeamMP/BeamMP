@@ -227,6 +227,11 @@ local includedControllerTypes = {
 			remoteOnly = true,
 			remoteFunction = jatoRemoteUpdateGFX
 		}
+	},
+
+	["lightbar"] = {
+		["toggleMode"] = {
+		}
 	}
 }
 

@@ -1553,10 +1553,11 @@ local function onServerVehicleResetted(serverVehicleID, data)
 			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 			if veh then
 				local pr = jsonDecode(data) -- Decoded data
-				veh:reset()
 				if pr then
 					veh:setPositionRotation(pr.pos.x, pr.pos.y, pr.pos.z, pr.rot.x, pr.rot.y, pr.rot.z, pr.rot.w) -- Apply position
+					veh:resetBrokenFlexMesh() -- setPositionRotation resets the vehicle but not the FlexMesh so we need to do that manually
 				else
+					veh:reset()
 					log('E', "onServerVehicleResetted", "Could not parse posrot JSON")
 				end
 			end

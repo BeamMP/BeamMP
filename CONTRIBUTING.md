@@ -62,5 +62,5 @@ In general, we follow the ["fork-and-pull" Git workflow](https://github.com/susa
 
 ## Getting Help
 
-Join us in the BeamMP Community [Forum](https://forum.beamnmp.com) and post your question there in the correct category with a descriptive tag.
+Join us in the BeamMP Community [Forum](https://forum.beammp.com) and post your question there in the correct category with a descriptive tag.
 Alternatively contact us on [Discord](https://discord.gg/beammp) (Not recommended for this subject).

@@ -1972,6 +1972,8 @@ local function onPreRender(dt)
 				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
 				v.position = vec3(tempPosx,tempPosy,tempPosz)
 				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
+
+				v.rotation = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp())) -- getRotation doesn't update in GE so we need to use direction vectors instead
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet

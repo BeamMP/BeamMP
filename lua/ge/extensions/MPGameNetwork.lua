@@ -139,6 +139,17 @@ local function quitMP(reason)
 	})
 end
 
+local function playerLeft(params)
+	local icon = nil
+	local leftName = string.match(params, "^(.+) left the server!$") 
+	if leftName then 
+		MPVehicleGE.onPlayerLeft(leftName) 
+		icon = icon or "person" 
+	end 
+	
+	UI.showNotification(params, nil, icon)
+end
+
 -- -----------------------------------------------------------------------------
 -- Events System
 -- -----------------------------------------------------------------------------
@@ -266,7 +277,7 @@ local HandleNetwork = {
 	['O'] = function(params) MPVehicleGE.handle(params) end, -- all vehicle spawn, modification and delete events, couplers
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
 	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params,nil,"person_add") end, -- A player joined
-	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
+	['L'] = function(params) playerLeft(params) end, -- A player left
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
 	['T'] = function(params) quitMP(params) end, -- Player Kicked Event (old, doesn't contain reason)

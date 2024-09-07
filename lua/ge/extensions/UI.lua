@@ -215,8 +215,6 @@ local function showNotification(text, category, icon)
 		MPVehicleGE.onPlayerLeft(leftName)
 		icon = icon or "person"
 	end
-	--local joinedName = string.match(text, "^Welcome (.+)!$")
-	--if joinedName then MPVehicleGE.onPlayerJoined(joinedName) end
 	
 	ui_message(''..text, 10, category or text, icon)
 end

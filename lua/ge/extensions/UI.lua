@@ -206,22 +206,18 @@ end
 
 --- Display a prompt in the top corner as a notification, Good for server related events like joins/leaves
 -- @param text string
--- @param type string
 -- @param category string 
 -- @param icon string material_ icons from ui\assets\Sprites\svg-symbols.svg example: smoking_rooms
-local function showNotification(text, type, category, icon)
-	if type and type == "error" then
-		log('I', 'showNotification', "[UI Error] > "..tostring(text))
-	else
-		log('I', 'showNotification', "[Message] > "..tostring(text))
-		local leftName = string.match(text, "^(.+) left the server!$")
-		if leftName then 
-			MPVehicleGE.onPlayerLeft(leftName)
-			icon = icon or "person"
-		end
-		--local joinedName = string.match(text, "^Welcome (.+)!$")
-		--if joinedName then MPVehicleGE.onPlayerJoined(joinedName) end
+local function showNotification(text, category, icon)
+	log('I', 'showNotification', "[Message] > "..tostring(text))
+	local leftName = string.match(text, "^(.+) left the server!$")
+	if leftName then 
+		MPVehicleGE.onPlayerLeft(leftName)
+		icon = icon or "person"
 	end
+	--local joinedName = string.match(text, "^Welcome (.+)!$")
+	--if joinedName then MPVehicleGE.onPlayerJoined(joinedName) end
+	
 	ui_message(''..text, 10, category or text, icon)
 end
 --- Show a UI dialog / alert box to inform the user of something.

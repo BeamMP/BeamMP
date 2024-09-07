@@ -265,7 +265,7 @@ local HandleNetwork = {
 	['Z'] = function(params) positionGE.handle(params) end, -- position and velocity
 	['O'] = function(params) MPVehicleGE.handle(params) end, -- all vehicle spawn, modification and delete events, couplers
 	['P'] = function(params) MPConfig.setPlayerServerID(params) end,
-	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params,nil,nil,"person_add") end, -- A player joined
+	['J'] = function(params) MPUpdatesGE.onPlayerConnect() UI.showNotification(params,nil,"person_add") end, -- A player joined
 	['L'] = function(params) UI.showNotification(params) end, -- Display custom notification
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
@@ -273,7 +273,7 @@ local HandleNetwork = {
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
-	['N'] = function(params) local category, icon, message = packet:match("([^:]+):([^:]+):(.+)") UI.showNotification(message, nil, category, icon) end,
+	['N'] = function(params) local category, icon, message = packet:match("([^:]+):([^:]+):(.+)") UI.showNotification(message, category, icon) end,
 }
 
 

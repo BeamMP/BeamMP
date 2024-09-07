@@ -1184,8 +1184,8 @@ local function spawnDestroyedVehicles(serverVehID)
     end
 
     if vehicles[serverVehID].isDeleted == false then
-        UI.showNotification(''..vehicles[serverVehID].ownerName..'\'s '..vehicles[serverVehID].jbeam..' hasnt been deleted yet?', ''..serverVehID..'delete', 'warning')
-        log("I", "restorePlayerVehicle", "This vehicle hasnt been deleted yet")
+        UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
+        log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
         return
     end
 
@@ -1207,7 +1207,7 @@ local function spawnDestroyedVehicles(serverVehID)
         serverVehicleID = serverVehID,
         data = encodedVehicleData
     }
-    UI.showNotification('Trying to respawn '..playerOwnerName..'\'s '..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
+    UI.showNotification('Trying to respawn '..playerOwnerName.."'s "..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
     if settings.getValue("enableSpawnQueue") then
         vehicles[serverVehID].spawnQueue = eventdata
         UI.updateQueue(getQueueCounts())

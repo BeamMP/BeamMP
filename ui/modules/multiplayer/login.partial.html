@@ -7,17 +7,11 @@
 				<h2 class="text-white" id="loginHeader">{{:: 'ui.multiplayer.loginDescription1' | translate}}</h2>
 				<input (keyup.enter)="multiplayer.login()" type="text" id="loginUsername" placeholder="Username / Email"/>
 				<input (keyup.enter)="multiplayer.login()" type="password" id="loginPassword" placeholder="Password"/>
-				<div style="display:flex; align-content: space-evenly;">
-					<md-button class="button" ng-click="login()">{{:: 'ui.multiplayer.login' | translate}}</md-button>
+				<div style="display:flex; align-content: space-evenly; width: 400px;">
+					<md-button class="button" style="margin-left: 0;" ng-click="login()">{{:: 'ui.multiplayer.login' | translate}}</md-button>
 					<md-button class="button" ng-click="switchConnection()">{{:: 'ui.multiplayer.playAsGuest' | translate}}</md-button>
-					<!--
-					<md-button class="button" onclick="openExternalLink('https://forum.beammp.com/signup')">{{:: 'ui.multiplayer.register' | translate}}</md-button>
-					--> 
+					<md-button class="button" style="margin-right: 0;" onclick="openExternalLink('https://forum.beammp.com/signup')">{{:: 'ui.multiplayer.register' | translate}}</md-button>
 				</div>
-				</em>
-					Want to register for an account? Then go to<br>forum.beammp.com and,
-					once there, look <br> to the top right of the page and click "Sign Up".
-				</em>
 			</form>
 			<form id="GuestContainer" style="display: none;">
 				<h3 class="text-white">{{:: 'ui.multiplayer.guestDescription1' | translate}}</h3>

@@ -496,7 +496,7 @@ function createRole(roleName, tag, shorttag, red, green, blue)
 	else
 		contents["tag"] = " [*" .. tag .. "]"
 	end
-	if shortag == 0 then
+	if shorttag == 0 then
 		contents["shorttag"] = ""
 	else
 		contents["shorttag"] = " [*" .. shorttag .. "]"
@@ -2268,7 +2268,7 @@ M.hideNicknames            = hideNicknames            -- takes: bool   returns: 
 M.toggleNicknames          = toggleNicknames          -- takes: -
 M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
-M.createRole               = createRole               -- takes: string roleName, string tag, string shortag, int red, int green, int blue
+M.createRole               = createRole               -- takes: string roleName, string tag, string shorttag, int red, int green, int blue
 M.removeRole               = removeRole               -- takes: string roleName
 M.setVehicleRole           = setVehicleRole           -- takes: string playerIDvehicleID, string roleName, string displayName
 M.removeVehicleRole        = removeVehicleRole        -- takes: string playerIDVehicleID

@@ -78,13 +78,17 @@ The individual language progress is as follows:
 
 | Language              | Badge                                                                                                                           |
 |-----------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| German                | [![gitlocalized ](https://gitlocalize.com/repo/9181/de-DE/badge.svg)](https://gitlocalize.com/repo/9181/de-DE?utm_source=badge) |
-| Spanish               | [![gitlocalized ](https://gitlocalize.com/repo/9181/es-ES/badge.svg)](https://gitlocalize.com/repo/9181/es-ES?utm_source=badge) |
+| Catalan               | [![gitlocalized ](https://gitlocalize.com/repo/9181/ca/badge.svg)](https://gitlocalize.com/repo/9181/ca?utm_source=badge)       |
+| Chinese               | [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)       |
+| Czech                 | [![gitlocalized ](https://gitlocalize.com/repo/9181/cs/badge.svg)](https://gitlocalize.com/repo/9181/cs?utm_source=badge)       |
 | French                | [![gitlocalized ](https://gitlocalize.com/repo/9181/fr-FR/badge.svg)](https://gitlocalize.com/repo/9181/fr-FR?utm_source=badge) |
+| German                | [![gitlocalized ](https://gitlocalize.com/repo/9181/de-DE/badge.svg)](https://gitlocalize.com/repo/9181/de-DE?utm_source=badge) |
 | Japanese              | [![gitlocalized ](https://gitlocalize.com/repo/9181/ja-JP/badge.svg)](https://gitlocalize.com/repo/9181/ja-JP?utm_source=badge) |
 | Korean (South Korea)  | [![gitlocalized ](https://gitlocalize.com/repo/9181/ko-KR/badge.svg)](https://gitlocalize.com/repo/9181/ko-KR?utm_source=badge) |
 | Polish                | [![gitlocalized ](https://gitlocalize.com/repo/9181/pl/badge.svg)](https://gitlocalize.com/repo/9181/pl?utm_source=badge)       |
 | Portuguese (Brazil)   | [![gitlocalized ](https://gitlocalize.com/repo/9181/pt_BR/badge.svg)](https://gitlocalize.com/repo/9181/pt_BR?utm_source=badge) |
 | Portuguese (Portugal) | [![gitlocalized ](https://gitlocalize.com/repo/9181/pt-PT/badge.svg)](https://gitlocalize.com/repo/9181/pt-PT?utm_source=badge) |
 | Russian               | [![gitlocalized ](https://gitlocalize.com/repo/9181/ru/badge.svg)](https://gitlocalize.com/repo/9181/ru?utm_source=badge)       |
-| Chinese               | [![gitlocalized ](https://gitlocalize.com/repo/9181/zh/badge.svg)](https://gitlocalize.com/repo/9181/zh?utm_source=badge)       |
+| Slovak                | [![gitlocalized ](https://gitlocalize.com/repo/9181/sk/badge.svg)](https://gitlocalize.com/repo/9181/sk?utm_source=badge)       |
+| Spanish               | [![gitlocalized ](https://gitlocalize.com/repo/9181/es-ES/badge.svg)](https://gitlocalize.com/repo/9181/es-ES?utm_source=badge) |
+| Turkish               | [![gitlocalized ](https://gitlocalize.com/repo/9181/tr/badge.svg)](https://gitlocalize.com/repo/9181/tr?utm_source=badge)       |

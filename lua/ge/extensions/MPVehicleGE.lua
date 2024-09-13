@@ -494,12 +494,12 @@ function createRole(roleName, tag, shorttag, red, green, blue)
 	if tag == 0 then
 		contents["tag"] = ""
 	else
-		contents["tag"] = " [*" .. tag .. "]"
+		contents["tag"] = " [" .. tag .. "]"
 	end
 	if shorttag == 0 then
 		contents["shorttag"] = ""
 	else
-		contents["shorttag"] = " [*" .. shorttag .. "]"
+		contents["shorttag"] = " [" .. shorttag .. "]"
 	end
 	custom_roleToInfo[roleName] = contents
 	return true

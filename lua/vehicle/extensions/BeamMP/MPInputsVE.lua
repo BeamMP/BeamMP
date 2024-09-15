@@ -95,7 +95,7 @@ local shortName = {
 local function getInputs()
 	local inputsToSend = {}
 	for inputName, _ in pairs(input.state) do
-		local state = electrics.values[inputName] -- the electric is the most accurate place to get the input value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
+		local state = electrics.values[inputName] or electrics.values[inputName.."_input"] -- the electric is the most accurate place to get the input value, the state.val is different with different filters and using the smoother states causes wrong inputs in arcade mode
 		if state then
 			if inputName == "steering" then
 				if v.data.input then

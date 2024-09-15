@@ -26,7 +26,7 @@
   "ui.options.multiplayer.nameTagShowDistance": "Zobrazit vzdálenost od ostatních hráčů",
   "ui.options.multiplayer.debugOutput": "Zobrazit síťovou aktivitu v konzoli",
   "ui.options.multiplayer.launcherPort": "Port spouštěče:[br]Neměňte, pokud není nutné",
-  "ui.options.multiplayer.launcherPortWarn": "Neměňte, pokud není to nutné",
+  "ui.options.multiplayer.launcherPortWarn": "Neměňte, pokud to není nutné",
   "ui.options.multiplayer.launcherPortDefaultPort": "Výchozí hodnota je 4444",
   "ui.options.multiplayer.launcherPort.tooltip": "Nastavte na vlastní port, který spouštěč používá.",
   "ui.options.multiplayer.clearLauncherCache": "Vyčistit mezipaměť modů spouštěče",

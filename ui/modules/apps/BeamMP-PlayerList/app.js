@@ -185,8 +185,9 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.queuedPlayers = []
 
 	$scope.$on('setQueue', function(event, data) {
+		$scope.queuedPlayers = []
+
 		if (!data.queuedPlayers) {
-			$scope.queuedPlayers = []
 			var rows = document.querySelectorAll('[id^="playerlist-row-"]');
 			for (let i = 0; i < rows.length; i++) {
 				rows[i].style.setProperty('background-color', 'transparent');

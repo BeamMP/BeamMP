@@ -53,6 +53,21 @@ local function sendBreakGroups(data, gameVehicleID)
 end
 
 
+local function sendControllerData(data, gameVehicleID)
+	if MPGameNetwork.launcherConnected() then
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
+			local decodedData = jsonDecode(data)
+			if decodedData.vehID then
+				decodedData.vehID = MPVehicleGE.getServerVehicleID(decodedData.vehID)
+			end
+			data = jsonEncode(decodedData)
+			MPGameNetwork.send('Xc:'..serverVehicleID..":"..data)
+		end
+	end
+end
+
+
 --- This function serves to send the nodes data received for another players vehicle from GE to VE, where it is handled.
 -- @param data table The data to be applied as nodes
 -- @param serverVehicleID string The VehicleID according to the server.
@@ -85,6 +100,8 @@ local function handle(rawData)
 		applyNodes(data, serverVehicleID)
 	elseif code == "g" then
 		applyBreakGroups(data, serverVehicleID)
+	elseif code == "c" then
+		MPControllerGE.applyControllerData(data, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
@@ -99,5 +116,6 @@ M.applyNodes = applyNodes
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 M.sendBreakGroups  = sendBreakGroups
+M.sendControllerData  = sendControllerData
 
 return M

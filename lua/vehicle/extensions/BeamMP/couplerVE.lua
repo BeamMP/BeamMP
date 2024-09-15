@@ -29,10 +29,17 @@ local function toggleCouplerState(data)
 				obj:stopLatching()
 			end
 		elseif controller.getControllerSafe(v.name).getGroupState() ~= v.state then
+			local couplerController = {}
+			if controllerSyncVE.OGcontrollerFunctionsTable and controllerSyncVE.OGcontrollerFunctionsTable[v.name] then -- for controller sync compatibility,
+				couplerController = controllerSyncVE.OGcontrollerFunctionsTable[v.name]	-- the controller sync disables the functions for remote vehicles to prevent ghost controlling, so we need to call the original function instead
+			elseif controller.getControllerSafe(v.name) then
+				couplerController = controller.getControllerSafe(v.name)
+			end
+
 			if v.state == "detached" or v.state == "autoCoupling" or v.state == "broken" then
-				controller.getControllerSafe(v.name).detachGroup()
+				couplerController.detachGroup()
 			elseif v.state == "attached" then
-				controller.getControllerSafe(v.name).tryAttachGroupImpulse()
+				couplerController.tryAttachGroupImpulse()
 			end
 		end
 	end
@@ -75,7 +82,7 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 
 		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
 	end
-	
+
 	lastNodeIDcoupled = nodeId
 	lastNodeID2coupled = obj2nodeId
 end
@@ -117,7 +124,7 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 
 		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
 	end
-	
+
 	lastNodeIDdecoupled = nodeId
 	lastNodeID2decoupled = obj2nodeId
 end

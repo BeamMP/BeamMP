@@ -299,27 +299,20 @@ end
 
 local lastLeftSignal = 0
 local lastRightSignal = 0
-local lastHazards = 0
 local remoteignition = true
 local remoteengineRunning = 1
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
 	if (decodedData) then -- If received data is correct
-		if not decodedData.signal_left_input then decodedData.signal_left_input = lastLeftSignal end
-		if not decodedData.signal_right_input then decodedData.signal_right_input = lastRightSignal end
-		if not decodedData.hazard_enabled then decodedData.hazard_enabled = lastHazards end
-
-		lastLeftSignal = decodedData.signal_left_input
-		lastRightSignal = decodedData.signal_right_input
-		lastHazards = decodedData.hazard_enabled
-
-		if decodedData.hazard_enabled == 1 then -- Apply hazard lights
-			electrics.set_warn_signal(decodedData.hazard_enabled)
-		end
-		if decodedData.hazard_enabled == 0 then -- Apply left signal value
-			if electrics.values.signal_left_input ~= decodedData.signal_left_input then
+		if decodedData.signal_left_input or decodedData.signal_right_input then
+			electrics.set_warn_signal(0) -- set all signals to 0 so we know the states
+			lastLeftSignal = decodedData.signal_left_input or lastLeftSignal
+			lastRightSignal = decodedData.signal_right_input or lastRightSignal
+			if lastLeftSignal == 1 and lastRightSignal == 1 then
+				electrics.set_warn_signal(1)
+			elseif lastLeftSignal == 1 then
 				electrics.toggle_left_signal()
-			elseif electrics.values.signal_right_input ~= decodedData.signal_right_input then
+			elseif lastRightSignal == 1 then
 				electrics.toggle_right_signal()
 			end
 		end

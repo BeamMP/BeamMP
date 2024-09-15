@@ -897,12 +897,25 @@ end
 
 local function getQueueCounts()
 	local spawns, edits = 0, 0
+	local queuedPlayers = {}
+
+	local highlightQueuedPlayers = settings.getValue("highlightQueuedPlayers")
 
 	for serverVehicleID, vehicle in pairs(vehicles) do
-		if vehicle.spawnQueue then spawns = spawns + 1 end
-		if vehicle.editQueue then edits = edits + 1 end
+		if vehicle.spawnQueue then 
+			spawns = spawns + 1 
+			if highlightQueuedPlayers then
+				queuedPlayers[vehicle.ownerID] = true
+			end
+		end
+		if vehicle.editQueue then 
+			edits = edits + 1 
+			if highlightQueuedPlayers then
+				queuedPlayers[vehicle.ownerID] = true
+			end
+		end
 	end
-	return spawns, edits
+	return spawns, edits, queuedPlayers
 end
 
 
@@ -1848,26 +1861,37 @@ local function focusCameraOnPlayer(targetName)
 	end
 end
 
-local function applyQueuedEvents()
-	UI.updateQueue(getQueueCounts())
+local function applyVehicleQueues(serverVehicleID, vehicle) 
+	if vehicle.spawnQueue then
+		local data = vehicle.spawnQueue
+		vehicle.spawnQueue = nil
+		applyVehSpawn(data)
+	end
+	if vehicle.editQueue then
+		local data = vehicle.editQueue
+		vehicle.editQueue = nil
+		applyVehEdit(serverVehicleID, data)
+	end
+end
 
+local function applyQueuedEvents()
 	for serverVehicleID, vehicle in pairs(vehicles) do
-		if vehicle.spawnQueue then
-			local data = vehicle.spawnQueue
-			vehicle.spawnQueue = nil
-			applyVehSpawn(data)
-		end
-		if vehicle.editQueue then
-			local data = vehicle.editQueue
-			vehicle.editQueue = nil
-			applyVehEdit(serverVehicleID, data)
-		end
+		applyVehicleQueues(serverVehicleID, vehicle)
 	end
 
 	UI.updateQueue(getQueueCounts())
 	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
 end
 
+local function applyPlayerQueues(playerID)
+	for serverVehicleID, vehicle in pairs(vehicles) do
+		if vehicle.ownerID == playerID then
+			applyVehicleQueues(serverVehicleID, vehicle)
+		end
+	end
+
+	UI.updateQueue(getQueueCounts())
+end
 
 local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
@@ -2280,6 +2304,7 @@ M.spawnRequest             = spawnRequest             -- takes: jbeamName, confi
 M.replaceRequest           = replaceRequest           -- takes: jbeamName, config, colors
 M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
+M.applyPlayerQueues 	   = applyPlayerQueues 	      -- takes: playerID
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
 M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
 M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName

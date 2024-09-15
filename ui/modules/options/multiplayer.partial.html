@@ -68,6 +68,12 @@
 
 <div class="mp-setting-border" ng-show="options.data.values.enableSpawnQueue">
   <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.highlightQueuedPlayers' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.highlightQueuedPlayers.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.highlightQueuedPlayers" ng-change="options.applyState()"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
     <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>

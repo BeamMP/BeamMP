@@ -153,8 +153,19 @@ end
 --- This function is used to update the edit/spawn queue values for the UI indicator.
 -- @param spawnCount number
 -- @param editCount number
-local function updateQueue( spawnCount, editCount)
-	UIqueue = {spawnCount = spawnCount, editCount = editCount}
+-- @param queuedPlayers table
+local function updateQueue( spawnCount, editCount, queuedPlayers)
+    if (queuedPlayers ~= nil and next(queuedPlayers) ~= nil) then
+        for key, player in pairs(MPVehicleGE.getPlayers()) do 
+            if queuedPlayers[key] == nil then 
+                queuedPlayers[key] = false
+            end
+        end
+    else
+        queuedPlayers = nil
+    end
+
+	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayers}
 	UIqueue.show = spawnCount+editCount > 0
 	sendQueue()
 end

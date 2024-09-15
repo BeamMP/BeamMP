@@ -155,17 +155,16 @@ end
 -- @param editCount number
 -- @param queuedPlayers table
 local function updateQueue( spawnCount, editCount, queuedPlayers)
-    if (queuedPlayers ~= nil and next(queuedPlayers) ~= nil) then
-        for key, player in pairs(MPVehicleGE.getPlayers()) do 
-            if queuedPlayers[key] == nil then 
-                queuedPlayers[key] = false
-            end
-        end
-    else
-        queuedPlayers = nil
-    end
+	local queuedPlayersJS = {}
+	if (not tableIsEmpty(queuedPlayers)) then
+		for key, value in pairs(queuedPlayers) do
+			queuedPlayersJS[tostring(key)] = value
+		end
+	else
+		queuedPlayersJS = nil
+	end
 
-	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayers}
+	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayersJS}
 	UIqueue.show = spawnCount+editCount > 0
 	sendQueue()
 end

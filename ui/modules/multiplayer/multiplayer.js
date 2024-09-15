@@ -39,7 +39,7 @@ function($scope, $state, $timeout, $document) {
 	};
 
 	$scope.openExternalLink = function(url) {
-		bngApi.engineLua(`openWebBrowser("`+url+`")`);
+		bngApi.engineLua(`MPCoreNetwork.openURL("`+url+`")`);
 	}
 
 	bngApi.engineLua(`MPConfig.getConfig()`, (data) => {
@@ -1079,7 +1079,7 @@ function modList(s) {
   	modarray.sort();
 
 	s = "";
-	for (var i=0; i<modarray.length-1; i++){
+	for (var i=0; i<modarray.length; i++){
 		if (modarray[i] != '') {
 			var modName = modarray[i].split('/').pop();
 			modName = modName.replace(".zip","");
@@ -1249,11 +1249,7 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 }
 
 function openExternalLink(url){
-	bngApi.engineLua(`mp_open_url("`+url+`")`);
-}
-
-function openForumLink(){
-	openExternalLink("http://forum.beammp.com");
+	bngApi.engineLua(`MPCoreNetwork.openURL("`+url+`")`);
 }
 
 function getServerInfoHTML(d) {
@@ -1335,7 +1331,7 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 		// Filter by empty or full
 		else if(checkIsEmpty && server.players > 0) continue;
 		else if(checkIsNotEmpty && server.players == 0) continue;
-		else if(checkIsNotFull && server.players >= server.maxplayers) continue;
+		else if(checkIsNotFull && server.players >= parseInt(server.maxplayers)) continue;
 		
 		// Filter by mod size
 		else if(checkModSlider && sliderMaxModSize * 1048576 < server.modstotalsize) continue;

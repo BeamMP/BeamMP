@@ -999,7 +999,7 @@ local function checkIfVehiclenameInvalid(vehicleName, playerName, v) -- TODO: fi
 	end
 
 	log('W', 'applyVehSpawn', "The received vehicle "..vehicleName.." is not valid, cancelling the spawn (likely a missing mod)")
-	if playerName then UI.showNotification("Player "..playerName.." spawned an illegal vehicle ("..vehicleName.."), it was skipped", ""..playerName..""..vehicleName.."illegal", "cancel") end
+	if playerName then UI.showNotification("Player "..playerName.." spawned an illegal vehicle ("..vehicleName.."), it was skipped", ""..playerName..""..vehicleName.."illegal", "remove_circle") end
 	return true
 end
 

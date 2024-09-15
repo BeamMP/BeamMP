@@ -144,7 +144,7 @@ local function playerLeft(params)
 	local leftName = string.match(params, "^(.+) left the server!$") 
 	if leftName then 
 		MPVehicleGE.onPlayerLeft(leftName) 
-		icon = icon or "person" 
+		icon = icon or "exit_to_app" 
 	end 
 	
 	UI.showNotification(params, nil, icon)

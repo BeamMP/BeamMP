@@ -11,22 +11,32 @@ local lastNodeID2coupled
 local lastNodeIDdecoupled
 local lastNodeID2decoupled
 
+local originalActivateAutoCoupling = beamstate.activateAutoCoupling
+
+local function activateAutoCoupling(...)
+	if v.mpVehicleType and v.mpVehicleType == "R" then return end
+	originalActivateAutoCoupling(...)
+end
+
+beamstate.activateAutoCoupling = activateAutoCoupling
+
 local function toggleCouplerState(data)
 	local decodedData = jsonDecode(data)
 	for k,v in pairs(decodedData) do
 		if v.state == false or v.state == true then
-			if v._nodetag and not v.trailer then
-				if v.state then
-					beamstate.attachCouplers(v._nodetag)
+			if v._nodetag then
+				local coupler = beamstate.couplerCache[v._nodetag]
+				if coupler then
+					if v.state then
+						obj:attachCoupler(coupler.cid, coupler.couplerTag or "", coupler.couplerStrength or 1000000, 10, coupler.couplerLockRadius or 0.025, 0.3, coupler.couplerTargets or 0)
+					else
+						obj:detachCoupler(v._nodetag, 0)
+						obj:queueGameEngineLua(string.format("onCouplerDetach(%s,%s)", obj:getId(), coupler.cid))
+						extensions.couplings.onBeamstateDetachCouplers()
+					end
 				else
-					obj:detachCoupler(v._nodetag, 0)
+					log("D", "couplerVE", "no cached coupler found with tag"..v._nodetag)
 				end
-			elseif v.state == true then
-				beamstate.activateAutoCoupling()
-			elseif v.state == false then
-				beamstate.disableAutoCoupling()
-				beamstate.detachCouplers()
-				obj:stopLatching()
 			end
 		elseif controller.getControllerSafe(v.name).getGroupState() ~= v.state then
 			local couplerController = {}
@@ -52,7 +62,7 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
-		if timer <= 0 and ID == obj2id then
+		if ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then
@@ -94,7 +104,7 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 		local Advanced = false
 		-- Advanced couplers, doors etc
 		local MPcouplerdata = {}
-		if timer <= 0 and ID == obj2id then
+		if ID == obj2id then
 			for k,v in pairs(MPcouplercache) do
 				local state = controller.getControllerSafe(v.name).getGroupState()
 				if v.state ~= state then

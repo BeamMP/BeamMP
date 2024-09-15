@@ -48,31 +48,31 @@ local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		nodesTimer = nodesTimer + dt
 		if nodesTimer >= nodesTickrate then
-			nodesTimer = 0
+			nodesTimer = (nodesTimer - nodesTickrate) % nodesTickrate
 			nodesGE.tick() -- Comment this line to disable nodes synchronization
 		end
 
 		positionTimer = positionTimer + dt
 		if positionTimer >= positionTickrate then
-			positionTimer = 0
+			positionTimer = (positionTimer - positionTickrate) % positionTickrate
 			positionGE.tick() -- Comment this line to disable position synchronization
 		end
 
 		inputsTimer = inputsTimer + dt
 		if inputsTimer >= inputsTickrate then
-			inputsTimer = 0
+			inputsTimer = (inputsTimer - inputsTickrate) % inputsTickrate
 			MPInputsGE.tick() -- Comment this line to disable inputs synchronization
 		end
 
 		electricsTimer = electricsTimer + dt
 		if electricsTimer >= electricsTickrate then
-			electricsTimer = 0
+			electricsTimer = (electricsTimer - electricsTickrate) % electricsTickrate
 			MPElectricsGE.tick() -- Comment this line to disable electrics synchronization
 		end
 		
 		powertrainTimer = powertrainTimer + dt
 		if powertrainTimer >= powertrainTickrate then
-			powertrainTimer = 0
+			powertrainTimer = (powertrainTimer - powertrainTickrate) % powertrainTickrate
 			MPPowertrainGE.tick() -- Comment this line to disable powertrain synchronization
 		end
 		

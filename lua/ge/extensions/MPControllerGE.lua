@@ -51,7 +51,7 @@ local function handle(rawData)
 	end
 end
 
-M.tick					 = tick
+M.tick			 = tick
 M.handle                 = handle
 M.sendControllerData	 = sendControllerData
 

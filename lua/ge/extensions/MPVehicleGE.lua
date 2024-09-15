@@ -41,19 +41,19 @@ local original_spawnDefault
 -- @tfield roleToInfo_subtable RoleName_N ..
 -- @usage local roleInfo = roleToInfo["USER"]
 local roleToInfo = {
-	['USER']	= { backcolor = ColorI(000, 000, 000, 127), forecolor = ColorI(255, 255, 255, 127), tag = "", shorttag = "" },
-	['EA']		= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Early Access]", shorttag = " [EA]" },
-	['CONT']	= { backcolor = ColorI(069, 000, 150, 127), forecolor = ColorI(193, 139, 255, 255), tag = " [Contributor]", shorttag = " [CO]" },
-	['YT']		= { backcolor = ColorI(200, 000, 000, 127), forecolor = ColorI(255, 000, 000, 127), tag = " [Content Creator]", shorttag = " [CC]" },
-	['ET']		= { backcolor = ColorI(210, 214, 109, 127), forecolor = ColorI(210, 214, 109, 127), tag = " [Events Team]", shorttag = " [Events]" },
-	['SUPPORT']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Support]", shorttag = " [Staff]" },
-	['STAFF']	= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [BeamMP Staff]", shorttag = " [Staff]" },
-	['MOD']		= { backcolor = ColorI(068, 109, 184, 127), forecolor = ColorI(99, 154, 255, 127), tag = " [Moderator]", shorttag = " [Mod]" },
-	['ADM']		= { backcolor = ColorI(218, 000, 078, 127), forecolor = ColorI(255, 000, 089, 127), tag = " [Admin]", shorttag = " [Adm]" },
-	['MDEV']	= { backcolor = ColorI(194, 055, 055, 127), forecolor = ColorI(255, 070, 101, 127), tag = " [BeamMP Dev]", shorttag = " [Dev]" },
-	['NGDEV']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Developer]", shorttag = " [BNG]" },
-	['NGSTAFF']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Staff]", shorttag = " [BNG]" },
-	['NGAFFIL']	= { backcolor = ColorI(252, 107, 003, 127), forecolor = ColorI(252, 107, 003, 127), tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
+	['USER']	= { backcolor = { r = 000, g = 000, b = 000 }, forecolor = { r = 255, g = 255, b = 255 }, tag = "", shorttag = "" },
+	['EA']		= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Early Access]", shorttag = " [EA]" },
+	['CONT']	= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Contributor]", shorttag = " [CO]" },
+	['YT']		= { backcolor = { r = 200, g = 000, b = 000 }, forecolor = { r = 255, g = 000, b = 000 }, tag = " [Content Creator]", shorttag = " [CC]" },
+	['ET']		= { backcolor = { r = 210, g = 214, b = 109 }, forecolor = { r = 210, g = 214, b = 109 }, tag = " [Events Team]", shorttag = " [Events]" },
+	['SUPPORT']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Support]", shorttag = " [Staff]" },
+	['STAFF']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [BeamMP Staff]", shorttag = " [Staff]" },
+	['MOD']		= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Moderator]", shorttag = " [Mod]" },
+	['ADM']		= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [Admin]", shorttag = " [Adm]" },
+	['MDEV']	= { backcolor = { r = 194, g = 055, b = 055 }, forecolor = { r = 255, g = 070, b = 101 }, tag = " [BeamMP Dev]", shorttag = " [Dev]" },
+	['NGDEV']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Developer]", shorttag = " [BNG]" },
+	['NGSTAFF']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Staff]", shorttag = " [BNG]" },
+	['NGAFFIL']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
 }
 
 --- (in table) Specifies the table in roleToInfo
@@ -112,27 +112,6 @@ local simplified_vehicles = {
 local settingsCache = {
 }
 -- ============= VARIABLES =============
-
---- Contains the Custom Roles created with createRole
--- @table custom_roleToInfo
--- @tfield roleToInfo_subtable RoleName_1 Contains the Role Specific Data
--- @tfield roleToInfo_subtable RoleName_N ..
--- @usage local roleInfo = custom_roleToInfo["CUSTOMROLE"]
-local custom_roleToInfo = {}
-
-
---- Contains only the Vehicles that have set Custom roles to it with setVehicleRole
--- @table custom_vehicleRoles
--- @tfield custom_vehicleRoles_subtable serverVehicleID_1 Contains Role and DisplayName of that Vehicle
--- @tfield custom_vehicleRoles_subtable serverVehicleID_N ..
--- @usage local roleInfo = custom_vehicleRoles["0-0"]
-local custom_vehicleRoles = {}
-
---- (in table) Specifies the table in custom_vehicleRoles
--- @table custom_vehicleRoles_subtable
--- @tfield string Role Contains the RoleName for this Vehicle
--- @tfield string DisplayName Contains the custom Displayname for this Vehicle
--- @usage local displayName = custom_roleToInfo["0-0"].DisplayName
 
 --- Contains all known Players.
 -- PlayerID's are integers starting at 0
@@ -433,96 +412,83 @@ function getPlayers() return players end
 -- @usage local vehicles = getVehicles()
 function getVehicles() return vehicles end
 
---- Sets a custom role and name to a vehicle
--- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
--- @tparam string roleName The name of the Custom Role. Setting this to "BLANK" will make the player tag invinsible
--- @tparam[opt] string displayName sets a Custom name to this Vehicle. Give 0 to not set a custom name
--- @treturn[1] 1 If success
--- @treturn[2] 0 playerIDVehicleID is invalid. Vehicle or Player might not exists
--- @treturn[3] -1 roleName does not exist
--- @usage setVehicleRole("0-0", "MYROLE", "Unknown")
-function setVehicleRole(playerIDVehicleID, roleName, displayName)
-	if vehicles[playerIDVehicleID] == nil then return 0 end
-	roleName = string.upper(roleName)
-	if roleName ~= "BLANK" then
-		if custom_roleToInfo[roleName] == nil then return -1 end
+local function createRoleHelper(tag, shorttag, red, green, blue)
+	if type(red) ~= "number" then return nil, "invalid red channel data" end
+	if type(green) ~= "number" then return nil, "invalid green channel data" end
+	if type(blue) ~= "number" then return nil, "invalid blue channel data" end
+
+	local contents = { backcolor = { r = clamp(red, 0, 255), g = clamp(green, 0, 255), b = clamp(blue, 0, 255)}, tag = "", shorttag = "" }
+	if type(tag) == "string" then
+		contents.tag = " [" .. tag .. "]"
 	end
-	
-	if displayName == 0 then
-		local playerName = players[vehicles[playerIDVehicleID].ownerID].name
-		displayName = playerName
-	else
-		displayName = "*" .. displayName
+
+	if type(shorttag) == "string" then
+		contents.shorttag = " [" .. shorttag .. "]"
 	end
-	
-	local contents = {}
-	contents["Role"] = roleName
-	contents["DisplayName"] = displayName
-	custom_vehicleRoles[playerIDVehicleID] = contents
-	return 1
+
+	return contents
 end
 
---- Removes a custom Role and Name from a Vehicle
--- @tparam string playerIDVehicleID X-Y. Where X is the PlayerID and Y the Players VehicleID
--- @treturn nil
--- @usage removeVehicleRole("0-0")
-function removeVehicleRole(playerIDVehicleID)
-	custom_vehicleRoles[playerIDVehicleID] = nil
+--- Sets a custom role for a player
+-- @tparam int playerID ID of the player
+-- @tparam string tag normal version of the role tag
+-- @tparam string shorttag shortened version of the role tag
+-- @tparam int red red channel of the role's color
+-- @tparam int green green channel of the role's color
+-- @tparam int blue blue channel of the role's color
+-- @treturn bool true in case of success, false in case of error
+-- @treturn nil, string error message
+-- @usage local success, error = setPlayerRole(0, "Example", "EX", 0, 127, 255)
+function setPlayerRole(playerID, ...)
+	local p = players[playerID]
+	if not p then return false, "player not found" end
+
+	local role, err = createRoleHelper(...)
+	if not role then
+		log('E', 'setPlayerRole', 'Function called with invalid arguments: ' .. tostring(err))
+		return false, err
+	end
+
+	p:setCustomRole(role)
 end
 
---- Creates a custom role to be used with setVehicleRole.
--- Give 0 to not use a Optional param.
--- @tparam string roleName Name of the Role
--- @tparam[opt] string tag Sets a optional tag. Playername [Long tag]
--- @tparam[opt] string shorttag Sets a optional shorttag: Playername [Short Tag]
--- @tparam[opt] integer red 0 to 255
--- @tparam[opt] integer green 0 to 255
--- @tparam[opt] integer blue 0 to 255
--- @treturn[1] true If success
--- @treturn[2] false When a color value is below 0 or when the roleName == "BLANK"
--- @usage createRole("MYROLE", "Custom", "Ctm", 252, 107, 3)
-function createRole(roleName, tag, shorttag, red, green, blue)
-	if red < 0 then return false end
-	if green < 0 then return false end
-	if blue < 0 then return false end
-	
-	roleName = string.upper(roleName)
-	if roleName == "BLANK" then return false end
-	
-	local contents = {}
-	contents["backcolor"] = ColorI(red, green, blue, 127)
-	if tag == 0 then
-		contents["tag"] = ""
-	else
-		contents["tag"] = " [" .. tag .. "]"
-	end
-	if shorttag == 0 then
-		contents["shorttag"] = ""
-	else
-		contents["shorttag"] = " [" .. shorttag .. "]"
-	end
-	custom_roleToInfo[roleName] = contents
-	return true
+--- Clears a custom role for a player
+-- @tparam int playerID ID of the player
+-- @treturn bool true in case of success, false in case of error
+-- @usage local success, error = clearPlayerRole(0)
+function clearPlayerRole(playerID)
+	return players[playerID] and players[playerID]:clearCustomRole() or false
 end
 
---- Removes a custom role.
--- All vehicles with that role will also loose it.
--- @tparam string roleName
--- @treturn true If success
--- @treturn false When the Role doesnt exists
--- @usage removeRole("MYROLE")
-function removeRole(roleName)
-	roleName = string.upper(roleName)
-	if custom_roleToInfo[roleName] == nil then return false end
-	
-	for playerIDVehicleID, data in pairs(custom_vehicleRoles) do
-		if data.Role == roleName then
-			custom_vehicleRoles[playerIDVehicleID] = nil
-		end
+--- Sets a custom role for a vehicle
+-- @tparam string playerIDVehicleID ID of the vehicle
+-- @tparam string tag normal version of the role tag
+-- @tparam string shorttag shortened version of the role tag
+-- @tparam int red red channel of the role's color
+-- @tparam int green green channel of the role's color
+-- @tparam int blue blue channel of the role's color
+-- @treturn bool true in case of success, false in case of error
+-- @treturn nil, string error message
+-- @usage local success, error = setVehicleRole("0-0", "Example", "EX", 0, 127, 255)
+function setVehicleRole(playerIDVehicleID, ...)
+	local v = vehicles[playerIDVehicleID]
+	if not v then return false, "vehicle not found" end
+
+	local role, err = createRoleHelper(...)
+	if not role then
+		log('E', 'setVehicleRole', 'Function called with invalid arguments: ' .. tostring(err))
+		return false, err
 	end
-	
-	custom_roleToInfo[roleName] = nil
-	return true
+
+	v:setCustomRole(role)
+end
+
+--- Clears a custom role for a vehicle
+-- @tparam string playerIDVehicleID ID of the vehicle
+-- @treturn bool true in case of success, false in case of error
+-- @usage local success, error = clearVehicleRole("0-0")
+function clearVehicleRole(playerIDVehicleID)
+	return vehicles[playerIDVehicleID] and vehicles[playerIDVehicleID]:clearCustomRole() or false
 end
 
 -- ============== INTERNAL FUNCTIONS ==============
@@ -621,7 +587,7 @@ local vehicleSimplifiers = {
 		else -- standard frame, offroad frame, short frame lands here
 			vehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
 		end
-		
+
 	end,
 	roamer = function(vehicleParts)
 		vehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon"
@@ -680,9 +646,9 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 		end
 		local slotTypes = {}
 		if type(part.slotType) == 'string' then
-		  table.insert(slotTypes, part.slotType)
+			table.insert(slotTypes, part.slotType)
 		elseif type(part.slotType) == 'table' then
-		  slotTypes = part.slotType
+			slotTypes = part.slotType
 		end
 		for _, slotType in ipairs(slotTypes) do
 			if newVehicleConfig.parts[slotType] then
@@ -710,13 +676,21 @@ function Player:new(data)
 	o.shortname = data.name
 	o.playerID = tonumber(data.playerID)
 
-	local roleName = data.role or 'USER'
-	o.role = roleToInfo[roleName] or {}
-	o.role.name = roleName
+	if data.role then -- try to apply role received from the server
+		o.role = roleToInfo[data.role]
+		o.role.name = data.role
+	end
+	if not o.role then -- fallback to user
+		o.role = roleToInfo['USER']
+		o.role.name = 'USER'
+	end
+
 	o.isLocal = data.isLocal or false
 
 	o.nickPrefixes = {}
 	o.nickSuffixes = {}
+
+	o.customRole = nil
 
 	o.vehicles = {IDs = data.vehicleIDs or {}}
 
@@ -773,6 +747,12 @@ function Player:setNickSuffix(tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
 	self.nickSuffixes[tagSource] = text
 end
+function Player:setCustomRole(role)
+	self.customRole = role
+end
+function Player:clearCustomRole(roleName)
+	self.customRole = nil
+end
 function Player:delete()
 	log('W', 'Player:delete', string.format('Removing player %s (%i)! Data: %s', self.name, self.playerID, dumps(self)))
 	for k, v in pairs(self.vehicles) do
@@ -780,6 +760,7 @@ function Player:delete()
 	end
 	if self.activeVehicleID then vehicles[self.activeVehicleID].spectators[self.playerID] = nil end
 	players[self.playerID] = nil
+
 	self = nil
 end
 function Player:onSerialized()
@@ -858,10 +839,19 @@ function Vehicle:delete()
 	end
 	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
-	
-    	players_vehicle_configs[self.serverVehicleString] = nil
 
-    	self = nil
+	players_vehicle_configs[self.serverVehicleString] = nil
+
+	self = nil
+end
+function Vehicle:setCustomRole(role)
+	self.customRole = role
+end
+function Vehicle:clearCustomRole(roleName)
+	self.customRole = nil
+end
+function Vehicle:setDisplayName(displayName)
+	self.customName = displayName
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1005,18 +995,18 @@ end
 
 
 local function applyVehSpawn(event)
-	local decodedData     = jsonDecode(event.data)
+	local decodedData = jsonDecode(event.data)
 	if not decodedData then --JSON decode failed
 		log("E", "applyVehSpawn", "Failed to spawn vehicle from "..event.playerNickname.."!")
 		return
 	end
 
-	local playerServerID  = decodedData.pid -- Server ID of the player that sent the vehicle
-	local gameVehicleID   = decodedData.vid -- gameVehicleID of the player that sent the vehicle
-	local vehicleName     = decodedData.jbm -- Vehicle name
-	local vehicleConfig   = decodedData.vcf -- Vehicle config, contains paint data
-	local pos             = vec3(decodedData.pos)
-	local rot             = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
+	local playerServerID = decodedData.pid -- Server ID of the player that sent the vehicle
+	local gameVehicleID  = decodedData.vid -- gameVehicleID of the player that sent the vehicle
+	local vehicleName    = decodedData.jbm -- Vehicle name
+	local vehicleConfig  = decodedData.vcf -- Vehicle config, contains paint data
+	local pos            = vec3(decodedData.pos)
+	local rot            = decodedData.rot.w and quat(decodedData.rot) or quat(0,0,0,0) --ensure the rotation data is good
 	local ignitionLevel   = (type(decodedData.ign) == "number") and decodedData.ign or 3
 
 	log('I', 'applyVehSpawn', "Spawning a vehicle from server with serverVehicleID "..event.serverVehicleID)
@@ -1069,9 +1059,9 @@ local function applyVehEdit(serverID, data)
 	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then log('E','applyVehEdit',"Vehicle "..gameVehicleID.." not found") return end
 
-	local decodedData     = jsonDecode(data) -- Decode the data
-	local vehicleName     = decodedData.jbm -- Vehicle name
-	local vehicleConfig   = decodedData.vcf -- Vehicle config
+	local decodedData   = jsonDecode(data) -- Decode the data
+	local vehicleName   = decodedData.jbm -- Vehicle name
+	local vehicleConfig = decodedData.vcf -- Vehicle config
 
 	local playerName = players[decodedData.pid] and players[decodedData.pid].name or 'Unknown'
 
@@ -1176,21 +1166,20 @@ end
 
 local function spawnDestroyedVehicles(serverVehID)
 
-    local vehdata = players_vehicle_configs[serverVehID]
-    if vehdata == nil then
-        
-        log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
-        return
-    end
+	local vehdata = players_vehicle_configs[serverVehID]
+	if vehdata == nil then
+		log("I", "restorePlayerVehicle", "couldnt find vehdata from the id given")
+		return
+	end
 
-    if vehicles[serverVehID].isDeleted == false then
-        UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
-        log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
-        return
-    end
+	if vehicles[serverVehID].isDeleted == false then
+		UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
+		log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
+		return
+	end
 
-    vehicles[serverVehID].isSpawned = true
-    vehicles[serverVehID].isDeleted = false
+	vehicles[serverVehID].isSpawned = true
+	vehicles[serverVehID].isDeleted = false
 		-- queue system
 --		local eventdata = {
 --			playerNickname = playerNickname,  -- same as owner name??? we shall find out
@@ -1198,42 +1187,41 @@ local function spawnDestroyedVehicles(serverVehID)
 --			data = data
 --		}
 
-    local playerOwnerName = vehicles[serverVehID].ownerName
+	local playerOwnerName = vehicles[serverVehID].ownerName
 
-    local encodedVehicleData = jsonEncode(vehdata)
+	local encodedVehicleData = jsonEncode(vehdata)
 
-    local eventdata = {
-        playerNickname = playerOwnerName,  --- mabye a issue?
-        serverVehicleID = serverVehID,
-        data = encodedVehicleData
-    }
-    UI.showNotification('Trying to respawn '..playerOwnerName.."'s "..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
-    if settings.getValue("enableSpawnQueue") then
-        vehicles[serverVehID].spawnQueue = eventdata
-        UI.updateQueue(getQueueCounts())
-    else
-        log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
-        applyVehSpawn(eventdata)
-        UI.updateQueue(0, 0)
-    end
+	local eventdata = {
+		playerNickname = playerOwnerName,  --- mabye a issue?
+		serverVehicleID = serverVehID,
+		data = encodedVehicleData
+	}
+	UI.showNotification('Trying to respawn '..playerOwnerName.."'s "..vehicles[serverVehID].jbeam, ''..playerOwnerName..''..serverVehID..'respawn', 'directions_car')
+	if settings.getValue("enableSpawnQueue") then
+		vehicles[serverVehID].spawnQueue = eventdata
+		UI.updateQueue(getQueueCounts())
+	else
+		log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
+		applyVehSpawn(eventdata)
+		UI.updateQueue(0, 0)
+	end
 end
 
 local function restorePlayerVehicle(playerName)
-    --  not a properproper wayyy of doing this
+	-- not a properproper wayyy of doing this
 
-    local player =  getPlayerByName(playerName)
-    if player == nil then
-        log("E", "restorePlayerVehicle", "Couldnt find player??")
+	local player = getPlayerByName(playerName)
+	if player == nil then
+		log("E", "restorePlayerVehicle", "Couldnt find player??")
+	end
 
-    end
+	-- its a table of ids
+	local vehicles_ServerIDs = player.vehicles.IDs
 
-    -- its a table of ids
-    local vehicles_ServerIDs = player.vehicles.IDs
-
-    for x,y in pairs(vehicles_ServerIDs)do
-        spawnDestroyedVehicles(y)
-        log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
-    end
+	for x,y in pairs(vehicles_ServerIDs)do
+		spawnDestroyedVehicles(y)
+		log("D", "restorePlayerVehicle", "Trying to respawn : ".. tostring(x) .. tostring(y))
+	end
 end
 
 
@@ -1245,7 +1233,6 @@ local function onVehicleDestroyed(gameVehicleID)
 
 		if not vehicle then return end
 		local serverVehicleID = vehicle.serverVehicleString -- Get the serverVehicleID
-		removeVehicleRole(serverVehicleID) -- remove possible custom role for that vehicle
 
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
@@ -1272,12 +1259,12 @@ local function onVehicleDestroyed(gameVehicleID)
 							[mainPartName] = string
 							[licenseName] = string
 							[model] = string
-							
+
 							the .pc format v2 contains all the same data in the same structure.. just with "format" and not with "partConfigFilename"
 						]]
 						vehicleConfig.format = 2
 						vehicleConfig.partConfigFilename = nil
-						
+
 						local handle = io.open("vehicles/unicycle/beammp_default.pc", "w")
 						if handle == nil then
 							log('I', "onVehicleDestroyed", 'Cannot open "vehicles/unicycle/beammp_default.pc" in write mode.')
@@ -1418,8 +1405,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		return
 	end
 
-	local playerServerID   = tonumber(decodedData.pid) -- Server ID of the owner
-	local gameVehicleID    = tonumber(decodedData.vid) -- remote gameVehicleID
+	local playerServerID = tonumber(decodedData.pid) -- Server ID of the owner
+	local gameVehicleID  = tonumber(decodedData.vid) -- remote gameVehicleID
 
 	--create player object if this is their first vehicle
 	if not players[playerServerID] or players[playerServerID].name ~= playerNickname then
@@ -1428,7 +1415,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 	end
 
 	if not settings.getValue("showDebugOutput") then
-	  log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
+		log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
 	end
 
 	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
@@ -1467,7 +1454,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			data = data
 		}
 
-        	players_vehicle_configs[serverVehicleID] = decodedData
+		players_vehicle_configs[serverVehicleID] = decodedData
 
 		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
@@ -1501,12 +1488,12 @@ local function onServerVehicleEdited(serverID, data)
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
 
-    	local saveVehicleRot =  players_vehicle_configs[serverID].rot
-    	local saveVehiclePos =  players_vehicle_configs[serverID].pos
+	local saveVehicleRot = players_vehicle_configs[serverID].rot
+	local saveVehiclePos = players_vehicle_configs[serverID].pos
 
-    	players_vehicle_configs[serverID] = decodedData
-    	players_vehicle_configs[serverID].pos = saveVehiclePos
-    	players_vehicle_configs[serverID].rot = saveVehicleRot
+	players_vehicle_configs[serverID] = decodedData
+	players_vehicle_configs[serverID].pos = saveVehiclePos
+	players_vehicle_configs[serverID].rot = saveVehicleRot
 
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
@@ -2040,7 +2027,7 @@ local function onPreRender(dt)
 			local distfloat = (cameraPos or vec3()):distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
-			
+
 			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
 				local dist = ""
@@ -2074,6 +2061,8 @@ local function onPreRender(dt)
 					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
+				if v.hideNametag or owner.hideNametag then goto skip_vehicle end
+
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
 					if settings.getValue("nameTagFadeInvert") then
 						nametagAlpha = 1 - nametagAlpha
@@ -2082,24 +2071,15 @@ local function onPreRender(dt)
 
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
-				
-				local name = ""
-				local tag = ""
-				local backColor = 0
-				local roleInfo = custom_vehicleRoles[serverVehicleID]
-				if roleInfo == nil then -- if default role
-					roleInfo = owner.role
-					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-					name = settings.getValue("shortenNametags") and owner.shortname or owner.name
-					tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
-				else -- if custom role
-					if roleInfo.Role == "BLANK" then goto skip_vehicle end -- we dont draw hidden player tags
-					name = roleInfo.DisplayName -- found in the custom_vehicleRoles table
-					roleInfo = custom_roleToInfo[roleInfo.Role] -- the rest of the information is in the custom_roleToInfo table
-					backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-					tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
-				end
 
+
+				local roleInfo = v.customRole or owner.customRole or owner.role
+
+				local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
+				local name = v.customName or ownerName
+
+				local tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
+				local backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
 				local prefix = ""
 				for source, tag in pairs(owner.nickPrefixes)
@@ -2282,7 +2262,7 @@ M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
-M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4 
+M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4
 M.getPlayers               = getPlayers               -- takes: -
 M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle
@@ -2298,10 +2278,10 @@ M.hideNicknames            = hideNicknames            -- takes: bool   returns: 
 M.toggleNicknames          = toggleNicknames          -- takes: -
 M.setPlayerNickPrefix      = setPlayerNickPrefix      -- takes: string targetName, string tagSource, string text
 M.setPlayerNickSuffix      = setPlayerNickSuffix      -- takes: string targetName, string tagSource, string text
-M.createRole               = createRole               -- takes: string roleName, string tag, string shorttag, int red, int green, int blue
-M.removeRole               = removeRole               -- takes: string roleName
-M.setVehicleRole           = setVehicleRole           -- takes: string playerIDvehicleID, string roleName, string displayName
-M.removeVehicleRole        = removeVehicleRole        -- takes: string playerIDVehicleID
+M.setVehicleRole           = setVehicleRole           -- takes: string playerIDvehicleID, string tag, string shorttag, number red, number green, number blue
+M.clearVehicleRole         = clearVehicleRole         -- takes: string playerIDVehicleID
+M.setPlayerRole            = setPlayerRole            -- takes: string playerID, string tag, string shorttag, number red, number green, number blue
+M.clearPlayerRole          = clearPlayerRole          -- takes: string playerID
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -
@@ -2310,9 +2290,8 @@ M.spawnRequest             = spawnRequest             -- takes: jbeamName, confi
 M.replaceRequest           = replaceRequest           -- takes: jbeamName, config, colors
 M.sendBeamstate            = sendBeamstate            -- takes: string state, number gameVehicleID
 M.applyQueuedEvents        = applyQueuedEvents        -- takes: -      returns: -
-M.applyPlayerQueues 	   = applyPlayerQueues 	      -- takes: playerID
+M.applyPlayerQueues        = applyPlayerQueues        -- takes: playerID
 M.teleportVehToPlayer      = teleportVehToPlayer      -- takes: string targetName
-M.teleportCameraToPlayer   = focusCameraOnPlayer      -- takes: string targetName NOTE: DEPRECATED
 M.focusCameraOnPlayer      = focusCameraOnPlayer      -- takes: string targetName
 M.groundmarkerToPlayer     = groundmarkerToPlayer     -- takes: string targetName
 M.groundmarkerFollowPlayer = groundmarkerFollowPlayer -- takes: string targetName
@@ -2322,6 +2301,20 @@ M.onVehicleReady           = onVehicleReady           -- Called when our VE file
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
+local function depricationWarning(oldFnName, replacementName)
+	local msg = "Deprecated function! Please update your code to use " .. tostring(replacementName)
+	log('E', oldFnName, debug.traceback(msg))
+	guihooks.trigger("toastrMsg", {type="warning", title="Deprecated BeamMP function used", msg=msg})
 
+	return nil, msg
+end
+
+function createRole() depricationWarning('createRole', 'MPVehicleGE.setVehicleRole/setPlayerRole') end
+function removeRole() depricationWarning('removeRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
+function removeVehicleRole() depricationWarning('removeVehicleRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
+
+M.createRole = createRole
+M.removeRole = removeRole
+M.removeVehicleRole = removeVehicleRole
 
 return M

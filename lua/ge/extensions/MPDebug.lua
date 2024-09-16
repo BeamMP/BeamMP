@@ -111,7 +111,7 @@ local function drawPlayerList()
 		--im.Text(tostring(ping))
 		--im.NextColumn()
 
-		if im.Button("Camera##"..tostring(listIndex)) then MPVehicleGE.teleportCameraToPlayer(player.name) end --focusCameraOnPlayer
+		if im.Button("Camera##"..tostring(listIndex)) then MPVehicleGE.focusCameraOnPlayer(player.name) end
 		im.NextColumn()
 
 		if im.Button("GPS##"..tostring(listIndex)) then MPVehicleGE.groundmarkerToPlayer(player.name) end

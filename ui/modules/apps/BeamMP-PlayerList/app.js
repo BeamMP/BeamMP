@@ -233,7 +233,7 @@ function applyQueuesForPlayer(targetPlayerID) {
 
 function showPlayerInfo(targetPlayerName) {
 	//console.log("showPlayerInfoEvent: " + targetPlayerName);
-	bngApi.engineLua('MPVehicleGE.teleportCameraToPlayer("'+targetPlayerName+'")')
+	bngApi.engineLua('MPVehicleGE.focusCameraOnPlayer("'+targetPlayerName+'")')
 }
 
 

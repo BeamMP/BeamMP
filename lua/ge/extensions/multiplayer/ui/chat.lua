@@ -282,7 +282,7 @@ local function render()
             columnWidth = columnWidth - 10
             
             if message.color then
-                imgui.TextColored(imgui.ImVec4(message.color[0]/255, message.color[1]/255, message.color[2]/255, message.color[3]/255), message.username)
+                imgui.TextColored(imgui.ImVec4(message.color[0]/255, message.color[1]/255, message.color[2]/255, (message.color[3] or 127)/255), message.username)
                 imgui.SameLine()
             else
                 imgui.Text(message.username .. ": ")

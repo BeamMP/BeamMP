@@ -2309,6 +2309,12 @@ local function depricationWarning(oldFnName, replacementName)
 	return nil, msg
 end
 
+
+local function teleportCameraToPlayer(playername)
+	depricationWarning('teleportCameraToPlayer', 'MPVehicleGE.focusCameraOnPlayer')
+	focusCameraOnPlayer(playername)
+end
+
 function createRole() depricationWarning('createRole', 'MPVehicleGE.setVehicleRole/setPlayerRole') end
 function removeRole() depricationWarning('removeRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
 function removeVehicleRole() depricationWarning('removeVehicleRole', 'MPVehicleGE.clearVehicleRole/clearPlayerRole') end
@@ -2316,5 +2322,6 @@ function removeVehicleRole() depricationWarning('removeVehicleRole', 'MPVehicleG
 M.createRole = createRole
 M.removeRole = removeRole
 M.removeVehicleRole = removeVehicleRole
+M.teleportCameraToPlayer   = teleportCameraToPlayer
 
 return M

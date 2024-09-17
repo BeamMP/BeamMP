@@ -33,7 +33,7 @@ end
 
 
 
-local function check()
+local function getPowerTrainData()
 	local devicesToSend = {}
 	local devices = powertrain.getDevices() -- Get all devices
 	for k, v in pairs(devices) do -- For each device
@@ -186,8 +186,12 @@ local function onExtensionLoaded()
 	cacheEngines()
 end
 
+local function check()
+	getPowerTrainData()
+	getEngineData()
+end
+
 M.check				  = check
-M.check				  = getEngineData
 M.applyLivePowertrain = applyLivePowertrain
 
 M.getEngineData = getEngineData

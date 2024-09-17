@@ -153,7 +153,9 @@ local includedControllerTypes = {
 	},
 	
 	["driveModes"] = {
-		["setDriveMode"] = {}
+		["setDriveMode"] = {},
+		["nextDriveMode"] = {},
+		["previousDriveMode"] = {},
 	},
 
 	["hydraulicSuspension"] = {

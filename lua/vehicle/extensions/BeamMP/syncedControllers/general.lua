@@ -140,34 +140,26 @@ end
 
 local includedControllerTypes = {
 
-	["rollover"] = {
-		["cycle"] = {},
-		["prepare"] = {}
-	},
-
-	["spinner"] = {
-		["toggleDirection"] = {
-			ownerFunction = toggleDirection,
-			receiveFunction = receiveToggleDirection,
+	["axleLift"] = {
+		["setMode"] = {
 			storeState = true
-		}
+		},
+		["toggleMode"] = {
+			ownerFunction = toggleMode,
+		},
+		["setParameters"] = {
+			compare = true
+			}
+	},
+	
+	["driveModes"] = {
+		["setDriveMode"] = {}
 	},
 
 	["hydraulicSuspension"] = {
 		["setGroupsPosition"] = {},
 		["setGroupsBleed"] = {},
 		["setGroupsMomentaryIncrease"] = {}
-	},
-
-	["tirePressureControl"] = {
-		["toggleGroupState"] = {
-			ownerFunction = toggleGroupState
-			},
-		["setGroupState"] = {},
-		["startInflateActiveGroups"] = {},
-		["startDeflateActiveGroups"] = {},
-		["setGroupsMomentaryIncrease"] = {},
-		["stopActiveGroups"] = {},
 	},
 
 	["hydraulics/hydraulicsCombustionEngineControl"] = {
@@ -185,31 +177,16 @@ local includedControllerTypes = {
 		["moveFeet"] = {}
 	},
 
-	["twoStepLaunch"] = {
-		["setTwoStep"] = {
-			ownerFunction = TwoStep,
-			receiveFunction = receiveTwoStep
-		},
-		["toggleTwoStep"] = {
-			ownerFunction = TwoStep,
-			receiveFunction = receiveTwoStep
-		},
-		["changeTwoStepRPM"] = {
-			ownerFunction = TwoStep,
-			receiveFunction = receiveTwoStep
+	["jato"] = {
+		["updateGFX"] = {
+			remoteOnly = true,
+			remoteFunction = jatoRemoteUpdateGFX
 		}
 	},
 
-	["axleLift"] = {
-		["setMode"] = {
-			storeState = true
-		},
+	["lightbar"] = {
 		["toggleMode"] = {
-			ownerFunction = toggleMode,
-		},
-		["setParameters"] = {
-			compare = true
-			}
+		}
 	},
 
 	["postCrashBrake"] = {
@@ -222,15 +199,42 @@ local includedControllerTypes = {
 		}
 	},
 
-	["jato"] = {
-		["updateGFX"] = {
-			remoteOnly = true,
-			remoteFunction = jatoRemoteUpdateGFX
+	["rollover"] = {
+		["cycle"] = {},
+		["prepare"] = {}
+	},
+
+	["spinner"] = {
+		["toggleDirection"] = {
+			ownerFunction = toggleDirection,
+			receiveFunction = receiveToggleDirection,
+			storeState = true
 		}
 	},
 
-	["lightbar"] = {
-		["toggleMode"] = {
+	["tirePressureControl"] = {
+		["toggleGroupState"] = {
+			ownerFunction = toggleGroupState
+			},
+		["setGroupState"] = {},
+		["startInflateActiveGroups"] = {},
+		["startDeflateActiveGroups"] = {},
+		["setGroupsMomentaryIncrease"] = {},
+		["stopActiveGroups"] = {},
+	},
+
+	["twoStepLaunch"] = {
+		["setTwoStep"] = {
+			ownerFunction = TwoStep,
+			receiveFunction = receiveTwoStep
+		},
+		["toggleTwoStep"] = {
+			ownerFunction = TwoStep,
+			receiveFunction = receiveTwoStep
+		},
+		["changeTwoStepRPM"] = {
+			ownerFunction = TwoStep,
+			receiveFunction = receiveTwoStep
 		}
 	}
 }

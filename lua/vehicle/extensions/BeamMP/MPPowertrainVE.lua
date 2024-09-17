@@ -13,6 +13,7 @@ local cachedCombustionEngineData = {}
 local ignitionLevel
 local lastignitionLevel
 local spawnVehicleIgnitionLevel
+local devices = powertrain.getDevices()
 -- ============= VARIABLES =============
 
 
@@ -20,7 +21,6 @@ local spawnVehicleIgnitionLevel
 local function applyLivePowertrain(data)
 	controller.mainController.setGearboxMode("realistic")
 	local decodedData = jsonDecode(data) -- Decode data
-	local devices = powertrain.getDevices()
 	for k, v in pairs(decodedData) do -- For each device	
 		--k = "gearbox"
 		--v.mode = "auto"
@@ -35,7 +35,6 @@ end
 
 local function getPowerTrainData()
 	local devicesToSend = {}
-	local devices = powertrain.getDevices() -- Get all devices
 	for k, v in pairs(devices) do -- For each device
 		if v.mode and v.setMode then -- If it's something that interests us
 			local currDevice = { type = v.type, mode = v.mode, gearIndex = v.gearIndex }

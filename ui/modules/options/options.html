@@ -3,7 +3,7 @@
 <md-content layout="column" class="filler" style="position: relative; background: transparent;" layout-align="start start">
 
   <div bng-frustum-mover="left" bng-blur="true" flex layout="row" style="overflow: auto;" ng-class="{'optionsSideBarFullscreen': fullscreenOptions === true, 'optionsSideBarControls': controlsScreen === true, 'optionsSideBarMinimal': fullscreenOptions !== true, }">
-    <md-content layout="column" style="border-right:1px solid #ddd;" layout>
+    <md-content class="options-toc" layout="column">
       <md-button
         ng-class="{'md-primary md-raised': (options.stateName.indexOf('options.display') !== -1)}"
         ui-sref="menu.options.display" style="text-align:left;" bng-sound-class="bng_click_generic_small">

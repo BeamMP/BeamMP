@@ -35,9 +35,9 @@
               ng-if="entry.options.length > 0">
 
               <div ng-if="vehConf_parts.displayNames" flex class="inputName"
-                ng-bind-html="entry.name | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
+                ng-bind-html="entry.name | highlightResults: vehConf_parts.partSearchQuery.highlight"></div>
               <div ng-if="!vehConf_parts.displayNames" flex class="inputName"
-                ng-bind-html="entry.description | highlightResults: vehConf_parts.partSearchQuery['name']"></div>
+                ng-bind-html="entry.description | highlightResults: vehConf_parts.partSearchQuery.highlight"></div>
               <div ng-if="vehConf_parts.partSearchQuery['slot']" flex class="inputName"
                 ng-bind-html="entry.slot | highlightResults: vehConf_parts.partSearchQuery['slot']"></div>
               <md-select ng-model="entry.val" ng-change="vehConf_parts.partConfigChanged(entry)" aria-label="_"

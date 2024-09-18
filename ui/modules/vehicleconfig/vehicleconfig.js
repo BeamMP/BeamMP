@@ -1,7 +1,3 @@
-// This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
-// If a copy of the MIT license was not distributed with this
-// file, You can obtain one from the NOTICES.md
-
 angular.module('beamng.stuff')
 
 /**
@@ -549,7 +545,10 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       vm.searchResString = "Search term too short"
       return
     }
-    vm.partSearchQuery = queryArgs
+    vm.partSearchQuery = {
+      ...queryArgs,
+      highlight: queryArgs.description || queryArgs.name || null,
+    }
 
     // add to search history
     if (queryString.trim() !== '' && !vm.searchHistoryBrowsing) {
@@ -750,6 +749,17 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
   $scope.$on('VehicleFocusChanged', () => bngApi.engineLua('extensions.core_vehicle_partmgmt.sendDataToUI()'))
   $scope.$on('VehicleConfigChange', (event, config) => calcTree(config))
 
+
+  let liveVariablesUpdate = localStorage.getItem('applyTuningChangesAutomatically')
+  if(liveVariablesUpdate !== null) {
+    vm.liveVariablesUpdate = JSON.parse(liveVariablesUpdate) || false
+  }
+
+  vm.applySettingChanged = function() {
+    localStorage.setItem('applyTuningChangesAutomatically', JSON.stringify(vm.liveVariablesUpdate))
+  }
+
+
   // advanced wheel debug
   vm.awdData = null
   vm.awdShow = false
@@ -849,7 +859,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.saveLocal("${configName}.pc")`)
 
     if (vm.saveThumbnail == true) {
-      bngApi.engineLua(`extensions.load('util_createThumbnails'); util_createThumbnails.startWork("${configName}")`)
+      bngApi.engineLua(`extensions.load('util_screenshotCreator'); util_screenshotCreator.startWork({selection="${configName}"})`)
     }
   }
 
@@ -944,6 +954,7 @@ function ($scope) {
   vm.geState = {physicsEnabled: true, debugSpawnEnabled: false}
   vm.cameraSpeed = 0
   vm.canApplyState = true
+  vm.partsSelectedSearchTerm = ''
 
   bngApi.engineLua("simTimeAuthority.getPause()", (state) => {
     vm.geState.physicsEnabled = !state
@@ -970,12 +981,48 @@ function ($scope) {
     }
   }
 
-  vm.partSelectedChanged = () => {
-    bngApi.activeObjectLua(`bdebug.partSelectedChanged()`)
+  vm.partsSelectedChanged = () => {
+    bngApi.activeObjectLua(`bdebug.partsSelectedChanged()`)
   }
 
-  vm.showOnlySelectedPartMeshChanged = () => {
-    bngApi.activeObjectLua(`bdebug.showOnlySelectedPartMeshChanged()`)
+  vm.partsSelectedchecked = () => {
+    if (vm.state.vehicle == undefined) {
+      return true
+    }
+
+    return vm.state.vehicle.partsSelected.length === vm.state.vehicle.parts.length
+  }
+
+  vm.partsSelectedIndeterminate = () => {
+    if (vm.state.vehicle == undefined) {
+      return false
+    }
+
+    return vm.state.vehicle.partsSelected.length !== 0 &&
+    vm.state.vehicle.partsSelected.length !== vm.state.vehicle.parts.length
+  }
+
+  vm.partsSelectedClicked = () => {
+    if (vm.state.vehicle == undefined) {
+      return
+    }
+
+    if (vm.state.vehicle.partsSelected.length === vm.state.vehicle.parts.length) {
+      vm.state.vehicle.partsSelected = []
+    }
+    else {
+      vm.state.vehicle.partsSelected = Array.from({length: vm.state.vehicle.parts.length}, (_, i) => i + 1)
+    }
+    vm.applyState()
+    vm.partsSelectedChanged()
+  }
+
+  vm.syncSelectedPartsWithPartsList = () => {
+    bngApi.activeObjectLua(`bdebug.syncSelectedPartsWithPartsList()`)
+  }
+
+  vm.showOnlySelectedPartsMeshChanged = () => {
+    bngApi.activeObjectLua(`bdebug.showOnlySelectedPartsMeshChanged()`)
   }
 
   vm.setMeshVisibility = (vis) => {

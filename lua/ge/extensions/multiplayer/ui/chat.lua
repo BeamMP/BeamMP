@@ -15,7 +15,7 @@ local M = {
 
 local utils = require("multiplayer.ui.utils")
 local ffi = require('ffi')
-ffi.cdef("int ImGuiInputTextCallbackLua(ImGuiInputTextCallbackData* data);")
+--ffi.cdef("int ImGuiInputTextCallbackLua(ImGuiInputTextCallbackData* data);")
 
 local imgui = ui_imgui
 local heightOffset = 20

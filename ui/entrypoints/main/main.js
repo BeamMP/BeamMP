@@ -1012,8 +1012,8 @@ angular
       $compileProvider.debugInfoEnabled(false)
 
       // whitelist for local:// prefix
-      $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|local):/)
-      $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|mailto|local):/)
+      $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|local|file):/)
+      $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|mailto|local|file):/)
 
       let theme = $mdThemingProvider.theme("default")
       theme.dark()
@@ -1279,6 +1279,14 @@ angular
         $state.go("menu.start")
       } else {
         $state.go("menu.mainmenu")
+      }
+
+      // set browser-ui background
+      if (!beamng.ingame) {
+        const el = document.body || document.getElementsByTagName("body")[0]
+        el.style.backgroundImage = 'url("/ui/modules/mainmenu/drive/tech_images/1_blur.jpg")'
+        el.style.backgroundSize = "cover"
+        el.style.backgroundPosition = "50% 50%"
       }
     },
   ])
@@ -2176,7 +2184,9 @@ angular
       $scope.$on("MenuToggle", (event, data) => {
         //console.log('toggleMenu', data, $state.current)
         //console.trace()
-        if (!beamng.ingame) return
+
+        // when in browser ui
+        // if (!beamng.ingame) return
 
         // *** navigation back logic here
         let backState = $state.current.backState
@@ -2362,7 +2372,7 @@ angular
 
       $scope.$on("replayStateChanged", function (event, core_replay) {
         $scope.$evalAsync(function () {
-          vm.replayActive = core_replay.state === "playing"
+          vm.replayActive = core_replay.state === "playback"
           vm.replayPaused = vm.replayActive && core_replay.paused
           updatePauseState()
         })
@@ -2421,7 +2431,13 @@ angular
           let blurUpdateWrapper = RateLimiter.debounce(updateBlur, 50)
 
           const resizeObserver = new ResizeObserver(blurUpdateWrapper)
+
+          // TODO - maybe revisit this - removed position monitoring for Angular blur since it appears to cause issues
+          //
+          //const removePositionObserver = window.observePosition(elem[0], blurUpdateWrapper)
+
           resizeObserver.observe(elem[0])
+
 
           scope.$watch(attrs.bngBlur, val => {
             switch (typeof val) {
@@ -2471,11 +2487,16 @@ angular
           }
 
           function updateBlur() {
-            if (blurAmount > 0 && isVisibleFast(elem[0])) {
+            if (blurAmount && isVisibleFast(elem[0])) {
               const blur = calcBlur()
-              if (!id && blur) id = BlurGame.register(blur)
-              else if (!blur) return BlurGame.unregister(id)
-              else BlurGame.update(id, blur)
+              if (!id && blur) {
+                id = BlurGame.register(blur)
+              } else if (!blur) {
+                BlurGame.unregister(id)
+                id = null
+              } else {
+                BlurGame.update(id, blur)
+              }
             } else {
               if (id) {
                 BlurGame.unregister(id)
@@ -2486,6 +2507,9 @@ angular
 
           scope.$on("$destroy", () => {
             resizeObserver.disconnect()
+            // TODO - maybe revisit this - removed position monitoring for Angular blur since it appears to cause issues
+            //
+            //removePositionObserver()
             blurAmount = 0
             blurUpdateWrapper()
           })

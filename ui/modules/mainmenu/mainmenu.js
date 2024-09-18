@@ -1,14 +1,8 @@
-// This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
-// If a copy of the MIT license was not distributed with this
-// file, You can obtain one from the NOTICES.md
-
 'use strict'
 
 angular.module('beamng.stuff')
 
 
-// no fucking clue, why this doesn't just work in the videoBackgroundDirective itself, but well you know
-// idea from: http://stackoverflow.com/questions/28016476/angular-on-video-load-event
 .directive('onVideoStart', function () {
   return {
     restrict: 'A',
@@ -274,6 +268,7 @@ angular.module('beamng.stuff')
   let vm = this
 
   vm.product = beamng.product
+  vm.productLogo = beamng.product.replace('BeamNG.', '')
   vm.techLicense = false
   techLicenseState.state.then((licenseVerified) => {
     vm.techLicense = licenseVerified
@@ -480,6 +475,19 @@ angular.module('beamng.stuff')
     $scope.inCareer = !!data;
   });
 
+  // GFX api
+  bngApi.engineLua('Engine.Render.getAdapterType()', function (isVulkan) {
+    vm.videoApi = isVulkan;
+  })
+
+  // Quick load a level
+  vm.quickLoadLevel = function () {
+    bngApi.engineLua(`core_levels.startLevel("/levels/smallgrid/main.level.json")`)
+  }
+
+  // trial new main menu
+  vm.tryNewMainMenu = () => window.bngVue.gotoGameState('mainmenu')
+
   vm.buttons = {
     big: null,
     groups: []
@@ -499,18 +507,18 @@ angular.module('beamng.stuff')
       }
     };
 
-    let max1 = 3, max2 = 4;
+    let rowlimit = [3, 4]; // desired [min, max] per row
     vm.rebuildButtons = function () {
       let len = buttons.length;
       // find out optimal count per row
-      let max = max1;
-      if ((len % max1 || max1) < (len % max2 || max2))
-        max = max2;
+      const max = Math.min(Math.max(rowlimit[0], Math.ceil(Math.sqrt(len))), rowlimit[1]);
       // calculate new layout
-      let top = len % max || max,
-        groupsmax = Math.ceil(len / max);
+      let top = [len % max || max]; // first row
+      if (max > 3 && top[0] === 1) // change to two top rows
+        top = [~~(max / 2), ~~(max / 2) + 1];
+      const groupsmax = Math.ceil(len / max);
       // clear/add rows
-      let groupslen = vm.buttons.groups.length;
+      const groupslen = vm.buttons.groups.length;
       for (let i = 0; i < groupsmax; i++) {
         if (i < groupslen)
           vm.buttons.groups[i].list = [];
@@ -520,7 +528,7 @@ angular.module('beamng.stuff')
       // rebuild the layout
       let group = 0;
       for (let button of buttons) {
-        if (vm.buttons.groups[group].list.length === (group === 0 ? top : max))
+        if (vm.buttons.groups[group].list.length === (top[group] || max))
           group++;
         vm.buttons.groups[group].list.push(button);
       }

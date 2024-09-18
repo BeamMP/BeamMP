@@ -1,7 +1,3 @@
-// This Source Code Form is subject to the terms of the MIT license offered from BeamNG GmbH.
-// If a copy of the MIT license was not distributed with this
-// file, You can obtain one from the NOTICES.md
-
 import { onCondition, inPath } from "./resourceLoader.js"
 
 const paths = {
@@ -44,6 +40,12 @@ export default [
 
   // 3rd party includes
   ...inPath(paths.EXTERNAL_LIBS, [
+    // ResizeObserver polyfill for Ultralight
+    '/resize-observer-polyfill/ResizeObserver.global.js',
+
+    // :focus-visible polyfill for controller focus frame (see _focus.scss)
+    '/focus-visible-polyfill/dist/focus-visible.js',
+
     '/angular/angular.js',
     '/angular/angular-animate.js',
     '/angular/angular-aria.js',

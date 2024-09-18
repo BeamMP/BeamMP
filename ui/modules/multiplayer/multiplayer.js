@@ -1308,7 +1308,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;
-	newRow.onclick = function() { select(this, bngApi); };
+	newRow.onclick = function() { select(this, bngApi, server.official); };
 }
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
@@ -1401,7 +1401,7 @@ function connect(ip, port, name, skipModWarning = false) {
 }
 
 // Used to select a row (when it's clicked)
-function select(row, bngApi) {
+function select(row, bngApi, isOfficial) {
 	var table = document.getElementById("serversTable");
 	// Deselect the old row
 	deselect(table.selectedRow);
@@ -1424,7 +1424,7 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName) };
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName, isOfficial) };
 	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');

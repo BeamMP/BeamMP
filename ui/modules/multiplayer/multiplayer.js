@@ -1387,7 +1387,7 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 }
 
 // Used to connect to the backend with ids
-function connect(ip, port, name) {
+function connect(ip, port, name, skipModWarning = false) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
@@ -1397,7 +1397,7 @@ function connect(ip, port, name) {
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'flex'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '")');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '", ' + skipModWarning + ')');
 }
 
 // Used to select a row (when it's clicked)

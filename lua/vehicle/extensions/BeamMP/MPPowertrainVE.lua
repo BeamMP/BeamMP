@@ -19,7 +19,6 @@ local devices = powertrain.getDevices()
 
 
 local function applyLivePowertrain(data)
-	controller.mainController.setGearboxMode("realistic")
 	local decodedData = jsonDecode(data) -- Decode data
 	for k, v in pairs(decodedData) do -- For each device
 		if v.mode and devices[k] and devices[k].setMode then

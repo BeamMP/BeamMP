@@ -261,8 +261,9 @@ end
 -- @param ip string The IP/URL of the server
 -- @param port number The Port of the server
 -- @param name string The Name of the server (Used at the top of the screen when in session)
--- @usage MPCoreNetwork.setCurrentServer('localhost', 30814, 'Test Server')
-local function setCurrentServer(ip, port, name)
+-- @param skipModWarning boolean If the mod security warning should be skipped
+-- @usage MPCoreNetwork.setCurrentServer('localhost', 30814, 'Test Server', false)
+local function setCurrentServer(ip, port, name, skipModWarning)
 	-- If the server is different then lets also clear the existing chat data as this does not always done on leaving
 	if currentServer ~= nil then
 		if currentServer.port ~= port and currentServer.ip ~= ip then
@@ -274,9 +275,10 @@ local function setCurrentServer(ip, port, name)
 		be:executeJS('localStorage.removeItem("chatMessages");')
 	end
 	currentServer = {
-		ip		   = ip,
-		port	   = port,
-		name	   = name
+		ip             = ip,
+		port	       = port,
+		name	       = name,
+		skipModWarning = skipModWarning or false
 	}
 end
 
@@ -284,13 +286,14 @@ end
 -- @param ip string The IP/URL of the server
 -- @param port number The Port of the server
 -- @param name string The Name of the server (Used at the top of the screen when in session)
--- @usage MPCoreNetwork.connectToServer('localhost', 30814, 'Test Server')
-local function connectToServer(ip, port, name)
+-- @param skipModWarning boolean If the mod security warning should be skipped
+-- @usage MPCoreNetwork.connectToServer('localhost', 30814, 'Test Server', false)
+local function connectToServer(ip, port, name, skipModWarning)
 	if isMpSession then log('W', 'connectToServer', 'Already in an MP Session! Leaving server!') M.leaveServer() end
 
 	if ip and port then -- Direct connect
 		currentServer = nil
-		setCurrentServer(ip, port, name)
+		setCurrentServer(ip, port, name, skipModWarning)
 	else
 		log('E', 'connectToServer', 'IP and PORT are required for connecting to a server.')
 		return
@@ -489,6 +492,14 @@ local function promptAutoJoin(params)
 	UI.promptAutoJoinConfirmation(params)
 end
 
+local function handleModWarning(params)
+	if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false and not currentServer.skipModWarning then
+		guihooks.trigger('DownloadSecurityPrompt', params) 
+	else 
+		send('WY') 
+	end
+end
+
 -- VV============= EVENTS =============VV
 
 --- Handle network message events.
@@ -503,7 +514,7 @@ local HandleNetwork = {
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,
 	['N'] = function(params) loginReceived(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
-	['W'] = function(params) if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false then guihooks.trigger('DownloadSecurityPrompt', params) else send('WY') end end,
+	['W'] = function(params) handleModWarning(params) end,
 	['Z'] = function(params) launcherVersion = params; end,
 }
 

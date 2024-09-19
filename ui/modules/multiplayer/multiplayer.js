@@ -1308,7 +1308,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;
-	newRow.onclick = function() { select(this, bngApi); };
+	newRow.onclick = function() { select(this, bngApi, server.official); };
 }
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
@@ -1387,7 +1387,7 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 }
 
 // Used to connect to the backend with ids
-function connect(ip, port, name) {
+function connect(ip, port, name, skipModWarning = false) {
 	console.log("Attempting to call connect to server...")
 	// Add server to recents
 	addRecent(highlightedServer);
@@ -1397,11 +1397,11 @@ function connect(ip, port, name) {
 	// Show the connecting screen
 	document.getElementById('LoadingServer').style.display = 'flex'
 	// Connect with ids
-	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '")');
+	bngApi.engineLua('MPCoreNetwork.connectToServer("' + ip + '", ' + port + ',"' + name + '", ' + skipModWarning + ')');
 }
 
 // Used to select a row (when it's clicked)
-function select(row, bngApi) {
+function select(row, bngApi, isOfficial) {
 	var table = document.getElementById("serversTable");
 	// Deselect the old row
 	deselect(table.selectedRow);
@@ -1424,7 +1424,7 @@ function select(row, bngApi) {
 
 	// Add the connect button
 	var connectToServerButton = document.getElementById('serverconnect-button');
-	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName) };
+	connectToServerButton.onclick = function() { connect(row.server.ip, row.server.port, row.server.strippedName, isOfficial) };
 	
 	if (server.favorite) {
 		var removeFavButton = document.getElementById('removeFav-button');

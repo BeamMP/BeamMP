@@ -11,6 +11,8 @@
   "ui.options.multiplayer.queueSpawnEdit.tooltip": "Se habilitado, o surgimento e edições de outros veículos serão colocados em uma fila, ao invés de serem aplicados imediatamente",
   "ui.options.multiplayer.queueAuto": "Aplicar automaticamente alterações de veículos na fila",
   "ui.options.multiplayer.queueAuto.tooltip": "Se Habilitado, você só atualizará veículos na fila quando estiver parado, com base nas configurações abaixo",
+  "ui.options.multiplayer.highlightQueuedPlayers": "Destacar jogadores na fila",
+  "ui.options.multiplayer.highlightQueuedPlayers.tooltip": "Destacar na lista de jogadores os que tenham eventos na fila",
   "ui.options.multiplayer.queueApplySpeed": "Limite de velocidade para aplicação da fila",
   "ui.options.multiplayer.queueApplySpeed.tooltip": "A fila é aplicada se seu veículo estiver mais lento do que essa velocidade",
   "ui.options.multiplayer.queueApplyTimeout": "Limite de tempo para aplicação da fila",

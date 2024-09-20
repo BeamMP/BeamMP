@@ -8,9 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out the code
+      if: ${{ github.event.release.prerelease == false }}
       uses: actions/checkout@v4
       with:
-        ref: 'development'
+        ref: 'public'
+
+    - name: Check out the code (early-access)
+      if: ${{ github.event.release.prerelease == true }}
+      uses: actions/checkout@v4
+      with:
+        ref: 'early-access'
+
     - name: Download beamlings.zip from Beamlings repository
       env: 
         PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}

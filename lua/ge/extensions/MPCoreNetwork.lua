@@ -575,7 +575,14 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				HandleNetwork[code](data)
+
+				local func = HandleNetwork[code]
+				
+				if func then
+					func(data)
+				else
+					log('E', 'onUpdate', 'Invalid packet "' .. code .. '" received. data: ' .. data)
+				end
 			end
 		end
 		--================================ SECONDS TIMER ================================

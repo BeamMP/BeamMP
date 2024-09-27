@@ -152,6 +152,8 @@ end
 local function openURL(url)
 	send("O"..url)
 	log('M', 'openURL', 'Requesting the BeamMP Launcher to open url: '..url)
+	-- Remove this when the url opening is in the public launcher release
+	guihooks.trigger('ConfirmationDialogOpen', "Link opened", "Please open  "..url.." in your browser if nothing happens.", "OK", "guihooks.trigger('ConfirmationDialogClose', 'Link opened')")
 end
 
 -- ================ UI ================

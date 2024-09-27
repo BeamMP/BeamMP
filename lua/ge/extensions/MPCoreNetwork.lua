@@ -425,7 +425,7 @@ local function loginReceived(params)
 
 		if authResult.role and authResult.role ~= "USER" then
 			local roleColor = MPVehicleGE.getRoleInfoTable()[authResult.role].backcolor
-			authResult.color = "rgba(" .. roleColor.r .. "," .. roleColor.g .. "," .. roleColor.b .. "," .. roleColor.a .. ")"
+			authResult.color = "rgba(" .. roleColor.r .. "," .. roleColor.g .. "," .. roleColor.b .. "," .. (roleColor.a or 127)/255 .. ")"
 		end
 	end
 

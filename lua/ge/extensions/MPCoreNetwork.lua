@@ -16,6 +16,8 @@ local M = {}
 -- launcher
 local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
+local http = require("socket.http")
+local ltn12 = require("ltn12")
 local launcherConnected = false
 local isConnecting = false
 local proxyPort = ""
@@ -411,7 +413,15 @@ local function loginReceived(params)
 
 	authResult = result
 	if authResult.username then
-		authResult.avatar = "http://localhost:".. proxyPort .."/avatar/"..authResult.username
+		local res = {}; 
+		local r, code, headers = http.request{
+			url = "http://localhost:".. proxyPort .."/avatar/"..authResult.username, 
+			sink = ltn12.sink.table(res)
+		}; 
+
+		if code == 200 then 
+			authResult.avatar = "data:" .. (headers["content-type"]) .. ";base64," .. MPHelpers.b64encode(table.concat(res))
+		end
 
 		if authResult.role and authResult.role ~= "USER" then
 			local roleColor = MPVehicleGE.getRoleInfoTable()[authResult.role].backcolor

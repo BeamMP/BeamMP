@@ -123,9 +123,13 @@ function($scope, $state, $timeout, $document) {
 		var x = document.getElementById('LOGINERRORFIELD').textContent= data;
 	});
 	
-	// Try to auto login
-	// bngApi.engineLua('MPCoreNetwork.autoLogin()');
-	// autologin is called from lua
+	//Workaround for sticky login UI
+	$scope.$on('actuallyLoggedIn', function (event, data) {
+		if (data == true) {
+			$state.go('menu.multiplayer.servers');
+		}
+	});
+	bngApi.engineLua('MPCoreNetwork.isLoggedIn()');
 }])
 
 

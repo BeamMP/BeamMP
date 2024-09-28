@@ -129,6 +129,20 @@ local function jatoRemoteUpdateGFX(controllerName, funcName, tempTable, ...) -- 
 	end
 end
 
+local function readDriveMode(controllerName, funcName, tempTable, ...)
+	local controller = controller.getControllerSafe(controllerName)
+	if controller then
+		controllerSyncVE.OGcontrollerFunctionsTable[controllerName][funcName](...)
+
+		tempTable.driveMode = controller.getCurrentDriveModeKey()
+		controllerSyncVE.sendControllerData(tempTable)
+	end
+end
+
+local function recieveDriveMode(data)
+	controllerSyncVE.OGcontrollerFunctionsTable[data.controllerName]["setDriveMode"](data.driveMode)
+end
+
 -- compare set to true only sends data when there is a change
 -- compare set to false sends the data every time the function is called
 -- adding ownerFunction and/or receiveFunction can set custom functions to read or change data before sending or on receiveing
@@ -154,8 +168,14 @@ local includedControllerTypes = {
 	
 	["driveModes"] = {
 		["setDriveMode"] = {},
-		["nextDriveMode"] = {},
-		["previousDriveMode"] = {},
+		["nextDriveMode"] = {
+			ownerFunction = readDriveMode,
+			receiveFunction = recieveDriveMode
+		},
+		["previousDriveMode"] = {
+			ownerFunction = readDriveMode,
+			receiveFunction = recieveDriveMode
+		},
 	},
 
 	["hydraulicSuspension"] = {

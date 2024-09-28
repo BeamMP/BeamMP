@@ -133,11 +133,11 @@ local function updateGFX(dt)
 					engine:setIgnition(engineData.ignitionCoef)
 				end
 				if engine.starterEngagedCoef == 0 then
-					if engineData.starterEngagedCoef == 1 or not engineData.isStalled and engine.isStalled and engineData.ignitionCoef then
+					if engineData.starterEngagedCoef == 1 or not engineData.isStalled and engine.isStalled and engineData.ignitionCoef == 1 then
 						engine:activateStarter()
 					end
 				end
-				if engineData.isStalled and not engine.isStalled then
+				if engineData.isStalled and not engine.isStalled and engineData.starterEngagedCoef == 0 then
 					engine:cutIgnition(1)
 					if engine.starterEngagedCoef == 1 then
 						engine:deactivateStarter()

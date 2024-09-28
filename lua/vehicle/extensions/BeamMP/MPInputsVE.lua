@@ -53,14 +53,20 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 			print('MPInputsVE Error in "applyGear()". Unsupported powertrain')
 		end
 		return nil
-	end 
-	
+	end
+
+	if electrics.values.gearboxMode and electrics.values.gearboxMode == "arcade" then
+		if controller.mainController.setGearboxMode then
+			controller.mainController.setGearboxMode("realistic")
+		end
+	end
+
 	-- certain gearbox need to be shifted with setGearIndex() while others need to be shifted with shiftXOnY()
 	if gearBoxHandler[powertrainDevice.type] == 1 then
 		local index = tonumber(data)
 		if not index then return end
 		powertrainDevice:setGearIndex(index)
-		
+
 	elseif gearBoxHandler[powertrainDevice.type] == 2 then
 		if electrics.values.isShifting then return end
 		local remoteGearMode = string.sub(data, 1, 1)
@@ -75,7 +81,7 @@ local function applyGear(data) --TODO: add handling for mismatched gearbox types
 		else
 			controller.mainController.shiftToGearIndex(translationTable[remoteGearMode])
 		end
-		
+
 	else
 		if not unsupportedPowertrainGearbox then
 			unsupportedPowertrainGearbox = true -- prevent spamming the log

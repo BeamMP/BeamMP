@@ -299,8 +299,6 @@ end
 
 local lastLeftSignal = 0
 local lastRightSignal = 0
-local remoteignition = true
-local remoteengineRunning = 1
 local function applyElectrics(data)
 	local decodedData = jsonDecode(data) -- Decode received data
 	if (decodedData) then -- If received data is correct
@@ -453,13 +451,8 @@ local function onReset()
 		electrics.values.absMode = settings.getValue("absBehavior", "realistic")
 	end
 	if v.mpVehicleType == "R" then
-		if controller.mainController.setGearboxMode then
-			controller.mainController.setGearboxMode("realistic")
-		end
 		if wheels then wheels.setABSBehavior(electrics.values.absMode or "realistic") end
 		localSwingwing = 0
-		remoteignition = true
-		remoteengineRunning = 1
 	end
 end
 

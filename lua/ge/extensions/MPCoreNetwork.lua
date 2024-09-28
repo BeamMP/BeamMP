@@ -167,6 +167,7 @@ end
 --- Returns true or false if the user is logged in.
 -- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
+	guihooks.trigger('actuallyLoggedIn', loggedIn)
 	return loggedIn
 end
 
@@ -604,6 +605,7 @@ end
 --- onLauncherConnected is an event which is called by internal scripts. This one is called when connection to the launcher is established
 --- @usage INTERNAL ONLY / GAME SPECIFIC
 onLauncherConnected = function()
+	loggedIn = false
 	reconnectAttempt = 0
 	log('W', 'onLauncherConnected', 'onLauncherConnected')
 	send('Z') -- request launcher version

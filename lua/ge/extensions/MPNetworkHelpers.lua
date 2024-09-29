@@ -28,7 +28,10 @@ M.receive = function(launcherSocket, recvState)
 			recvState.state = 'error'
 			return recvState
 		end
-		local len = ffi.cast("uint32_t*", ffi.new("char[?]", 4, header))[0]
+		--local len = ffi.cast("uint32_t*", ffi.new("char[?]", 4, header))[0]
+		local len = ffi.new("uint32_t[1]")
+		ffi.copy(len, header, 4)
+		len = len[0]
 		if not len then
 			log('E', 'receive', 'Error: Failed to read header')
 			recvState.state = 'error'

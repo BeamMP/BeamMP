@@ -943,7 +943,8 @@ local function sendVehicleSpawn(gameVehicleID)
 		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
 
 		if not players[vehicleTable.pid] or players[vehicleTable.pid].name ~= MPConfig.getNickname() then
-			players[vehicleTable.pid] = Player:new({name=MPConfig.getNickname(), playerID=vehicleTable.pid, isLocal=true })
+			local role = MPCoreNetwork.getAuthResult().role
+			players[vehicleTable.pid] = Player:new({name=MPConfig.getNickname(), playerID=vehicleTable.pid, isLocal=true, role=role })
 		end
 
 		--vehicles[gameVehicleID] = vehObj

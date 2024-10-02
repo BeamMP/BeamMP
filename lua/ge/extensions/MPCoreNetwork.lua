@@ -432,6 +432,10 @@ local function loginReceived(params)
 	guihooks.trigger('authReceived', authResult)
 end
 
+--- Returns the result from authentication, which includes the user's name, beammp id and role
+local function getAuthResult()
+	return authResult
+end
 
 --- Leaves the server and performs necessary cleanup.
 -- @param goBack boolean Whether to go back to the previous screen after leaving the server.
@@ -761,6 +765,7 @@ M.login                = login
 M.autoLogin            = autoLogin
 M.logout               = logout
 M.isLoggedIn           = isLoggedIn
+M.getAuthResult        = getAuthResult
 -- events
 M.onUiChangedState     = onUiChangedState
 M.onExtensionLoaded    = onExtensionLoaded

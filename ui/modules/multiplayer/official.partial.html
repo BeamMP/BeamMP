@@ -36,6 +36,17 @@
 			</md-select>
 
 
+			<md-select id="map-select" ng-model="multiplayermenu.serverVersions" multiple placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
+				<md-tooltip md-direction="right">
+					{{:: 'ui.multiplayer.serverVersionFilterTooltip' | translate}}
+				</md-tooltip>
+			
+				<md-option ng-repeat="version in multiplayermenu.availableServerVersions" ng-value="multiplayermenu.availableServerVersions[$index]" style="height: 40px;">
+					{{ version }}
+				</md-option>
+			</md-select>
+			
+
 			<md-checkbox ng-model="multiplayermenu.checkModSlider" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.modSliderTooltip' | translate}}

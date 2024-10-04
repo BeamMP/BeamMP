@@ -111,6 +111,7 @@
     "ui.multiplayer.notFull": "Not full",
     "ui.multiplayer.notFullTooltip": "Only show not full servers",
     "ui.multiplayer.mapFilterTooltip": "Enable map filter",
+    "ui.multiplayer.serverVersionFilterTooltip": "Enable server version filter",
     "ui.multiplayer.modSlider": "Mod size limiter",
     "ui.multiplayer.modSliderTooltip": "Enable mod size limiter",
     "ui.multiplayer.clearRecent": "Clear Recents",

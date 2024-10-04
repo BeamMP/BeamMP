@@ -354,6 +354,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = serverListOptions.checkModSlider
 		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
 		vm.selectMap = serverListOptions.selectMap
+		vm.serverVersions = serverListOptions.serverVersions
 		vm.searchText = ""
 	} else {
 		vm.checkIsEmpty = false
@@ -362,6 +363,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = false
 		vm.sliderMaxModSize = 500 // in MB
 		vm.selectMap = "Any"
+		vm.serverVersions = []
 		vm.searchText = ""
 	}
 	
@@ -401,7 +403,7 @@ function($scope, $state, $timeout) {
 			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
 		}
 
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			official,
 			4, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3, Official = 4
@@ -412,6 +414,7 @@ function($scope, $state, $timeout) {
 			vm.checkModSlider,
 			vm.sliderMaxModSize,
 			vm.selectMap,
+			vm.serverVersions,
 			bngApi
 		);
 		serverListOptions = {
@@ -421,6 +424,7 @@ function($scope, $state, $timeout) {
 			checkModSlider : vm.checkModSlider,
 			sliderMaxModSize : vm.sliderMaxModSize,
 			selectMap : vm.selectMap,
+			serverVersions : vm.serverVersions
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
@@ -448,6 +452,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = serverListOptions.checkModSlider
 		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
 		vm.selectMap = serverListOptions.selectMap
+		vm.serverVersions = serverListOptions.serverVersions,
 		vm.searchText = ""
 	} else {
 		vm.checkIsEmpty = false
@@ -456,6 +461,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = false
 		vm.sliderMaxModSize = 500 // in MB
 		vm.selectMap = "Any"
+		vm.serverVersions = []
 		vm.searchText = ""
 	}
 	
@@ -494,7 +500,7 @@ function($scope, $state, $timeout) {
 			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
 		}
 
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
 			0, // Favorite, Recent or Servers tab
@@ -505,6 +511,7 @@ function($scope, $state, $timeout) {
 			vm.checkModSlider,
 			vm.sliderMaxModSize,
 			vm.selectMap,
+			vm.serverVersions,
 			bngApi
 		);
 
@@ -515,6 +522,7 @@ function($scope, $state, $timeout) {
 			checkModSlider : vm.checkModSlider,
 			sliderMaxModSize : vm.sliderMaxModSize,
 			selectMap : vm.selectMap,
+			serverVersions : vm.serverVersions
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
@@ -538,6 +546,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = serverListOptions.checkModSlider
 		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
 		vm.selectMap = serverListOptions.selectMap
+		vm.serverVersions = serverListOptions.serverVersions
 		vm.searchText = ""
 	} else {
 		vm.checkIsEmpty = false
@@ -546,6 +555,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = false
 		vm.sliderMaxModSize = 500 // in MB
 		vm.selectMap = "Any"
+		vm.serverVersions = []
 		vm.searchText = ""
 	}
 	
@@ -586,7 +596,7 @@ function($scope, $state, $timeout) {
 			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
 		}
 
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			featured,
 			3, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3
@@ -597,6 +607,7 @@ function($scope, $state, $timeout) {
 			vm.checkModSlider,
 			vm.sliderMaxModSize,
 			vm.selectMap,
+			vm.serverVersions,
 			bngApi
 		);
 		serverListOptions = {
@@ -606,6 +617,7 @@ function($scope, $state, $timeout) {
 			checkModSlider : vm.checkModSlider,
 			sliderMaxModSize : vm.sliderMaxModSize,
 			selectMap : vm.selectMap,
+			serverVersions : vm.serverVersions
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
@@ -629,6 +641,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = serverListOptions.checkModSlider
 		vm.sliderMaxModSize = serverListOptions.sliderMaxModSize
 		vm.selectMap = serverListOptions.selectMap
+		vm.serverVersions = serverListOptions.serverVersions
 		vm.searchText = ""
 	} else {
 		vm.checkIsEmpty = false
@@ -637,6 +650,7 @@ function($scope, $state, $timeout) {
 		vm.checkModSlider = false
 		vm.sliderMaxModSize = 500 // in MB
 		vm.selectMap = "Any"
+		vm.serverVersions = []
 		vm.searchText = ""
 	}
 	
@@ -677,7 +691,7 @@ function($scope, $state, $timeout) {
 			if (serverListOptions.checkIsNotEmpty && vm.checkIsEmpty) vm.checkIsNotEmpty = false;
 		}
 
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			partner,
 			4, // Servers = 0, Favorites = 1, Recent = 2, Featured = 3, Partner = 4
@@ -688,6 +702,7 @@ function($scope, $state, $timeout) {
 			vm.checkModSlider,
 			vm.sliderMaxModSize,
 			vm.selectMap,
+			vm.serverVersions,
 			bngApi
 		);
 		serverListOptions = {
@@ -697,6 +712,7 @@ function($scope, $state, $timeout) {
 			checkModSlider : vm.checkModSlider,
 			sliderMaxModSize : vm.sliderMaxModSize,
 			selectMap : vm.selectMap,
+			serverVersions : vm.serverVersions
 		};
 		localStorage.setItem("serverListOptions", JSON.stringify(serverListOptions));
 	};
@@ -724,7 +740,7 @@ function($scope, $state, $timeout) {
 	});
 
 	vm.repopulate = async function() {
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
 			2, // Favorite, Recent or Servers tab
@@ -775,6 +791,7 @@ function($scope, $state, $timeout) {
 	vm.checkModSlider = false;
 	vm.sliderMaxModSize = 500; // in MB
 	vm.selectMap = "Any";
+	vm.serverVersions = [];
 	vm.searchText = "";
 	bngApi.engineLua('MPCoreNetwork.sendBeamMPInfo()'); // request cached server list
 	
@@ -794,7 +811,7 @@ function($scope, $state, $timeout) {
 	});
 
 	vm.repopulate = async function() {
-		vm.availableMaps = await populateTable(
+		[vm.availableMaps, vm.availableServerVersions] = await populateTable(
 			document.getElementById("serversTableBody"),
 			servers,
 			1, // Favorite, Recent or Servers tab
@@ -805,6 +822,7 @@ function($scope, $state, $timeout) {
 			vm.checkModSlider,
 			vm.sliderMaxModSize,
 			vm.selectMap,
+			vm.serverVersions,
 			bngApi
 		);
 	};
@@ -1316,10 +1334,11 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 }
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
-async function populateTable(tableTbody, servers, type, searchText = '', checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap = 'Any', bngApi) {
+async function populateTable(tableTbody, servers, type, searchText = '', checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap = 'Any', SelectedServerVersions = [], bngApi) {
 	var newTbody = document.createElement('tbody');
 	newTbody.id = "serversTableBody";
 	var mapNames = new Array(); //["Any"];
+	var serverVersions = new Array();
 	for (const server of servers) {
 		if (!server) {
 			break;
@@ -1328,6 +1347,8 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 		var smoothMapName = SmoothMapName(server.map);
 		var isFavorite = false;
 		var isRecent = false;
+
+		if (!serverVersions.includes("v" + server.version)) serverVersions.push("v" + server.version);
 
 		// Filter by search
 		if (!server.strippedName.toLowerCase().includes(searchText.toLowerCase())) continue;
@@ -1342,6 +1363,8 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 	
 		// Filter by map
 		else if((selectMap != "Any" && selectMap != smoothMapName)) continue;
+
+		else if (SelectedServerVersions.length > 0 && !SelectedServerVersions.includes("v" + server.version)) continue;
 
 		// Add the maps to the combobox on the UI
 		if(!mapNames.includes(smoothMapName)) mapNames.push(smoothMapName);
@@ -1387,7 +1410,7 @@ async function populateTable(tableTbody, servers, type, searchText = '', checkIs
 	mapNames.sort(); // Sort the maps by name
 	mapNames.unshift("Any"); // Set Any to the beginning
 	if (type == 2) sortTable("recent", true, -1);
-	return mapNames; // Set the list of available maps
+	return [mapNames, serverVersions]; // Set the list of available maps
 }
 
 // Used to connect to the backend with ids

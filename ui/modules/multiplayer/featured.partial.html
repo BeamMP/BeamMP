@@ -36,7 +36,7 @@
 			</md-select>
 
 			
-			<md-select id="filter-dropdown" ng-model="multiplayermenu.serverVersions" multiple placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();"></md-select>
+			<md-select id="filter-dropdown" ng-model="multiplayermenu.serverVersions" multiple placeholder="All" class="md-no-underline dropdown" ng-change="multiplayermenu.repopulate();">
 				<md-tooltip md-direction="right">
 					{{:: 'ui.multiplayer.serverVersionFilterTooltip' | translate}}
 				</md-tooltip>

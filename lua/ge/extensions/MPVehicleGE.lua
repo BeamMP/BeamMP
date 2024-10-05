@@ -1015,8 +1015,8 @@ local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
 	else
 		core_vehicle_partmgmt_saveLocal(p1)
 		
-		local util_createThumbnails_startWork = util_createThumbnails.startWork
-		util_createThumbnails.startWork = function (p1)
+		local util_createThumbnails_startWork = extensions.util_createThumbnails.startWork
+		extensions.util_createThumbnails.startWork = function (p1)
 			local vehicle = be:getPlayerVehicle(0)
 			if vehicle:getField("protected", 0) == "1" then
 				return

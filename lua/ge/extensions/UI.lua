@@ -492,6 +492,20 @@ local function onUiChangedState(currentUiState, previousUiState)
                 };
             }
         ]])
+    elseif currentUiState == "menu.vehicleconfig.parts" then
+        be:queueJS([[
+            syncButton = document.querySelector("md-content > div:nth-child(4) > button.md-raised.md-primary.md-button.md-default-theme").cloneNode(true);
+
+            syncButton.children[0].remove()
+            syncButton.children[0].innerText = "SYNC"
+            syncButton.onclick = function() {
+	            bngApi.engineLua("MPVehicleGE.sendVehicleEdit(be:getPlayerVehicle(0):getID())");
+            }
+            syncButton.removeAttribute('ng-disabled');
+            syncButton.removeAttribute('disabled');
+
+            document.querySelector("md-content > div:nth-child(4)").appendChild(syncButton);
+        ]])
     end
 end
 

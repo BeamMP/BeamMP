@@ -469,6 +469,32 @@ local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
+local function onUiChangedState(currentUiState, previousUiState)
+    if currentUiState == "menu.mainmenu" then
+        be:queueJS([[
+            buttonGroups = document.querySelector('.menu-column .mainmenu-buttongroups');
+            firstRow = buttonGroups.children[0];
+
+            if (firstRow.children[0].innerText !== 'Multiplayer') {
+                secondRow = buttonGroups.children[1];
+                thirdRow = buttonGroups.children[2];
+
+                secondRow.insertBefore(firstRow.children[2], secondRow.firstChild);
+                secondRow.insertBefore(firstRow.children[1], secondRow.firstChild);
+                thirdRow.insertBefore(secondRow.lastElementChild, thirdRow.firstChild);
+                firstRow.insertBefore(firstRow.children[0].cloneNode(true), firstRow.children[0]);
+
+                multiplayerButton = firstRow.children[0];
+                multiplayerButton.children[1].innerText = 'Multiplayer';
+                multiplayerButton.children[0].style.backgroundImage = 'url("/ui/modules/multiplayer/icons/account-multiple.svg")';
+                multiplayerButton.onclick = function() {
+                    angular.element(document.body).injector().get('$state').go('menu.multiplayer.tos');
+                };
+            }
+        ]])
+    end
+end
+
 --- Executes when the user or mod ends a mission/session (map) .
 -- @param mission table The mission object.
 local function onClientEndMission(mission)
@@ -530,6 +556,7 @@ M.showMdDialog = showMdDialog
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat
 
+M.onUiChangedState = onUiChangedState
 M.onClientEndMission = onClientEndMission
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate

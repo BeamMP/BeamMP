@@ -471,11 +471,12 @@ end
 
 local function onUiChangedState(currentUiState, previousUiState)
     if currentUiState == "menu.mainmenu" then
+        local multiplayerText = MPTranslate("ui.playmodes.multiplayer", "Multiplayer")
         be:queueJS([[
             buttonGroups = document.querySelector('.menu-column .mainmenu-buttongroups');
             firstRow = buttonGroups.children[0];
 
-            if (firstRow.children[0].innerText !== 'Multiplayer') {
+            if (firstRow.children[0].innerText !== ']] .. multiplayerText .. [[') {
                 secondRow = buttonGroups.children[1];
                 thirdRow = buttonGroups.children[2];
 
@@ -485,7 +486,7 @@ local function onUiChangedState(currentUiState, previousUiState)
                 firstRow.insertBefore(firstRow.children[0].cloneNode(true), firstRow.children[0]);
 
                 multiplayerButton = firstRow.children[0];
-                multiplayerButton.children[1].innerText = 'Multiplayer';
+                multiplayerButton.children[1].innerText = ']] .. multiplayerText .. [[';
                 multiplayerButton.children[0].style.backgroundImage = 'url("/ui/modules/multiplayer/icons/account-multiple.svg")';
                 multiplayerButton.onclick = function() {
                     angular.element(document.body).injector().get('$state').go('menu.multiplayer.tos');
@@ -493,11 +494,12 @@ local function onUiChangedState(currentUiState, previousUiState)
             }
         ]])
     elseif currentUiState == "menu.vehicleconfig.parts" then
+        local syncText = MPTranslate("ui.common.multiplayer.sync", "Sync")
         be:queueJS([[
             syncButton = document.querySelector("md-content > div:nth-child(4) > button.md-raised.md-primary.md-button.md-default-theme").cloneNode(true);
 
             syncButton.children[0].remove()
-            syncButton.children[0].innerText = "SYNC"
+            syncButton.children[0].innerText = "]] .. syncText .. [["
             syncButton.onclick = function() {
 	            bngApi.engineLua("MPVehicleGE.sendVehicleEdit(be:getPlayerVehicle(0):getID())");
             }

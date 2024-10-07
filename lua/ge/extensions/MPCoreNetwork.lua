@@ -581,6 +581,7 @@ local function onUpdate(dt)
 				if func then
 					func(data)
 				else
+					guihooks.trigger('toastrMsg', { type = 'error', title = 'Error', msg = 'Invalid packet "' .. code .. '" received, please report this in our Discord server with your log file.' })
 					log('E', 'onUpdate', 'Invalid packet "' .. code .. '" received. data: ' .. data)
 				end
 			end

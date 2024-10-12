@@ -1,6 +1,8 @@
 {
     "ui.playmodes.multiplayer": "Multiplayer",
     "ui.options.multiplayer": "Multiplayer",
+    "ui.options.multiplayer.protectConfigFromClone": "Enable Config Protection from Cloning",
+    "ui.options.multiplayer.protectConfigFromClone.tooltip": "Protect this config from being cloned by other players.",
     "ui.options.multiplayer.enableNewChatMenu": "New chat menu",
     "ui.options.multiplayer.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
     "ui.options.multiplayer.enablePosSmoother": "Enable vehicle position smoothing",
@@ -145,5 +147,9 @@
     "ui.multiplayer.security.no_return": "Cancel & Return",
     "ui.multiplayer.security.accept_proceed": "Download & Join",
     "ui.multiplayer.security.title": "Server Mods Detected",
-    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings."
+    "ui.multiplayer.security.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings.",
+    "ui.multiplayer.configprotection.clone.title": "Vehicle Clone Error",
+    "ui.multiplayer.configprotection.clone.message": "Sorry, you cannot clone this vehicle.",
+    "ui.multiplayer.configprotection.save.title": "Vehicle Save Error",
+    "ui.multiplayer.configprotection.save.message": "Sorry, you cannot save this vehicle."
 }

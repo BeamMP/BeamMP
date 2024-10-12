@@ -74,6 +74,15 @@
   </md-list-item>
 
   <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.queueWithLMB' | translate}}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueWithLMB.tooltip' | translate }}</md-tooltip>
+    <md-select aria-label="_" ng-model="options.data.values.queueWithLMB" ng-change="options.applyState()">
+      <md-option ng-value="true">{{:: 'ui.options.multiplayer.leftMouseButton' | translate }}</md-option>
+      <md-option ng-value="false">{{:: 'ui.options.multiplayer.rightMouseButton' | translate }}</md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
     <p>{{:: 'ui.options.multiplayer.queueAuto' | translate }}</p>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.queueAuto.tooltip' | translate }}</md-tooltip>
     <md-checkbox ng-model="options.data.values.enableQueueAuto" ng-change="options.applyState()"></md-checkbox>

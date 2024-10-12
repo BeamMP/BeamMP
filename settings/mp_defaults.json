@@ -40,5 +40,6 @@
   "showPlayerIDs"               : [ "cloud", false ],
   "protectConfigFromClone"      : [ "cloud", false ],
   "skipModSecurityWarning"      : [ "local", false ],
-  "highlightQueuedPlayers"      : [ "local", true  ]
+  "highlightQueuedPlayers"      : [ "local", true  ],
+  "queueWithLMB"                : [ "cloud", true  ]
 }

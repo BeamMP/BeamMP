@@ -502,10 +502,19 @@ function($scope, $state, $timeout) {
 
 	$scope.isFilterOverlayVisible = false;
 
+	$scope.toggleFilterOverlay = function () {
+		$scope.isFilterOverlayVisible = !$scope.isFilterOverlayVisible;
 	};
 
+	$scope.clearFilters = function () {
+		vm.checkIsEmpty = false;
+		vm.checkIsNotEmpty = false;
+		vm.checkIsNotFull = false;
+		vm.checkModSlider = false;
+		vm.sliderMaxModSize = 500;
+		vm.selectMap = "Any map";
+		vm.serverVersions = [];
 		vm.repopulate();
-	});
 	}
 
 	repopulateServerList = function () { vm.repopulate().then(() => { }); }

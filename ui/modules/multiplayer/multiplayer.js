@@ -137,8 +137,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 'ConfirmationDialog', 
-function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
+.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', '$filter', 'ConfirmationDialog', 'toastr', 
+function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toastr) {
 	var vm = this;
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
@@ -299,6 +299,7 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 			custom: true, port: port
 		}
 		addFav(server)
+		toastr.info($filter('translate')('ui.multiplayer.favorited_toast_description'), $filter('translate')('ui.multiplayer.favorited_toast_title'));
 	}
 
 	vm.stateName = $state.current.name;

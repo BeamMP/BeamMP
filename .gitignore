@@ -10,3 +10,4 @@ vehicles/unicycle/*.dae
 vehicles/unicycle/*.png
 vehicles/unicycle/unicycle_beamling.jbeam
 vehicles/unicycle/main.materials.json
+.vscode

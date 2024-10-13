@@ -22,6 +22,9 @@ else
 	log('M', 'versionCheck', 'BeamMP is compatible with the current version.')
 end
 
+load("MPNetworkHelpers")
+setExtensionUnloadMode("MPNetworkHelpers", "manual")
+
 load("multiplayer/multiplayer")
 setExtensionUnloadMode("multiplayer/multiplayer", "manual")
 

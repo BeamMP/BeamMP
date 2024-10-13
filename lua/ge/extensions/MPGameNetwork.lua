@@ -10,11 +10,13 @@
 
 local M = {}
 
+local ffi = require("ffi")
+
 
 -- ============= VARIABLES =============
 
 local socket = require('socket')
-local TCPLauncherSocket = nop
+local TCPLauncherSocket
 local launcherConnected = false
 local isConnecting = false
 local eventTriggers = {}
@@ -33,16 +35,6 @@ setmetatable(_G,{}) -- temporarily disable global notifications
 --- Attempt to establish a connection to the Launcher, Note that this connection is only used for when in-session.
 -- @usage MPGameNetwork.connectToLauncher(true)
 local function connectToLauncher()
-	-- Check if we are using V2.1
-	if mp_game then
-		launcherConnected = true
-		--M.send('A') -- immediately heartbeat to check if connection was established
-		log('W', 'connectToLauncher', 'Launcher should already be connected!')
-		M.send('A')
-		return
-	end
-
-	-- Okay we are not using V2.1, lets do the V2 stuff
 	log('M', 'connectToLauncher', "Connecting MPGameNetwork!")
 	if not launcherConnected then
 		isConnecting = true
@@ -60,10 +52,6 @@ end
 --- Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
 -- @usage MPGameNetwork.disconnectLauncher(true)
 local function disconnectLauncher()
-	if mp_game then
-		launcherConnected = false
-		return
-	end
 	if launcherConnected then
 		TCPLauncherSocket:close()
 		launcherConnected = false
@@ -74,21 +62,29 @@ end
 --- Send given packet to the Server, over the Launcher.
 -- @tparam string s The packet to be sent to the Launcher/server.
 -- @usage MPGameNetwork.sendData(`<data>`)
-local function sendData(s)
-	-- First check if we are V2.1 Networking or not
-	if mp_game then
-		mp_game(s)
-		if not launcherConnected then launcherConnected = true isConnecting = false end
-		if settings.getValue("showDebugOutput") then
-			log('M', 'sendData', 'Sending Data ('..#s..'): '..s)
+local function sendData(data)
+	-- if not connected return
+	if not TCPLauncherSocket then return end
+	local header = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
+	local packet = header .. data
+
+	local retries = 1
+
+	local bytes, error, index = TCPLauncherSocket:send(packet)
+
+	if error == 'timeout' then
+		while (retries > 0 and error) do
+			isConnecting = false
+			log('E', 'sendData', 'Socket error: '..error)
+			if error == "timeout" then
+				log('W', 'sendData', 'Stopped at index: '..index..' while trying to send '..#packet..' bytes of data. retries:' .. retries)
+				packet = string.sub(packet, index + 1)
+
+				bytes, error, index = TCPLauncherSocket:send(packet)
+			end
 		end
-		if MPDebug then MPDebug.packetSent(#s) end
-		return
 	end
 
-	-- Else we now will use the V2 Networking
-	if TCPLauncherSocket == nop then return end
-	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
 	if error then
 		isConnecting = false
 		log('E', 'sendData', 'Socket error: '..error)
@@ -98,13 +94,13 @@ local function sendData(s)
 		elseif error == "Socket is not connected" then
 
 		else
-			log('E', 'sendData', 'Stopped at index: '..index..' while trying to send '..#s..' bytes of data.')
+			log('W', 'sendData', 'Stopped at index: '..index..' while trying to send '..#packet..' bytes of data.')
 		end
 		return
 	else
 		if not launcherConnected then launcherConnected = true isConnecting = false end
 		if settings.getValue("showDebugOutput") then
-			log('M', 'sendData', 'Sending Data ('..bytes..'): '..s)
+			log('M', 'sendData', 'Sending Data ('..bytes..'): '..data)
 		end
 		if MPDebug then MPDebug.packetSent(bytes) end
 	end
@@ -287,6 +283,15 @@ local HandleNetwork = {
 
 local heartbeatTimer = 0
 
+local recvState = {
+	-- 'ready': ready to receive a new packet, data is contained within `data` if any
+	-- 'partial': `partialData` contains data, we're missing `missing` bytes
+	-- 'error': errorneous state
+	state = 'ready',
+	data = "",
+	missing = 0,
+}
+
 --- Tries to receive data from the Launcher every tick from the gameengine and handles the launcher <-> game heartbeat.
 -- @tparam integer dt delta time
 -- @usage INTERNAL ONLY / GAME SPECIFIC
@@ -295,8 +300,20 @@ local function onUpdate(dt)
 	if launcherConnected then
 		if TCPLauncherSocket ~= nop then
 			while(true) do
-				local received, status, partial = TCPLauncherSocket:receive() -- Receive data
-				if received == nil or received == "" then break end
+				recvState = MPNetworkHelpers.receive(TCPLauncherSocket, recvState)
+				if recvState.state == 'error' then
+					-- error! :(
+					break
+				end
+				if recvState.state ~= 'ready' then
+					-- full packet NOT received, retry
+					break
+				end
+				if recvState.data == "" then
+					break
+				end
+
+				local received = recvState.data
 
 				if settings.getValue("showDebugOutput") == true then
 					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
@@ -332,14 +349,6 @@ local function connectionStatus() --legacy, here because some mods use it
 	return launcherConnected and 1 or 0
 end
 
-M.receiveIPCGameData = function(code, data)
-	local received = code..data
-	HandleNetwork[code](data)
-	if settings.getValue("showDebugOutput") == true then
-		log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-	end
-	if MPDebug then MPDebug.packetReceived(#received) end
-end
 
 detectGlobalWrites() -- reenable global write notifications
 

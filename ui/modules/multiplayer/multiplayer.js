@@ -308,10 +308,17 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 
 	$scope.$on('LoadingInfo', function (event, data) {
 		if (document.getElementById('LoadingStatus').innerText != data.message) console.log(data.message)
+
+		// Escape all html
+		data.message = data.message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		
+		// Replace ^p with <br>
+		data.message = data.message.replace(/\^p/g, "<br>");
+
 		if (data.message == "done") {
-			document.getElementById('LoadingStatus').innerText = "Done";
+			document.getElementById('LoadingStatus').innerHTML = "Done";
 		} else {
-			document.getElementById('LoadingStatus').innerText = data.message;
+			document.getElementById('LoadingStatus').innerHTML = data.message;
 		}
 		
 		document.getElementById('OriginalLoadingStatus').setAttribute("hidden", "hidden");

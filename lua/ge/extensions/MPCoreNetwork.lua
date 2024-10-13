@@ -575,6 +575,13 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
+
+				if HandleNetwork[code] == nil then
+					TCPLauncherSocket = nop
+					log('E', 'onUpdate', 'Received unknown code: '..code)
+					break
+				end
+
 				HandleNetwork[code](data)
 			end
 		end

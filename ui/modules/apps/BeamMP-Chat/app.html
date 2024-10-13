@@ -1,98 +1,254 @@
+
 <div ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
-	<style>
-		.error {
-			color: red;
-		}
-		#chat-window {
-			display: flex;
-			flex-direction: column;
-			height:100%;
-			width:100%;
-			font-size:1em;
-			font-family: sans-serif, Arial, Helvetica;
-		}
-		#chat-input {
-			width:100%;
-			height:auto;
-			background-color:rgba(0, 0, 0, 0.25);
-			border: 2px solid rgba(175, 175, 175, 0.45);
-			padding-left: 5px;
-			color:white;
-			transition: 0.20s;
-		}
-		#chat-input::placeholder {
-			color: #DDDDDD;
-		}
-		#chat-input:hover {
-			background-color:rgba(0, 0, 0, 0.5);
-		}
-		.buttons {
-			color: #DDDDDD;
-			border: 2px solid rgba(175, 175, 175, 0.45);
-			transition: 0.20s;
-			background-color:rgba(0, 0, 0, 0.45);
-			height:100%;
-		}
-		.buttons:hover {
-			background-color:rgba(0, 0, 0, 0.65);
-			color: #FFFFFF;
-		}
-		.swap-buttons {
-			min-width:23px;
-			text-align: center;
-		}
-		#chatbox {
-			display: flex;
-			min-height:40px;
-			width:250px;
-			transition: 0.13s;
-			transition-delay:700ms;
-		}
-		#chatbox:hover {
-			width:100%;
-			transition-delay:0ms;
-		}
-		ul#chat-list {
-			list-style: none;
-			padding-left: 0px;
-			overflow-y: scroll;
-			overflow-wrap: break-word;
-		}
-		#chat-list {
-			display:flex;
-			flex-direction: column;
-			margin-top:auto;
-			margin-bottom:0px;
-			width:100%;
-		}
 
-		.chat-message {
-			padding: 3px 0px;
-			background-color: rgba(0, 0, 0, 0.60);
-		}
-		.chat-message:nth-child(2n+1) {
-			background-color:rgba(0, 0, 0, 0.45);
-		}
+        <style>
 
-		.chat-message-timestamp{
-			font-size: 0.7em;
-			line-height: 0.7em;
-			color: rgba(255, 255, 255, 0.6);
-			padding-right: 5px;
-		}
+            /*Error Styling*/
+            .error {
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+                background-color: #f44336; /* Red */
+                color: white;
+                border-radius: 5px;
+                font-size: 1.0em; /* 14px/16=0.875em */
+            }
 
-		::-webkit-scrollbar {
-			width: 0px;  /* Remove scrollbar space */
-			background: transparent;  /* Optional: just make scrollbar invisible */
-		}
-	</style>
-	<div id="chat-window">
-		<ul id="chat-list"></ul>
-		<form id="chatbox">
-			<button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
-			<input id="chat-input" type="text" ng-click="select()" placeholder="Chat here"></input>
-			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
-			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
-		</form>
-	</div>
+            /*Multiplayer Chat Styling */
+            .multiplayerChat {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+            }
+
+            /*Chat Window Styling*/
+            #chat-window {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                width: 100%;
+                font-family: Arial, sans-serif;
+            }
+
+            /*Chat Input Styling*/
+            #chat-input {
+                width: 100px;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.10);
+                border: none;
+                border-radius: 5px;
+                padding: 2px;
+                margin: 2px;
+                color: white;
+                transition: 0.25s ease-in-out;
+            }
+
+            /*Chat Input Placeholder Styling*/
+            #chat-input::placeholder {
+                margin: 2px;
+                padding: 2px;
+                color: white;
+                text-align: center;
+            }
+
+            /*Chat Input Hover Styling*/
+            #chat-input:hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            /*Chat Input Focus Styling*/
+            #chat-input:focus {
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.50);
+            }
+
+            /*Buttons Styling*/
+            .buttons {
+                color: #ffffff;
+                border: none;
+                border-radius: 5px;
+                margin: 2px;
+                padding: 2px;
+                transition: 0.25s;
+                background-color: rgba(0, 0, 0, 0.10);
+                height: 100%;
+            }
+
+            /*Buttons Hover Styling*/
+            .buttons:hover {
+                background-color: rgb(212, 100, 26, 1.0); /*BeamMP Orange */
+            }
+
+            /*Swap Button Styling*/
+            .swap-buttons {
+                color: #ffffff;
+                width: 25px;
+                height: contain;
+                text-align: center;
+            }
+
+            /*Chatbox Styling*/
+            #chatbox {
+                display: flex;
+                width: 100%;
+                min-height: 40px;
+                height: contain;
+            }
+
+            /*Chatbox Focus Styling*/
+            #chatbox:focus-within {
+                width: 100%;
+                transition: 0.25s ease-in-out;
+            }
+
+            /*Unordered List Chat List Styling*/
+            ul#chat-list {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow-y: scroll;
+                overflow-wrap: break-word;
+            }
+
+            /*Chat List Styling*/
+            #chat-list {
+                display: flex;
+                flex-direction: column;
+                padding-inline: 0px;
+                margin-top: auto;
+                margin-bottom: auto;
+                width: 100%;
+            }
+
+            /*Chat Message Styling*/
+            .chat-message {
+                border-radius: 5px;
+                font-size: 1em;
+                width: contain;
+                height: contain;
+                margin-top: 2px;
+                margin-bottom: 2px;
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                transition: 0.25s ease-in-out;
+            }
+
+            /*Chat Message Hover Styling*/
+            .chat-message:hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            /*Chat Message Alternating Rows Styling*/
+            .chat-message:nth-child(2n+1) {
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                width: contain;
+                height: fit-content;
+            }
+
+            /*Chat Message Alternating Rows Hover Styling*/
+            .chat-message:nth-child(2n+1):hover {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            /*Chat Message Timestamp Styling*/
+            .chat-message-timestamp {
+                font-size: 1em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Chat Message Username Styling*/
+            .chat-message-username {
+                font-size: 1.0em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Chat Message Text Styling*/
+            .chat-message-text {
+                font-size: 1.0em; /* 14px/16=0.875em */
+                color: rgba(255, 255, 255, 1.0);
+                background-color: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+                width: contain;
+                height: contain;
+                margin-right: 5px;
+                padding-inline: 5px;
+            }
+
+            /*Scrollbar Styling*/
+            ::-webkit-scrollbar {
+                margin-left: 5px;
+                width: 5px;
+                height: contain;
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Track Styling*/
+            ::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.10);
+                width: 5px;
+                height: contain;
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Styling*/
+            ::-webkit-scrollbar-thumb {
+                background: rgba(212, 100, 26, 0.10);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Hover Styling*/
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(212, 100, 26, 0.25);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Thumb Active Styling*/
+            ::-webkit-scrollbar-thumb:active {
+                background: rgba(212, 100, 26, 1.0);
+                border-radius: 5px;
+            }
+
+            /*Scrollbar Corner Styling*/
+            ::-webkit-scrollbar-corner {
+                background: rgba(0, 0, 0, 0.10);
+                border-radius: 5px;
+            }
+        </style>
+
+        <div id="chat-window">
+            <ul id="chat-list">
+                <li class="chat-message" ng-repeat="message in chatList track by $index">
+                    <span class="chat-message-timestamp">{{message.timestamp}}</span>
+                    <span class="chat-message-username">{{message.username}}</span>
+                    <span class="error" ng-if="message.error">{{message.error}}</span>
+                    <span class="chat-message-text">{{message.text}}</span>
+                </li>
+            </ul>
+
+            <form id="chatbox">
+                <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
+                <button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
+                <input id="chat-input" type="text" ng-click="select()" placeholder="Chat Here" ng-keydown="onEnterKeyPress($event)">
+                <button id="send-button" class="buttons" ng-click="chatSend()">Send</button>
+            </form>
+
+        </div>
+
 </div>

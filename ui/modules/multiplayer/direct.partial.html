@@ -7,7 +7,8 @@
 		</div>
 		<input type="text" id="directport" name="port" placeholder="Server Port" value="30814" tabindex="2"/>
 		<!--<input type="text" id="nickname" name="nickname" placeholder="Nickname"/>-->
-		<md-button id="direct-connect-button" class="button" ng-class="" ng-click="multiplayer.directConnect()" tabindex="3">{{:: 'ui.multiplayer.connect' | translate}}</md-button>
+		<md-button id="direct-connect-button" class="button" ng-click="multiplayer.directConnect()" tabindex="3">{{:: 'ui.multiplayer.connect' | translate}}</md-button>
+		<md-button id="add-fav-button" class="button" ng-click="multiplayer.directConnectFavorite()" tabindex="4">{{:: 'ui.multiplayer.favorite' | translate}}</md-button>
 		<md-divider></md-divider>
 	</div>
 	<div id="footer"></div>

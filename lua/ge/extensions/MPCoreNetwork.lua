@@ -161,7 +161,7 @@ end
 -- Returns the version of the launcher.
 -- @return string version The version of the launcher.
 local function getLauncherVersion()
-	return "2.0" --launcherVersion
+	return launcherVersion
 end
 
 --- Returns true or false if the user is logged in.

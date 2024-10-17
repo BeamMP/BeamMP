@@ -920,7 +920,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		local vehicleTable = {}
 		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
 		local pos          = veh:getPosition()
-		local rot          = quat(veh:getRotation())
+		local rot          = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp()))
 
 		vehicleTable.pid = MPConfig.getPlayerServerID() -- Player Server ID
 		vehicleTable.vid = gameVehicleID -- Game Vehicle ID
@@ -1102,7 +1102,7 @@ local function applyVehEdit(serverID, data)
 		local options = {
 			model = vehicleName,
 			config = serialize(vehicleConfig),
-			pos = veh:getPosition(), rot = quat(veh:getRotation()), cling = true,
+			pos = veh:getPosition(), rot = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp())), cling = true,
 		}
 
 		veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
@@ -1374,7 +1374,7 @@ local function onVehicleResetted(gameVehicleID)
 			--print("Vehicle "..gameVehicleID.." resetted by client")
 			local veh = be:getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
-			local rot = quat(veh:getRotation())
+			local rot = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp()))
 			local tempTable = {
 				pos = {
 					x = pos.x,

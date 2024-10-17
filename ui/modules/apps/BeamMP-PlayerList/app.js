@@ -20,6 +20,7 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 	$scope.warnVis = false;
 	$scope.timer = null;
 	$scope.showPlayerIDs = true
+	$scope.queueWithLMB = true;
 	$scope.init = function() {
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
@@ -31,6 +32,9 @@ app.controller("PlayerList", ['$scope', function ($scope) {
     bngApi.engineLua('settings.getValue("showPlayerIDs")', (data) => {
       $scope.showPlayerIDs = data
     })
+	bngApi.engineLua('settings.getValue("queueWithLMB")', (data) => {
+		$scope.queueWithLMB = data
+	  })
   }
   $scope.settingsChanged()
 
@@ -140,8 +144,8 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				nameCell.textContent = parsedList[i].formatted_name;
 				//var c = parsedList[i].color
 				//nameCell.style = `color:rgba(${c[0]},${c[1]},${c[2]},255)`;
-				nameCell.setAttribute("oncontextmenu", "showPlayerInfo('"+parsedList[i].name+"')");
-				nameCell.setAttribute("onclick","applyQueuesForPlayer('"+parsedList[i].id+"')");
+				nameCell.setAttribute($scope.queueWithLMB ? "oncontextmenu" : "onclick", "showPlayerInfo('"+parsedList[i].name+"')");
+				nameCell.setAttribute($scope.queueWithLMB ? "onclick" : "oncontextmenu","applyQueuesForPlayer('"+parsedList[i].id+"')");
 				nameCell.setAttribute("class", "player-button");
 
 				// Insert a cell containing the link to forum

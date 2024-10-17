@@ -15,7 +15,7 @@
   background-color: #404040b8;
 }
 
-#map-select {
+#filter-dropdown {
   height: 40px;
   background: unset;
   color: white !important;
@@ -83,7 +83,6 @@ table#serversTable {
 
 .servers-button {
   width: 200px;
-  margin: 0 0 0 10px;
   height: 40px;
 }
 
@@ -149,7 +148,6 @@ div#LoadingBody {
 
 div#addCustomFav {
   color: white;
-  background-color: rgba(0, 0, 0, 0.75);
 
   position: absolute;
   z-index: 100;
@@ -161,19 +159,23 @@ div#addCustomFav {
   transform: translateX(-50%);
   left: 50%;
 
-  background-color: #848484;
+  background-color: #848484c7;
   padding: 15px;
   border-radius: 5px;
+
+  height: 30%;
+  width: 40%;
 }
 
 input {
   display: block;
   width: 400px;
-  margin: 0 0 20px;
+  margin-top: 5px;
   padding: 8px 12px 10px 12px;
   border: 1px solid rgba(0, 0, 0, 0.5);
   background: rgba(0, 0, 0, 0.25);
   color: white;
+  height: 45px;
 }
 
 .row {
@@ -197,8 +199,6 @@ ul.serverItemDetails {
 md-checkbox .md-container {
   position: absolute;
   top: 50%;
-  -webkit-transform: translateY(-100%);
-  transform: translateY(-100%);
   display: inline-block;
   width: 18px;
   height: 18px;
@@ -228,6 +228,51 @@ md-checkbox {
 
 md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   padding-top: 0px;
+}
+
+.filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-body {
+  background-color: grey;
+  padding: 20px;
+  border-radius: 8px;
+  width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.filter-body h2 {
+  margin-top: 10px;
+}
+
+.filter-content {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.dropdown-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.dropdown-row md-select {
+  width: 40%;
 }
 
 [placeholder]::-webkit-input-placeholder {

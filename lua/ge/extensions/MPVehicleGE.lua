@@ -725,9 +725,6 @@ local vehicleSimplifiers = {
 -- @treturn table newVehicleConfig, that now contains the simplified body/parts, or the original table if no changes can be made
 -- @usage local newVehicleName, newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
 local function simplifyVehicle(vehicleName, vehicleConfig)
-	if vehicleConfig.format ~= 2 then
-		return vehicleName, vehicleConfig
-	end
 	local newVehicleConfig = deepcopy(vehicleConfig)
 
 	-- this do not check for incomptable parts
@@ -1095,7 +1092,7 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
+		vehicleName, vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -1146,7 +1143,7 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
+		vehicleName, vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	if vehicleName == veh:getJBeamFilename() then

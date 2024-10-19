@@ -463,6 +463,52 @@ local function localVehiclesExist()
 end
 
 local vehicleSimplifiers = {
+	common = function(vehicleConfig) -- this currently exist to fix wheels (TRIES TO) because simplified traffic have no (broken) default wheel
+		local parts = vehicleConfig.parts
+		
+		parts.simple_traffic_wheels_F = "simple_traffic_midsize_wheels_F_01a" -- absolute default
+		parts.simple_traffic_midsize_hubcaps_F = "" -- remove default hubcap
+		if parts.wheel_F_centerlug then
+		elseif parts.wheel_F_3 then -- USES 4 LUG DEFAULT
+			parts.simple_traffic_wheels_F = "simple_traffic_pessima_wheels_F_01a"
+			parts.simple_traffic_pessima_hubcaps_F = "" -- remove default hubcap
+		elseif parts.wheel_F_4 then
+			parts.simple_traffic_wheels_F = "simple_traffic_pessima_wheels_F_01a"
+			parts.simple_traffic_pessima_hubcaps_F = "" -- remove default hubcap
+		elseif parts.wheel_F_5 then
+		elseif parts.wheel_F_6 then
+			parts.simple_traffic_wheels_F = "simple_traffic_van_wheels_F_01a"
+		elseif parts.wheel_F_8 then -- USES 6 LUG DEFAULT
+			parts.simple_traffic_wheels_F = "simple_traffic_van_wheels_F_01a"
+		elseif parts.wheel_F_8_alt then
+			parts.simple_traffic_wheels_F = "simple_traffic_pickup_wheels_F_05a" -- corresponding wheel: steelwheel_04a_16x7_F
+			if parts.wheel_F_8_alt == "wheel_32a_16x7_F" then
+				parts.simple_traffic_wheels_F = "simple_traffic_pickup_wheels_F_04a"
+			end
+		end
+
+		parts.simple_traffic_wheels_R = "simple_traffic_midsize_wheels_R_01a" -- absolute default， its one of the standard steel wheels ig
+		parts.simple_traffic_midsize_hubcaps_R = "" -- remove default hubcap
+		if parts.wheel_R_centerlug then
+		elseif parts.wheel_R_3 then -- USES 4 LUG DEFAULT
+			parts.simple_traffic_wheels_R = "simple_traffic_pessima_wheels_R_01a"
+			parts.simple_traffic_pessima_hubcaps_R = "" -- remove default hubcap
+		elseif parts.wheel_R_4 then
+			parts.simple_traffic_wheels_R = "simple_traffic_pessima_wheels_R_01a"
+			parts.simple_traffic_pessima_hubcaps_R = "" -- remove default hubcap
+		elseif parts.wheel_R_5 then
+		elseif parts.wheel_R_6 then
+			parts.simple_traffic_wheels_R = "simple_traffic_van_wheels_R_01a"
+		elseif parts.wheel_R_8 then -- USES 6 LUG DEFAULT
+			parts.simple_traffic_wheels_R = "simple_traffic_van_wheels_R_01a"
+		elseif parts.wheel_R_8_dually then
+			parts.simple_traffic_wheels_R = "simple_traffic_pickup_wheels_R_05a" -- corresponding wheel: steelwheel_04a_16x7_R_dually_true
+			if parts.wheel_R_8_alt == "wheel_32a_16x7_R_dually_true" then
+				parts.simple_traffic_wheels_R = "simple_traffic_pickup_wheels_R_04a"
+			end
+		end
+
+	end,
 	bastion = function(vehicleConfig)
 		local parts = vehicleConfig.parts
 		local newModel = "simple_traffic"
@@ -730,6 +776,7 @@ local function simplifyVehicle(vehicleName, vehicleConfig)
 	-- this do not check for incomptable parts
 	if vehicleSimplifiers[vehicleName] then
 		local newVehicleName = vehicleSimplifiers[vehicleName](newVehicleConfig) or vehicleName
+		vehicleSimplifiers.common(newVehicleConfig)
 		return newVehicleName, newVehicleConfig
 	end
 

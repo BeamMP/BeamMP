@@ -699,11 +699,11 @@ local vehicleSimplifiers = {
 			parts.simple_traffic_pickup_bumper_R = parts.pickup_bumper_R == "" and "" or nil
 			local version = string.find(parts.pickup_fascia, "pickup_fascia_prefacelift") and 1 or (string.find(parts.pickup_fascia, "pickup_fascia_facelift") and 3) or 2
 			if version == 1 then
-				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_pre_chorme_alt" or "simple_traffic_pickup_version_pre_base"
+				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_pre_chrome_alt" or "simple_traffic_pickup_version_pre_base"
 			elseif version == 2 then
-				parts.simple_traffic_pickup_version = "simple_traffic_pickup_version_pre_chorme"
+				parts.simple_traffic_pickup_version = "simple_traffic_pickup_version_pre_chrome"
 			elseif version == 3 then
-				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_facelift_chorme" or "simple_traffic_pickup_version_facelift_base"
+				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_facelift_chrome" or "simple_traffic_pickup_version_facelift_base"
 			end
 		end
 
@@ -736,10 +736,10 @@ local vehicleSimplifiers = {
 
 		if isLate then
 			parts.simple_traffic_van_trim = "simple_traffic_van_trim_facelift"
-			parts.simple_traffic_van_trim_facelift = isLux and "simple_traffic_van_trim_facelift_chorme" or "simple_traffic_van_trim_facelift_plastic"
+			parts.simple_traffic_van_trim_facelift = isLux and "simple_traffic_van_trim_facelift_chrome" or "simple_traffic_van_trim_facelift_plastic"
 		else
 			parts.simple_traffic_van_trim = "simple_traffic_van_trim_pre"
-			parts.simple_traffic_van_trim_pre = isLux and "simple_traffic_van_trim_pre_chorme" or "simple_traffic_van_trim_pre_plastic"
+			parts.simple_traffic_van_trim_pre = isLux and "simple_traffic_van_trim_pre_chrome" or "simple_traffic_van_trim_pre_plastic"
 		end
 		if isUpfit then
 			parts.simple_traffic_van_bumper_F = parts.van_bumper_F == "" and "" or nil

@@ -299,7 +299,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 			custom: true, port: port
 		}
 		addFav(server)
-		toastr.info($filter('translate')('ui.multiplayer.favorited_toast_description'), $filter('translate')('ui.multiplayer.favorited_toast_title'));
+		toastr.info($filter('translate')('ui.multiplayer.favoritedToast.description'), $filter('translate')('ui.multiplayer.favoritedToast.title'));
 	}
 
 	vm.stateName = $state.current.name;

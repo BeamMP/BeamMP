@@ -1447,7 +1447,11 @@ async function receiveServers(data) {
 	// Parse the data to a nice looking Array
 	for (var i = 0; i < data.length; i++) {
 		var v = data[i]
-		if(v.cversion == launcherVersion){
+		const [vMajor, vMinor] = v.cversion.split('.').map(Number);
+		const [launcherMajor, launcherMinor] = launcherVersion.split('.').map(Number);
+
+		// Compare the versions
+		if (vMajor === launcherMajor && launcherMinor >= vMinor) {
 			v.strippedName = stripCustomFormatting(v.sname);
 			serversArray.push(v);
 		}

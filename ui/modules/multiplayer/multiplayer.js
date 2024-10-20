@@ -298,6 +298,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 			owner: "", playersList: "", sdesc: "", sname: name, strippedName: name,
 			custom: true, port: port
 		}
+		favorites = await getFavorites();
 		addFav(server)
 		toastr.info($filter('translate')('ui.multiplayer.favoritedToast.description'), $filter('translate')('ui.multiplayer.favoritedToast.title'));
 	}

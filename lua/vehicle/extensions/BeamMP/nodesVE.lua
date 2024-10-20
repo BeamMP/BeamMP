@@ -7,6 +7,10 @@ local M = {}
 
 -- ============= VARIABLES =============
 local lastPos = vec3(0,0,0)
+local abs = math.abs
+local NORMALTYPE = 0
+local NODE_FIXED = 1
+local wheelNodes = {}
 -- ============= VARIABLES =============
 
 
@@ -233,6 +237,120 @@ local function onReset()
 	end
 end
 
+local function nodeCheck(nodeID)
+	local connectedNodes = {}
+	for _, beam in pairs(v.data.beams) do
+		if beam.id1 == nodeID then
+			connectedNodes[beam.id2] = 1
+		else 
+			if beam.id2 == nodeID then
+				connectedNodes[beam.id1] = 1
+			end
+		end
+	end
+
+	local shellNode = {true, true, true}
+	for id, num in  pairs(connectedNodes) do
+		if abs(v.data.nodes[nodeID].pos.x) < abs(v.data.nodes[id].pos.x) then
+			shellNode[0] = false
+		end	
+
+		if abs(v.data.nodes[nodeID].pos.y) < abs(v.data.nodes[id].pos.y) then
+			shellNode[1] = false
+		end	
+
+		if abs(v.data.nodes[nodeID].pos.z) < abs(v.data.nodes[id].pos.z) then
+			shellNode[2] = false
+		end	
+	end
+
+	return shellNode[0] or shellNode[1] or shellNode[2]
+end
+
+local function disableCollisions()
+	if v.data.nodes == nil then return end
+	print("LowerCollisionAccuracy has been enabled for this Vehicle " .. tostring(obj:getID()))
+
+	for _, node in pairs(v.data.nodes) do -- For each node
+
+		local collision = false
+		local selfCollision = node.selfCollision or false
+		local staticCollision = node.staticCollision or true
+
+		local skip = false
+
+		if node.wheelID ~= nil or nodeCheck(node.cid) == true then -- If it's a wheel
+			if node.wheelID ~= nil then
+				if wheelNodes[node.wheelID] == nil then
+					wheelNodes[node.wheelID] = 0
+				end
+
+				if wheelNodes[node.wheelID] < 2 then
+					wheelNodes[node.wheelID] = wheelNodes[node.wheelID] + 1
+					goto continue
+				else 
+					wheelNodes[node.wheelID] = 0
+				end
+
+			else
+				goto continue
+			end
+		end
+
+
+		-- --------------------- Node type ---------------------
+		local ntype = NORMALTYPE
+		if node.fixed == true then ntype = NODE_FIXED end
+
+		-- --------------------- Random stuff ---------------------
+		local frictionCoef = type(node.frictionCoef) == 'number' and node.frictionCoef or 1
+		local slidingFrictionCoef = type(node.slidingFrictionCoef) == 'number' and node.slidingFrictionCoef or frictionCoef
+		local noLoadCoef = type(node.noLoadCoef) == 'number' and node.noLoadCoef or 1
+		local fullLoadCoef = type(node.fullLoadCoef) == 'number' and node.fullLoadCoef or 0
+		local loadSensitivitySlope = type(node.loadSensitivitySlope) == 'number' and node.loadSensitivitySlope or 0
+		local nodeWeight = node.nodeWeight
+		local nodeMaterialTypeID
+		if node.nodeMaterial ~= nil then
+			nodeMaterialTypeID = node.nodeMaterial
+			if type(nodeMaterialTypeID) ~= "number" then nodeMaterialTypeID = 0 end
+		else
+			nodeMaterialTypeID = 0
+		end
+
+		-- We set the node
+		local pos = obj:getNodePosition(node.cid)
+
+		obj:setNode(
+			node.cid,
+			pos.x,
+			pos.y,
+			pos.z,
+			nodeWeight,
+			ntype,
+			frictionCoef,
+			slidingFrictionCoef,
+			node.stribeckExponent or 1.75,
+			node.stribeckVelMult or 1,
+			noLoadCoef,
+			fullLoadCoef,
+			loadSensitivitySlope,
+			node.softnessCoef or 0.5,
+			node.treadCoef or 0.5,
+			node.tag or '',
+			node.couplerStrength or math.huge,
+			node.firstGroup or -1,
+			selfCollision,
+			collision,
+			staticCollision, 
+			nodeMaterialTypeID
+		)
+
+		::continue::
+	end
+	obj:requestReset(RESET_PHYSICS)
+end
+
+M.disableCollisions = disableCollisions
 
 M.distance   = distance
 M.applyNodes = applyNodes

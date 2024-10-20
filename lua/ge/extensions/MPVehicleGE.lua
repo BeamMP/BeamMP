@@ -1398,17 +1398,12 @@ local function onVehicleColorChanged(gameVehicleID, index, paint)
     if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
     local vehicle = getVehicleByGameID(gameVehicleID) -- get vehicle table for this vehicle
     if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle
+
         local veh = be:getObjectByID(gameVehicleID) -- get vehicle as object
-		local pos = veh:getPosition() -- get position
-		local rot = quat(veh:getRotation()) -- get rotation
-		local vehicleTable = { pos = { x = pos.x, y = pos.y, z = pos.z }, rot = { x = rot.x, y = rot.y, z = rot.z, w = rot.w } }
-		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID) -- get vehicle's data
-		vehicleTable.vcf = vehicleData.config -- put config in our table
-		vehicleTable.vcf.paints = MPHelpers.getColorsFromVehObj(veh) -- get paints
-        	vehicleTable.vcf.paints[index] = paint --insert new paint at index as chosen from color picker
-		vehicleTable.pid = MPConfig.getPlayerServerID()
-		vehicleTable.jbm = veh:getJBeamFilename()
-		MPGameNetwork.send('Op:'..vehicle.serverVehicleString..":"..jsonEncode(vehicleTable).."")
+		local paintData =  MPHelpers.getColorsFromVehObj(veh)
+        paintData[index] = paint --insert new paint at index as chosen from color picker
+
+		MPGameNetwork.send('Op:'..vehicle.serverVehicleString..":"..jsonEncode(paintData).."")
     end
 end
 
@@ -1617,20 +1612,15 @@ end
 local function onServerVehicleColorChanged(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	local vehicle = getVehicleByGameID(gameVehicleID) -- get vehicle table for this vehicle
-	if vehicle and vehicle.serverVehicleString and not vehicle.isLocal then -- If serverVehicleID not null and not player own vehicle
+	if vehicle and vehicle.serverVehicleString and not vehicle.isLocal and not vehicle.editQueue then -- If serverVehicleID not null and not player own vehicle
 		if gameVehicleID then
 			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
 			if veh then
-				local pr = jsonDecode(data) -- Decoded data
-				veh:queueLuaCommand("extensions.hook(\"onBeamMPVehicleColorChange\")")
-				if pr then
-					local vehicleConfig = pr.vcf
-					if vehicleConfig then -- if there's config data
-						if vehicleConfig.paints then -- if there's paint data
-							for k, v in pairs(vehicleConfig.paints) do -- apply paints
-								extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
-							end
-						end
+				local paint = jsonDecode(data) -- Decoded data
+				if paint then -- if there's paint data
+					veh:queueLuaCommand("extensions.hook(\"onBeamMPVehicleColorChange\")")
+					for k, v in pairs(paint) do -- apply paint
+						extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
 					end
 				end
 			end
@@ -1695,7 +1685,7 @@ local HandleNetwork = {
 		end
 	end,
 	['p'] = function(rawData) -- live paint update
-		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:({.+})") -- '0-0:{jsonstring}'
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%[.+%])") -- '0-0:[jsonstring]'
 
 		if serverVehicleID ~= nil then
 			onServerVehicleColorChanged(serverVehicleID, data)

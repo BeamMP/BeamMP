@@ -137,8 +137,8 @@ function($scope, $state, $timeout, $document) {
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	MAIN CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
-.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', 'ConfirmationDialog', 
-function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
+.controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', '$filter', 'ConfirmationDialog', 'toastr', 
+function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toastr) {
 	var vm = this;
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
@@ -285,6 +285,23 @@ function($scope, $state, $timeout, $mdDialog, ConfirmationDialog) {
 		port.value = '';
 		vm.refreshList();
 	};
+
+	vm.directConnectFavorite = async function() {
+		var ip = document.getElementById('directip').value.trim();
+		var port = document.getElementById('directport').value.trim();
+
+		var valid = (ip.length > 0) && (port.length > 0) && !isNaN(port)
+		if (!valid) return;
+		var name = ip + ":" + port;
+		var server = {
+			cversion: await getLauncherVersion(), ip: ip, location: "--", map: "", maxplayers: "0", players: "0",
+			owner: "", playersList: "", sdesc: "", sname: name, strippedName: name,
+			custom: true, port: port
+		}
+		favorites = await getFavorites();
+		addFav(server)
+		toastr.info($filter('translate')('ui.multiplayer.favoritedToast.description'), $filter('translate')('ui.multiplayer.favoritedToast.title'));
+	}
 
 	vm.stateName = $state.current.name;
 	bngApi.engineLua('settings.requestState()');

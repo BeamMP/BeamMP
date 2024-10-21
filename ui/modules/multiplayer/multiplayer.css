@@ -109,6 +109,11 @@ table#serversTable {
   margin-left: 0px;
 }
 
+#add-fav-button {
+  width: fit-content;
+  margin-left: 0px;
+}
+
 #launcher-connect-button {
   width: 250px;
   margin: 0 10px 0 0;

@@ -1393,6 +1393,19 @@ local function onVehicleResetted(gameVehicleID)
 	end
 end
 
+--============================ ON VEHICLE COLOR CHANGED (CLIENT) ============================
+local function onVehicleColorChanged(gameVehicleID, index, paint)
+    if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+    local vehicle = getVehicleByGameID(gameVehicleID) -- get vehicle table for this vehicle
+    if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle
+
+        local veh = be:getObjectByID(gameVehicleID) -- get vehicle as object
+		local paintData =  MPHelpers.getColorsFromVehObj(veh)
+        paintData[index] = paint --insert new paint at index as chosen from color picker
+
+		MPGameNetwork.send('Op:'..vehicle.serverVehicleString..":"..jsonEncode(paintData).."")
+    end
+end
 
 
 -- server events
@@ -1596,6 +1609,24 @@ local function onServerCameraSwitched(playerID, serverVehicleID)
 	vehicles[serverVehicleID].spectators[playerID] = true
 end
 
+local function onServerVehicleColorChanged(serverVehicleID, data)
+	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
+	local vehicle = getVehicleByGameID(gameVehicleID) -- get vehicle table for this vehicle
+	if vehicle and vehicle.serverVehicleString and not vehicle.isLocal and not vehicle.editQueue then -- If serverVehicleID not null and not player own vehicle
+		if gameVehicleID then
+			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
+			if veh then
+				local paint = jsonDecode(data) -- Decoded data
+				if paint then -- if there's paint data
+					veh:queueLuaCommand("extensions.hook(\"onBeamMPVehicleColorChange\")")
+					for k, v in pairs(paint) do -- apply paint
+						extensions.core_vehicle_manager.liveUpdateVehicleColors(gameVehicleID, veh, k, v)
+					end
+				end
+			end
+		end
+	end
+end
 
 local HandleNetwork = {
 	['s'] = function(rawData) -- spawn
@@ -1651,6 +1682,15 @@ local HandleNetwork = {
 			onServerCameraSwitched(playerID, serverVehicleID)
 		else
 			-- public version has missing playerID
+		end
+	end,
+	['p'] = function(rawData) -- live paint update
+		local serverVehicleID, data = string.match(rawData,"^(%d+%-%d+)%:(%[.+%])") -- '0-0:[jsonstring]'
+
+		if serverVehicleID ~= nil then
+			onServerVehicleColorChanged(serverVehicleID, data)
+		else
+			log('E', "HandleNetwork", "Color pattern match failed")
 		end
 	end
 }
@@ -2258,6 +2298,7 @@ M.onVehicleSpawned         = onVehicleSpawned
 M.onVehicleDestroyed       = onVehicleDestroyed
 M.onVehicleSwitched        = onVehicleSwitched
 M.onVehicleResetted        = onVehicleResetted
+M.onVehicleColorChanged    = onVehicleColorChanged
 M.onPlayerLeft             = onPlayerLeft
 M.onClientPostStartMission = onDisconnect
 M.onUIInitialised          = onUIInitialised

@@ -996,6 +996,10 @@ function formatDescriptionName(string) {
         if( apply.lastIndexOf('^r') > -1) {
             apply = apply.slice( apply.lastIndexOf('^r') + 1 );
         }
+		if (apply.lastIndexOf('^p') > -1) {
+			apply = apply.slice(apply.lastIndexOf('^p') + 1);
+			final.appendChild(document.createElement('br'));
+		}
         tmpStr = string.substring( indexes[i], indexes[i + 1] );
         final.appendChild( applyDescCode(tmpStr, apply) );
     }

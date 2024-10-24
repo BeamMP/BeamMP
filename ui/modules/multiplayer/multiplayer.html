@@ -20,7 +20,7 @@
 		<input type="text" id="customFavName" name="customFavName" placeholder="Custom server"/>
 		<input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP"/>
 		<input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814"/>
-		<md-button class="button" ng-click="multiplayer.addCustomServer()">{{:: 'ui.multiplayer.save' | translate}}</md-button>
+		<md-button class="button" ng-click="multiplayer.addCustomServer()" style="margin-top: 20px;">{{:: 'ui.multiplayer.save' | translate}}</md-button>
 	</center>
 </div>
 
@@ -36,32 +36,32 @@
 
     <div flex layout="row" style="overflow: auto;">
       <md-content layout="column" id="left-menu">
-        <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.servers') !== -1)}" ui-sref="menu.multiplayer.servers" style="text-align:left;">
+        <md-button class="servers-btn md-primary md-raised" id="-servers-btn" ng-click="switchServerView('')" style="text-align:left;">
           <md-icon class="material-icons">explore</md-icon>
 		      {{:: 'ui.multiplayer.servers' | translate}}
         </md-button>
 
-        <md-button id="feat-servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.featured') !== -1)}" ui-sref="menu.multiplayer.featured" style="text-align:left;">
+        <md-button class="servers-btn" id="featured-servers-btn" ng-click="switchServerView('featured')" style="text-align:left;">
           <md-icon class="material-icons">star</md-icon>
 		      {{:: 'ui.multiplayer.featured' | translate}}
         </md-button>
 
-        <md-button id="servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.official') !== -1)}" ui-sref="menu.multiplayer.official" style="text-align:left;">
+        <md-button class="servers-btn" id="official-servers-btn" ng-click="switchServerView('official')" style="text-align:left;">
           <md-icon class="material-icons">desktop_windows</md-icon>
 		      {{:: 'ui.multiplayer.official' | translate}}
         </md-button>
 
-        <md-button id="part-servers-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.partner') !== -1)}" ui-sref="menu.multiplayer.partner" style="text-align:left;">
+        <md-button class="servers-btn" id="partner-servers-btn" ng-click="switchServerView('partner')" style="text-align:left;">
           <md-icon class="material-icons">public</md-icon>
 		      {{:: 'ui.multiplayer.partner' | translate}}
         </md-button>
 
-        <md-button id="favorites-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.favorites') !== -1)}" ui-sref="menu.multiplayer.favorites" style="text-align:left;">
+        <md-button class="servers-btn" id="favorites-servers-btn" ng-click="switchServerView('favorites')" style="text-align:left;">
           <md-icon class="material-icons">bookmark</md-icon>
 				  {{:: 'ui.multiplayer.favorites' | translate}}
         </md-button>
 
-        <md-button id="recent-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.recent') !== -1)}" ui-sref="menu.multiplayer.recent" style="text-align:left;">
+        <md-button class="servers-btn" id="recents-servers-btn" ng-click="switchServerView('recents')" style="text-align:left;">
           <md-icon class="material-icons">alarm</md-icon>
 				  {{:: 'ui.multiplayer.recent' | translate}}
         </md-button>

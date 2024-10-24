@@ -11,8 +11,6 @@
 
 local M = {}
 
-local jbeamIO = require('jbeam/io') -- to be used later for getting slotting information of parts
-
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 -- ============= VARIABLES =============
@@ -63,51 +61,6 @@ local roleToInfo = {
 -- @tfield string shorttag Contains the Short version of Tag
 -- @usage local roleInfo = roleToInfo["USER"].tag
 -- @usage local roleInfo = roleToInfo["USER"].backcolor.r
-
---- Contains the known simplified Vehicle versions.
--- JBeamNames are Strings eg. "moonhawk", "unicycle"
--- @table simplified_vehicles
--- @tfield string JBeamName_1 eg. "simple_traffic_body_5door_wagon"
--- @tfield string JBeamName_N
--- @usage local simplified = simplified_vehicles["coupe"]
-local simplified_vehicles = {
-	atv         = "simple_traffic_atv",
-	autobello   = "simple_traffic_autobello",
-	barstow     = "simple_traffic_body_2door_coupe",
-	bastion     = "simple_traffic_body_4door_sedan",
-	bluebuck    = "simple_traffic_body_4door_sedan",
-	bolide      = "simple_traffic_bolide",
-	burnside    = "simple_traffic_body_4door_sedan",
-	bx          = "simple_traffic_body_2door_coupe",
-	citybus     = "simple_traffic_citybus",
-	covet       = "simple_traffic_body_3door_hatch",
-	etk800      = "simple_traffic_body_5door_wagon",
-	etkc        = "simple_traffic_body_2door_coupe",
-	etki        = "simple_traffic_body_4door_sedan",
-	fullsize    = "simple_traffic_body_4door_sedan", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	hopper      = "simple_traffic_hopper",
-	lansdale    = "simple_traffic_body_5door_wagon",
-	legran      = "simple_traffic_body_4door_sedan",
-	midsize     = "simple_traffic_body_4door_sedan",
-	midtruck    = "simple_traffic_midtruck",
-	miramar     = "simple_traffic_body_4door_sedan",
-	moonhawk    = "simple_traffic_body_2door_coupe",
-	pessima     = "simple_traffic_body_4door_sedan",
-	pickup      = "simple_traffic_body_d10", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	pigeon      = "simple_traffic_pigeon",
-	racetruck   = "simple_traffic_racetruck",
-	roamer      = "simple_traffic_body_5door_wagon", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	rockbouncer = "simple_traffic_rockbouncer",
-	sbr         = "simple_traffic_body_2door_coupe",
-	scintilla   = "simple_traffic_scintilla",
-	sunburst    = "simple_traffic_body_4door_sedan",
-	us_semi     = "simple_traffic_us_semi",
-	utv         = "simple_traffic_utv",
-	van         = "simple_traffic_body_6door_van", -- THIS DOES NOT WORK, IT SHOULD REPLACE THE FRAME SLOT BUT WE ONLY DOING BODY SLOT RIGHT NOW
-	vivace      = "simple_traffic_vivace", -- why are you always the weird one
-	wendover    = "simple_traffic_body_2door_coupe",
-	wigeon      = "simple_traffic_wigeon"
-}
 
 local settingsCache = {
 }
@@ -510,156 +463,325 @@ local function localVehiclesExist()
 end
 
 local vehicleSimplifiers = {
-	-- complicated chaos, just looking at this put me in tears
-
-	bastion = function(vehicleParts) -- case 1, simple body replace
-		vehicleParts["bastion_body"] = "simple_traffic_body_4door_sedan"
-	end,
-	bx = function(vehicleParts) -- case 2, correspond with what body is used -- nvm this is minor chaos
-		vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe"
-		if vehicleParts["bx_body"] == "bx_body_coupe" then
-			--vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_coupe" -- is default already
-		else
-			if vehicleParts["bx_fenderflare_RR"] == "bx_fenderflare_RR" and vehicleParts["bx_fenderflare_RL"] == "bx_fenderflare_RL"
-			and ((vehicleParts["bx_fenderflare_FR_popup"] == "bx_fenderflare_FR_popup" and vehicleParts["bx_fenderflare_FL_popup"] == "bx_fenderflare_FL_popup")
-			or (vehicleParts["bx_fenderflare_FR_fixed"] == "bx_fenderflare_FR_fixed" and vehicleParts["bx_fenderflare_FL_fixed"] == "bx_fenderflare_FL_fixed")) then
-				vehicleParts["bx_body"] = "simple_traffic_body_2door_coupe_tuner" -- this gives widebody fenderflare bodystyle
-			else
-				vehicleParts["simple_traffic_bodystyle"] = "simple_traffic_bodystyle_hatch"
+	common = function(vehicleConfig) -- this currently exist to fix wheels (TRIES TO) because simplified traffic have no (broken) default wheel
+		local parts = vehicleConfig.parts
+		
+		parts.simple_traffic_wheels_F = "simple_traffic_midsize_wheels_F_01a" -- absolute default
+		parts.simple_traffic_midsize_hubcaps_F = "" -- remove default hubcap
+		if parts.wheel_F_centerlug then
+		elseif parts.wheel_F_3 then -- USES 4 LUG DEFAULT
+			parts.simple_traffic_wheels_F = "simple_traffic_pessima_wheels_F_01a"
+			parts.simple_traffic_pessima_hubcaps_F = "" -- remove default hubcap
+		elseif parts.wheel_F_4 then
+			parts.simple_traffic_wheels_F = "simple_traffic_pessima_wheels_F_01a"
+			parts.simple_traffic_pessima_hubcaps_F = "" -- remove default hubcap
+		elseif parts.wheel_F_5 then
+		elseif parts.wheel_F_6 then
+			parts.simple_traffic_wheels_F = "simple_traffic_van_wheels_F_01a"
+		elseif parts.wheel_F_8 then -- USES 6 LUG DEFAULT
+			parts.simple_traffic_wheels_F = "simple_traffic_van_wheels_F_01a"
+		elseif parts.wheel_F_8_alt then
+			parts.simple_traffic_wheels_F = "simple_traffic_pickup_wheels_F_05a" -- corresponding wheel: steelwheel_04a_16x7_F
+			if parts.wheel_F_8_alt == "wheel_32a_16x7_F" then
+				parts.simple_traffic_wheels_F = "simple_traffic_pickup_wheels_F_04a"
 			end
 		end
-	end,
-	covet = function(vehicleParts)
-		vehicleParts["covet_body"] = "simple_traffic_body_3door_hatch"
-	end,
-	etk800 = function(vehicleParts)
-		if vehicleParts["etk800_body"] == "etk800_body_sedan" then
-			vehicleParts["etk800_body"] = "simple_traffic_body_4door_sedan"
-		else
-			vehicleParts["etk800_body"] = "simple_traffic_body_5door_wagon"
-		end
-	end,
-	etkc = function(vehicleParts)
-		vehicleParts["etkc_body"] = "simple_traffic_body_2door_coupe"
-	end,
-	etki = function(vehicleParts)
-		vehicleParts["etki_body"] = "simple_traffic_body_4door_sedan"
-	end,
-	fullsize = function(vehicleParts) -- case 1.5, frame replace
-		vehicleParts["fullsize_frame"] = "simple_traffic_body_4door_sedan"
-	end,
-	lansdale = function(vehicleParts) -- case 3, something thats not the body decides what body is used
-		if vehicleParts["lansdale_radsupport"] == "lansdale_radsupport_late" then
-			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon_facelift"
-		else
-			vehicleParts["lansdale_body"] = "simple_traffic_body_5door_wagon"
-		end
-	end,
-	legran = function(vehicleParts)
-		if vehicleParts["legran_body"] == "legran_body_wagon" then
-			vehicleParts["legran_body"] = "simple_traffic_body_5door_wagon"
-		else
-			vehicleParts["legran_body"] = "simple_traffic_body_4door_sedan"
-		end
-	end,
-	midsize = function(vehicleParts)
-		vehicleParts["midsize_body"] = "simple_traffic_body_4door_sedan"
-	end,
-	pessima = function(vehicleParts)
-		vehicleParts["pessima_body"] = "simple_traffic_body_4door_sedan"
-	end,
-	pickup = function(vehicleParts) -- case 4, chaos D:
-		if vehicleParts["pickup_frame"] == "pickup_frame_upfit_heavy" then
-			vehicleParts["pickup_frame"] = "simple_traffic_body_d45" -- boxtruck
 
-		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew cabin frames
-		string.match(vehicleParts["pickup_frame"], "pickup_frame_extlongbed") then -- ingores heavy for ext cabin longbed frames
-			vehicleParts["pickup_frame"] = "simple_traffic_body_d25" -- ext cab long bed
-
-		elseif string.match(vehicleParts["pickup_frame"], "pickup_frame_crew") or -- ingores heavy for (the rest of) crew cabin frames
-		string.match(vehicleParts["pickup_frame"], "pickup_frame_ext") or -- ingores heavy for (the rest of) ext cabin frames
-		string.match(vehicleParts["pickup_frame"], "pickup_frame_longbed") or -- ingores heavy for longbed frames
-		vehicleParts["pickup_frame"] == "pickup_desert_frame_crew" or
-		vehicleParts["pickup_frame"] == "pickup_desert_frame_ext" or
-		string.match(vehicleParts["pickup_frame"], "pickup_frame_short_ext") then -- ingores heavy for short ext frames
-			vehicleParts["pickup_frame"] = "simple_traffic_body_d15" -- crew cab normal bed
-
-		else -- standard frame, offroad frame, short frame lands here
-			vehicleParts["pickup_frame"] = "simple_traffic_body_d10" -- short frame
-		end
-
-	end,
-	roamer = function(vehicleParts)
-		vehicleParts["roamer_frame"] = "simple_traffic_body_5door_wagon"
-	end,
-	sunburst = function(vehicleParts)
-		vehicleParts["sunburst_body"] = "simple_traffic_body_4door_sedan"
-	end,
-	van = function(vehicleParts) -- case 5 mltiple deciding factors
-		if vehicleParts["van_frame"] == "van_frame_upfit_heavy" then
-			vehicleParts["van_frame"] = "simple_traffic_body_2door_boxtruck"
-		elseif string.match(vehicleParts["van_frame"], "van_frame_ext") then -- ingores heavy for frames
-			if vehicleParts["van_body_ext"] == "van_body_passenger_ext" then
-				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_passenger"
-			else
-				vehicleParts["van_frame"] = "simple_traffic_body_6door_van_ext"
+		parts.simple_traffic_wheels_R = "simple_traffic_midsize_wheels_R_01a" -- absolute default， its one of the standard steel wheels ig
+		parts.simple_traffic_midsize_hubcaps_R = "" -- remove default hubcap
+		if parts.wheel_R_centerlug then
+		elseif parts.wheel_R_3 then -- USES 4 LUG DEFAULT
+			parts.simple_traffic_wheels_R = "simple_traffic_pessima_wheels_R_01a"
+			parts.simple_traffic_pessima_hubcaps_R = "" -- remove default hubcap
+		elseif parts.wheel_R_4 then
+			parts.simple_traffic_wheels_R = "simple_traffic_pessima_wheels_R_01a"
+			parts.simple_traffic_pessima_hubcaps_R = "" -- remove default hubcap
+		elseif parts.wheel_R_5 then
+		elseif parts.wheel_R_6 then
+			parts.simple_traffic_wheels_R = "simple_traffic_van_wheels_R_01a"
+		elseif parts.wheel_R_8 then -- USES 6 LUG DEFAULT
+			parts.simple_traffic_wheels_R = "simple_traffic_van_wheels_R_01a"
+		elseif parts.wheel_R_8_dually then
+			parts.simple_traffic_wheels_R = "simple_traffic_pickup_wheels_R_05a" -- corresponding wheel: steelwheel_04a_16x7_R_dually_true
+			if parts.wheel_R_8_alt == "wheel_32a_16x7_R_dually_true" then
+				parts.simple_traffic_wheels_R = "simple_traffic_pickup_wheels_R_04a"
 			end
-		else
-			vehicleParts["van_frame"] = "simple_traffic_body_6door_van"
 		end
+
 	end,
-	vivace = function(vehicleParts)
-		if string.match(vehicleParts["vivace_fueltank"], "vivace_battery") then
-			vehicleParts["vivace_body"] = "simple_traffic_vivace_e"
+	bastion = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_bastion"
+		parts.simple_traffic_bastion_bumper_F = parts.bastion_bumper_F == "" and "" or nil
+		parts.simple_traffic_bastion_bumper_R = parts.bastion_bumper_R == "" and "" or nil
+		parts.simple_traffic_bastion_hood = parts.bastion_hood == "" and "" or nil
+		parts.simple_traffic_bastion_trunk = parts.bastion_trunk == "" and "" or nil
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	bx = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isHatch = parts.bx_body == "bx_body_hatch"
+		parts.simple_traffic_model = "simple_traffic_bx_body"
+		parts.simple_traffic_bx_bumper_F = parts.bx_bumper_F == "" and "" or nil
+		parts.simple_traffic_bx_bumper_R = parts.bx_bumper_R == "" and "" or nil
+		parts.simple_traffic_bx_hood = parts.bx_hood == "" and "" or nil
+		parts.simple_traffic_bx_bodystyle = isHatch and "simple_traffic_bx_bodystyle_hatch" or nil
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	covet = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_covet_body"
+		parts.simple_traffic_covet_bumper_F = parts.covet_bumper_F == "" and "" or nil
+		parts.simple_traffic_covet_bumper_R = parts.covet_bumper_R == "" and "" or nil
+		parts.simple_traffic_covet_hood = parts.covet_hood == "" and "" or nil
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	etk800 = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isWagon = parts.etk800_body == "etk800_body_wagon"
+		parts.simple_traffic_model = isWagon and "simple_traffic_etk800_wagon" or "simple_traffic_etk800_sedan"
+		parts.simple_traffic_etk800_bumper_F = parts.etk800_bumper_F == "" and "" or nil
+		parts.simple_traffic_etk800_bumper_R = parts.etk800_bumper_R == "" and "" or nil
+		parts.simple_traffic_etk800_hood = parts.etk800_hood == "" and "" or nil
+		if isWagon then
 		else
-			vehicleParts["vivace_body"] = "simple_traffic_vivace"
+			parts.simple_traffic_etk800_trunk = parts.etk800_trunk == "" and "" or nil
 		end
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
 	end,
-	wendover = function(vehicleParts)
-		vehicleParts["wendover_body"] = "simple_traffic_body_2door_coupe"
+	etki = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_etki_body"
+		parts.simple_traffic_etki_bumper_F = parts.etki_bumper_F == "" and "" or nil
+		parts.simple_traffic_etki_bumper_R = parts.etki_bumper_R == "" and "" or nil
+		parts.simple_traffic_etki_hood = parts.etki_hood == "" and "" or nil
+		parts.simple_traffic_etki_trunk = parts.etki_trunk == "" and "" or nil
+		parts.skin_traffic_etki_lights = parts.skin_lights == "etki_skin_lights_alt" and "simple_traffic_etki_lights_facelift" or "simple_traffic_etki_lights_pre"
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
 	end,
-	-- is there a better way to implement this mess?
+	fullsize = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_fullsize_body"
+		parts.simple_traffic_fullsize_bumper_F = parts.fullsize_bumper_F == "" and "" or nil
+		parts.simple_traffic_fullsize_bumper_R = parts.fullsize_bumper_R == "" and "" or nil
+		parts.simple_traffic_fullsize_hood = parts.fullsize_hood == "" and "" or nil
+		parts.simple_traffic_fullsize_trunk = parts.fullsize_trunk == "" and "" or nil
+		parts.skin_traffic_fullsize = string.find(parts.paint_design, "taxi") and "simple_traffic_fullsize_skin_taxi"
+		parts.simple_traffic_fullsize_extra = parts.fullsize_roof_accessory == "fullsize_adcarrier" and "simple_traffic_fullsize_extra_taxi"
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	lansdale = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isPre = parts.lansdale_radsupport == "lansdale_radsupport_early"
+		parts.simple_traffic_model = "simple_traffic_lansdale"
+		parts.simple_traffic_lansdale_bumper_F = parts.lansdale_bumper_F == "" and "" or nil
+		parts.simple_traffic_lansdale_bumper_R = parts.lansdale_bumper_R == "" and "" or nil
+		parts.simple_traffic_lansdale_hood = parts.lansdale_hood == "" and "" or nil
+		parts.simple_traffic_lansdale_extra = parts.lansdale_roof_accessory == "lansdale_adcarrier" and "simple_traffic_lansdale_extra_taxi"
+		if isPre then
+			parts.skin_traffic_lansdale_pre = string.find(parts.paint_design, "taxi") and "simple_traffic_lansdale_skin_taxi"
+		else
+		end
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	legran = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isWagon = parts.legran_body == "legran_body_wagon"
+		local isLate = parts.legran_fascia == "legran_fascia_b"
+		parts.simple_traffic_model = isWagon and "simple_traffic_legran_body_wagon" or "simple_traffic_legran_body_sedan"
+		parts.simple_traffic_legran_bumper_F = parts.legran_bumper_F == "" and "" or nil
+		parts.simple_traffic_legran_bumper_R = parts.legran_bumper_R == "" and "" or nil
+		parts.simple_traffic_legran_hood = parts.legran_hood == "" and "" or nil
+		if isWagon then
+			parts.simple_traffic_legran_version_wagon = isLate and "simple_traffic_legran_wagon_facelift" or "simple_traffic_legran_wagon_pre"
+		else
+			parts.simple_traffic_legran_trunk = parts.legran_trunk == "" and "" or nil
+			parts.simple_traffic_legran_version_sedan = isLate and "simple_traffic_legran_sedan_facelift" or "simple_traffic_legran_sedan_pre"
+		end
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	midsize = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_midsize_body"
+		parts.simple_traffic_midsize_bumper_F = parts.midsize_bumper_F == "" and "" or nil
+		parts.simple_traffic_midsize_bumper_R = parts.midsize_bumper_R == "" and "" or nil
+		parts.simple_traffic_midsize_hood = parts.midsize_hood == "" and "" or nil
+		parts.simple_traffic_midsize_trunk = parts.midsize_trunk == "" and "" or nil
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	pessima = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+
+		parts.simple_traffic_model = "simple_traffic_pessima"
+		parts.simple_traffic_pessima_bumper_F = parts.pessima_bumper_F == "" and "" or nil
+		parts.simple_traffic_pessima_bumper_R = parts.pessima_bumper_R == "" and "" or nil
+		parts.simple_traffic_pessima_hood = parts.pessima_hood == "" and "" or nil
+		parts.simple_traffic_pessima_trunk = parts.pessima_trunk == "" and "" or nil
+		parts.simple_traffic_pessima_trim = "simple_traffic_pessima_trim_stock" -- beamng skill issue, doesnt come with one by default, its core slot
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	pickup = function(vehicleConfig) -- case 4, chaos D:
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isUpfit = parts.pickup_frame == "pickup_frame_upfit_heavy"
+		parts.simple_traffic_pickup_hood = parts.pickup_hood == "" and "" or nil
+
+		if isUpfit then
+			parts.simple_traffic_model = "simple_traffic_pickup_cargobox" -- boxtruck
+			parts.simple_traffic_pickup_bumper_F = parts.pickup_bumper_F == "" and "" or "simple_traffic_pickup_bumper_F" -- fix beamng skill issue
+
+		elseif string.find(parts.pickup_frame, "pickup_frame_crewlongbed") or -- ingores heavy suffix for crew longbed frames
+		string.find(parts.pickup_frame, "pickup_frame_extlongbed") then -- ingores heavy for ext longbed frames
+			parts.simple_traffic_model = "simple_traffic_pickup_crew" -- crew long bed
+
+		elseif string.find(parts.pickup_frame, "pickup_frame_crew") or -- ingores heavy for (the rest of) crew frames
+		string.find(parts.pickup_frame, "pickup_frame_ext") or -- ingores heavy for (the rest of) ext frames
+		string.find(parts.pickup_frame, "pickup_frame_longbed") or -- ingores heavy for longbed frames
+		parts.pickup_frame == "pickup_desert_frame_crew" or
+		parts.pickup_frame == "pickup_desert_frame_ext" or
+		string.find(parts.pickup_frame, "pickup_frame_short_ext") then -- ingores heavy for short ext frames
+			parts.simple_traffic_model = "simple_traffic_pickup_ext" -- ext normal bed
+
+		elseif string.find(parts.pickup_frame, "pickup_frame_short") then -- ingores heavy suffix for short frames
+			parts.simple_traffic_model = "simple_traffic_pickup_short" -- short frame
+
+		else -- standard frame, offroad frame lands here
+			parts.simple_traffic_model = "simple_traffic_pickup_single" -- reg normal bed
+		end
+
+		if not isUpfit then
+			parts.simple_traffic_pickup_bumper_F = parts.pickup_bumper_F == "" and "" or nil
+			parts.simple_traffic_pickup_bumper_R = parts.pickup_bumper_R == "" and "" or nil
+			local version = string.find(parts.pickup_fascia, "pickup_fascia_prefacelift") and 1 or (string.find(parts.pickup_fascia, "pickup_fascia_facelift") and 3) or 2
+			if version == 1 then
+				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_pre_chrome_alt" or "simple_traffic_pickup_version_pre_base"
+			elseif version == 2 then
+				parts.simple_traffic_pickup_version = "simple_traffic_pickup_version_pre_chrome"
+			elseif version == 3 then
+				parts.simple_traffic_pickup_version = not string.find(parts.pickup_fascia, "alt") and "simple_traffic_pickup_version_facelift_chrome" or "simple_traffic_pickup_version_facelift_base"
+			end
+		end
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	roamer = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isExt = string.find(parts.roamer_frame, "roamer_frame_ext") ~= nil
+		local isLate = parts.roamer_radsupport == "roamer_radsupport_facelift"
+		parts.simple_traffic_model = isExt and "simple_traffic_roamer_ext" or "simple_traffic_roamer"
+		parts.simple_traffic_roamer_bumper_F = parts.roamer_bumper_F == "" and "" or nil
+		parts.simple_traffic_roamer_bumper_R = parts.roamer_bumper_R == "" and "" or nil
+		parts.simple_traffic_roamer_hood = parts.roamer_hood == "" and "" or nil
+		parts.simple_traffic_roamer_version = isLate and "simple_traffic_roamer_version_facelift" or "simple_traffic_roamer_version_pre"
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
+	van = function(vehicleConfig)
+		local parts = vehicleConfig.parts
+		local newModel = "simple_traffic"
+		local isUpfit = parts.van_frame == "van_frame_upfit_heavy"
+		local isLate = string.find(parts.van_facia_F, "_late") ~= nil
+		local isLux = string.find(parts.van_facia_F, "_high") or string.find(parts.van_facia_F, "_alt")
+		parts.simple_traffic_model = isUpfit and "simple_traffic_van_boxtruck" or "simple_traffic_van"
+
+		if isLate then
+			parts.simple_traffic_van_trim = "simple_traffic_van_trim_facelift"
+			parts.simple_traffic_van_trim_facelift = isLux and "simple_traffic_van_trim_facelift_chrome" or "simple_traffic_van_trim_facelift_plastic"
+		else
+			parts.simple_traffic_van_trim = "simple_traffic_van_trim_pre"
+			parts.simple_traffic_van_trim_pre = isLux and "simple_traffic_van_trim_pre_chrome" or "simple_traffic_van_trim_pre_plastic"
+		end
+		if isUpfit then
+			parts.simple_traffic_van_bumper_F = parts.van_bumper_F == "" and "" or nil
+			parts.simple_traffic_van_hood = parts.van_hood == "" and "" or nil
+		else
+			parts.simple_traffic_van_bumper_F = parts.van_bumper_F == "" and "" or "simple_traffic_van_bumper_F" -- fix skill issue
+			parts.simple_traffic_van_bumper_R = parts.van_bumper_R == "" and "" or "simple_traffic_van_bumper_R" -- fix skill issue
+			parts.simple_traffic_van_hood = parts.van_hood == "" and "" or "simple_traffic_van_hood" -- fix skill issue
+
+			if string.find(parts.van_body or parts.van_body_ext, "van_body_passenger") then
+				parts.simple_traffic_van_body = "simple_traffic_van_body_passenger"
+			elseif string.find(parts.van_body or parts.van_body_ext, "van_body_sidedoor") then
+				parts.simple_traffic_van_body = "simple_traffic_van_body_cargodoor"
+			else -- van cab only also lands here
+				parts.simple_traffic_van_body = "simple_traffic_van_body_cargo"
+			end
+		end
+
+		vehicleConfig.model = newModel
+		vehicleConfig.mainPartName = newModel
+		return newModel
+	end,
 }
 
 --- modify the given vehicleConfig so it as closely resembles the original config with simplified vehicle, or not touched if simplified vehicle not possible
 -- @tparam string vehicleName, eg covet, midsize
 -- @tparam table vehicleConfig, aka decodedData.vcf
+-- @treturn string newVehicleName, new vehicleName, because beam shoved all simplified traffic vehicle into simple_traffic vehicle
 -- @treturn table newVehicleConfig, that now contains the simplified body/parts, or the original table if no changes can be made
--- @usage local newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
+-- @usage local newVehicleName, newVehicleConfig = simplifyVehicle("vivace", vehicleConfig)
 local function simplifyVehicle(vehicleName, vehicleConfig)
 	local newVehicleConfig = deepcopy(vehicleConfig)
 
 	-- this do not check for incomptable parts
 	if vehicleSimplifiers[vehicleName] then
-		vehicleSimplifiers[vehicleName](newVehicleConfig.parts)
-		return newVehicleConfig
-	end
-
-	-- simple fallback logic
-	local expectedPartID = simplified_vehicles[vehicleName]
-	if expectedPartID then
-		local ioCtx = jbeamIO.startLoading({string.format("/vehicles/%s/", vehicleName), "/vehicles/common/"}) -- generate io context for use later
-		local part = jbeamIO.getPart(ioCtx, expectedPartID)
-		if not part then
-			log('W', 'simplifyVehicle fallback logic', "part "..expectedPartID.." was not found for "..vehicleName.."")
-			return vehicleConfig
-		end
-		local slotTypes = {}
-		if type(part.slotType) == 'string' then
-			table.insert(slotTypes, part.slotType)
-		elseif type(part.slotType) == 'table' then
-			slotTypes = part.slotType
-		end
-		for _, slotType in ipairs(slotTypes) do
-			if newVehicleConfig.parts[slotType] then
-				newVehicleConfig.parts[slotType] = expectedPartID
-				return newVehicleConfig
-			end
-		end
+		local newVehicleName = vehicleSimplifiers[vehicleName](newVehicleConfig) or vehicleName
+		vehicleSimplifiers.common(newVehicleConfig)
+		return newVehicleName, newVehicleConfig
 	end
 
 	table.clear(newVehicleConfig)
-	return vehicleConfig
+	return vehicleName, vehicleConfig
 end
 
 -- ============= OBJECTS =============
@@ -1017,7 +1139,7 @@ local function applyVehSpawn(event)
 	nextSpawnIsRemote = true -- this flag is used to indicate whether the next spawn is remote or not
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
+		vehicleName, vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
@@ -1068,7 +1190,7 @@ local function applyVehEdit(serverID, data)
 	if checkIfVehiclenameInvalid(vehicleName, playerName, vehicles[serverID]) then return end
 
 	if settings.getValue("simplifyRemoteVehicles") then
-		vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
+		vehicleName, vehicleConfig = simplifyVehicle(vehicleName, vehicleConfig)
 	end
 
 	if vehicleName == veh:getJBeamFilename() then

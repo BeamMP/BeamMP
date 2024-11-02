@@ -19,7 +19,7 @@ local socket = require('socket')
 local launcherConnected = false
 local isConnecting = false
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.13.7" -- the mod version
+local modVersion = "4.13.8" -- the mod version
 -- server
 
 local serverList -- server list JSON

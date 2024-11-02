@@ -44,6 +44,13 @@ end
 
 local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:(.*)")
+
+	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
+
+	if not veh or veh.isLocal then
+		return
+	end
+
 	if code == "c" then
 		applyControllerData(data, serverVehicleID)
 	else

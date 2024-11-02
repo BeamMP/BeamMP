@@ -158,6 +158,13 @@ end
 -- @param rawData string The raw message data.
 local function handle(rawData)
 	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+
+	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
+
+	if not veh or veh.isLocal then
+		return
+	end
+
 	if code == 'p' then
 		local decoded = jsonDecode(data)
 		if settings.getValue("enablePosSmoother") then

@@ -281,7 +281,7 @@ local HandleNetwork = {
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
-	['M'] = function(params) local category, icon, message = params:match("([^:]+):([^:]+):(.+)") UI.showNotification(message, category, icon) end, -- Custom UI notification
+	['n'] = function(params) local category, icon, message = params:match("([^:]+):?(.-):(.+)") UI.showNotification(message, category, icon) end, -- Custom UI notification
 }
 
 

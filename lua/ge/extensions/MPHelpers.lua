@@ -199,21 +199,53 @@ end
 
 
 --- Replaces a substring that exists in a string from an array of strings.
--- @param inputString the string you want to filter.
+-- @param inputStr the string you want to filter.
 -- @param filterArray the string array you want to filter out.
+-- @param replacementChar the character to put in the words place
 -- @usage MPHelpers.filterString("The Quick Brown Fox", ["The"])
-local function filterString(inputString, filterArray)
-	local filteredString = inputString
+function filterString(inputStr, filterArray, replacementChar)
+	-- Default replacement character to '*' if not provided
+	replacementChar = replacementChar or '*'
 
-	for _, word in ipairs(filterArray) do
-		local pattern = word:gsub(".", function(char)
-			return "[" .. char:lower() .. char:upper() .. "]"
-		end)
-		local replacement = string.rep("*", string.len(word))
-		filteredString = string.gsub(filteredString, pattern, replacement)
+	-- Function to create a pattern that matches variations of a word
+	local function createPattern(word)
+			-- Table to replace letters with their possible numeric or Unicode equivalents
+			local substitutions = {
+					a = "[a4@αа]", -- Includes Greek alpha (α) and Cyrillic (а)
+					b = "[b8ß]", -- Includes German sharp S (ß)
+					c = "[cςç¢]", -- Includes Greek sigma (ς) and Latin-based characters
+					d = "[d]", -- No common substitutes found
+					e = "[e3€е]", -- Includes Cyrillic e (е)
+					g = "[g9ɢ]", -- Includes Latin letter G (ɢ)
+					i = "[i1l!|ιі]", -- Includes Greek iota (ι) and Cyrillic i (і)
+					l = "[l1i!|ʟ]", -- Includes Latin letter L (ʟ)
+					o = "[o0οоø]", -- Includes Greek omicron (ο), Cyrillic o (о), and Scandinavian o-slash (ø)
+					s = "[s5z$ѕ]", -- Includes Cyrillic s (ѕ)
+					t = "[t7τ]", -- Includes Greek tau (τ)
+					z = "[z2sʐ]" -- Includes Latin letter z (ʐ)
+			}
+
+			-- Escape the word and replace each letter with its substitution pattern
+			local pattern = word:gsub(".", function(char)
+					return substitutions[char:lower()] or char
+			end)
+
+			-- Allow spaces or special characters between letters (non-greedy match)
+			pattern = pattern:gsub("(.)", "%1%s*")
+
+			-- Ensure it matches regardless of capitalization
+			return "(?i)%f[%w]" .. pattern .. "%f[%W]"
 	end
 
-	return filteredString
+	-- Replace all occurrences of forbidden words and their variations
+	for _, word in ipairs(filterArray) do
+			local pattern = createPattern(word)
+			inputStr = inputStr:gsub(pattern, function(match)
+					return replacementChar:rep(#match:gsub("%s", ""))
+			end)
+	end
+
+	return inputStr
 end
 
 --generic

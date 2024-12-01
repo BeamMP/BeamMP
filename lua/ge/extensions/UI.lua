@@ -33,9 +33,7 @@ M.uiIcons = {
     user = 0,
 }
 
-local profanityFilter = nil
-local hateFilter = nil
-local inappropriateContentFilter = nil
+local chatFilterLevel = nil
 local customFilter = {}
 
 local windowOpacity = 0.9
@@ -427,17 +425,9 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	local player = MPVehicleGE.getPlayerByName(username)
 
     -- Apply chat filtering
-    -- Basic Profanity
-    if settings.getValue("filterProfanity") then
-        msg = MPHelpers.filterString(msg, profanityFilter)
-    end
-    -- Hate Speech
-    if settings.getValue("filterHate") then
-        msg = MPHelpers.filterString(msg, hateFilter)
-    end
-    -- Inappropriate Filter
-    if settings.getValue("filterInappropriateContent") then
-        msg = MPHelpers.filterString(msg, inappropriateContentFilter)
+    -- Based on set level
+    if settings.getValue("chatFilterLevel") then
+        msg = MPHelpers.filterString(msg, chatFilterLevel)
     end
 
     -- Custom Filter

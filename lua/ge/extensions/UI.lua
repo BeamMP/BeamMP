@@ -33,9 +33,6 @@ M.uiIcons = {
     user = 0,
 }
 
-local chatFilterLevel = nil
-local customFilter = {}
-
 local windowOpacity = 0.9
 
 M.windowOpen = imgui.BoolPtr(true)
@@ -427,11 +424,25 @@ local function chatMessage(rawMessage) -- chat message received (angular)
     -- Apply chat filtering
     -- Based on set level
     if settings.getValue("chatFilterLevel") then
-        msg = MPHelpers.filterString(msg, chatFilterLevel)
+        local chatFilterArray, err = MPHelpers.readFile("lua/ge/extensions/multiplayer/filters/level_"..settings.getValue("chatFilterLevel")..".txt")
+        dump(chatFilterArray)
+        if err then
+            chatFilterArray = {}
+            log('E', 'chatMessage', 'Failed to load filter list: '..err)
+        end
+        print(msg)
+        msg = MPHelpers.filterString(msg, chatFilterArray)
+        print(msg)
     end
 
     -- Custom Filter
-    if settings.getValue("filterCustomWords") then
+    if settings.getValue("filteredWords") then
+        local customFilterRaw = settings.getValue("filteredWords")
+        local customFilter = {}
+        for s in customFilterRaw:gmatch("[^\r\n]+") do
+            table.insert(customFilter, s)
+        end
+        print(customFilter)
         msg = MPHelpers.filterString(msg, customFilter)
     end
 

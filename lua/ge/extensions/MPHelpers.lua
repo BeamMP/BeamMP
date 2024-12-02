@@ -197,6 +197,24 @@ function pairs (value)
 end 
 end
 
+--- Reads a file line by line returning an array of the lines
+-- @param filePath the filepath to read.
+-- @usage MPHelpers.readFile("/lua/ge/extensions/multiplayer/filters/level_0.txt")
+local function readFile(filePath)
+	local file = io.open(filePath, "r") -- Open the file in read mode
+	if not file then
+			-- Return nil and an error message if the file can't be opened
+			return nil, "Error: Cannot open file at " .. filePath
+	end
+
+	local lines = {} -- Initialize an array to hold the lines
+	for line in file:lines() do
+			table.insert(lines, line) -- Insert each line into the array
+	end
+
+	file:close() -- Close the file after reading
+	return lines, nil -- Return the array of lines and nil for error
+end
 
 --- Replaces a substring that exists in a string from an array of strings.
 -- @param inputStr the string you want to filter.
@@ -240,7 +258,9 @@ function filterString(inputStr, filterArray, replacementChar)
 	-- Replace all occurrences of forbidden words and their variations
 	for _, word in ipairs(filterArray) do
 			local pattern = createPattern(word)
+			dump(pattern)
 			inputStr = inputStr:gsub(pattern, function(match)
+					dump(match)
 					return replacementChar:rep(#match:gsub("%s", ""))
 			end)
 	end
@@ -251,6 +271,7 @@ end
 --generic
 M.tableLength  = tableSize
 M.filterString = filterString
+M.readFile     = readFile
 
 --local
 M.colorMatch   = colorMatch

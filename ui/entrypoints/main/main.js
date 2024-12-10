@@ -210,6 +210,13 @@ angular
           backState: "menu.mainmenu",
         })
 
+        .state('menu.rally', {
+          url: '/rally',
+          templateUrl: '/ui/modules/rallyselect/rallyselect.html',
+          controller: 'RallySelectController',
+          backState: 'menu.mainmenu',
+        })
+
         .state("menu.campaigns", {
           url: "/campaigns",
           templateUrl: "/ui/modules/campaignselect/campaignselect.html",
@@ -246,6 +253,8 @@ angular
                   return "menu.lightrunnerOverview"
                 case "quickrace":
                   return "menu.quickraceOverview"
+                case "rally":
+                  return "menu.rally"
               }
             }
             return "BACK_TO_MENU"
@@ -500,16 +509,39 @@ angular
 
         .state("menu.vehicleconfig", {
           url: "/vehicle-config",
+          uiAppsShown: true,
+        })
+        .state("menu.vehicleconfig.parts", {
+          url: "/vehicle-config/parts",
+          uiAppsShown: true,
+        })
+        .state("menu.vehicleconfig.tuning", {
+          url: "/vehicle-config/tuning",
+          uiAppsShown: true,
+        })
+        .state("menu.vehicleconfig.color", {
+          url: "/vehicle-config/color",
+        })
+        .state("menu.vehicleconfig.save", {
+          url: "/vehicle-config/save",
+        })
+        .state("menu.vehicleconfig.debug", {
+          url: "/vehicle-config/debug",
+          uiAppsShown: true,
+        })
+
+        .state("menu.vehicleconfigold", {
+          url: "/vehicle-config-old",
           templateUrl: "/ui/modules/vehicleconfig/vehicleconfig.html",
           controller: "VehicleconfigCtrl",
-          redirectTo: "menu.vehicleconfig.parts",
+          redirectTo: "menu.vehicleconfigold.parts",
           backState($scope, $state, $stateParams) {
             if ($scope.gameState === "garage") return "garagemode"
             return "BACK_TO_MENU"
           },
         })
-        .state("menu.vehicleconfig.parts", {
-          url: "/vehicle-config/parts",
+        .state("menu.vehicleconfigold.parts", {
+          url: "/vehicle-config-old/parts",
           templateUrl: "/ui/modules/vehicleconfig/partial.parts.html",
           controller: "Vehicleconfig_parts as vehConf_parts",
           backState($scope, $state, $stateParams) {
@@ -518,8 +550,8 @@ angular
           },
           uiAppsShown: true, // defaults to false
         })
-        .state("menu.vehicleconfig.tuning", {
-          url: "/vehicle-config/tuning",
+        .state("menu.vehicleconfigold.tuning", {
+          url: "/vehicle-config-old/tuning",
           templateUrl: "/ui/modules/vehicleconfig/partial.tuning.html",
           controller: "Vehicleconfig_tuning as vehConf_tuning",
           backState($scope, $state, $stateParams) {
@@ -528,8 +560,8 @@ angular
           },
           uiAppsShown: true, // defaults to false
         })
-        .state("menu.vehicleconfig.color", {
-          url: "/vehicle-config/color",
+        .state("menu.vehicleconfigold.color", {
+          url: "/vehicle-config-old/color",
           templateUrl: "/ui/modules/vehicleconfig/partial.color.html",
           controller: "Vehicleconfig_color as vehConf_color",
           backState($scope, $state, $stateParams) {
@@ -537,8 +569,8 @@ angular
             return "BACK_TO_MENU"
           },
         })
-        .state("menu.vehicleconfig.save", {
-          url: "/vehicle-config/save",
+        .state("menu.vehicleconfigold.save", {
+          url: "/vehicle-config-old/save",
           templateUrl: "/ui/modules/vehicleconfig/partial.save.html",
           controller: "Vehicleconfig_save as vehConf_save",
           backState($scope, $state, $stateParams) {
@@ -546,34 +578,14 @@ angular
             return "BACK_TO_MENU"
           },
         })
-        .state("menu.vehicleconfig.debug", {
-          url: "/vehicle-config/debug",
+        .state("menu.vehicleconfigold.debug", {
+          url: "/vehicle-config-old/debug",
           templateUrl: "/ui/modules/vehicleconfig/debug.partial.html",
           controller: "Vehicleconfig_debug as vehConf_debug",
           backState($scope, $state, $stateParams) {
             if ($scope.gameState === "garage") return "garagemode"
             return "BACK_TO_MENU"
           },
-          uiAppsShown: true, // defaults to false
-        })
-
-        .state("menu.vehicleconfig.vue", {
-          url: "/vehicle-config/vue",
-          uiAppsShown: true, // defaults to false
-        })
-        .state("menu.vehicleconfig.vue.tuning", {
-          url: "/vehicle-config/vue/tuning",
-          uiAppsShown: true, // defaults to false
-        })
-        // the following is to force angular menu to show up
-        .state("menu.vehicleconfig.vue-angular", {
-          url: "/vehicle-config/vue-angular",
-          redirectTo: "menu.vehicleconfig.vue",
-          uiAppsShown: true, // defaults to false
-        })
-        .state("menu.vehicleconfig.vue-angular.tuning", {
-          url: "/vehicle-config/vue-angular/tuning",
-          redirectTo: "menu.vehicleconfig.vue.tuning",
           uiAppsShown: true, // defaults to false
         })
 
@@ -1870,6 +1882,7 @@ angular
             }
 
             // update ui apps visibility
+            if (vm.currentStateName === "play")
             $scope.$emit("ShowApps", !!$state.current.uiAppsShown)
 
             $state.previous = fromState
@@ -1906,44 +1919,13 @@ angular
         vm.switchState(state, params)
       }
 
-      const vueScreenUiAppLayoutMap = {
-        refueling: {
-          uiAppsShow: true,
-          uiLayout: "tasklist",
-        },
-        computer: {
-          uiAppsShow: true,
-          uiLayout: "tasklist",
-        },
-        partShopping: {
-          uiAppsShow: true,
-          uiLayout: "tasklist",
-        },
-        vehicleShopping: {
-          uiAppsShow: true,
-          uiLayout: "tasklistTall",
-        },
-        cargoOverview: {
-          uiAppsShow: false,
-        },
-        "mission-details": {
-          uiAppsShow: false,
-        },
-      }
       $scope.$on("$stateNotFound", function (event, unfoundState, fromState, fromParams) {
         const unfoundStateTo = unfoundState.to
-        const vueScreenConfig = vueScreenUiAppLayoutMap[unfoundStateTo]
-        if (vueScreenConfig) {
-          bngApi.engineLua("career_career.isActive()", isCareerActive => {
-            if (isCareerActive && vueScreenConfig.uiAppsShow) {
-              $scope.$emit("appContainer:loadLayoutByType", vueScreenConfig.uiLayout)
-            } else if (isCareerActive) {
-              $scope.$emit("appContainer:clear")
-            }
-          })
-        }
-        // angular doesn't recognise the state, so try Vue (making sure it doesn't pingpong back to here)
-        bngVue.gotoGameState(unfoundState.to, { params: unfoundState.toParams, tryAngularJS: false })
+        // console.log("NON-ANGULAR-STATE", unfoundState.to, { unfoundState, fromState })
+        bngVue.gotoGameState(unfoundState.to, {
+          params: unfoundState.toParams,
+          tryAngularJS: false,
+        })
         unfoundState.to = "blank"
       })
 
@@ -2181,13 +2163,7 @@ angular
         }
       })
 
-      $scope.$on("MenuToggle", (event, data) => {
-        //console.log('toggleMenu', data, $state.current)
-        //console.trace()
-
-        // when in browser ui
-        // if (!beamng.ingame) return
-
+      function navigationBack() {
         // *** navigation back logic here
         let backState = $state.current.backState
         // this hack allows to catch Esc or (B) gamepad button
@@ -2221,9 +2197,6 @@ angular
           $state.go(targetState, getPrevArgs($state, targetState))
           return
         }
-
-        //console.log(`received MenuToggle in gamestate: ${vm.gameState}. currently in state: ${$state.current.name}`)
-
         let showMenu = false
         $scope.$evalAsync(function () {
           if (typeof data == "boolean") {
@@ -2241,6 +2214,24 @@ angular
           $state.go(targetState, getPrevArgs($state, targetState))
         })
         bngApi.engineLua(`extensions.hook("onMenuToggled", ${showMenu})`)
+      }
+
+      $scope.$on("MenuToggle", (event, data) => {
+        //console.log('toggleMenu', data, $state.current)
+        //console.trace()
+
+        // when in browser ui
+        // if (!beamng.ingame) return
+
+        // hacky fix when in mission to navigate between mission control, mission details, and play
+        bngApi.engineLua("gameplay_missions_missionScreen.isAnyMissionActive()", (data) => {
+          if(data) {
+            $state.go("mission-details")
+          } else {
+            navigationBack()
+          }
+        })
+        //console.log(`received MenuToggle in gamestate: ${vm.gameState}. currently in state: ${$state.current.name}`)
       })
       function getPrevArgs($state, targetState) {
         // exiting menus

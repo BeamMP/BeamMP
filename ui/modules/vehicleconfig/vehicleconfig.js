@@ -72,7 +72,7 @@ angular.module('beamng.stuff')
         }
       }
       if(slotInfo.coreSlot === undefined && optionCount > 0) {
-        element.options.unshift({name: '<empty>', description: 'Empty', val: ''})
+        element.options.unshift({name: '&lt;empty&gt;', description: 'Empty', val: ''})
       } else {
         element.open = true
       }
@@ -174,7 +174,7 @@ angular.module('beamng.stuff')
 }])
 
 .controller('VehicleconfigCtrl', ['$scope', '$state', function ($scope, $state) {
-  const tabs = ['menu.vehicleconfig.parts', 'menu.vehicleconfig.tuning', 'menu.vehicleconfig.color', 'menu.vehicleconfig.save', 'menu.vehicleconfig.debug']
+  const tabs = ['menu.vehicleconfigold.parts', 'menu.vehicleconfigold.tuning', 'menu.vehicleconfigold.color', 'menu.vehicleconfigold.save', 'menu.vehicleconfigold.debug']
 
   currentTabUpdate()
 
@@ -192,7 +192,14 @@ angular.module('beamng.stuff')
     $scope.model = {selected: current === -1 ? 0 : current }
   }
 
-  $scope.$watch("$state.current.name", currentTabUpdate);
+  $scope.$watch("$state.current.name", currentTabUpdate)
+
+  $scope.toNewUi = () => {
+    let state = $state.current.name.replace("vehicleconfigold", "vehicleconfig")
+    // we don't have vue debug yet
+    if (state.endsWith(".debug")) state = "menu.vehicleconfig"
+    $state.go(state)
+  }
 }])
 /**
  * @ngdoc controller
@@ -202,8 +209,8 @@ angular.module('beamng.stuff')
  * @require beamng.stuff:bngApi
  * @require beamng.stuff:VehicleConfig
 **/
-.controller('Vehicleconfig_parts', ['$filter', '$scope', '$window', 'RateLimiter', 'VehicleConfig',
-function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
+.controller('Vehicleconfig_parts', ['$filter', '$scope', '$sce', '$window', 'RateLimiter', 'VehicleConfig',
+function ($filter, $scope, $sce, $window, RateLimiter, VehicleConfig) {
   let vm = this
 
   // Multi Part Highlighting
@@ -236,6 +243,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
         }
       })
     }
+    flattenedParts[currentConfig.mainPartName] = true
     //console.log("highlightparts: ", flattenedParts)
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.highlightParts(${bngApi.serializeToLua(flattenedParts)})`)
   }
@@ -286,6 +294,28 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     event.stopPropagation()
   }
 
+  vm.displayValue = function (opt) {
+    let val = ""
+    // (opt.isAuxiliary ? '[!] ' : '')
+    if (opt.isAuxiliary) {
+      val += "[!] "
+    }
+    // + ((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname'])
+    if (vm.partSearchQuery.partname && opt.val && opt.val !== "") {
+      val += $filter("highlightResults")(opt.val, vm.partSearchQuery.partname) + ' - '
+    }
+    // + (opt.description | highlightResults: vehConf_parts.partSearchQuery['name'])
+    val += $filter("highlightResults")(opt.description, vm.partSearchQuery.description)
+    // note: "name" is "val" except it can have "<empty>" name
+    // + ((vehConf_parts.displayNames && opt.name != '' ? ' - [' + opt.name + ']' : '') | highlightResults: vehConf_parts.partSearchQuery['name'])
+    if (vm.displayNames && opt.name && opt.name !== "") {
+      val += " - [" + $filter("highlightResults")(opt.name, vm.partSearchQuery.name) + "]"
+    }
+    return $sce.trustAsHtml(val)
+  }
+
+
+
   vm.open = {}
   vm.d = {}
   vm.stickyPartSelection = false
@@ -334,6 +364,7 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
       flattenedParts[selectedPart.val] = true
     }
 
+    flattenedParts[currentConfig.mainPartName] = true
     //console.log('selectParts: ', selectedPart, flattenedParts)
     bngApi.engineLua(`extensions.core_vehicle_partmgmt.selectParts(${bngApi.serializeToLua(flattenedParts)})`)
   }
@@ -643,10 +674,10 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
 }])
 .filter('highlightResults', function($sce) {
   return function(text, search) {
-    if (!search) {
-      return $sce.trustAsHtml(text)
+    if (search) {
+      text = unescape(escape(text).replace(new RegExp(escape(search), 'gi'), '<span class="highlightResults">$&</span>'))
     }
-    return $sce.trustAsHtml(unescape(escape(text).replace(new RegExp(escape(search), 'gi'), '<span class="highlightResults">$&</span>')))
+    return $sce.trustAsHtml(text)
   }
 })
 .controller('Vehicleconfig_tuning', ["RateLimiter", "VehicleConfig", "$scope", "$filter", function (RateLimiter, VehicleConfig, $scope, $filter) {
@@ -672,6 +703,11 @@ function ($filter, $scope, $window, RateLimiter, VehicleConfig) {
     // console.debug(`Writing vehicle configuration (live update)`)
     vm.write()
   }, 200)
+
+  vm.dynMirrorsEnabled = false
+  bngApi.engineLua('settings.getValue("GraphicDynMirrorsEnabled")', (data) => {
+    vm.dynMirrorsEnabled = data
+  })
 
   vm.addSpacer = (function () {
     let lastCategory
@@ -951,8 +987,15 @@ function ($scope) {
   let vm = this
 
   vm.state = {}
-  vm.geState = {physicsEnabled: true, debugSpawnEnabled: false}
-  vm.cameraSpeed = 0
+  vm.stateNoReset = {}
+  vm.geState = {
+    physicsEnabled: true,
+    debugSpawnEnabled: false,
+  }
+  vm.partsState = {
+    partsSorted: [],
+    partsHighlightedIdxs: [],
+  }
   vm.canApplyState = true
   vm.partsSelectedSearchTerm = ''
 
@@ -964,54 +1007,40 @@ function ($scope) {
     vm.geState.debugSpawnEnabled = !!state
   })
 
-  vm.update = () => {
-    bngApi.engineLua("core_camera.getSpeed()", (speed) => {
-      vm.cameraSpeed = Number(speed)
-      bngApi.activeObjectLua('bdebug.requestState()')
-    })
-  }
-  vm.setCameraSpeed = (cameraSpeed) => {
-    vm.cameraSpeed = cameraSpeed
-    bngApi.engineLua( 'core_camera.setSpeed(' + cameraSpeed + ')' )
-  },
+  bngApi.activeObjectLua(`bdebug.requestState()`)
+  bngApi.engineLua('extensions.core_vehicle_partmgmt.sendPartsSelectorStateToUI()')
 
-  vm.applyState = () => {
+  vm.applyState = (notSendBack) => {
+    notSendBack = !!notSendBack
     if (vm.canApplyState) {
-      bngApi.activeObjectLua(`bdebug.setState( ${bngApi.serializeToLua(vm.state)} )`)
+      bngApi.activeObjectLua(`bdebug.setState(${bngApi.serializeToLua(vm.state)},${bngApi.serializeToLua(vm.stateNoReset)},${notSendBack})`)
     }
   }
 
   vm.partsSelectedChanged = () => {
-    bngApi.activeObjectLua(`bdebug.partsSelectedChanged()`)
+    bngApi.engineLua(`extensions.core_vehicle_partmgmt.partsSelectorChanged(${bngApi.serializeToLua(vm.partsState)})`)
   }
 
-  vm.partsSelectedchecked = () => {
-    if (vm.state.vehicle == undefined) {
-      return true
-    }
+  vm.partsSelectorChanged = () => {
+    vm.applyState(true)
+    vm.partsSelectedChanged()
+  }
 
-    return vm.state.vehicle.partsSelected.length === vm.state.vehicle.parts.length
+  vm.partsSelectedChecked = () => {
+    return vm.partsState.partsHighlightedIdxs.length === vm.partsState.partsSorted.length
   }
 
   vm.partsSelectedIndeterminate = () => {
-    if (vm.state.vehicle == undefined) {
-      return false
-    }
-
-    return vm.state.vehicle.partsSelected.length !== 0 &&
-    vm.state.vehicle.partsSelected.length !== vm.state.vehicle.parts.length
+    return vm.partsState.partsHighlightedIdxs.length !== 0 &&
+    vm.partsState.partsHighlightedIdxs.length !== vm.partsState.partsSorted.length
   }
 
   vm.partsSelectedClicked = () => {
-    if (vm.state.vehicle == undefined) {
-      return
-    }
-
-    if (vm.state.vehicle.partsSelected.length === vm.state.vehicle.parts.length) {
-      vm.state.vehicle.partsSelected = []
+    if (vm.partsState.partsHighlightedIdxs.length === vm.partsState.partsSorted.length) {
+      vm.partsState.partsHighlightedIdxs = []
     }
     else {
-      vm.state.vehicle.partsSelected = Array.from({length: vm.state.vehicle.parts.length}, (_, i) => i + 1)
+      vm.partsState.partsHighlightedIdxs = Array.from({length: vm.partsState.partsSorted.length}, (_, i) => i + 1)
     }
     vm.applyState()
     vm.partsSelectedChanged()
@@ -1029,7 +1058,7 @@ function ($scope) {
     bngApi.engineLua(`core_vehicles.setMeshVisibility(${bngApi.serializeToLua(vis)})`)
   }
 
-  $scope.$on('BdebugUpdate', (_, debugState) => {
+  $scope.$on('BdebugUpdate', (_, debugState, stateNoReset) => {
     // All this to workaround a bug with slider not updating
     $scope.$applyAsync(() => {
       if (vm.state.vehicle) {
@@ -1048,7 +1077,14 @@ function ($scope) {
       vm.canApplyState = true
     })
   })
-  bngApi.activeObjectLua(`bdebug.requestState()`)
+  
+  $scope.$on('VehicleFocusChanged', function(event, data) {
+    bngApi.engineLua('extensions.core_vehicle_partmgmt.sendPartsSelectorStateToUI()')
+  })
+
+  $scope.$on('PartsSelectorUpdate', (_, state) => {
+    vm.partsState = state
+  })
 
   $scope.$on('physicsStateChanged',  (_, state) => {
     vm.geState.physicsEnabled = !!state
@@ -1057,10 +1093,6 @@ function ($scope) {
   $scope.$on('debugSpawnChanged',  (_, state) => {
     vm.geState.debugSpawnEnabled = !!state
   })
-
-  vm.setCameraFov = () => {
-    bngApi.engineLua(`core_camera.setFOV(0, ${vm.state.fov});`)
-  },
 
   vm.controls = {
     vehicle: {

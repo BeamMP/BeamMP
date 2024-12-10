@@ -4,7 +4,7 @@
 
 local ver = split(beamng_versionb, ".")
 local majorVer = tonumber(ver[2])
-local compatibleVersion = 33
+local compatibleVersion = 34
 if majorVer ~= compatibleVersion then
 	log('W', 'versionCheck', 'BeamMP is incompatible with BeamNG.drive version '..beamng_versionb)
 	log('M', 'versionCheck', 'Deactivating BeamMP mod.')
@@ -19,6 +19,7 @@ if majorVer ~= compatibleVersion then
 	end
 	return
 else
+	guihooks.trigger("toastrMsg", {type="warning", title="Old UI Loaded for BeamMP", msg="BeamMP is not yet compatible with the new BeamNG.drive Vue based UI. We are working actively to resolve this as soon as possible.", config={closeButton=true, timeOut=0, extendedTimeOut=0}})
 	log('M', 'versionCheck', 'BeamMP is compatible with the current version.')
 end
 

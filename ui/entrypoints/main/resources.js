@@ -109,6 +109,7 @@ export default [
     '/environment/environment.js',
     '/scenarioselect/scenarioselect.js',
     '/scenariocontrol/scenariocontrol.js',
+    '/rallyselect/rallyselect.js',
     '/comic/comic.js',
     '/vehicleselect/vehicleselect.js',
     '/options/options.js',

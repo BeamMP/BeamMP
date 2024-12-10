@@ -46,7 +46,7 @@
                   ng-repeat="opt in entry.options | orderBy : [vehConf_parts.emptyFront, 'description', 'name'] track by $index"
                   ng-if="!opt.isAuxiliary || vehConf_parts.showAuxiliary"
                   ng-value="opt.val"
-                  ng-bind-html="(opt.isAuxiliary ? '[!] ' : '') + ((vehConf_parts.partSearchQuery['partname'] ? ((opt.val != '') ? (opt.val + ' - ') : '') : '') | highlightResults: vehConf_parts.partSearchQuery['partname']) + (opt.description | highlightResults: vehConf_parts.partSearchQuery['name']) + ((vehConf_parts.displayNames && opt.name != '' ? ' - [' + opt.name + ']' : '') | highlightResults: vehConf_parts.partSearchQuery['name'])"
+                  ng-bind-html="vehConf_parts.displayValue(opt)"
                   style="white-space:nowrap">
                 </md-option>
               </md-select>

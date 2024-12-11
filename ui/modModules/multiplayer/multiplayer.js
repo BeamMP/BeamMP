@@ -11,8 +11,244 @@ var favorites = [];
 var recents = [];
 var mdDialog;
 var mdDialogVisible = false;
+var userData = {
+	username: 'Loading...',
+	avatar: '',
+	role: 'USER',
+	color: '',
+	id: -1
+};
+var beammpMetrics = {
+	beammp_players_online: "...", 
+	beammp_public_servers: "..."
+}
 
-angular.module('beamng.stuff')
+export default angular.module('multiplayer', ['ui.router'])
+
+.config(['$stateProvider', function($stateProvider) {
+  $stateProvider.state('menu.multiplayer', {
+		url: '/multiplayer',
+		templateUrl: '/ui/modModules/multiplayer/multiplayer.html',
+		controller: 'MultiplayerController as multiplayer',
+		backState: 'BACK_TO_MENU',
+		abstract: true
+	})
+	.state('menu.multiplayer.tos', {
+		url: '/mptos',
+		templateUrl: '/ui/modModules/multiplayer/tos.partial.html',
+		controller: 'MultiplayerTOSController as multiplayertos',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.launcher', {
+		url: '/mplauncher',
+		templateUrl: '/ui/modModules/multiplayer/launcher.partial.html',
+		controller: 'MultiplayerLauncherController as multiplayerlauncher',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.login', {
+		url: '/mplogin',
+		templateUrl: '/ui/modModules/multiplayer/login.partial.html',
+		controller: 'MultiplayerLoginController as multiplayerlogin',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.servers', {
+		url: '/mpservers',
+		templateUrl: '/ui/modModules/multiplayer/servers.partial.html',
+		controller: 'MultiplayerServersController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.official', {
+		url: '/mpofficial',
+		templateUrl: '/ui/modModules/multiplayer/official.partial.html',
+		controller: 'MultiplayerOfficialController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.featured', {
+		url: '/mpfeatured',
+		templateUrl: '/ui/modModules/multiplayer/featured.partial.html',
+		controller: 'MultiplayerFeaturedController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.partner', {
+		url: '/mppartner',
+		templateUrl: '/ui/modModules/multiplayer/partner.partial.html',
+		controller: 'MultiplayerPartnerController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.recent', {
+		url: '/mprecent',
+		templateUrl: '/ui/modModules/multiplayer/recent.partial.html',
+		controller: 'MultiplayerRecentController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.favorites', {
+		url: '/mpfavorites',
+		templateUrl: '/ui/modModules/multiplayer/favorites.partial.html',
+		controller: 'MultiplayerFavoritesController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.multiplayer.direct', {
+		url: '/mpdirect',
+		templateUrl: '/ui/modModules/multiplayer/direct.partial.html',
+		controller: 'MultiplayerDirectController as multiplayermenu',
+		backState: 'BACK_TO_MENU'
+	})
+	.state('menu.options.multiplayer', {
+		url: '/multiplayer',
+		templateUrl: '/ui/modules/options/multiplayer.partial.html',
+		backState: 'BACK_TO_MENU',
+	})
+
+}])
+
+.run(['$rootScope', function ($rootScope) {
+  $rootScope.$on('MainMenuButtons', function (event, addButton) {
+    addButton({
+      translateid: 'ui.playmodes.multiplayer',
+      icon: '/ui/modModules/multiplayer/icons/account-multiple.svg',
+      targetState: 'menu.multiplayer.tos'
+    })
+  })
+
+	// Check for server to join
+	$rootScope.$on('AutoJoinConfirmation', function(evt, data) {
+		console.log('AutoJoinConfirmation',evt,data)
+		var d = JSON.parse(decodeURI(data.message))
+		confirmationMessage = `Do you want to connect to the server at ${d.ip}:${d.port}?`
+		userConfirmed = window.confirm(confirmationMessage); 
+		if (userConfirmed) {
+			bngApi.engineLua(`MPCoreNetwork.connectToServer("${d.ip}","${d.port}","${d.sname}")`);
+		}
+	})
+
+	var beammpUserInfo = document.createElement("div");
+	beammpUserInfo.innerHTML = `
+	<style>
+.beammp-info-bar {
+  z-index: 1000000000;
+  position: absolute;
+  top: 3em;
+  right: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 3em;
+  padding-right: 10px;
+  background-image: linear-gradient(67deg,transparent 1.05rem,#f60 1.15rem 1.4rem,#00000099 1.5rem);
+  border-top-right-radius: var(--bng-corners-1);
+  border-bottom-right-radius: var(--bng-corners-1);
+  color: #fff;
+  pointer-events: all;
+  height: 2.9em;
+  line-height: 2.9em;
+  overflow: hidden;
+}
+
+.beammp-info-bar > span.divider {
+  display: inline-block;
+  width: .25rem;
+  height: 1.8em;
+  margin-left: .5rem;
+  margin-right: .2rem;
+  padding: 0!important;
+  background-color: #f60;
+  transform: skew(23deg);
+}
+	</style>
+	<div class="beammp-info-bar">
+		<img src="/ui/modModules/multiplayer/beammp.png" style="margin: 0px 8px;" height="32px">
+		<img src="/ui/modModules/multiplayer/icons/account-multiple.svg" style="padding: 5px" height="22px">
+		<span style="padding-left: 5px; padding-right: 10px;">Players: <strong id="beammpMetricsPlayers">${ beammpMetrics.beammp_players_online }</strong> </span>
+		<img src="/ui/modModules/multiplayer/icons/dns.svg" style="padding: 5px" height="22px">
+		<span style="padding-left: 5px;">Servers: <strong id="beammpMetricsServers">${ beammpMetrics.beammp_public_servers }</strong> </span>
+		<span class="divider" id="beammp-profile-divider"></span>
+		<img src="${userData.avatar}" id="beammp-profile-avatar" style="padding: 5px; border-radius: 50%;" height="22px">
+		<span><strong id="beammp-profile-name">${userData.username}</strong> </span>
+	</div>
+	`
+
+	$rootScope.$on('authReceived', function (event, data) {	
+		let nameElement = document.getElementById("beammp-profile-name")
+		let avatarElement = document.getElementById("beammp-profile-avatar")
+
+		if (nameElement && avatarElement) {
+			userData = {
+				username: data.username,
+				avatar: data.avatar,
+				role: data.role,
+				color: data.color,
+				id: data.id
+			}
+		}
+
+		nameElement.textContent = data.username;
+		avatarElement.src = data.avatar;
+	})
+
+	$rootScope.$on('beammpInfo', function (event, data) {
+		if (data.code == 200) {
+			let parts = data.body[0].split(" ")
+			// Initialize an empty object
+			const metrics = {};
+
+			// Loop through the array, incrementing by 2 to process key-value pairs
+			for (let i = 0; i < parts.length; i += 2) {
+					const key = parts[i];
+					const value = parts[i + 1];
+					metrics[key] = value;
+			}
+
+			beammpMetrics = metrics
+
+			
+			document.getElementById("beammpMetricsPlayers").textContent = beammpMetrics.beammp_players_online
+			document.getElementById("beammpMetricsServers").textContent = beammpMetrics.beammp_public_servers
+		}
+	})
+
+	$rootScope.$on('authReceived', function (event, data) {
+		console.log('authReceived', data)
+		if (data.avatar == undefined) {
+			document.getElementById("beammp-profile-divider").style.display = 'none'
+			document.getElementById("beammp-profile-name").style.display = 'none'
+			document.getElementById("beammp-profile-avatar").style.display = 'none'
+		} else {
+			document.getElementById("beammp-profile-divider").style.display = 'block'
+			let nameElement = document.getElementById("beammp-profile-name")
+			let avatarElement = document.getElementById("beammp-profile-avatar")
+
+			nameElement.style.display = 'block';
+			avatarElement.style.display = 'block';
+
+			if (nameElement && avatarElement) {
+				userData = {
+					username: data.username,
+					avatar: data.avatar,
+					role: data.role,
+					color: data.color,
+					id: data.id
+				}
+			}
+
+			nameElement.textContent = data.username;
+			avatarElement.src = data.avatar;
+		}
+	})
+
+	$rootScope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
+
+		if (toState.name == "menu.mainmenu") {
+			bngApi.engineLua('MPCoreNetwork.getLoginState()');
+			bngApi.engineLua('MPCoreNetwork.makeRequest("backend", "metrics", "beammpInfo")');
+			beammpUserInfo.style.display = "block";
+			document.getElementsByTagName("body")[0].appendChild(beammpUserInfo)
+		} else {
+			beammpUserInfo.style.display = "none";
+		}
+  })
+}])
+
 /* //////////////////////////////////////////////////////////////////////////////////////////////
 *	TOS CONTROLLER
 */ //////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +405,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 
 	// Display the servers list page once the page is loaded
 	$scope.$on('$stateChangeSuccess', async function (event, toState, toParams, fromState, fromParams) {
-		//console.log(toState.url);
+		bngApi.engineLua('MPCoreNetwork.getLoginState()');
 		if (toState.url == "/multiplayer") {
 			// local://local/ui/#/menu/multiplayer/mpservers
 			document.getElementById('servers-btn').click();
@@ -1044,10 +1280,10 @@ function formatDescriptionName(string) {
         indexes = [],
         apply = [],
         tmpStr,
-        deltaIndex,
-        noCode,
+        indexDelta,
         final = document.createDocumentFragment(),
-        i;
+        i,
+        len;
     for(i = 0, len = codes.length; i < len; i++) {
         indexes.push( string.indexOf(codes[i]) );
         string = string.replace(codes[i], '\x00\x00');
@@ -1098,10 +1334,10 @@ function formatServerName(string) {
         indexes = [],
         apply = [],
         tmpStr,
-        deltaIndex,
-        noCode,
+        indexDelta,
         final = document.createDocumentFragment(),
-        i;
+        i,
+				len;
     for(i = 0, len = codes.length; i < len; i++) {
         indexes.push( string.indexOf(codes[i]) );
         string = string.replace(codes[i], '\x00\x00');
@@ -1137,9 +1373,9 @@ function formatServerName(string) {
 function officialMark(o, s) {
 	if (o) {
 		if (s) {
-			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
+			return '<img src="local://local/ui/modModules/multiplayer/beammp.png" alt="" style="height: 23px; padding-right: 10px;"> [Official Server]  '
 		} else {
-			return '<img src="local://local/ui/modules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
+			return '<img src="local://local/ui/modModules/multiplayer/beammp.png" alt="" style="height: 21px; padding-right: 10px; padding-left: 10px; position: absolute;">'
 		}
 
 	} else {
@@ -1383,7 +1619,7 @@ function createRow(table, server, bgcolor, bngApi, isFavorite, isRecent, sname) 
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
 	`;*/
 	newRow.innerHTML = `
-		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag"></img> ${server.location}</td>
+		<td style="background-color:${bgcolor}; font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px;"><img src="local://local/ui/modModules/multiplayer/flags/${server.location.toLowerCase()}.png" class="flag"></img> ${server.location}</td>
 		<td style="background-color:${bgcolor};">${formatServerName(sname)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${SmoothMapName(server.map)}</td>
 		<td style="background-color:${bgcolor}; font-size: initial;">${server.players}/${server.maxplayers}</td>
@@ -1592,7 +1828,7 @@ function sortTable(sortType, isNumber, dir) {
 
 function setServersTableHeight() {
 	let topDistance = document.getElementById("serversTableContainer").getBoundingClientRect().top;
-	let navBarHeight = document.querySelector(".menuNavbar").getBoundingClientRect().top;
+	let navBarHeight = document.querySelector("#vue-app > div.vue-app-main.click-through > div").getBoundingClientRect().top;
 	document.getElementById("serversTableContainer").style.maxHeight = (window.innerHeight - topDistance - (window.innerHeight - navBarHeight)) + 'px';
 }
 

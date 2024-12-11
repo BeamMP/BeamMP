@@ -22,7 +22,7 @@ local launcherConnected = false
 local isConnecting = false
 local proxyPort = ""
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.13.9.1" -- the mod version
+local modVersion = "4.13.9.2" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -195,6 +195,12 @@ end
 -- @usage autoLogin() -- Tells the launcher to attempt to auto authenticate with BeamMP Services
 local function autoLogin()
 	send('Nc')
+end
+
+--- Gets the current login data.
+-- @usage getLoginState() -- Triggers a return of the login data
+local function getLoginState()
+	guihooks.trigger("authReceived", authResult)
 end
 
 --- Tells the launcher to log out the user.
@@ -430,6 +436,19 @@ local function loginReceived(params)
 	end
 
 	guihooks.trigger('authReceived', authResult)
+end
+
+-- Enable making a http request on demand
+local function makeRequest (e, p, r)
+	local res = {}; 
+	local _, code, headers = http.request{
+		url = "http://localhost:".. proxyPort .."/"..e.."/"..p, 
+		sink = ltn12.sink.table(res)
+	}; 
+	local ret = {}
+	ret["code"] = code
+	ret["body"] = res
+	guihooks.trigger(r, ret)
 end
 
 --- Returns the result from authentication, which includes the user's name, beammp id and role
@@ -710,9 +729,6 @@ local function onUiChangedState (curUIState, prevUIState)
 	if curUIState == 'menu' and getMissionFilename() == "" then -- required due to game bug that happens if UI is reloaded on the main menu
 		guihooks.trigger('ChangeState', 'menu.mainmenu')
 	end
-	if (curUIState == 'menu.multiplayer.servers') then
-		guihooks.trigger('authReceived', authResult)
-	end
 end
 
 --- Serializes data for saving to be loaded on lua reload. Allows for lua state memory persistence between reloads
@@ -763,6 +779,7 @@ M.approveModDownload   = approveModDownload
 -- auth
 M.login                = login
 M.autoLogin            = autoLogin
+M.getLoginState        = getLoginState
 M.logout               = logout
 M.isLoggedIn           = isLoggedIn
 M.getAuthResult        = getAuthResult
@@ -774,6 +791,7 @@ M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
 -- UI
 M.openURL              = openURL
+M.makeRequest          = makeRequest
 M.sendBeamMPInfo       = sendBeamMPInfo
 M.requestPlayers       = requestPlayers
 M.requestServerList    = requestServerList

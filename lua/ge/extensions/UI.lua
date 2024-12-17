@@ -420,17 +420,43 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	parts[1] = ''
 	local msg = string.gsub(message, username..': ', '')
 	local player = MPVehicleGE.getPlayerByName(username)
+
+    -- Apply chat filtering
+    -- Based on set level
+    if settings.getValue("chatFilterLevel") then
+        local chatFilterArray, err = MPHelpers.readFile("lua/ge/extensions/multiplayer/filters/level_"..settings.getValue("chatFilterLevel")..".txt")
+        dump(chatFilterArray)
+        if err then
+            chatFilterArray = {}
+            log('E', 'chatMessage', 'Failed to load filter list: '..err)
+        end
+        print(msg)
+        msg = MPHelpers.filterString(msg, chatFilterArray)
+        print(msg)
+    end
+
+    -- Custom Filter
+    if settings.getValue("filteredWords") then
+        local customFilterRaw = settings.getValue("filteredWords")
+        local customFilter = {}
+        for s in customFilterRaw:gmatch("[^\r\n]+") do
+            table.insert(customFilter, s)
+        end
+        print(customFilter)
+        msg = MPHelpers.filterString(msg, customFilter)
+    end
+
 	if player then
         username = username .. player.role.shorttag
 		local c = player.role.forecolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
-		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter, color = color})
+		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..message) -- DO NOT REMOVE
+		guihooks.trigger("chatMessage", {username = username, message = username..': '..msg, id = chatcounter, color = color})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, chatcounter, color)
 	else
-		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter})
+		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..message) -- DO NOT REMOVE
+		guihooks.trigger("chatMessage", {username = username, message = username..': '..msg, id = chatcounter})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, id)
 	end

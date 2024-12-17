@@ -1,0 +1,30 @@
+<link rel="stylesheet" type="text/css" href="/ui/modules/options/multiplayer.partial.css" />
+
+<md-list-item layout="column" layout-align="start start">
+  <p>
+    <h3>{{:: 'ui.options.chatFilter' | translate}}</h3>
+  </p>
+</md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.safety.chatFilter' | translate}}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.chatFilterDescription' | translate }}</span>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.safety.chatFilter.tooltip' | translate }}</md-tooltip>
+  <md-select aria-label="_" ng-model="options.data.values.chatFilterLevel" ng-change="options.applyState()">
+  <md-option ng-value="0">{{:: 'ui.options.multiplayer.safety.chatFilter.opts.lvl0' | translate }}</md-option>
+  <md-option ng-value="1">{{:: 'ui.options.multiplayer.safety.chatFilter.opts.lvl1' | translate }}</md-option>
+  <md-option ng-value="2">{{:: 'ui.options.multiplayer.safety.chatFilter.opts.lvl2' | translate }}</md-option>
+  <md-option ng-value="3">{{:: 'ui.options.multiplayer.safety.chatFilter.opts.lvl3' | translate }}</md-option>
+  <md-option ng-value="4">{{:: 'ui.options.multiplayer.safety.chatFilter.opts.lvl4' | translate }}</md-option>
+  </md-select>
+</md-list-item>
+
+<md-list-item md-no-ink style="margin-bottom: 1.5em; display: block; margin-top: 1.5em;">
+  <p>{{:: 'ui.options.multiplayer.safety.filterCustomWords' | translate}}</p>
+  <span class="mp-option-helper">{{:: 'ui.options.multiplayer.safety.filterCustomWordsDescription' | translate }}</span>
+  <md-input-container style="width: 100%; margin-top: 20px;">
+    <textarea id="filteredWords" flex ng-model="options.data.values.filteredWords"
+      ng-change="options.applyState()"></textarea>
+      <label>{{:: 'ui.options.multiplayer.safety.filterCustomWords.helper' | translate }}</label>
+  </md-input-container>
+</md-list-item>

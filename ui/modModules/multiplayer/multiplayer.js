@@ -403,6 +403,10 @@ function($scope, $state, $timeout, $document) {
 		
 	}
 
+	$scope.setOffline = function() {
+		bngApi.engineLua('MPCoreNetwork.setOffline()');
+	}
+
 	$scope.guestLogin = function() {
 		bngApi.engineLua('MPCoreNetwork.login()');
 	}
@@ -524,10 +528,12 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		}
 
 		// Check if we are logged in
-		const loggedIn = await isLoggedIn();
-		if (!loggedIn) {
-			$state.go('menu.multiplayer.login');
-			return;
+		if (!getIsOffline()) {
+			const loggedIn = await isLoggedIn();
+			if (!loggedIn) {
+				$state.go('menu.multiplayer.login');
+				return;
+			}
 		}
 	});
 	
@@ -1314,6 +1320,14 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
+function getIsOffline() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.IsOffline()", (offline) => {
+			resolve(offline);
+		});
+	});
+}
+
 globalThis.openExternalLink = function(url){
 	bngApi.engineLua(`MPCoreNetwork.openURL("`+url+`")`);
 }
@@ -1575,6 +1589,14 @@ async function isLoggedIn() {
 async function isLauncherConnected() {
 	return new Promise(function(resolve, reject) {
 		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
+async function isOfflineMode() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.isOffline()", (data) => {
 			resolve(data);
 		});
 	});

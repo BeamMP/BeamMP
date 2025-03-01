@@ -123,6 +123,7 @@
   "ui.multiplayer.loginDescription1": "Entrar com sua conta BeamMP.",
   "ui.multiplayer.guestDescription1": "Jogar como convidado pode ter algumas restrições de servidor, para uma experiência completa recomendamos registrar-se.",
   "ui.multiplayer.iHaveAnAccount": "Eu tenho uma conta",
+  "ui.multiplayer.playOffline": "Jogue sem internet",
   "ui.multiplayer.play": "Jogar",
   "ui.multiplayerlauncher.lost": "O jogo não está conectado ao inicializador! Por favor, inicie o jogo usando o Inicializador BeamMP.",
   "ui.multiplayerlauncher.connect": "Conectar",

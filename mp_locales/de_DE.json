@@ -116,6 +116,7 @@
   "ui.multiplayer.loginDescription1": "Mit BeamMP-Konto anmelden",
   "ui.multiplayer.guestDescription1": "Das Spielen als Gast kann einige Server-Einschränkungen mit sich bringen. Um das volle Erlebnis zu genießen, empfehlen wir die Verwendung eines registrierten Kontos.",
   "ui.multiplayer.iHaveAnAccount": "Ich habe ein Konto",
+  "ui.multiplayer.playOffline": "Spielen Sie ohne Internet",
   "ui.multiplayer.play": "Spielen",
   "ui.multiplayerlauncher.lost": "Das Spiel hat keine Verbindung zum Launcher. Bitte starte das Spiel durch den BeamMP-Launcher",
   "ui.multiplayerlauncher.connect": "Verbinden",

@@ -122,6 +122,7 @@
   "ui.multiplayer.guestDescription1": "Jogar como convidado pode ter algumas restrições de servidor. Para uma experiência completa, recomendamos usar uma conta registrada.",
   "ui.multiplayer.iHaveAnAccount": "eu tenho uma conta",
   "ui.multiplayer.playOffline": "Jogue sem internet",
+  "ui.multiplayer.offline": "Off-line",
   "ui.multiplayer.play": "Jogar",
   "ui.multiplayerlauncher.lost": "O jogo não está conectado ao launcher! Por favor, inicie o jogo usando o BeamMP Launcher.",
   "ui.multiplayerlauncher.connect": "Conectar",

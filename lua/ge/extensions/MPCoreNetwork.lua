@@ -190,10 +190,6 @@ local function setOffline()
 	offline = true
 end
 
-function IsOffline()
-	return offline
-end
-
 --- Logs in the user with the given identifiers by sending the request to the launcher
 -- @param identifiers table The identifiers used for login.
 local function login(identifiers)
@@ -688,9 +684,7 @@ onLauncherConnected = function()
 	requestServerList()
 	extensions.hook('onLauncherConnected')
 	guihooks.trigger('onLauncherConnected')
-	if IsOffline() == false then
-		autoLogin()
-	end
+	autoLogin()
 	if isMpSession and currentServer then
 		connectToServer(currentServer.ip, currentServer.port, currentServer.name)
 	end
@@ -792,7 +786,6 @@ M.approveModDownload   = approveModDownload
 -- auth
 M.login                = login
 M.setOffline		   = setOffline
-M.IsOffline			   = IsOffline
 M.autoLogin            = autoLogin
 M.getLoginState        = getLoginState
 M.logout               = logout

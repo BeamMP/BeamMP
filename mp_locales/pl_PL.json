@@ -124,6 +124,7 @@
   "ui.multiplayer.guestDescription1": "Granie jako gość może wiązać się z pewnymi ograniczeniami na serwerze. Aby korzystać z pełnej funkcjonalności gry, zalecamy używanie zarejestrowanego konta. \n",
   "ui.multiplayer.iHaveAnAccount": "Posiadam konto",
   "ui.multiplayer.playOffline": "Graj bez Internetu",
+  "ui.multiplayer.offline": "Nieaktywny",
   "ui.multiplayer.play": "Graj",
   "ui.multiplayerlauncher.lost": "Gra nie jest połączona z launcherem! Uruchom grę za pomocą BeamMP Launcher.",
   "ui.multiplayerlauncher.connect": "Połącz",

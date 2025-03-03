@@ -115,9 +115,13 @@
         <span id="serverlist-profile-name" style="text-align: center; background-color: rgba(0, 0, 0, 0); border-radius: 10px; margin-left: 15px; margin-right: 15px; margin-top: 10px; padding: 2px;"></span>
         <span id="serverlist-profile-id" style="text-align: center;font-size: 0.9em; line-height: 1.5em; opacity: 0.8; cursor: pointer; margin-top: 6px;"></span>
 
-        <md-button ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
+        <md-button id="logout-button" ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
           <md-icon class="material-icons">exit_to_app</md-icon>
 				  {{:: 'ui.multiplayer.logout' | translate}}
+        </md-button>
+        <md-button id="offline-button" ng-click="logout()" class="md-raised md-accent" style="text-align:left;display:none;">
+          <md-icon class="material-icons">exit_to_app</md-icon>
+				  {{:: 'ui.multiplayer.offline' | translate}}
         </md-button>
       </md-content>
 

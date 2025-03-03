@@ -134,6 +134,7 @@
     "ui.multiplayer.guestDescription1": "Гра в ролі гостя може мати певні обмеження на сервері, для повноцінної гри ми рекомендуємо використовувати зареєстрований акаунт.",
     "ui.multiplayer.iHaveAnAccount": "В мене є акаунт",
     "ui.multiplayer.playOffline": "Грати без інтернету",
+    "ui.multiplayer.offline": "Офлайн",
     "ui.multiplayer.play": "Грати",
     "ui.multiplayerlauncher.lost": "Гра не підключена до лаунчера! Будь ласка, запустіть гру за допомогою BeamMP Launcher.",
     "ui.multiplayerlauncher.connect": "Підключитися",

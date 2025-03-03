@@ -122,6 +122,7 @@
   "ui.multiplayer.guestDescription1": "Hraní jako host může mít některá omezení na serveru, pro plný zážitek doporučujeme použít registrovaný účet.",
   "ui.multiplayer.iHaveAnAccount": "Mám účet",
   "ui.multiplayer.playOffline": "Hrajte bez internetu",
+  "ui.multiplayer.offline": "Offline",
   "ui.multiplayer.play": "Hrát",
   "ui.multiplayerlauncher.lost": "Hra není připojena k launcheru! Spusťte hru pomocí BeamMP Launcheru.",
   "ui.multiplayerlauncher.connect": "Připojit",

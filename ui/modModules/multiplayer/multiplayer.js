@@ -11,6 +11,7 @@ var favorites = [];
 var recents = [];
 var mdDialog;
 var mdDialogVisible = false;
+var offline = false;
 var userData = {
 	username: 'Loading...',
 	avatar: '',
@@ -404,7 +405,12 @@ function($scope, $state, $timeout, $document) {
 	}
 
 	$scope.setOffline = function() {
+		offline = true;
 		bngApi.engineLua('MPCoreNetwork.setOffline()');
+		document.getElementById("logout-button").style.display = "none";
+		document.getElementById("offline-button").style.display = "block";
+		$state.go('menu.multiplayer.direct');
+		//beammpModInfo.innerHTML = beammpModInfo.innerHTML.replace("ONLINE", "OFFLINE");
 	}
 
 	$scope.guestLogin = function() {
@@ -413,6 +419,10 @@ function($scope, $state, $timeout, $document) {
 	
 	$scope.$on('LoggedIn', function (event, data) {
 		$state.go('menu.multiplayer.servers');
+		offline = false;
+		bngApi.engineLua('MPCoreNetwork.setOnline()');
+		document.getElementById("offline-button").style.display = "none";
+		document.getElementById("logout-button").style.display = "block";
 	});
 	
 	$scope.$on('LoginError', function (event, data) {
@@ -528,8 +538,8 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		}
 
 		// Check if we are logged in
-		if (!getIsOffline()) {
-			const loggedIn = await isLoggedIn();
+		const loggedIn = await isLoggedIn();
+		if (!offline) {
 			if (!loggedIn) {
 				$state.go('menu.multiplayer.login');
 				return;
@@ -1320,14 +1330,6 @@ function addRecent(server, isUpdate) { // has to have name, ip, port
 	if(!isUpdate) localStorage.setItem("recents", JSON.stringify(recents));
 }
 
-function getIsOffline() {
-	return new Promise(function(resolve, reject) {
-		bngApi.engineLua("MPCoreNetwork.IsOffline()", (offline) => {
-			resolve(offline);
-		});
-	});
-}
-
 globalThis.openExternalLink = function(url){
 	bngApi.engineLua(`MPCoreNetwork.openURL("`+url+`")`);
 }
@@ -1589,14 +1591,6 @@ async function isLoggedIn() {
 async function isLauncherConnected() {
 	return new Promise(function(resolve, reject) {
 		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
-			resolve(data);
-		});
-	});
-}
-
-async function isOfflineMode() {
-	return new Promise(function(resolve, reject) {
-		bngApi.engineLua("MPCoreNetwork.isOffline()", (data) => {
 			resolve(data);
 		});
 	});

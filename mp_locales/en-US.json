@@ -139,6 +139,7 @@
     "ui.multiplayer.guestDescription1": "Playing as a guest may have some server restrictions, for the full experience we recommend using a registered account.",
     "ui.multiplayer.iHaveAnAccount": "I have an account",
     "ui.multiplayer.playOffline": "Play Offline",
+    "ui.multiplayer.offline": "Offline",
     "ui.multiplayer.play": "Play",
     "ui.multiplayerlauncher.lost": "The game is not connected to the launcher! Please start the game using the BeamMP Launcher.",
     "ui.multiplayerlauncher.connect": "Connect",

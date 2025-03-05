@@ -1,2 +1,0 @@
-Offline modifications by D. Preston Peek.
-This file exists to ensure BeamMP was properly copied into the mods/multiplayer folder. If the file exists, your custom BeamMP is enabled.

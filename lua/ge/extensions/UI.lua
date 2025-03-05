@@ -512,6 +512,35 @@ local function onUpdate(dt)
     renderWindow()
 end
 
+local customPlayerlistButtons = {
+    -- ['text'] = function(name, id) end
+}
+
+local function getCustomButtonNames()
+    local ret = {}
+
+    for key, func in pairs(customPlayerlistButtons) do 
+        table.insert(ret, key)
+    end
+
+    return ret
+end
+
+setmetatable(customPlayerlistButtons, {
+    __index = function(table, key, value)
+        rawset(table, key, value)
+        guihooks.trigger("updateCustomButtons", getCustomButtonNames())
+    end,
+    __newindex = function(table, key, value)
+        rawset(table, key, value)
+        guihooks.trigger("updateCustomButtons", getCustomButtonNames())
+    end
+})
+
+local function getCustomPlayerlistButtons()
+    return customPlayerlistButtons
+end
+
 M.updateLoading = updateLoading
 M.promptAutoJoinConfirmation = promptAutoJoinConfirmation
 M.updatePlayersList = updatePlayersList
@@ -526,6 +555,8 @@ M.setPlayerPing = setPlayerPing
 M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
+M.getCustomPlayerlistButtons = getCustomPlayerlistButtons
+M.getCustomButtonNames = getCustomButtonNames
 
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat

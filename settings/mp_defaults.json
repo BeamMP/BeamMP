@@ -41,6 +41,6 @@
   "protectConfigFromClone"      : [ "cloud", false ],
   "skipModSecurityWarning"      : [ "local", false ],
   "highlightQueuedPlayers"      : [ "local", true  ],
-  "queueWithLMB"                : [ "cloud", true  ],
+  "playerlistLeftclick"         : [ "cloud", 0 ],
   "refreshIngame"               : [ "local", false ]
 }

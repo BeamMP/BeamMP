@@ -87,6 +87,26 @@
 		table#players-table > tbody > tr:nth-child(even) {
 			background-color: rgba(255, 255, 255, 0.25);
 		}
+		#playerlist-contextmenu {
+			background: #333;
+			padding: 10px;
+			border-radius: 5px;
+			max-width: 200px;
+		}
+		#playerlist-contextmenu > button {
+			background: #444;
+			color: white;
+			border: none;
+			padding: 8px 12px;
+			width: 100%;
+			text-align: left;
+			cursor: pointer;
+			border-radius: 3px;
+			margin-bottom: 5px;
+		}
+		#playerlist-contextmenu button:hover {
+			background: #555;
+		}
 	</style>
 	<div id="main-container">
 		<div id="plist-container">
@@ -94,16 +114,24 @@
 				<tr>
 					<th colspan="1" ng-show="showPlayerIDs">ID</th>
 					<th colspan="3">
-						Players
+						{{:: 'ui.apps.multiplayer.playerlist.players' | translate }}
 						<button class="buttons direction-buttons" ng-click="plSwapHorizontal()">🡘</button>
 						<button class="buttons direction-buttons" ng-click="plSwapVertical()">🡙</button>
 					</th>
 				</tr>
 				<tr>
-					<td>No players.. something is wrong</td>
+					<td>{{:: 'ui.apps.multiplayer.playerlist.error' | translate }}</td>
 				</tr>
 			</table>
 		</div>
 		<button class="buttons" id="show-button" onclick="toggleList()">&lt;</button>
+	</div>
+	<div id="playerlist-contextmenu" style="display: none;">
+		<button id="pl-context-CopyNameButton">{{:: 'ui.apps.multiplayer.playerlist.copyname' | translate}}</button>
+		<button id="pl-context-DeleteAllButton">{{:: 'ui.apps.multiplayer.playerlist.deleteAllVehicles' | translate}}</button>
+		<button id="pl-context-QueueEventsButton">{{:: 'ui.apps.multiplayer.playerlist.queueEvents' | translate}}</button>
+		<button id="pl-context-SwitchCameraButton">{{:: 'ui.apps.multiplayer.playerlist.switchCameraTo' | translate}}</button>
+		<button id="pl-context-OpenProfileButton">{{:: 'ui.apps.multiplayer.playerlist.openProfile' | translate}}</button>
+		<button id="pl-context-RestoreVehicles">{{:: 'ui.apps.multiplayer.playerlist.restoreVehicles' | translate}}</button>
 	</div>
 </div>

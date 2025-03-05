@@ -1445,19 +1445,13 @@ local function spawnDestroyedVehicles(serverVehID)
 
 	vehicles[serverVehID].isSpawned = true
 	vehicles[serverVehID].isDeleted = false
-		-- queue system
---		local eventdata = {
---			playerNickname = playerNickname,  -- same as owner name??? we shall find out
---			serverVehicleID = serverVehicleID,
---			data = data
---		}
 
 	local playerOwnerName = vehicles[serverVehID].ownerName
 
 	local encodedVehicleData = jsonEncode(vehdata)
 
 	local eventdata = {
-		playerNickname = playerOwnerName,  --- mabye a issue?
+		playerNickname = playerOwnerName,
 		serverVehicleID = serverVehID,
 		data = encodedVehicleData
 	}
@@ -1473,14 +1467,15 @@ local function spawnDestroyedVehicles(serverVehID)
 end
 
 local function restorePlayerVehicle(playerName)
-	-- not a properproper wayyy of doing this
+	-- not a proper way of doing this
 
 	local player = getPlayerByName(playerName)
 	if player == nil then
-		log("E", "restorePlayerVehicle", "Couldnt find player??")
+		log("E", "restorePlayerVehicle", "Unable to find player ".. playerName)
+
+		return
 	end
 
-	-- its a table of ids
 	local vehicles_ServerIDs = player.vehicles.IDs
 
 	for x,y in pairs(vehicles_ServerIDs)do

@@ -23,7 +23,7 @@ We take our open source community seriously and hold ourselves and other contrib
 
 Contributions are made to this repo via Issues and Pull Requests (PRs). A few general guidelines that cover both:
 
-- To report security vulnerabilities, please use our [Responsible Disclosure Program]() which is monitored by our developer team.
+- To report security vulnerabilities, please use our [Responsible Disclosure Program](https://forms.gle/34xKX4ypZ5nb4XQs7) which is monitored by our developer team.
 - Search for existing Issues and PRs before creating your own.
 - We work hard to makes sure issues are handled in a timely manner but, depending on the impact, it could take a while to investigate the root cause. A friendly ping in the comment thread to the submitter or a contributor can help draw attention if your issue is blocking.
 - If you've never contributed before, see [the first timer's guide on our wiki]() for resources and tips on how to get started.

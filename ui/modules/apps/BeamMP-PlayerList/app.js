@@ -16,24 +16,25 @@ app.directive('multiplayerplayerlist', [function () {
 		controllerAs: 'ctrl'
 	}
 }]);
-app.controller("PlayerList", ['$scope', function ($scope) {
+app.controller("PlayerList", ['$scope', '$filter', function ($scope, $filter) {
 	$scope.warnVis = false;
 	$scope.timer = null;
 	$scope.showPlayerIDs = true
-	$scope.queueWithLMB = true;
+	$scope.playerlistLeftclick = 0;
 	$scope.init = function() {
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
 		setPLDirection(localStorage.getItem('plVertical'));
 		if (localStorage.getItem('plShown') == 1) showList();
+		bngApi.engineLua("guihooks.trigger('updateCustomButtons', UI.getCustomButtonNames())")
 	};
 
 	$scope.settingsChanged = function() {
     bngApi.engineLua('settings.getValue("showPlayerIDs")', (data) => {
       $scope.showPlayerIDs = data
     })
-	bngApi.engineLua('settings.getValue("queueWithLMB")', (data) => {
-		$scope.queueWithLMB = data
+	bngApi.engineLua('settings.getValue("playerlistLeftclick")', (data) => {
+		$scope.playerlistLeftclick = data
 	  })
   }
   $scope.settingsChanged()
@@ -99,6 +100,14 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 		}
 	})
 
+	var customButtons = []
+
+	$scope.$on('updateCustomButtons', function(event, data) {
+		if (Array.isArray(data)) {
+			customButtons = data;
+		}
+	})
+
 	$scope.$on('playerList', function(event, data) {
 		let playersList = document.getElementById("players-table");
 		let parsedList = JSON.parse(data);
@@ -144,8 +153,104 @@ app.controller("PlayerList", ['$scope', function ($scope) {
 				nameCell.textContent = parsedList[i].formatted_name;
 				//var c = parsedList[i].color
 				//nameCell.style = `color:rgba(${c[0]},${c[1]},${c[2]},255)`;
-				nameCell.setAttribute($scope.queueWithLMB ? "oncontextmenu" : "onclick", "showPlayerInfo('"+parsedList[i].name+"')");
-				nameCell.setAttribute($scope.queueWithLMB ? "onclick" : "oncontextmenu","applyQueuesForPlayer('"+parsedList[i].id+"')");
+
+				switch ($scope.playerlistLeftclick) {
+					case 0:
+						nameCell.setAttribute("onclick", "applyQueuesForPlayer('"+parsedList[i].id+"')");
+						break;
+					case 1:
+						nameCell.setAttribute("onclick", "showPlayerInfo('"+parsedList[i].name+"')");
+						break;
+					case 2:
+						nameCell.setAttribute("onclick", "viewPlayer('"+parsedList[i].name+"')");
+						break;
+					case 3:
+						bngApi.engineLua(`
+							for id, veh in pairs(MPVehicleGE.getVehicles()) do
+								if veh.ownerName == require("mime").unb64('` + btoa(parsedList[i].name) + `') then
+									be:getObjectByID(veh.gameVehicleID):delete()
+								end
+							end
+						`)
+						break;
+					case 4:
+						nameCell.setAttribute("onclick", "restorePlayerVehicle('"+parsedList[i].name+"')");
+						break;
+					case 5:
+						nameCell.setAttribute("onclick", "bngApi.engineLua(`setClipboard(require('mime').unb64('` + btoa(parsedList[i].name) + `'))`)");
+						break;
+				}
+
+
+				nameCell.addEventListener("contextmenu", function(e) {
+					e.preventDefault();
+				
+					const playerlistContextmenu = document.getElementById("playerlist-contextmenu");
+
+					playerlistContextmenu.style.display = "block";
+					playerlistContextmenu.style.top = e.clientY + "px";
+					playerlistContextmenu.style.left = e.clientX + "px";
+					playerlistContextmenu.style.position = "fixed";
+
+					playerlistContextmenu.onmouseleave = function () {
+						playerlistContextmenu.style.display = "none";
+					};
+
+					document.getElementById("pl-context-CopyNameButton").onclick = function() {
+						bngApi.engineLua(`setClipboard(require("mime").unb64('` + btoa(parsedList[i].name) + `'))`);
+						playerlistContextmenu.style.display = "none";
+					}
+
+					document.getElementById("pl-context-DeleteAllButton").onclick = function() {
+						bngApi.engineLua(`
+								for id, veh in pairs(MPVehicleGE.getVehicles()) do
+									if veh.ownerName == require("mime").unb64('` + btoa(parsedList[i].name) + `') then
+										be:getObjectByID(veh.gameVehicleID):delete()
+									end
+								end
+							`)
+						playerlistContextmenu.style.display = "none";
+					}
+
+					document.getElementById("pl-context-QueueEventsButton").onclick = function() {
+						applyQueuesForPlayer(parsedList[i].id);
+						playerlistContextmenu.style.display = "none";
+					}
+
+					document.getElementById("pl-context-SwitchCameraButton").onclick = function() {
+						showPlayerInfo(parsedList[i].name);
+						playerlistContextmenu.style.display = "none";
+					}
+
+					document.getElementById("pl-context-OpenProfileButton").onclick = function() {
+						viewPlayer(parsedList[i].name);
+						playerlistContextmenu.style.display = "none";
+					}
+
+					document.getElementById("pl-context-RestoreVehicles").onclick = function() {
+						restorePlayerVehicle(parsedList[i].name);
+						playerlistContextmenu.style.display = "none";
+					}
+
+					for (let child of playerlistContextmenu.children) {
+						if (child.id === "pl-context-custom") {
+							playerlistContextmenu.removeChild(child);
+						}
+					}
+
+					customButtons.forEach(element => {
+						let customButton = document.createElement("button");
+						customButton.id = "pl-context-custom"
+						customButton.textContent = element;
+						customButton.onclick = function() {
+							bngApi.engineLua(`
+								UI.getCustomPlayerlistButtons()["` + element + `"]("` + parsedList[i].name + `", ` + parsedList[i].id + `)
+								`)
+						}
+
+						playerlistContextmenu.appendChild(customButton);
+					});
+				});
 				nameCell.setAttribute("class", "player-button");
 
 				// Insert a cell containing the link to forum

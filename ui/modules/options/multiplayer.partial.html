@@ -347,6 +347,13 @@
   <span ng-if="options.data.values.launcherPort == 4444" style="margin-left:15px">({{:: 'ui.common.default' | translate}})</span>
 </md-list-item>
 
+<md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.disableWithoutLauncher.tooltip' | translate }}</md-tooltip>
+  <p>{{:: 'ui.options.multiplayer.disableWithoutLauncher' | translate }}</p>
+  <md-checkbox ng-model="options.data.values.disableWithoutLauncher" ng-change="options.applyState()"></md-checkbox>
+</md-list-item>
+
+
 <!--<md-list-item md-no-ink>
     <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.clearLauncherCache.tooltip' | translate }}</md-tooltip>
     <p>{{:: 'ui.options.multiplayer.clearLauncherCache' | translate }}</p>

@@ -88,6 +88,8 @@
     "ui.options.multiplayer.experimental": "EXPERIMENTAL",
     "ui.options.multiplayer.refreshIngame": "Allow the serverlist to refresh ingame",
     "ui.options.multiplayer.refreshIngame.tooltip": "Wether to allow the serverlist to refresh whilst in a session. Enabling this can cause lag spikes.",
+    "ui.options.multiplayer.disableWithoutLauncher": "Disable multiplayer without launcher",
+    "ui.options.multiplayer.disableWithoutLauncher.tooltip": "Disables BeamMP when the launcher isn't present.",
     "ui.multiplayer.multiplayer": "Multiplayer",
     "ui.multiplayer.connecting": "Connecting",
     "ui.multiplayer.connectingToServer": "Connecting to server...",

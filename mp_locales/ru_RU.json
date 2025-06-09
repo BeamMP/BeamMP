@@ -129,6 +129,8 @@
   "ui.multiplayer.loginDescription1": "Авторизуйтесь с помощью вашего BeamMP аккаунта.",
   "ui.multiplayer.guestDescription1": "Играя как гость, вы можете столкнуться с некоторыми ограничениями на серверах, мы рекомендуем зарегистрировать свой аккаунт BeamMP для получения лучшего игрового опыта.",
   "ui.multiplayer.iHaveAnAccount": "У меня уже есть аккаунт",
+  "ui.multiplayer.playOffline": "Играй без интернета",
+  "ui.multiplayer.offline": "Офлайн",
   "ui.multiplayer.play": "Играть",
   "ui.multiplayerlauncher.lost": "Игра не подключена к лаунчеру! Пожалуйста запустите игру используя лаунчер BeamMP.",
   "ui.multiplayerlauncher.connect": "Подключиться",

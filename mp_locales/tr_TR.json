@@ -136,6 +136,8 @@
   "ui.multiplayer.loginDescription1": "BeamMP hesabınla giriş yap.",
   "ui.multiplayer.guestDescription1": "Misafir olarak oynamanın sunucu kısıtlamaları olabilir, bazı sunuculara girmenizi engelleyebilir. tam deneyim için kayıtlı bir hesap kullanmanızı öneririz.",
   "ui.multiplayer.iHaveAnAccount": "Bir hesabım var",
+  "ui.multiplayer.playOffline": "İnternet olmadan oyna",
+  "ui.multiplayer.offline": "Çevrimdışı",
   "ui.multiplayer.play": "Oyna",
   "ui.multiplayerlauncher.lost": "Oyun launcher'a bağlı değil! Lütfen BeamMP launcherını kullanarak oyunu başlatın.",
   "ui.multiplayerlauncher.connect": "Bağlan",

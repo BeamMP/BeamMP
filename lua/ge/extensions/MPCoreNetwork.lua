@@ -35,6 +35,7 @@ local status = "" -- "", "waitingForResources", "LoadingResources", "LoadingMap"
 
 local loggedIn = false
 local authResult = {}
+local offline = false
 
 -- event functions
 
@@ -89,6 +90,7 @@ local function send(s)
 			log('W', 'send', 'Lost launcher connection!')
 			if launcherConnected then guihooks.trigger('LauncherConnectionLost') end
 			launcherConnected = false
+			--TODO-Preston: See if we need to remove these lines? VV
 			authResult = {}
 			guihooks.trigger("authReceived", authResult)
 		elseif error == "Socket is not connected" then
@@ -181,6 +183,11 @@ end
 -- @return boolean launcherConnected True if the launcher is connected, false otherwise.
 local function isLauncherConnected()
 	return launcherConnected
+end
+
+local function setOffline()
+	log('M', 'offline', 'Switching to offline mode...')
+	offline = true
 end
 
 --- Logs in the user with the given identifiers by sending the request to the launcher
@@ -784,6 +791,7 @@ M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload
 -- auth
 M.login                = login
+M.setOffline		   = setOffline
 M.autoLogin            = autoLogin
 M.getLoginState        = getLoginState
 M.logout               = logout

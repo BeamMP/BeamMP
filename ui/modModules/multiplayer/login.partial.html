@@ -10,8 +10,9 @@
 				<div style="display:flex; align-content: space-evenly; width: 400px;">
 					<md-button class="button" style="margin-left: 0;" ng-click="login()">{{:: 'ui.multiplayer.login' | translate}}</md-button>
 					<md-button class="button" ng-click="switchConnection()">{{:: 'ui.multiplayer.playAsGuest' | translate}}</md-button>
-					<md-button class="button" style="margin-right: 0;" onclick="openExternalLink('https://forum.beammp.com/signup')">{{:: 'ui.multiplayer.register' | translate}}</md-button>
+					<md-button class="button" style="margin-right: 5;" onclick="openExternalLink('https://forum.beammp.com/signup')">{{:: 'ui.multiplayer.register' | translate}}</md-button>
 				</div>
+				<md-button class="button" ng-click="setOffline()">{{:: 'ui.multiplayer.playOffline' | translate}}</md-button>
 			</form>
 			<form id="GuestContainer" style="display: none;">
 				<h3 class="text-white">{{:: 'ui.multiplayer.guestDescription1' | translate}}</h3>

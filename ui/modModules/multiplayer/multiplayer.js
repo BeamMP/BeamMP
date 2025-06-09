@@ -11,6 +11,7 @@ var favorites = [];
 var recents = [];
 var mdDialog;
 var mdDialogVisible = false;
+var offline = false;
 var userData = {
 	username: 'Loading...',
 	avatar: '',
@@ -403,12 +404,25 @@ function($scope, $state, $timeout, $document) {
 		
 	}
 
+	$scope.setOffline = function() {
+		offline = true;
+		bngApi.engineLua('MPCoreNetwork.setOffline()');
+		document.getElementById("logout-button").style.display = "none";
+		document.getElementById("offline-button").style.display = "block";
+		$state.go('menu.multiplayer.direct');
+		//beammpModInfo.innerHTML = beammpModInfo.innerHTML.replace("ONLINE", "OFFLINE");
+	}
+
 	$scope.guestLogin = function() {
 		bngApi.engineLua('MPCoreNetwork.login()');
 	}
 	
 	$scope.$on('LoggedIn', function (event, data) {
 		$state.go('menu.multiplayer.servers');
+		offline = false;
+		bngApi.engineLua('MPCoreNetwork.setOnline()');
+		document.getElementById("offline-button").style.display = "none";
+		document.getElementById("logout-button").style.display = "block";
 	});
 	
 	$scope.$on('LoginError', function (event, data) {
@@ -525,9 +539,11 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 
 		// Check if we are logged in
 		const loggedIn = await isLoggedIn();
-		if (!loggedIn) {
-			$state.go('menu.multiplayer.login');
-			return;
+		if (!offline) {
+			if (!loggedIn) {
+				$state.go('menu.multiplayer.login');
+				return;
+			}
 		}
 	});
 	

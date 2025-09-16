@@ -270,7 +270,7 @@ local includedControllerTypes = {
     ["setTargetRPMRatio"] = {}
   },
 
-	["spinner"] = {
+	["large_spinner"] = {
     ["setTargetRPMRatioIncrease"] = {},
     ["setTargetRPMRatioDecrease"] = {},
     ["setTargetRPMRatio"] = {}

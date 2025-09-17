@@ -2255,8 +2255,11 @@ local function onPreRender(dt)
 		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil
 		local activeVehID = activeVeh and activeVeh:getID() or nil
 
+		-- NOTE: If you return here you have upto a 3% performance saving. This means everything below has a 3% impact per frame.
+		--if true then return end
+
 		-- Groundmarkers
-		if activeVehPos then
+		if activeVehPos and groundmarkerRoads ~= {} then
 			lastGmQuery = lastGmQuery - dt
 			if lastGmQuery <= 0 then
 				lastGmQuery = 0.2

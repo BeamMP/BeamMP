@@ -269,6 +269,9 @@ end
 
 --- This function is used to execute smoothed positional updates if enabled
 local function onPreRender(dt)
+	-- If you return here you get a 3-4% perf boost. 
+	--if true then return end
+
 	-- tick pos updates per vehicle based on their median pos update interval
 	for serverVehicleID, data in pairs(POSSMOOTHER) do
 		local timedif = data.executed_last:stop()

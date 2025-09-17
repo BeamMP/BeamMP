@@ -59,6 +59,9 @@ local heartbeatTimer = 0
 local reconnectTimer = 0
 local reconnectAttempt = 0
 
+-- defined vars to prevent lookups in main loop
+local setting_SHOWDEBUGOUTPUT = settings.getValue("showDebugOutput")
+
 -- AA============= VARIABLES =============AA
 
 
@@ -69,17 +72,6 @@ local reconnectAttempt = 0
 -- If V2.1 Networking is available, it will be used, otherwise V2 Networking will be used.
 -- @param s string containing the data to send to the launcher
 local function send(s)
-	-- First check if we are V2.1 Networking or not
-	if mp_core then
-		mp_core(s)
-		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
-
-		if not settings.getValue("showDebugOutput") then return end
-		log('M', 'send', 'Sending Data ('..#s..'): '..s)
-		return
-	
-	end
-	-- Else we now will use the V2 Networking
 	if TCPLauncherSocket == nop then return end
 
 	local bytes, error, index = TCPLauncherSocket:send(#s..'>'..s)
@@ -100,7 +92,7 @@ local function send(s)
 	else
 		if not launcherConnected then launcherConnected = true isConnecting = false onLauncherConnected() end
 
-		if not settings.getValue("showDebugOutput") then return end
+		if not setting_SHOWDEBUGOUTPUT then return end
 		log('M', 'send', 'Sending Data ('..bytes..'): '..s)
 	end
 end
@@ -109,18 +101,9 @@ end
 -- @param silent boolean determines if the connection request should be done silently
 local function connectToLauncher(silent)
 	--log('M', 'connectToLauncher', debug.traceback())
-	-- Check if we are using V2.1
-	if mp_core then
-		send('A') -- immediately heartbeat to check if connection was established
-		log('W', 'connectToLauncher', 'Launcher already connected!')
-		guihooks.trigger('onLauncherConnected')
-		return
-	end
-
-	-- Okay we are not using V2.1, lets do the V2 stuff
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
-	if not launcherConnected and not mp_core then
+	if not launcherConnected then
 		socketPartialData = nil
 		TCPLauncherSocket = socket.tcp()
 		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
@@ -535,8 +518,8 @@ end
 -- @usage MPCoreNetwork.handleU('lstart')
 local function handleU(params)
 	UI.updateLoading(params)
-	local code = string.sub(params, 1, 1)
-	local data = string.sub(params, 2)
+	local code = params:sub(1, 1)
+	local data = params:sub(2)
 	if code == "l" then
 		if data == "start" then
 		end
@@ -597,51 +580,23 @@ local function onUpdate(dt)
 	if status == "LoadingResources" then
 		updateUiTimer = updateUiTimer + dt
 	end
-	if not mp_core then -- This is not required in V2.1
-		heartbeatTimer = heartbeatTimer + dt
-	end
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
-		if mp_core then
-			while (true) do
-				local msg = mp_try_pop()
-				if msg then
-					local code = string.sub(msg, 1, 1)
-					local received = string.sub(msg, 2)
-					if settings.getValue("showDebugOutput") == true and code == 'C' then
-						log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-					end
-			
-
-					-- break it up into code + data
-					local c = string.sub(received, 1, 1)
-					local d = string.sub(received, 2)
-					if code == 'C' then
-						HandleNetwork[c](d)
-					elseif code == 'G' and MPGameNetwork.launcherConnected() then
-						MPGameNetwork.receiveIPCGameData(c, d)
-					end
-			
-					if MPDebug then MPDebug.packetReceived(#received) end
-				else
-					break
-				end
-			end
-		end
 
 		if TCPLauncherSocket ~= nop then
 			while(true) do
 				local received, stat, partial = TCPLauncherSocket:receive('*l', socketPartialData)
+				-- stat might actually be err
 				socketPartialData = partial
 				if not received or received:len() == 0 then
 					break
 				end
 
 				-- break it up into code + data
-				local code = string.sub(received, 1, 1)
-				local data = string.sub(received, 2)
+				local code = received:sub(1, 1)
+				local data = received:sub(2)
 				
-				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
+				if setting_SHOWDEBUGOUTPUT then -- TODO: add option to filter out heartbeat packets
 					log('M', 'onUpdate', 'Receiving Data ([' .. code .. '] ' .. #received .. '): ' .. received)
 				end
 				
@@ -710,9 +665,6 @@ runPostJoin = function() -- gets called once loaded into a map
 		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
 		status = "Playing"
 		guihooks.trigger('onServerJoined')
-		if mp_core then
-			send('A')
-		end
 	end
 end
 
@@ -764,15 +716,7 @@ end
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
 -- We use this to load our UI info and connect to the launcher
 local function onExtensionLoaded()
-	if mp_core then
-		onLauncherConnected()
-	end
-	if not mp_core then
-		connectToLauncher(true)
-	end
-	if FS:fileExists('settings/BeamMP/ui_info.json') then --TODO: remove this after a while
-		FS:removeFile('settings/BeamMP/ui_info.json')
-	end
+	connectToLauncher(true)
 	reloadUI() -- required to show modified mainmenu
 end
 

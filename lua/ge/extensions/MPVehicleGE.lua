@@ -2008,8 +2008,8 @@ local HandleNetwork = {
 }
 
 local function handle(rawData)
-	local code = string.sub(rawData, 1, 1)
-	local rawData = string.sub(rawData, 3)
+	local code = rawData:sub(1, 1)
+	local rawData = rawData:sub(3)
 	if HandleNetwork[code] then
 		HandleNetwork[code](rawData)
 	else
@@ -2244,15 +2244,12 @@ local function onUpdate(dt)
 	end
 end
 
-local function onPreRender(dt)
+local function onPreRender(dt, dtR)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
-		local blobColorQueued = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
-		local blobColorIllegal = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
-		local blobColorDeleted = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
 
 		-- get current vehicle ID and position
 		local activeVeh = be:getPlayerVehicle(0)
-		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil
+		local activeVehPos = activeVeh and activeVeh:getPosition() or nil
 		local activeVehID = activeVeh and activeVeh:getID() or nil
 
 		-- NOTE: If you return here you have upto a 3% performance saving. This means everything below has a 3% impact per frame.
@@ -2267,8 +2264,7 @@ local function onPreRender(dt)
 				if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
 			end
 
-			local playerRoadData = groundmarkerRoads['player']
-			if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
+			if groundmarkerRoads['player'] and groundmarkerRoads['player'].first and groundmarkerRoads['player'].first ~= 'nil' then
 				for target, data in pairs(groundmarkerRoads) do
 					if target ~= 'player' then
 						if data.best and data.best ~= lastGmFocus then
@@ -2288,7 +2284,7 @@ local function onPreRender(dt)
 
 
 		-- get camera position, apply queue
-		local cameraPos = vec3(core_camera.getPosition())
+		local cameraPos = core_camera.getPosition()
 		if activeVeh then
 			if not commands.isFreeCamera() then cameraPos = activeVehPos end
 
@@ -2335,8 +2331,7 @@ local function onPreRender(dt)
 		end
 
 		for serverVehicleID, v in pairs(vehicles) do
-			local owner = v:getOwner()
-			if v.isLocal or not owner then goto skip_vehicle end
+			if v.isLocal or not v:getOwner() then goto skip_vehicle end
 			local gameVehicleID = v.gameVehicleID
 			local veh = be:getObjectByID(gameVehicleID)
 
@@ -2348,7 +2343,7 @@ local function onPreRender(dt)
 				v.position = vec3(tempPosx,tempPosy,tempPosz)
 				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
 
-				v.rotation = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp())) -- getRotation doesn't update in GE so we need to use direction vectors instead
+				v.rotation = quatFromDir(-veh:getDirectionVector(), veh:getDirectionVectorUp()) -- getRotation doesn't update in GE so we need to use direction vectors instead
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet
@@ -2359,22 +2354,22 @@ local function onPreRender(dt)
 
 				if v.spawnQueue then -- in queue
 					if settingsCache.showBlobQueued then
-						colors = blobColorQueued
+						colors = settingsCache.blobColorQueued
 					end
 				elseif v.isIllegal then -- illegal (modded)
 					if settingsCache.showBlobIllegal then
-						colors = blobColorIllegal
+						colors = settingsCache.blobColorIllegal
 					end
 				elseif v.isDeleted then
 					if settingsCache.showBlobDeleted then
-						colors = blobColorDeleted
+						colors = settingsCache.blobColorDeleted
 					end
 				else
-					colors = { 1, 0, 1 }
+					colors = settingsCache.blobColorDefault
 				end
 
 				if colors then
-					debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
+					debugDrawer:drawSphere(pos, 1, colors)
 					pos.z = pos.z + 1
 				end
 			end
@@ -2419,7 +2414,7 @@ local function onPreRender(dt)
 					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
 
-				if v.hideNametag or owner.hideNametag then goto skip_vehicle end
+				if v.hideNametag or v:getOwner().hideNametag then goto skip_vehicle end
 
 				if settings.getValue("nameTagFadeEnabled") and not commands.isFreeCamera() then
 					if settings.getValue("nameTagFadeInvert") then
@@ -2431,20 +2426,20 @@ local function onPreRender(dt)
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
 
-				local roleInfo = v.customRole or owner.customRole or owner.role
+				local roleInfo = v.customRole or v:getOwner().customRole or v:getOwner().role
 
-				local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
+				local ownerName = settings.getValue("shortenNametags") and v:getOwner().shortname or v:getOwner().name
 				local name = v.customName or ownerName
 
 				local tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
 				local backColor = ColorI(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
 
 				local prefix = ""
-				for source, tag in pairs(owner.nickPrefixes)
+				for source, tag in pairs(v:getOwner().nickPrefixes)
 					do prefix = prefix..tag.." " end
 
 				local suffix = ""
-				for source, tag in pairs(owner.nickSuffixes)
+				for source, tag in pairs(v:getOwner().nickSuffixes)
 					do suffix = suffix..tag.." " end
 
 
@@ -2454,7 +2449,7 @@ local function onPreRender(dt)
 
 					for spectatorID, _ in pairs(v.spectators) do
 						local spectator = players[spectatorID]
-						if not (spectator == owner or spectator.isLocal) then
+						if not (spectator == v:getOwner() or spectator.isLocal) then
 							spectators = spectators .. spectator.name .. ', '
 						end
 					end
@@ -2595,12 +2590,14 @@ local function onSettingsChanged()
 		settingsCache[k] = settings.getValue(k)
 	end
 
-	--for _,v in pairs(colorKeys) do
-	--	local p = table.pack(MPHelpers.hex2rgb(settings.getValue(k)))
-	--	p[4] = 0.5
-	--
-	--	settingsCache[k]  = ColorF(table.unpack(p))
-	--end
+	for _,k in pairs(colorKeys) do
+		local p = table.pack(MPHelpers.hex2rgb(settings.getValue(k)))
+		p[4] = 0.5
+	
+		settingsCache[k]  = ColorF(table.unpack(p))
+	end
+
+	settingsCache['blobColorDefault'] = ColorF(1, 0, 1, 0.5)
 end
 
 detectGlobalWrites() -- reenable global write notifications

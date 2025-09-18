@@ -120,8 +120,8 @@ local function onWorldReadyState(state)
 	log('W', 'onWorldReadyState', state)
 	if state == 2 then
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
-			log('M', 'onWorldReadyState', 'Setting game state to multiplayer.')
-			core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+			log('M', 'onWorldReadyState', 'Setting game state to multiplayer freeroam.')
+			core_gamestate.setGameState('freeroam', 'multiplayer', 'multiplayer')
 			local spawnDefaultGroups = { "CameraSpawnPoints", "PlayerSpawnPoints", "PlayerDropPoints", "spawnpoints" }
 
 			for i, v in pairs(spawnDefaultGroups) do

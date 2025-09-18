@@ -62,6 +62,10 @@ local reconnectAttempt = 0
 -- defined vars to prevent lookups in main loop
 local setting_SHOWDEBUGOUTPUT = settings.getValue("showDebugOutput")
 
+local function onSettingsChanged()
+	setting_SHOWDEBUGOUTPUT = settings.getValue("showDebugOutput")
+end
+
 -- AA============= VARIABLES =============AA
 
 
@@ -743,6 +747,7 @@ M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
+M.onSettingsChanged    = onSettingsChanged
 -- UI
 M.openURL              = openURL
 M.makeRequest          = makeRequest

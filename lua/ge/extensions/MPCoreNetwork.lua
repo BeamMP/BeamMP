@@ -590,7 +590,6 @@ local function onUpdate(dt)
 		if TCPLauncherSocket ~= nop then
 			while(true) do
 				local received, stat, partial = TCPLauncherSocket:receive('*l', socketPartialData)
-				-- stat might actually be err
 				socketPartialData = partial
 				if not received or received:len() == 0 then
 					break

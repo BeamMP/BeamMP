@@ -32,7 +32,6 @@ local controllerTimer = 0
 local controllerTickrate = 1/15
 
  -- This doesn't do anything because the data isn't queued on the receiving end
- -- commented out from where it is called in MPGameNetwork to test impact.
 local function onPlayerConnect()
 	MPElectricsGE.tick()
 	nodesGE.tick()

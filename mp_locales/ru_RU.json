@@ -184,5 +184,6 @@
   "ui.apps.multiplayer.playerlist.openProfile": "Открыть профиль",
   "ui.apps.multiplayer.playerlist.restoreVehicles": "Очередь удаленных транспортных средств",
   "ui.apps.multiplayer.playerlist.players": "Игроки",
-  "ui.apps.multiplayer.playerlist.error": "Нет игроков.. что-то не так"
+  "ui.apps.multiplayer.playerlist.error": "Нет игроков.. что-то не так",
+  "ui.options.multiplayer.nameTagsHideBehindObjects" : "Скрывать ники за обьектами"
 }

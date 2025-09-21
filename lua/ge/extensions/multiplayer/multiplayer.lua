@@ -84,8 +84,6 @@ local function onDeactivateBigMapCallback()
 	end
 end
 
-M.onDeactivateBigMapCallback = onDeactivateBigMapCallback
-
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
 --- This is the main processing thread of BeamMP in the game
@@ -146,7 +144,7 @@ local function onServerLeave()
 	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
 	if original_markerInteraction_isStateFreeroam then gameplay_markerInteraction.isStateFreeroam = original_markerInteraction_isStateFreeroam end
 	if original_markerInteraction_onPreRender then gameplay_markerInteraction.onPreRender = original_markerInteraction_onPreRender end
-	gameplay_markerInteraction.setMarkersVisibleTemporary(true)
+	if gameplay_markerInteraction then gameplay_markerInteraction.setMarkersVisibleTemporary(true) end
 end
 
 
@@ -194,6 +192,7 @@ end
 M.onUpdate          = onUpdate
 M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
+M.onDeactivateBigMapCallback = onDeactivateBigMapCallback
 M.runPostJoin = runPostJoin
 M.onServerLeave = onServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

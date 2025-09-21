@@ -15,6 +15,7 @@ local M = {state={}}
 local originalGetDriverData
 local originalToggleWalkingMode
 local original_onInstabilityDetected
+local original_markerInteraction_isStateFreeroam
 local original_markerInteraction_onPreRender
 
 --- Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.
@@ -53,6 +54,12 @@ local function modified_onInstabilityDetected(jbeamFilename)
 	log('E', "", "Instability detected for vehicle " .. tostring(jbeamFilename))
 end
 
+local function modified_markerInteraction_isStateFreeroam()
+	if core_gamestate.state and (core_gamestate.state.state == "freeroam" or core_gamestate.state.state == 'career' or  core_gamestate.state.state == 'multiplayer') then
+		return true
+	end
+	return false
+end
 
 local function hideAllMissionMarkers()
 	if not gameplay_playmodeMarkers then return end
@@ -121,7 +128,10 @@ local function runPostJoin()
 	onInstabilityDetected = modified_onInstabilityDetected
 
 	if gameplay_markerInteraction then
+		original_markerInteraction_isStateFreeroam = gameplay_markerInteraction.isStateFreeroam
 		original_markerInteraction_onPreRender = gameplay_markerInteraction.onPreRender
+
+		gameplay_markerInteraction.isStateFreeroam = modified_markerInteraction_isStateFreeroam
 		gameplay_markerInteraction.onPreRender = nop
 		gameplay_markerInteraction.setMarkersVisibleTemporary(false)
 		hideAllMissionMarkers()
@@ -134,6 +144,7 @@ local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
 	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
 	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
+	if original_markerInteraction_isStateFreeroam then gameplay_markerInteraction.isStateFreeroam = original_markerInteraction_isStateFreeroam end
 	if original_markerInteraction_onPreRender then gameplay_markerInteraction.onPreRender = original_markerInteraction_onPreRender end
 	gameplay_markerInteraction.setMarkersVisibleTemporary(true)
 end

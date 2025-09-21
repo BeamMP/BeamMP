@@ -15,7 +15,7 @@ local M = {state={}}
 local originalGetDriverData
 local originalToggleWalkingMode
 local original_onInstabilityDetected
-
+local original_markerInteraction_onPreRender
 
 --- Custom GetDriverData for allowing the getting of the right hand door or not for passenger aspects.
 --- @param veh userdata The vehicle data
@@ -54,12 +54,30 @@ local function modified_onInstabilityDetected(jbeamFilename)
 end
 
 
+local function hideAllMissionMarkers()
+	if not gameplay_playmodeMarkers then return end
+
+	for i, cluster in ipairs(gameplay_playmodeMarkers.getPlaymodeClusters()) do
+		local marker = gameplay_playmodeMarkers.getMarkerForCluster(cluster)
+		marker:hide()
+	end
+end
+
 --- Called when the Big Map is loaded by the user. 
 local function onBigMapActivated() -- don't pause the game when opening the Big Map
 	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 		simTimeAuthority.pause(false)
+		hideAllMissionMarkers()
 	end
 end
+
+local function onDeactivateBigMapCallback()
+	if MPCoreNetwork and MPCoreNetwork.isMPSession() then
+		hideAllMissionMarkers()
+	end
+end
+
+M.onDeactivateBigMapCallback = onDeactivateBigMapCallback
 
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
@@ -101,6 +119,13 @@ local function runPostJoin()
 		onInstabilityDetected = modified_onInstabilityDetected
 	end
 	onInstabilityDetected = modified_onInstabilityDetected
+
+	if gameplay_markerInteraction then
+		original_markerInteraction_onPreRender = gameplay_markerInteraction.onPreRender
+		gameplay_markerInteraction.onPreRender = nop
+		gameplay_markerInteraction.setMarkersVisibleTemporary(false)
+		hideAllMissionMarkers()
+	end
 end
 
 
@@ -109,6 +134,8 @@ local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
 	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
 	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
+	if original_markerInteraction_onPreRender then gameplay_markerInteraction.onPreRender = original_markerInteraction_onPreRender end
+	gameplay_markerInteraction.setMarkersVisibleTemporary(true)
 end
 
 

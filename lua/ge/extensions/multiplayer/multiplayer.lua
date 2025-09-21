@@ -192,6 +192,7 @@ end
 M.onUpdate          = onUpdate
 M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
+M.onNavigateToMission = onDeactivateBigMapCallback
 M.onDeactivateBigMapCallback = onDeactivateBigMapCallback
 M.runPostJoin = runPostJoin
 M.onServerLeave = onServerLeave

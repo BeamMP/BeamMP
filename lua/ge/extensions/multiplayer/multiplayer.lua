@@ -194,6 +194,7 @@ M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
 M.onNavigateToMission = onDeactivateBigMapCallback
 M.onDeactivateBigMapCallback = onDeactivateBigMapCallback
+M.onUiChangedState = onDeactivateBigMapCallback
 M.runPostJoin = runPostJoin
 M.onServerLeave = onServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

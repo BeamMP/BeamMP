@@ -725,29 +725,6 @@ end
 --- Executes when the user or mod ends a mission/session (map) .
 -- @param mission table The mission object.
 local function onClientEndMission(mission)
-	if isMpSession and mission then
-		-- A mission has ended while in a multiplayer session. This is the primary hook for career mode progression.
-		-- It sends the raw mission data to the server for validation and processing.
-
-		-- Event: 'Career:missionCompleted'
-		-- Data: A JSON string representing the 'mission' object provided by the game engine.
-		-- Expected Server Behavior:
-		-- 1. Decode the JSON mission data.
-		-- 2. Validate if the mission is a valid, career-related mission (e.g., by checking against a list of approved mission names).
-		-- 3. If valid, calculate and award the player the appropriate amount of money/XP.
-		-- 4. Persist the player's new data.
-		-- 5. Optionally, send a 'Career:BalanceInfo' or similar event back to the client to confirm the transaction.
-		if extensions.UI and extensions.UI.showSystemMessage then
-			extensions.UI.showSystemMessage("Mission finished! Sending results to the server...", "[CAREER]")
-		end
-
-		local missionData = jsonEncode(mission)
-		if TriggerServerEvent then
-			TriggerServerEvent('Career:missionCompleted', missionData)
-			log('I', 'onClientEndMission', 'Career mission ended. Notifying server. Data: ' .. missionData)
-		end
-	end
-
 	log('W', 'onClientEndMission', 'isGoingMpSession: '..tostring(isGoingMpSession))
 	log('W', 'onClientEndMission', 'isMpSession: '..tostring(isMpSession))
 	if not isGoingMpSession then -- leaves server when loading into another freeroam map from an MP sesison

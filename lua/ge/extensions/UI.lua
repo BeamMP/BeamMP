@@ -438,72 +438,9 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 end
 
 
---- Displays the player's balance received from the server.
---- Displays a system message locally in the chat.
--- @param text string The message to display.
--- @param sender string (Optional) The sender name, e.g., "[SYSTEM]" or "[CAREER]". Defaults to "[SYSTEM]".
--- @param color table (Optional) The color of the message.
-local function showSystemMessage(text, sender, color)
-    sender = sender or "[SYSTEM]"
-    color = color or {[0] = 173, [1] = 216, [2] = 230, [3] = 255} -- Default to light blue
-    chatcounter = chatcounter + 1
-    guihooks.trigger("chatMessage", {username = sender, message = text, id = chatcounter, color = color})
-    if chatWindow and chatWindow.addMessage then
-        chatWindow.addMessage(sender, text, chatcounter, color)
-    end
-end
-
--- Displays the player's balance received from the server.
--- This is the handler for the 'Career:BalanceInfo' event.
--- @param balanceData string The player's balance as a string, sent from the server.
-local function onBalanceInfoReceived(balanceData)
-	local balance = tonumber(balanceData)
-	local message
-	if balance then
-		-- Update the central career state
-		if extensions.career_client then
-			extensions.career_client.setBalance(balance)
-		end
-		message = "Your current balance is: $" .. string.format("%d", balance)
-	else
-		message = "Received invalid balance information from the server."
-	end
-
-	-- Display the message in chat with a distinct color.
-	local systemColor = {[0] = 255, [1] = 215, [2] = 0, [3] = 255} -- Gold color for money
-	showSystemMessage(message, "[CAREER]", systemColor)
-	-- Also show a more prominent notification
-	if balance and showNotification then
-		showNotification("Balance updated: $" .. string.format("%d", balance), "Career", "attach_money")
-	end
-end
-
 --- Sends a chat message to the server for viewing by other players.
--- Intercepts local commands like /money before sending.
 -- @param msg string The chat message typed by the user
 local function chatSend(msg)
-	-- Intercept client-side career commands
-	if msg:sub(1, 1) == "/" then
-		local parts = split(msg, " ")
-		local cmd = string.lower(parts[1])
-
-		if cmd == "/money" or cmd == "/balance" then
-			-- Event: 'Career:RequestBalance'
-			-- Data: None. The server identifies the player by their connection.
-			-- Expected Server Behavior:
-			-- 1. Look up the requesting player's ID.
-			-- 2. Retrieve the player's current balance from the persisted data.
-			-- 3. Send the balance back to the client using the 'Career:BalanceInfo' event.
-			if TriggerServerEvent then
-				TriggerServerEvent('Career:RequestBalance', '')
-				-- Display a local confirmation message to the user.
-				showSystemMessage("Requesting your balance from the server...")
-			end
-			return -- Prevent the command from being sent as a regular chat message
-		end
-	end
-
-	-- If it's not a local command, send it as a regular chat message.
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
 	TriggerClientEvent("ChatMessageSent", c)
@@ -543,9 +480,6 @@ end
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
 -- We use this to load our UI and config
 local function onExtensionLoaded()
-	if AddEventHandler then
-		AddEventHandler('Career:BalanceInfo', onBalanceInfoReceived)
-	end
     log("D", "MPInterface", "Loaded")
 	gui_module.initialize(gui)
 	gui.registerWindow("BeamMP Chat", imgui.ImVec2(333, 266))
@@ -618,7 +552,6 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setPlayerPing = setPlayerPing
-M.showSystemMessage = showSystemMessage
 M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog

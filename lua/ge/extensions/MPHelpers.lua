@@ -294,38 +294,22 @@ function filterString(inputStr, filterArray, replacementChar)
 			return substitutions[char] or char
 		end)
 		
-		--print(pattern)
+		-- Allow optional spaces or special characters between letters (but require at least the character)
+		pattern = pattern:gsub("(.)", "%1%%s*")
 
-		-- Allow spaces or special characters between letters (non-greedy match)
-		pattern = pattern:gsub("(.)", "%1*%%s*")
-
-		-- Ensure it matches regardless of capitalization
+		-- Ensure it matches regardless of capitalization and only matches whole words
 		return "%f[%w]" .. pattern .. "%f[%W]"
 	end
 
 	-- Replace all occurrences of forbidden words and their variations
 	for _, word in ipairs(filterArray) do
 		local pattern = createPattern(word)
-		--dump(pattern)
 		inputStr = inputStr:gsub(pattern, function(match)
-			dump(match)
-			return replacementChar:rep(#match:gsub("%s", ""))
-		end)
-
-		local processedStr = inputStr:lower():gsub(pattern, function(match)
-			print("Matched:", match)
-			return replacementChar:rep(#match:gsub("%s", "")) -- Replace matched characters
-		end)
-
-		local i = 0
-		inputStr = inputStr:gsub(".", function(char)
-			i = i + 1
-			--print(processedStr:sub(i, i), char)
-			if processedStr:sub(i, i) == "*" then
-				return "*"
-			else
-				return char  
-			end
+			dump("Filtered word: " .. match) -- Debug output to see what was filtered
+			-- Replace the entire matched string with replacement characters
+			-- Remove spaces from the match to get the actual character count
+			local charCount = #match:gsub("%s", "")
+			return replacementChar:rep(charCount)
 		end)
 	end
 

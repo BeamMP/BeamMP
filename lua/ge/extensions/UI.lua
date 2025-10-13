@@ -425,7 +425,7 @@ local function chatMessage(rawMessage) -- chat message received (angular)
     -- Based on set level
     if settings.getValue("chatFilterLevel") then
         local chatFilterArray, err = MPHelpers.readFile("lua/ge/extensions/multiplayer/filters/level_"..settings.getValue("chatFilterLevel")..".txt")
-        dump(chatFilterArray)
+        --dump(chatFilterArray)
         if err then
             chatFilterArray = {}
             log('E', 'chatMessage', 'Failed to load filter list: '..err)

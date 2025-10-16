@@ -93,7 +93,14 @@ local function send(s)
 			authResult = {}
 			guihooks.trigger("authReceived", authResult)
 		elseif error == "Socket is not connected" then
-
+			if settings.getValue("disableWithoutLauncher") then
+				local mods = core_modmanager.getMods()
+				if (mods.beammp or mods.multiplayerbeammp or {}).active then
+					core_modmanager.deactivateMod("beammp")
+					core_modmanager.deactivateMod("multiplayerbeammp")
+					log('W', 'send', 'Launcher not connected! Deactivating mod!')
+				end
+			end
 		else
 			log('E', 'send', 'Stopped at index: '..index..' while trying to send '..#s..' bytes of data.')
 		end

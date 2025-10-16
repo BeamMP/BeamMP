@@ -42,5 +42,6 @@
   "skipModSecurityWarning"      : [ "local", false ],
   "highlightQueuedPlayers"      : [ "local", true  ],
   "playerlistLeftclick"         : [ "cloud", 0 ],
-  "refreshIngame"               : [ "local", false ]
+  "refreshIngame"               : [ "local", false ],
+  "disconnectedWarningFrequency": [ "cloud", 5 ]
 }

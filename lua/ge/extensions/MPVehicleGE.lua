@@ -2588,6 +2588,9 @@ end
 
 
 local function onUIInitialised()
+	extensions.core_vehicle_partmgmt.saveLocal = core_vehicle_partmgmt_saveLocal_overwrite
+	extensions.core_vehicle_partmgmt.savedefault = core_vehicle_partmgmnt_savedefault_overwrite
+	extensions.gameplay_garageMode.start = gameplay_garageMode_start_overwrite
 	UI.updateQueue(getQueueCounts())
 end
 

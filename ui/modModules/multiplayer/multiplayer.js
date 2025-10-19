@@ -493,8 +493,25 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 	// Trigger Warning Prompt
 	$scope.$on('DownloadSecurityPrompt', function (event, data) {
 		var o = true
+
+		// Get mod information from the highlighted server
+		var modCountValue = 0;
+		var modSizeFormatted = '0 Bytes';
+
+		if (highlightedServer && highlightedServer.modlist) {
+			modCountValue = modCount(highlightedServer.modlist);
+			modSizeFormatted = formatBytes(highlightedServer.modstotalsize || 0);
+		}
+
+		// Build enhanced prompt message with mod information
+		var basePrompt = $filter('translate')('ui.multiplayer.security.prompt');
+		var modInfoText = '\n\n' +
+			'Number of mods: ' + modCountValue + '\n' +
+			'Total download size: ' + modSizeFormatted;
+		var enhancedPrompt = basePrompt + modInfoText;
+
 		ConfirmationDialog.open(
-			"ui.multiplayer.security.title", "ui.multiplayer.security.prompt",
+			"ui.multiplayer.security.title", enhancedPrompt,
 			[
 				{ label: "ui.multiplayer.security.no_return", key: false, isCancel: true },
 				// { label: "Enter and don't show this again", key: true },
@@ -510,7 +527,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 				o = false
 				bngApi.engineLua(`MPCoreNetwork.rejectModDownload()`);
 				vm.closeLoadingPopup()
-			}			
+			}
 		});
 	})
 

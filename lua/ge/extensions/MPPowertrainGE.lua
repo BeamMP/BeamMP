@@ -14,11 +14,9 @@ local M = {}
 
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
 local function tick()
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
-	for i,v in pairs(ownMap) do -- For each own vehicle
-		local veh = be:getObjectByID(i) -- Get vehicle
-		if veh then
-			veh:queueLuaCommand("MPPowertrainVE.check()") -- Send all devices values
+	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
+		if v then
+			v:queueLuaCommand("MPPowertrainVE.check()")
 		end
 	end
 end

@@ -17,12 +17,10 @@ local lastElectrics
 
 
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
-local function tick() -- Update electrics values of all vehicles
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
-	for i,v in pairs(ownMap) do -- For each own vehicle
-		local veh = be:getObjectByID(i) -- Get vehicle
-		if veh then
-			veh:queueLuaCommand("MPElectricsVE.check()") -- Check if any value changed
+local function tick()
+	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
+		if v then
+			v:queueLuaCommand("MPElectricsVE.check()")
 		end
 	end
 end

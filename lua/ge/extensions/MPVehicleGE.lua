@@ -412,6 +412,18 @@ local function createRoleHelper(tag, shorttag, red, green, blue)
 	return contents
 end
 
+local function getPlayerVehicles(playerID)
+	return players[playerID] and players[playerID].vehicles or {IDs = {}, objects = {}}
+end
+
+local function getPlayerVehicleIDs(playerID)
+	return players[playerID] and players[playerID].vehicles.IDs or {}
+end
+
+local function getPlayerVehicleObjects(playerID)
+	return players[playerID] and players[playerID].vehicles.objects or {}
+end
+
 --- Sets a custom role for a player
 -- @tparam int playerID ID of the player
 -- @tparam string tag normal version of the role tag
@@ -927,7 +939,7 @@ function Player:new(data)
 
 	o.customRole = nil
 
-	o.vehicles = {IDs = data.vehicleIDs or {}}
+	o.vehicles = {IDs = data.vehicleIDs or {}, objects = data.vehicleObjects or {}}
 
 	local mt =
 	{
@@ -970,6 +982,9 @@ end
 function Player:addVehicle(v)
 	local id = type(v) == 'table' and v.serverVehicleString or v
 	self.vehicles.IDs[id] = id
+	if getGameVehicleID(id) then
+		self.vehicles.objects[id] = getObjectByID(getGameVehicleID(id)) or nil
+	end
 	log('W', 'Player:addVehicle', 'Assigned vehicle ID '..tostring(id)..' to player '..self.name)
 end
 function Player:setNickPrefix(tagSource, text)
@@ -1072,7 +1087,7 @@ function Vehicle:delete()
 	for playerID, v in pairs(self.spectators) do
 		if players[playerID] then players[playerID].activeVehicleID = nil end
 	end
-	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil end
+	if players[self.ownerID] and self.serverVehicleString then players[self.ownerID].vehicles.IDs[self.serverVehicleString] = nil players[self.ownerID].vehicles.objects[self.serverVehicleString] = nil end
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 
 	players_vehicle_configs[self.serverVehicleString] = nil
@@ -2698,6 +2713,9 @@ M.onUIInitialised          = onUIInitialised
 -- FUNCTIONS
 M.restorePlayerVehicle     = restorePlayerVehicle         -- takes: playerID eg 1 2 3 4
 M.getPlayers               = getPlayers               -- takes: -
+M.getPlayerVehicles        = getPlayerVehicles
+M.getPlayerVehicleIDs      = getPlayerVehicleIDs
+M.getPlayerVehicleObjects  = getPlayerVehicleObjects
 M.getVehicles              = getVehicles              -- takes: -
 M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, returns Vehicle
 M.getVehicleByServerID     = getVehicleByServerID     -- takes: string serverVehicleID, returns Vehicle

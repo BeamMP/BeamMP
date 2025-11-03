@@ -51,6 +51,14 @@ local original_spawnNewVehicle
 local original_replaceVehicle
 local original_spawnDefault
 
+-- ============= vector cache  =============
+local cameraPos = vec3()
+local pos = vec3()
+local dir = vec3()
+local dirUp = vec3()
+local activeVehPos = vec3()
+local vehVel = vec3()
+
 local ffiFound = false
 if ffi and ffi.C then
 	ffiFound = true
@@ -1069,8 +1077,8 @@ function Vehicle:new(data)
 	o.isSpawned = data.isSpawned ~= false -- default to true
 	o.isDeleted = data.isDeleted or false
 
-	o.position = nil
-	o.rotation = nil
+	o.position = vec3()
+	o.rotation = quat()
 
 	o.spectators = {}
 
@@ -1339,7 +1347,7 @@ local function applyVehSpawn(event)
 	
 
 	local vehicle = vehicles[event.serverVehicleID]
-	if vehicle and vehicle.position and vehicle.rotation then -- if we have receieved position packets then use that for position and rotation instead
+	if vehicle and vehicle.position and vehicle.position:squaredLength() ~= 0 and vehicle.rotation then -- if we have receieved position packets then use that for position and rotation instead
 		pos = vec3(vehicle.position)
 		rot = quat(0,0,1,0) * quat(vehicle.rotation) -- the car rotates 180 degrees on spawn so we need to counter that
 	end
@@ -2414,20 +2422,26 @@ local function onPreRender(dt)
 			if v.isLocal or not owner then goto skip_vehicle end
 			local gameVehicleID = v.gameVehicleID
 			local veh = be:getObjectByID(gameVehicleID)
+			local heightOffset = 0
 
 			if v.isSpawned and veh then -- update position if available
 				if not v.vehicleHeight or v.vehicleHeight == 0 then
 					v.vehicleHeight = veh:getInitialHeight()
 				end
-				local tempPosx,tempPosy,tempPosz = be:getObjectOOBBCenterXYZ(gameVehicleID)
-				v.position = vec3(tempPosx,tempPosy,tempPosz)
-				v.position.z = v.position.z + (v.vehicleHeight * 0.5) + 0.2
+				v.position:set(be:getObjectOOBBCenterXYZ(gameVehicleID))
+				heightOffset = (v.vehicleHeight * 0.5) + 0.2
 
-				v.rotation = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp())) -- getRotation doesn't update in GE so we need to use direction vectors instead
+				--updating rotations, it uses vectors due to getRotation not being updated
+				--using set functions with XYZ like this is garbage free
+				dir:set(veh:getDirectionVectorXYZ())
+				dirUp:set(veh:getDirectionVectorUpXYZ())
+				v.rotation:setFromDir(dir,dirUp)
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet
-			local pos = Point3F(v.position.x, v.position.y, v.position.z)
+
+			pos:set(v.position)
+			pos.z = pos.z + heightOffset
 
 			if settings.getValue("enableBlobs") and not v.isSpawned then
 				local colors = nil

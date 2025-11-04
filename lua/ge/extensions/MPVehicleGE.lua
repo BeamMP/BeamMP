@@ -996,22 +996,31 @@ function Player:addVehicle(v)
 		self.vehicles.objects[id] = getObjectByID(getGameVehicleID(id)) or nil
 	end
 	log('W', 'Player:addVehicle', 'Assigned vehicle ID '..tostring(id)..' to player '..self.name)
+	local veh = vehicles[id]
+	if veh then
+		veh:updateNameTagCache()
+		veh:updateSpectatorsTagCache()
+	end
 end
 function Player:setNickPrefix(tagSource, text)
 	--setPlayerNickPrefix(self.name, tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
 	self.nickPrefixes[tagSource] = text
+	self:updateNameTagCache()
 end
 function Player:setNickSuffix(tagSource, text)
 	--setPlayerNickSuffix(self.name, tagSource, text)
 	if text == nil then text = tagSource; tagSource = "default" end
 	self.nickSuffixes[tagSource] = text
+	self:updateNameTagCache()
 end
 function Player:setCustomRole(role)
 	self.customRole = role
+	self:updateNameTagCache()
 end
 function Player:clearCustomRole(roleName)
 	self.customRole = nil
+	self:updateNameTagCache()
 end
 function Player:delete()
 	log('W', 'Player:delete', string.format('Removing player %s (%i)! Data: %s', self.name, self.playerID, dumps(self)))
@@ -1022,6 +1031,22 @@ function Player:delete()
 	players[self.playerID] = nil
 
 	self = nil
+end
+function Player:updateNameTagCache()
+	for id,id in pairs(self.vehicles.IDs) do
+		local veh = vehicles[id]
+		if veh then
+			veh:updateNameTagCache()
+		end
+	end
+end
+function Player:updateSpectatorsTagCache()
+	for id,id in pairs(self.vehicles.IDs) do
+		local veh = vehicles[id]
+		if veh then
+			veh:updateSpectatorsTagCache()
+		end
+	end
 end
 function Player:onSerialized()
 	local t = {
@@ -1037,6 +1062,8 @@ function Player:onSettingsChanged()
 	local charLimit = tonumber(settings.getValue("nametagCharLimit"))
 	if not settings.getValue("shortenNametags") or not charLimit or #self.name <= charLimit + 3 then
 		self.shortname = self.name
+		self:updateNameTagCache()
+		self:updateSpectatorsTagCache()
 		return
 	end
 
@@ -1044,6 +1071,8 @@ function Player:onSettingsChanged()
 	if #short ~= #self.name then short = short .. "..." end
 
 	self.shortname = short
+	self:updateNameTagCache()
+	self:updateSpectatorsTagCache()
 end
 
 local Vehicle = {}
@@ -1075,6 +1104,7 @@ function Vehicle:new(data)
 	end
 
 	o.ownerName = data.ownerName
+	o.nameTag = data.ownerName
 	o.isLocal = data.isLocal or false
 	o.isSpawned = data.isSpawned ~= false -- default to true
 	o.isDeleted = data.isDeleted or false
@@ -1083,6 +1113,7 @@ function Vehicle:new(data)
 	o.rotation = quat()
 
 	o.spectators = {}
+	o.spectatorsTag = ""
 
 	if not settings.getValue("showDebugOutput") then
 		log('W', 'Vehicle:new', string.format("Vehicle %s (%s) created! Data:%s", o.serverVehicleString, o.ownerName, dumps(data)))
@@ -1106,12 +1137,54 @@ function Vehicle:delete()
 end
 function Vehicle:setCustomRole(role)
 	self.customRole = role
+	self:updateNameTagCache()
+	self:updateSpectatorsTagCache() --TODO: find out if this is necessary
 end
 function Vehicle:clearCustomRole(roleName)
 	self.customRole = nil
+	self:updateNameTagCache()
+	self:updateSpectatorsTagCache() --TODO: find out if this is necessary
 end
 function Vehicle:setDisplayName(displayName)
 	self.customName = displayName
+	self:updateNameTagCache()
+	self:updateSpectatorsTagCache() --TODO: find out if this is necessary
+end
+function Vehicle:updateNameTagCache()
+	local owner = self:getOwner()
+	local roleInfo = self.customRole or owner.customRole or owner.role
+
+	local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
+	local name = self.customName or ownerName
+
+	local tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
+	local prefix = ""
+	for source, tag in pairs(owner.nickPrefixes) do
+		prefix = prefix..tag.." "
+	end
+
+	local suffix = ""
+	for source, tag in pairs(owner.nickSuffixes) do
+		suffix = suffix..tag.." "
+	end
+	self.nameTag = String(" " .. table.concat({prefix, name, suffix, tag}) .. " ")
+end
+function Vehicle:updateSpectatorsTagCache()
+	local owner = self:getOwner()
+	local spectators = ""
+	for spectatorID, _ in pairs(self.spectators) do
+		local spectator = players[spectatorID]
+		if not (spectator == owner or spectator.isLocal) then
+			local spectatorName = settings.getValue("shortenNametags") and spectator.shortname or spectator.name
+			spectators = spectators .. spectatorName .. ', '
+		end
+	end
+	if spectators ~= "" then
+		spectators = spectators:sub(1,-3) -- cut off tailing comma
+		self.spectatorsTag = String(" ".. spectators .." ")
+	else
+		self.spectatorsTag = ""
+	end
 end
 function Vehicle:onSerialized()
 	local t = {
@@ -1977,14 +2050,19 @@ end
 
 local function onServerCameraSwitched(playerID, serverVehicleID)
 	if not players[playerID] then return end -- TODO: better fix?
-	if players[playerID] and players[playerID].activeVehicleID and vehicles[players[playerID].activeVehicleID] then
-		vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
+	if players[playerID] and players[playerID].activeVehicleID then
+		local veh = vehicles[players[playerID].activeVehicleID]
+		if veh then
+			vehicles[players[playerID].activeVehicleID].spectators[playerID] = nil -- clear prev spectator field
+			veh:updateSpectatorsTagCache()
+		end
 	end
 
 	players[playerID].activeVehicleID = serverVehicleID
 
 	if not vehicles[serverVehicleID] then return end
 	vehicles[serverVehicleID].spectators[playerID] = true
+	vehicles[serverVehicleID]:updateSpectatorsTagCache()
 end
 
 local function onServerVehicleColorChanged(serverVehicleID, data)
@@ -2576,43 +2654,17 @@ local function onPreRender(dt)
 
 
 				local roleInfo = v.customRole or owner.customRole or owner.role
-
-				local ownerName = settings.getValue("shortenNametags") and owner.shortname or owner.name
-				local name = v.customName or ownerName
-
-				local tag = settings.getValue("shortenNametags") and roleInfo.shorttag or roleInfo.tag
 				local backColor = color(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-
-				local prefix = ""
-				for source, tag in pairs(owner.nickPrefixes)
-					do prefix = prefix..tag.." " end
-
-				local suffix = ""
-				for source, tag in pairs(owner.nickSuffixes)
-					do suffix = suffix..tag.." " end
-
-
 				-- draw spectators
 				if settings.getValue("showSpectators") then
-					local spectators = ""
-
-					for spectatorID, _ in pairs(v.spectators) do
-						local spectator = players[spectatorID]
-						if not (spectator == owner or spectator.isLocal) then
-							spectators = spectators .. spectator.name .. ', '
-						end
-					end
-
-					spectators = spectators:sub(1,-3) -- cut off tailing comma
-
-					if spectators ~= "" then
+					if v.spectatorsTag ~= "" then
 						local spectatorBackColor = backColor
 						if settings.getValue("spectatorUnifiedColors") then
 							spectatorBackColor = color(roleToInfo.USER.backcolor.r, roleToInfo.USER.backcolor.g, roleToInfo.USER.backcolor.b, math.floor(nametagAlpha*127))
 						end
 						drawTextAdvanced(
 							pos.x, pos.y, pos.z, -- Location
-							String(" ".. spectators .." "), -- Text
+							v.spectatorsTag, -- Text
 							color(255, 255, 255, nametagAlpha*254), -- Foreground Color, Alpha is multiplied by 254 because using 255 seems to break backround alpha in 0.37
 							true, -- Draw background 
 							false, -- Wtf
@@ -2627,7 +2679,7 @@ local function onPreRender(dt)
 				-- draw main nametag
 				drawTextAdvanced(
 					pos.x, pos.y, pos.z, -- Location
-					String(" " .. table.concat({prefix, name, suffix, tag, dist}) .. " "), -- Text
+					v.nameTag .. dist, -- Text
 					color(255, 255, 255, nametagAlpha*254), -- Foreground Color, Alpha is multiplied by 254 because using 255 seems to break backround alpha in 0.37
 					true, -- Draw background 
 					false, -- Wtf

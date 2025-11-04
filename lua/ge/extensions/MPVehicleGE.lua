@@ -2612,28 +2612,25 @@ local function onPreRender(dt)
 
 				local dist = ""
 				if distfloat > 10 and settings.getValue("nameTagShowDistance") then
-					local unit
 					local mapEntry = distfloat
 					if settings.getValue("uiUnitLength") == "imperial" then
 						mapEntry = mapEntry * 3.28084
 						if mapEntry > 5280 then
 							mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
-							unit = "mi"
+							dist = string.format("%.2f mi ", mapEntry)
 						else
 							mapEntry = math.floor(mapEntry)
-							unit = "ft"
+							dist = string.format("%.f ft ", mapEntry)
 						end
 					else
 						if mapEntry >= 1000 then
 							mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
-							unit = "km"
+							dist = string.format("%.2f km ", mapEntry)
 						else
 							mapEntry = math.floor(mapEntry)
-							unit = "m"
+							dist = string.format("%.f m ", mapEntry)
 						end
 					end
-
-					dist = string.format(" %s %s", tostring(mapEntry), unit)
 				end
 
 				if settings.getValue("fadeVehicles") and veh then

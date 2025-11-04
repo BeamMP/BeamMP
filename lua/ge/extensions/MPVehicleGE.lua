@@ -67,6 +67,7 @@ end
 
 -- debug drawers, using the FFI functions for debugDraw is a lot faster and produces no garbage
 local drawTextAdvanced = ffiFound and ffi.C.BNG_DBG_DRAW_TextAdvanced or nop
+local drawSphere = ffiFound and ffi.C.BNG_DBG_DRAW_Sphere or nop
 
 --- Contains Information about Backend authorized Roles
 -- @table roleToInfo
@@ -2386,13 +2387,33 @@ local function onUpdate(dt)
   --playerTags.updatePositions()
 end
 
+local hasInitColors = false
+
+local blobColorQueued =  color(0,0,0,127)
+local blobColorIllegal = color(0,0,0,127)
+local blobColorDeleted = color(0,0,0,127)
+
+local blobColorFallBack = color(255, 0, 255, 127)
+
+local function initColors()
+	if MPHelpers then
+		local rgbaBlobColorQueued = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
+		local rgbaBlobColorIllegal = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
+		local rgbaBlobColorDeleted = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
+
+		blobColorQueued =  color(rgbaBlobColorQueued[1]*255,rgbaBlobColorQueued[2]*255,rgbaBlobColorQueued[3]*255,127)
+		blobColorIllegal = color(rgbaBlobColorIllegal[1]*255,rgbaBlobColorIllegal[2]*255,rgbaBlobColorIllegal[3]*255,127)
+		blobColorDeleted = color(rgbaBlobColorDeleted[1]*255,rgbaBlobColorDeleted[2]*255,rgbaBlobColorDeleted[3]*255,127)
+		hasInitColors = true
+	end
+end
+
+
 local function onPreRender(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
-		local blobColorQueued = MPHelpers.hex2rgb(settings.getValue("blobColorQueued"))
-		local blobColorIllegal = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
-		local blobColorDeleted = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
-
-
+		if not hasInitColors then
+			initColors()
+		end
 
 		-- get camera position
 		cameraPos:set(core_camera.getPositionXYZ())
@@ -2500,11 +2521,11 @@ local function onPreRender(dt)
 						colors = blobColorDeleted
 					end
 				else
-					colors = { 1, 0, 1 }
+					colors = blobColorFallBack
 				end
 
 				if colors then
-					debugDrawer:drawSphere(pos, 1, ColorF(colors[1], colors[2], colors[3], 0.5))
+					drawSphere(pos.x, pos.y, pos.z, 1, colors, true)
 					pos.z = pos.z + 1
 				end
 			end
@@ -2742,6 +2763,7 @@ local function onSettingsChanged()
 	--
 	--	settingsCache[k]  = ColorF(table.unpack(p))
 	--end
+	initColors()
 end
 
 detectGlobalWrites() -- reenable global write notifications

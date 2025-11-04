@@ -2189,15 +2189,35 @@ end
 local lastGmQuery = -1 --get player pos on first run
 local groundmarkerRoads = {}
 local gmTargetPlayer = nil
-local lastGmFocus = nil
+
+local function updateGroundMarkers()
+	local playerRoadData = groundmarkerRoads['player']
+	if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
+		for target, data in pairs(groundmarkerRoads) do
+			if target ~= 'player' then
+				if data.best and data.best ~= core_groundMarkers.getTargetPos() then
+					if activeVehPos:squaredDistance(data.position) > 200 then
+						core_groundMarkers.setFocus(data.best)
+						log('M', 'onPreRender', 'setting focus to '..data.best)
+					else
+						core_groundMarkers.setFocus(nil)
+						groundmarkerRoads[target] = nil
+					end
+				end
+			end
+		end
+	end
+end
 
 local function queryRoadNodeToPosition(targetPosition, owner)
 	if not owner then owner = "target" end
-	targetPosition = vec3(targetPosition)
 	local first, second, distance = map.findClosestRoad(targetPosition)
 	if not first and not second then return false end
-
-	groundmarkerRoads[owner] = {position=targetPosition}
+	if not groundmarkerRoads[owner] then
+		groundmarkerRoads[owner] = {position=targetPosition}
+	else
+		groundmarkerRoads[owner].position:set(targetPosition)
+	end
 	if first ~= 'nil' and second ~= 'nil' then
 		groundmarkerRoads[owner].first = first
 		groundmarkerRoads[owner].next = second
@@ -2207,8 +2227,8 @@ local function queryRoadNodeToPosition(targetPosition, owner)
 		local node2 = mapData.nodes[second]
 		if node1 and node2 then
 			-- find which node is closest to the owner
-			local sqrDist1 = (targetPosition - node1.pos):squaredLength()
-			local sqrDist2 = (targetPosition - node2.pos):squaredLength()
+			local sqrDist1 = targetPosition:squaredDistance(node1.pos)
+			local sqrDist2 = targetPosition:squaredDistance(node2.pos)
 
 			if sqrDist1 < sqrDist2 then groundmarkerRoads[owner].best = first
 			else groundmarkerRoads[owner].best = second end
@@ -2219,19 +2239,22 @@ local function queryRoadNodeToPosition(targetPosition, owner)
 	return false, nil
 end
 
-local function groundmarkerToPlayer(targetName)
+local function groundmarkerToPlayer(targetName, update)
+	if not update then
+		gmTargetPlayer = nil
+		queryRoadNodeToPosition(activeVehPos, 'player')
+		updateGroundMarkers()
+	end
 	if not targetName then
 		groundmarkerRoads["targetVeh"] = nil
-		lastGmFocus = nil
 		core_groundMarkers.setFocus(nil)
 	end
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		if vehicle.ownerName == targetName then
-			local targetVeh = be:getObjectByID(vehicle.gameVehicleID)
-			local targetVehPos = targetVeh:getPosition()
-			local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
-
-			queryRoadNodeToPosition(vec3Pos, "targetVeh")
+			queryRoadNodeToPosition(vehicle.position, "targetVeh")
+			if not update then
+				updateGroundMarkers()
+			end
 			return
 		end
 	end
@@ -2245,7 +2268,6 @@ local function groundmarkerFollowPlayer(targetName, dontfollow)
 		else
 			gmTargetPlayer = nil
 			groundmarkerRoads["targetVeh"] = nil
-			lastGmFocus = nil
 			core_groundMarkers.setFocus(nil)
 		end
 	end
@@ -2290,6 +2312,19 @@ local function focusCameraOnPlayer(targetName)
 				return
 			end
 		end
+	end
+end
+
+local function groundMarkers(dt)
+	lastGmQuery = lastGmQuery - dt
+	if lastGmQuery <= 0 then
+		lastGmQuery = 0.2
+		queryRoadNodeToPosition(activeVehPos, 'player')
+		if gmTargetPlayer then
+			groundmarkerToPlayer(gmTargetPlayer, true)
+		end
+
+		updateGroundMarkers()
 	end
 end
 
@@ -2357,38 +2392,7 @@ local function onPreRender(dt)
 		local blobColorIllegal = MPHelpers.hex2rgb(settings.getValue("blobColorIllegal"))
 		local blobColorDeleted = MPHelpers.hex2rgb(settings.getValue("blobColorDeleted"))
 
-		-- get current vehicle ID and position
-		local activeVeh = be:getPlayerVehicle(0)
-		local activeVehPos = activeVeh and vec3(activeVeh:getPosition()) or nil
-		local activeVehID = activeVeh and activeVeh:getID() or nil
 
-		-- Groundmarkers
-		if activeVehPos then
-			lastGmQuery = lastGmQuery - dt
-			if lastGmQuery <= 0 then
-				lastGmQuery = 0.2
-				queryRoadNodeToPosition(activeVehPos, 'player')
-				if gmTargetPlayer then groundmarkerToPlayer(gmTargetPlayer) end
-			end
-
-			local playerRoadData = groundmarkerRoads['player']
-			if playerRoadData and playerRoadData.first and playerRoadData.first ~= 'nil' then
-				for target, data in pairs(groundmarkerRoads) do
-					if target ~= 'player' then
-						if data.best and data.best ~= lastGmFocus then
-							if (activeVehPos - data.position):squaredLength() > 200 then
-								core_groundMarkers.setFocus(data.best)
-								log('M', 'onPreRender', 'setting focus to '..data.best)
-								lastGmFocus = data.best
-							else
-								core_groundMarkers.setFocus(nil)
-								groundmarkerRoads[target] = nil
-							end
-						end
-					end
-				end
-			end
-		end
 
 		-- get camera position
 		cameraPos:set(core_camera.getPositionXYZ())
@@ -2400,6 +2404,10 @@ local function onPreRender(dt)
 			if not commands.isFreeCamera() then cameraPos:set(activeVehPos) end
 		end
 
+		local activeVehID = activeVeh and activeVeh:getID() or nil
+		if activeVehID and gmTargetPlayer then
+			groundMarkers(dt)
+		end
 
 		-- apply queue
 		if queueWaiting then

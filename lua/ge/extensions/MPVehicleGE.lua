@@ -2479,7 +2479,7 @@ local function onPreRender(dt)
 			local veh = getObjectByID(gameVehicleID)
 			local heightOffset = 0
 
-			if v.isSpawned and veh then -- update position if available
+			if v.isSpawned and veh and veh:getActive() then -- update position if available
 				if not v.vehicleHeight or v.vehicleHeight == 0 then
 					v.vehicleHeight = veh:getInitialHeight()
 				end

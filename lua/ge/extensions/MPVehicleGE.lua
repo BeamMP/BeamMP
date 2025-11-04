@@ -43,6 +43,7 @@ local localCounter = 0
 local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
+local queueWaiting = false
 local isAtSyncSpeed = true
 local hideNicknamesToggle = false
 
@@ -1557,6 +1558,7 @@ local function spawnDestroyedVehicles(serverVehID)
 	if settings.getValue("enableSpawnQueue") then
 		vehicles[serverVehID].spawnQueue = eventdata
 		UI.updateQueue(getQueueCounts())
+		queueWaiting = true
 	else
 		log("D", "restorePlayerVehicle", "Queue disabled, spawning vehicle now")
 		applyVehSpawn(eventdata)
@@ -1847,6 +1849,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
 
 			vehicles[serverVehicleID].spawnQueue = eventdata
+			queueWaiting = true
 
 			local icon = 'directions_car'
 			if decodedData.jbm == "unicycle" then
@@ -1885,7 +1888,7 @@ local function onServerVehicleEdited(serverID, data)
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 		vehicles[serverID].editQueue = data
-
+		queueWaiting = true
 		log('I', 'onServerVehicleEdited', "edit "..serverID.." queued")
 		local playerNickname = owner and owner.name or "unknown"
 		UI.updateQueue(getQueueCounts())
@@ -2007,10 +2010,12 @@ local function onServerVehicleColorChanged(serverVehicleID, data)
             local decodedData = jsonDecode(vehicle.spawnQueue.data)
             decodedData.vcf.paints = jsonDecode(data)
             vehicle.spawnQueue.data = jsonEncode(decodedData)
+			queueWaiting = true
         elseif vehicle.editQueue then
             local decodedData = jsonDecode(vehicle.editQueue)
             decodedData.vcf.paints = jsonDecode(data)
             vehicle.editQueue = jsonEncode(decodedData)
+			queueWaiting = true
         end
 
         local deletedVehicleData = players_vehicle_configs[serverVehicleID]
@@ -2168,13 +2173,14 @@ end
 
 local function sendPendingVehicleEdits()
 	for gameVehicleID,_ in pairs(vehiclesToSync) do
-		local veh = be:getObjectByID(gameVehicleID)
+		local veh = getObjectByID(gameVehicleID)
 		if veh and isOwn(veh:getID()) then
 			log('I', "syncVehicles", "Autosyncing vehicle "..gameVehicleID)
 			sendVehicleEdit(gameVehicleID)
 		end
+		vehiclesToSync[gameVehicleID] = nil
 	end
-	vehiclesToSync = {}
+	--vehiclesToSync = {}
 end
 
 
@@ -2301,22 +2307,39 @@ local function applyVehicleQueues(serverVehicleID, vehicle)
 end
 
 local function applyQueuedEvents()
+	local queueChanged = false
 	for serverVehicleID, vehicle in pairs(vehicles) do
-		applyVehicleQueues(serverVehicleID, vehicle)
+		if vehicle.spawnQueue or vehicle.editQueue then
+			applyVehicleQueues(serverVehicleID, vehicle)
+			queueChanged = true
+		end
 	end
-
-	UI.updateQueue(getQueueCounts())
+	if queueChanged then
+		UI.updateQueue(getQueueCounts())
+	end
+	queueWaiting = false
 	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
 end
 
 local function applyPlayerQueues(playerID)
+	local queueEmpty = true
+	local queueChanged = false
 	for serverVehicleID, vehicle in pairs(vehicles) do
-		if vehicle.ownerID == playerID then
-			applyVehicleQueues(serverVehicleID, vehicle)
+		if vehicle.spawnQueue or vehicle.editQueue then
+			if vehicle.ownerID == playerID then
+				applyVehicleQueues(serverVehicleID, vehicle)
+				queueChanged = true
+			else
+				queueEmpty = false
+			end
 		end
 	end
-
-	UI.updateQueue(getQueueCounts())
+	if queueChanged then
+		UI.updateQueue(getQueueCounts())
+	end
+	if queueEmpty then
+		queueWaiting = false
+	end
 end
 
 local function onUpdate(dt)
@@ -2367,42 +2390,52 @@ local function onPreRender(dt)
 			end
 		end
 
+		-- get camera position
+		cameraPos:set(core_camera.getPositionXYZ())
 
-		-- get camera position, apply queue
-		local cameraPos = vec3(core_camera.getPosition())
+		-- get current vehicle ID and position
+		local activeVeh = getPlayerVehicle(0)
 		if activeVeh then
-			if not commands.isFreeCamera() then cameraPos = activeVehPos end
-
-			if settings.getValue("queueAutoSkipRemote") and not isOwn(activeVehID) then applyQueuedEvents() end
-
-			if settings.getValue("enableQueueAuto") then
-				local vehicleSpd = math.abs(activeVeh:getVelocity():length() or 0)
-
-				local maxSyncSpd = settings.getValue("queueApplySpeed")
-				local maxTime = settings.getValue("queueApplyTimeout")
+			activeVehPos:set(activeVeh:getPositionXYZ())
+			if not commands.isFreeCamera() then cameraPos:set(activeVehPos) end
+		end
 
 
-				-- If below set speed
-				if (vehicleSpd <= maxSyncSpd) then
-					queueApplyTimer = queueApplyTimer + dt
-					guihooks.trigger("onBeamMPSetAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
-					-- if time under speed more than or equal to max
-					if (queueApplyTimer >= maxTime) then
-						applyQueuedEvents()
+		-- apply queue
+		if queueWaiting then
+			if activeVeh then
+				if settings.getValue("queueAutoSkipRemote") and not isOwn(activeVehID) then applyQueuedEvents() end
+
+				if settings.getValue("enableQueueAuto") then
+					vehVel:set(activeVeh:getVelocityXYZ())
+					local vehicleSpd = math.abs(vehVel:squaredLength() or 0)
+
+					local maxSyncSpd = settings.getValue("queueApplySpeed")
+					local maxTime = settings.getValue("queueApplyTimeout")
+
+
+					-- If below set speed
+					if (vehicleSpd <= maxSyncSpd^2) then
+						queueApplyTimer = queueApplyTimer + dt
+						guihooks.trigger("onBeamMPSetAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
+						-- if time under speed more than or equal to max
+						if (queueApplyTimer >= maxTime) then
+							applyQueuedEvents()
+							queueApplyTimer = 0
+						end
+					else -- Reset timer and UI
+						if queueApplyTimer > 0 then
+							guihooks.trigger("onBeamMPSetAutoQueueProgress", "0")
+						end
 						queueApplyTimer = 0
 					end
-				else -- Reset timer and UI
-					if queueApplyTimer > 0 then
-						guihooks.trigger("onBeamMPSetAutoQueueProgress", "0")
-					end
-					queueApplyTimer = 0
 				end
-			end
-		else
-			queueApplyTimer = 0
-			applyQueuedEvents()
-			if not commands.isFreeCamera() then
-				commands.setFreeCamera()		-- Fix camera
+			else
+				queueApplyTimer = 0
+				applyQueuedEvents()
+				if not commands.isFreeCamera() then
+					commands.setFreeCamera()		-- Fix camera
+				end
 			end
 		end
 

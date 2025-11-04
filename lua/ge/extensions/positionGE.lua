@@ -88,7 +88,7 @@ local function applyPos(decoded, serverVehicleID)
 
 	decoded.localSimspeed = simspeedFraction
 
-	local veh = be:getObjectByID(vehicle.gameVehicleID)
+	local veh = getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
@@ -219,7 +219,7 @@ end
 -- @param y number Coordinate y
 -- @param z number Coordinate z
 local function setPosition(gameVehicleID, x, y, z) -- TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua without resetting the vehicle
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	veh:setPositionNoPhysicsReset(Point3F(x, y, z))
 end
 
@@ -228,7 +228,7 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 	local newRot = positionData.rot
 	local vel = positionData.vel
 	local rvel = positionData.rvel
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 
 	local localVel = veh:getVelocity()
 	local vehVel = positionData.vehVel

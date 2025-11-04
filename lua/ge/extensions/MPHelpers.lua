@@ -143,7 +143,7 @@ local function splitStringToTable(string, delimeter, convert_into)
 end
 
 --- Reads the vehicles color directly from the obj instead of from the vehicle_manager.lua
--- @param veh object Vehicle object from eg. be:getObjectByID(gameVehicleID)
+-- @param veh object Vehicle object from eg. getObjectByID(gameVehicleID)
 -- @return table paints Same format as extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config.paints
 local function getColorsFromVehObj(veh)
 	local paints = {}

@@ -446,7 +446,7 @@ end
 -- @tparam integer gameVehicleID - The ID of the game vehicle
 -- @usage MPGameNetwork.onVehicleReady(`<game vehicle id>`)
 local function onVehicleReady(gameVehicleID)
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if not veh then
 		log('R', 'onVehicleReady', 'Vehicle does not exist!')
 		return

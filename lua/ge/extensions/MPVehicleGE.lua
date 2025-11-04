@@ -1248,7 +1248,7 @@ end
 --called by onVehicleSpawned
 --============================ SEND VEHICLE ============================
 local function sendVehicleSpawn(gameVehicleID)
-	local veh = be:getObjectByID(gameVehicleID) -- Get spawned vehicle ID
+	local veh = getObjectByID(gameVehicleID) -- Get spawned vehicle ID
 	if veh then -- In case of bug
 		local vehicleTable = {}
 		local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
@@ -1297,7 +1297,7 @@ end
 local function sendVehicleEdit(gameVehicleID)
 	local vehicleTable = {} -- Vehicle table
 	local vehicleData  = extensions.core_vehicle_manager.getVehicleData(gameVehicleID)
-	local veh          = be:getObjectByID(gameVehicleID)
+	local veh          = getObjectByID(gameVehicleID)
 	local c            = veh.color
 	local p0           = veh.colorPalette0
 	local p1           = veh.colorPalette1
@@ -1336,7 +1336,7 @@ end
 -- Patch Game Functions in relation to vehicle configs
 local core_vehicles_cloneCurrent = core_vehicles.cloneCurrent
 core_vehicles.cloneCurrent = function ()
-	local vehicle = be:getPlayerVehicle(0)
+	local vehicle = getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
 		local title = MPTranslate("ui.beammp.configprotection.clone.title", "Vehicle Clone Error")
 		local msg = MPTranslate("ui.beammp.configprotection.clone.message", "Sorry, you cannot clone this vehicle.")
@@ -1349,7 +1349,7 @@ end
 
 local core_vehicle_partmgmt_saveLocal = extensions.core_vehicle_partmgmt.saveLocal
 local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
-	local vehicle = be:getPlayerVehicle(0)
+	local vehicle = getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
 		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
 		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
@@ -1362,7 +1362,7 @@ end
 
 local core_vehicle_partmgmnt_savedefault = extensions.core_vehicle_partmgmt.savedefault
 local function core_vehicle_partmgmnt_savedefault_overwrite(p1)
-	local vehicle = be:getPlayerVehicle(0)
+	local vehicle = getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
 		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
 		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
@@ -1439,7 +1439,7 @@ local function applyVehSpawn(event)
 	end
 
 	local spawnedVehID = getGameVehicleID(event.serverVehicleID)
-	local spawnedVeh = spawnedVehID and be:getObjectByID(spawnedVehID) or nil
+	local spawnedVeh = spawnedVehID and getObjectByID(spawnedVehID) or nil
 
 	if spawnedVeh then -- if a vehicle with this ID was found update the obj
 		log('W', 'applyVehSpawn', "(spawn)Updating vehicle from server "..vehicleName.." with id "..spawnedVehID)
@@ -1483,7 +1483,7 @@ local function applyVehEdit(serverID, data)
 	local gameVehicleID = getGameVehicleID(serverID) -- Get the gameVehicleID
 	if not gameVehicleID then log('E','applyVehEdit',"gameVehicleID for "..serverID.." not found") return end
 
-	local veh = be:getObjectByID(gameVehicleID) -- Get the vehicle
+	local veh = getObjectByID(gameVehicleID) -- Get the vehicle
 	if not veh then log('E','applyVehEdit',"Vehicle "..gameVehicleID.." not found") return end
 
 	local decodedData   = jsonDecode(data) -- Decode the data
@@ -1514,7 +1514,7 @@ local function applyVehEdit(serverID, data)
 			tableMerge(playerVehicle.config, vehicleConfig) -- add new parts to the existing config
 
 			if configChanged then
-				veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
+				veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((getPlayerVehicle(0) and getPlayerVehicle(0):getID() == gameVehicleID) or false))
 				veh:respawn(serialize(playerVehicle.config))
 				if settings.getValue("licensePlateUsesPlayerName") then
 					core_vehicles.setPlateText(data.playerNickname, gameVehicleID)
@@ -1537,7 +1537,7 @@ local function applyVehEdit(serverID, data)
 			pos = veh:getPosition(), rot = quat(0,0,1,0) *  quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp())), cling = true,
 		}
 
-		veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((be:getPlayerVehicle(0) and be:getPlayerVehicle(0):getID() == gameVehicleID) or false))
+		veh:setDynDataFieldbyName("autoEnterVehicle", 0, tostring((getPlayerVehicle(0) and getPlayerVehicle(0):getID() == gameVehicleID) or false))
 		log('I', 'applyVehEdit', "Updating vehicle from server "..vehicleName.." with id "..serverID)
 		spawn.setVehicleObject(veh, options)
 
@@ -1559,7 +1559,7 @@ local function onVehicleSpawned(gameVehicleID)
 
 	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
 
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	local newJbeamName = veh:getJBeamFilename()
 
 	local vehicle = getVehicleByGameID(gameVehicleID)
@@ -1675,7 +1675,7 @@ local function onVehicleDestroyed(gameVehicleID)
 			log('I', "onVehicleDestroyed", string.format("Vehicle %i (%s) removed by local player", gameVehicleID, serverVehicleID or "?"))
 			if vehicle.isLocal then
 				if serverVehicleID then
-					local veh = be:getObjectByID(gameVehicleID)
+					local veh = getObjectByID(gameVehicleID)
 					if veh and veh:getJBeamFilename() == "unicycle" and settings.getValue("unicycleAutoSave") == true then -- if the player destroyed their unicycle
 						local vehicleConfig = extensions.core_vehicle_manager.getVehicleData(gameVehicleID).config
 						--[[ Contains as of 0.30
@@ -1809,7 +1809,7 @@ local function onVehicleResetted(gameVehicleID)
 		local vehicle = getVehicleByGameID(gameVehicleID)
 		if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle -- If it's not null
 			--print("Vehicle "..gameVehicleID.." resetted by client")
-			local veh = be:getObjectByID(gameVehicleID)
+			local veh = getObjectByID(gameVehicleID)
 			local pos = veh:getPosition()
 			local rot = quatFromDir(-vec3(veh:getDirectionVector()), vec3(veh:getDirectionVectorUp()))
 			local tempTable = {
@@ -1843,7 +1843,7 @@ local function onVehicleColorChanged(gameVehicleID, index, paint)
     local vehicle = getVehicleByGameID(gameVehicleID) -- get vehicle table for this vehicle
     if vehicle and vehicle.serverVehicleString and vehicle.isLocal then -- If serverVehicleID not null and player own vehicle
 
-        local veh = be:getObjectByID(gameVehicleID) -- get vehicle as object
+        local veh = getObjectByID(gameVehicleID) -- get vehicle as object
 		local paintData =  MPHelpers.getColorsFromVehObj(veh)
         paintData[index] = paint --insert new paint at index as chosen from color picker
 
@@ -1892,7 +1892,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 		log("W", "onServerVehicleSpawned", "ID is same as received ID, synced vehicle gameVehicleID: "..gameVehicleID.." with ServerID: "..serverVehicleID)
 		
-		local veh = be:getObjectByID(gameVehicleID)
+		local veh = getObjectByID(gameVehicleID)
 		if not veh or not veh:getActive() then
 			log("W", "onServerVehicleSpawned", "Local vehicle "..gameVehicleID.." does not exist anymore, triggering delete event for server vehicle "..serverVehicleID)
 			onVehicleDestroyed(gameVehicleID)
@@ -1968,7 +1968,7 @@ local function onServerVehicleEdited(serverID, data)
 		UI.updateQueue(getQueueCounts())
 		UI.showNotification('Edit received and queued for '..playerNickname, ''..playerNickname..''..serverID..'edit', 'build')
 	else
-		local currentVeh = be:getPlayerVehicle(0) -- Camera fix
+		local currentVeh = getPlayerVehicle(0) -- Camera fix
 
 		applyVehEdit(serverID, data)
 		UI.updateQueue(0, 0)
@@ -1995,10 +1995,10 @@ local function onServerVehicleRemoved(serverVehicleID)
 	local gameVehicleID = vehicle.gameVehicleID
 	if gameVehicleID > 0 then
 		log('I', "onServerVehicleRemoved", string.format("Vehicle %i (%s) removed by server ", gameVehicleID, serverVehicleID))
-		local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
+		local veh = getObjectByID(gameVehicleID) -- Get associated vehicle
 		if veh then
 			onVehicleDestroyedAllowed = false
-			local currveh = be:getPlayerVehicle(0)
+			local currveh = getPlayerVehicle(0)
 			local isCurrent = (currveh and currveh:getID() == gameVehicleID) or false
 			veh:delete() -- Remove it
 			if isCurrent then be:enterNextVehicle(0,1) end-- Fix camera
@@ -2019,7 +2019,7 @@ local function onServerVehicleResetted(serverVehicleID, data)
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
 	if localCounter - (lastResetTime[serverVehicleID] or 0) > 0.2 then
 		if gameVehicleID then
-			local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
+			local veh = getObjectByID(gameVehicleID) -- Get associated vehicle
 			if veh then
 				local pr = jsonDecode(data) -- Decoded data
 				veh:queueLuaCommand("extensions.hook(\"onBeamMPVehicleReset\")")
@@ -2041,7 +2041,7 @@ end
 local function onServerVehicleCoupled(serverVehicleID, data)
 	local vehicle = getVehicleByServerID(serverVehicleID) -- Get game ID
 	if not vehicle.isLocal then
-		local veh = be:getObjectByID(vehicle.gameVehicleID)
+		local veh = getObjectByID(vehicle.gameVehicleID)
 		if veh then
 			veh:queueLuaCommand("couplerVE.toggleCouplerState(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 		end
@@ -2071,7 +2071,7 @@ local function onServerVehicleColorChanged(serverVehicleID, data)
 
     if vehicle and vehicle.serverVehicleString and not vehicle.isLocal then -- If serverVehicleID not null and not player own vehicle
         if gameVehicleID and gameVehicleID ~= -1 and not vehicle.editQueue then
-            local veh = be:getObjectByID(gameVehicleID) -- Get associated vehicle
+            local veh = getObjectByID(gameVehicleID) -- Get associated vehicle
             if veh then
                 local paint = jsonDecode(data) -- Decoded data
                 if paint then -- if there's paint data
@@ -2183,7 +2183,7 @@ local function handle(rawData)
 end
 
 local function saveDefaultRequest()
-	local currentVehicle = be:getPlayerVehicle(0)
+	local currentVehicle = getPlayerVehicle(0)
 	if not MPCoreNetwork.isMPSession() or currentVehicle and isOwn(currentVehicle:getID()) then
 		extensions.core_vehicle_partmgmt.savedefault()
 		log('I', "saveDefaultRequest", "Request to save vehicle accepted")
@@ -2196,7 +2196,7 @@ end
 local function spawnDefaultRequest()
 	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("onBeamMPTrackNewVehicle"); return end
 
-	local currentVehicle = be:getPlayerVehicle(0)
+	local currentVehicle = getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
 
 	if currentVehicle then
@@ -2219,7 +2219,7 @@ local function spawnRequest(model, config, colors)
 end
 
 local function replaceRequest(model, config, colors)
-	local currentVehicle = be:getPlayerVehicle(0)
+	local currentVehicle = getPlayerVehicle(0)
 	local gameVehicleID = currentVehicle and currentVehicle:getID() or -1
 	local vehicle = getVehicleByGameID(gameVehicleID)
 
@@ -2759,7 +2759,7 @@ end
 
 local function onVehicleReady(gameVehicleID)
 	log('M', 'onVehicleReady', 'Vehicle '..tostring(gameVehicleID)..' signaled that it is ready')
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if not veh then
 		log('E', 'onVehicleReady', 'Vehicle does not exist!')
 		return

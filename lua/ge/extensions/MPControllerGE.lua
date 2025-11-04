@@ -29,7 +29,7 @@ end
 
 local function applyControllerData(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		local decodedData = jsonDecode(data)
 		if decodedData.vehID then

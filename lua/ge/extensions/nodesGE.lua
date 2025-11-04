@@ -69,7 +69,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyNodes(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("nodesVE.applyNodes(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 	end
@@ -81,7 +81,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyBreakGroups(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("nodesVE.applyBreakGroups(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 	end

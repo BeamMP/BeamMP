@@ -2275,19 +2275,12 @@ local function groundmarkerFollowPlayer(targetName, dontfollow)
 end
 
 local function teleportVehToPlayer(targetName)
-	local activeVehicle = be:getPlayerVehicle(0)
+	local activeVehicle = getPlayerVehicle(0)
 
 	if activeVehicle then
 		for serverVehicleID, vehicle in pairs(vehicles) do
 			if vehicle.ownerName == targetName then
-				--print("teleporting to "..tostring(i))
-				local targetVeh = be:getObjectByID(vehicle.gameVehicleID)
-				local targetVehPos = targetVeh:getPosition()
-				local targetVehRot = quatFromDir(vec3(targetVeh:getDirectionVector()), vec3(targetVeh:getDirectionVectorUp()))
-
-				local vec3Pos = vec3(targetVehPos.x, targetVehPos.y, targetVehPos.z)
-
-				spawn.safeTeleport(activeVehicle, vec3Pos, targetVehRot, false)
+				spawn.safeTeleport(activeVehicle, vehicle.position, vehicle.rotation, false)
 				return
 			end
 		end
@@ -2298,14 +2291,14 @@ local function teleportVehToPlayer(targetName)
 end
 
 local function focusCameraOnPlayer(targetName)
-	local activeVehicle = be:getPlayerVehicle(0)
+	local activeVehicle = getPlayerVehicle(0)
 	local activeVehicleID = activeVehicle and activeVehicle:getID() or nil
 	log('I', "focusCameraOnPlayer", "Teleporting camera to: "..targetName)
 
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		if vehicle.ownerName == targetName and vehicle.jbeam ~= "unicycle" then
 			log('I', "focusCameraOnPlayer", "Found vehicle: "..vehicle.gameVehicleID)
-			local targetVeh = be:getObjectByID(vehicle.gameVehicleID)
+			local targetVeh = getObjectByID(vehicle.gameVehicleID)
 
 			if vehicle.gameVehicleID ~= activeVehicleID and targetVeh then
 				log('I', "focusCameraOnPlayer", "Entering vehicle "..vehicle.gameVehicleID)
@@ -2483,7 +2476,7 @@ local function onPreRender(dt)
 			local owner = v:getOwner()
 			if v.isLocal or not owner then goto skip_vehicle end
 			local gameVehicleID = v.gameVehicleID
-			local veh = be:getObjectByID(gameVehicleID)
+			local veh = getObjectByID(gameVehicleID)
 			local heightOffset = 0
 
 			if v.isSpawned and veh then -- update position if available
@@ -2533,7 +2526,7 @@ local function onPreRender(dt)
 			local nametagAlpha = 1
 			local nametagFadeoutDistance = settings.getValue("nameTagFadeDistance", 40)
 
-			local distfloat = (cameraPos or vec3()):distance(pos)
+			local distfloat = cameraPos:distance(pos)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 

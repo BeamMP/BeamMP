@@ -205,12 +205,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	for i = 0, be:getObjectCount() - 1 do
-		local veh = be:getObject(i)
-		if veh then
-			veh:queueLuaCommand("positionVE.setPing("..p..")")
-		end
-	end
+	be:queueAllObjectLua("positionVE.setPing("..p..")")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.

@@ -118,6 +118,8 @@ local smoothRvel = vec3(0,0,0)
 local physHandlerAdded = false
 
 local debugDrawer = obj.debugDrawProxy
+
+local simSpeedReal = 1
 -- ============= VARIABLES =============
 
 
@@ -180,28 +182,9 @@ local function onReset()
 	framesSinceReset = 0
 end
 
-local physcounter = 0
-local physstart = 0
 
-local physmult = 1
 
 local function update(dtSim)
-	if physcounter == 0 then
-		physstart = os.clock()
-	end
-	physcounter = physcounter+1
-	if physcounter == 2000 then
-		physcounter = 0
-		local physend = os.clock()
-		local physdiff = physend - physstart
-		if playerInfo.firstPlayerSeated then
-			physmult = 1/physdiff -- (physdiff == 0) and 0 or 1/physdiff
-			--print(tostring(physmult*100) .."% realtime")
-			obj:queueGameEngineLua("positionGE.setActualSimSpeed("..tostring(physmult)..")")
-		end
-	end
-
-
 	-- Smooth vehicle velocity to prevent vibrating
 	smoothVel = localVelSmoother:get(vec3(obj:getVelocity()), dtSim)
 	smoothRvel = localRvelSmoother:get(vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()), dtSim)
@@ -408,7 +391,7 @@ local function setVehiclePosRot(data)
 	local rvel = vec3(pr.rvel)
 	local tim  = pr.tim
 	local ping = pr.ping
-	local simspeedfraction = pr.localSimspeed
+	local simspeedfraction = 1/simSpeedReal
 
 	if not tim then return end
 	if remoteData.timer > tim then return end
@@ -419,8 +402,8 @@ local function setVehiclePosRot(data)
 	remoteData.rot = rot
 	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
 	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
-	remoteData.vel = vel
-	remoteData.rvel = rvel
+	remoteData.vel = vel*simspeedfraction
+	remoteData.rvel = rvel*simspeedfraction
 	remoteData.timer = tim
 	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
 	remoteData.recTime = timer
@@ -431,7 +414,9 @@ local function onInit()
 	enablePhysicsStepHook()
 end
 
-
+local function setGameSpeed(speed)
+	simSpeedReal = speed
+end
 
 M.onReset            = onReset
 M.onInit             = onInit
@@ -441,6 +426,7 @@ M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
 M.setVehiclePosRot   = setVehiclePosRot
 M.setPing            = setPing
+M.setGameSpeed       = setGameSpeed
 
 
 return M

@@ -11,6 +11,7 @@
 
 local M = {}
 
+local targetGameSpeed = 1
 local actualSimSpeed = 1
 
 --[[
@@ -54,17 +55,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			local decoded = jsonDecode(data)
-			local simspeedReal = simTimeAuthority.getReal()
-
-			decoded.isTransitioning = (simTimeAuthority.get() ~= simspeedReal) or nil
-
-			simspeedReal = simTimeAuthority.getPause() and 0 or simspeedReal -- set velocities to 0 if game is paused
-
-			for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedReal end
-			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
-
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..jsonEncode(decoded))
+			MPGameNetwork.send('Zp:'..serverVehicleID..":"..data)
 		end
 	end
 end
@@ -76,17 +67,6 @@ end
 local function applyPos(decoded, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
-
-
-	local simspeedFraction = 1
-	local gameSpeed = simTimeAuthority.getReal()
-	if gameSpeed > 0 then
-		simspeedFraction = 1/gameSpeed
-		for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedFraction end
-		for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedFraction end
-	end
-
-	decoded.localSimspeed = simspeedFraction
 
 	local veh = getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
@@ -277,6 +257,15 @@ local function onPreRender(dt)
 	end
 end
 
+local function onUpdate(dtReal, dtSim, dtRaw)
+	setActualSimSpeed(dtSim/dtRaw)
+	local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
+	if targetGameSpeed ~= simSpeed then
+		be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+	end
+	targetGameSpeed = simSpeed
+end
+
 --- This function is used to reset the positional update smoother when it is disabled
 local function onSettingsChanged()
 	if not settings.getValue("enablePosSmoother") then -- nil/false
@@ -296,6 +285,7 @@ M.setPing                     = setPing
 M.setActualSimSpeed           = setActualSimSpeed
 M.getActualSimSpeed           = getActualSimSpeed
 M.onPreRender                 = onPreRender
+M.onUpdate                    = onUpdate
 M.onSettingsChanged           = onSettingsChanged
 M.posSmoother                 = POSSMOOTHER -- debug entry
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

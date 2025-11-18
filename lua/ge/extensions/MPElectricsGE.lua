@@ -35,7 +35,7 @@ local function sendElectrics(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('We:'..serverVehicleID..":"..data)
+			MPGameNetwork.send(MPHelpers.generatePacketBuffer('We',serverVehicleID,data))
 			lastElectrics = data
 		end
 	end

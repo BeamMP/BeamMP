@@ -1278,7 +1278,7 @@ local function sendVehicleSpawn(gameVehicleID)
 		vehicleTable.vcf.licenseName = veh:getDynDataFieldbyName("licenseText", 0)
 
 		local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-		MPGameNetwork.send('Os:0:'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+		MPGameNetwork.send(MPHelpers.generatePacketBuffer('Os',0,stringToSend)) -- Send table that contain all vehicle informations for each vehicle
 		log('I', "sendVehicle", "Vehicle "..gameVehicleID.." was sent")
 
 		--local vehObj = Vehicle:new({ isLocal=true, ownerName=MPConfig.getNickname(), gameVehicleID=gameVehicleID, jbeam=vehicleTable.jbm, ownerID=vehicleTable.pid })
@@ -1323,13 +1323,13 @@ local function sendVehicleEdit(gameVehicleID)
 	vehicleTable.vcf.licenseName = veh:getDynDataFieldbyName("licenseText", 0)
 
 	local stringToSend = jsonEncode(vehicleTable) -- Encode table to send it as json string
-	MPGameNetwork.send('Oc:'..getServerVehicleID(gameVehicleID)..':'..stringToSend) -- Send table that contain all vehicle informations for each vehicle
+	MPGameNetwork.send(MPHelpers.generatePacketBuffer('Oc',getServerVehicleID(gameVehicleID),stringToSend)) -- Send table that contain all vehicle informations for each vehicle
 	log('I', "sendVehicleEdit", "Vehicle custom data "..gameVehicleID.." was sent")
 	vehiclesToSync[gameVehicleID] = nil
 end
 
 local function sendBeamstate(data, gameVehicleID)
-	MPGameNetwork.send('Ot:'..getServerVehicleID(gameVehicleID)..':'..data)
+	MPGameNetwork.send(MPHelpers.generatePacketBuffer('Ot',getServerVehicleID(gameVehicleID),data))
 end
 
 
@@ -1707,7 +1707,7 @@ local function onVehicleDestroyed(gameVehicleID)
 							handle:close()
 						end
 					end
-					MPGameNetwork.send('Od:'..serverVehicleID)
+					MPGameNetwork.send(MPHelpers.generatePacketBuffer('Od',serverVehicleID))
 					vehicles[serverVehicleID]:delete()
 				end
 			end
@@ -1727,9 +1727,7 @@ local function sendActiveVehicleID(newVehObj)
 	end
 	if newServerVehicleID then
 		local playerID = MPConfig.getPlayerServerID()
-		local s = tostring(playerID) .. ':' .. newServerVehicleID
-
-		MPGameNetwork.send('Om:'.. s)
+		MPGameNetwork.send(MPHelpers.generatePacketBuffer('Om',tostring(playerID),newServerVehicleID))
 	end
 end
 
@@ -1825,7 +1823,7 @@ local function onVehicleResetted(gameVehicleID)
 					w = rot.w
 				}
 			}
-			MPGameNetwork.send('Or:'..vehicle.serverVehicleString..":"..jsonEncode(tempTable).."")
+			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Or',vehicle.serverVehicleString,jsonEncode(tempTable)))
 		elseif vehicle then -- apply ABS behavior on nonlocal vehicles
 			local veh = be:getObjectByID(gameVehicleID)
 			local absMode = veh:getField("absMode", 0)
@@ -1846,8 +1844,7 @@ local function onVehicleColorChanged(gameVehicleID, index, paint)
         local veh = getObjectByID(gameVehicleID) -- get vehicle as object
 		local paintData =  MPHelpers.getColorsFromVehObj(veh)
         paintData[index] = paint --insert new paint at index as chosen from color picker
-
-		MPGameNetwork.send('Op:'..vehicle.serverVehicleString..":"..jsonEncode(paintData).."")
+		MPGameNetwork.send(MPHelpers.generatePacketBuffer('Op',vehicle.serverVehicleString,jsonEncode(paintData)))
     end
 end
 

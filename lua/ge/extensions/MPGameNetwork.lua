@@ -291,7 +291,7 @@ end
 -- @tparam string data - The data to be sent with the event
 -- @usage TriggerServerEvent(`<name>`, `<data>`)
 function TriggerServerEvent(name, data)
-	M.send('E:'..name..':'..data)
+	M.send(MPHelpers.generatePacketBuffer('E',name,data))
 end
 
 --- Triggers a local client event with the specified name and data.
@@ -299,7 +299,7 @@ end
 -- @tparam string data - The data to be sent with the event
 -- @usage `TriggerClientEvent(`<name>`, `<data>`)
 function TriggerClientEvent(name, data)
-	handleEvents(':'..name..':'..data)
+	handleEvents(':'..name..':'..data) --TODO: make a string.match bypass
 end
 
 --- Adds an event handler for the specified event name and function.

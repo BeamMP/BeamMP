@@ -12,6 +12,9 @@ local M = {}
 local LOCALISATION = nil
 local mime = require'mime' -- Game libary. Used in BeamNG.drive\lua\common\libs\luasocket\socket\mime.lua. We only use it for b64
 
+local stringBuffer = require("string.buffer")
+local sendStringBuff = stringBuffer.new()
+
 setmetatable(_G,{}) -- temporarily disable global write notifications
 
 --- Returns the decoded lang table from disk
@@ -282,11 +285,24 @@ local function onExtensionLoaded()
 	M.translate                = MPTranslate
 end
 
+local function generatePacketBuffer(packetType,id,data)
+	sendStringBuff:reset()
+	sendStringBuff:put(packetType)
+	if id then
+		sendStringBuff:put(":",id)
+	end
+	if data then
+		sendStringBuff:put(":",data) -- delete packets doesn't include data
+	end
+	return sendStringBuff
+end
+
 M.b64encode                = b64encode
 M.b64decode                = b64decode
 M.getColorsFromVehObj      = getColorsFromVehObj
 M.splitStringToTable       = splitStringToTable
 M.simplifyVehConfig        = simplifyVehConfig
+M.generatePacketBuffer       = generatePacketBuffer
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

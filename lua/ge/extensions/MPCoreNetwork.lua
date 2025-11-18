@@ -20,6 +20,8 @@ local TCPLauncherSocket = nop -- Launcher socket
 local socket = require('socket')
 local http = require("socket.http")
 local ltn12 = require("ltn12")
+local stringBuffer = require("string.buffer")
+local sendStringBuff = stringBuffer.new()
 local launcherConnected = false
 local isConnecting = false
 local proxyPort = ""
@@ -73,7 +75,8 @@ local function send(data) -- TODO currently the socket keeps retrying indefinite
 	if TCPLauncherSocket == nop then return end
 
 	local header = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
-	local packet = header .. data
+	sendStringBuff:reset():put(header,data)
+	local packet = sendStringBuff:tostring()
 
 	local retries = 1
 

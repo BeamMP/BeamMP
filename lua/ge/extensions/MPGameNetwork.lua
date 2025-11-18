@@ -16,6 +16,8 @@ local ffi = require("ffi")
 -- ============= VARIABLES =============
 
 local socket = require('socket')
+local stringBuffer = require("string.buffer")
+local sendStringBuff = stringBuffer.new()
 local TCPLauncherSocket
 local launcherConnected = false
 local isConnecting = false
@@ -81,7 +83,8 @@ local function sendData(data) -- TODO currently the socket keeps retrying indefi
 	-- if not connected return
 	if not TCPLauncherSocket then return end
 	local header = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
-	local packet = header .. data
+	sendStringBuff:reset():put(header,data)
+	local packet = sendStringBuff:tostring()
 
 	local retries = 1
 

@@ -455,13 +455,11 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		$state.go('menu.multiplayer.servers');
 		repopulateServerList();
 
-		var buttons = document.getElementsByClassName("servers-btn");
-		for (var i = 0; i < buttons.length; i++) {
-			buttons[i].classList.remove("md-primary");
-			buttons[i].classList.remove("md-raised");
-		}
-		document.getElementById(view+"-servers-btn").classList.add("md-primary");
-		document.getElementById(view+"-servers-btn").classList.add("md-raised");
+		document.getElementsByClassName("selected-server-mp-btn")[0].classList.remove("selected-server-mp-btn");
+		var button = document.getElementById(view+"-mp-btn");
+		if (!button) return;
+		button.classList.add("selected-server-mp-btn");
+
 
 		if (view == "recents") {
 			$translate('ui.multiplayer.clearRecent').then(function (translation) {
@@ -519,7 +517,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		bngApi.engineLua('MPCoreNetwork.getLoginState()');
 		if (toState.url == "/multiplayer") {
 			// local://local/ui/#/menu/multiplayer/mpservers
-			document.getElementById('servers-btn').click();
+			// document.getElementById('servers-btn').click();
 			
 		}
 
@@ -1077,11 +1075,7 @@ function($scope, $state, $timeout, $filter) {
 		serverView = "";
 		$timeout.cancel(timeOut);
 		//console.log('[MultiplayerServersController] destroyed.');
-		var buttons = document.getElementsByClassName("servers-btn");
-		for (var i = 0; i < buttons.length; i++) {
-			buttons[i].classList.remove("md-primary");
-			buttons[i].classList.remove("md-raised");
-		}
+		document.getElementsByClassName("selected-server-mp-btn")[0].classList.remove("selected-server-mp-btn");
 	});
 	
 	$scope.$on('onServerListReceived', async function (event, data) {

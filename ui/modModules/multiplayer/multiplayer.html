@@ -4,7 +4,7 @@
 
 <div id="LoadingServer" style="display: none;">
   <div id="LoadingBody" style="">
-    <md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closeLoadingPopup()"> X </md-button>
+    <button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closeLoadingPopup()"> X </button>
     <h1>{{:: 'ui.multiplayer.connectingToServer' | translate}}</h1>
     <hr id="loadingstatus-divider"/>
     <span id="OriginalLoadingStatus" hidden style="height: 0px;"></span>
@@ -36,7 +36,7 @@
 
 <div id="addCustomFav" style="display: none;" class="filter-overlay">
   <div class="addCustomFav">
-    <md-button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </md-button>
+    <button style="right:0; top:0; margin:0;" class="button close-button" ng-class="" ng-click="multiplayer.closePopup()"> X </button>
     <md-list-item layout class="md-padding">
       <h1>{{:: 'ui.multiplayer.addCustomServer' | translate}}: </h1>
     </md-list-item>
@@ -44,7 +44,7 @@
       <input type="text" id="customFavName" name="customFavName" placeholder="Server name"/>
       <input type="text" id="customFavIP" name="customFavIP" placeholder="Server IP"/>
       <input type="text" id="customFavPort" name="customFavPort" placeholder="Server port" value="30814"/>
-      <md-button class="button" ng-click="multiplayer.addCustomServer()" style="margin-top: 20px; width: 400px;">{{:: 'ui.multiplayer.save' | translate}}</md-button>
+      <button class="button" ng-click="multiplayer.addCustomServer()" style="margin-top: 20px; width: 400px;">{{:: 'ui.multiplayer.save' | translate}}</button>
     </center>
   </div>
 </div>
@@ -55,80 +55,80 @@
         <md-list-item layout="row" class="">
             <h1 class="md-toolbar-tools" style="width:auto;">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
             <p id="topRightStatus" style="text-align: center;margin: 0 auto;position: absolute;width: 100%;color: white;">{{:: 'ui.multiplayer.patreon.message.user' | translate}}
-              <md-button class="" style="
+              <button class="" style="
               margin: 5px;
               border: 2px solid;
               border-radius: 5px;
               padding: 2px 5px;
               color: var(--bng-orange);
-          " ng-click="multiplayer.showMessage()"><span>{{:: 'ui.multiplayer.patreon.button.user' | translate}}</span></md-button></p>
+          " ng-click="multiplayer.showMessage()"><span>{{:: 'ui.multiplayer.patreon.button.user' | translate}}</span></button></p>
 			<!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
         </md-list-item>
     </md-toolbar>
 
     <div flex layout="row" style="overflow: auto;">
-      <md-content layout="column" id="left-menu">
-        <md-button class="servers-btn md-primary md-raised" id="-servers-btn" ng-click="switchServerView('')" style="text-align:left;">
-          <md-icon class="material-icons">explore</md-icon>
+      <div class="mp-btn-container" layout="column" id="left-menu">
+        <button class="mp-btn selected-server-mp-btn" id="-mp-btn" ng-click="switchServerView('')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/public.svg"></md-icon>
 		      {{:: 'ui.multiplayer.servers' | translate}}
-        </md-button>
+        </button>
 
-        <md-button class="servers-btn" id="featured-servers-btn" ng-click="switchServerView('featured')" style="text-align:left;">
-          <md-icon class="material-icons">star</md-icon>
+        <button class="mp-btn" id="featured-mp-btn" ng-click="switchServerView('featured')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/featured.svg"></md-icon>
 		      {{:: 'ui.multiplayer.featured' | translate}}
-        </md-button>
+        </button>
 
-        <md-button class="servers-btn" id="official-servers-btn" ng-click="switchServerView('official')" style="text-align:left;">
-          <md-icon class="material-icons">desktop_windows</md-icon>
+        <button class="mp-btn" id="official-mp-btn" ng-click="switchServerView('official')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/official.svg"></md-icon>
 		      {{:: 'ui.multiplayer.official' | translate}}
-        </md-button>
+        </button>
 
-        <md-button class="servers-btn" id="partner-servers-btn" ng-click="switchServerView('partner')" style="text-align:left;">
-          <md-icon class="material-icons">public</md-icon>
+        <button class="mp-btn" id="partner-mp-btn" ng-click="switchServerView('partner')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/partner.svg"></md-icon>
 		      {{:: 'ui.multiplayer.partner' | translate}}
-        </md-button>
+        </button>
 
-        <md-button class="servers-btn" id="favorites-servers-btn" ng-click="switchServerView('favorites')" style="text-align:left;">
-          <md-icon class="material-icons">bookmark</md-icon>
+        <button class="mp-btn" id="favorites-mp-btn" ng-click="switchServerView('favorites')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/favorite.svg"></md-icon>
 				  {{:: 'ui.multiplayer.favorites' | translate}}
-        </md-button>
+        </button>
 
-        <md-button class="servers-btn" id="recents-servers-btn" ng-click="switchServerView('recents')" style="text-align:left;">
-          <md-icon class="material-icons">alarm</md-icon>
+        <button class="mp-btn" id="recents-mp-btn" ng-click="switchServerView('recents')">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/recent.svg"></md-icon>
 				  {{:: 'ui.multiplayer.recent' | translate}}
-        </md-button>
+        </button>
 
-        <md-button id="direct-connect-btn" ng-class="{'md-primary md-raised': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
-          <md-icon class="material-icons">web</md-icon>
+        <button class="mp-btn" id="direct-connect-mp-btn" ng-class="{'selected-server-mp-btn': (multiplayer.stateName.indexOf('multiplayer.direct') !== -1)}" ui-sref="menu.multiplayer.direct" style="text-align:left;">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/direct-connect.svg"></md-icon>
 				  {{:: 'ui.multiplayer.direct_connect' | translate}}
-        </md-button>
+        </button>
 
         <md-divider></md-divider>
 
-        <md-button onclick="openExternalLink(`https://docs.beammp.com`)" ng-class="" style="text-align:left;">
-          <md-icon class="material-icons">description</md-icon>
+        <button onclick="openExternalLink(`https://docs.beammp.com`)" class="mp-btn">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/wiki.svg"></md-icon>
           {{:: 'ui.multiplayer.docs' | translate}}
-        </md-button>
+        </button>
 
-        <md-button id="forum-btn" onclick="openExternalLink(`https://forum.beammp.com`)" ng-class="" style="text-align:left;">
-          <md-icon class="material-icons">web</md-icon>
+        <button id="forum-btn" onclick="openExternalLink(`https://forum.beammp.com`)" class="mp-btn">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/forum.svg"></md-icon>
 				  {{:: 'ui.multiplayer.forum' | translate}}
-        </md-button>
+        </button>
 
-        <md-button onclick="openExternalLink(`https://discord.gg/BeamMP`)" ng-class="" style="text-align:left;">
-          <md-icon md-svg-src="local://local/ui/modModules/multiplayer/icons/icon_clyde_white_RGB.svg"></md-icon>
+        <button onclick="openExternalLink(`https://discord.gg/BeamMP`)" class="mp-btn">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/discord.svg"></md-icon>
           {{:: 'ui.multiplayer.discord' | translate}}
-        </md-button>
+        </button>
 
-        <md-button onclick="openExternalLink(`https://www.patreon.com/BeamMP`)" ng-class="" style="text-align:left;">
-          <img src="local://local/ui/modModules/multiplayer/icons/Digital-Patreon-Logo_White.png" style="width: 25px;vertical-align: middle;"></img>
+        <button onclick="openExternalLink(`https://www.patreon.com/BeamMP`)" class="mp-btn">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/patreon.svg"></md-icon>
           {{:: 'ui.multiplayer.patreon' | translate}}
-        </md-button>
+        </button>
 
-        <md-button onclick="openExternalLink(`https://github.com/BeamMP/`)" style="text-align: left;">
-          <img src="local://local/ui/modModules/multiplayer/icons/github-mark.svg" style="width: 25px;vertical-align: middle;"></img>
+        <button onclick="openExternalLink(`https://github.com/BeamMP/`)" class="mp-btn">
+          <md-icon md-svg-src="/ui/modModules/multiplayer/icons/github.svg"></md-icon>
           {{:: 'ui.multiplayer.github' | translate}}
-        </md-button>
+        </button>
 
 	    <md-divider></md-divider>
 	    
@@ -138,11 +138,11 @@
         <span id="serverlist-profile-name" style="text-align: center; background-color: rgba(0, 0, 0, 0); border-radius: 10px; margin-left: 15px; margin-right: 15px; margin-top: 10px; padding: 2px;"></span>
         <span id="serverlist-profile-id" style="text-align: center;font-size: 0.9em; line-height: 1.5em; opacity: 0.8; cursor: pointer; margin-top: 6px;"></span>
 
-        <md-button ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
+        <button ng-click="logout()" class="md-raised md-accent" style="text-align:left;">
           <md-icon class="material-icons">exit_to_app</md-icon>
 				  {{:: 'ui.multiplayer.logout' | translate}}
-        </md-button>
-      </md-content>
+        </button>
+      </div>
 
       <div flex style="position: relative;">
         <md-content ui-view class="container" style="background: transparent; overflow: auto;"></md-content>

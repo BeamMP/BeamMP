@@ -1,3 +1,78 @@
+:root {
+  --MP-orange-1: rgba(255, 102, 0, 1);
+  --MP-orange-2: rgba(255, 102, 0, 0.80);
+  --MP-opacity-background1: rgba(0, 0, 0, 0.60);
+  --MP-opacity-background2: rgba(31, 31, 31, 0.90);
+  --MP-opacity-background3: rgba(31, 31, 31, 0.70);
+  --MP-button-background: rgba(31, 31, 31, 1);
+  --MP-button-text: rgba(255, 255, 255, 0.70);
+}
+
+#serverListHeader {
+  background-color: var(--MP-opacity-background1);
+}
+#serverListMainContainer {
+  background: rgba(202, 202, 202, 0.5);
+  backdrop-filter: blur(3.5px);
+}
+/* apply font family to everything in #serverListMainContainer */
+#serverListMainContainer * {
+  font-family: var(--fnt-defs);
+  font-weight: 600;
+}
+
+#serversTableHead {
+  background-color: var(--MP-opacity-background1);
+  font-weight: bold;
+}
+
+#top-bar{
+  background: var(--MP-opacity-background2);
+  border-bottom: 1px solid var(--MP-orange-1);
+}
+
+#left-menu {
+  color: white;
+  background: var(--MP-opacity-background2);
+}
+.mp-btn-container {
+  padding: 10px 6px 0px 6px;
+  justify-content: center;
+  display: grid;
+  grid-gap: 8px;
+  grid-template-columns: 1fr;
+}
+
+.selected-server-mp-btn {
+  border-color: var(--MP-orange-1) !important;
+  box-shadow: 0 0 12px rgba(255, 102, 0, 0.7);
+}
+
+.mp-btn:hover {
+    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.4);
+}
+
+.mp-btn {
+    border: 1px solid transparent;
+    transition: border-color 0.5s ease, opacity 0.5s ease, box-shadow 0.5s ease;
+    text-align:left;
+    display: flex;
+    align-items: center;
+    color: var(--MP-button-text);
+    background: var(--MP-button-background);
+    width: 100%;
+    font-size: var(--ui-rem);
+    padding: 8px;
+    border-radius: 10px;
+    justify-self: center;
+    align-self: center;
+}
+.mp-btn md-icon {
+    margin: unset;
+    margin-right: 5px;
+}
+
 .rounded-progress .md-container {
   border-radius: 10px;
   overflow: hidden; /* prevents overflow of the bar */
@@ -16,14 +91,6 @@
   top: -50px;
 }
 
-#top-bar {
-  background: #404040b8;
-}
-
-#left-menu {
-  color: white;
-  background-color: #404040b8;
-}
 
 #filter-dropdown {
   height: 40px;
@@ -467,6 +534,9 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 #serverListMainContainer .focus-visible::before {     
   display: none; 
 }
+#serverListMainContainer .focus-visible {
+  overflow: hidden !important;
+}
 
 .server-item {
     height: 24px;
@@ -483,7 +553,7 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   background-color: rgba(0, 123, 195, 0.3);
 }
 .official {
-  background-color: rgba(255, 106, 0, 0.25);
+  background-color: rgba(255, 102, 0, 0.5);
 }
 .favorite {
   background-color: rgba(255, 215, 0, 0.35);

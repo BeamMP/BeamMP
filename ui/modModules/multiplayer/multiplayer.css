@@ -29,33 +29,48 @@
 #top-bar{
   background: var(--MP-opacity-background2);
   border-bottom: 1px solid var(--MP-orange-1);
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  grid-gap: 0.3125rem;
+  align-items: center;
 }
-
 #left-menu {
   color: white;
   background: var(--MP-opacity-background2);
 }
+#topRightStatus {
+  font-size: 1.5rem;
+  color: var(--MP-button-text);
+}
 .mp-btn-container {
-  padding: 10px 6px 0px 6px;
+  padding: 0.625rem 0.375rem 0 0.375rem;
   justify-content: center;
   display: grid;
-  grid-gap: 8px;
+  grid-gap: 0.3rem;
   grid-template-columns: 1fr;
 }
 
 .selected-server-mp-btn {
   border-color: var(--MP-orange-1) !important;
-  box-shadow: 0 0 12px rgba(255, 102, 0, 0.7);
+  box-shadow: 0 0 0.75rem rgba(255, 102, 0, 0.7);
 }
 
 .mp-btn:hover {
     opacity: 0.8;
-    box-shadow: 0 0 8px rgba(255, 102, 0, 0.4);
+    box-shadow: 0 0 0.5rem rgba(255, 102, 0, 0.4);
 }
-
+.mp-btn2 {
+    border: 1px solid var(--MP-orange-1);
+    background: transparent;
+    color: var(--MP-orange-2);
+    border-radius: 0.625rem;
+    padding: 0.3125rem;
+    height: fit-content;
+    width: fit-content;
+}
 .mp-btn {
     border: 1px solid transparent;
-    transition: border-color 0.5s ease, opacity 0.5s ease, box-shadow 0.5s ease;
+    transition: border-color 0.5s ease, opacity 0.2s ease, box-shadow 0.2s ease;
     text-align:left;
     display: flex;
     align-items: center;
@@ -63,16 +78,20 @@
     background: var(--MP-button-background);
     width: 100%;
     font-size: var(--ui-rem);
-    padding: 8px;
-    border-radius: 10px;
+    padding: 0.5rem;
+    border-radius: 0.625rem;
     justify-self: center;
     align-self: center;
 }
 .mp-btn md-icon {
     margin: unset;
-    margin-right: 5px;
+    margin-right: 0.313rem;
 }
-
+.mp-divider{
+    justify-self: center;
+    border-top-color: var(--MP-orange-1) !important;
+    width: 80%;
+}
 .rounded-progress .md-container {
   border-radius: 10px;
   overflow: hidden; /* prevents overflow of the bar */
@@ -183,7 +202,7 @@ table#serversTable {
 }
 
 #connect-button {
-  width: 200px;
+  width: 12.5rem;
   margin-left: auto;
   float: right;
 }
@@ -260,10 +279,10 @@ div#LoadingBody {
   z-index: 100;
 
   background-color: grey;
-  padding: 15px;
-  border-radius: 5px;
+  padding: 0.9375rem;
+  border-radius: 0.3125rem;
 
-  width: 700px
+  width: 43.75rem
 }
 
 input {
@@ -279,7 +298,7 @@ input {
 
 .row {
   width: 100%;
-  padding-top: 10px;
+  padding-top: 0.625rem;
   display: flex;
 }
 
@@ -511,17 +530,17 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
 }
 
 .flag {
-  height: 17px;
+  height: 1.0625rem;
   float: left;
   position: relative;
-  top: 2px;
-  max-width: 34px;
+  top: 0.125rem;
+  max-width: 2.125rem;
 }
 
 
 .server-maxplayers,
 .server-flag {
-  width: 90px;
+  width: 5.625rem;
 }
 .server-mapname {
   width: 33.33%;

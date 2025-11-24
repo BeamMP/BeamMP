@@ -827,24 +827,23 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		let nameElement = document.getElementById("serverlist-profile-name")
 		let idElement = document.getElementById("serverlist-profile-id")
 		let avatarElement = document.getElementById("serverlist-profile-avatar")
-
+		let patreonBtn = document.querySelector(".patreon-btn")
 		if (Object.keys(data).length > 1) {
 			let patreonText = $filter('translate')('ui.multiplayer.patreon.message.user')
 
 			let banner = document.getElementById("topRightStatus")
-
+			let topBar = document.getElementById("top-bar")
 			if (data.role == "EA") {
 				patreonText = $filter('translate')('ui.multiplayer.patreon.message.ea')
 				banner.children[0].style.display = "none"
 				banner.style.color = "#fe8cff";
 			} else {
-				banner.children[0].style.display = ""
-				banner.style.color = "white";
+				banner.style.display = ""
+				banner.style.color = "var(--MP-button-text)";
 			}
 
-			banner.firstChild.nodeValue = patreonText
-			banner.children[0].style.color = "var(--bng-orange)"
-			banner.children[0].children[0].innerText = $filter('translate')('ui.multiplayer.patreon.button.user')
+			banner.textContent = patreonText
+			patreonBtn.textContent = $filter('translate')('ui.multiplayer.patreon.button.user')
 
 			if (data.color != null)
 				nameElement.style.backgroundColor = data.color
@@ -1247,8 +1246,7 @@ function($scope, $state, $timeout) {
 			}
 		);
 	};
-}])
-
+}]);
 
 
 

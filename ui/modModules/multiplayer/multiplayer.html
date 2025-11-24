@@ -51,20 +51,12 @@
 
 <md-content id="back" layout="column">
 
-    <md-toolbar class="md-primary" id="top-bar">
-        <md-list-item layout="row" class="">
-            <h1 class="md-toolbar-tools" style="width:auto;">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
-            <p id="topRightStatus" style="text-align: center;margin: 0 auto;position: absolute;width: 100%;color: white;">{{:: 'ui.multiplayer.patreon.message.user' | translate}}
-              <button class="" style="
-              margin: 5px;
-              border: 2px solid;
-              border-radius: 5px;
-              padding: 2px 5px;
-              color: var(--bng-orange);
-          " ng-click="multiplayer.showMessage()"><span>{{:: 'ui.multiplayer.patreon.button.user' | translate}}</span></button></p>
+    <div id="top-bar">
+          <h1 class="md-toolbar-tools" style="width:auto; color: var(--MP-orange-2)">{{:: 'ui.multiplayer.multiplayer' | translate}}</h1>
+          <p id="topRightStatus">{{:: 'ui.multiplayer.patreon.message.user' | translate}}</p>
+          <button class="mp-btn2 patreon-btn" ng-click="multiplayer.showMessage()">{{:: 'ui.multiplayer.patreon.button.user' | translate}}</button>
 			<!--<md-button id="launcher-connect-button" class="button" ng-click="multiplayer.resetLauncherConnection()">Connect to launcher</md-button>-->
-        </md-list-item>
-    </md-toolbar>
+    </div>
 
     <div flex layout="row" style="overflow: auto;">
       <div class="mp-btn-container" layout="column" id="left-menu">
@@ -103,7 +95,7 @@
 				  {{:: 'ui.multiplayer.direct_connect' | translate}}
         </button>
 
-        <md-divider></md-divider>
+        <md-divider class="mp-divider"></md-divider>
 
         <button onclick="openExternalLink(`https://docs.beammp.com`)" class="mp-btn">
           <md-icon md-svg-src="/ui/modModules/multiplayer/icons/wiki.svg"></md-icon>
@@ -130,7 +122,7 @@
           {{:: 'ui.multiplayer.github' | translate}}
         </button>
 
-	    <md-divider></md-divider>
+      <md-divider class="mp-divider"></md-divider>
 	    
 	    <div flex="" style="max-height: none;"></div>
       

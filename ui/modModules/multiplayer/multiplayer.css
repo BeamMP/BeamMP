@@ -73,6 +73,12 @@
     padding: 0.3125rem;
     width: 12.5rem;
     height: 2.5rem;
+    transition: border-color 0.5s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+.mp-btn3:hover {
+    opacity: 0.8;
+    border-color: var(--MP-orange-1);
+    box-shadow: 0 0 0.75rem rgba(255, 102, 0, 0.7);
 }
 .mp-btn2 {
     border: 1px solid var(--MP-orange-1);
@@ -109,10 +115,15 @@
   border: 2px solid var(--MP-border);
   width: 25rem;
 }
+#search:focus {
+  border-color: var(--MP-orange-2);
+}
 #search::placeholder {
   color: var(--MP-opacity-text);
 }
-
+#activeFilters {
+  color: var(--MP-orange-1);
+}
 .mp-divider{
     justify-self: center;
     border-top-color: var(--MP-orange-1) !important;

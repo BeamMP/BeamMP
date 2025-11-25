@@ -2,21 +2,23 @@
 <md-content id="serverListMainContainer" style="display: flex; flex-direction: column; height: 100%;">
 
 	<div id="serverListHeader" layout="row" layout-padding="">
-		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search" />
-		<md-button id="refresh-button" class="button servers-button" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</md-button>
 
-		<md-button id="extra-button" class="button servers-button" style="display: none;"></md-button>
+		<input ng-model="multiplayermenu.searchText" ng-change="multiplayermenu.repopulate();" type="text" id="search" name="search" placeholder="Search"/>
 
-		<md-button class="button servers-button" style="display: flex; justify-content: center; width: 200px;" ng-click="toggleFilterOverlay()">
+		<button id="refresh-button" class="mp-btn3" ng-class="" ng-click="multiplayer.refreshList()">{{:: 'ui.multiplayer.refresh' | translate}}</button>
+
+		<button id="extra-button" class="mp-btn3" style="display: none;"></button>
+
+		<button class="mp-btn3" ng-click="toggleFilterOverlay()">
 			<span style="margin-right: 10px">{{:: 'ui.multiplayer.openFilters' | translate}}</span>
 			<md-tooltip md-direction="top">{{:: 'ui.multiplayer.openFilters' | translate}}</md-tooltip>
-		</md-button>
+		</button>
 
-		<md-button class="button servers-button" style="display: none; justify-content: center; width: 200px;" id="clearFiltersButton" ng-click="clearFilters()">
+		<button class="mp-btn3" id="clearFiltersButton" ng-click="clearFilters()">
 			<span style="margin-right: 10px">{{:: 'ui.multiplayer.clearFilters' | translate}}</span>
 			<md-icon style="margin: 0; vertical-align: middle;">clear</md-icon>
 			<md-tooltip md-direction="top">{{:: 'ui.multiplayer.clearFilters' | translate}}</md-tooltip>
-		</md-button>
+		</button>
 
 		<span id="FiltersPrefix" style="display: none; font-weight: bold; align-self: center;">{{:: 'ui.multiplayer.activeFilters' | translate}}</span>
 		<span id="activeFilters" style="align-self: center; padding-left: 10px;"></span>

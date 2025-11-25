@@ -4,12 +4,18 @@
   --MP-opacity-background1: rgba(0, 0, 0, 0.60);
   --MP-opacity-background2: rgba(31, 31, 31, 0.90);
   --MP-opacity-background3: rgba(31, 31, 31, 0.70);
+  --MP-search-background: rgba(23, 23, 23, 0.5);
+  --MP-border: rgba(38, 38, 38, 1);
   --MP-button-background: rgba(31, 31, 31, 1);
   --MP-button-text: rgba(255, 255, 255, 0.70);
+  --MP-opacity-text: rgba(255, 255, 255, 0.50);
 }
 
 #serverListHeader {
-  background-color: var(--MP-opacity-background1);
+  background-color: var(--MP-opacity-background1) !important;
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
 }
 #serverListMainContainer {
   background: rgba(202, 202, 202, 0.5);
@@ -59,6 +65,15 @@
     opacity: 0.8;
     box-shadow: 0 0 0.5rem rgba(255, 102, 0, 0.4);
 }
+.mp-btn3 {
+    border: 2px solid var(--MP-border);
+    background: var(--MP-button-background);
+    color: var(--MP-button-text);
+    border-radius: 0.625rem;
+    padding: 0.3125rem;
+    width: 12.5rem;
+    height: 2.5rem;
+}
 .mp-btn2 {
     border: 1px solid var(--MP-orange-1);
     background: transparent;
@@ -87,6 +102,17 @@
     margin: unset;
     margin-right: 0.313rem;
 }
+#search {
+  text-indent: 2rem;
+  background: url(/ui/modModules/multiplayer/icons/search.svg) no-repeat scroll 5px center, var(--MP-search-background);
+  border-radius: 0.625rem;
+  border: 2px solid var(--MP-border);
+  width: 25rem;
+}
+#search::placeholder {
+  color: var(--MP-opacity-text);
+}
+
 .mp-divider{
     justify-self: center;
     border-top-color: var(--MP-orange-1) !important;
@@ -116,10 +142,6 @@
   background: unset;
   color: white !important;
   margin: 10px;
-}
-
-#search {
-  border-radius: var(--bng-corners-1);
 }
 
 #back {
@@ -174,7 +196,7 @@ table#serversTable {
   min-width: 150px;
 }
 
-.button {
+/* .button {
   color: white;
   text-align: center;
   background-color: rgb(212, 100, 26);
@@ -183,12 +205,12 @@ table#serversTable {
   width: 100%;
   transition-duration: 0.15s;
   cursor: pointer;
-}
+} */
 
-.servers-button {
+/* .servers-button {
   width: 200px;
   height: 40px;
-}
+} */
 
 .button:hover {
   background-color: white;
@@ -285,7 +307,7 @@ div#LoadingBody {
   width: 43.75rem
 }
 
-input {
+/* input {
   display: block;
   width: 400px;
   margin-top: 6px;
@@ -294,7 +316,7 @@ input {
   background: rgba(0, 0, 0, 0.25);
   color: white;
   height: 40px;
-}
+} */
 
 .row {
   width: 100%;

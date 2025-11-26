@@ -10,15 +10,28 @@
   --MP-button-text: rgba(255, 255, 255, 0.70);
   --MP-opacity-text: rgba(255, 255, 255, 0.50);
 }
-/* .UI-Flex-Wrapper is the main container of the UI. If we resize it with some math, this will auto-scale the 1080p UI to ANY other resolutions.
-The :has is to only apply to the server list to prevent issues.
-Feels like black magic */
-.UI-Flex-Wrapper:has(#serverListMainContainer) {  
-  --MP-scale-factor: min(calc(100vw / 1920), calc(100vh / 1080));
+
+/* UI RESPONSIVE */
+body:has(#serverListMainContainer) {  
   width: 1920px;
   height: 1080px;
-  transform: scale(var(--MP-scale-factor));
   transform-origin: top left;
+}
+
+@media (max-width: 1280px) {
+  body:has(#serverListMainContainer) {
+    transform: scale(0.6667);
+  }
+}
+@media (min-width: 1281px) and (max-width: 1920px) {
+  body:has(#serverListMainContainer) {
+    transform: scale(1);
+  }
+}
+@media (min-width: 1921px) {
+  body:has(#serverListMainContainer) {
+    transform: scale(1.3333);
+  }
 }
 
 #serverListHeader {

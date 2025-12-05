@@ -258,12 +258,14 @@ local function onPreRender(dt)
 end
 
 local function onUpdate(dtReal, dtSim, dtRaw)
-	setActualSimSpeed(dtSim/dtRaw)
-	local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
-	if targetGameSpeed ~= simSpeed then
-		be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+		setActualSimSpeed(dtSim/dtRaw)
+		local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
+		if targetGameSpeed ~= simSpeed then
+			be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+		end
+		targetGameSpeed = simSpeed
 	end
-	targetGameSpeed = simSpeed
 end
 
 --- This function is used to reset the positional update smoother when it is disabled

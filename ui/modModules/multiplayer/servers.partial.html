@@ -148,11 +148,17 @@
 									<span>{{SmoothMapName(server.server.map || "")}}</span>
 								</div>
 								<div id="relative-server-players">
-									<md-icon md-svg-src="/ui/modModules/multiplayer/icons/players.svg"></md-icon>
-									<div id="server-players">
-										<!-- <span>{{server.server.players|| ""}}/{{server.server.maxplayers|| ""}}</span> -->
-										<span ng-repeat="player in listPlayers(server.server.playerslist|| [])" class="mp-player">{{player}}</span>
-									</div>
+										<md-icon
+											class="players-corner-icon"
+											md-svg-src="/ui/modModules/multiplayer/icons/players.svg">
+										</md-icon>
+
+										<div id="server-players">
+											<span ng-repeat="player in listPlayers(server.server.playerslist || [])"
+												class="mp-player">
+												{{player}}
+											</span>
+										</div>
 								</div>
 							</div>
 							<div class="info-right">

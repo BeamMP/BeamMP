@@ -184,21 +184,34 @@ body:has(#serverListMainContainer) {
     white-space: nowrap;
     overflow: hidden;
 }
-#relative-server-players md-icon{
-  position: absolute;
-  top: 0;
-  left: 0.5rem;
-}
-#relative-server-players{
-  position: relative;
-}
-#server-players{
-    width: 85%;
-    justify-self: end;
-    border-radius: 0.625rem;
+#relative-server-players {
     display: flex;
     flex-direction: column;
     background: var(--MP-button-background);
+    border-radius: 0.625rem;
+    padding: 1.1.100rem 1.100rem 0.700rem 1.100rem;
+    margin-top: .9375rem;
+    margin-left: .9375rem;
+}
+
+.players-corner-icon {
+    align-self: flex-start;
+    margin-top: -2.0375rem;
+    margin-left: -2.0375rem;
+    margin-bottom: 0;
+    
+    border: .0625rem solid var(--MP-orange-1);
+    background: var(--MP-button-background);
+    border-radius: 0.625rem;
+    padding: .3125rem;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+#server-players{
+  padding-top: .75rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 .floating-title {
 

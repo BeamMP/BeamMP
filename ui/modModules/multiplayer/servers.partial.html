@@ -136,32 +136,54 @@
 				
 				<tr ng-if="server.id === selectedServerId" ng-repeat-end id="ServerInfoRow">
 					<td colspan="5">
-							<h1 style="padding-left:10px;">
-								<img ng-if="server.server.official" 
-								ng-src="local://local/ui/modModules/multiplayer/beammp.png" 
-								alt="Official Server"
-								ng-style="{'height': '23px', 'padding-right': '10px'}">
-								<span ng-if="server.server.official">[Official Server]</span>
-								<span ng-bind-html="formatCodes(server.server.sname)" style="font-size:22px; margin-left:5px"></span>
-							</h1>
-							<div class="row">
-							<div class="col">
-								<table class="description-table">
-									<tr><td>Owner:</td><td>{{server.server.owner|| ""}}</td></tr>
-									<tr><td>Map:</td><td>{{SmoothMapName(server.server.map || "")}}</td></tr>
-									<tr><td>Players:</td><td>{{server.server.players|| ""}}/{{server.server.maxplayers|| ""}}</td></tr>
-									<tr><td valign="top">Description:</td><td ng-bind-html="formatCodes(server.server.sdesc|| '', true)"></td></tr>
-								</table>
+
+						<div id="info-container">
+							<div class="info-left">
+								<div id="server-owner">
+									<md-icon md-svg-src="/ui/modModules/multiplayer/icons/owner.svg"></md-icon>
+									<span>{{(server.server.owner || "").replace('#', '')}}</span>
+								</div>
+								<div id="server-map">
+									<md-icon md-svg-src="/ui/modModules/multiplayer/icons/map.svg"></md-icon>
+									<span>{{SmoothMapName(server.server.map || "")}}</span>
+								</div>
+								<div id="relative-server-players">
+									<md-icon md-svg-src="/ui/modModules/multiplayer/icons/players.svg"></md-icon>
+									<div id="server-players">
+										<!-- <span>{{server.server.players|| ""}}/{{server.server.maxplayers|| ""}}</span> -->
+										<span ng-repeat="player in listPlayers(server.server.playerslist|| [])" class="mp-player">{{player}}</span>
+									</div>
+								</div>
 							</div>
-							<div class="col">
+							<div class="info-right">
+								<h1 style="padding-left:10px;">
+									<img ng-if="server.server.official" 
+									ng-src="local://local/ui/modModules/multiplayer/beammp.png" 
+									alt="Official Server"
+									ng-style="{'height': '23px', 'padding-right': '10px'}">
+									<span ng-if="server.server.official">[Official Server]</span>
+									<span ng-bind-html="formatCodes(server.server.sname)" style="font-size:22px; margin-left:5px"></span>
+								</h1>
+								<div id="server-desc">
+									<span class="floating-title">Description</span>
+									<p ng-bind-html="formatCodes(server.server.sdesc|| '', true)"></p>
+								</div>
+								<div id="server-mods">
+									<span class="floating-title">Mods</span>
+									<!-- <li>Mods: {{modCount(server.server.modlist|| "")}}</li> -->
+									<div id="mods-name">{{modList(server.server.modlist|| "")}}</div>
+									<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
+								</div>
+							</div>
+							<!-- <div class="info-right">
 								<ul class="serverItemDetails">
 									<li>Mods: {{modCount(server.server.modlist|| "")}}</li>
 									<li>Mod Names: <div style="margin-left: 10px; max-width: 75%; max-height: 200px; overflow-y: auto; background: rgba(0, 0, 0, 0.1);">{{modList(server.server.modlist|| "")}}</div></li>
 									<li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li>
 								</ul>
-							</div>
+							</div> -->
 						</div>
-						<div class="row" style="padding-left: 10px;" ng-switch="server.isFavorite">
+						<!-- <div class="row" style="padding-left: 10px;" ng-switch="server.isFavorite">
 							<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)" style="margin-left: 10px;">Connect</md-button>
 							<div ng-switch-when="true">
 								<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav(server.server)" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>
@@ -169,11 +191,11 @@
 							<div ng-switch-when="false">
 								<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(server.server, true)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>
 							</div>
-						</div>
-						<div class="row">
+						</div> -->
+						<!-- <div class="row">
 							<h4></h4>
 							<p>{{listPlayers(server.server.playerslist|| "")}}</p>
-						</div>
+						</div> -->
 					</td>
 				</tr>
     			<tr ng-style="{'height': afterHeight + 'px'}"></tr>

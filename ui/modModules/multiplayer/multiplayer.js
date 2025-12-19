@@ -988,22 +988,32 @@ function($scope, $state, $timeout, $filter) {
 	};
 
 	$scope.selectServer = function(server) {
-		const serverId = server.id;
-		highlightedServer = server.server
-		if ($scope.selectedServerId === serverId) {
-			$scope.selectedServerId = null;
-			highlightedServer = null
-			$scope.expandedRowHeight = 0;
-		} else {
-			$scope.selectedServerId = serverId;
-			$scope.selectedIndex = $scope.serversArray.findIndex(s => s.id === $scope.selectedServerId);
-
-			$timeout(function() {	//timeout because the serverInfoRow is not rendered yet
-				const row = document.getElementById('ServerInfoRow');
-				$scope.expandedRowHeight = row.offsetHeight;
-			})
+		if ($scope.clickTimeout) {
+			$timeout.cancel($scope.clickTimeout);
+			$scope.clickTimeout = null;
+			$scope.connect(server.server.ip, server.server.port, server.name, server.server.official);
+			return;
 		}
-		$scope.onScroll();
+
+		$scope.clickTimeout = $timeout(function() {
+			const serverId = server.id;
+			highlightedServer = server.server
+			if ($scope.selectedServerId === serverId) {
+				$scope.selectedServerId = null;
+				highlightedServer = null
+				$scope.expandedRowHeight = 0;
+			} else {
+				$scope.selectedServerId = serverId;
+				$scope.selectedIndex = $scope.serversArray.findIndex(s => s.id === $scope.selectedServerId);
+
+				$timeout(function() {	//timeout because the serverInfoRow is not rendered yet
+					const row = document.getElementById('ServerInfoRow');
+					if (row) $scope.expandedRowHeight = row.offsetHeight;
+				})
+			}
+			$scope.onScroll();
+			$scope.clickTimeout = null;
+		}, 200);
 	};
 
 	serversTableContainer.addEventListener('scroll', () => {
@@ -1386,13 +1396,10 @@ function returnDefault(data, type) {
 
 
 function listPlayers(s) {
-	if (s != undefined || s != "") {
-		var re = new RegExp(";", 'g');
-		s = s.replace(re, ', ');
-		s = s.substring(0, s.length -2);
-		return "Current players: " + s
+	if (s != undefined && s != "") {
+		return s.split(';').filter(function(e){return e});
 	} else {
-		return "No players..."
+		return [];
 	}
 }
 

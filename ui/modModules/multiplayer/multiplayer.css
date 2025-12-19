@@ -127,7 +127,7 @@ body:has(#serverListMainContainer) {
     justify-self: center;
     align-self: center;
 }
-.mp-btn md-icon {
+.mp-btn md-icon, #server-owner md-icon, #server-map md-icon {
     margin: unset;
     margin-right: 0.313rem;
 }
@@ -152,6 +152,66 @@ body:has(#serverListMainContainer) {
     border-top-color: var(--MP-orange-1) !important;
     width: 80%;
 }
+
+#info-container {
+    display: flex;
+}
+#server-owner{
+    text-align:left;
+    display: flex;
+    align-items: center;
+    color: var(--MP-button-text);
+    background: var(--MP-button-background);
+    font-size: var(--ui-rem);
+    padding: 0.5rem;
+    border-radius: 0.625rem;
+    align-self: center;
+}
+#server-map{
+    text-align:left;
+    display: flex;
+    align-items: center;
+    color: var(--MP-button-text);
+    background: var(--MP-button-background);
+    font-size: var(--ui-rem);
+    padding: 0.5rem;
+    border-radius: 0.625rem;
+    align-self: center;
+}
+#server-map span {
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+#relative-server-players md-icon{
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+}
+#relative-server-players{
+  position: relative;
+}
+#server-players{
+    width: 85%;
+    justify-self: end;
+    border-radius: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--MP-button-background);
+}
+.floating-title {
+
+}
+.info-left{
+    padding: 0.625rem;
+    display: grid;
+    grid-gap: 0.625rem;
+}
+.info-right{
+
+}
+
 .rounded-progress .md-container {
   border-radius: 10px;
   overflow: hidden; /* prevents overflow of the bar */
@@ -352,18 +412,18 @@ div#LoadingBody {
   height: 40px;
 } */
 
-.row {
+/* .row {
   width: 100%;
   padding-top: 0.625rem;
   display: flex;
-}
+} */
 
-.col {
+/* .col {
   width: 50%;
-}
+} */
 
 tr#ServerInfoRow {
-  background-color: #3535357a;
+  background-color: var(--MP-opacity-background3);
 }
 
 ul.serverItemDetails {

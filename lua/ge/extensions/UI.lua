@@ -226,8 +226,6 @@ end
 local function renderWindow()
     if not configLoaded then return end
 
-    gui.setupWindow("BeamMP Chat")
-
     imgui.PushStyleVar2(imgui.StyleVar_WindowMinSize, (collapsed and imgui.ImVec2(lastSize.x, 20)) or M.windowMinSize)
 
     imgui.PushStyleVar2(imgui.StyleVar_WindowPadding, M.windowPadding)

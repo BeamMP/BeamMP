@@ -4,21 +4,22 @@
 		<div>
 			<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">Quit</button>
 		</div>
-		<div class="block" id="server-name-block" style="display: none;">
-			<div class="marquee">
-				<span class="session-status"></span>
-				<span class="session-status"></span> 
-				<!-- duplicated for the marquee -->
+		<div class="info-container">
+			<div class="block" id="server-name-block" style="display: none;">
+				<div class="marquee">
+					<span class="session-status"></span>
+					<span class="session-status"></span> 
+				</div>
+			</div>
+			<div class="block others-block">
+				<span>Players: <span id="Session-PlayerCount"> ? </span></span>
+			</div>
+			<div class="block others-block">
+				<span>Ping: <span id="Session-Ping">?</span></span>
+			</div>
+			<div class="block others-block" id="queue-block" style="display: none; padding: 0px" >
+				<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">0</span></button>
 			</div>
 		</div>
-		<div class="block others-block">
-			<span>Players: <span id="Session-PlayerCount"> ? </span></span>
 		</div>
-		<div class="block others-block">
-			<span>Ping: <span id="Session-Ping">?</span></span>
-		</div>
-		<div class="block others-block" id="queue-block" style="display: none; padding: 0px" >
-			<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">0</span></button>
-		</div>
-	</div>
 </div>

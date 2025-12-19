@@ -832,47 +832,51 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 			let patreonText = $filter('translate')('ui.multiplayer.patreon.message.user')
 
 			let banner = document.getElementById("topRightStatus")
-			let topBar = document.getElementById("top-bar")
-			if (data.role == "EA") {
-				patreonText = $filter('translate')('ui.multiplayer.patreon.message.ea')
-				banner.children[0].style.display = "none"
-				banner.style.color = "#fe8cff";
-			} else {
-				banner.style.display = ""
-				banner.style.color = "var(--MP-button-text)";
-			}
 
-			banner.textContent = patreonText
-			patreonBtn.textContent = $filter('translate')('ui.multiplayer.patreon.button.user')
+			if (banner != null) {
 
-			if (data.color != null)
-				nameElement.style.backgroundColor = data.color
-			else
-				nameElement.style.backgroundColor = "rgba(0, 0, 0, 0)"
-
-			nameElement.textContent = data.username;
-			avatarElement.src = data.avatar;
-
-			if (data.id != null) {
-				nameElement.style.cursor = "pointer";
-				nameElement.onclick = function() {
-					openExternalLink("https://forum.beammp.com/u/" + data.username + "/summary");
-				}
-	
-				idElement.textContent = "ID: " + data.id
-				idElement.onclick = function() {
-					bngApi.engineLua(`setClipboard("`+data.id+`")`);
-					toastr.info("Copied ID to clipboard")
-				}
-				if (data.role != "USER") {
-					idElement.style.marginTop = "0"
+				if (data.role == "EA") {
+					patreonText = $filter('translate')('ui.multiplayer.patreon.message.ea')
+					banner.children[0].style.display = "none"
+					banner.style.color = "#fe8cff";
 				} else {
-					idElement.style.marginTop = "6px"
+					banner.children[0].style.display = ""
+					banner.style.color = "white";
 				}
-			} else {
-				idElement.textContent = "";
-				nameElement.onclick = null;
-				nameElement.style.cursor = "default";
+
+				banner.firstChild.nodeValue = patreonText
+				banner.children[0].style.color = "var(--bng-orange)"
+				banner.children[0].children[0].innerText = $filter('translate')('ui.multiplayer.patreon.button.user')
+
+				if (data.color != null)
+					nameElement.style.backgroundColor = data.color
+				else
+					nameElement.style.backgroundColor = "rgba(0, 0, 0, 0)"
+
+				nameElement.textContent = data.username;
+				avatarElement.src = data.avatar;
+
+				if (data.id != null) {
+					nameElement.style.cursor = "pointer";
+					nameElement.onclick = function () {
+						openExternalLink("https://forum.beammp.com/u/" + data.username + "/summary");
+					}
+
+					idElement.textContent = "ID: " + data.id
+					idElement.onclick = function () {
+						bngApi.engineLua(`setClipboard("` + data.id + `")`);
+						toastr.info("Copied ID to clipboard")
+					}
+					if (data.role != "USER") {
+						idElement.style.marginTop = "0"
+					} else {
+						idElement.style.marginTop = "6px"
+					}
+				} else {
+					idElement.textContent = "";
+					nameElement.onclick = null;
+					nameElement.style.cursor = "default";
+				}
 			}
 		} else {
 			nameElement.textContent = "";

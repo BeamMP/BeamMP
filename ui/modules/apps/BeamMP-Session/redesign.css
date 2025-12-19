@@ -29,7 +29,17 @@ div#Session {
 		align-items: center;
 	}
 
-	.outerDiv > .block {
+	.info-container {
+		display: flex;
+		flex-flow: row nowrap;
+		height: 100%;		
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		overflow: hidden;         
+        flex: 0 1 auto;
+        min-width: 0;
+	}
+	.info-container > .block {
 		display: flex;
 		align-items: center;
 		padding: 0px 10px 0px 10px;
@@ -38,35 +48,19 @@ div#Session {
 		min-width: auto;
 		height: 100%;
 		text-shadow: 0px 0px 4px #000, 0px 0px 6px #000, 0px 0px 8px #000;
-
-		border-top: 1px solid rgba(255, 255, 255, 0.2);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-		background-color: transparent; 
 	}
-	
-	.outerDiv > .block:first-of-type {
-		border-left: 1px solid rgba(255, 255, 255, 0.2);
-		border-top-left-radius: 8px;
-		border-bottom-left-radius: 8px;
+	.info-container > .block [class*="color-"]:not(.color-f) {
+   		text-shadow: none;
 	}
-	
-	.outerDiv > .block:last-of-type {
-		border-right: 1px solid rgba(255, 255, 255, 0.2);
-		border-top-right-radius: 8px;
-		border-bottom-right-radius: 8px;
-	}
-	
-	.outerDiv > .block:not(:last-of-type) {
-		border-right: 1px solid rgba(255, 255, 255, 0.2);
-	}
-
-	.others-block {
-		flex: 0 0 auto;
-	}
-
-	#button-block {
-		padding: 0px;
-		margin: 0px;
+    .info-container > #server-name-block {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .info-container > .others-block {
+        flex: 0 0 auto;
+    }
+	.info-container > .block:not(:first-child) {
+		 border-left: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.multiplayersession .buttons {

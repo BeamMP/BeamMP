@@ -23,7 +23,7 @@ local isConnecting = false
 local proxyPort = ""
 local socketPartialData
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.19.1" -- the mod version
+local modVersion = "4.20.2" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -732,15 +732,6 @@ local function onClientEndMission(mission)
 	end
 end
 
---- Executes when the UI state changes.
--- @param curUIState string The current UI state.
--- @param prevUIState string The previous UI state.
-local function onUiChangedState (curUIState, prevUIState)
-	if curUIState == 'menu' and getMissionFilename() == "" then -- required due to game bug that happens if UI is reloaded on the main menu
-		guihooks.trigger('ChangeState', 'menu.mainmenu')
-	end
-end
-
 --- Serializes data for saving to be loaded on lua reload. Allows for lua state memory persistence between reloads
 -- @return table The serialized data.
 local function onSerialize()
@@ -794,7 +785,6 @@ M.logout               = logout
 M.isLoggedIn           = isLoggedIn
 M.getAuthResult        = getAuthResult
 -- events
-M.onUiChangedState     = onUiChangedState
 M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission

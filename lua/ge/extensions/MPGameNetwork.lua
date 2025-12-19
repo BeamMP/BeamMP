@@ -537,28 +537,20 @@ simTimeAuthority.set = function(...)
 	end
 end
 
-local pausedStates = {"menu.mainmenu", "menu.photomode", "menu.options", "menu.vehiclesnew", "menu.appedit", "menu.levels", "menu.mods", "menu.appselect"}
-
-local function stateStartsWithPausedPrefix(stateName)
-  for _, prefix in ipairs(pausedStates) do
-	if MPCoreNetwork.isMPSession() and stateName ~= "menu.photomode" then
-		break
+local simTimeAuthority_pushPauseRequest = simTimeAuthority.pushPauseRequest
+simTimeAuthority.pushPauseRequest = function(id)
+	if MPCoreNetwork.isMPSession() and id ~= "menu.photomode" then
+		return
 	end
-
-    if string.sub(stateName, 1, string.len(prefix)) == prefix then
-      return true
-    end
-  end
-  return false
+	simTimeAuthority_pushPauseRequest(id)
 end
 
-extensions.core_gamestate.onUiChangedState = function(toState, fromState)
-  if stateStartsWithPausedPrefix(toState) then
-    simTimeAuthority.pushPauseRequest(toState)
-  end
-  if stateStartsWithPausedPrefix(fromState) then
-    simTimeAuthority.popPauseRequest(fromState)
-  end
+local simTimeAuthority_popPauseRequest = simTimeAuthority.popPauseRequest
+simTimeAuthority.popPauseRequest = function(id)
+	if MPCoreNetwork.isMPSession() and id ~= "menu.photomode" then
+		return
+	end
+	simTimeAuthority_popPauseRequest(id)
 end
 
 --events

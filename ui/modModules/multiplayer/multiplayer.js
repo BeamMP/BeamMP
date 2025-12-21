@@ -33,6 +33,9 @@ let repopulateServerList = async function() {
 import('/ui/lib/ext/purify.min.js')
 
 angular.module('BeamNG.ui')
+.config(['$compileProvider', function($compileProvider) {
+  // Allow base64 attributes for angularjs img src
+  $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|local|mailto):|data:image\/(png|jpg|jpeg|gif|svg\+xml);/);}])
 .run(function($rootScope, $templateCache) {
   $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
     if (toState.name === 'loading' || fromState.name === 'loading') {
@@ -443,6 +446,11 @@ function($scope, $state, $timeout, $document) {
 .controller('MultiplayerController', ['$scope', '$state', '$timeout', '$mdDialog', '$filter', 'ConfirmationDialog', 'toastr', '$translate',
 function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toastr, $translate) {
 	var vm = this;
+	$scope.openExternalLink = openExternalLink;
+	$scope.clipboardCopy = function(text) {
+						bngApi.engineLua(`setClipboard("` + text + `")`);
+						toastr.info("Copied ID to clipboard")
+					}
 	bngApi = bngApi;
 	mdDialog = $mdDialog;
 
@@ -824,66 +832,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 	}
 
 	$scope.$on('authReceived', function (event, data) {
-		let nameElement = document.getElementById("serverlist-profile-name")
-		let idElement = document.getElementById("serverlist-profile-id")
-		let avatarElement = document.getElementById("serverlist-profile-avatar")
-		let patreonBtn = document.querySelector(".patreon-btn")
-		if (Object.keys(data).length > 1) {
-			let patreonText = $filter('translate')('ui.multiplayer.patreon.message.user')
-
-			let banner = document.getElementById("topRightStatus")
-
-			if (banner != null) {
-
-				if (data.role == "EA") {
-					patreonText = $filter('translate')('ui.multiplayer.patreon.message.ea')
-					banner.children[0].style.display = "none"
-					banner.style.color = "#fe8cff";
-				} else {
-					banner.children[0].style.display = ""
-					banner.style.color = "white";
-				}
-
-				banner.firstChild.nodeValue = patreonText
-				banner.children[0].style.color = "var(--bng-orange)"
-				banner.children[0].children[0].innerText = $filter('translate')('ui.multiplayer.patreon.button.user')
-
-				if (data.color != null)
-					nameElement.style.backgroundColor = data.color
-				else
-					nameElement.style.backgroundColor = "rgba(0, 0, 0, 0)"
-
-				nameElement.textContent = data.username;
-				avatarElement.src = data.avatar;
-
-				if (data.id != null) {
-					nameElement.style.cursor = "pointer";
-					nameElement.onclick = function () {
-						openExternalLink("https://forum.beammp.com/u/" + data.username + "/summary");
-					}
-
-					idElement.textContent = "ID: " + data.id
-					idElement.onclick = function () {
-						bngApi.engineLua(`setClipboard("` + data.id + `")`);
-						toastr.info("Copied ID to clipboard")
-					}
-					if (data.role != "USER") {
-						idElement.style.marginTop = "0"
-					} else {
-						idElement.style.marginTop = "6px"
-					}
-				} else {
-					idElement.textContent = "";
-					nameElement.onclick = null;
-					nameElement.style.cursor = "default";
-				}
-			}
-		} else {
-			nameElement.textContent = "";
-			nameElement.style.backgroundColor = "rgba(0, 0, 0, 0)";
-			idElement.textContent = "";
-			avatarElement.removeAttribute("src");
-		}
+		$scope.userdata = data;
 	});
 
 	vm.exit = function ($event) {

@@ -214,7 +214,7 @@ body:has(#serverListMainContainer) {
 }
 #serversTableContainer::-webkit-scrollbar {
     position: static;
-    width: 8px;
+    width: .5rem;
 }
 #serversTableContainer::-webkit-scrollbar-track {
     background: var(--MP-opacity-background2);
@@ -229,14 +229,14 @@ body:has(#serverListMainContainer) {
 
 #server-players::-webkit-scrollbar {
     position: static;
-    width: 2px;
+    width: .125rem;
 }
 #server-players::-webkit-scrollbar-track {
     background: transparent;
 }
 #server-players::-webkit-scrollbar-thumb {
     background-color: var(--MP-orange-1);
-    border-radius: 10px;
+    border-radius: .625rem;
     border: none;
 }
 #server-players{
@@ -245,7 +245,7 @@ body:has(#serverListMainContainer) {
     flex-direction: column;
     width: 100%;
     overflow: auto;
-    max-height: 200px;
+    max-height: 12.5rem;
 }
 #relative-server-desc, #relative-server-mods {
     display: flex;
@@ -274,7 +274,7 @@ body:has(#serverListMainContainer) {
     background: var(--MP-button-background);
     border-radius: 0.625rem;
     padding: .2125rem .8125rem .2125rem .8125rem;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 .3125rem rgba(0,0,0,0.5);
     z-index: 10;
 }
 
@@ -288,11 +288,11 @@ body:has(#serverListMainContainer) {
     width: 100%;
     display: grid;
     grid-auto-rows: min-content;
-    grid-gap: 20px;
+    grid-gap: 1.25rem;
 }
 .info-right h1{
   margin: auto;
-  padding-bottom: 10px;
+  padding-top: .625rem;
 }
 .mp-profile {
     display: flex;

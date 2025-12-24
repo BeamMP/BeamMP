@@ -170,15 +170,19 @@
 									<span ng-if="server.server.official">[Official Server]</span>
 									<span ng-bind-html="formatCodes(server.server.sname)" style="font-size:22px; margin-left:5px"></span>
 								</h1>
-								<div id="server-desc">
-									<span class="floating-title">Description</span>
-									<p ng-bind-html="formatCodes(server.server.sdesc|| '', true)"></p>
+								<div id="relative-server-desc">
+									<span class="mp-corner-text">Description</span>
+									<div id="server-desc">
+										<p ng-bind-html="formatCodes(server.server.sdesc|| '', true)"></p>
+									</div>
 								</div>
-								<div id="server-mods">
-									<span class="floating-title">Mods</span>
-									<!-- <li>Mods: {{modCount(server.server.modlist|| "")}}</li> -->
-									<div id="mods-name">{{modList(server.server.modlist|| "")}}</div>
-									<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
+								<div id="relative-server-mods">
+									<span class="mp-corner-text">Mods</span>
+									<div id="server-mods">
+										<!-- <li>Mods: {{modCount(server.server.modlist|| "")}}</li> -->
+										<div id="mods-name">{{modList(server.server.modlist|| "")}}</div>
+										<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
+									</div>
 								</div>
 							</div>
 							<!-- <div class="info-right">

@@ -187,6 +187,15 @@
 										<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
 									</div>
 								</div>
+								<div class="mp-server-buttons" ng-switch="server.isFavorite">
+									<button id="serverconnect-button" class="server-buttons" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)">Connect</button>
+									<div ng-switch-when="true">
+										<button id="removeFav-button" class="server-buttons" ng-class="" ng-click="removeFav(server.server)">Remove Favorite</button>
+									</div>
+									<div ng-switch-when="false">
+										<button id="addFav-button" class="server-buttons" ng-class="" ng-click="addFav(server.server, true)">Add Favorite</button>
+									</div>
+								</div>
 							</div>
 							<!-- <div class="info-right">
 								<ul class="serverItemDetails">
@@ -195,15 +204,6 @@
 									<li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li>
 								</ul>
 							</div> -->
-						</div>
-						<div class="mp-server-buttons" ng-switch="server.isFavorite">
-							<button id="serverconnect-button" class="server-buttons" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)">Connect</button>
-							<div ng-switch-when="true">
-								<button id="removeFav-button" class="server-buttons" ng-class="" ng-click="removeFav(server.server)">Remove Favorite</button>
-							</div>
-							<div ng-switch-when="false">
-								<button id="addFav-button" class="server-buttons" ng-class="" ng-click="addFav(server.server, true)">Add Favorite</button>
-							</div>
 						</div>
 						<!-- <div class="row" style="padding-left: 10px;" ng-switch="server.isFavorite">
 							<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)" style="margin-left: 10px;">Connect</md-button>

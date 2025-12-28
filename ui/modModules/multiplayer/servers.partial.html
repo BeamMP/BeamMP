@@ -127,11 +127,11 @@
 					<td class="loading-shimmer" colspan="4"></td>
 				</tr>	
     			<tr ng-style="{'height': beforeHeight + 'px'}"></tr>
-				<tr class="server-item" ng-repeat-start="server in visibleServers track by server.id" ng-show="serversTable" ng-click="selectServer(server)" ng-class="{'highlight': server.server.ip + ':' + server.server.port === selectedServerId}">
-					<td ng-class="{'offline': server.offline, 'custom': server.custom, 'favorite': server.isFavorite, 'featured': server.server.featured, 'official': server.server.official, 'partner': server.server.partner}" class="server-flag" style="font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px" ><img ng-src="local://local/ui/modModules/multiplayer/flags/{{server.server.location.toLowerCase()}}.png" class="flag"></img> {{server.server.location}}</td>
-					<td ng-class="{'offline': server.offline, 'custom': server.custom, 'favorite': server.isFavorite, 'featured': server.server.featured, 'official': server.server.official, 'partner': server.server.partner}" class="server-servername" ng-bind-html="formatCodes(server.name)" ></td>
-					<td ng-class="{'offline': server.offline, 'custom': server.custom, 'favorite': server.isFavorite, 'featured': server.server.featured, 'official': server.server.official, 'partner': server.server.partner}" class="server-mapname" style="font-size: initial">{{SmoothMapName(server.server.map)}}</td>
-					<td ng-class="{'offline': server.offline, 'custom': server.custom, 'favorite': server.isFavorite, 'featured': server.server.featured, 'official': server.server.official, 'partner': server.server.partner}" class="server-maxplayers" style="font-size: initial">{{server.server.players}}/{{server.server.maxplayers}}</td>
+				<tr class="server-item" ng-repeat-start="server in visibleServers track by server.id" ng-show="serversTable" ng-click="selectServer(server)" ng-class="{'highlight': server.server.ip + ':' + server.server.port === selectedServerId, 'offline': server.offline, 'custom': server.custom, 'favorite': server.isFavorite, 'featured': server.server.featured, 'official': server.server.official, 'partner': server.server.partner, 'unofficial': !server.server.official && !server.server.partner && !server.server.featured }">
+					<td class="server-flag" style="font-size: initial; padding-left: 3px; text-align: right; padding-right: 10px" ><img ng-src="local://local/ui/modModules/multiplayer/flags/{{server.server.location.toLowerCase()}}.png" class="flag"></img> {{server.server.location}}</td>
+					<td class="server-servername" ng-bind-html="formatCodes(server.name)" ></td>
+					<td class="server-mapname" style="font-size: initial">{{SmoothMapName(server.server.map)}}</td>
+					<td class="server-maxplayers" style="font-size: initial">{{server.server.players}}/{{server.server.maxplayers}}</td>
 				</tr>
 				
 				<tr ng-if="server.id === selectedServerId" ng-repeat-end id="ServerInfoRow">

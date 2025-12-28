@@ -2,9 +2,9 @@
   --MP-orange-1: rgba(255, 102, 0, 1);
   --MP-orange-2: rgba(255, 102, 0, 0.80);
   --MP-scrollbar-orange: rgba(255, 102, 0, 0.70);
-  --MP-opacity-background1: rgba(0, 0, 0, 0.60);
-  --MP-opacity-background2: rgba(31, 31, 31, 0.90);
-  --MP-opacity-background3: rgba(31, 31, 31, 0.70);
+  --MP-opacity-background1: rgba(0, 0, 0, 0.80);
+  --MP-opacity-background2: rgba(20, 20, 20, 0.90);
+  --MP-opacity-background3: rgba(20, 20, 20, 0.70);
   --MP-search-background: rgba(23, 23, 23, 0.5);
   --MP-border: rgba(38, 38, 38, 1);
   --MP-button-background: rgba(31, 31, 31, 1);
@@ -246,9 +246,10 @@ body:has(#serverListMainContainer) {
     width: 100%;
     overflow: auto;
     max-height: 12.5rem;
+    padding-right: .3125rem;
 }
 #relative-server-desc, #relative-server-mods {
-    color: var(--MP-button-text);
+    color: white;
     display: flex;
     flex-direction: column;
     background: var(--MP-button-background);
@@ -365,14 +366,6 @@ table#serversTable {
 
 #serversTable th:hover {
   background-color: rgba(0, 0, 0, 0.25);
-}
-
-#serversTable tr:hover {
-  background-color: rgba(0, 0, 0, 0.25);
-}
-
-.highlight {
-  background-color: #99aab5 !important;
 }
 
 .dropdown {
@@ -773,23 +766,74 @@ md-slider.ng-pristine.ng-untouched.ng-valid.md-default-theme.ng-empty {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
+.featured:hover {
+  background-color: rgba(0, 119, 4, 1);
+}
+.partner:hover {
+  background-color: rgba(0, 65, 119, 1);
+}
+.official:hover {
+  background-color: rgba(255, 102, 0, 1);
+}
+.unofficial:hover {
+  background-color: rgba(53, 53, 53, 1);
+}
+.favorite:hover {
+  background-color: rgba(189, 189, 21, 1);
+}
+.custom:hover {
+  background-color: rgba(255, 215, 0, 0.75);
+}
+.offline:hover {
+  opacity: 100%;
+}
+
+
+.highlight.featured {
+  background-color: rgba(0, 119, 4, 1) !important;
+}
+.highlight.partner {
+  background-color: rgba(0, 65, 119, 1) !important;
+}
+.highlight.official {
+  background-color: rgba(255, 102, 0, 1) !important;
+}
+.highlight.unofficial {
+  background-color: rgba(53, 53, 53, 1) !important;
+}
+.highlight.favorite {
+  background-color: rgba(189, 189, 21, 1) !important;
+}
+.highlight.custom {
+  background-color: rgba(255, 215, 0, 0.75) !important;
+}
+.highlight.offline {
+  opacity: 100% !important;
+}
+
 .featured {
-  background-color: rgba(0, 128, 0, 0.25);
+  background-color: rgba(0, 119, 4, 0.65);
 }
 .partner {
-  background-color: rgba(0, 123, 195, 0.3);
+  background-color: rgba(0, 65, 119, 0.65);
 }
 .official {
-  background-color: rgba(255, 102, 0, 0.5);
+  background-color: rgba(255, 102, 0, 0.65);
+}
+.unofficial {
+  background-color: rgba(53, 53, 53, 0.65);
 }
 .favorite {
-  background-color: rgba(255, 215, 0, 0.35);
+  background-color: rgba(189, 189, 21, 0.75);
 }
 .custom {
   background-color: rgba(255, 215, 0, 0.35);
 }
 .offline {
-  background-color: rgba(0, 0, 0, 0.35);
+  opacity: 80%;
+  background-color: rgb(0 0 0);
 }
 
 .color-0 { color: #000000; }

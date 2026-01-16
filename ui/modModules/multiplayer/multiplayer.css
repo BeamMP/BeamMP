@@ -279,6 +279,24 @@ body:has(#serverListMainContainer) {
     box-shadow: 0 0 .3125rem rgba(0,0,0,0.5);
     z-index: 10;
 }
+.mp-server-tags {
+    display: flex;
+    width: 70%;
+    margin: auto;
+    gap: .3125rem;
+}
+.mp-tag{
+    gap: .125rem;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    font-size: .875rem;
+    background: var(--MP-button-background);
+    border: .0625rem solid var(--MP-orange-1);
+    border-radius: 0.625rem;
+    padding: .2125rem .3125rem .2125rem .3125rem;
+    box-shadow: 0 0 .3125rem rgba(0, 0, 0, 0.5);
+}
 
 .info-left{
     display: grid;

@@ -154,7 +154,7 @@
 										</md-icon>
 
 										<div id="server-players">
-											<span ng-repeat="player in listPlayers(server.server.playerslist)"
+											<span ng-repeat="player in listPlayers(server.server.playerslist) track by $index"
 												class="mp-player">
 												{{player}}
 											</span>
@@ -186,6 +186,9 @@
 										<div id="mods-name">{{modList(server.server.modlist|| "")}}</div>
 										<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
 									</div>
+								</div>
+								<div class="mp-server-tags">
+									<span class="mp-tag" ng-repeat="tag in server.server.tags track by $index"><md-icon md-svg-src="/ui/modModules/multiplayer/icons/tag.svg"></md-icon>{{tag}}</span></md-icon>
 								</div>
 								<div class="mp-server-buttons" ng-switch="server.isFavorite">
 									<button id="serverconnect-button" class="server-buttons" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)">Connect</button>

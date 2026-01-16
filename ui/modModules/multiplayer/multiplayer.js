@@ -1488,11 +1488,12 @@ async function populateTable($filter, $scope, servers, tab, searchText = '', che
 		if (tab == "partner" && !server.partner) continue;
 
 		//server.tags = "tag1,tag2"
-		var serverTags = server.tags.toLowerCase().split(",").map(tag => tag.trim());
+
+		server.tags = (typeof server.tags === 'string' ? server.tags.split(',') : (server.tags || [])).map(tag => tag.toLowerCase().trim());
 
 		var missingTag = false;
 		for (let tag of tags) {
-			if (!serverTags.includes(tag.toLowerCase())) missingTag = true;
+			if (!server.tags.includes(tag.toLowerCase())) missingTag = true;
 		}
 
 		if (missingTag) continue;
@@ -1551,11 +1552,10 @@ async function populateTable($filter, $scope, servers, tab, searchText = '', che
 				else stillOk = false;
 			}
 			if (!stillOk) {
-
-				var serverTags = (tmpServer1.tags || "").toLowerCase().split(",").map(tag => tag.trim());
+				tmpServer1.tags = (typeof tmpServer1.tags === 'string' ? tmpServer1.tags.split(',') : (tmpServer1.tags || [])).map(tag => tag.toLowerCase().trim());
 				var missingTag = false;
 				for (let tag of tags) {
-					if (!serverTags.includes(tag.toLowerCase())) missingTag = true;
+					if (!tmpServer1.tags.includes(tag.toLowerCase())) missingTag = true;
 				}
 				if (missingTag) continue;
 

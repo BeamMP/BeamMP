@@ -142,7 +142,9 @@ local function onWorldReadyState(state)
 		if MPCoreNetwork and MPCoreNetwork.isMPSession() then
 			log('M', 'onWorldReadyState', 'Setting game state to BeamMP multiplayer.')
 			local spawnDefaultGroups = { "CameraSpawnPoints", "PlayerSpawnPoints", "PlayerDropPoints", "spawnpoints" }
-
+			if not commands.isFreeCamera() then
+				commands.setFreeCamera()
+			end
 			for i, v in pairs(spawnDefaultGroups) do
 				if scenetree.findObject(spawnDefaultGroups[i]) then
 					local spawngroupPoint = scenetree.findObject(spawnDefaultGroups[i]):getRandom()

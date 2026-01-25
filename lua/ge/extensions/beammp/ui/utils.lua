@@ -12,6 +12,14 @@ local M = {}
 
 local imgui = ui_imgui
 
+local ImVec4One = imgui.ImVec4(1, 1, 1, 1)
+local ImVec4Zero = imgui.ImVec4(0, 0, 0, 0)
+local buttonSize = imgui.ImVec2(1, 1)
+
+local Col_Button = imgui.GetStyleColorVec4(imgui.Col_Button)
+local Col_ButtonActive = imgui.GetStyleColorVec4(imgui.Col_ButtonActive)
+local Col_ButtonHovered = imgui.GetStyleColorVec4(imgui.Col_ButtonHovered)
+
 --- Creates an image button with the specified texture ID, size, and colors using IMGUI.
 --- @param texID number The ID of the texture to use for the button.
 --- @param size number The size of the button.
@@ -21,14 +29,17 @@ local imgui = ui_imgui
 --- @return boolean Returns true if the button was clicked, false otherwise.
 M.imageButton = function(texID, size, color, activeColor, hoveredColor)
     --local colors = imgui.GetStyle()[1].Colors
-    color = color or imgui.GetStyleColorVec4(imgui.Col_Button)
-    activeColor = activeColor or imgui.GetStyleColorVec4(imgui.Col_ButtonActive)
-    hoveredColor = hoveredColor or imgui.GetStyleColorVec4(imgui.Col_ButtonHovered)
+    color = color or Col_Button
+    activeColor = activeColor or Col_ButtonActive
+    hoveredColor = hoveredColor or Col_ButtonHovered
 
     -- Remove background
-    imgui.PushStyleColor2(imgui.Col_Button, imgui.ImVec4(0, 0, 0, 0))
-    local buttonSize = imgui.ImVec2(size, size)
-    if imgui.ImageButton("##ImageButton" .. tostring(texID), texID, buttonSize, imgui.ImVec2Zero, imgui.ImVec2One, imgui.ImVec4(0, 0, 0, 0), imgui.ImVec4(1, 1, 1, 1)) then
+    imgui.PushStyleColor2(imgui.Col_Button, ImVec4Zero)
+
+    buttonSize.x = size
+    buttonSize.y = size
+
+    if imgui.ImageButton("##ImageButton" .. tostring(texID), texID, buttonSize, imgui.ImVec2Zero, imgui.ImVec2One, ImVec4Zero, ImVec4One) then
         imgui.PopStyleColor()
         return true
     end

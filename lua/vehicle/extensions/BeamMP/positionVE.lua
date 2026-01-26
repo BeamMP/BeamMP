@@ -402,9 +402,8 @@ local function getVehicleRotation()
 	local vel = smoothVel + cog:cross(rvel)
 	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 
-	-- disabled because the GE implementation of slowmo sync is instant, but doesn't account for low fps compensation
-	--vel = vel * physmult
-	--rvel = rvel * physmult
+	vel = vel * simSpeedReal
+	rvel = rvel * simSpeedReal
 
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},

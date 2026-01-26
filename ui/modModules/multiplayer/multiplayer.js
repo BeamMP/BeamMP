@@ -927,7 +927,6 @@ function($scope, $state, $timeout, $filter) {
 	$scope.selectedServerId = null;
 	$scope.expandedRowHeight = 0;
 	$scope.itemHeight = 24;
-	console.log('Item height set to', $scope.itemHeight);
 	$scope.loadingShimmerCount = Math.ceil($scope.viewportHeight / $scope.itemHeight)
 
 	$scope.onScroll = function() {
@@ -1086,7 +1085,6 @@ function($scope, $state, $timeout, $filter) {
 			var smoothMapName = SmoothMapName(server.map);
 
 			if(!vm.availableMaps.includes(smoothMapName)) vm.availableMaps.push(smoothMapName);
-
 			var serverTags = server.tags.split(",");
 			for (const tag of serverTags) {
 				if (!vm.availableTags.includes(tag.trim())) vm.availableTags.push(tag.trim());	
@@ -1516,7 +1514,7 @@ async function populateTable($filter, $scope, servers, tab, searchText = '', che
 
 		//server.tags = "tag1,tag2"
 
-		server.tags = (typeof server.tags === 'string' ? server.tags.split(',') : (server.tags || [])).map(tag => tag.toLowerCase().trim());
+		server.tags = (typeof server.tags === 'string' ? server.tags.split(',') : (server.tags || [])).map(tag => tag.toLowerCase().trim()).filter(tag => tag.length > 0);
 
 		var missingTag = false;
 		for (let tag of tags) {
@@ -1579,7 +1577,7 @@ async function populateTable($filter, $scope, servers, tab, searchText = '', che
 				else stillOk = false;
 			}
 			if (!stillOk) {
-				tmpServer1.tags = (typeof tmpServer1.tags === 'string' ? tmpServer1.tags.split(',') : (tmpServer1.tags || [])).map(tag => tag.toLowerCase().trim());
+				tmpServer1.tags = (typeof tmpServer1.tags === 'string' ? tmpServer1.tags.split(',') : (tmpServer1.tags || [])).map(tag => tag.toLowerCase().trim()).filter(tag => tag.length > 0);
 				var missingTag = false;
 				for (let tag of tags) {
 					if (!tmpServer1.tags.includes(tag.toLowerCase())) missingTag = true;

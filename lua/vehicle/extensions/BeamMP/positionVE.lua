@@ -86,6 +86,7 @@ local raccErrorSmoother = newVectorSmoothing(50)            -- Smoother for angu
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
+local lastMailboxVersion = 0
 local framesSinceReset = 0
 local timer = 0
 local ownPing = 0
@@ -192,11 +193,47 @@ end
 
 
 
+local function updateRemoteData()
+	local currentMailBoxVersion = obj:getLastMailboxVersion("vehPosPckt" .. objectId)
+	if lastMailboxVersion ~= currentMailBoxVersion then
+		local jsonData = obj:getLastMailbox("vehPosPckt" .. objectId)
+		local pr = jsonDecode(jsonData)
+		local pos  = vec3(pr.pos)
+		local vel  = vec3(pr.vel)
+		local rot  = quat(pr.rot)
+		local rvel = vec3(pr.rvel)
+		local tim  = pr.tim
+		local ping = pr.ping
+		local simspeedfraction = 1/simSpeedReal
+
+		if not tim then return end
+		if remoteData.timer > tim then return end
+
+		local remoteDT = max(tim - remoteData.timer, 0.001)
+
+		remoteData.pos = pos
+		remoteData.rot = rot
+		remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
+		remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
+		remoteData.vel = vel*simspeedfraction
+		remoteData.rvel = rvel*simspeedfraction
+		remoteData.timer = tim
+		remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
+		remoteData.recTime = timer
+		remoteData.localSimspeed = math.min(simspeedfraction, 25)
+	end
+	lastMailboxVersion = currentMailBoxVersion
+end
+
+
+
 local function updateGFX(dt)
 	dt = dt * (remoteData.localSimspeed or 1)
 	timer = timer + dt
 	lastDT = dt
 	framesSinceReset = framesSinceReset + 1
+
+	updateRemoteData()
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
@@ -382,34 +419,6 @@ end
 
 
 
-local function setVehiclePosRot(data)
-
-	local pr   = jsonDecode(data)
-	local pos  = vec3(pr.pos)
-	local vel  = vec3(pr.vel)
-	local rot  = quat(pr.rot)
-	local rvel = vec3(pr.rvel)
-	local tim  = pr.tim
-	local ping = pr.ping
-	local simspeedfraction = 1/simSpeedReal
-
-	if not tim then return end
-	if remoteData.timer > tim then return end
-
-	local remoteDT = max(tim - remoteData.timer, 0.001)
-
-	remoteData.pos = pos
-	remoteData.rot = rot
-	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
-	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
-	remoteData.vel = vel*simspeedfraction
-	remoteData.rvel = rvel*simspeedfraction
-	remoteData.timer = tim
-	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
-	remoteData.recTime = timer
-	remoteData.localSimspeed = math.min(simspeedfraction, 25)
-end
-
 local function onInit()
 	enablePhysicsStepHook()
 end
@@ -424,7 +433,6 @@ M.onExtensionLoaded  = onInit
 M.onPhysicsStep      = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
-M.setVehiclePosRot   = setVehiclePosRot
 M.setPing            = setPing
 M.setGameSpeed       = setGameSpeed
 

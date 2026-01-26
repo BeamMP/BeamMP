@@ -967,6 +967,13 @@ function($scope, $state, $timeout, $filter) {
 	};
 
 	$scope.selectServer = function(server) {
+		highlightedServer = server.server;
+		const serverId = server.id;
+		if ($scope.selectedServerId === serverId) {
+			$scope.selectedServerId = null;
+			highlightedServer = null;
+			$scope.expandedRowHeight = 0;
+		}
 		if ($scope.clickTimeout) {
 			$timeout.cancel($scope.clickTimeout);
 			$scope.clickTimeout = null;
@@ -975,21 +982,12 @@ function($scope, $state, $timeout, $filter) {
 		}
 
 		$scope.clickTimeout = $timeout(function() {
-			const serverId = server.id;
-			highlightedServer = server.server
-			if ($scope.selectedServerId === serverId) {
-				$scope.selectedServerId = null;
-				highlightedServer = null
-				$scope.expandedRowHeight = 0;
-			} else {
-				$scope.selectedServerId = serverId;
-				$scope.selectedIndex = $scope.serversArray.findIndex(s => s.id === $scope.selectedServerId);
-
-				$timeout(function() {	//timeout because the serverInfoRow is not rendered yet
-					const row = document.getElementById('ServerInfoRow');
-					if (row) $scope.expandedRowHeight = row.offsetHeight;
-				})
-			}
+			$scope.selectedServerId = serverId;
+			$scope.selectedIndex = $scope.serversArray.findIndex(s => s.id === $scope.selectedServerId);
+			$timeout(function() {	//timeout because the serverInfoRow is not rendered yet
+				const row = document.getElementById('ServerInfoRow');
+				if (row) $scope.expandedRowHeight = row.offsetHeight;
+			})
 			$scope.onScroll();
 			$scope.clickTimeout = null;
 		}, 200);

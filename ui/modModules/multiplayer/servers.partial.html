@@ -180,11 +180,12 @@
 									</div>
 								</div>
 								<div id="relative-server-mods">
-									<span class="mp-corner-text">Mods</span>
+									<div style="display: flex;gap: 2.5rem;">
+										<span class="mp-corner-text">Mods: {{modCount(server.server.modlist|| "")}}</span>
+										<span class="mp-corner-text">{{formatBytes(server.server.modstotalsize) || "0"}}</span>
+									</div>
 									<div id="server-mods">
-										<!-- <li>Mods: {{modCount(server.server.modlist|| "")}}</li> -->
 										<div id="mods-name">{{modList(server.server.modlist|| "")}}</div>
-										<!-- <li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li> -->
 									</div>
 								</div>
 								<div class="mp-server-tags">
@@ -200,27 +201,7 @@
 									</div>
 								</div>
 							</div>
-							<!-- <div class="info-right">
-								<ul class="serverItemDetails">
-									<li>Mods: {{modCount(server.server.modlist|| "")}}</li>
-									<li>Mod Names: <div style="margin-left: 10px; max-width: 75%; max-height: 200px; overflow-y: auto; background: rgba(0, 0, 0, 0.1);">{{modList(server.server.modlist|| "")}}</div></li>
-									<li>Total Mods Size: {{formatBytes(server.server.modstotalsize) || "0"}}</li>
-								</ul>
-							</div> -->
 						</div>
-						<!-- <div class="row" style="padding-left: 10px;" ng-switch="server.isFavorite">
-							<md-button id="serverconnect-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="connect(server.server.ip, server.server.port, server.name, server.server.official)" style="margin-left: 10px;">Connect</md-button>
-							<div ng-switch-when="true">
-								<md-button id="removeFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="removeFav(server.server)" style="margin-left: 10px; background-color: #FF6961;">Remove Favorite</md-button>
-							</div>
-							<div ng-switch-when="false">
-								<md-button id="addFav-button" class="button servers-button md-button md-default-theme" ng-class="" ng-click="addFav(server.server, true)" style="margin-left: 10px; background-color: #FFB646">Add Favorite</md-button>
-							</div>
-						</div> -->
-						<!-- <div class="row">
-							<h4></h4>
-							<p>{{listPlayers(server.server.playerslist|| "")}}</p>
-						</div> -->
 					</td>
 				</tr>
     			<tr ng-style="{'height': afterHeight + 'px'}"></tr>

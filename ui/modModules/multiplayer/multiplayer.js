@@ -895,12 +895,39 @@ function($scope, $state, $timeout, $filter) {
 		$state.go('menu.mainmenu');
 	};
 
+
+
+	function updateScale() {
+		const container = document.body;
+		const uiWidth = 1920;	// ui made for this resolution
+		const uiHeight = 1080;
+		const widthScale = window.innerWidth / uiWidth;
+		const heightScale =  window.innerHeight / uiHeight;
+		const scale = Math.min(widthScale, heightScale);
+
+		if (container.querySelector('#serverListMainContainer')) {
+			container.style.zoom = scale;
+			container.style.contentVisibility = 'auto';
+		}
+	}
+	updateScale();
+	window.addEventListener('resize', updateScale);
+	$scope.$on('$destroy', function() {
+		window.removeEventListener('resize', updateScale);
+		const container = document.body;
+		container.style.zoom = '';
+		container.style.contentVisibility = '';
+	});
+
+
+
 	const serversTableContainer = document.getElementById("serversTableContainer");
-	$scope.itemHeight = 24;
 	$scope.buffer = 10;
 	$scope.viewportHeight = serversTableContainer.clientHeight;
 	$scope.selectedServerId = null;
 	$scope.expandedRowHeight = 0;
+	$scope.itemHeight = 24;
+	console.log('Item height set to', $scope.itemHeight);
 	$scope.loadingShimmerCount = Math.ceil($scope.viewportHeight / $scope.itemHeight)
 
 	$scope.onScroll = function() {

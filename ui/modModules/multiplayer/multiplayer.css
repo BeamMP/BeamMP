@@ -12,28 +12,6 @@
   --MP-opacity-text: rgba(255, 255, 255, 0.50);
 }
 
-/* UI RESPONSIVE */
-body:has(#serverListMainContainer) {  
-  width: 1920px;
-  height: 1080px;
-  transform-origin: top left;
-}
-
-@media (max-width: 1280px) {
-  body:has(#serverListMainContainer) {
-    transform: scale(0.6667);
-  }
-}
-@media (min-width: 1281px) and (max-width: 1920px) {
-  body:has(#serverListMainContainer) {
-    transform: scale(1);
-  }
-}
-@media (min-width: 1921px) {
-  body:has(#serverListMainContainer) {
-    transform: scale(1.3333);
-  }
-}
 
 #serverListHeader {
   background-color: var(--MP-opacity-background1) !important;

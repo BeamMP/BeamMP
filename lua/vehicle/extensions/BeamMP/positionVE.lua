@@ -194,9 +194,11 @@ end
 
 
 local function updateRemoteData()
-	local currentMailBoxVersion = obj:getLastMailboxVersion("vehPosPckt" .. objectId)
+	if not v.mpServerID or v.mpServerID == "" then return end
+	local mailBoxName = "vehPosPckt" .. v.mpServerID
+	local currentMailBoxVersion = obj:getLastMailboxVersion(mailBoxName)
 	if lastMailboxVersion ~= currentMailBoxVersion then
-		local jsonData = obj:getLastMailbox("vehPosPckt" .. objectId)
+		local jsonData = obj:getLastMailbox(mailBoxName)
 		local pr = jsonDecode(jsonData)
 		local pos  = vec3(pr.pos)
 		local vel  = vec3(pr.vel)

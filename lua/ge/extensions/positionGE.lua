@@ -74,7 +74,7 @@ local function applyPos(data, serverVehicleID)
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		be:sendToMailbox("vehPosPckt" .. vehicle.gameVehicleID ,data)
+		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
 	end
 
 	local owner = vehicle:getOwner()

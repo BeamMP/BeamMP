@@ -2774,6 +2774,10 @@ local function onVehicleReady(gameVehicleID)
 	if veh.mpVehicleType then
 		veh:queueLuaCommand("MPVehicleVE.setVehicleType(mime.unb64(\'".. MPHelpers.b64encode(veh.mpVehicleType) .."\'))")
 	end
+	if vehiclesMap[gameVehicleID] then
+		veh:queueLuaCommand("MPVehicleVE.setServerID(mime.unb64(\'".. MPHelpers.b64encode(vehiclesMap[gameVehicleID]) .."\'))")
+	end
+
 	MPGameNetwork.onVehicleReady(gameVehicleID)
 end
 

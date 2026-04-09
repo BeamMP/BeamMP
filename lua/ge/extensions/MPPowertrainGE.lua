@@ -30,7 +30,7 @@ local function sendLivePowertrain(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Yl',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Yl',serverVehicleID,data))
 		end
 	end
 end
@@ -52,7 +52,7 @@ local function sendEngineData(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Ye',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Ye',serverVehicleID,data))
 		end
 	end
 end

@@ -285,24 +285,11 @@ local function onExtensionLoaded()
 	M.translate                = MPTranslate
 end
 
-local function generatePacketBuffer(packetType,id,data)
-	sendStringBuff:reset()
-	sendStringBuff:put(packetType)
-	if id then
-		sendStringBuff:put(":",id)
-	end
-	if data then
-		sendStringBuff:put(":",data) -- delete packets doesn't include data
-	end
-	return sendStringBuff
-end
-
 M.b64encode                = b64encode
 M.b64decode                = b64decode
 M.getColorsFromVehObj      = getColorsFromVehObj
 M.splitStringToTable       = splitStringToTable
 M.simplifyVehConfig        = simplifyVehConfig
-M.generatePacketBuffer       = generatePacketBuffer
 
 M.onExtensionLoaded = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

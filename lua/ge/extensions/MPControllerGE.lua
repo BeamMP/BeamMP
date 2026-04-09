@@ -21,7 +21,7 @@ local function sendControllerData(data, gameVehicleID)
 				decodedData.vehID = MPVehicleGE.getServerVehicleID(decodedData.vehID) -- used for controllers that call to another vehicle, like the me262 missile targeting system
 			end
 			data = jsonEncode(decodedData)
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Rc',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Rc',serverVehicleID,data))
 		end
 	end
 end

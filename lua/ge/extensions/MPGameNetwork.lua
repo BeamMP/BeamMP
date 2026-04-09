@@ -291,7 +291,7 @@ end
 -- @tparam string data - The data to be sent with the event
 -- @usage TriggerServerEvent(`<name>`, `<data>`)
 function TriggerServerEvent(name, data)
-	M.send(MPHelpers.generatePacketBuffer('E',name,data))
+	M.send(MPNetworkHelpers.generatePacketBuffer('E',name,data))
 end
 
 --- Triggers a local client event with the specified name and data.

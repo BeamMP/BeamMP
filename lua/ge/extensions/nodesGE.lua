@@ -29,7 +29,7 @@ local function sendNodes(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Xn',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xn',serverVehicleID,data))
 		end
 	end
 end
@@ -43,7 +43,7 @@ local function sendBreakGroups(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Xg',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xg',serverVehicleID,data))
 		end
 	end
 end
@@ -59,7 +59,7 @@ local function sendControllerData(data, gameVehicleID)
 			end
 			data = jsonEncode(decodedData)
 
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Xc',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xc',serverVehicleID,data))
 		end
 	end
 end

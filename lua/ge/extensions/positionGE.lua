@@ -55,7 +55,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
 		end
 	end
 end

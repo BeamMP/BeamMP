@@ -31,7 +31,7 @@ local function sendInputs(data, gameVehicleID) -- Called by vehicle lua
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send(MPHelpers.generatePacketBuffer('Vi',serverVehicleID,data))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Vi',serverVehicleID,data))
 		end
 	end
 end

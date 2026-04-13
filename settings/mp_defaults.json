@@ -43,5 +43,11 @@
   "highlightQueuedPlayers"      : [ "local", true  ],
   "playerlistLeftclick"         : [ "cloud", 0 ],
   "useUiAppRedesign"            : [ "cloud", false ],
-  "refreshIngame"               : [ "local", false ]
+  "refreshIngame"               : [ "local", false ],
+  "enableVoiceChat"             : [ "local", false ],
+  "voiceChatMode"               : [ "cloud", "ptt" ],
+  "voiceChatMuted"              : [ "local", false ],
+  "voiceChatVolume"             : [ "local", 80 ],
+  "voiceChatInputDevice"        : [ "local", "default" ],
+  "voiceChatOutputDevice"       : [ "local", "default" ]
 }

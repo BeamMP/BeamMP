@@ -1,0 +1,17 @@
+{
+  "domElement": "<multiplayervoicechat></multiplayervoicechat>",
+  "name": "Voice Chat",
+  "types": [
+    "ui.apps.categories.multiplayer"
+  ],
+  "css": {
+    "right": "10px",
+    "bottom": "120px",
+    "width": "200px",
+    "height": "300px"
+  },
+  "description": "Voice chat indicator",
+  "author": "BeamMP",
+  "version": "1.0",
+  "directive": "multiplayervoicechat"
+}

@@ -578,6 +578,11 @@ end
 local HandleNetwork = {
 	['A'] = function(params) receiveLauncherHeartbeat() end, -- Launcher heartbeat
 	['B'] = function(params) serverList = params; sendBeamMPInfo() end, -- Server list received
+	['F'] = function(params) 
+		if extensions.MPVoiceChat then 
+			extensions.MPVoiceChat.onLauncherData(params) 
+		end 
+	end, -- Voice chat data from launcher
 	['J'] = function(params) promptAutoJoin(params) end, -- Automatic Server Joining
 	['L'] = function(params) setMods(params) status = "LoadingResources" end, --received after sending 'C' packet
 	['M'] = function(params) log('W', 'HandleNetwork', 'Received Map! '..params) loadLevel(params) end,

@@ -32,5 +32,24 @@
         "isBasic": true,
         "title": "Toggle Chat",
         "desc": "Toggle the chat window"
+    },
+    "voicechat": {
+        "cat": "beammp",
+        "order": 4,
+        "ctx": "tlua",
+        "onDown": "MPVoiceChat.startTalking()",
+        "onUp": "MPVoiceChat.stopTalking()",
+        "isBasic": true,
+        "title": "Voice Chat (PTT)",
+        "desc": "Hold to talk in voice chat"
+    },
+    "voicechatMute": {
+        "cat": "beammp",
+        "order": 5,
+        "ctx": "tlua",
+        "onDown": "MPVoiceChat.toggleMute()",
+        "isBasic": true,
+        "title": "Voice Chat Mute Toggle",
+        "desc": "Toggle microphone mute (open mic mode)"
     }
 }

@@ -1,0 +1,40 @@
+#vc-container {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px;
+	font-family: 'Segoe UI', sans-serif;
+	pointer-events: none;
+}
+
+.vc-entry {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	font-size: 13px;
+	animation: vc-fade-in 0.15s ease;
+}
+
+.vc-entry.vc-self {
+	background: rgba(76, 175, 80, 0.6);
+}
+
+.vc-icon {
+	font-size: 16px;
+	opacity: 0.9;
+}
+
+.vc-name {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+@keyframes vc-fade-in {
+	from { opacity: 0; transform: translateY(4px); }
+	to   { opacity: 1; transform: translateY(0); }
+}

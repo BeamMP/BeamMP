@@ -349,6 +349,68 @@
 
 
 <md-divider></md-divider>
+<md-list-item layout="column" layout-align="start start"><p><h3>{{:: 'ui.options.multiplayer.voiceChat' | translate }}</h3></p></md-list-item>
+
+<md-list-item md-no-ink>
+  <p>{{:: 'ui.options.multiplayer.voiceChat.enable' | translate }}</p>
+  <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.enable.tooltip' | translate }}</md-tooltip>
+  <md-checkbox ng-model="options.data.values.enableVoiceChat" ng-change="options.applyState()" ng-init="options.data.values.enableVoiceChat = options.data.values.enableVoiceChat !== undefined ? options.data.values.enableVoiceChat : false"></md-checkbox>
+</md-list-item>
+
+<div class="mp-setting-border" ng-show="options.data.values.enableVoiceChat">
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.voiceChat.micMode' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.micMode.tooltip' | translate }}</md-tooltip>
+    <md-select aria-label="Mic Mode" ng-model="options.data.values.voiceChatMode" ng-change="options.applyState()" ng-init="options.data.values.voiceChatMode = options.data.values.voiceChatMode || 'ptt'">
+      <md-option ng-value="'ptt'">{{:: 'ui.options.multiplayer.voiceChat.micMode.ptt' | translate }}</md-option>
+      <md-option ng-value="'open'">{{:: 'ui.options.multiplayer.voiceChat.micMode.open' | translate }}</md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item md-no-ink ng-show="options.data.values.voiceChatMode === 'open'">
+    <p>{{:: 'ui.options.multiplayer.voiceChat.mute' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.mute.tooltip' | translate }}</md-tooltip>
+    <md-checkbox ng-model="options.data.values.voiceChatMuted" ng-change="options.applyState()" ng-init="options.data.values.voiceChatMuted = options.data.values.voiceChatMuted || false"></md-checkbox>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.volume.tooltip' | translate }}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.multiplayer.voiceChat.volume' | translate }}</p>
+    <md-slider flex ng-model="options.data.values.voiceChatVolume" min="0" max="100" step="5" aria-label="_"
+      ng-change="options.applyState()" ng-init="options.data.values.voiceChatVolume = options.data.values.voiceChatVolume != null ? options.data.values.voiceChatVolume : 80">
+    </md-slider>
+    <span style="margin-left:15px">{{ (options.data.values.voiceChatVolume).toFixed(0) }}%</span>
+  </md-list-item>
+
+  <md-list-item layout class="md-padding" style="padding-top:0; padding-bottom:0">
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.micLevel.tooltip' | translate }}</md-tooltip>
+    <p flex="30">{{:: 'ui.options.multiplayer.voiceChat.micLevel' | translate }}</p>
+    <div flex style="margin-left:15px; margin-right:15px; height:6px; background-color:#333; border-radius:3px; overflow:hidden;">
+      <div style="height:100%; background-color:#4CAF50; transition: width 0.1s ease;" ng-style="{'width': (multiplayer.micLevel || 0) + '%'}"></div>
+    </div>
+    <span style="margin-left:15px; min-width:35px;">{{ (multiplayer.micLevel || 0).toFixed(0) }}%</span>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.voiceChat.inputDevice' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.inputDevice.tooltip' | translate }}</md-tooltip>
+    <md-select aria-label="Input Device" ng-model="options.data.values.voiceChatInputDevice" ng-change="options.applyState()" ng-init="options.data.values.voiceChatInputDevice = options.data.values.voiceChatInputDevice || 'default'" style="min-width: 200px;">
+      <md-option ng-value="'default'">{{:: 'ui.options.multiplayer.voiceChat.systemDefault' | translate }}</md-option>
+      <md-option ng-repeat="dev in multiplayer.voiceInputDevices" ng-value="dev.id">{{dev.name}}</md-option>
+    </md-select>
+  </md-list-item>
+
+  <md-list-item md-no-ink>
+    <p>{{:: 'ui.options.multiplayer.voiceChat.outputDevice' | translate }}</p>
+    <md-tooltip md-direction="right">{{:: 'ui.options.multiplayer.voiceChat.outputDevice.tooltip' | translate }}</md-tooltip>
+    <md-select aria-label="Output Device" ng-model="options.data.values.voiceChatOutputDevice" ng-change="options.applyState()" ng-init="options.data.values.voiceChatOutputDevice = options.data.values.voiceChatOutputDevice || 'default'" style="min-width: 200px;">
+      <md-option ng-value="'default'">{{:: 'ui.options.multiplayer.voiceChat.systemDefault' | translate }}</md-option>
+      <md-option ng-repeat="dev in multiplayer.voiceOutputDevices" ng-value="dev.id">{{dev.name}}</md-option>
+    </md-select>
+  </md-list-item>
+</div>
+
+<md-divider></md-divider>
 <md-list-item layout="column" layout-align="start start" ng-show="options.data.values.showAdvancedMPOptions"><p><h3>{{:: 'ui.options.multiplayer.others' |  translate }}</h3></p></md-list-item>
 
 <md-list-item md-no-ink ng-show="options.data.values.showAdvancedMPOptions">

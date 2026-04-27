@@ -239,9 +239,6 @@ local function updateGFX(dt)
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
-	
-	-- Since the line above returns end if there is no remote data we know this vehicle should be remote if this runs
-	if v.mpVehicleType == "L" then v.mpVehicleType = "R" end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))

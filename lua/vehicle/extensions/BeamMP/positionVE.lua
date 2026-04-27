@@ -230,12 +230,12 @@ end
 
 
 local function updateGFX(dt)
+	updateRemoteData()
 	dt = dt * (remoteData.localSimspeed or 1)
 	timer = timer + dt
 	lastDT = dt
 	framesSinceReset = framesSinceReset + 1
 
-	updateRemoteData()
 
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end

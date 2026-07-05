@@ -96,7 +96,11 @@ local function sendData(data) -- TODO currently the socket keeps retrying indefi
 				packet = string.sub(packet, index + 1)
 
 				bytes, error, index = TCPLauncherSocket:send(packet)
+			else
+				break -- non-timeout error (e.g. closed): stop retrying, the handler below deals with it
 			end
+			retries = retries - 1 -- was never decremented: a persistent timeout (frozen/stalled
+			                      -- launcher) spun this loop forever on the GE thread = game freeze
 		end
 	end
 

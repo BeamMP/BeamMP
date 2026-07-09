@@ -70,6 +70,9 @@ setExtensionUnloadMode("nodesGE", "manual")
 load("MPControllerGE")
 setExtensionUnloadMode("MPControllerGE", "manual")
 
+load("MPVoiceChat")
+setExtensionUnloadMode("MPVoiceChat", "manual")
+
 -- load this file last so it can reference the others
 load("MPHelpers")
 setExtensionUnloadMode("MPHelpers", "manual")

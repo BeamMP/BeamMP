@@ -127,6 +127,31 @@ export default angular.module('multiplayer', ['ui.router'])
     })
   })
 
+  // Voice Chat UI data
+  $rootScope.multiplayer = $rootScope.multiplayer || {};
+  $rootScope.multiplayer.voiceInputDevices = [];
+  $rootScope.multiplayer.voiceOutputDevices = [];
+  $rootScope.multiplayer.micLevel = 0;
+
+  $rootScope.$on('VoiceChatDevicesReceived', function(event, devices) {
+    $rootScope.multiplayer.voiceInputDevices = devices.input || [];
+    $rootScope.multiplayer.voiceOutputDevices = devices.output || [];
+    $rootScope.$applyAsync();
+  });
+
+  $rootScope.$on('VoiceChatMicLevel', function(event, level) {
+    $rootScope.multiplayer.micLevel = Math.max(0, Math.min(100, level || 0));
+    if (!$rootScope.$$phase) {
+      $rootScope.$applyAsync();
+    }
+  });
+
+  $rootScope.$on('$stateChangeSuccess', function(event, toState) {
+    if (toState.name === 'menu.options.multiplayer') {
+      bngApi.engineLua('if extensions.MPVoiceChat then extensions.MPVoiceChat.requestDevices() end');
+    }
+  });
+
 	// Check for server to join
 	$rootScope.$on('AutoJoinConfirmation', function(evt, data) {
 		console.log('AutoJoinConfirmation',evt,data)
@@ -486,7 +511,8 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 				};
 			});
 		} else {
-			document.getElementById("extra-button").style.display = "none";
+			const extraBtn = document.getElementById("extra-button");
+			if (extraBtn) extraBtn.style.display = "none";
 		}
 	}
 
@@ -1523,7 +1549,8 @@ globalThis.openExternalLink = function(url){
 
 // /!\ IMPORTANT /!\ //// TYPE 0 = Normal / 1 = Favorites / 2 = Recents
 async function populateTable($filter, $scope, servers, tab, searchText = '', checkIsEmpty, checkIsNotEmpty, checkIsNotFull, checkModSlider, sliderMaxModSize, selectMap = 'Any map', SelectedServerVersions = [], tags = [], SelectedServerLocations = []) {
-	$scope.serversTable = {}; 
+	$scope.serversTable = {};
+	$scope.serversArray = [];
 	var type = 0;
 	if (tab == "favorites") type = 1;
 	else if (tab == "recents") type = 2;

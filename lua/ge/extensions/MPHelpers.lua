@@ -243,8 +243,83 @@ function pairs (value)
 end 
 end
 
+--- Reads a file line by line returning an array of the lines
+-- @param filePath the filepath to read.
+-- @usage MPHelpers.readFile("/lua/ge/extensions/multiplayer/filters/level_0.txt")
+local function readFile(filePath)
+	local file = io.open(filePath, "r") -- Open the file in read mode
+	if not file then
+			-- Return nil and an error message if the file can't be opened
+			return nil, "Error: Cannot open file at " .. filePath
+	end
+
+	local lines = {} -- Initialize an array to hold the lines
+	for line in file:lines() do
+			table.insert(lines, line) -- Insert each line into the array
+	end
+
+	file:close() -- Close the file after reading
+	return lines, nil -- Return the array of lines and nil for error
+end
+
+--- Replaces a substring that exists in a string from an array of strings.
+-- @param inputStr the string you want to filter.
+-- @param filterArray the string array you want to filter out.
+-- @param replacementChar the character to put in the words place
+-- @usage MPHelpers.filterString("The Quick Brown Fox", ["The"])
+function filterString(inputStr, filterArray, replacementChar)
+	-- Default replacement character to '*' if not provided
+	replacementChar = replacementChar or '*'
+
+	-- Function to create a pattern that matches variations of a word
+	local function createPattern(word)
+		-- Table to replace letters with their possible numeric or Unicode equivalents
+		local substitutions = {
+			a = "[a4@αа]", -- Includes Greek alpha (α) and Cyrillic (а)
+			b = "[b8ß]", -- Includes German sharp S (ß)
+			c = "[cςç¢]", -- Includes Greek sigma (ς) and Latin-based characters
+			d = "[d]", -- No common substitutes found
+			e = "[e3€е]", -- Includes Cyrillic e (е)
+			g = "[g9ɢ]", -- Includes Latin letter G (ɢ)
+			i = "[i1l!|ιіí]", -- Includes Greek iota (ι) and Cyrillic i (і)
+			l = "[l1i!|ʟ]", -- Includes Latin letter L (ʟ)
+			o = "[o0οоø]", -- Includes Greek omicron (ο), Cyrillic o (о), and Scandinavian o-slash (ø)
+			s = "[s5z$ѕ]", -- Includes Cyrillic s (ѕ)
+			t = "[t7τ]", -- Includes Greek tau (τ)
+			z = "[z2sʐ]" -- Includes Latin letter z (ʐ)
+		}
+
+		-- Escape the word and replace each letter with its substitution pattern
+		local pattern = word:lower():gsub(".", function(char)
+			return substitutions[char] or char
+		end)
+		
+		-- Allow optional spaces or special characters between letters (but require at least the character)
+		pattern = pattern:gsub("(.)", "%1%%s*")
+
+		-- Ensure it matches regardless of capitalization and only matches whole words
+		return "%f[%w]" .. pattern .. "%f[%W]"
+	end
+
+	-- Replace all occurrences of forbidden words and their variations
+	for _, word in ipairs(filterArray) do
+		local pattern = createPattern(word)
+		inputStr = inputStr:gsub(pattern, function(match)
+			dump("Filtered word: " .. match) -- Debug output to see what was filtered
+			-- Replace the entire matched string with replacement characters
+			-- Remove spaces from the match to get the actual character count
+			local charCount = #match:gsub("%s", "")
+			return replacementChar:rep(charCount)
+		end)
+	end
+
+	return inputStr
+end
+
 --generic
 M.tableLength  = tableSize
+M.filterString = filterString
+M.readFile     = readFile
 
 --local
 M.colorMatch   = colorMatch

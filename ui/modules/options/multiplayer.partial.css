@@ -11,3 +11,11 @@ input:invalid {
   margin: 0px 16px 16px 16px;
   border: 2px solid rgba(255,255,255,0.3);
 }
+
+.mp-option-helper {
+  position: absolute;
+  top: 30px;
+  color: rgba(255,255,255,0.7);
+  font-size: smaller;    
+  max-width: 85%;
+}

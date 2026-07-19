@@ -211,6 +211,11 @@ $stateProvider.state('menu.multiplayer', {
 		templateUrl: '/ui/modules/options/multiplayer.partial.html',
 		backState: 'BACK_TO_MENU',
 	})
+	.state('menu.options.mpsafety', {
+		url: '/mpsafety',
+		templateUrl: '/ui/modules/options/mpsafety.partial.html',
+		backState: 'BACK_TO_MENU',
+	})
 
 }])
 

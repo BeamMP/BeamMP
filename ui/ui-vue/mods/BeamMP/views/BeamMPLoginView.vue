@@ -9,19 +9,34 @@
         <h2 class="login-title">{{ $tt("ui.multiplayer.loginDescription1") }}</h2>
 
         <div class="input-group">
-          <label>{{ $tt("ui.multiplayer.login.username") }}</label>
-          <input v-model="username" class="bng-input" type="text" autocomplete="username" />
+          <label for="beammp-login-username">{{ $tt("ui.multiplayer.login.username") }}</label>
+          <div class="input-shell">
+            <span class="field-prefix" aria-hidden="true">@</span>
+            <input
+              id="beammp-login-username"
+              v-model="username"
+              v-bng-text-input
+              type="text"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+            />
+          </div>
         </div>
 
         <div class="input-group">
-          <label>{{ $tt("ui.multiplayer.login.password") }}</label>
-          <input
-            v-model="password"
-            class="bng-input"
-            type="password"
-            autocomplete="current-password"
-            @keyup.enter="submitLogin"
-          />
+          <label for="beammp-login-password">{{ $tt("ui.multiplayer.login.password") }}</label>
+          <div class="input-shell">
+            <span class="field-prefix password-prefix" aria-hidden="true">•••</span>
+            <input
+              id="beammp-login-password"
+              v-model="password"
+              v-bng-text-input
+              type="password"
+              autocomplete="current-password"
+              @keyup.enter="submitLogin"
+            />
+          </div>
         </div>
 
         <div class="actions">
@@ -46,6 +61,7 @@
 import { ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { BngButton } from "@/common/components/base"
+import { vBngTextInput } from "@/common/directives"
 import { BEAMMP_SERVERS_ROUTE_NAME } from "../shared/constants.js"
 import { useBeamMPState } from "../shared/beammpState.js"
 
@@ -53,8 +69,8 @@ const router = useRouter()
 const username = ref("")
 const password = ref("")
 const mode = ref("account")
-const LEGACY_LOGO_PATH = "local://local/ui/modModules/multiplayer/beammp_new_cropped.png"
-const LOGO_FALLBACK = new URL("../icons/account-multiple.svg", import.meta.url).href
+const LEGACY_LOGO_PATH = "local://local/ui/modModulesOLD/multiplayer/beammp_new_cropped.png"
+const LOGO_FALLBACK = "/ui/ui-vue/mods/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
 const { login, guestLogin, openExternal, state } = useBeamMPState()
 
@@ -127,12 +143,65 @@ watch(() => state.loggedIn.value, value => {
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.35rem;
 
   label {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--bng-cool-gray-100);
   }
+}
+
+.input-shell {
+  display: flex;
+  min-height: 2.7rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--bng-corners-1);
+  background: rgba(7, 10, 14, 0.78);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.42);
+  }
+
+  &:focus-within {
+    border-color: var(--bng-orange-500);
+    box-shadow: 0 0 0 0.13rem rgba(var(--bng-orange-500-rgb), 0.32);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.55rem 0.7rem;
+    border: 0;
+    outline: 0;
+    color: var(--bng-off-white);
+    background: transparent;
+    font: inherit;
+
+    &:-webkit-autofill {
+      -webkit-text-fill-color: var(--bng-off-white);
+      box-shadow: 0 0 0 1000px rgb(12, 15, 20) inset;
+    }
+  }
+}
+
+.field-prefix {
+  display: grid;
+  min-width: 2.6rem;
+  place-items: center;
+  padding: 0 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--bng-cool-gray-200);
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.password-prefix {
+  letter-spacing: 0.08rem;
 }
 
 .guest-copy {

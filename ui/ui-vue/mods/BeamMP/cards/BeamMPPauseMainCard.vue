@@ -1,13 +1,37 @@
 <template>
   <div class="card">
-    <h3>{{ $tt("ui.playmodes.multiplayer") }}</h3>
-    <p>{{ state.auth.value?.username || "Guest" }}</p>
+    <header class="card-header">
+      <div>
+        <h3>{{ $tt("ui.playmodes.multiplayer") }}</h3>
+        <p class="subtitle">BeamMP session controls</p>
+      </div>
+      <div class="identity">
+        <span class="online-dot"></span>
+        <span>{{ state.auth.value?.username || "Guest" }}</span>
+      </div>
+    </header>
 
     <div class="actions">
-      <BngButton @click="resume">{{ $tt("ui.common.action.resume") }}</BngButton>
-      <BngButton accent="secondary" @click="openBrowser">{{ $tt("ui.multiplayer.pauseMenu.serverDetails") }}</BngButton>
-      <BngButton accent="secondary" @click="showLeaveConfirm = true">{{ $tt("ui.multiplayer.pauseMenu.disconnect") }}</BngButton>
-      <BngButton accent="attention" @click="showQuitConfirm = true">{{ $tt("ui.multiplayer.pauseMenu.quitGame") }}</BngButton>
+      <Button class="action action--primary" @click="resume">
+        <template #prefix><BngIcon :type="icons.play" /></template>
+        <span>{{ $tt("ui.common.action.resume") }}</span>
+      </Button>
+      <Button class="action" @click="openBrowser">
+        <template #prefix><BngIcon :type="icons.info" /></template>
+        <span>{{ $tt("ui.multiplayer.pauseMenu.serverDetails") }}</span>
+      </Button>
+      <Button class="action action--wide" @click="openServerList">
+        <template #prefix><BngIcon :type="icons.globe" /></template>
+        <span>Server List</span>
+      </Button>
+      <Button class="action" @click="showLeaveConfirm = true">
+        <template #prefix><BngIcon :type="icons.exit" /></template>
+        <span>{{ $tt("ui.multiplayer.pauseMenu.disconnect") }}</span>
+      </Button>
+      <Button class="action action--danger" @click="showQuitConfirm = true">
+        <template #prefix><BngIcon :type="icons.powerOnOff" /></template>
+        <span>{{ $tt("ui.multiplayer.pauseMenu.quitGame") }}</span>
+      </Button>
     </div>
 
     <BeamMPModal
@@ -34,13 +58,18 @@
 
 <script setup>
 import { ref } from "vue"
-import { lua } from "@/bridge"
-import { BngButton } from "@/common/components/base"
-import { BEAMMP_ROUTE_NAME } from "../shared/constants.js"
+import { lua, useBridge } from "@/bridge"
+import { BngIcon, icons } from "@/common/components/base"
+import { Button } from "@/common/components/utility"
+import {
+  BEAMMP_CURRENT_SERVER_ROUTE_NAME,
+  BEAMMP_SERVERS_ROUTE_NAME,
+} from "../shared/constants.js"
 import BeamMPModal from "../shared/BeamMPModal.vue"
 import { useBeamMPState } from "../shared/beammpState.js"
 
 const bngVue = window.bngVue || { gotoGameState() {} }
+const { api } = useBridge()
 const { state } = useBeamMPState()
 const showLeaveConfirm = ref(false)
 const showQuitConfirm = ref(false)
@@ -50,17 +79,21 @@ function resume() {
 }
 
 function openBrowser() {
-  lua.extensions.ui_router.push(BEAMMP_ROUTE_NAME)
+  lua.extensions.ui_router.push(BEAMMP_CURRENT_SERVER_ROUTE_NAME)
+}
+
+function openServerList() {
+  lua.extensions.ui_router.push(BEAMMP_SERVERS_ROUTE_NAME)
 }
 
 function confirmLeaveServer() {
   showLeaveConfirm.value = false
-  window.bngApi?.engineLua("MPCoreNetwork.leaveServer(true)")
+  api.engineLua("MPCoreNetwork.leaveServer(true)")
 }
 
 function confirmQuitGame() {
   showQuitConfirm.value = false
-  window.bngApi?.engineLua("quit()")
+  api.engineLua("quit()")
 }
 </script>
 
@@ -68,13 +101,116 @@ function confirmQuitGame() {
 .card {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 1rem;
+  padding: 0.5rem;
   color: var(--bng-off-white);
 }
 
-.actions {
+.card-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.15rem 0.85rem;
+  border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
+}
+
+h3,
+.subtitle {
+  margin: 0;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+.subtitle {
+  margin-top: 0.2rem;
+  color: var(--bng-cool-gray-300);
+  font-size: 0.82rem;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 48%;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--bng-corners-2);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.72);
+  color: var(--bng-cool-gray-100);
+  font-size: 0.8rem;
+}
+
+.identity span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.online-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--bng-add-green-400);
+  box-shadow: 0 0 0.4rem rgba(var(--bng-add-green-400-rgb), 0.55);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.action {
+  --bng-icon-size: 1.5rem;
+  --bng-bg-border-radius: var(--bng-corners-1);
+  --bng-bg-border-width: 0.0625rem;
+  --bng-bg-enabled: var(--bng-cool-gray-650);
+  --bng-bg-hover: var(--bng-cool-gray-600);
+  --bng-bg-active: var(--bng-cool-gray-600);
+  --bng-bg-border-enabled: var(--bng-cool-gray-300);
+  --bng-bg-border-hover: var(--bng-cool-gray-300);
+  --bng-bg-border-active: var(--bng-cool-gray-300);
+  --bng-bg-enabled-opacity: 0.6;
+  --bng-bg-hover-opacity: 0.85;
+  --bng-bg-active-opacity: 0.9;
+  --bng-content-flow: row;
+  --bng-content-align: center;
+  --bng-content-justify: flex-start;
+  --bng-button-padding: 0.65rem;
+  --bng-button-margin: 0;
+  --bng-button-min-width: 0;
+  --bng-button-max-width: none;
+
+  width: 100%;
+  min-height: 3.25rem;
+  gap: 0.55rem;
+  font-size: 1rem;
+}
+
+.action--primary {
+  --bng-bg-enabled: var(--bng-orange-500);
+  --bng-bg-hover: var(--bng-orange-600);
+  --bng-bg-active: var(--bng-orange-700);
+  --bng-bg-border-enabled: var(--bng-orange-300);
+  --bng-bg-border-hover: var(--bng-orange-200);
+  --bng-bg-border-active: var(--bng-orange-300);
+  --bng-bg-enabled-opacity: 1;
+}
+
+.action--wide {
+  grid-column: 1 / -1;
+}
+
+.action--danger {
+  --bng-bg-enabled: var(--bng-add-red-600);
+  --bng-bg-hover: var(--bng-add-red-600);
+  --bng-bg-active: var(--bng-add-red-600);
+  --bng-bg-border-enabled: var(--bng-add-red-400);
+  --bng-bg-border-hover: var(--bng-add-red-400);
+  --bng-bg-border-active: var(--bng-add-red-400);
 }
 </style>

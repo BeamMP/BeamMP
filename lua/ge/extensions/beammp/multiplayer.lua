@@ -156,8 +156,8 @@ end
 M.onUpdate          = onUpdate
 M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
-M.runPostJoin = runPostJoin
-M.onServerLeave = onServerLeave
+M.onBeamMPPostJoin = runPostJoin
+M.onBeamMPServerLeave = onServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

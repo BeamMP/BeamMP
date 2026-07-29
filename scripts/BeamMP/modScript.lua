@@ -25,8 +25,8 @@ end
 load("MPNetworkHelpers")
 setExtensionUnloadMode("MPNetworkHelpers", "manual")
 
-load("multiplayer/multiplayer")
-setExtensionUnloadMode("multiplayer/multiplayer", "manual")
+load("beammp/multiplayer")
+setExtensionUnloadMode("beammp/multiplayer", "manual")
 
 load("MPDebug")
 setExtensionUnloadMode("MPDebug", "manual")

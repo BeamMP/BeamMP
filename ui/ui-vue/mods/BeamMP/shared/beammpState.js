@@ -1,4 +1,7 @@
 import { computed, ref } from "vue"
+import { useBridge } from "@/bridge"
+
+const { api } = useBridge()
 
 const DEFAULT_FILTERS = {
   searchText: "",
@@ -37,6 +40,30 @@ const tagThemes = {
   Moderated: "",
 }
 
+const officialMaps = [
+  "Automation Test Track",
+  "Autotest",
+  "Cliff",
+  "Derby",
+  "Driver Training",
+  "East Coast Usa",
+  "Garage V2",
+  "Glow City",
+  "Gridmap",
+  "Gridmap V2",
+  "Hirochi Raceway",
+  "Industrial",
+  "Italy",
+  "Johnson Valley",
+  "Jungle Rock Island",
+  "Showroom V2",
+  "Small Island",
+  "Smallgrid",
+  "Template",
+  "Utah",
+  "West Coast Usa",
+]
+
 const state = {
   isReady: ref(false),
   tosAccepted: ref(localStorage.getItem("tosAccepted") === "true"),
@@ -65,13 +92,7 @@ const state = {
 
 let listenersReady = false
 
-function bngApi() {
-  return window.bngApi
-}
-
 function engineLua(command, callback) {
-  const api = bngApi()
-  if (!api?.engineLua) return
   api.engineLua(command, callback)
 }
 
@@ -148,12 +169,15 @@ function formatBytes(bytes = 0, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 
-function normalizeServer(server) {
+function normalizeServer(server, listIndex) {
+  const endpoint = `${server?.ip}:${server?.port}`
   return {
     ...server,
     strippedName: stripCustomFormatting(server?.sname || ""),
+    sortName: stripCustomFormatting(server?.sname || "").toLowerCase(),
     mapName: smoothMapName(server?.map || ""),
-    id: `${server?.ip}:${server?.port}`,
+    endpoint,
+    id: Number.isInteger(listIndex) ? `${endpoint}#${listIndex}` : endpoint,
     tagsList: formatServerTags(server?.tags || ""),
   }
 }
@@ -236,7 +260,7 @@ function applyFilters(items, view) {
 
 function readServerList(data) {
   const list = Array.isArray(data) ? data : []
-  state.servers.value = list.map(normalizeServer)
+  state.servers.value = list.map((server, index) => normalizeServer(server, index))
   if (state.selectedServerId.value) {
     const exists = state.servers.value.some(server => server.id === state.selectedServerId.value)
     if (!exists) state.selectedServerId.value = ""
@@ -244,21 +268,29 @@ function readServerList(data) {
 }
 
 function isFavorite(server) {
-  return state.favorites.value.some(f => `${f.ip}:${f.port}` === server.id)
+  return state.favorites.value.some(f => `${f.ip}:${f.port}` === server.endpoint)
 }
 
 function isRecent(server) {
-  return state.recents.value.some(r => `${r.ip}:${r.port}` === server.id)
+  return state.recents.value.some(r => `${r.ip}:${r.port}` === server.endpoint)
 }
 
 function addRecent(server) {
   if (!server) return
-  const trimmed = state.recents.value.filter(r => !(r.ip === server.ip && r.port === server.port))
+  const endpoint = `${server.ip}:${server.port}`
+  const trimmed = state.recents.value.filter(r => `${r.ip}:${r.port}` !== endpoint)
+  const {
+    id,
+    endpoint: ignoredEndpoint,
+    tagsList,
+    ...persistedServer
+  } = server
   trimmed.push({
+    ...persistedServer,
     ip: server.ip,
     port: server.port,
-    sname: server.sname,
-    strippedName: server.strippedName,
+    sname: server.sname || server.name || endpoint,
+    strippedName: server.strippedName || stripCustomFormatting(server.sname || server.name || endpoint),
     addTime: Date.now(),
   })
   state.recents.value = trimmed.slice(-50)
@@ -313,6 +345,9 @@ function selectServer(serverId) {
 async function refreshConnectionState() {
   state.loggedIn.value = Boolean(await luaCall("MPCoreNetwork.isLoggedIn()"))
   state.launcherConnected.value = Boolean(await luaCall("MPCoreNetwork.isLauncherConnected()"))
+  state.auth.value = state.loggedIn.value
+    ? (await luaCall("MPCoreNetwork.getAuthResult()")) || {}
+    : {}
 }
 
 async function requestServerList() {
@@ -329,7 +364,6 @@ async function login(username, password) {
     state.loginError.value = "Missing credentials"
     return
   }
-  const api = bngApi()
   const credentials = { username: username.trim(), password: password.trim() }
   engineLua(`MPCoreNetwork.login(${api.serializeToLua(credentials)})`)
 }
@@ -348,6 +382,14 @@ async function logout() {
 async function connectToServer(ip, port, name = "", skipModWarning = false) {
   const useIp = (ip || "127.0.0.1").trim()
   const usePort = Number(port || "30814")
+  const endpoint = `${useIp}:${usePort}`
+  const listedServer = state.servers.value.find(server => server.endpoint === endpoint)
+  addRecent(listedServer || {
+    ip: useIp,
+    port: usePort,
+    sname: name || endpoint,
+    strippedName: stripCustomFormatting(name || endpoint),
+  })
   state.loadingOverlayVisible.value = true
   state.loadingStatus.value = ""
   state.downloadingMods.value = []
@@ -456,31 +498,39 @@ function ensureListeners(events) {
   if (listenersReady) return
   listenersReady = true
 
-  events.on("onServerListReceived", data => readServerList(data))
+  events.on("BeamMP_ServerListReceived", data => readServerList(data))
+  events.on("BeamMP_Info", data => {
+    state.beammpMetrics.value = {
+      ...state.beammpMetrics.value,
+      ...(data || {}),
+    }
+  })
   events.on("LoadingInfo", payload => onLoadingInfo(payload))
-  events.on("LoggedIn", () => {
+  events.on("BeamMP_LoggedIn", () => {
     state.loggedIn.value = true
     state.loginError.value = ""
+    requestServerList()
   })
-  events.on("actuallyLoggedIn", data => {
+  events.on("BeamMP_LoginState", data => {
     state.loggedIn.value = Boolean(data)
+    if (state.loggedIn.value) requestServerList()
   })
-  events.on("LoginError", data => {
+  events.on("BeamMP_LoginError", data => {
     state.loginError.value = String(data || "Login failed")
   })
-  events.on("onLauncherConnected", () => {
+  events.on("BeamMP_LauncherConnected", () => {
     state.launcherConnected.value = true
   })
-  events.on("LauncherConnectionLost", () => {
+  events.on("BeamMP_LauncherConnectionLost", () => {
     state.launcherConnected.value = false
   })
-  events.on("authReceived", data => {
+  events.on("BeamMP_AuthReceived", data => {
     state.auth.value = data || {}
   })
-  events.on("onServerJoined", () => {
+  events.on("BeamMP_ServerJoined", () => {
     state.loadingOverlayVisible.value = false
   })
-  events.on("DownloadSecurityPrompt", data => {
+  events.on("BeamMP_DownloadSecurityPrompt", data => {
     showSecurityPrompt(data?.message || "")
   })
 }
@@ -495,10 +545,16 @@ const availableTags = computed(() => {
 
 const availableMaps = computed(() => {
   const maps = new Set()
+  const official = new Set()
   state.servers.value.forEach(server => {
     if (server.mapName) maps.add(server.mapName)
+    if (server.mapName && officialMaps.includes(server.mapName)) official.add(server.mapName)
   })
-  return [...maps].sort((a, b) => a.localeCompare(b))
+  const officialMapsSorted = [...official].sort((a, b) => a.localeCompare(b))
+  const otherMapsSorted = [...maps]
+    .filter(map => !official.has(map))
+    .sort((a, b) => a.localeCompare(b))
+  return [...officialMapsSorted, ...otherMapsSorted]
 })
 
 const availableVersions = computed(() => {
@@ -518,10 +574,42 @@ const availableLocations = computed(() => {
 const selectedServer = computed(() => state.servers.value.find(s => s.id === state.selectedServerId.value) || null)
 
 const visibleServers = computed(() => {
-  const byFilter = applyFilters(state.servers.value, state.view.value)
+  const source = state.view.value === "favorites"
+    ? state.favorites.value.map(favorite => {
+        const id = `${favorite.ip}:${favorite.port}`
+        const liveServer = state.servers.value.find(server => server.endpoint === id)
+        return normalizeServer({
+          ...favorite,
+          ...(liveServer || {}),
+        })
+      })
+    : state.view.value === "recent"
+      ? state.recents.value.map(recent => {
+          const id = `${recent.ip}:${recent.port}`
+          const liveServer = state.servers.value.find(server => server.endpoint === id)
+          return normalizeServer({
+            ...recent,
+            ...(liveServer || {}),
+          })
+        })
+    : state.servers.value
+  const byFilter = applyFilters(source, state.view.value)
   if (state.view.value === "recent") {
     const recentMap = Object.fromEntries(state.recents.value.map(r => [`${r.ip}:${r.port}`, r.addTime || 0]))
-    return [...byFilter].sort((a, b) => (recentMap[b.id] || 0) - (recentMap[a.id] || 0))
+    return [...byFilter].sort((a, b) => (recentMap[b.endpoint] || 0) - (recentMap[a.endpoint] || 0))
+  }
+  if (state.view.value === "servers") {
+    return byFilter
+      .map((server, index) => ({ server, index }))
+      .sort((a, b) => {
+        if (a.server.official && b.server.official) {
+          return a.server.strippedName.localeCompare(b.server.strippedName) || a.index - b.index
+        }
+        if (a.server.official) return -1
+        if (b.server.official) return 1
+        return a.index - b.index
+      })
+      .map(({ server }) => server)
   }
   return byFilter
 })
@@ -536,6 +624,7 @@ export function useBeamMPState(events) {
     addRecent,
     availableLocations,
     availableMaps,
+    officialMaps,
     availableTags,
     availableVersions,
     clearRecents,

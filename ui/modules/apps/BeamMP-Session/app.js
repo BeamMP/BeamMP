@@ -16,16 +16,20 @@ app.directive('multiplayersession', [function () {
 	}
 }]);
 
-app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, $mdDialog, Settings) {
+app.controller("BeamMPSessionController", ['$scope', '$mdDialog', 'Settings', function ($scope, $mdDialog, Settings) {
 
 	const applySessionStyle = function(useNewDesign) {
 		const stylesheet = document.getElementById('session-style');
+		const session = document.getElementById('Session');
 		if (!stylesheet) return;
 
 		let newStylePath = useNewDesign ? '/ui/modules/apps/BeamMP-Session/redesign.css' : '/ui/modules/apps/BeamMP-Session/app.css';
 		
 		if (stylesheet.getAttribute('href') !== newStylePath) {
 			stylesheet.setAttribute('href', newStylePath);
+		}
+		if (session) {
+			session.classList.toggle('ui-style-redesigned', Boolean(useNewDesign));
 		}
 	};
 
@@ -59,7 +63,7 @@ app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, 
 		applySessionStyle(Settings.values.useUiAppRedesign);
 	});
 
-	$scope.$on('showMdDialog', function (event, data) {
+	$scope.$on('BeamMP_ShowDialog', function (event, data) {
 		switch (data.dialogtype) {
 			case "alert":
 				if (mdDialogVisible) { return; }
@@ -109,7 +113,7 @@ app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, 
 		}
 	});
 
-	$scope.$on('setPing', function (event, ping) {
+	$scope.$on('BeamMP_SetPing', function (event, ping) {
 		var sessionPing = document.getElementById("Session-Ping")
 		// To ensure that the element exists
 		if (sessionPing) {
@@ -117,7 +121,7 @@ app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, 
 		}
 	});
 
-	$scope.$on('setQueue', function (event, queue) {
+	$scope.$on('BeamMP_SetQueue', function (event, queue) {
 		var queueBlock = document.getElementById("queue-block");
 		// To ensure that the element exists
 		if (queueBlock) {
@@ -137,11 +141,11 @@ app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, 
 
 	});
 
-	$scope.$on('setAutoQueueProgress', function (event, progress) {
+	$scope.$on('BeamMP_SetAutoQueueProgress', function (event, progress) {
 		document.getElementById('queue-block').style["background-position"] = progress + "%";
 	});
 
-	$scope.$on('setServerName', function (event, data) {
+	$scope.$on('BeamMP_SetServerName', function (event, data) {
 		//console.log('Setting status to: ' + sanitizeString(status))
 		const block = document.getElementById('server-name-block');
 
@@ -149,20 +153,18 @@ app.controller("Session", ['$scope', '$mdDialog', 'Settings', function ($scope, 
 		else {
 			block.style.display = "";
 			const marquee = block.querySelector('.marquee');
-			let sessionStatus = document.getElementsByClassName("session-status");
+			const sessionStatus = marquee.querySelectorAll(".session-status");
 			for (let i = 0; i < sessionStatus.length; i++) {
 				sessionStatus[i].innerHTML = formatServerName(data); // DISPLAY SERVER NAME FORMATTING
-				if (isMarqueeNeeded(sessionStatus[i])) {
-					marquee.classList.add('activate-marquee');
-				} else {
-					marquee.classList.remove('activate-marquee');
-					break;
-				}
 			}
+			marquee.classList.remove('activate-marquee');
+			requestAnimationFrame(() => {
+				marquee.classList.toggle('activate-marquee', isMarqueeNeeded(block, sessionStatus[0]));
+			});
 		}
 	});
 
-	$scope.$on('setPlayerCount', function (event, count) {
+	$scope.$on('BeamMP_SetPlayerCount', function (event, count) {
 		document.getElementById("Session-PlayerCount").innerHTML = count;
 	});
 }]);
@@ -218,7 +220,10 @@ function formatServerName(string) {
     return result;
 }
 
-function isMarqueeNeeded(element) {
-	const block = document.getElementById('server-name-block');
-    return element.offsetWidth > block.getBoundingClientRect().width;
+function isMarqueeNeeded(block, element) {
+	if (!block || !element) return false;
+	const style = window.getComputedStyle(block);
+	const horizontalPadding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+	const availableWidth = Math.max(0, block.clientWidth - horizontalPadding);
+	return element.getBoundingClientRect().width > availableWidth;
 }

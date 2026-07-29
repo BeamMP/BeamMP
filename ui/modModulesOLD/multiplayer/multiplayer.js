@@ -334,7 +334,7 @@ beammpModInfo.innerHTML = `
 `
 beammpModInfo.id = 'BeamMPVersionInject'
 
-$rootScope.$on('authReceived', function (event, data) {
+$rootScope.$on('BeamMP_AuthReceived', function (event, data) {
 	let nameElement = document.getElementById("beammp-profile-name")
 	let avatarElement = document.getElementById("beammp-profile-avatar")
 	let divider = document.getElementById("beammp-profile-divider")
@@ -406,7 +406,7 @@ $rootScope.$on('authReceived', function (event, data) {
 	}
 })
 
-$rootScope.$on('BeamMPInfo', function (event, data) {
+$rootScope.$on('BeamMP_Info', function (event, data) {
 	beammpMetrics = data	
 	injectVersion()
 	document.getElementById("beammpMetricsPlayers").textContent = beammpMetrics.players
@@ -547,7 +547,7 @@ function($scope, $state, $timeout, $document) {
 		bngApi.engineLua('MPCoreNetwork.connectToLauncher()')
 	}
 	
-	$scope.$on('onLauncherConnected', function (event, data) {
+	$scope.$on('BeamMP_LauncherConnected', function (event, data) {
 		$state.go('menu.multiplayer.login')
 	})
 	
@@ -596,16 +596,16 @@ function($scope, $state, $timeout, $document) {
 		bngApi.engineLua('MPCoreNetwork.login()')
 	}
 	
-	$scope.$on('LoggedIn', function (event, data) {
+	$scope.$on('BeamMP_LoggedIn', function (event, data) {
 		$state.go('menu.multiplayer.servers')
 	})
 	
-	$scope.$on('LoginError', function (event, data) {
+	$scope.$on('BeamMP_LoginError', function (event, data) {
 		var x = document.getElementById('LOGINERRORFIELD').textContent= data
 	})
 	
 	//Workaround for sticky login UI
-	$scope.$on('actuallyLoggedIn', function (event, data) {
+	$scope.$on('BeamMP_LoginState', function (event, data) {
 		if (data == true) {
 			$state.go('menu.multiplayer.servers')
 		}
@@ -684,7 +684,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 	}
 
 	// Trigger Warning Prompt
-	$scope.$on('DownloadSecurityPrompt', function (event, data) {
+	$scope.$on('BeamMP_DownloadSecurityPrompt', function (event, data) {
 		var o = true
 		ConfirmationDialog.open(
 			"ui.multiplayer.security.title", "ui.multiplayer.security.prompt",
@@ -739,11 +739,11 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		
 	})
 	
-	$scope.$on('LauncherConnectionLost', function (event, data) {
+	$scope.$on('BeamMP_LauncherConnectionLost', function (event, data) {
 		$state.go('menu.multiplayer.launcher')
 	})
 
-	$scope.$on('showMdDialog', function (event, data) {
+	$scope.$on('BeamMP_ShowDialog', function (event, data) {
 		switch (data.dialogtype) {
 			case "alert":
 				if (mdDialogVisible) { return }
@@ -809,7 +809,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		}
 	})
 
-	$scope.$on('onServerJoined', function (event, data) {
+	$scope.$on('BeamMP_ServerJoined', function (event, data) {
 		$state.go('play')
 	})
 
@@ -1092,7 +1092,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		}
 	}
 
-	$scope.$on('authReceived', function (event, data) {
+	$scope.$on('BeamMP_AuthReceived', function (event, data) {
 		let nameElement = document.getElementById("serverlist-profile-name")
 		let roleTitleElement = document.getElementById("serverlist-profile-role-title")
 		let avatarElement = document.getElementById("serverlist-profile-avatar")
@@ -1274,7 +1274,7 @@ function($scope, $state, $timeout, $mdDialog, $filter, ConfirmationDialog, toast
 		}, 500)
 	}
 
-	$scope.$on('onServerListReceived', async function (event, data) {
+	$scope.$on('BeamMP_ServerListReceived', async function (event, data) {
 		setSearchFilters(await getSearchFilterData(data))
 	})
 	$scope.$on('reloadSearchFilters', function (event, data) {
@@ -1420,7 +1420,7 @@ function($scope, $state, $timeout, $document) {
 	vm.formattedTags = []
 	vm.availableServerLocations = []
 
-	$scope.$on('onServerListReceived', async function (event, data) {
+	$scope.$on('BeamMP_ServerListReceived', async function (event, data) {
 		setSearchFilters(await getSearchFilterData(data))
 	})
 	$scope.$on('reloadSearchFilters', function (event, data) {
@@ -1766,7 +1766,7 @@ function($scope, $state, $timeout, $filter) {
 		}
 	})
 	
-	$scope.$on('onServerListReceived', async function (event, data) {
+	$scope.$on('BeamMP_ServerListReceived', async function (event, data) {
 		servers = await receiveServers(data)
 
 		recents = await getRecents()

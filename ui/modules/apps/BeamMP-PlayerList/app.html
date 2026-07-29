@@ -1,17 +1,19 @@
-<div ng-controller="PlayerList" id="PlayerList" class="multiplayerPlayerList" ng-init="init()" ng-style="{'background-color': 'rgba(0, 0, 0, 0)', 'height': '100%'}">
-	<link type="text/css" rel="stylesheet" href="/ui/modModules/multiplayer/multiplayer.css">
+<div ng-controller="BeamMPPlayerListController" id="PlayerList" class="multiplayerPlayerList" ng-init="init()" ng-style="{'background-color': 'rgba(0, 0, 0, 0)', 'height': '100%'}">
+	<link type="text/css" rel="stylesheet" href="/ui/modModulesOLD/multiplayer/multiplayer.css">
 	<link id="playerlist-style" rel="stylesheet" type="text/css" href="/ui/modules/apps/BeamMP-PlayerList/app.css">
+	<link type="text/css" rel="stylesheet" href="/ui/modules/apps/BeamMP-PlayerList/playerlist-modern.css">
 	<div id="main-container">
 		<div id="plist-container">
 			<table id="players-table">
 				<tr>
 					<th class="playerslist-col-1" ng-show="showPlayerIDs">ID</th>
 					<th class="playerslist-col-2">
-						{{:: 'ui.apps.multiplayer.playerlist.players' | translate }}
+						<span>{{:: 'ui.apps.multiplayer.playerlist.players' | translate }}</span>
+						<span id="player-count-badge">0</span>
 					</th>
 					<th  class="playerslist-col-3">
-						<button class="buttons direction-buttons" ng-click="plSwapHorizontal()">🡘</button>
-						<button class="buttons direction-buttons" ng-click="plSwapVertical()">🡙</button>
+						<button class="buttons direction-buttons" ng-click="plSwapHorizontal()" title="Move player list horizontally">↔</button>
+						<button class="buttons direction-buttons" ng-click="plSwapVertical()" title="Move player list vertically">↕</button>
 					</th>
 				</tr>
 				<tr>
@@ -19,7 +21,7 @@
 				</tr>
 			</table>
 		</div>
-		<button class="buttons" id="show-button" onclick="toggleList()">&lt;</button>
+		<button class="buttons" id="show-button" onclick="toggleList()" title="Show or hide player list">&lt;</button>
 	</div>
 	<div id="playerlist-contextmenu" style="display: none;">
 		<button id="pl-context-CopyNameButton">{{:: 'ui.apps.multiplayer.playerlist.copyname' | translate}}</button>

@@ -214,7 +214,7 @@ end
 local function updateGFX(dt)
 	if not hookExstensions then
 		hookExstensions = true
-		extensions.hook("loadControllerSyncFunctions") -- controllerSyncVE.lua doesn't exist for the other extensions when calling the hook with onExtensionLoaded
+		extensions.hook("onBeamMPLoadControllerSyncFunctions") -- controllerSyncVE.lua doesn't exist for the other extensions when calling the hook with onExtensionLoaded
 		controller.cacheAllControllerFunctions() -- recache functions to make UpdateGFX hooks work
 	end
 	-- here im resyncing function states after the remote vehicle was reset

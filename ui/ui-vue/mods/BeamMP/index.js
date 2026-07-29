@@ -20,7 +20,7 @@ const TITLE_translationId = 'ui.beammp.common.title'
 function addBeamMPMainMenuButton(addButton) {
   addButton({
     // Old Angular-compatible menu button shape.
-    translateId: TITLE_translationId,
+    translateid: TITLE_translationId,
     icon: `${MOD_ROOT}/icons/account-multiple.svg`,
     targetState: BEAMMP_ROUTE_NAME,
 
@@ -80,12 +80,12 @@ export async function onLoad() {
     events.emit("BroadcastMainMenuButtons")
   }
 
-  // 3. A dedicated "BeamMP" pause tab with 2 rail buttons.
+  // 3. A dedicated "BeamMP" pause tab.
   // tab must be registered before its buttons, so make sure to await for it
   await lua.extensions.ui_pause_actions.registerModTab({
     id: TAB_ID,
     label: TITLE,
-    icon: "wrench",
+    icon: "peopleOutline",
     card2ComponentName: `${MOD_ROOT}/cards/BeamMPPausePlayersCard.vue`,
   })
   // then, register rail buttons for that tab
@@ -104,13 +104,11 @@ export async function onLoad() {
     componentName: `${MOD_ROOT}/cards/BeamMPDirectConnectCard.vue`,
   })
 
-  // 4. One button in the shared "Mods" pause tab. That tab only appears while at least one mod has a
-  // button registered there, and disappears again once every mod using it unregisters.
   await lua.extensions.ui_pause_actions.registerModButton({
-    id: "beammp-card",
-    tabId: "mods",
-    label: TITLE,
-    icon: "multiplayer",
+    id: "beammp-pause-server-mods",
+    tabId: TAB_ID,
+    label: "Server Mods",
+    icon: "puzzleModule",
     componentName: `${MOD_ROOT}/views/BeamMPModsCard.vue`,
   })
 }
@@ -129,7 +127,4 @@ export async function onUnload() {
 
   // however, unregisterModTab already unregisters its buttons, so this call is enough for cleanup
   await lua.extensions.ui_pause_actions.unregisterModTab(TAB_ID)
-
-  // unregister a button from Mods tab
-  await lua.extensions.ui_pause_actions.unregisterModButton("beammp-card")
 }

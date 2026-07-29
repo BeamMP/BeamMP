@@ -228,7 +228,7 @@
 	"ui.multiplayer.pauseMenu.disconnectConfirmation": "This will disconnect you from the server and return you to the main menu. Proceed?",
 	"ui.multiplayer.pauseMenu.quitToDesktop": "Quit to Desktop",
 	"ui.multiplayer.pauseMenu.quitToDesktopConfirmation": "This will close the game. Proceed?",
-	"ui.multiplayer.queuedEvents": "There are %d|%d queued events.\nPress [action=applyQueuedEvents] to apply the queued events.",
+  "ui.multiplayer.queuedEvents": "Vehicle updates waiting: {{count}}.\nSelect \"Events queued\" in the BeamMP session bar to apply them.",
 	"ui.multiplayer.mdDialog.disconnectGeneric": "You have been disconnected from the server",
 	"ui.multiplayer.mdDialog.continueOffline": "Continue offline"
 }

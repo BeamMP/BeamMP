@@ -20,7 +20,7 @@ app.directive('multiplayerchat', [function () {
 }]); 
 
 
-app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
+app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, Settings) {
 	const applyChatStyle = function(useNewDesign) {
 		const stylesheet = document.getElementById('chat-style');
 		const sendButton = document.getElementById('send-button');
@@ -145,7 +145,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		scrollToLastMessage();
 	}
 
-	$scope.$on('chatMessage', function (event, data) {
+	$scope.$on('BeamMP_ChatMessage', function (event, data) {
 		if (data.id > lastMsgId) {
 			lastMsgId = data.id;
 
@@ -164,7 +164,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		}
 	});
 
-	$scope.$on('clearChatHistory', function (event, data) {
+	$scope.$on('BeamMP_ClearChatHistory', function (event, data) {
 		localStorage.removeItem('chatMessages');
 	})
 

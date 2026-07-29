@@ -2068,7 +2068,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("onBeamMPTrackNewVehicle"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -2106,7 +2106,7 @@ local function replaceRequest(model, config, colors)
 	--extensions.hook("trackNewVeh")
 end
 
-M.runPostJoin = function()
+M.onBeamMPPostJoin = function()
 	original_removeAllExceptCurrent = core_vehicles.removeAllExceptCurrent
 	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
 	original_replaceVehicle = core_vehicles.replaceVehicle
@@ -2117,7 +2117,7 @@ M.runPostJoin = function()
 	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest
 end
 
-M.onServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
+M.onBeamMPServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
 	if original_removeAllExceptCurrent then core_vehicles.removeAllExceptCurrent = original_removeAllExceptCurrent end
 	if original_spawnNewVehicle then core_vehicles.spawnNewVehicle = original_spawnNewVehicle end
 	if original_replaceVehicle then core_vehicles.replaceVehicle = original_replaceVehicle end
@@ -2340,7 +2340,7 @@ local function onPreRender(dt)
 				-- If below set speed
 				if (vehicleSpd <= maxSyncSpd) then
 					queueApplyTimer = queueApplyTimer + dt
-					guihooks.trigger("setAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
+					guihooks.trigger("BeamMP_SetAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
 					-- if time under speed more than or equal to max
 					if (queueApplyTimer >= maxTime) then
 						applyQueuedEvents()
@@ -2348,7 +2348,7 @@ local function onPreRender(dt)
 					end
 				else -- Reset timer and UI
 					if queueApplyTimer > 0 then
-						guihooks.trigger("setAutoQueueProgress", "0")
+						guihooks.trigger("BeamMP_SetAutoQueueProgress", "0")
 					end
 					queueApplyTimer = 0
 				end

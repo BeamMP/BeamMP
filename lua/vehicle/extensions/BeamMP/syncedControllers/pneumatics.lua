@@ -113,7 +113,7 @@ local function onReset()
 	beamGroups = {}
 end
 
-M.loadControllerSyncFunctions = loadFunctions
+M.onBeamMPLoadControllerSyncFunctions = loadFunctions
 M.getBeamMPControllerData = getBeamMPControllerData
 M.onReset = onReset
 

@@ -10,7 +10,7 @@
       <div class="avatar"><BngIcon :type="icons.personSolid" /></div>
       <div class="player">
         <span class="name">{{ player.name }}</span>
-        <span class="id">ID {{ player.id }}</span>
+        <span v-if="settings.values.showPlayerIDs" class="id">ID {{ player.id }}</span>
       </div>
       <span class="ping"><span class="ping-dot"></span>{{ player.ping || "?" }}ms</span>
       <BngButton
@@ -40,6 +40,9 @@ import { useBridge } from "@/bridge"
 import { ACCENTS, BngButton, BngIcon, icons } from "@/common/components/base"
 import { BngBinding, BngCardHeading } from "@/common/components/base"
 import { useBeamMPState } from "../shared/beammpState.js"
+import { useSettings } from "@/services/settings"
+
+const settings = useSettings()
 
 const { api, events } = useBridge()
 const { extensionCommand } = useBeamMPState()
@@ -92,7 +95,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem;
   color: var(--bng-off-white);
 }
 
@@ -100,14 +102,16 @@ onUnmounted(() => {
   --bng-card-heading-ribbon-color: var(--bng-cool-gray-700);
   margin: 0;
   margin-left: 0;
-  font-size: 1.25em;
-  font-weight: 600;
-  line-height: 1.625em;
   margin-top: 0.5rem;
+  font-size: 1.25em;
+  line-height: 1.625em;
 }
 
 .card-content {
+	display: flex;
+	flex-direction: column;
 	padding: 0 0.5rem 0.5rem 0.5rem;
+	gap: 0.5rem;
 }
 
 .count {
@@ -119,7 +123,7 @@ onUnmounted(() => {
   border-radius: var(--bng-corners-2);
   background: var(--bng-orange-500);
   color: var(--bng-off-white);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .player-row {
@@ -129,12 +133,14 @@ onUnmounted(() => {
   align-items: center;
   min-height: 3.5rem;
   padding: 0.35rem 0.5rem;
-  border-radius: var(--bng-corners-2);
-  background:
-    linear-gradient(90deg,
-      rgba(var(--bng-cool-gray-900-rgb), 0.96) 0%,
-      rgba(var(--bng-cool-gray-900-rgb), 0.86) 68%,
-      rgba(var(--bng-cool-gray-900-rgb), 0.45) 100%);
+  border-radius: var(--bng-corners-1);
+  border-width: 0.0625em;
+  border-style: solid;
+  background-color: var(--bng-cool-gray-750);
+  border-color: var(--bng-cool-gray-500);
+  &:hover {
+	background-color: ar(--bng-cool-gray-700);
+  };
 }
 
 .avatar {
@@ -161,7 +167,7 @@ onUnmounted(() => {
 .name {
   overflow: hidden;
   color: var(--bng-off-white);
-  font-weight: 600;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -171,8 +177,9 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.3rem;
   color: var(--bng-cool-gray-300);
+  font-family: 'Noto Sans Mono';
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .ping-dot {

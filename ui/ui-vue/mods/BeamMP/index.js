@@ -132,7 +132,7 @@ export async function onLoad() {
     id: "beammp-pause-player-list",
     tabId: TAB_ID,
     label: $translate.instant("ui.common.beammp.playerList"),
-    icon: "personSolid",
+    icon: "itemsTree",
     //componentName: `${MOD_ROOT}/cards/BeamMPPauseMainCard.vue`,
     componentName: `${MOD_ROOT}/cards/BeamMPPausePlayersCard.vue`,
   })
@@ -140,7 +140,7 @@ export async function onLoad() {
     id: "beammp-pause-server-details	",
     tabId: TAB_ID,
     label: $translate.instant("ui.common.beammp.serverDetails"),
-    icon: "personSolid",
+    icon: "globeSimplified",
     componentName: `${MOD_ROOT}/cards/BeamMPPauseServerDetailsRedirect.vue`,
   })
 }

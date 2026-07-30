@@ -22,27 +22,22 @@
       <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat">
         <button
           class="buttons send-button"
+		  id="send-button"
           type="submit"
           :title="$tt('ui.apps.beammp.chat.send') || 'Send message'"
           :aria-label="$tt('ui.apps.beammp.chat.send') || 'Send message'"
         >
           {{ sendButtonText }}
         </button>
-        <input
-          ref="chatInputRef"
-          v-model="inputText"
-          class="chat-input"
-          type="text"
-          maxlength="500"
-          autocomplete="off"
-          :placeholder="$tt('ui.apps.beammp.chat.placeholder') || 'Chat here'"
-          :aria-label="$tt('ui.apps.beammp.chat.input') || 'BeamMP chat message'"
-          @focus="focusChat"
-          @mouseenter="isHovered = true"
-          @mouseleave="isHovered = false"
-          @keydown="onInputKeydown"
-        >
+		<BngInput
+            v-model="inputText"
+            class="chat-input"
+            type="text"
+            :maxlength="500"
+            :show-external-button="false"
+        />
         <button
+		  id="chat-horizontal-button"
           class="buttons swap-buttons"
           type="button"
           :title="$tt('ui.apps.beammp.chat.moveHorizontal') || 'Move chat horizontally'"
@@ -52,6 +47,7 @@
           ↔
         </button>
         <button
+		  id="chat-vertical-button"
           class="buttons swap-buttons"
           type="button"
           :title="$tt('ui.apps.beammp.chat.moveVertical') || 'Move chat vertically'"
@@ -68,6 +64,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useBridge } from "@/bridge"
+import { BngDropdown, BngInput, ACCENTS } from "@/common/components/base"
 
 const { api, events } = useBridge()
 
@@ -300,6 +297,7 @@ function sendChat() {
 }
 
 function onInputKeydown(event) {
+	console.log(event)
   if (event.key === "ArrowUp") {
     inputText.value = lastSentMessage.value
     nextTick(() => {
@@ -320,7 +318,7 @@ function addMessage(message, time = currentTimeString(), messageId = null) {
   scrollToLastMessage()
 }
 
-function onChatMessage(payload) {
+function onBeamMPChatMessage(payload) {
   if (!payload || payload.id <= lastMessageId.value) return
   lastMessageId.value = payload.id
   const time = currentTimeString()
@@ -358,7 +356,7 @@ onMounted(() => {
     enableNewChatMenu.value = Boolean(value)
   }, false)
 
-  events.on("onBeamMPChatMessage", onChatMessage)
+  events.on("onBeamMPChatMessage", onBeamMPChatMessage)
   events.on("onBeamMPClearChatHistory", onClearHistory)
   events.on("SettingsChanged", onSettingsChanged)
 
@@ -372,7 +370,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  events.off("onBeamMPChatMessage", onChatMessage)
+  events.off("onBeamMPChatMessage", onBeamMPChatMessage)
   events.off("onBeamMPClearChatHistory", onClearHistory)
   events.off("SettingsChanged", onSettingsChanged)
 
@@ -393,7 +391,6 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   color: var(--bng-off-white);
-  font-family: var(--bmp-fnt-defs);
 }
 
 .beammpChat2 *,
@@ -462,8 +459,8 @@ onUnmounted(() => {
 .beammpChat2 .chat-message-timestamp {
   padding-right: 0.45rem;
   color: var(--bng-cool-gray-300);
-  font-family: "VueNotoSans Mono", monospace;
-  font-size: 0.72em;
+  font-family: "Noto Sans Mono", monospace;
+  font-size: 0.75em;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -517,9 +514,9 @@ onUnmounted(() => {
 
 .beammpChat2 .chat-input {
   width: 100%;
+  height: 100%;
   min-width: 0;
   flex: 1 1 auto;
-  padding: 0.45rem 0.65rem;
   border: 0;
   outline: 0;
   background: transparent;

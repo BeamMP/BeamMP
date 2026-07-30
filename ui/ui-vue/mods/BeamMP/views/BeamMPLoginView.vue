@@ -50,7 +50,7 @@
         <p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>
         <div class="actions">
           <!--<BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>-->
-          <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.play") }}</BngButton>
+          <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.mainmenu.play") }}</BngButton>
         </div>
       </template>
     </article>

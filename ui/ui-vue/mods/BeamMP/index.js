@@ -4,6 +4,8 @@ import { useBridge } from "@/bridge"
 import { ROUTE_SOURCE_ID, routeRecords } from "./routes.js"
 import { BEAMMP_ROUTE_NAME } from "./shared/constants.js"
 
+import { $translate } from "@/services/translation"
+
 // get lua and events interfaces
 const { lua, events } = useBridge()
 // note: here we use "low-level" events from the bridge because this file is not a Vue component
@@ -86,31 +88,30 @@ export async function onLoad() {
     id: TAB_ID,
     label: TITLE,
     icon: "peopleOutline",
-    card2ComponentName: `${MOD_ROOT}/cards/BeamMPPausePlayersCard.vue`,
+    //card2ComponentName: `${MOD_ROOT}/cards/BeamMPPausePlayersCard.vue`,
   })
   // then, register rail buttons for that tab
   await lua.extensions.ui_pause_actions.registerModButton({
-    id: "beammp-pause-main",
+    id: "beammp-pause-player-list",
     tabId: TAB_ID,
-    label: "Main",
-    icon: "multiplayer",
-    componentName: `${MOD_ROOT}/cards/BeamMPPauseMainCard.vue`,
+    label: $translate.instant("ui.common.beammp.playerList"),
+    icon: "personSolid",
+    componentName: `${MOD_ROOT}/cards/BeamMPPausePlayersCard.vue`,
   })
   await lua.extensions.ui_pause_actions.registerModButton({
-    id: "beammp-pause-direct",
+    id: "beammp-pause-server-details	",
     tabId: TAB_ID,
-    label: "Direct Connect",
-    icon: "globeSimpleNotSign",
-    componentName: `${MOD_ROOT}/cards/BeamMPDirectConnectCard.vue`,
+    label: $translate.instant("ui.common.beammp.serverDetails"),
+    icon: "personSolid",
+    componentName: `${MOD_ROOT}/cards/BeamMPPauseServerDetailsRedirect.vue`,
   })
-
-  await lua.extensions.ui_pause_actions.registerModButton({
-    id: "beammp-pause-server-mods",
-    tabId: TAB_ID,
-    label: "Server Mods",
-    icon: "puzzleModule",
-    componentName: `${MOD_ROOT}/views/BeamMPModsCard.vue`,
-  })
+  //await lua.extensions.ui_pause_actions.registerModButton({
+  //  id: "beammp-pause-disconnect",
+  //  tabId: TAB_ID,
+  //  label: $translate.instant("ui.common.beammp.disconnect"),
+  //  icon: "exit",
+  //  componentName: `${MOD_ROOT}/cards/BeamMPPauseDisconnectModal.vue`,
+  //})
 }
 
 export async function onUnload() {

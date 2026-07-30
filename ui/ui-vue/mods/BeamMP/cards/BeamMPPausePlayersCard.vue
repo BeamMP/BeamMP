@@ -1,38 +1,36 @@
 <template>
   <div class="card">
-    <header class="card-header">
-      <div>
-        <h3>{{ $tt("ui.common.beammp.playerList") }}</h3>
-        <p>{{ players.length }} {{ players.length === 1 ? "player" : "players" }} connected</p>
-      </div>
-      <span class="count">{{ players.length }}</span>
-    </header>
+    <BngCardHeading type="ribbon" outline class="beammp-player-list-heading">
+		{{ $tt("ui.common.beammp.playerList") }} ({{ players.length }} {{ players.length === 1 ? "player" : "players" }} connected)
+    </BngCardHeading>
 
-    <div v-if="!players.length" class="empty">{{ $tt("ui.beammp.server.noPlayers") }}</div>
-    <div v-for="player in players" :key="`${player.id}:${player.name}`" class="player-row">
-      <div class="avatar"><BngIcon :type="icons.personSolid" /></div>
-      <div class="player">
-        <span class="name">{{ player.name }}</span>
-        <span class="id">ID {{ player.id }}</span>
-      </div>
-      <span class="ping"><span class="ping-dot"></span>{{ player.ping || "?" }}ms</span>
-      <BngButton
-        class="player-action"
-        :accent="ACCENTS.menu"
-        :icon="icons.copy"
-        :aria-label="$tt('ui.apps.beammp.playerlist.copyname')"
-        :title="$tt('ui.apps.beammp.playerlist.copyname')"
-        @click="copyName(player.name)"
-      />
-      <BngButton
-        class="player-action"
-        :accent="ACCENTS.menu"
-        :icon="icons.external"
-        :aria-label="$tt('ui.apps.beammp.playerlist.openProfile')"
-        :title="$tt('ui.apps.beammp.playerlist.openProfile')"
-        @click="openProfile(player.name)"
-      />
-    </div>
+	<div class="card-content">
+		<div v-if="!players.length" class="empty">{{ $tt("ui.beammp.server.noPlayers") }}</div>
+		<div v-for="player in players" :key="`${player.id}:${player.name}`" class="player-row">
+		<div class="avatar"><BngIcon :type="icons.personSolid" /></div>
+		<div class="player">
+			<span class="name">{{ player.name }}</span>
+			<span class="id">ID {{ player.id }}</span>
+		</div>
+		<span class="ping"><span class="ping-dot"></span>{{ player.ping || "?" }}ms</span>
+		<BngButton
+			class="player-action"
+			:accent="ACCENTS.menu"
+			:icon="icons.copy"
+			:aria-label="$tt('ui.apps.beammp.playerlist.copyname')"
+			:title="$tt('ui.apps.beammp.playerlist.copyname')"
+			@click="copyName(player.name)"
+		/>
+		<BngButton
+			class="player-action"
+			:accent="ACCENTS.menu"
+			:icon="icons.external"
+			:aria-label="$tt('ui.apps.beammp.playerlist.openProfile')"
+			:title="$tt('ui.apps.beammp.playerlist.openProfile')"
+			@click="openProfile(player.name)"
+		/>
+		</div>
+	</div>
   </div>
 </template>
 
@@ -40,6 +38,7 @@
 import { onMounted, onUnmounted, ref } from "vue"
 import { useBridge } from "@/bridge"
 import { ACCENTS, BngButton, BngIcon, icons } from "@/common/components/base"
+import { BngBinding, BngCardHeading } from "@/common/components/base"
 
 const { api, events } = useBridge()
 const players = ref([])
@@ -91,32 +90,22 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem;
   color: var(--bng-off-white);
 }
 
-.card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0 0.15rem 0.85rem;
-  border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
-}
+.beammp-player-list-heading {
+  --bng-card-heading-ribbon-color: var(--bng-cool-gray-700);
 
-h3,
-.card-header p {
   margin: 0;
+  margin-left: 0;
+  font-size: 1.25em;
+  font-weight: 600;
+  line-height: 1.625em;
+  margin-top: 0.5rem;
 }
 
-h3 {
-  font-size: 1.15rem;
-}
-
-.card-header p {
-  margin-top: 0.2rem;
-  color: var(--bng-cool-gray-300);
-  font-size: 0.82rem;
+.card-content {
+	padding: 0 0.5rem 0.5rem 0.5rem;
 }
 
 .count {

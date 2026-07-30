@@ -1,23 +1,23 @@
 <template>
   <section class="panel">
-    <h1>{{ $tt("ui.beammptos.title") }}</h1>
+    <h1>{{ $tt("ui.beammp.tos.title") }}</h1>
 
     <div class="block">
-      <h2>{{ $tt("ui.beammptos.tos") }}</h2>
+      <h2>{{ $tt("ui.beammp.tos") }}</h2>
       <p>
-        {{ $tt("ui.beammptos.tos.description1") }}
+        {{ $tt("ui.beammp.tos.description1") }}
         <a href="#" @click.prevent="openExternal('https://forum.beammp.com/topic/94/terms-of-use-v1-0')">here</a>.
-        {{ $tt("ui.beammptos.tos.description2") }}
+        {{ $tt("ui.beammp.tos.description2") }}
       </p>
       <label><input v-model="tosAccepted" type="checkbox" /> I accept the Terms of Service</label>
     </div>
 
     <div class="block">
-      <h2>{{ $tt("ui.beammptos.rules") }}</h2>
+      <h2>{{ $tt("ui.common.beammp.rules") }}</h2>
       <p>
-        {{ $tt("ui.beammptos.rules.description1") }}
+        {{ $tt("ui.beammp.rules.description1") }}
         <a href="#" @click.prevent="openExternal('https://docs.beammp.com/community/rules/')">here</a>.
-        {{ $tt("ui.beammptos.rules.description2") }}
+        {{ $tt("ui.beammp.rules.description2") }}
       </p>
       <label><input v-model="rulesAccepted" type="checkbox" /> I accept the Multiplayer Rules</label>
     </div>

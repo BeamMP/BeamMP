@@ -77,7 +77,7 @@
 
     <div v-if="state.loadingOverlayVisible.value" class="loading-overlay">
       <div class="loading-card">
-        <h2>{{ $tt("ui.common.beammp.connectingToServer") }}</h2>
+        <h2>{{ $tt("ui.beammp.serverBrowser.connectingToServer") }}</h2>
         <p>{{ state.loadingStatus.value || $tt("ui.common.beammp.connecting") }}</p>
 
         <div v-if="state.downloadingMods.value.length" class="mods-list">
@@ -189,7 +189,7 @@ async function scrollContentToTop() {
   if (contentPanel.value) contentPanel.value.scrollTop = 0
 }
 
-const fallbackAvatar = "/ui/ui-vue/mods/BeamMP/icons/account-multiple.svg"
+const fallbackAvatar = "/ui/ui-vue/src/assets/fonts/bngIcons/svg/personSolid.svg"
 const accountAvatar = computed(() => {
   const avatar = String(state.auth.value?.avatar || "")
   if (!avatar || avatar.includes("Q291bGQgbm90IGVzdGFibGlzaCBjb25uZWN0aW9u")) {
@@ -317,14 +317,13 @@ onBeforeUnmount(() => {
   justify-content: flex-end;
   flex-wrap: nowrap;
   gap: 0.55rem;
-  margin-right: 2.75rem;
   max-width: calc(100% - 2.75rem);
 }
 
 .metrics {
   display: flex;
   flex: 0 1 auto;
-  min-width: 0;
+  min-width: fit-content;
   flex-wrap: nowrap;
   align-items: center;
   gap: 0;
@@ -335,7 +334,7 @@ onBeforeUnmount(() => {
   .metric-item {
     display: flex;
     flex: 0 1 auto;
-    min-width: 0;
+    min-width: fit-content;
     align-items: center;
     gap: 0.35rem;
     white-space: nowrap;

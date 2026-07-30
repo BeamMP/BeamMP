@@ -161,13 +161,12 @@ function smoothMapName(map = "") {
 }
 
 function formatBytes(bytes = 0, decimals = 2) {
-  const numericBytes = Number(bytes)
-  if (!Number.isFinite(numericBytes) || numericBytes <= 0) return "0 Bytes"
+  if (!bytes) return "0 Bytes"
   const k = 1024
   const dm = decimals < 0 ? 0 : decimals
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-  const i = Math.floor(Math.log(numericBytes) / Math.log(k))
-  return `${parseFloat((numericBytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 
 function normalizeServer(server, listIndex) {

@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+	<!--
     <header class="card-header">
       <div>
         <h3>{{ $tt("ui.playmodes.multiplayer") }}</h3>
@@ -10,48 +11,41 @@
         <span>{{ state.auth.value?.username || "Guest" }}</span>
       </div>
     </header>
+	-->
 
     <div class="actions">
-      <Button class="action action--primary" @click="resume">
+      <Button class="action action--primary action--wide" @click="resume">
         <template #prefix><BngIcon :type="icons.play" /></template>
         <span>{{ $tt("ui.common.action.resume") }}</span>
       </Button>
-      <Button class="action" @click="openBrowser">
+      <Button class="action action--wide" @click="openBrowser">
         <template #prefix><BngIcon :type="icons.info" /></template>
-        <span>{{ $tt("ui.beammp.pauseMenu.serverDetails") }}</span>
+        <span>{{ $tt("ui.common.beammp.serverDetails") }}</span>
       </Button>
+	  <!--
       <Button class="action action--wide" @click="openServerList">
         <template #prefix><BngIcon :type="icons.globe" /></template>
         <span>Server List</span>
       </Button>
-      <Button class="action" @click="showLeaveConfirm = true">
+      <Button class="action action--wide" @click="showLeaveConfirm = true">
         <template #prefix><BngIcon :type="icons.exit" /></template>
-        <span>{{ $tt("ui.beammp.pauseMenu.disconnect") }}</span>
+        <span>{{ $tt("ui.common.beammp.disconnect") }}</span>
       </Button>
       <Button class="action action--danger" @click="showQuitConfirm = true">
         <template #prefix><BngIcon :type="icons.powerOnOff" /></template>
         <span>{{ $tt("ui.beammp.pauseMenu.quitGame") }}</span>
       </Button>
+	  -->
     </div>
 
     <BeamMPModal
       :visible="showLeaveConfirm"
-      :title="$tt('ui.beammp.pauseMenu.areYouSure')"
-      :message="$tt('ui.beammp.pauseMenu.disconnectConfirmation')"
-      :confirm-text="$tt('ui.beammp.pauseMenu.disconnect')"
+      :title="$tt('ui.common.beammp.areYouSure')"
+      :message="$tt('ui.common.beammp.disconnectConfirmation')"
+      :confirm-text="$tt('ui.common.beammp.disconnect')"
       :cancel-text="$tt('ui.common.cancel')"
       @confirm="confirmLeaveServer"
       @cancel="showLeaveConfirm = false"
-    />
-
-    <BeamMPModal
-      :visible="showQuitConfirm"
-      :title="$tt('ui.beammp.pauseMenu.areYouSure')"
-      :message="$tt('ui.beammp.pauseMenu.quitToDesktopConfirmation')"
-      :confirm-text="$tt('ui.beammp.pauseMenu.quitToDesktop')"
-      :cancel-text="$tt('ui.common.cancel')"
-      @confirm="confirmQuitGame"
-      @cancel="showQuitConfirm = false"
     />
   </div>
 </template>

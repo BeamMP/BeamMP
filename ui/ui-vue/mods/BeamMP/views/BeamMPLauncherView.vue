@@ -1,7 +1,7 @@
 <template>
   <section class="centered">
-    <h2>{{ $tt("ui.beammplauncher.lost") }}</h2>
-    <BngButton @click="reconnect">{{ $tt("ui.beammplauncher.connect") }}</BngButton>
+    <h2>{{ $tt("ui.beammp.launcher.lost") }}</h2>
+    <BngButton @click="reconnect">{{ $tt("ui.common.beammp.connect") }}</BngButton>
   </section>
 </template>
 

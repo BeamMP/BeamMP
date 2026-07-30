@@ -24,7 +24,7 @@
           <h3>{{ $tt("ui.common.beammp.information") }}</h3>
           <dl>
             <div>
-              <dt>{{ $tt("ui.common.beammp.address") }}</dt>
+              <dt>{{ $tt("ui.options.protocols.address") }}</dt>
               <dd>
                 <button
                   class="endpoint-reveal"
@@ -75,7 +75,7 @@
           <span>{{ displayedMods.length }}</span>
         </div>
         <div v-if="!displayedMods.length" class="muted">
-          {{ $tt("ui.beammp.server.isUnmodded") }}
+          {{ $tt("ui.common.beammp.vanilla") }}
         </div>
         <div v-else class="chips">
           <span v-for="modName in displayedMods" :key="modName" class="chip chip--mod">{{ modName }}</span>

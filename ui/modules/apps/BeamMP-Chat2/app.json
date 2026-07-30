@@ -1,0 +1,23 @@
+{
+  "domElement": "<beammp-chat2></beammp-chat2>",
+  "name": "BeamMP Chat 2",
+  "types": [
+    "ui.apps.categories.beammp"
+  ],
+  "css": {
+    "left": "180px",
+    "bottom": "0px",
+    "width": "550px",
+    "height": "170px",
+    "min-width": "320px",
+    "min-height": "120px"
+  },
+  "description": "Chat while in BeamMP servers",
+  "author": "BeamMP",
+  "version": "2.0",
+  "directive": "beammpChat2",
+  "category": "Gameplay",
+  "isAuxiliary": false,
+  "interactive": "required",
+  "preserveAspectRatio": false
+}

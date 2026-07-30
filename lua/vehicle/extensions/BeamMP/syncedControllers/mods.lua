@@ -243,7 +243,7 @@ local function onReset()
 	aimMode = "auto"
 end
 
-M.loadControllerSyncFunctions = loadFunctions
+M.onBeamMPLoadControllerSyncFunctions = loadFunctions
 M.onReset = onReset
 
 return M

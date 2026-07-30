@@ -1,10 +1,10 @@
--- Copyright (C) 2024 BeamMP Ltd., BeamMP team and contributors.
+-- Copyright (C) 2026 BeamMP Ltd., BeamMP team and contributors.
 -- Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
 local ver = split(beamng_versionb, ".")
 local majorVer = tonumber(ver[2])
-local compatibleVersion = 38
+local compatibleVersion = 39
 if majorVer ~= compatibleVersion then
 	log('W', 'versionCheck', 'BeamMP is incompatible with BeamNG.drive version '..beamng_versionb)
 	log('M', 'versionCheck', 'Deactivating BeamMP mod.')
@@ -25,8 +25,8 @@ end
 load("MPNetworkHelpers")
 setExtensionUnloadMode("MPNetworkHelpers", "manual")
 
-load("multiplayer/multiplayer")
-setExtensionUnloadMode("multiplayer/multiplayer", "manual")
+load("beammp/multiplayer")
+setExtensionUnloadMode("beammp/multiplayer", "manual")
 
 load("MPDebug")
 setExtensionUnloadMode("MPDebug", "manual")

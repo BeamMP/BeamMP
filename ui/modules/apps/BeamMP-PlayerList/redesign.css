@@ -4,7 +4,7 @@
 			justify-content: flex-end;
 			align-content: flex-end;
 			height: 100%;
-			font-family: 'Segoe UI', Roboto, sans-serif;
+			font-family: var(--bmp-fnt-defs);
 			font-weight: bold;
 		}
 		#plist-container {
@@ -79,7 +79,7 @@
 		}
 
 
-		.multiplayerPlayerList .buttons {
+		.beammpPlayerList .buttons {
 			color: #DDDDDD;
 			transition: 0.20s;
 			background-color: transparent;
@@ -88,7 +88,7 @@
 			margin: 0px 0 0 0;
 			cursor: pointer;
 		}
-		.multiplayerPlayerList .buttons:hover {
+		.beammpPlayerList .buttons:hover {
 			background-color: rgba(0, 0, 0, 0.2);
 			color: #FFFFFF;
 		}

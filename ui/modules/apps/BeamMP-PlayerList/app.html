@@ -1,31 +1,33 @@
-<div ng-controller="PlayerList" id="PlayerList" class="multiplayerPlayerList" ng-init="init()" ng-style="{'background-color': 'rgba(0, 0, 0, 0)', 'height': '100%'}">
+<div ng-controller="BeamMPPlayerListController" id="PlayerList" class="bngApp beammpPlayerList" ng-init="init()" ng-style="{'background-color': 'rgba(0, 0, 0, 0)', 'height': '100%'}">
 	<link id="playerlist-style" rel="stylesheet" type="text/css" href="/ui/modules/apps/BeamMP-PlayerList/app.css">
+	<link type="text/css" rel="stylesheet" href="/ui/modules/apps/BeamMP-PlayerList/playerlist-modern.css">
 	<div id="main-container">
 		<div id="plist-container">
 			<table id="players-table">
 				<tr>
 					<th class="playerslist-col-1" ng-show="showPlayerIDs">ID</th>
 					<th class="playerslist-col-2">
-						{{:: 'ui.apps.multiplayer.playerlist.players' | translate }}
+						<span>{{:: 'ui.apps.beammp.playerlist.players' | translate }}</span>
+						<span id="player-count-badge">0</span>
 					</th>
 					<th  class="playerslist-col-3">
-						<button class="buttons direction-buttons" ng-click="plSwapHorizontal()">🡘</button>
-						<button class="buttons direction-buttons" ng-click="plSwapVertical()">🡙</button>
+						<button class="buttons direction-buttons" ng-click="plSwapHorizontal()" title="Move player list horizontally">↔</button>
+						<button class="buttons direction-buttons" ng-click="plSwapVertical()" title="Move player list vertically">↕</button>
 					</th>
 				</tr>
 				<tr>
-					<td>{{:: 'ui.apps.multiplayer.playerlist.error' | translate }}</td>
+					<td>{{:: 'ui.apps.beammp.playerlist.error' | translate }}</td>
 				</tr>
 			</table>
 		</div>
-		<button class="buttons" id="show-button" onclick="toggleList()">&lt;</button>
+		<button class="buttons" id="show-button" onclick="toggleList()" title="Show or hide player list">&lt;</button>
 	</div>
 	<div id="playerlist-contextmenu" style="display: none;">
-		<button id="pl-context-CopyNameButton">{{:: 'ui.apps.multiplayer.playerlist.copyname' | translate}}</button>
-		<button id="pl-context-DeleteAllButton">{{:: 'ui.apps.multiplayer.playerlist.deleteAllVehicles' | translate}}</button>
-		<button id="pl-context-QueueEventsButton">{{:: 'ui.apps.multiplayer.playerlist.queueEvents' | translate}}</button>
-		<button id="pl-context-SwitchCameraButton">{{:: 'ui.apps.multiplayer.playerlist.switchCameraTo' | translate}}</button>
-		<button id="pl-context-OpenProfileButton">{{:: 'ui.apps.multiplayer.playerlist.openProfile' | translate}}</button>
-		<button id="pl-context-RestoreVehicles">{{:: 'ui.apps.multiplayer.playerlist.restoreVehicles' | translate}}</button>
+		<button id="pl-context-CopyNameButton">{{:: 'ui.apps.beammp.playerlist.copyname' | translate}}</button>
+		<button id="pl-context-DeleteAllButton">{{:: 'ui.apps.beammp.playerlist.deleteAllVehicles' | translate}}</button>
+		<button id="pl-context-QueueEventsButton">{{:: 'ui.apps.beammp.playerlist.queueEvents' | translate}}</button>
+		<button id="pl-context-SwitchCameraButton">{{:: 'ui.apps.beammp.playerlist.switchCameraTo' | translate}}</button>
+		<button id="pl-context-OpenProfileButton">{{:: 'ui.apps.beammp.playerlist.openProfile' | translate}}</button>
+		<button id="pl-context-RestoreVehicles">{{:: 'ui.apps.beammp.playerlist.restoreVehicles' | translate}}</button>
 	</div>
 </div>

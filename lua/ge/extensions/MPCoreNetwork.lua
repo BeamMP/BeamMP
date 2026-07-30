@@ -25,7 +25,7 @@ local isConnecting = false
 local proxyPort = ""
 local socketPartialData
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.21.1" -- the mod version
+local modVersion = "4.22.0" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -93,16 +93,22 @@ local function send(data) -- TODO currently the socket keeps retrying indefinite
 	end
 
 	if error then
+		if error == "Socket is not connected" then
+			-- tcp handshake still in progress; keep isConnecting=true and let onUpdate retry
+			return
+		end
 		isConnecting = false
 		log('E', 'send', 'Socket error: '..error)
 		if error == "closed" and launcherConnected then
 			log('W', 'send', 'Lost launcher connection!')
-			if launcherConnected then guihooks.trigger('LauncherConnectionLost') end
+			if launcherConnected then guihooks.trigger('onBeamMPLauncherConnectionLost') end
 			launcherConnected = false
+			TCPLauncherSocket = nop
 			authResult = {}
-			guihooks.trigger("authReceived", authResult)
-		elseif error == "Socket is not connected" then
-
+			guihooks.trigger("onBeamMPAuthReceived", authResult)
+		elseif error == "closed" then
+			-- socket died before we finished connecting, force new socket next attempt
+			TCPLauncherSocket = nop
 		else
 			log('E', 'send', 'Stopped at index: '..index..' while trying to send '..#data..' bytes of data.')
 		end
@@ -122,14 +128,16 @@ local function connectToLauncher(silent)
 	isConnecting = true
 	if not silent then log('W', 'connectToLauncher', "connectToLauncher called! Current connection status: "..tostring(launcherConnected)) end
 	if not launcherConnected then
-		TCPLauncherSocket = socket.tcp()
-		TCPLauncherSocket:setoption("keepalive", true) -- Keepalive to avoid connection closing too quickly
-		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444))
-		send('A') -- immediately heartbeat to check if connection was established
+		if TCPLauncherSocket == nop then
+			TCPLauncherSocket = socket.tcp()
+			TCPLauncherSocket:setoption("keepalive", true) -- keepalive to avoid connection closing too quickly
+			TCPLauncherSocket:settimeout(0) -- set timeout to 0 to avoid freezing
+			TCPLauncherSocket:connect(settings.getValue("launcherIp", '127.0.0.1'), settings.getValue("launcherPort", 4444))
+		end
+		send('A') -- will succeed once handshake completes, triggering onLauncherConnected
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
-		guihooks.trigger('onLauncherConnected')
+		guihooks.trigger('onBeamMPLauncherConnected')
 	end
 end
 
@@ -176,7 +184,7 @@ end
 --- Returns true or false if the user is logged in.
 -- @return boolean loggedIn True if the user is logged in, false otherwise.
 local function isLoggedIn()
-	guihooks.trigger('actuallyLoggedIn', loggedIn)
+	guihooks.trigger('onBeamMPLoginState', loggedIn)
 	return loggedIn
 end
 
@@ -203,7 +211,7 @@ end
 --- Gets the current login data.
 -- @usage getLoginState() -- Triggers a return of the login data
 local function getLoginState()
-	guihooks.trigger("authReceived", authResult)
+	guihooks.trigger("onBeamMPAuthReceived", authResult)
 end
 
 --- Tells the launcher to log out the user.
@@ -213,7 +221,7 @@ local function logout()
 	send('N:LO')
 	loggedIn = false
 	authResult = {}
-	guihooks.trigger("authReceived", authResult)
+	guihooks.trigger("onBeamMPAuthReceived", authResult)
 end
 
 --- Sends the current player and server count plus the mod and launcher version to the CEF UI.
@@ -221,14 +229,14 @@ end
 local function sendBeamMPInfo()
 	local servers = jsonDecode(serverList)
 	if not servers or tableIsEmpty(servers) then return log('M', 'No server list.') end
-	guihooks.trigger('onServerListReceived', servers) -- server list
+	guihooks.trigger('onBeamMPServerListReceived', servers) -- server list
 	local p, s = 0, 0
 	for _,server in pairs(servers) do
 		p = p + server.players
 		s = s + 1
 	end
 	-- send player and server values to front end.
-	guihooks.trigger('BeamMPInfo', { -- <players> count on the bottom of the screen
+	guihooks.trigger('onBeamMPInfo', { -- <players> count on the bottom of the screen
 		players = ''..p,
 		servers = ''..s,
 		beammpGameVer = ''..modVersion,
@@ -325,7 +333,7 @@ local function connectToServer(ip, port, name, skipModWarning)
 	log('M', 'connectToServer', "Connecting to server "..ipString)
 	status = "waitingForResources"
 	
-	guihooks.trigger('clearChatHistory')
+	guihooks.trigger('onBeamMPClearChatHistory')
 end
 
 --- Parse the map file name into its loadable string form and return it.
@@ -413,14 +421,15 @@ local function loginReceived(params)
 	if (result.success == true or result.Auth == 1) then
 		log('M', 'loginReceived', 'Login successful.')
 		loggedIn = true
-		guihooks.trigger('LoggedIn', result.message or '')
+		guihooks.trigger('onBeamMPLoggedIn', result.message or '')
 	else
 		log('M', 'loginReceived', 'Login failed.')
 		loggedIn = false
-		guihooks.trigger('LoginError', result.message or '')
+		guihooks.trigger('onBeamMPLoginError', result.message or '')
 	end
 
 	authResult = result
+	authResult.role = authResult.role or "USER"
 	if authResult.username then
 		local res = {}; 
 		local r, code, headers = http.request{
@@ -438,7 +447,7 @@ local function loginReceived(params)
 		end
 	end
 
-	guihooks.trigger('authReceived', authResult)
+	guihooks.trigger('onBeamMPAuthReceived', authResult)
 end
 
 -- Enable making a http request on demand
@@ -465,7 +474,7 @@ end
 local function leaveServer(goBack)
 	log('W', 'leaveServer', 'Reset Session Called! goBack: ' .. tostring(goBack))
 	send('QS') -- Quit session, disconnecting MPCoreNetwork socket is not necessary
-	extensions.hook('onServerLeave')
+	extensions.hook('onBeamMPServerLeave')
 	isMpSession = false
 	isGoingMpSession = false
 	loadMods = false
@@ -473,6 +482,11 @@ local function leaveServer(goBack)
 	status = "" -- Reset status
 	updateUiTimer = 0
 	UI.updateLoading("")
+	UI.clearPauseMenuModButtons()
+	if ui_topBar then
+		ui_topBar.removeEntry("multiplayerPause")
+		ui_topBar.requestEntries()
+	end
 	MPGameNetwork.disconnectLauncher()
 	MPVehicleGE.onDisconnect()
 	local callback = nop
@@ -563,7 +577,7 @@ end
 
 local function handleModWarning(params)
 	if params == 'MODS_FOUND' and settings.getValue("skipModSecurityWarning", false) == false and not currentServer.skipModWarning then
-		guihooks.trigger('DownloadSecurityPrompt', params) 
+		guihooks.trigger('onBeamMPDownloadSecurityPrompt', params)
 	else 
 		send('WY') 
 	end
@@ -660,10 +674,17 @@ local function onUpdate(dt)
 			send('Up')
 		end
 	else
-		if reconnectAttempt < 10 and reconnectTimer >= 2 and not isConnecting then
+		if isConnecting then
+			-- socket exists but handshake is still completing; retry heartbeat frequently
+			if reconnectTimer >= 0.25 then
+				reconnectTimer = 0
+				send('A') -- succeeds once connected, fires onLauncherConnected
+			end
+		elseif reconnectAttempt < 10 and reconnectTimer >= 2 then
+			-- no socket or socket died; create a fresh one
 			reconnectAttempt = reconnectAttempt + 1
 			reconnectTimer = 0
-			connectToLauncher(true) --TODO: add counter and stop attempting after enough failed attempts
+			connectToLauncher(true)
 		end
 	end
 end
@@ -679,8 +700,8 @@ onLauncherConnected = function()
 	send('Z') -- request launcher version
 	send('P') -- request launcher proxy port
 	requestServerList()
-	extensions.hook('onLauncherConnected')
-	guihooks.trigger('onLauncherConnected')
+	extensions.hook('onBeamMPLauncherConnected')
+	guihooks.trigger('onBeamMPLauncherConnected')
 	autoLogin()
 	if isMpSession and currentServer then
 		connectToServer(currentServer.ip, currentServer.port, currentServer.name)
@@ -696,14 +717,25 @@ runPostJoin = function() -- gets called once loaded into a map
 		freeroam_freeroam.onPlayerCameraReady = originalFreeroamOnPlayerCameraReady
 	end
 	if isMpSession and isGoingMpSession then
-		extensions.hook('runPostJoin')
+		extensions.hook('onBeamMPPostJoin')
 		spawn.preventPlayerSpawning = false -- re-enable spawning of default vehicle so it gets spawned if the user switches to freeroam
 		MPGameNetwork.connectToLauncher()
 		log('W', 'runPostJoin', 'isGoingMpSession = false')
 		isGoingMpSession = false
-		core_gamestate.setGameState('multiplayer', 'multiplayer', 'multiplayer')
+		core_gamestate.setGameState('multiplayer', 'beammp', 'multiplayer')
 		status = "Playing"
-		guihooks.trigger('onServerJoined')
+		if ui_topBar then
+			ui_topBar.getEntries()["multiplayerPause"] = {
+				id = "multiplayerPause",
+				label = "ui.playmodes.multiplayer",
+				icon = "globeSimplified",
+				targetState = "menu.multiplayerPause",
+				flags = {'inGameOnly'},
+				order = 1.5
+			}
+			ui_topBar.requestEntries()
+		end
+		guihooks.trigger('onBeamMPServerJoined')
 	end
 end
 
@@ -711,6 +743,15 @@ end
 --- @usage `extensions.hook('onClientStartMission')`
 local function onClientStartMission()
 	if isMpSession and isGoingMpSession then runPostJoin() end
+end
+
+--- BeamNG 0.39 resolves its final loading-screen route after onClientStartMission.
+-- Keep an established multiplayer session in gameplay instead of allowing the
+-- loading screen's compatibility transition to leave the native main menu open.
+local function onWorldReadyState(readyState)
+	if readyState == 2 and isMpSession and not isGoingMpSession and extensions.ui_router then
+		extensions.ui_router.navigate("play")
+	end
 end
 
 --- Executes when the user or mod ends a mission/session (map) .
@@ -772,6 +813,7 @@ M.onExtensionLoaded    = onExtensionLoaded
 M.onUpdate             = onUpdate
 M.onClientEndMission   = onClientEndMission
 M.onClientStartMission = onClientStartMission
+M.onWorldReadyState    = onWorldReadyState
 -- UI
 M.openURL              = openURL
 M.makeRequest          = makeRequest

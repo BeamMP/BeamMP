@@ -47,11 +47,13 @@ local function connectToLauncher()
 	if not launcherConnected then
 		isConnecting = true
 		socketPartialData = nil
-		TCPLauncherSocket = socket.tcp()
-		TCPLauncherSocket:setoption("keepalive", true)
-		TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
-		M.send('A')
+		if not TCPLauncherSocket then
+			TCPLauncherSocket = socket.tcp()
+			TCPLauncherSocket:setoption("keepalive", true)
+			TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
+			TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
+		end
+		M.send('A') -- will succeed once handshake completes, setting launcherConnected=true
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
 	end
@@ -61,11 +63,14 @@ end
 --- Disconnect from the Launcher by closing the TCP connection, Note that this connection is only used for when in-session.
 -- @usage MPGameNetwork.disconnectLauncher(true)
 local function disconnectLauncher()
-	if launcherConnected then
+	if TCPLauncherSocket then
 		TCPLauncherSocket:close()
-		launcherConnected = false
-		socketPartialData = nil
+		TCPLauncherSocket = nil
 	end
+	launcherConnected = false
+	isConnecting = false
+	socketPartialData = nil
+	connectRetryTimer = 0
 end
 
 
@@ -96,13 +101,18 @@ local function sendData(data) -- TODO currently the socket keeps retrying indefi
 	end
 
 	if error then
+		if error == "Socket is not connected" then
+			-- tcp handshake still in progress; keep isConnecting=true and let onUpdate retry
+			return
+		end
 		isConnecting = false
 		log('E', 'sendData', 'Socket error: '..error)
 		if error == "closed" and launcherConnected then
 			log('W', 'sendData', 'Lost launcher connection!')
 			launcherConnected = false
-		elseif error == "Socket is not connected" then
-
+			TCPLauncherSocket = nil
+		elseif error == "closed" then
+			TCPLauncherSocket = nil
 		else
 			log('W', 'sendData', 'Stopped at index: '..index..' while trying to send '..#packet..' bytes of data.')
 		end
@@ -468,6 +478,7 @@ local HandleNetwork = {
 
 
 local heartbeatTimer = 0
+local connectRetryTimer = 0
 
 local recvState = {
 	-- 'ready': ready to receive a new packet, data is contained within `data` if any
@@ -517,6 +528,14 @@ local function onUpdate(dt)
 	if heartbeatTimer >= 1 and MPCoreNetwork.isMPSession() and launcherConnected then --TODO: something
 		heartbeatTimer = 0
 		M.send('A')
+	end
+	-- retry proxy connection while handshake is still completing
+	if isConnecting and not launcherConnected and TCPLauncherSocket then
+		connectRetryTimer = connectRetryTimer + dt
+		if connectRetryTimer >= 0.25 then
+			connectRetryTimer = 0
+			M.send('A')
+		end
 	end
 end
 

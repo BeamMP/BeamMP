@@ -11,15 +11,15 @@
 
 local M = {}
 
-local chatWindow = require("multiplayer.ui.chat")
-local optionsWindow = require("multiplayer.ui.options")
-local playerListWindow = require("multiplayer.ui.playerList")
+local chatWindow = require("beammp.ui.chat")
+local optionsWindow = require("beammp.ui.options")
+local playerListWindow = require("beammp.ui.playerList")
 require('/common/extensions/ui/flowgraph/editor_api_luaintf')(M)
 local gui_module = require("ge/extensions/editor/api/gui")
 local gui = {setupEditorGuiTheme = nop}
 local imgui = ui_imgui
 local imu = require('ui/imguiUtils')
-local utils = require("multiplayer.ui.utils")
+local utils = require("beammp.ui.utils")
 local configLoaded = false
 
 M.uiIcons = {
@@ -140,14 +140,14 @@ local function updatePlayersList(data)
 		table.insert(playerListData, {name = p, formatted_name = username, color = color, id = id})
 	end
 	if not MPCoreNetwork.isMPSession() or tableIsEmpty(players) then return end
-	guihooks.trigger("playerList", jsonEncode(playerListData))
-	guihooks.trigger("playerPings", jsonEncode(pings))
+	guihooks.trigger("onBeamMPPlayerList", jsonEncode(playerListData))
+	guihooks.trigger("onBeamMPPlayerPings", jsonEncode(pings))
 	playerListWindow.updatePlayerList(pings) -- Send pings because this is a key-value table that contains name and the ping
 end
 
 --- Used to tell the Ui of new status for the updates queue.
 local function sendQueue() -- sends queue to UI
-	guihooks.trigger("setQueue", UIqueue)
+	guihooks.trigger("onBeamMPSetQueue", UIqueue)
 end
 
 --- This function is used to update the edit/spawn queue values for the UI indicator.
@@ -166,6 +166,26 @@ local function updateQueue( spawnCount, editCount, queuedPlayers)
 
 	UIqueue = {spawnCount = spawnCount, editCount = editCount, queuedPlayers = queuedPlayersJS}
 	UIqueue.show = spawnCount+editCount > 0
+
+	if UIqueue.show then
+		--log('D', 'queueNotification', 'Creating queue message')
+		ui_message({
+				txt = "ui.beammp.queuedEvents",
+				context = {count = (UIqueue.spawnCount or 0) + (UIqueue.editCount or 0)}
+			},
+			60,
+			"queuedEvents",
+			"carClock"
+		)
+	else
+		--log('D', 'queueNotification', 'Deleting queue message')
+		-- ui_message() doesn't support clearing message categories
+		guihooks.trigger('Message', {
+			category = 'queuedEvents',
+			clear = true
+		})
+	end
+	
 	sendQueue()
 end
 
@@ -173,7 +193,7 @@ end
 -- @param ping number
 local function setPing(ping)
 	if tonumber(ping) < 0 then return end -- not connected
-	guihooks.trigger("setPing", ""..ping.." ms")
+	guihooks.trigger("onBeamMPSetPing", tostring(ping))
 	pings[MPConfig.getNickname()] = ping
 end
 
@@ -182,7 +202,7 @@ end
 -- Useful in determining who we are 
 -- @param name any
 local function setNickname(name)
-	guihooks.trigger("setNickname", name)
+	guihooks.trigger("onBeamMPSetNickname", name)
 end
 
 
@@ -191,7 +211,7 @@ end
 -- @param serverName string
 local function setServerName(serverName)
 	serverName = serverName or (MPCoreNetwork.getCurrentServer() and MPCoreNetwork.getCurrentServer().name)
-	guihooks.trigger("setServerName", serverName)
+	guihooks.trigger("onBeamMPSetServerName", serverName)
 end
 
 
@@ -199,7 +219,7 @@ end
 -- This is set as part of the joining process automatically and is updated during the session
 -- @param playerCount string
 local function setPlayerCount(playerCount)
-	guihooks.trigger("setPlayerCount", playerCount)
+	guihooks.trigger("onBeamMPSetPlayerCount", playerCount)
 end
 
 
@@ -215,7 +235,7 @@ end
 --- Show a UI dialog / alert box to inform the user of something.
 -- @param options any
 local function showMdDialog(options)
-	guihooks.trigger("showMdDialog", options)
+	guihooks.trigger("onBeamMPShowVueDialog", options)
 end
 
 -- -------------------------------------------------------------
@@ -339,15 +359,15 @@ local function renderWindow()
                 currentWindow = windows.options
                 windowTitle = "BeamMP Chat (Options)"
             end
-            imgui.EndChild()
+        end
+        imgui.EndChild()
 
-            if not collapsed then
-                currentWindow.render()
-            end
+        if not collapsed then
+            currentWindow.render()
         end
         imgui.PopStyleVar()
-        imgui.End()
     end
+    imgui.End()
 
     imgui.PopStyleColor(16)
     imgui.PopStyleVar(3)
@@ -439,12 +459,12 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 		local c = player.role.forecolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter, color = color})
+		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter, color = color})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, chatcounter, color)
 	else
 		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("chatMessage", {username = username, message = message, id = chatcounter})
+		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, id)
 	end
@@ -543,17 +563,48 @@ end
 setmetatable(customPlayerlistButtons, {
     __index = function(table, key, value)
         rawset(table, key, value)
-        guihooks.trigger("updateCustomButtons", getCustomButtonNames())
+        guihooks.trigger("onBeamMPUpdateCustomButtons", getCustomButtonNames())
     end,
     __newindex = function(table, key, value)
         rawset(table, key, value)
-        guihooks.trigger("updateCustomButtons", getCustomButtonNames())
+        guihooks.trigger("onBeamMPUpdateCustomButtons", getCustomButtonNames())
     end
 })
 
 local function getCustomPlayerlistButtons()
     return customPlayerlistButtons
 end
+
+
+local pauseMenuModButtons = {}
+
+local function getPauseMenuModButtons()
+	return pauseMenuModButtons
+end
+
+-- Send the list of pause menu mod buttons to UI
+local function sendPauseMenuModButtons()
+	guihooks.trigger('onBeamMPPauseMenuModButtons', pauseMenuModButtons)
+end
+
+local function pushPauseMenuModButton(id, data)
+	pauseMenuModButtons[id] = {
+		text = data.text,
+		lua = data.lua,
+		classList = data.classList
+	}
+	sendPauseMenuModButtons()
+end
+
+local function popPauseMenuModButton(id)
+	pauseMenuModButtons[id] = nil
+	sendPauseMenuModButtons()
+end
+
+local function clearPauseMenuModButtons()
+	pauseMenuModButtons = {}
+end
+
 
 M.updateLoading = updateLoading
 M.promptAutoJoinConfirmation = promptAutoJoinConfirmation
@@ -571,6 +622,12 @@ M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog
 M.getCustomPlayerlistButtons = getCustomPlayerlistButtons
 M.getCustomButtonNames = getCustomButtonNames
+
+M.getPauseMenuModButtons = getPauseMenuModButtons
+M.sendPauseMenuModButtons = sendPauseMenuModButtons
+M.pushPauseMenuModButton = pushPauseMenuModButton
+M.popPauseMenuModButton = popPauseMenuModButton
+M.clearPauseMenuModButtons = clearPauseMenuModButtons
 
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat

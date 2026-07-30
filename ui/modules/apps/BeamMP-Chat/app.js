@@ -9,7 +9,7 @@ let lastSentMessage = "";
 let lastMsgId = 0;
 let newChatMenu = false;
 import('/ui/lib/ext/purify.min.js')
-app.directive('multiplayerchat', [function () {
+app.directive('beammpChat', [function () {
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-Chat/app.html',
 		replace: true,
@@ -20,7 +20,7 @@ app.directive('multiplayerchat', [function () {
 }]); 
 
 
-app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
+app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, Settings) {
 	const applyChatStyle = function(useNewDesign) {
 		const stylesheet = document.getElementById('chat-style');
 		const sendButton = document.getElementById('send-button');
@@ -145,7 +145,7 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		scrollToLastMessage();
 	}
 
-	$scope.$on('chatMessage', function (event, data) {
+	$scope.$on('onBeamMPChatMessage', function (event, data) {
 		if (data.id > lastMsgId) {
 			lastMsgId = data.id;
 
@@ -164,12 +164,13 @@ app.controller("Chat", ['$scope', 'Settings', function ($scope, Settings) {
 		}
 	});
 
-	$scope.$on('clearChatHistory', function (event, data) {
+	$scope.$on('onBeamMPClearChatHistory', function (event, data) {
 		localStorage.removeItem('chatMessages');
 	})
 
 	$scope.$on('SettingsChanged', function (event, data) {
 		Settings.values = data.values;
+		newChatMenu = Settings.values.enableNewChatMenu;
 
 		applyChatStyle(Settings.values.useUiAppRedesign);
 
@@ -314,24 +315,34 @@ function formatChatMessage(string) {
         currentText = '';
     };
 
-    for (const token of tokens) {
-        if (/^\^.$/.test(token)) {
-            flush();
-            if (token === '^r') {
-                classes.clear();
-            } else {
-                const cls = globalThis.serverStyleMap?.[token];
-                if (cls?.startsWith('color-')) {
-                    [...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
-                    classes.add(cls);
-                } else if (cls) {
-                    classes.add(cls);
-                }
-            }
-        } else {
-            currentText += token;
-        }
-    }
+    for (let i = 0; i < tokens.length; i++) {
+		const token = tokens[i];
+		const nextToken = tokens[i+1]?.trim() || '';
+		if (/^\^.$/.test(token)) {
+			flush();
+			if (token === '^r') {
+				classes.clear();
+			} else if (token === '^p') {
+				currentText += '<br>';
+			} else if (token === '^*') {
+				const cls = globalThis.serverStyleMap?.[token];
+				if(cls) classes.add(cls);
+				if (iconsOrig[nextToken]) {
+					currentText = iconsOrig[nextToken].glyph
+				};
+			} else {
+				const cls = globalThis.serverStyleMap?.[token];
+				if (cls?.startsWith('color-')) {
+					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
+					classes.add(cls);
+				} else if (cls) {
+					classes.add(cls);
+				}
+			}
+		} else if (tokens[i-1]!='^*') {
+			currentText += token;
+		}
+	}
 
     flush();
     return result;

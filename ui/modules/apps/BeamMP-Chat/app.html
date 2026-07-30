@@ -1,12 +1,13 @@
-<div ng-controller="Chat" id="Chat" class="bngApp multiplayerChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
-	<link id="chat-style" rel="stylesheet" type="text/css" href="/ui/modules/apps/BeamMP-Chat/redesign.css">
+<div ng-controller="BeamMPChatController" id="BeamMPChat" class="bngApp beammpChat" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}" ng-init="init()">
+	<link id="chat-style" rel="stylesheet" type="text/css" href="/ui/modules/apps/BeamMP-Chat/app.css">
+	<link type="text/css" rel="stylesheet" href="/ui/assets/BeamMP/shared_styles/formatCodes.css">
     <div id="chat-window">
         <ul id="chat-list"></ul>
         <form id="chatbox">
-			<button id="send-button" class="buttons" ng-click="chatSend()">💬</button>
-			<input id="chat-input" type="text" ng-click="select()" placeholder="Chat here">
-			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()">🡘</button>
-			<button id="swap-button" class="buttons swap-buttons" ng-click="chatSwapVertical()">🡙</button>
+			<button id="send-button" type="button" class="buttons" ng-click="chatSend()" title="Send message" aria-label="Send message">Send</button>
+			<input id="chat-input" type="text" maxlength="500" autocomplete="off" ng-click="select()" placeholder="Chat here" aria-label="beammp chat message">
+			<button id="chat-horizontal-button" type="button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()" title="Move chat horizontally" aria-label="Move chat horizontally">↔</button>
+			<button id="chat-vertical-button" type="button" class="buttons swap-buttons" ng-click="chatSwapVertical()" title="Move chat vertically" aria-label="Move chat vertically">↕</button>
 		</form>
     </div>
 </div>

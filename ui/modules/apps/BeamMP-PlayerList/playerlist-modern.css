@@ -1,0 +1,211 @@
+.beammpPlayerList #main-container {
+  display: flex;
+  height: 100%;
+  align-content: flex-end;
+  justify-content: flex-end;
+  font-family: var(--bmp-fnt-defs);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.beammpPlayerList #plist-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+  border-top: 3px solid var(--bng-orange-500);
+  border-radius: var(--bng-corners-2, 6px);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.88);
+  box-shadow: 0 3px 12px rgba(var(--bng-off-black-rgb), 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.beammpPlayerList.ui-style-redesigned #plist-container,
+.beammpPlayerList.ui-style-redesigned #show-button {
+  border-color: rgba(var(--bng-cool-gray-100-rgb), 0.24);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.34);
+  box-shadow:
+    0 3px 12px rgba(var(--bng-off-black-rgb), 0.2),
+    inset 0 0 0 1px rgba(var(--bng-off-white-rgb), 0.04);
+  backdrop-filter: blur(10px) saturate(115%);
+}
+
+.beammpPlayerList #players-table {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-collapse: collapse;
+  background: transparent;
+  color: var(--bng-off-white);
+  table-layout: fixed;
+}
+
+.beammpPlayerList #players-table tr:first-child {
+  height: 34px;
+  background: rgba(var(--bng-cool-gray-700-rgb), 0.58);
+}
+
+.beammpPlayerList.ui-style-redesigned #players-table tr:first-child {
+  background: rgba(var(--bng-cool-gray-700-rgb), 0.26);
+}
+
+.beammpPlayerList #players-table th {
+  height: 34px;
+  padding: 0 7px;
+  border: 0;
+  border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
+  color: var(--bng-cool-gray-100);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.beammpPlayerList #players-table td {
+  height: 34px;
+  max-width: 0;
+  padding: 0 7px;
+  overflow: hidden;
+  border: 0;
+  border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.14);
+  color: var(--bng-off-white);
+  text-overflow: ellipsis;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.beammpPlayerList.ui-style-redesigned #players-table th,
+.beammpPlayerList.ui-style-redesigned #players-table td,
+.beammpPlayerList.ui-style-redesigned #show-button {
+  text-shadow: 0 1px 2px rgba(var(--bng-off-black-rgb), 0.95);
+}
+
+.beammpPlayerList #players-table tr:not(:first-child) {
+  background: transparent;
+  transition: background-color 120ms ease;
+}
+
+.beammpPlayerList #players-table tr:not(:first-child):hover {
+  background: rgba(var(--bng-orange-500-rgb), 0.16);
+  transform: none;
+}
+
+.beammpPlayerList #players-table td:first-child {
+  color: var(--bng-cool-gray-400);
+  font-size: 11px;
+}
+
+.beammpPlayerList #players-table td:nth-child(2) {
+  font-weight: 700;
+}
+
+.beammpPlayerList #players-table td:nth-child(3) {
+  color: var(--bng-cool-gray-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.beammpPlayerList .playerslist-col-1 {
+  width: 32px;
+}
+
+.beammpPlayerList .playerslist-col-2 {
+  width: auto;
+  min-width: 100px;
+}
+
+.beammpPlayerList .playerslist-col-3 {
+  width: 64px;
+  padding: 0 !important;
+  text-align: right !important;
+}
+
+.beammpPlayerList #player-count-badge {
+  display: inline-grid;
+  min-width: 17px;
+  height: 17px;
+  margin-left: 5px;
+  padding: 0 3px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--bng-orange-500);
+  color: var(--bng-off-white);
+  font-size: 10px;
+}
+
+.beammpPlayerList .buttons {
+  border: 0;
+  background: transparent;
+  color: var(--bng-cool-gray-200);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.beammpPlayerList .buttons:hover {
+  background: rgba(var(--bng-orange-500-rgb), 0.2);
+  color: var(--bng-off-white);
+}
+
+.beammpPlayerList .direction-buttons {
+  float: none;
+  width: 30px;
+  height: 34px;
+  padding: 0;
+  font-size: 15px;
+}
+
+.beammpPlayerList .tp-button {
+  width: 100% !important;
+  min-height: 34px;
+  padding: 0 5px;
+  color: var(--bng-cool-gray-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.beammpPlayerList #show-button {
+  width: 28px;
+  height: 75px;
+  margin: 0 0 0 4px;
+  padding: 0;
+  align-self: flex-start;
+  border: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+  border-left: 3px solid var(--bng-orange-500);
+  border-radius: var(--bng-corners-2, 6px);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.88);
+  box-shadow: 0 3px 12px rgba(var(--bng-off-black-rgb), 0.28);
+  backdrop-filter: blur(12px);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.beammpPlayerList #playerlist-contextmenu {
+  max-width: 210px;
+  padding: 6px;
+  border: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+  border-radius: var(--bng-corners-2, 6px);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.96);
+  box-shadow: 0 5px 18px rgba(var(--bng-off-black-rgb), 0.4);
+}
+
+.beammpPlayerList #playerlist-contextmenu > button {
+  width: 100%;
+  margin: 0 0 3px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--bng-corners-1, 3px);
+  background: rgba(var(--bng-cool-gray-700-rgb), 0.72);
+  color: var(--bng-off-white);
+  text-align: left;
+  cursor: pointer;
+}
+
+.beammpPlayerList #playerlist-contextmenu > button:hover {
+  background: rgba(var(--bng-orange-500-rgb), 0.32);
+}
+
+.beammpPlayerList #plist-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.beammpPlayerList #plist-container::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: rgba(var(--bng-cool-gray-300-rgb), 0.5);
+}

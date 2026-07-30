@@ -8,7 +8,7 @@
     height: 100%;
     width: 100%;
     font-size: 1em;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--bmp-fnt-defs);
     font-weight: bold;
 }
 
@@ -47,6 +47,7 @@ ul#chat-list {
     line-height: 0.7em;
     color: rgba(255, 255, 255, 0.8);
     padding-right: 8px;
+	font-family: 'VueNotoSans Mono', monospace;
 }
 
 #chatbox {
@@ -92,6 +93,7 @@ ul#chat-list {
     height: 100%;
     transition: 0.2s;
     cursor: pointer;
+	font-family: var(--bmp-fnt-defs);
 }
 
 .multiplayerChat .buttons:hover {
@@ -102,84 +104,4 @@ ul#chat-list {
 .swap-buttons {
     min-width: 25px;
     text-align: center;
-}
-
-.color-0 {
-    color: #000000;
-}
-
-.color-1 {
-    color: #0000AA;
-}
-
-.color-2 {
-    color: #00AA00;
-}
-
-.color-3 {
-    color: #00AAAA;
-}
-
-.color-4 {
-    color: #AA0000;
-}
-
-.color-5 {
-    color: #AA00AA;
-}
-
-.color-6 {
-    color: #FFAA00;
-}
-
-.color-7 {
-    color: #AAAAAA;
-}
-
-.color-8 {
-    color: #555555;
-}
-
-.color-9 {
-    color: #5555FF;
-}
-
-.color-a {
-    color: #55FF55;
-}
-
-.color-b {
-    color: #55FFFF;
-}
-
-.color-c {
-    color: #FF5555;
-}
-
-.color-d {
-    color: #FF55FF;
-}
-
-.color-e {
-    color: #FFFF55;
-}
-
-.color-f {
-    color: #FFFFFF;
-}
-
-.bold {
-    font-weight: bold;
-}
-
-.line-through {
-    text-decoration: line-through;
-}
-
-.underline {
-    text-decoration: underline;
-}
-
-.italic {
-    font-style: italic;
 }

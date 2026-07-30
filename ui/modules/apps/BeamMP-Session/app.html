@@ -1,8 +1,10 @@
-<div ng-controller="Session" id="Session" class="bngApp multiplayersession" ng-init="init()" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}">
+<div ng-controller="BeamMPSessionController" id="Session" class="bngApp beammpSession" ng-init="init()" ng-style="{'width': '100%', 'height': '100%', 'background-color': 'transparent'}">
 	<link id="session-style" rel="stylesheet" type="text/css" href="/ui/modules/apps/BeamMP-Session/app.css">
+	<link type="text/css" rel="stylesheet" href="/ui/assets/BeamMP/shared_styles/formatCodes.css">
+	<link type="text/css" rel="stylesheet" href="/ui/modules/apps/BeamMP-Session/session-modern.css">
 	<div class="outerDiv">
-		<div>
-			<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()">Quit</button>
+		<div class="leave-container">
+			<button type="button" id="quit-button" name="button" class="buttons" ng-click="mpquit()" title="Disconnect from server">Leave</button>
 		</div>
 		<div class="info-container">
 			<div class="block" id="server-name-block" style="display: none;">
@@ -12,10 +14,12 @@
 				</div>
 			</div>
 			<div class="block others-block">
-				<span>Players: <span id="Session-PlayerCount"> ? </span></span>
+				<span class="metric-label">Players</span>
+				<span class="metric-value" id="Session-PlayerCount">?</span>
 			</div>
 			<div class="block others-block">
-				<span>Ping: <span id="Session-Ping">?</span></span>
+				<span class="metric-label">Ping</span>
+				<span class="metric-value"><span id="Session-Ping">?</span> ms</span>
 			</div>
 			<div class="block others-block" id="queue-block" style="display: none; padding: 0px" >
 				<button class="buttons" style="background-color: transparent" ng-click="applyQueue()">Events queued: <span id="Session-Queue" title="">0</span></button>

@@ -1,7 +1,7 @@
 div#Session {
 		display: -webkit-box;
 		height: 30px;
-		font-family: 'Segoe UI', Roboto, sans-serif;
+		font-family: var(--bmp-fnt-defs);
     	font-weight: bold;
 		color: white;
 	}
@@ -19,6 +19,7 @@ div#Session {
 	#quit-button {
 		width: 55px;
 		height: 100%;
+		font-family: var(--bmp-fnt-defs);
 	}
 
 	.outerDiv {
@@ -63,7 +64,7 @@ div#Session {
 		 border-left: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
-	.multiplayersession .buttons {
+	.beammpSession .buttons {
 		color: #DDDDDD;
 		border: none;
 		transition: 0.20s;
@@ -72,7 +73,7 @@ div#Session {
 		cursor: pointer;
 	}
 
-	.multiplayersession .buttons:hover {
+	.beammpSession .buttons:hover {
 		background-color:rgba(0, 0, 0, 0.2);
 		color: #FFFFFF;
 	}
@@ -89,27 +90,28 @@ div#Session {
 		padding: 0 10px;
 	}
 
-	.color-0 { color: #000000; }
-	.color-1 { color: #0000AA; }
-	.color-2 { color: #00AA00; }
-	.color-3 { color: #00AAAA; }
-	.color-4 { color: #AA0000; }
-	.color-5 { color: #AA00AA; }
-	.color-6 { color: #FFAA00; }
+	.color-0 { color: #131313; }
+	.color-1 { color: var(--bng-add-indigoblue-600); }
+	.color-2 { color: var(--bng-add-green-400); }
+	.color-3 { color: var(--bng-add-babyblue-400); }
+	.color-4 { color: var(--bng-add-red-600); }
+	.color-5 { color: var(--bng-add-magenta-550); }
+	.color-6 { color: var(--bng-orange-b400); }
 	.color-7 { color: #AAAAAA; }
 	.color-8 { color: #555555; }
-	.color-9 { color: #5555FF; }
-	.color-a { color: #55FF55; }
-	.color-b { color: #55FFFF; }
-	.color-c { color: #FF5555; }
-	.color-d { color: #FF55FF; }
-	.color-e { color: #FFFF55; }
+	.color-9 { color: var(--bng-add-indigoblue-500); }
+	.color-a { color: var(--bng-add-green-200); }
+	.color-b { color: var(--bng-add-babyblue-200); }
+	.color-c { color: #ff4545; }
+	.color-d { color: var(--bng-add-magenta-300); }
+	.color-e { color: var(--bng-ter-yellow-50); }
 	.color-f { color: #FFFFFF; }
 
 	.bold { font-weight: bold; }
 	.line-through { text-decoration: line-through; }
 	.underline { text-decoration: underline; }
 	.italic { font-style: italic; }
+	.bngIcon { font-family: bngIcons !important; }
 
 	.marquee {
 		display: flex;

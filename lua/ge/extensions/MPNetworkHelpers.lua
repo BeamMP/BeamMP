@@ -46,7 +46,6 @@ M.receive = function(launcherSocket, recvState)
 				recvState.state = 'partial'
 				recvState.missing = len - #partialBody
 				log('W', 'receive', 'Partial receive, missing '..tostring(recvState.missing)..' bytes')
-				dump(recvState)
 				return recvState
 			end
 
@@ -73,7 +72,6 @@ M.receive = function(launcherSocket, recvState)
 				-- subtract what we've received now
 				recvState.missing = recvState.missing - #partialBody
 				log('W', 'receive', 'Partial receive AGAIN, missing '..tostring(recvState.missing)..' bytes')
-				dump(recvState)
 				return recvState
 			end
 
@@ -84,7 +82,7 @@ M.receive = function(launcherSocket, recvState)
 			return recvState
 		end
 		-- finally received everything
-		recvState.data = recvState.data..(partialBody or "")
+		recvState.data = recvState.data..(fullBody or "")
 		recvState.missing = 0
 		recvState.state = 'ready'
 	end

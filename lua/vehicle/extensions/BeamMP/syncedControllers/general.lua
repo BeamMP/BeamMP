@@ -273,7 +273,7 @@ local function loadFunctions()
 	end
 end
 
-M.loadControllerSyncFunctions = loadFunctions
+M.onBeamMPLoadControllerSyncFunctions = loadFunctions
 M.onReset = onReset
 
 return M

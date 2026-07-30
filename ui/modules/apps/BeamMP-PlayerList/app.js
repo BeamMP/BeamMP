@@ -4,10 +4,11 @@
 
 var connected = false;
 var players = [];
-let pingList = [];
+var pingList = [];
 var nickname = "";
 var app = angular.module('beamng.apps');
-app.directive('multiplayerplayerlist', [function () {
+app.directive('beammpPlayerListAngular', [function () {
+	console.log("BeamMP Player List Directive initialized");
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-PlayerList/app.html',
 		replace: true,
@@ -16,7 +17,7 @@ app.directive('multiplayerplayerlist', [function () {
 		controllerAs: 'ctrl'
 	}
 }]);
-app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope, $filter, Settings) {
+app.controller("BeamMPPlayerListController", ['$scope', '$filter', 'Settings', function ($scope, $filter, Settings) {
 	$scope.warnVis = false;
 	$scope.timer = null;
 	$scope.showPlayerIDs = true
@@ -24,6 +25,7 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 
 	const applyPlayerListStyle = function(useNewDesign) {
 		const stylesheet = document.getElementById('playerlist-style');
+		const playerList = document.getElementById('PlayerList');
 		if (!stylesheet) return;
 
 		let newStylePath;
@@ -36,23 +38,27 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 		if (stylesheet.getAttribute('href') !== newStylePath) {
 			stylesheet.setAttribute('href', newStylePath);
 		}
+		if (playerList) {
+			playerList.classList.toggle('ui-style-redesigned', Boolean(useNewDesign));
+		}
 	};
 
 	$scope.init = function() {
+		console.log("BeamMP Player List Controller initialized");
 		// Set players list direction
 		setPLDirection(localStorage.getItem('plHorizontal'));
 		setPLDirection(localStorage.getItem('plVertical'));
 		if (localStorage.getItem('plShown') == 1) showList();
-		bngApi.engineLua("guihooks.trigger('updateCustomButtons', UI.getCustomButtonNames())")
+		bngApi.engineLua("guihooks.trigger('onBeamMPUpdateCustomButtons', UI.getCustomButtonNames())")
 		
 		// Apply style on init
 		applyPlayerListStyle(Settings.values.useUiAppRedesign);
-      	bngApi.engineLua('settings.getValue("showPlayerIDs")', (data) => {
-      		$scope.showPlayerIDs = data
-    	})
+    bngApi.engineLua('settings.getValue("showPlayerIDs")', (data) => {
+      $scope.showPlayerIDs = data
+    })
 		bngApi.engineLua('settings.getValue("playerlistLeftclick")', (data) => {
 			$scope.playerlistLeftclick = data
-	  	})
+	  })
 	};
 
 	$scope.$on('SettingsChanged', function (event, data) {
@@ -114,7 +120,7 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 		else setPLDirection("top");
 	}
 
-	$scope.$on('playerPings', function(event, data) {
+	$scope.$on('onBeamMPPlayerPings', function(event, data) {
 		pingList = JSON.parse(data);
 		for(let i = 0; i < pingList.length; i++) {
 			pingList[i] = pingList[i]-16;
@@ -124,15 +130,17 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 
 	var customButtons = []
 
-	$scope.$on('updateCustomButtons', function(event, data) {
+	$scope.$on('onBeamMPUpdateCustomButtons', function(event, data) {
 		if (Array.isArray(data)) {
 			customButtons = data;
 		}
 	})
 
-	$scope.$on('playerList', function(event, data) {
+	$scope.$on('onBeamMPPlayerList', function(event, data) {
 		let playersList = document.getElementById("players-table");
 		let parsedList = JSON.parse(data);
+		const countBadge = document.getElementById("player-count-badge");
+		if (countBadge) countBadge.textContent = parsedList.length;
 		
 		if(players != null && playersList != null){
 			//get differences between playernames and send them as messages
@@ -295,7 +303,7 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 				// Insert the button inside the cell
 				var btn = document.createElement("BUTTON");
 				var pingText = pingList[parsedList[i].name] || "?";
-				btn.appendChild(document.createTextNode(pingText+='ms'));
+				btn.appendChild(document.createTextNode(`${pingText} ms`));
 				btn.setAttribute("onclick","teleportToPlayer('"+parsedList[i]+"')");
 				btn.setAttribute("class", "tp-button buttons");
 				pingCell.appendChild(btn);
@@ -310,13 +318,13 @@ app.controller("PlayerList", ['$scope', '$filter', 'Settings', function ($scope,
 		players = parsedList; //store player list as an array for the next update
 	})
 
-	$scope.$on('setNickname', function(event, data) {
+	$scope.$on('onBeamMPSetNickname', function(event, data) {
 		nickname = data
 	})
 
 	$scope.queuedPlayers = []
 
-	$scope.$on('setQueue', function(event, data) {
+	$scope.$on('onBeamMPSetQueue', function(event, data) {
 		$scope.queuedPlayers = []
 
 		if (!data.queuedPlayers) {
@@ -378,15 +386,6 @@ function showList() {
 	var shownText = "&gt;";
 	var hiddenText = "&lt;";
 	if (localStorage.getItem('plHorizontal') == "right") { shownText = "&lt;"; hiddenText = "&gt;"; }
-	var plContainer = document.getElementById("plist-container");
-	var btn = document.getElementById("show-button");
-	plContainer.style.display = "block";
-	btn.innerHTML = shownText;
-}
-
-function hideList() {
-	var hiddenText = "&lt;";
-	if (localStorage.getItem('plHorizontal') == "right") { hiddenText = "&gt;"; }
 	var plContainer = document.getElementById("plist-container");
 	var btn = document.getElementById("show-button");
 	plContainer.style.display = "block";

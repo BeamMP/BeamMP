@@ -1,8 +1,8 @@
 {
-  "domElement": "<multiplayerplayerlist></multiplayerplayerlist>",
-  "name": "Multiplayer Player List",
+  "domElement": "<beammp-playerlist></beammp-playerlist>",
+  "name": "BeamMP Player List",
   "types": [
-    "ui.apps.categories.multiplayer"
+    "ui.apps.categories.beammp"
   ],
   "css": {
   	"right": "0px",
@@ -11,8 +11,8 @@
   	"width": "auto",
     "height": "530px"
   },
-  "description": "The playerlist for the multiplayer session.",
+  "description": "The playerlist for the BeamMP Session.",
   "author": "BeamMP Team",
-  "version": "1.0",
-  "directive": "multiplayerplayerlist"
+  "version": "1.1",
+  "directive": "beammpPlayerListAngular"
 }

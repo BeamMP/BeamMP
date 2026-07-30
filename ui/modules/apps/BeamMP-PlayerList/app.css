@@ -4,6 +4,7 @@
     justify-content: flex-end;
     align-content: flex-end;
     height: 100%;
+	font-family: var(--bmp-fnt-defs);
 }
 #plist-container {
     display: none;
@@ -51,7 +52,7 @@
     margin: 0;
     padding: 0;
 }
-.multiplayerPlayerList .buttons {
+.beammpPlayerList .buttons {
     color: #DDDDDD;
     transition: 0.20s;
     background-color: rgba(0, 0, 0, 0.45);
@@ -59,7 +60,7 @@
     border: none;
     margin: 0px 0 0 0;
 }
-.multiplayerPlayerList .buttons:hover {
+.beammpPlayerList .buttons:hover {
     background-color: rgba(0, 0, 0, 0.65);
     color: #FFFFFF;
 }

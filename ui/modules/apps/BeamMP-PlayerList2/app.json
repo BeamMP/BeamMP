@@ -1,0 +1,18 @@
+{
+  "domElement": "<beammp-playerlist-vue></beammp-playerlist-vue>",
+  "name": "BeamMP Player List (Vue)",
+  "types": [
+    "ui.apps.categories.beammp"
+  ],
+  "css": {
+  	"right": "0px",
+  	"top": "90px",
+    "min-width": "300px",
+  	"width": "auto",
+    "height": "530px"
+  },
+  "description": "The playerlist for the BeamMP Session.",
+  "author": "BeamMP Team",
+  "version": "1.1",
+  "directive": "beammpPlayerListVue"
+}

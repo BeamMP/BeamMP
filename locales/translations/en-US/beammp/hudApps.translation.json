@@ -1,0 +1,11 @@
+{
+    "ui.apps.categories.beammp": "BeamMP",
+    "ui.apps.beammp.playerlist.players": "Players",
+    "ui.apps.beammp.playerlist.copyname": "Copy name",
+    "ui.apps.beammp.playerlist.deleteAllVehicles": "Delete all vehicles",
+    "ui.apps.beammp.playerlist.queueEvents": "Queue events",
+    "ui.apps.beammp.playerlist.switchCameraTo": "Switch camera to",
+    "ui.apps.beammp.playerlist.openProfile": "Open profile",
+    "ui.apps.beammp.playerlist.restoreVehicles": "Queue deleted vehicles",
+    "ui.apps.beammp.playerlist.error": "No players… something is wrong"
+}

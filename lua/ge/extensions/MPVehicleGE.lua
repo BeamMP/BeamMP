@@ -11,6 +11,25 @@
 
 local M = {}
 
+---[[ Test PlayerTags
+--local playerTags = require("ge/extensions/render/playerTags")
+--
+--local playerCount = 1   -- last settled player count (from getAssignedPlayers)
+--local taggedCount = nil -- player count the current tags were built for (nil = none built)
+--
+--local function rebuildTags()
+--  local tags = {}
+--  for i = 0, playerCount - 1 do
+--    tags[#tags + 1] = {player = i, label = core_locales.contextTranslate("ui.multiseat.playerTag", {number = i + 1}), color = playerTags.color(i + 1, playerCount)}
+--  end
+--  playerTags.rebuild(tags)
+--  taggedCount = playerCount
+--end
+--
+--M.onExtensionUnloaded = function() playerTags.reset(); taggedCount = nil end
+--M.onSerialize = function() playerTags.reset(); taggedCount = nil end
+---
+
 setmetatable(_G,{}) -- temporarily disable global notifications
 
 -- ============= VARIABLES =============
@@ -54,7 +73,7 @@ local roleToInfo = {
 	['SUPPORT']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Support]", shorttag = " [Staff]" },
 	['STAFF']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [BeamMP Staff]", shorttag = " [Staff]" },
 	['MOD']		= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Moderator]", shorttag = " [Mod]" },
-	['ADM']		= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [Admin]", shorttag = " [Adm]" },
+	['ADMIN']		= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [Admin]", shorttag = " [Adm]" },
 	['MDEV']	= { backcolor = { r = 194, g = 055, b = 055 }, forecolor = { r = 255, g = 070, b = 101 }, tag = " [BeamMP Dev]", shorttag = " [Dev]" },
 	['NGDEV']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Developer]", shorttag = " [BNG]" },
 	['NGSTAFF']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Staff]", shorttag = " [BNG]" },
@@ -1221,8 +1240,8 @@ local core_vehicles_cloneCurrent = core_vehicles.cloneCurrent
 core_vehicles.cloneCurrent = function ()
 	local vehicle = be:getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
-		local title = MPTranslate("ui.multiplayer.configprotection.clone.title", "Vehicle Clone Error")
-		local msg = MPTranslate("ui.multiplayer.configprotection.clone.message", "Sorry, you cannot clone this vehicle.")
+		local title = MPTranslate("ui.beammp.configprotection.clone.title", "Vehicle Clone Error")
+		local msg = MPTranslate("ui.beammp.configprotection.clone.message", "Sorry, you cannot clone this vehicle.")
 		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
 		return
 	else
@@ -1234,8 +1253,8 @@ local core_vehicle_partmgmt_saveLocal = extensions.core_vehicle_partmgmt.saveLoc
 local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
 	local vehicle = be:getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
-		local title = MPTranslate("ui.multiplayer.configprotection.save.title", "Vehicle Save Error")
-		local msg = MPTranslate("ui.multiplayer.configprotection.save.message", "Sorry, you cannot save this vehicle.")
+		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
+		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
 		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
 		return
 	else
@@ -1247,8 +1266,8 @@ local core_vehicle_partmgmnt_savedefault = extensions.core_vehicle_partmgmt.save
 local function core_vehicle_partmgmnt_savedefault_overwrite(p1)
 	local vehicle = be:getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
-		local title = MPTranslate("ui.multiplayer.configprotection.save.title", "Vehicle Save Error")
-		local msg = MPTranslate("ui.multiplayer.configprotection.save.message", "Sorry, you cannot save this vehicle.")
+		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
+		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
 		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
 		return
 	else
@@ -1260,8 +1279,8 @@ local gameplay_garageMode_start = gameplay_garageMode.start
 local function gameplay_garageMode_start_overwrite()
 	local vehicle = be:getPlayerVehicle(0)
 	if vehicle and vehicle:getField("protected", 0) == "1" then
-		local title = MPTranslate("ui.multiplayer.configprotection.save.title", "Vehicle Save Error")
-		local msg = MPTranslate("ui.multiplayer.configprotection.save.message", "Sorry, you cannot save this vehicle.")
+		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
+		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
 		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
 		return
 	else
@@ -1631,7 +1650,7 @@ local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 			local newVehObj = getVehicleByGameID(newGameVehicleID) or {}
 
 			-- enter a remote car as a passenger
-			if not newVehObj.isLocal and oldVehicle and oldVehicle:getJBeamFilename() == "unicycle" then
+			if not newVehObj.isLocal and oldVehicle and oldVehicle:getJBeamFilename() == "unicycle" and newVehicle and newVehicle:getJBeamFilename() ~= "unicycle" then
 				--core_camera.setByName(0,"onboard.rider") -- citybus
 				core_camera.setByName(0,"passenger") -- auto generated
 				core_camera.setByName(0,"onboard.passenger") -- custom
@@ -2068,7 +2087,7 @@ local function saveDefaultRequest()
 end
 
 local function spawnDefaultRequest()
-	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("trackNewVeh"); return end
+	if not MPCoreNetwork.isMPSession() then original_spawnDefault(); extensions.hook("onBeamMPTrackNewVehicle"); return end
 
 	local currentVehicle = be:getPlayerVehicle(0)
 	local defaultConfig = jsonReadFile('settings/default.pc')
@@ -2106,7 +2125,7 @@ local function replaceRequest(model, config, colors)
 	--extensions.hook("trackNewVeh")
 end
 
-M.runPostJoin = function()
+M.onBeamMPPostJoin = function()
 	original_removeAllExceptCurrent = core_vehicles.removeAllExceptCurrent
 	original_spawnNewVehicle = core_vehicles.spawnNewVehicle
 	original_replaceVehicle = core_vehicles.replaceVehicle
@@ -2117,7 +2136,7 @@ M.runPostJoin = function()
 	core_vehicles.spawnDefault = MPVehicleGE.spawnDefaultRequest
 end
 
-M.onServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
+M.onBeamMPServerLeave = function() --NOTE: the nil checks are so the function doesn't get set to a nil after a lua reload
 	if original_removeAllExceptCurrent then core_vehicles.removeAllExceptCurrent = original_removeAllExceptCurrent end
 	if original_spawnNewVehicle then core_vehicles.spawnNewVehicle = original_spawnNewVehicle end
 	if original_replaceVehicle then core_vehicles.replaceVehicle = original_replaceVehicle end
@@ -2281,6 +2300,9 @@ local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		localCounter = localCounter + dt
 	end
+
+	--if taggedCount ~= playerCount then rebuildTags() end
+  --playerTags.updatePositions()
 end
 
 local function onPreRender(dt)
@@ -2340,7 +2362,7 @@ local function onPreRender(dt)
 				-- If below set speed
 				if (vehicleSpd <= maxSyncSpd) then
 					queueApplyTimer = queueApplyTimer + dt
-					guihooks.trigger("setAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
+					guihooks.trigger("onBeamMPSetAutoQueueProgress", tostring((queueApplyTimer / maxTime)*100))
 					-- if time under speed more than or equal to max
 					if (queueApplyTimer >= maxTime) then
 						applyQueuedEvents()
@@ -2348,7 +2370,7 @@ local function onPreRender(dt)
 					end
 				else -- Reset timer and UI
 					if queueApplyTimer > 0 then
-						guihooks.trigger("setAutoQueueProgress", "0")
+						guihooks.trigger("onBeamMPSetAutoQueueProgress", "0")
 					end
 					queueApplyTimer = 0
 				end
@@ -2370,7 +2392,9 @@ local function onPreRender(dt)
 			editSyncTimer = 0
 		end
 
+		--playerCount = 0
 		for serverVehicleID, v in pairs(vehicles) do
+			--playerCount = playerCount + 1
 			local owner = v:getOwner()
 			if v.isLocal or not owner then goto skip_vehicle end
 			local gameVehicleID = v.gameVehicleID

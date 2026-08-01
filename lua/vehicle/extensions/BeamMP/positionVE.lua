@@ -380,7 +380,17 @@ local function getVehicleRotation()
 	local cog = velocityVE.cogRel:rotated(rot)
 	local pos = vec3(obj:getPosition()) + cog
 	local vel = smoothVel + cog:cross(rvel)
-	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
+	-- Skip sending if ANY value is NaN. During rapid instability the game can produce NaN
+	-- position/rotation (not just velocity); sending it teleports this car to NaN on every
+	-- other client -- it "disappears" for them until the owner reloads. Checking only the
+	-- velocity (the old behaviour) let NaN positions through.
+	if pos.x ~= pos.x or pos.y ~= pos.y or pos.z ~= pos.z
+		or vel.x ~= vel.x or vel.y ~= vel.y or vel.z ~= vel.z
+		or rot.x ~= rot.x or rot.y ~= rot.y or rot.z ~= rot.z or rot.w ~= rot.w
+		or rvel.x ~= rvel.x or rvel.y ~= rvel.y or rvel.z ~= rvel.z then
+		log('E','getVehicleRotation', 'skipped invalid (NaN) position/velocity values')
+		return
+	end
 
 	-- disabled because the GE implementation of slowmo sync is instant, but doesn't account for low fps compensation
 	--vel = vel * physmult
@@ -411,6 +421,12 @@ local function setVehiclePosRot(data)
 	local simspeedfraction = pr.localSimspeed
 
 	if not tim then return end
+	-- Reject NaN/garbage so a bad packet can't fling this remote car off-world
+	-- (defensive: older senders don't have the send-side NaN guard).
+	if pos.x ~= pos.x or pos.y ~= pos.y or pos.z ~= pos.z
+		or rot.x ~= rot.x or rot.y ~= rot.y or rot.z ~= rot.z or rot.w ~= rot.w then
+		return
+	end
 	if remoteData.timer > tim then return end
 
 	local remoteDT = max(tim - remoteData.timer, 0.001)

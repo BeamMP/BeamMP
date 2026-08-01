@@ -511,6 +511,14 @@ local function onClientEndMission(mission)
     chatWindow.clearHistory()
 end
 
+local function fixOldHUDLayout()
+	local layout = jsonReadFile("/settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+	if layout and layout.version==0.53 then
+		log('W', 'fixOldHUDLayout', "Removed pre-0.39 multiplayer (BeamMP) HUD layout")
+		FS:removeFile("/settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+	end
+end
+
 --- Triggered by BeamNG when the lua mod is loaded by the modmanager system.
 -- We use this to load our UI and config
 local function onExtensionLoaded()
@@ -534,6 +542,8 @@ local function onExtensionLoaded()
 
         ::continue::
     end
+
+	fixOldHUDLayout()
 
 	initialized = true
 end
@@ -605,6 +615,13 @@ local function clearPauseMenuModButtons()
 	pauseMenuModButtons = {}
 end
 
+local function onHideRadialMenu()
+	if MPCoreNetwork.isMPSession() then
+		log('D', 'onHideRadialMenu', 'Returned to beammp HUD layout')
+		ui_appLayouts.setUsedLayout("beammp")
+	end
+end
+
 
 M.updateLoading = updateLoading
 M.promptAutoJoinConfirmation = promptAutoJoinConfirmation
@@ -632,6 +649,7 @@ M.clearPauseMenuModButtons = clearPauseMenuModButtons
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat
 
+M.onHideRadialMenu = onHideRadialMenu
 M.onClientEndMission = onClientEndMission
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate

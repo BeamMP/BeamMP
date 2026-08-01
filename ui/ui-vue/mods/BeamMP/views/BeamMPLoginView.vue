@@ -69,8 +69,8 @@ const router = useRouter()
 const username = ref("")
 const password = ref("")
 const mode = ref("guest")
-const LEGACY_LOGO_PATH = "local://local/ui/modModulesOLD/multiplayer/beammp_new_cropped.png"
-const LOGO_FALLBACK = "/ui/ui-vue/mods/BeamMP/icons/account-multiple.svg"
+const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
+const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
 const { login, guestLogin, openExternal, state } = useBeamMPState()
 

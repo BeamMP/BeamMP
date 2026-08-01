@@ -117,32 +117,17 @@ function confirmQuitGame() {
   border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
 }
 
-h3,
-.subtitle {
-  margin: 0;
-}
-
-h3 {
-  font-size: 1.15rem;
-}
-
-.subtitle {
-  margin-top: 0.2rem;
-  color: var(--bng-cool-gray-300);
-  font-size: 0.82rem;
-}
-
 .identity {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   min-width: 0;
   max-width: 48%;
-  padding: 0.3rem 0.55rem;
+  padding: 0.3rem 0.5rem;
   border-radius: var(--bng-corners-2);
   background: rgba(var(--bng-cool-gray-900-rgb), 0.72);
   color: var(--bng-cool-gray-100);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .identity span:last-child {

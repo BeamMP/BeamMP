@@ -199,8 +199,7 @@ function openDocs() {
   border-radius: 999px;
   background: rgba(var(--bng-orange-500-rgb), 0.2);
   color: var(--bng-orange-300);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -330,9 +329,8 @@ function openDocs() {
   border-radius: 999px;
   background: rgba(var(--bng-add-green-500-rgb), 0.18);
   color: var(--bng-add-green-200);
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .link-grid {

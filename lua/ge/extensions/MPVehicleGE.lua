@@ -2793,6 +2793,13 @@ local function onExtensionLoaded()
 	onSettingsChanged()
 end
 
+local function refreshNametagCache()
+	for playerID,player in pairs(players) do
+		player:updateNameTagCache()
+		player:updateSpectatorsTagCache()
+	end
+end
+
 local function onSettingsChanged()
 	for playerID,player in pairs(players) do
 		player:onSettingsChanged()
@@ -2859,6 +2866,7 @@ M.setVehicleRole           = setVehicleRole           -- takes: string playerIDv
 M.clearVehicleRole         = clearVehicleRole         -- takes: string playerIDVehicleID
 M.setPlayerRole            = setPlayerRole            -- takes: string playerID, string tag, string shorttag, number red, number green, number blue
 M.clearPlayerRole          = clearPlayerRole          -- takes: string playerID
+M.refreshNametagCache      = refreshNametagCache
 M.getGameVehicleID         = getGameVehicleID         -- takes: -      returns: { 'gamevehid' : 'servervehid', '23456' : '1-2' }
 M.getServerVehicleID       = getServerVehicleID       -- takes: -      returns: { 'servervehid' : 'gamevehid', '1-2' : '23456' }
 M.saveDefaultRequest       = saveDefaultRequest       -- takes: -

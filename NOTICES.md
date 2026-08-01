@@ -40,18 +40,18 @@ All code, assets or works not specified in this document which do not have a dif
 - Assets: By Patreon Ltd
   - **License:** https://www.patreon.com/brand
   - **Files:**
-    - `ui/modules/multiplayer/icons/Digital-Patreon-Logo_White.png`
+    - `ui/assets/BeamMP/icons/Digital-Patreon-Logo_White.png`
 
 - Assets: By Discord Inc
   - **License:** https://discord.com/branding
   - **Files:**
-    - `ui/modules/multiplayer/icons/icon_clyde_white_RGB.svg`
+    - `ui/assets/BeamMP/icons/icon_clyde_white_RGB.svg`
 
 - Assets: By Flagpedia
   - **License:** completely free for commercial and non-commercial use (public domain)
   - **Origin:** https://flagpedia.net/download/icons
   - **Files:**
-    - All flag .png files within `ui/modules/multiplayer/flags/*`
+    - All flag .png files within `ui/assets/BeamMP/flags/*`
 
 ## Contact Information
 For questions or more information, please contact [BeamMP](mailto:admin@beammp.com).

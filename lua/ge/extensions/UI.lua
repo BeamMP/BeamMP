@@ -52,11 +52,6 @@ M.uiIcons = {
     user = 0,
 }
 
-local ImVec2_uv0 = imgui.ImVec2(0,0)
-local ImVec2_uv1 = imgui.ImVec2(1,1)
-local ImVec4_bg_col = imgui.ImVec4(0,0,0,0)
-local ImVec4_tint_col = imgui.ImVec4(1,1,1,1)
-
 local windowOpacity = 0.9
 
 M.windowOpen = imgui.BoolPtr(true)

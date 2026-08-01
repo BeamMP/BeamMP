@@ -407,7 +407,7 @@ onUnmounted(() => {
   min-height: 0;
   gap: 0.35rem;
   padding: 0.25rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .beammpChat2 .chat-list {
@@ -601,11 +601,11 @@ onUnmounted(() => {
 
 @media (max-width: 420px) {
   .beammpChat2 .chat-window {
-    font-size: 0.82rem;
+    font-size: 0.75rem;
   }
 
   .beammpChat2 .send-button {
-    min-width: 2.7rem;
+    min-width: 2.5rem;
     overflow: hidden;
     font-size: 0;
   }

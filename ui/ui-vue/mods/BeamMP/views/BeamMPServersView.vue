@@ -722,14 +722,13 @@ onBeforeUnmount(() => {
 .mod-size-summary {
   display: inline-flex;
   align-items: center;
-  min-height: 2.1rem;
-  padding: 0 0.72rem;
+  min-height: 2.1875rem;
+  padding: 0 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--bng-corners-1);
   color: var(--bng-cool-gray-50);
   background: rgba(20, 24, 31, 0.6);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -737,15 +736,13 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.1rem;
+  min-height: 2.1875rem;
   padding: 0 0.75rem;
   border: 1px solid rgba(var(--bng-orange-500-rgb), 0.35);
   border-radius: var(--bng-corners-1);
   color: var(--bng-cool-gray-100);
   background: rgba(0, 0, 0, 0.28);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 

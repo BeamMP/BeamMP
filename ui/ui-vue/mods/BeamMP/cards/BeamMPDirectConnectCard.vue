@@ -2,15 +2,19 @@
   <div class="card">
     <h3>{{ $tt("ui.common.beammp.direct_connect") }}</h3>
 
-    <label>
-      {{ $tt("ui.beammp.serverBrowser.serverIp") }}
-      <input v-model="ip" class="bng-input" type="text" />
-    </label>
+      <BngInput
+	  	v-model="ip"
+		type="text"
+		:show-external-button="false"
+		label="{{ $tt('ui.beammp.serverBrowser.serverIp') }}"
+	  />
 
-    <label>
-      {{ $tt("ui.beammp.serverBrowser.serverPort") }}
-      <input v-model="port" class="bng-input" type="text" />
-    </label>
+      <BngInput
+	    v-model="port"
+		type="text"
+		:show-external-button="false"
+		label="{{ $tt('ui.beammp.serverBrowser.serverPort') }}"
+	  />
 
     <div class="actions">
       <BngButton @click="connect">{{ $tt("ui.common.beammp.connect") }}</BngButton>
@@ -21,11 +25,11 @@
 
 <script setup>
 import { ref } from "vue"
-import { BngButton } from "@/common/components/base"
+import { BngInput, BngButton, BngDropdown, ACCENTS } from "@/common/components/base"
 import { useBeamMPState } from "../shared/beammpState.js"
 
 const ip = ref("")
-const port = ref("30814")
+const port = ref("")
 const { connectToServer, directConnectFromClipboard } = useBeamMPState()
 
 async function connect() {

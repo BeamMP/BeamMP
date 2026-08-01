@@ -18,11 +18,11 @@
       <div class="topbar-tools">
         <div class="metrics">
           <span class="metric-item">
-            <img src="../icons/account-multiple.svg" alt="" />
+            <img src="/ui/assets/BeamMP/icons/account-multiple.svg" alt="" />
             <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
           </span>
           <span class="metric-item">
-            <img src="../icons/dns.svg" alt="" />
+            <img src="/ui/assets/BeamMP/icons/dns.svg" alt="" />
             <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
           </span>
         </div>
@@ -65,7 +65,7 @@
         <div class="spacer" />
 
         <button class="nav-btn secondary external-link external-link--patreon" @click="openExternal('https://www.patreon.com/BeamMP')">
-          <img src="../icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="" class="external-link-icon" />
+          <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="" class="external-link-icon" />
           <span class="external-link-copy">
             <span class="external-link-title">{{ $tt("ui.common.beammp.patreon") }}</span>
             <small class="external-link-subtitle">{{ $tt("ui.beammp.patreon.message.user") }}</small>
@@ -76,7 +76,7 @@
           <span>{{ $tt("ui.common.beammp.forum") }}</span>
         </button>
         <button class="nav-btn secondary external-link" @click="openExternal('https://discord.gg/BeamMP')">
-          <img src="../icons/icon_clyde_white_RGB.svg" alt="" class="external-link-icon" />
+          <img src="/ui/assets/BeamMP/icons/icon_clyde_white_RGB.svg" alt="" class="external-link-icon" />
           <span>{{ $tt("ui.common.beammp.discord") }}</span>
         </button>
         <button class="nav-btn secondary external-link" @click="openExternal('https://docs.beammp.com')">
@@ -84,7 +84,7 @@
           <span>{{ $tt("ui.common.beammp.docs") }}</span>
         </button>
         <button class="nav-btn secondary external-link" @click="openExternal('https://github.com/BeamMP/')">
-          <img src="../icons/github-mark.svg" alt="" class="external-link-icon" />
+          <img src="/ui/assets/BeamMP/icons/github-mark.svg" alt="" class="external-link-icon" />
           <span>{{ $tt("ui.common.beammp.github") }}</span>
         </button>
       </aside>
@@ -336,7 +336,6 @@ onBeforeUnmount(() => {
   justify-content: flex-end;
   flex-wrap: nowrap;
   gap: 0.55rem;
-  margin-right: 2.75rem;
   max-width: calc(100% - 2.75rem);
 }
 

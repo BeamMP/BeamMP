@@ -242,9 +242,8 @@ onUnmounted(() => {
 
 .eyebrow {
   color: var(--bng-orange-300);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 

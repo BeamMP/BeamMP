@@ -2,7 +2,7 @@ div#Session {
   height: 34px;
   color: var(--bng-off-white);
   font-family: var(--bmp-fnt-defs);
-  font-size: 13px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -109,7 +109,7 @@ div#Session {
 
 .beammpSession .metric-label {
   color: var(--bng-cool-gray-400);
-  font-size: 11px;
+  font-size: 1rem;
   font-weight: 500;
   text-transform: uppercase;
 }

@@ -393,7 +393,7 @@ onUnmounted(() => {
 	width: 100%;
 	height: 100%;
 	font-family: var(--bmp-fnt-defs);
-	font-size: 13px;
+	font-size: 1rem;
 	font-weight: 600;
 }
 
@@ -483,7 +483,7 @@ onUnmounted(() => {
 
 .player-id {
 	color: var(--bng-cool-gray-400);
-	font-size: 11px;
+	font-size: 0.75rem;
 	cursor: pointer;
 }
 
@@ -522,7 +522,7 @@ onUnmounted(() => {
 	border-radius: 9px;
 	background: var(--bng-orange-500);
 	color: var(--bng-off-white);
-	font-size: 10px;
+	font-size: 0.75rem;
 }
 
 .buttons {

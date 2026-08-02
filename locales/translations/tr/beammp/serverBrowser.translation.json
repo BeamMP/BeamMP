@@ -1,0 +1,15 @@
+{
+  "ui.beammp.serverBrowser.connectingToServer": "Sunucuya bağlanılıyor…",
+  "ui.beammp.serverBrowser.saveAsFavorite": "Favorilere Ekle",
+  "ui.beammp.serverBrowser.addFavorite": "Favorilere Ekle",
+  "ui.beammp.serverBrowser.removeFavorite": "Favorilerden Kaldır",
+  "ui.beammp.serverBrowser.serverIp": "Sunucu IP",
+  "ui.beammp.serverBrowser.serverPort": "Sunucu Portu",
+  "ui.beammp.serverBrowser.addCustomServer": "Özel Sunucu Ekle",
+  "ui.beammp.serverBrowser.modSecurityWarning.no_return": "İptal Et ve Geri Dön",
+  "ui.beammp.serverBrowser.modSecurityWarning.accept_proceed": "İndir ve Katıl",
+  "ui.beammp.serverBrowser.filters.filterOptions": "Arama Filtreleri",
+  "ui.beammp.serverBrowser.filters.resetFilters": "Filtreleri Sıfırla",
+  "ui.beammp.serverBrowser.filters.playerCountMin": "Minimum oyuncu sayısı",
+  "ui.beammp.serverBrowser.filters.playerCountMax": "Maksimum oyuncu sayısı"
+}

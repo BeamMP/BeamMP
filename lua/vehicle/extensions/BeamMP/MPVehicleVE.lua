@@ -5,6 +5,7 @@
 local M = {}
 
 v.mpVehicleType = "L" -- we assume vehicles are local (they're set to remove once we receive pos data from the server)
+v.mpServerID = ""
 
 local keyStates = {} -- table of keys and their states, used as a reference
 local keysToPoll = {} -- list of keys we want to poll for state changes
@@ -57,6 +58,10 @@ local function setVehicleType(x)
   v.mpVehicleType = x
 end
 
+local function setServerID(id)
+  v.mpServerID = id
+end
+
 local function updateGFX(dtReal)
 	if v.mpVehicleType == 'R' and hydros.enableFFB then -- disable ffb if it got enabled by a reset
 		-- trigger a check that will set FFBID to -1
@@ -84,6 +89,7 @@ M.updateGFX = updateGFX
 M.onExtensionLoaded    = onExtensionLoaded
 
 M.setVehicleType       = setVehicleType
+M.setServerID          = setServerID
 
 --M.getKeyState = getKeyState
 --M.addKeyEventListener = addKeyEventListener

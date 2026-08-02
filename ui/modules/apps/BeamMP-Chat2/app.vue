@@ -166,11 +166,11 @@ function formatChatMessage(value) {
       } else if (token === "^p") {
         result += "<br>"
       } else if (token === "^*") {
-        const cls = globalThis.serverStyleMap?.[token]
+        const cls = globalThis.beammpTextStyleMap?.[token]
         if (cls) classes.add(cls)
         if (globalThis.iconsOrig?.[nextToken]) currentText = globalThis.iconsOrig[nextToken].glyph
       } else {
-        const cls = globalThis.serverStyleMap?.[token]
+        const cls = globalThis.beammpTextStyleMap?.[token]
         if (cls?.startsWith("color-")) {
           for (const activeClass of [...classes]) {
             if (activeClass.startsWith("color-")) classes.delete(activeClass)

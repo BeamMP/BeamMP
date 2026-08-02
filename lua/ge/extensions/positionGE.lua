@@ -11,6 +11,7 @@
 
 local M = {}
 
+local targetGameSpeed = 1
 local actualSimSpeed = 1
 
 --[[
@@ -39,11 +40,9 @@ local TIMER = (HighPerfTimer or hptimer) -- game own timer that is much more acc
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
 local function tick()
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
-	for i,v in pairs(ownMap) do -- For each own vehicle
-		local veh = be:getObjectByID(i) -- Get vehicle
-		if veh then
-			veh:queueLuaCommand("positionVE.getVehicleRotation()")
+	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
+		if v then
+			v:queueLuaCommand("positionVE.getVehicleRotation()")
 		end
 	end
 end
@@ -56,59 +55,45 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			local decoded = jsonDecode(data)
-			local simspeedReal = simTimeAuthority.getReal()
-
-			decoded.isTransitioning = (simTimeAuthority.get() ~= simspeedReal) or nil
-
-			simspeedReal = simTimeAuthority.getPause() and 0 or simspeedReal -- set velocities to 0 if game is paused
-
-			for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedReal end
-			for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedReal end
-
-			MPGameNetwork.send('Zp:'..serverVehicleID..":"..jsonEncode(decoded))
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
 		end
 	end
 end
 
 
 --- This function serves to send the position data received for another players vehicle from GE to VE, where it is handled.
--- @param decoded table The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
+-- @param encoded json The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
 -- @param serverVehicleID string The VehicleID according to the server.
-local function applyPos(decoded, serverVehicleID)
+local function applyPos(data, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 
-
-	local simspeedFraction = 1
-	local gameSpeed = simTimeAuthority.getReal()
-	if gameSpeed > 0 then
-		simspeedFraction = 1/gameSpeed
-		for k,v in pairs(decoded.vel) do decoded.vel[k] = v*simspeedFraction end
-		for k,v in pairs(decoded.rvel) do decoded.rvel[k] = v*simspeedFraction end
-	end
-
-	decoded.localSimspeed = simspeedFraction
-
-	local veh = be:getObjectByID(vehicle.gameVehicleID)
+	local veh = getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		veh:queueLuaCommand("positionVE.setVehiclePosRot(mime.unb64(\'".. MPHelpers.b64encode(jsonEncode(decoded)) .."\'))")
+		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
 	end
-	local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
-	vehicle.lastDt = decoded.tim
-	local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
-
-	vehicle.ping = ping
-	vehicle.fps = 1/deltaDt
-	vehicle.position = Point3F(decoded.pos[1],decoded.pos[2],decoded.pos[3])
-	vehicle.rotation = quat(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
 
 	local owner = vehicle:getOwner()
-	if owner then UI.setPlayerPing(owner.name, ping) end-- Send ping to UI
+	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+		local decoded = jsonDecode(data)
+		local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
+		vehicle.lastDt = decoded.tim
+
+		vehicle.position:set(decoded.pos[1],decoded.pos[2],decoded.pos[3])
+		vehicle.rotation:set(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
+
+		if owner and not owner.updatedPing then
+			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
+			UI.setPlayerPing(owner.name, ping)
+			owner.ping = ping
+			owner.fps = 1/deltaDt
+		end-- Send ping to UI
+		owner.hasUpdatedPing = true
+	end
 end
 
 --- Tries to delay the positional update execution to match the average update interval from this vehicle
@@ -192,11 +177,11 @@ local function handle(rawData)
 	end
 
 	if code == 'p' then
-		local decoded = jsonDecode(data)
 		if settings.getValue("enablePosSmoother") then
+			local decoded = jsonDecode(data)
 			smoothPosExec(serverVehicleID, decoded)
 		else
-			applyPos(decoded, serverVehicleID)
+			applyPos(data, serverVehicleID)
 		end
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
@@ -207,12 +192,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	for i = 0, be:getObjectCount() - 1 do
-		local veh = be:getObject(i)
-		if veh then
-			veh:queueLuaCommand("positionVE.setPing("..p..")")
-		end
-	end
+	be:queueAllObjectLua("positionVE.setPing("..p..")")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.
@@ -221,7 +201,7 @@ end
 -- @param y number Coordinate y
 -- @param z number Coordinate z
 local function setPosition(gameVehicleID, x, y, z) -- TODO: this is only here because there seems to be no way to set vehicle position in vehicle lua without resetting the vehicle
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	veh:setPositionNoPhysicsReset(Point3F(x, y, z))
 end
 
@@ -230,7 +210,7 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 	local newRot = positionData.rot
 	local vel = positionData.vel
 	local rvel = positionData.rvel
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 
 	local localVel = veh:getVelocity()
 	local vehVel = positionData.vehVel
@@ -276,10 +256,25 @@ local function onPreRender(dt)
 			POSSMOOTHER[serverVehicleID].executed_last:stopAndReset()
 			POSSMOOTHER[serverVehicleID].executed = true
 			POSSMOOTHER[serverVehicleID].last_executed_tim = data.data.tim
-			applyPos(data.data, serverVehicleID)
+			applyPos(jsonEncode(data.data), serverVehicleID)
 			
 		elseif timedif > 60000 then -- seconds. vehicle potentially removed. rem entry
 			POSSMOOTHER[serverVehicleID] = nil
+		end
+	end
+end
+
+local function onUpdate(dtReal, dtSim, dtRaw)
+	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+		setActualSimSpeed(dtSim/dtRaw)
+		local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
+		if targetGameSpeed ~= simSpeed then
+			be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+		end
+		targetGameSpeed = simSpeed
+		local players = getPlayers()
+		for k,player in pairs(players) do
+			player.hasUpdatedPing = false
 		end
 	end
 end
@@ -303,6 +298,7 @@ M.setPing                     = setPing
 M.setActualSimSpeed           = setActualSimSpeed
 M.getActualSimSpeed           = getActualSimSpeed
 M.onPreRender                 = onPreRender
+M.onUpdate                    = onUpdate
 M.onSettingsChanged           = onSettingsChanged
 M.posSmoother                 = POSSMOOTHER -- debug entry
 M.onInit = function() setExtensionUnloadMode(M, "manual") end

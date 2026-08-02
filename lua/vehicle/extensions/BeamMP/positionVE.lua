@@ -86,6 +86,7 @@ local raccErrorSmoother = newVectorSmoothing(50)            -- Smoother for angu
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 
 -- Persistent data
+local lastMailboxVersion = 0
 local framesSinceReset = 0
 local timer = 0
 local ownPing = 0
@@ -118,6 +119,8 @@ local smoothRvel = vec3(0,0,0)
 local physHandlerAdded = false
 
 local debugDrawer = obj.debugDrawProxy
+
+local simSpeedReal = 1
 -- ============= VARIABLES =============
 
 
@@ -180,28 +183,9 @@ local function onReset()
 	framesSinceReset = 0
 end
 
-local physcounter = 0
-local physstart = 0
 
-local physmult = 1
 
 local function update(dtSim)
-	if physcounter == 0 then
-		physstart = os.clock()
-	end
-	physcounter = physcounter+1
-	if physcounter == 2000 then
-		physcounter = 0
-		local physend = os.clock()
-		local physdiff = physend - physstart
-		if playerInfo.firstPlayerSeated then
-			physmult = 1/physdiff -- (physdiff == 0) and 0 or 1/physdiff
-			--print(tostring(physmult*100) .."% realtime")
-			obj:queueGameEngineLua("positionGE.setActualSimSpeed("..tostring(physmult)..")")
-		end
-	end
-
-
 	-- Smooth vehicle velocity to prevent vibrating
 	smoothVel = localVelSmoother:get(vec3(obj:getVelocity()), dtSim)
 	smoothRvel = localRvelSmoother:get(vec3(obj:getPitchAngularVelocity(), obj:getRollAngularVelocity(), obj:getYawAngularVelocity()), dtSim)
@@ -209,17 +193,52 @@ end
 
 
 
+local function updateRemoteData()
+	if not v.mpServerID or v.mpServerID == "" then return end
+	local mailBoxName = "vehPosPckt" .. v.mpServerID
+	local currentMailBoxVersion = obj:getLastMailboxVersion(mailBoxName)
+	if lastMailboxVersion ~= currentMailBoxVersion then
+		local jsonData = obj:getLastMailbox(mailBoxName)
+		local pr = jsonDecode(jsonData)
+		local pos  = vec3(pr.pos)
+		local vel  = vec3(pr.vel)
+		local rot  = quat(pr.rot)
+		local rvel = vec3(pr.rvel)
+		local tim  = pr.tim
+		local ping = pr.ping
+		local simspeedfraction = 1/simSpeedReal
+
+		if not tim then return end
+		if remoteData.timer > tim then return end
+
+		local remoteDT = max(tim - remoteData.timer, 0.001)
+
+		remoteData.pos = pos
+		remoteData.rot = rot
+		remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
+		remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
+		remoteData.vel = vel*simspeedfraction
+		remoteData.rvel = rvel*simspeedfraction
+		remoteData.timer = tim
+		remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
+		remoteData.recTime = timer
+		remoteData.localSimspeed = math.min(simspeedfraction, 25)
+	end
+	lastMailboxVersion = currentMailBoxVersion
+end
+
+
+
 local function updateGFX(dt)
+	updateRemoteData()
 	dt = dt * (remoteData.localSimspeed or 1)
 	timer = timer + dt
 	lastDT = dt
 	framesSinceReset = framesSinceReset + 1
 
+
 	-- If there is no received data, or data is older than timeout, do nothing
 	if not remoteData.pos or (timer-remoteData.recTime) > packetTimeout then return end
-	
-	-- Since the line above returns end if there is no remote data we know this vehicle should be remote if this runs
-	if v.mpVehicleType == "L" then v.mpVehicleType = "R" end
 
 	-- Local vehicle data
 	local vehRot = quatFromDir(-vec3(obj:getDirectionVector()), vec3(obj:getDirectionVectorUp()))
@@ -382,9 +401,8 @@ local function getVehicleRotation()
 	local vel = smoothVel + cog:cross(rvel)
 	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 
-	-- disabled because the GE implementation of slowmo sync is instant, but doesn't account for low fps compensation
-	--vel = vel * physmult
-	--rvel = rvel * physmult
+	vel = vel * simSpeedReal
+	rvel = rvel * simSpeedReal
 
 	local tempTable = {
 		pos = {pos.x, pos.y, pos.z},
@@ -399,39 +417,13 @@ end
 
 
 
-local function setVehiclePosRot(data)
-
-	local pr   = jsonDecode(data)
-	local pos  = vec3(pr.pos)
-	local vel  = vec3(pr.vel)
-	local rot  = quat(pr.rot)
-	local rvel = vec3(pr.rvel)
-	local tim  = pr.tim
-	local ping = pr.ping
-	local simspeedfraction = pr.localSimspeed
-
-	if not tim then return end
-	if remoteData.timer > tim then return end
-
-	local remoteDT = max(tim - remoteData.timer, 0.001)
-
-	remoteData.pos = pos
-	remoteData.rot = rot
-	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
-	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
-	remoteData.vel = vel
-	remoteData.rvel = rvel
-	remoteData.timer = tim
-	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
-	remoteData.recTime = timer
-	remoteData.localSimspeed = math.min(simspeedfraction, 25)
-end
-
 local function onInit()
 	enablePhysicsStepHook()
 end
 
-
+local function setGameSpeed(speed)
+	simSpeedReal = speed
+end
 
 M.onReset            = onReset
 M.onInit             = onInit
@@ -439,8 +431,8 @@ M.onExtensionLoaded  = onInit
 M.onPhysicsStep      = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
-M.setVehiclePosRot   = setVehiclePosRot
 M.setPing            = setPing
+M.setGameSpeed       = setGameSpeed
 
 
 return M

@@ -11,15 +11,11 @@
 
 local M = {}
 
-
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
 local function tick()
-	local ownMap = MPVehicleGE.getOwnMap()
-	for i,v in pairs(ownMap) do
-		local veh = be:getObjectByID(i)
-		if veh then
-			--veh:queueLuaCommand("nodesVE.getNodes()")
-			veh:queueLuaCommand("nodesVE.getBreakGroups()")
+	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
+		if v then
+			v:queueLuaCommand("nodesVE.getBreakGroups()")
 		end
 	end
 end
@@ -33,7 +29,7 @@ local function sendNodes(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
-			MPGameNetwork.send('Xn:'..serverVehicleID..":"..data)
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xn',serverVehicleID,data))
 		end
 	end
 end
@@ -47,7 +43,7 @@ local function sendBreakGroups(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID)
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then
-			MPGameNetwork.send('Xg:'..serverVehicleID..":"..data)
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xg',serverVehicleID,data))
 		end
 	end
 end
@@ -62,7 +58,8 @@ local function sendControllerData(data, gameVehicleID)
 				decodedData.vehID = MPVehicleGE.getServerVehicleID(decodedData.vehID)
 			end
 			data = jsonEncode(decodedData)
-			MPGameNetwork.send('Xc:'..serverVehicleID..":"..data)
+
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Xc',serverVehicleID,data))
 		end
 	end
 end
@@ -73,7 +70,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyNodes(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("nodesVE.applyNodes(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 	end
@@ -85,7 +82,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyBreakGroups(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		veh:queueLuaCommand("nodesVE.applyBreakGroups(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
 	end

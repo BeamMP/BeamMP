@@ -197,13 +197,13 @@ function formatServerName(string) {
 			if (token === '^r') {
 				classes.clear();
 			} else if (token === '^*') {
-				const cls = globalThis.serverStyleMap?.[token];
+				const cls = globalThis.beammpTextStyleMap?.[token];
 				if(cls) classes.add(cls);
 				if (iconsOrig[nextToken]) {
 					currentText = iconsOrig[nextToken].glyph
 				};
 			} else {
-				const cls = globalThis.serverStyleMap?.[token];
+				const cls = globalThis.beammpTextStyleMap?.[token];
 				if (cls?.startsWith('color-')) {
 					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
 					classes.add(cls);

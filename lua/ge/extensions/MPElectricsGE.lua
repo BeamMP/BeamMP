@@ -17,12 +17,10 @@ local lastElectrics
 
 
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
-local function tick() -- Update electrics values of all vehicles
-	local ownMap = MPVehicleGE.getOwnMap() -- Get map of own vehicles
-	for i,v in pairs(ownMap) do -- For each own vehicle
-		local veh = be:getObjectByID(i) -- Get vehicle
-		if veh then
-			veh:queueLuaCommand("MPElectricsVE.check()") -- Check if any value changed
+local function tick()
+	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
+		if v then
+			v:queueLuaCommand("MPElectricsVE.check()")
 		end
 	end
 end
@@ -37,7 +35,7 @@ local function sendElectrics(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
-			MPGameNetwork.send('We:'..serverVehicleID..":"..data)
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('We',serverVehicleID,data))
 			lastElectrics = data
 		end
 	end
@@ -49,7 +47,7 @@ end
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyElectrics(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		if not MPVehicleGE.isOwn(gameVehicleID) then
 			veh:queueLuaCommand("MPElectricsVE.applyElectrics(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")

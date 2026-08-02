@@ -1,0 +1,19 @@
+{
+  "ui.options.beammp.protectConfigFromClone": "Konfigürasyon Klonlama Korumasını etkinleştir",
+  "ui.options.beammp.protectConfigFromClone.tooltip": "Bu yapılandırmanın diğer oyuncular tarafından kopyalanmasını engelle.",
+  "ui.options.beammp.enableNewChatMenu": "Yeni sohbet menüsü",
+  "ui.options.beammp.enableNewChatMenu.tooltip": "Yeni sohbet menüsü ImGui kullanıyor. Özelleştirilebilir, şık ve harika!",
+  "ui.options.beammp.enablePosSmoother": "Araç konumu yumuşatmayı etkinleştir",
+  "ui.options.beammp.autoSyncVehicles": "Otomatik parça senkronizasyonunu etkinleştir",
+  "ui.options.beammp.autoSyncVehicles.tooltip": "Etkinleştirilirse, araç parçalarınız birkaç saniye sonra diğer oyuncularla otomatik olarak senkronize edilir.",
+  "ui.options.beammp.queueSpawnEdit": "Oyuncu aracı güncelleme/düzenleme kuyruğunu etkinleştir",
+  "ui.options.beammp.queueAuto": "Kuyruktaki araç değişikliklerini otomatik olarak uygula",
+  "ui.options.beammp.playerlistLeftclick": "Oyuncu listesi sol tık eylemi",
+  "ui.options.beammp.playerlistLeftclick.tooltip": "Oyuncu listesindeki bir oyuncu ismine sol tıklayınca ne yapılacağını seçin",
+  "ui.options.beammp.luaOptimisations": "Araç optimizasyonlarını etkinleştir",
+  "ui.options.beammp.nameTags": "Oyuncu isim etiketlerini gizle",
+  "ui.options.beammp.launcherPortDefaultPort": "Varsayılan: 4444",
+  "ui.options.beammp.tuneColorQueued": "Kuyrukta bekleyen araç",
+  "ui.options.beammp.experimental": "Deneysel",
+  "ui.options.beammp.useUiAppRedesign.old": "Eski"
+}

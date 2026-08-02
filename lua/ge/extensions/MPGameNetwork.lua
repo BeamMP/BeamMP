@@ -16,6 +16,8 @@ local ffi = require("ffi")
 -- ============= VARIABLES =============
 
 local socket = require('socket')
+local stringBuffer = require("string.buffer")
+local sendStringBuff = stringBuffer.new()
 local TCPLauncherSocket
 local launcherConnected = false
 local isConnecting = false
@@ -51,8 +53,8 @@ local function connectToLauncher()
 			TCPLauncherSocket = socket.tcp()
 			TCPLauncherSocket:setoption("keepalive", true)
 			TCPLauncherSocket:settimeout(0) -- Set timeout to 0 to avoid freezing
-			TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
 		end
+		TCPLauncherSocket:connect((settings.getValue("launcherIp") or '127.0.0.1'), (settings.getValue("launcherPort") or 4444)+1)
 		M.send('A') -- will succeed once handshake completes, setting launcherConnected=true
 	else
 		log('W', 'connectToLauncher', 'Launcher already connected!')
@@ -81,7 +83,8 @@ local function sendData(data) -- TODO currently the socket keeps retrying indefi
 	-- if not connected return
 	if not TCPLauncherSocket then return end
 	local header = ffi.string(ffi.new("uint32_t[?]", 4, #data), 4)
-	local packet = header .. data
+	sendStringBuff:reset():put(header,data)
+	local packet = sendStringBuff:tostring()
 
 	local retries = 1
 
@@ -288,7 +291,7 @@ end
 -- @tparam string data - The data to be sent with the event
 -- @usage TriggerServerEvent(`<name>`, `<data>`)
 function TriggerServerEvent(name, data)
-	M.send('E:'..name..':'..data)
+	M.send(MPNetworkHelpers.generatePacketBuffer('E',name,data))
 end
 
 --- Triggers a local client event with the specified name and data.
@@ -296,7 +299,7 @@ end
 -- @tparam string data - The data to be sent with the event
 -- @usage `TriggerClientEvent(`<name>`, `<data>`)
 function TriggerClientEvent(name, data)
-	handleEvents(':'..name..':'..data)
+	handleEvents(':'..name..':'..data) --TODO: make a string.match bypass
 end
 
 --- Adds an event handler for the specified event name and function.
@@ -446,7 +449,7 @@ end
 -- @tparam integer gameVehicleID - The ID of the game vehicle
 -- @usage MPGameNetwork.onVehicleReady(`<game vehicle id>`)
 local function onVehicleReady(gameVehicleID)
-	local veh = be:getObjectByID(gameVehicleID)
+	local veh = getObjectByID(gameVehicleID)
 	if not veh then
 		log('R', 'onVehicleReady', 'Vehicle does not exist!')
 		return

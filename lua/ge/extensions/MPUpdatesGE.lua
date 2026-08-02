@@ -46,6 +46,7 @@ end
 -- @param dt float
 local function onUpdate(dt)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+		if be:getObjectCount() == 0 then return end
 		nodesTimer = nodesTimer + dt
 		if nodesTimer >= nodesTickrate then
 			nodesTimer = (nodesTimer - nodesTickrate) % nodesTickrate

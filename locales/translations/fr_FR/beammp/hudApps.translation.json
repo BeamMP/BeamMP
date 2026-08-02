@@ -1,10 +1,11 @@
 {
-    "ui.apps.beammp.playerlist.players": "Players",
-    "ui.apps.beammp.playerlist.copyname": "Copy name",
-    "ui.apps.beammp.playerlist.deleteAllVehicles": "Delete all vehicles",
-    "ui.apps.beammp.playerlist.queueEvents": "Queue events",
-    "ui.apps.beammp.playerlist.switchCameraTo": "Switch camera to",
-    "ui.apps.beammp.playerlist.openProfile": "Open profile",
-    "ui.apps.beammp.playerlist.restoreVehicles": "Queue deleted vehicles",
-    "ui.apps.beammp.playerlist.error": "No players… something is wrong"
+  "ui.apps.categories.beammp": "BeamMP",
+  "ui.apps.beammp.playerlist.players": "Joueurs",
+  "ui.apps.beammp.playerlist.copyname": "Copier le nom",
+  "ui.apps.beammp.playerlist.deleteAllVehicles": "Supprimer tous les véhicules",
+  "ui.apps.beammp.playerlist.queueEvents": "Événements en file d'attente",
+  "ui.apps.beammp.playerlist.switchCameraTo": "Changer de caméra vers",
+  "ui.apps.beammp.playerlist.openProfile": "Ouvrir le profil",
+  "ui.apps.beammp.playerlist.restoreVehicles": "Véhicules supprimés de la file d'attente",
+  "ui.apps.beammp.playerlist.error": "Aucun joueur… il y a un problème."
 }

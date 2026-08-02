@@ -1,0 +1,9 @@
+{
+  "ui.apps.categories.beammp": "BeamMP",
+  "ui.apps.beammp.playerlist.players": "Oyuncular",
+  "ui.apps.beammp.playerlist.copyname": "Adı kopyala",
+  "ui.apps.beammp.playerlist.deleteAllVehicles": "Tüm araçları sil",
+  "ui.apps.beammp.playerlist.queueEvents": "Sıra olayları",
+  "ui.apps.beammp.playerlist.openProfile": "Profili aç",
+  "ui.apps.beammp.playerlist.error": "Hiç oyuncu yok… bir terslik var"
+}

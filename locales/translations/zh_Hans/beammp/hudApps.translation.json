@@ -1,10 +1,11 @@
 {
-    "ui.apps.beammp.playerlist.players": "Players",
-    "ui.apps.beammp.playerlist.copyname": "Copy name",
-    "ui.apps.beammp.playerlist.deleteAllVehicles": "Delete all vehicles",
-    "ui.apps.beammp.playerlist.queueEvents": "Queue events",
-    "ui.apps.beammp.playerlist.switchCameraTo": "Switch camera to",
-    "ui.apps.beammp.playerlist.openProfile": "Open profile",
-    "ui.apps.beammp.playerlist.restoreVehicles": "Queue deleted vehicles",
-    "ui.apps.beammp.playerlist.error": "No players… something is wrong"
+  "ui.apps.categories.beammp": "BeamMP",
+  "ui.apps.beammp.playerlist.players": "玩家",
+  "ui.apps.beammp.playerlist.copyname": "复制昵称",
+  "ui.apps.beammp.playerlist.deleteAllVehicles": "删除所有车辆",
+  "ui.apps.beammp.playerlist.queueEvents": "事件队列",
+  "ui.apps.beammp.playerlist.switchCameraTo": "切换摄像机至",
+  "ui.apps.beammp.playerlist.openProfile": "打开配置",
+  "ui.apps.beammp.playerlist.restoreVehicles": "删除车辆队列",
+  "ui.apps.beammp.playerlist.error": "没有玩家...可能出问题了喵"
 }

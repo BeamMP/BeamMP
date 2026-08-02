@@ -15,7 +15,7 @@ local M = {}
 --- Teleports the players vehicle to a specified position.
 --- @param targetPos vec3 The target position to teleport the player to. Format: {x, y, z}
 local function tpPlayerToPos(targetPos)
-	local activeVehicle = be:getPlayerVehicle(0)
+	local activeVehicle = getPlayerVehicle(0)
 
 	if activeVehicle then
 

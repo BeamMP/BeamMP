@@ -14,6 +14,8 @@ local ignitionLevel
 local lastignitionLevel
 local spawnVehicleIgnitionLevel
 local devices = powertrain.getDevices()
+
+local hasHydraulicCylinders = false
 -- ============= VARIABLES =============
 
 
@@ -184,10 +186,18 @@ end
 local function check()
 	getPowerTrainData()
 	getEngineData()
+	if hasHydraulicCylinders then
+		MPPowertrainHydrosVE.getHydroBeams() -- tick hydraulicCylinder here so we don't waste GE > VE queues for vehicles that don't have them
+	end
+end
+
+local function setHasHydraulicCylinders()
+	hasHydraulicCylinders = true
 end
 
 M.check				  = check
 M.applyLivePowertrain = applyLivePowertrain
+M.setHasHydraulicCylinders = setHasHydraulicCylinders
 
 M.getEngineData = getEngineData
 M.applyEngineData = applyEngineData

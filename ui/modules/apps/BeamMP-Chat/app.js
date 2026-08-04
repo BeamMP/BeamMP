@@ -9,6 +9,7 @@ let lastSentMessage = "";
 let lastMsgId = 0;
 let newChatMenu = false;
 import('/ui/lib/ext/purify.min.js')
+import('/ui/ui-vue/mods/BeamMP/shared/textFormat.js')
 app.directive('beammpChat', [function () {
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-Chat/app.html',
@@ -266,86 +267,8 @@ async function showChat() {
 
 
 function formatChatMessage(string) {
-    const blockedTags = new Set(['script', 'iframe', 'form', 'input', 'button', 'a']);
-    
-    const dangerousAttributePattern = /^(?:on.*|(?:form).*|action)$/i;
-
-    function isSafeHtml(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        
-        const elements = div.getElementsByTagName('*');
-        for (let element of elements) {
-            if (blockedTags.has(element.tagName.toLowerCase())) {
-                return false;
-            }
-            
-            for (let attr of element.attributes) {
-                if (dangerousAttributePattern.test(attr.name) || 
-                    /javascript:|data:/i.test(attr.value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    if (string.startsWith("Server: ")) {
-        const messageContent = string.substring(8);
-        if (messageContent.includes('<') && messageContent.includes('>')) {
-            if (isSafeHtml(messageContent)) {
-                return "Server: " + messageContent;
-            }
-        }
-    }
-
-    let result = '';
-    let currentText = '';
-    let classes = new Set();
-
-    string = DOMPurify.sanitize(string);
-    const tokens = string.split(/(\^.)/g);
-
-    const flush = () => {
-        if (!currentText) return;
-        const classList = Array.from(classes);
-        result += classList.length
-            ? `<span class="${classList.join(' ')}">${currentText}</span>`
-            : currentText;
-        currentText = '';
-    };
-
-    for (let i = 0; i < tokens.length; i++) {
-		const token = tokens[i];
-		const nextToken = tokens[i+1]?.trim() || '';
-		if (/^\^.$/.test(token)) {
-			flush();
-			if (token === '^r') {
-				classes.clear();
-			} else if (token === '^p') {
-				currentText += '<br>';
-			} else if (token === '^*') {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if(cls) classes.add(cls);
-				if (iconsOrig[nextToken]) {
-					currentText = iconsOrig[nextToken].glyph
-				};
-			} else {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if (cls?.startsWith('color-')) {
-					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
-					classes.add(cls);
-				} else if (cls) {
-					classes.add(cls);
-				}
-			}
-		} else if (tokens[i-1]!='^*') {
-			currentText += token;
-		}
-	}
-
-    flush();
-    return result;
+	if (!globalThis.beammpFormatText) return string;
+	return globalThis.beammpFormatText(string, { allowServerHtml: true });
 }
 
 // -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //

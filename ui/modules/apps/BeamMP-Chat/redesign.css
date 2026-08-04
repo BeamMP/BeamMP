@@ -42,6 +42,10 @@ ul#chat-list {
     transform: translateY(-2px);
 }
 
+span[style*="background-color"] {
+    text-shadow: none;
+}
+
 .chat-message-timestamp {
     font-size: 0.75em;
     line-height: 0.75em;

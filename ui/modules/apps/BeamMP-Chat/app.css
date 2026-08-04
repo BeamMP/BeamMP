@@ -57,6 +57,10 @@
     background: rgba(var(--bng-cool-gray-800-rgb), 0.7);
 }
 
+.beammpChat span[style*="background-color"] {
+    text-shadow: none;
+}
+
 .beammpChat .chat-message:hover {
     border-left-color: var(--bng-orange-500);
     background: rgba(var(--bng-cool-gray-700-rgb), 0.82);

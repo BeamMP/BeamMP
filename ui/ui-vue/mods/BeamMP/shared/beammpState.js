@@ -1,5 +1,6 @@
 import { computed, ref } from "vue"
 import { useBridge } from "@/bridge"
+import { stripBeamMPFormatting } from "./textFormat.js"
 
 // useBridge is a Vue composable, so initialise it from useBeamMPState() while
 // component setup is active, then retain its API for this shared state module.
@@ -221,7 +222,7 @@ function saveFilters() {
 }
 
 function stripCustomFormatting(name = "") {
-  return name.replace(/\^[0-9a-frlmnop*]/gi, "")
+  return stripBeamMPFormatting(name)
 }
 
 function smoothMapName(map = "") {

@@ -298,7 +298,7 @@ import { BngButton, BngInput } from "@/common/components/base"
 import { vBngTextInput } from "@/common/directives"
 import { useBeamMPState } from "../shared/beammpState.js"
 import { icons as bngIcons } from "/ui/ui-vue/src/assets/fonts/bngIcons/bngIcons.js"
-import { BEAMMP_TEXT_STYLE_MAP } from "../shared/constants.js"
+import { formatBeamMPText } from "../shared/textFormat.js"
 
 const route = useRoute()
 const filtersRail = ref(null)
@@ -542,79 +542,18 @@ function onServersScroll(event) {
   }
 }
 
-function escapeHtml(value = "") {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
+function renderServerTitleIcon(name) {
+  const icon = bngIcons?.[name]
+  if (!icon?.fileSvg) return null
+  return {
+    html: `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${icon.fileSvg}" alt="" aria-hidden="true" />`,
+  }
 }
 
 function serverTitleMarkup(server) {
-  const raw = String(server?.sname || server?.strippedName || "")
-  if (!raw) return ""
-
-  const tokens = raw.split(/(\^.)/g)
-  let result = ""
-  let currentText = ""
-  const activeClasses = new Set()
-
-  const flushText = () => {
-    if (!currentText) return
-    const classList = Array.from(activeClasses)
-    const encoded = escapeHtml(currentText)
-    result += classList.length
-      ? `<span class="${classList.join(" ")}">${encoded}</span>`
-      : encoded
-    currentText = ""
-  }
-
-  for (let index = 0; index < tokens.length; index += 1) {
-    const token = tokens[index]
-    const nextToken = (tokens[index + 1] || "").trim()
-
-    if (/^\^.$/.test(token)) {
-      flushText()
-
-      if (token === "^r") {
-        activeClasses.clear()
-        continue
-      }
-
-      if (token === "^p") {
-        result += "<br>"
-        continue
-      }
-
-      if (token === "^*") {
-        const icon = bngIcons?.[nextToken]
-        if (icon?.fileSvg) {
-          result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${icon.fileSvg}" alt="" aria-hidden="true" />`
-        }
-        index += 1
-        continue
-      }
-
-      const mappedClass = BEAMMP_TEXT_STYLE_MAP[token]
-      if (mappedClass?.startsWith("color-")) {
-        for (const className of [...activeClasses]) {
-          if (className.startsWith("color-")) {
-            activeClasses.delete(className)
-          }
-        }
-        activeClasses.add(mappedClass)
-      } else if (mappedClass) {
-        activeClasses.add(mappedClass)
-      }
-      continue
-    }
-
-    currentText += token
-  }
-
-  flushText()
-  return result
+  return formatBeamMPText(String(server?.sname || server?.strippedName || ""), {
+    renderIcon: renderServerTitleIcon,
+  })
 }
 
 function playerNames(server) {

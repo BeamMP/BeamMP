@@ -436,7 +436,7 @@ local function applyElectrics(data)
 		end
 
 		-- Transbrake syncing
-		if decodedData.transbrake and electrics.values.transbrake ~= decodedData.transbrake then
+		if decodedData.transbrake ~= nil and electrics.values.transbrake ~= decodedData.transbrake then
 			controller.getControllerSafe("transbrake").setTransbrake(decodedData.transbrake)
 		end
 

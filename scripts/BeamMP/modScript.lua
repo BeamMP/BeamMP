@@ -43,6 +43,12 @@ setExtensionUnloadMode("MPCoreNetwork", "manual")
 load("MPConfig")
 setExtensionUnloadMode("MPConfig", "manual")
 
+load("MPTimeSyncVehicleTracker")
+setExtensionUnloadMode("MPTimeSyncVehicleTracker", "manual")
+
+load("MPTimeSync")
+setExtensionUnloadMode("MPTimeSync", "manual")
+
 load("MPGameNetwork")
 setExtensionUnloadMode("MPGameNetwork", "manual")
 

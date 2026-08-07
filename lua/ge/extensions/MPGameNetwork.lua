@@ -440,6 +440,7 @@ local HandleNetwork = {
 	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
 	['n'] = function(params) local category, icon, message = params:match("([^:]+):?(.-):(.+)") UI.showNotification(message, category, icon) end, -- Custom UI notification
 	['D'] = function(params) spawnUiDialog(jsonDecode(params)) end, -- Custom UI Dialog
+	['t'] = function(params, dtRaw) MPTimeSync.receivePing(params, dtRaw) end,
 }
 
 
@@ -458,7 +459,7 @@ local recvState = {
 --- Tries to receive data from the Launcher every tick from the gameengine and handles the launcher <-> game heartbeat.
 -- @tparam integer dt delta time
 -- @usage INTERNAL ONLY / GAME SPECIFIC
-local function onUpdate(dt)
+local function onUpdate(dtReal, dtSim, dtRaw)
 	--====================================================== DATA RECEIVE ======================================================
 	if launcherConnected then
 		if TCPLauncherSocket ~= nop then
@@ -485,7 +486,7 @@ local function onUpdate(dt)
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)
-				HandleNetwork[code](data)
+				HandleNetwork[code](data, dtRaw)
 
 				if MPDebug then MPDebug.packetReceived(#received) end
 			end
@@ -497,7 +498,7 @@ local function onUpdate(dt)
 	end
 	-- retry proxy connection while handshake is still completing
 	if isConnecting and not launcherConnected and TCPLauncherSocket then
-		connectRetryTimer = connectRetryTimer + dt
+		connectRetryTimer = connectRetryTimer + dtReal
 		if connectRetryTimer >= 0.25 then
 			connectRetryTimer = 0
 			M.send('A')

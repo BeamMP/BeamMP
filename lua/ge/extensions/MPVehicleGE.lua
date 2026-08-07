@@ -2864,6 +2864,10 @@ local function onVehicleReady(gameVehicleID)
 	end
 
 	MPGameNetwork.onVehicleReady(gameVehicleID)
+
+	if vehicles[vehiclesMap[gameVehicleID]] then
+		extensions.hook("onBeamMPVehicleReady",gameVehicleID,vehicles[vehiclesMap[gameVehicleID]],veh)
+	end
 end
 
 

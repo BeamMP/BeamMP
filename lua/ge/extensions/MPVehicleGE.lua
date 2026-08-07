@@ -2871,6 +2871,12 @@ local function onVehicleReady(gameVehicleID)
 	if vehiclesMap[gameVehicleID] then
 		veh:queueLuaCommand("MPVehicleVE.setServerID(mime.unb64(\'".. MPHelpers.b64encode(vehiclesMap[gameVehicleID]) .."\'))")
 	end
+
+	MPGameNetwork.onVehicleReady(gameVehicleID)
+
+	if vehicles[vehiclesMap[gameVehicleID]] then
+		extensions.hook("onBeamMPVehicleReady",gameVehicleID,vehicles[vehiclesMap[gameVehicleID]],veh)
+	end
 end
 
 

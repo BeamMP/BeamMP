@@ -314,10 +314,13 @@ local function updateGFX(dt)
 	end
 
 	-- Calculate back to local time using the remote timestamp and the smoothed time difference
-	local calcLocalTime = remoteData.timer + timeOffset
+	--local calcLocalTime = remoteData.timer + timeOffset
 
 	-- How far ahead the position needs to be predicted
-	local predictTime = min(max(timer - calcLocalTime, -maxPredict), maxPredict)
+	--local predictTime = min(max(timer - calcLocalTime, -maxPredict), maxPredict)
+
+	--TODO add fallback if time sync does not exist on the server
+	local predictTime = min(max(MPTimeSyncVE.getServerSimTime() - remoteData.timer, -maxPredict), maxPredict)
 
 	-- More prediction = slower smoothing
 	local smootherDT = dt / guardZero(abs(predictTime))
@@ -490,7 +493,7 @@ local function getVehicleRotation()
 	posSendTable.rvel[1] = rvel.x
 	posSendTable.rvel[2] = rvel.y
 	posSendTable.rvel[3] = rvel.z
-	posSendTable.tim = timer
+	posSendTable.tim = MPTimeSyncVE.getServerSimTime(),--timer
 	posSendTable.ping = ownPing + lastDT
 
 	posSendBuffer:reset()

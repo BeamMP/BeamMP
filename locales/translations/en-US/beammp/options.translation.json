@@ -85,5 +85,7 @@
     "ui.options.beammp.useUiAppRedesign": "HUD App Style",
     "ui.options.beammp.useUiAppRedesign.tooltip": "Choose the visual style for BeamMP's HUD apps.",
     "ui.options.beammp.useUiAppRedesign.redesign": "Redesign",
-    "ui.options.beammp.useUiAppRedesign.old": "Old"
+    "ui.options.beammp.useUiAppRedesign.old": "Old",
+    "ui.options.beammp.disableTimeSync": "Disable Simulation time synchronization",
+    "ui.options.beammp.disableTimeSync.tooltip": "Disable the speed modifier that keeps simulation time synced to the Server time, Only disable this if your game speed is having issues,\n\n disabling time sync will likely make the game run slower and loose a lot of lap time when racing \n\nIt may also make prediction more jumpy"
 }

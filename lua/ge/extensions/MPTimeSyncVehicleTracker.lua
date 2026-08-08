@@ -16,7 +16,7 @@ local noVECounter = 0
 
 local simTimeVehID -- this is the vehicleID of the vehicle i use to send the accurate simulation Time to GE, dtSim in GE seems to drift at low frame rates
 
-local function checkTrackingVehicle(dtSim, simTime) --TODO make sure this doesn't continuously retry if all vehicles fail, maybe it can be done from events only?
+local function checkTrackingVehicle(dtSim) --TODO make sure this doesn't continuously retry if all vehicles fail, maybe it can be done from events only?
 	if dtSim ~= 0 and lastDTSim ~= 0 and lastVeSimTime == veSimTime then
 		local vehCount = be:getObjectCount()--noVECounter
 		if foundCarLastFrame or framesSinceNewCar < 5 then
@@ -47,7 +47,7 @@ local function checkTrackingVehicle(dtSim, simTime) --TODO make sure this doesn'
 				end
 			end
 		end
-		veSimTime = simTime
+		veSimTime = veSimTime + dtSim
 	else
 		noVECounter = 0
 	end
@@ -88,11 +88,15 @@ end
 local function onBeamMPVehicleReady(vehID,MPveh,vehOBJ)
 	if getVehicleByGameID(vehID) then
 		local veh = getObjectByID(vehID)
-		if veh and simTimeVehID == vehID then
-			veh:queueLuaCommand("if MPTimeSyncVE then MPTimeSyncVE.isSimTimeTracker = true end")
+		if veh then
+			if MPTimeSync.hasReceivedPing then
+				veh:queueLuaCommand("if MPTimeSyncVE then MPTimeSyncVE.useTimeSync = true end")
+			end
+			if simTimeVehID == vehID then
+				veh:queueLuaCommand("if MPTimeSyncVE then MPTimeSyncVE.isSimTimeTracker = true end")
+			end
 		end
 	end
-
 	--if next(MPVehicleGE.getOwnMap()) == nil then
 	--	tempShiftTime = spectateTimeShift
 	--else

@@ -12,6 +12,7 @@ local timeOffsets = ffi.new("timeSyncStruct[1]")
 local timeOffsetsSize = ffi.sizeof("timeSyncStruct")
 
 M.isSimTimeTracker = false
+M.useTimeSync = false
 
 local simTimeOffset = 0
 local cpuTimeOffset = 0
@@ -35,7 +36,7 @@ local function getServerSimTime()
 end
 
 local function getSimSpeed()
-	return timeShiftSpeed
+	return (1 - timeShiftSpeed)
 end
 
 local function updateSimTime()
@@ -46,10 +47,6 @@ local function updateSimTime()
     simTimeOffset = timeOffsets[0].simTimeOffset
     cpuTimeOffset = timeOffsets[0].cpuTimeOffset
     timeShiftSpeed = timeOffsets[0].timeShiftSpeed
-
-	--dump("simTimeOffset",simTimeOffset)
-	--dump("cpuTimeOffset",cpuTimeOffset)
-	--dump("timeShiftSpeed",timeShiftSpeed)
 end
 
 local function updateGFX(dt)

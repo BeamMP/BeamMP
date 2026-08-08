@@ -73,7 +73,7 @@ local tpVelSmoother = newTemporalSmoothingNonLinear(2,1000)  -- Smoother for fil
 local tpRvelSmoother = newTemporalSmoothingNonLinear(2,1000) -- Smoother for filtering low rotation velocities during collisions
 
 -- Prediction
-local maxPredict = 0.3         -- Maximum prediction limit (s)
+local maxPredict = 10.5         -- Maximum prediction limit (s)
 local packetTimeout = 0.1      -- Stop prediction if no packet received within this time (s)
 
 -- Smoothing
@@ -229,7 +229,7 @@ local function updateRemoteData()
 		local pr = jsonDecode(jsonData)
 		local tim  = pr.tim
 		local ping = pr.ping
-		local simspeedfraction = 1/simSpeedReal
+		local simspeedfraction = 1/(simSpeedReal*MPTimeSyncVE.getSimSpeed())
 
 		if not tim then return end
 		if remoteData.timer > tim then return end
@@ -339,7 +339,7 @@ local function updateGFX(dt)
 	rot:set(remoteData.rot * quatFromEuler(rotAdd:xyz()))
 	rvel:set(push3(remoteRvel) + push3(remoteRacc)*predictTime)
 
-	--[[
+	---[[
 	-- Debug
 	debugDrawer:drawSphere(0.3, remoteData.pos, color(0,0,255,200))
 	debugDrawer:drawLine(remoteData.pos, (remoteData.pos + vec3(0,-5,0):rotated(remoteData.rot)), color(0,0,255,200))
@@ -479,8 +479,8 @@ local function getVehicleRotation()
 	vel:setAdd(cog)
 	if vel ~= vel then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
 
-	vel:setScaled(simSpeedReal)
-	rvel:setScaled(simSpeedReal)
+	vel:setScaled(simSpeedReal * MPTimeSyncVE.getSimSpeed())
+	rvel:setScaled(simSpeedReal * MPTimeSyncVE.getSimSpeed())
 
 	local tim = MPTimeSyncVE.useTimeSync and MPTimeSyncVE.getServerSimTime() or timer
 

@@ -204,6 +204,7 @@ local function onReset()
 	remoteData.racc:set(0,0,0)
 	remoteData.timer = -1
 	framesSinceReset = 0
+	tpTimer = 0
 end
 
 
@@ -245,9 +246,9 @@ local function updateRemoteData()
 		remoteData.acc:setScaled(1/remoteDT)
 		limitVecLength(remoteData.acc, maxAcc)
 		remoteData.racc:set(rvel)
-		remoteData.acc:setSub(remoteData.rvel)
-		remoteData.acc:setScaled(1/remoteDT)
-		limitVecLength(remoteData.acc, maxRacc)
+		remoteData.racc:setSub(remoteData.rvel)
+		remoteData.racc:setScaled(1/remoteDT)
+		limitVecLength(remoteData.racc, maxRacc)
 		remoteData.vel:set(vel)
 		remoteData.vel:setScaled(simspeedfraction)
 		remoteData.rvel:set(rvel)

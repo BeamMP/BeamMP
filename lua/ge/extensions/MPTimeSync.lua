@@ -8,8 +8,7 @@ local floor = math.floor
 ----options----
 
 local allowSlowMotion = true
-local speedShiftEnabled = false
-
+local speedShiftEnabled = true
 
 ffi.cdef [[
 	typedef struct {
@@ -31,16 +30,20 @@ local timeData = ffi.new("timeStruct[1]")
 local timeOffsets = ffi.new("timeSyncStruct[1]")
 local timeOffsetsSize = ffi.sizeof("timeSyncStruct")
 
+M.hasReceivedPing = false
+
+local isInReplay = false
+
 local queuedSimSpeed = 0
 local veSimTime = 0
 
 local pingCount = 0
 local pingTimer = 0
-local pingSendRate = 1/2
+local pingSendRate = 1
 
 local targetTimeOffset = 0
 local timeOffsetCPU = 0
-local lastTimeOffsetCPU = 0
+local lastTimeOffsetCPU = -1
 
 local simTimeError = 0
 
@@ -48,8 +51,6 @@ local timeOffsetSim = 0
 local lastTimeOffsetSim = 0
 local timeOffsetSimSmooth = 0
 local timeOffsetSimChangeRate = 0
-
-local BeamMPSimTime = 0
 
 local serverTimeRecOffsetSmoother = newTemporalSmoothingNonLinear(1,1)
 local serverTimeOffsetSmoother = newTemporalSmoothingNonLinear(0.03,0.03)
@@ -83,7 +84,7 @@ function getBeamMPServerTime()
 end
 
 function getBeamMPSimTime()
-	return (veSimTime - timeOffsetSimSmooth) --+ tempShiftTimeSmoother:get(tempShiftTime,lastDT) -- 0.2
+	return veSimTime - timeOffsetSimSmooth --+ tempShiftTimeSmoother:get(tempShiftTime,lastDT) -- 0.2
 end
 
 local function setSimOffset()
@@ -95,11 +96,11 @@ local function setSimOffset()
 	lastTimeOffsetSim = timeOffsetSim
 	timeOffsetSimChangeRate = 0
 
-	BeamMPSimTime = getBeamMPSimTime()
+	MPSpeedShift.reset()
 	return timeOffsetSim-lastOffset
 end
 
-local function sendOffsetsToVE(vehID)
+local function sendOffsetsToVE()
     timeOffsets[0].simTimeOffset = timeOffsetSimSmooth
     timeOffsets[0].cpuTimeOffset = timeOffsetCPU
     timeOffsets[0].timeShiftSpeed = timeOffsetSimChangeRate
@@ -108,11 +109,9 @@ local function sendOffsetsToVE(vehID)
 end
 
 local function checkVehicleTime(dtSim)
-    local time = 0
     if MPTimeSyncVehicleTracker then
-        time = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim, BeamMPSimTime, veSimTime)
+        veSimTime = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim)
     end
-    return time
 end
 
 local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
@@ -160,7 +159,7 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	local decoupledTimeShift = 1
 	local lowFPStimeShift = 1
 
-	if targetGameSpeed ~= 1 or maxSpeedSmooth < 1 and calculatedGameSpeed < 1 then-- prevent prediction runaway if fps is lower than 20, aka game can't run full speed, this may cause issues with competitive timers if they use this mod's server or sim time, will need to investigate
+	if targetGameSpeed ~= 1 or maxSpeedSmooth < 1 and calculatedGameSpeed < 1 then-- prevent prediction runaway if fps is lower than 20, aka game can't run full speed
 		local roundedGameSpeed = (floor((calculatedGameSpeed*1000)+0.5)/1000)
 		local gameSpeedPercent = floor(roundedGameSpeed*100)
 		if avgSpeed < 1 and gameSpeedPercent < 100 then
@@ -182,7 +181,7 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 
 	timeShift = (dtRaw*max((1-targetGameSpeed),(1-lowFPStimeShift)))
 
-	if not speedShiftEnabled then
+	if settings.getValue("disableTimeSync") then--speedShiftEnabled then
 		decoupledTimeShift = simTimeError/5
 		timeShift = timeShift + decoupledTimeShift*dtRaw
 	end
@@ -190,14 +189,17 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	if timeShift ~= 0 then
 		timeOffsetSim = timeOffsetSim - timeShift
 	end
+	if not settings.getValue("disableTimeSync") and not isInReplay then--speedShiftEnabled then
+		MPSpeedShift.syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
+	end
 end
 
 local function timeSyncUpdate(dtReal, dtSim, dtRaw)
-    veSimTime = checkVehicleTime(dtSim)
+    checkVehicleTime(dtSim)
 	timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw)
 
 	local timeOffsetError = abs(timeOffsetCPU - targetTimeOffset)
-	if timeOffsetError > 1 or pingCount == 15 then
+	if timeOffsetError > 1 or pingCount == 5 then
 		serverTimeOffsetSmoother:set(targetTimeOffset)
         timeOffsetCPU = targetTimeOffset
 		setSimOffset()
@@ -248,6 +250,11 @@ local function receivePing(data, dtRaw)
 
 	pingCount = pingCount + 1
 
+	if not M.hasReceivedPing then
+		be:queueAllObjectLua("if MPTimeSyncVE then MPTimeSyncVE.useTimeSync = true end")
+	end
+	M.hasReceivedPing = true
+
 	local responseTime = math.max(0,os:clockhp() - gameTime - dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
 
 	local rawOffset = os:clockhp() - serverTime - dtRaw + responseTime/2 -- but dtRaw needs to also be subtracted here to get the correct offset
@@ -260,23 +267,42 @@ local function receivePing(data, dtRaw)
 end
 
 local function onUpdate(dtReal, dtSim,dtRaw)
+	if not MPGameNetwork.launcherConnected() then return end
 	pingTimer = pingTimer + dtRaw
 	if pingTimer >= pingSendRate then
 		pingTimer = 0
 		sendPing()
 	end
-
+	if not M.hasReceivedPing and pingCount < 2 then return end
     timeSyncUpdate(dtReal, dtSim, dtRaw)
 end
 
-local function onExtensionUnloaded()
-	be:setSimulationTimeScale(simTimeAuthority.get()*(be:getEnabled() and 1 or 0))
-	be:setPhysicsSpeedFactor(0)
-	be:queueAllObjectLua("if positionVE then positionVE.enableSimTimeTracking = false end")
+local function checkIfInReplay()
+	if core_replay.state.state == "playback" then
+		isInReplay = true
+	else
+		isInReplay = false
+	end
 end
 
+local function onExtensionLoaded()
+	checkIfInReplay()
+end
+
+local function onBeamMPServerLeave()
+	M.hasReceivedPing = false
+
+	timeOffsetSimSmooth = 0
+	timeOffsetCPU = 0
+	timeOffsetSimChangeRate = 0
+
+	sendOffsetsToVE()
+end
+
+M.onReplayStateChanged = checkIfInReplay
+M.onExtensionLoaded = onExtensionLoaded
+M.onBeamMPServerLeave = onBeamMPServerLeave
 M.receivePing = receivePing
 M.onUpdate = onUpdate
-M.onExtensionUnloaded = onExtensionUnloaded
 
 return M

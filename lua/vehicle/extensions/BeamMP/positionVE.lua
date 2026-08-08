@@ -306,21 +306,23 @@ local function updateGFX(dt)
 		lastVehVel = vehVel:copy()
 	end
 
-	-- Smoothed difference between local and remote timestamps
-	local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
-	if abs(timeOffset - remoteData.timeOffset) > 1 then
-		timeOffsetSmoother:set(remoteData.timeOffset)
-		timeOffset = remoteData.timeOffset
+	local predictTime = 0
+
+	if MPTimeSyncVE.useTimeSync then--MPTimeSyncVE.getSimSpeed()
+		predictTime = min(max(MPTimeSyncVE.getServerSimTime() - remoteData.timer, -maxPredict), maxPredict)
+	else
+		-- Smoothed difference between local and remote timestamps
+		local timeOffset = timeOffsetSmoother:get(remoteData.timeOffset, dt)
+		if abs(timeOffset - remoteData.timeOffset) > 1 then
+			timeOffsetSmoother:set(remoteData.timeOffset)
+			timeOffset = remoteData.timeOffset
+		end
+		-- Calculate back to local time using the remote timestamp and the smoothed time difference
+		local calcLocalTime = remoteData.timer + timeOffset
+
+		-- How far ahead the position needs to be predicted
+		predictTime = min(max(timer - calcLocalTime, -maxPredict), maxPredict)
 	end
-
-	-- Calculate back to local time using the remote timestamp and the smoothed time difference
-	--local calcLocalTime = remoteData.timer + timeOffset
-
-	-- How far ahead the position needs to be predicted
-	--local predictTime = min(max(timer - calcLocalTime, -maxPredict), maxPredict)
-
-	--TODO add fallback if time sync does not exist on the server
-	local predictTime = min(max(MPTimeSyncVE.getServerSimTime() - remoteData.timer, -maxPredict), maxPredict)
 
 	-- More prediction = slower smoothing
 	local smootherDT = dt / guardZero(abs(predictTime))
@@ -480,6 +482,8 @@ local function getVehicleRotation()
 	vel:setScaled(simSpeedReal)
 	rvel:setScaled(simSpeedReal)
 
+	local tim = MPTimeSyncVE.useTimeSync and MPTimeSyncVE.getServerSimTime() or timer
+
 	posSendTable.pos[1] = pos.x
 	posSendTable.pos[2] = pos.y
 	posSendTable.pos[3] = pos.z
@@ -493,7 +497,7 @@ local function getVehicleRotation()
 	posSendTable.rvel[1] = rvel.x
 	posSendTable.rvel[2] = rvel.y
 	posSendTable.rvel[3] = rvel.z
-	posSendTable.tim = MPTimeSyncVE.getServerSimTime(),--timer
+	posSendTable.tim = tim
 	posSendTable.ping = ownPing + lastDT
 
 	posSendBuffer:reset()

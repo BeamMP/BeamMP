@@ -255,9 +255,12 @@ local function receivePing(data, dtRaw)
 	end
 	M.hasReceivedPing = true
 
-	local responseTime = math.max(0,os:clockhp() - gameTime - dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
+--	local responseTime = math.max(0,os:clockhp() - gameTime - dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
+--
+--	local rawOffset = os:clockhp() - serverTime - dtRaw + responseTime/2 -- but dtRaw needs to also be subtracted here to get the correct offset
 
-	local rawOffset = os:clockhp() - serverTime - dtRaw + responseTime/2 -- but dtRaw needs to also be subtracted here to get the correct offset
+	local responseTime = os:clockhp() - gameTime
+	local rawOffset = os:clockhp() - (serverTime + (responseTime/2))
 
 	if abs(targetTimeOffset - rawOffset) > 1 or pingCount == 1 then
 		serverTimeRecOffsetSmoother:set(rawOffset)

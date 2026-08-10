@@ -297,7 +297,6 @@ function sendChat() {
 }
 
 function onInputKeydown(event) {
-	console.log(event)
   if (event.key === "ArrowUp") {
     inputText.value = lastSentMessage.value
     nextTick(() => {

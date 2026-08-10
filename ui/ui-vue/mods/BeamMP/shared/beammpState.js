@@ -419,6 +419,17 @@ function selectServer(serverId) {
   state.selectedServerId.value = state.selectedServerId.value === serverId ? "" : serverId
 }
 
+function sortServers(by) {
+  const sorted = [...state.servers.value]
+  sorted.sort((a, b) => {
+    if (by === "players") {
+      return (Number(b.players || 0) - Number(a.players || 0)) || a.sortName.localeCompare(b.sortName)
+    }
+    return a.sortName.localeCompare(b.sortName)
+  })
+  state.servers.value = sorted
+}
+
 async function refreshConnectionState() {
   state.loggedIn.value = Boolean(await extensionCall("MPCoreNetwork", "isLoggedIn"))
   state.launcherConnected.value = Boolean(await extensionCall("MPCoreNetwork", "isLauncherConnected"))
@@ -742,6 +753,7 @@ export function useBeamMPState(events) {
     approveSecurityPrompt,
     rejectSecurityPrompt,
     selectServer,
+    sortServers,
     selectedServer,
     showSecurityPrompt,
     setView,

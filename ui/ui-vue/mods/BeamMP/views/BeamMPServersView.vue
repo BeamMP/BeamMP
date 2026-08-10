@@ -30,7 +30,7 @@
               <th>{{ $tt("ui.common.beammp.location") }}</th>
               <th>{{ $tt("ui.common.beammp.title") }}</th>
               <th>{{ $tt("ui.common.beammp.map") }}</th>
-              <th>{{ $tt("ui.common.beammp.players") }}</th>
+              <th @click="sortServers('players')">{{ $tt("ui.common.beammp.players") }}</th>
               <th></th>
             </tr>
           </thead>
@@ -332,6 +332,7 @@ const {
   requestServerList,
   resetFilters,
   selectServer,
+  sortServers,
   setView,
   state,
   updateFilter,

@@ -3,8 +3,10 @@
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
-      <p v-if="state.loginError.value" class="error">{{ state.loginError.value }}</p>
+      <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
 
+      
+        <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription2temp") }}</h2>
       <template v-if="mode === 'account'">
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>
 
@@ -47,7 +49,7 @@
       </template>
 
       <template v-else>
-        <p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>
+        <!--p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>-->
         <div class="actions">
           <BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>
           <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
@@ -68,6 +70,7 @@ import { useBeamMPState } from "../shared/beammpState.js"
 const router = useRouter()
 const username = ref("")
 const password = ref("")
+const hasTriedToLogin = ref(false)
 const mode = ref("guest")
 const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
@@ -90,10 +93,12 @@ function switchToAccount() {
 
 async function submitLogin() {
   await login(username.value, password.value)
+  hasTriedToLogin.value = true
   password.value = ""
 }
 
 async function submitGuest() {
+  hasTriedToLogin.value = true
   await guestLogin()
 }
 
@@ -210,6 +215,7 @@ watch(() => state.loggedIn.value, value => {
 }
 
 .actions {
+  justify-content: center;
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -223,7 +229,8 @@ watch(() => state.loggedIn.value, value => {
 .error {
   margin: 0;
   text-align: center;
-  color: var(--bng-red-500);
+  color: var(--bng-add-red-500);
+
 }
 
 @media (max-width: 680px) {

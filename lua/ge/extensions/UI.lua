@@ -646,13 +646,6 @@ local function clearPauseMenuModButtons()
 	pauseMenuModButtons = {}
 end
 
-local function onHideRadialMenu()
-	if MPCoreNetwork.isMPSession() then
-		log('D', 'onHideRadialMenu', 'Returned to beammp HUD layout')
-		ui_appLayouts.setUsedLayout("beammp")
-	end
-end
-
 
 M.updateLoading = updateLoading
 M.promptAutoJoinConfirmation = promptAutoJoinConfirmation
@@ -680,7 +673,6 @@ M.clearPauseMenuModButtons = clearPauseMenuModButtons
 M.bringToFront = bringToFront
 M.toggleChat = toggleChat
 
-M.onHideRadialMenu = onHideRadialMenu
 M.onClientEndMission = onClientEndMission
 M.onExtensionLoaded = onExtensionLoaded
 M.onUpdate = onUpdate

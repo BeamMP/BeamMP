@@ -2,7 +2,8 @@
 // import bridge and route definitions
 import { useBridge } from "@/bridge"
 import { ROUTE_SOURCE_ID, routeRecords } from "./routes.js"
-import { BEAMMP_ROUTE_NAME } from "./shared/constants.js"
+import { BEAMMP_ROUTE_NAME, BEAMMP_TOS_ROUTE_NAME, BEAMMP_LAUNCHER_ROUTE_NAME } from "./shared/constants.js"
+import { useBeamMPState } from "./shared/beammpState.js"
 import { $translate } from "@/services/translation"
 import { ACCENTS } from "@/common/components/base"
 import { openConfirmation } from "@/services/popup"
@@ -11,6 +12,8 @@ import { openConfirmation } from "@/services/popup"
 const { api, lua, events } = useBridge()
 // note: here we use "low-level" events from the bridge because this file is not a Vue component
 //       so, never forget to unsubscribe from events when the mod is unloaded
+
+const { state } = useBeamMPState()
 
 // mod root directory
 const MOD_ROOT = "/ui/ui-vue/mods/BeamMP"
@@ -107,6 +110,14 @@ async function showBeamMPDialog(options = {}) {
   }
 }
 
+async function isLauncherConnected() {
+	return new Promise(function(resolve, reject) {
+		bngApi.engineLua("MPCoreNetwork.isLauncherConnected()", (data) => {
+			resolve(data);
+		});
+	});
+}
+
 export async function onLoad() {
   events.on("onBeamMPShowVueDialog", showBeamMPDialog)
 
@@ -143,6 +154,28 @@ export async function onLoad() {
     icon: "globeSimplified",
     componentName: `${MOD_ROOT}/cards/BeamMPPauseServerDetailsRedirect.vue`,
   })
+
+  vueRouter.beforeEach(async (to, from) => {
+    if (to.name.startsWith(BEAMMP_ROUTE_NAME)) {
+      var connected = await isLauncherConnected()
+      
+
+      if (!connected) {
+        if (to.name !== BEAMMP_LAUNCHER_ROUTE_NAME) {
+          return { name: BEAMMP_LAUNCHER_ROUTE_NAME }
+        }
+      }
+
+      if (state.tosAccepted.value == false && to.name !== BEAMMP_TOS_ROUTE_NAME) {
+        return { name: BEAMMP_TOS_ROUTE_NAME }
+      }
+
+      if (state.auth.value == null && to.name !== BEAMMP_LOGIN_ROUTE_NAME) {
+        return { name: BEAMMP_LOGIN_ROUTE_NAME }
+      }
+      
+    }
+  }) 
 }
 
 export async function onUnload() {

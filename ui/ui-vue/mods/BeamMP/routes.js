@@ -29,7 +29,7 @@ export const routeRecords = [
       {
         path: "",
         name: BEAMMP_ROUTE_NAME,
-        redirect: { name: BEAMMP_TOS_ROUTE_NAME },
+        redirect: { name: BEAMMP_LAUNCHER_ROUTE_NAME },
         //redirect: { name: BEAMMP_HOME_ROUTE_NAME },
         meta: {
           luaRoute: {

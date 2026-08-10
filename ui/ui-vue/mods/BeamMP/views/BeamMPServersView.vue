@@ -11,7 +11,7 @@
               @update:model-value="onSearch"
             />
             <BngButton class="refresh-btn" @click="requestServerList">{{ $tt("ui.common.beammp.refresh") }}</BngButton>
-            <span class="mod-size-summary">Total Mod Size &lt; {{ maxModSizeLabel }}</span>
+            <span class="mod-size-summary">{{ $tt("ui.beammp.serverBrowser.filters.totalModSize") }} &lt; {{ maxModSizeLabel }}</span>
             <BngButton
               v-if="state.view.value === 'recent'"
               class="clear-recents-btn"
@@ -64,11 +64,11 @@
                 </td>
                 <td>{{ server.mapName }}</td>
                 <td>{{ server.players }}/{{ server.maxplayers }}</td>
-                <td class="details-cell">
+                <!-- <td class="details-cell">
                   <button class="details-button" @click.stop="selectServer(server.id)">
                     {{ state.selectedServerId.value === server.id ? "Hide" : "Details" }}
                   </button>
-                </td>
+                </td>-->
               </tr>
               <tr v-if="state.selectedServerId.value === server.id" class="details-row">
                 <td colspan="5">
@@ -189,7 +189,7 @@
         </section>
 
         <section class="filter-group">
-          <h3>Total Mod Size</h3>
+          <h3>{{ $tt("ui.beammp.serverBrowser.filters.totalModSize") }}</h3>
           <div class="range-row">
             <input
               class="range-input"
@@ -205,7 +205,7 @@
         </section>
 
         <section class="filter-group">
-          <h3>Matching</h3>
+          <h3>{{ $tt("ui.beammp.serverBrowser.filters.matching") }}</h3>
         <label class="match-all">
           <input
             type="checkbox"
@@ -214,8 +214,8 @@
           />
           <span class="checkmark" aria-hidden="true" />
           <span>
-            <strong>Match all</strong>
-            <small>Require every selected filter</small>
+            <strong>{{ $tt("ui.beammp.serverBrowser.filters.matchAll") }}</strong>
+            <small>{{ $tt("ui.beammp.serverBrowser.filters.matchAllSubtext") }}</small>
           </span>
         </label>
         </section>
@@ -786,6 +786,11 @@ onBeforeUnmount(() => {
 .search-input {
   flex: 1 1 22rem;
   min-width: 12rem;
+  text-align: center;
+}
+
+.search-input::placeholder {
+  text-align: center;
 }
 
 .refresh-btn,
@@ -1100,6 +1105,10 @@ onBeforeUnmount(() => {
     padding: 0.26rem 0.42rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     text-align: left;
+  }
+
+  thead th {
+    text-align: center;
   }
 }
 

@@ -1,10 +1,9 @@
 {
-    "ui.apps.beammp.playerlist.players": "Players",
-    "ui.apps.beammp.playerlist.copyname": "Copy name",
-    "ui.apps.beammp.playerlist.deleteAllVehicles": "Delete all vehicles",
-    "ui.apps.beammp.playerlist.queueEvents": "Queue events",
-    "ui.apps.beammp.playerlist.switchCameraTo": "Switch camera to",
-    "ui.apps.beammp.playerlist.openProfile": "Open profile",
-    "ui.apps.beammp.playerlist.restoreVehicles": "Queue deleted vehicles",
-    "ui.apps.beammp.playerlist.error": "No players… something is wrong"
+  "ui.apps.categories.beammp": "BeamMP",
+  "ui.apps.beammp.playerlist.players": "Hráči",
+  "ui.apps.beammp.playerlist.copyname": "Zkopírovat jméno",
+  "ui.apps.beammp.playerlist.deleteAllVehicles": "Smazat všechna vozidla",
+  "ui.apps.beammp.playerlist.switchCameraTo": "Přepnout kameru na",
+  "ui.apps.beammp.playerlist.openProfile": "Otevřít profil",
+  "ui.apps.beammp.playerlist.error": "Žádní hráči...něco je špatně"
 }

@@ -108,9 +108,9 @@ local function sendOffsetsToVE()
 	be:sendToMailbox("BeamMPTimeOffsets",data)
 end
 
-local function checkVehicleTime(dtSim)
+local function checkVehicleTime(dtSim, dtRaw)
     if MPTimeSyncVehicleTracker then
-        veSimTime = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim)
+        veSimTime = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim, dtRaw)
     end
 end
 
@@ -152,18 +152,17 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 
 	maxCapableSpeed = min(1.2,maxCapableSpeedRaw)
 
-	maxSpeedSmooth = maxSpeedSmoother:get(min(1.1,max(0.99,maxCapableSpeed)),dtRaw)
+	maxSpeedSmooth = maxSpeedSmoother:get(min(1.1,max(0,maxCapableSpeed)),dtRaw)
 
 	local targetGameSpeed = allowSlowMotion and gameSpeed or 1
-	local timeShift = 0
 	local decoupledTimeShift = 1
-	local lowFPStimeShift = 1
+	local lowFPStimeShift = false
 
-	if targetGameSpeed ~= 1 or maxSpeedSmooth < 1 and calculatedGameSpeed < 1 then-- prevent prediction runaway if fps is lower than 20, aka game can't run full speed
+	if maxSpeedSmooth < 1 and avgSpeed < 1 then-- prevent prediction runaway if fps is lower than 20, aka game can't run full speed
 		local roundedGameSpeed = (floor((calculatedGameSpeed*1000)+0.5)/1000)
 		local gameSpeedPercent = floor(roundedGameSpeed*100)
 		if avgSpeed < 1 and gameSpeedPercent < 100 then
-			lowFPStimeShift = min(1,avgSpeed - (simTimeError*0.5*(gameSpeed*2)))
+			lowFPStimeShift = true
 			if lastFrameTime ~= floor(1/(dtRaw)) or showFPSwarnTimer < 0 then
 				showFPSwarnTimer = 2
 				guihooks.message("fps is low, should be above 20 : currently "..floor(1/(dtRaw)).."fps \nsimulation speed is running slow : currently "..gameSpeedPercent.."%", 3, "serverSimSyncFPSWarn" , "warning")
@@ -179,23 +178,42 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 		lastFrameTime = floor(1/(dtRaw))
 	end
 
-	timeShift = (dtRaw*max((1-targetGameSpeed),(1-lowFPStimeShift)))
 
-	if settings.getValue("disableTimeSync") then--speedShiftEnabled then
-		decoupledTimeShift = simTimeError/5
-		timeShift = timeShift + decoupledTimeShift*dtRaw
+	local targetSpeedOffset = (1-targetGameSpeed)
+	local lowFPSSpeedOffset = lowFPStimeShift and (1-maxSpeedSmooth) or 1
+
+	local totalTimeShift = targetSpeedOffset + lowFPSSpeedOffset
+
+	if totalTimeShift ~= 0 then
+		if targetSpeedOffset < 1 then
+			local timeModify = (targetSpeedOffset*dtRaw)
+			timeOffsetSim = timeOffsetSim - timeModify
+			timeOffsetSimSmoother.state = timeOffsetSimSmoother.state - timeModify
+		end
+		if lowFPSSpeedOffset < 1 then
+			local speedDiff = max(0,(lowFPSSpeedOffset - targetSpeedOffset))
+			local offsetModifier = max(0,(speedDiff) + (simTimeError/2))
+
+			timeOffsetSim = timeOffsetSim - (offsetModifier*dtRaw)
+		end
 	end
 
-	if timeShift ~= 0 then
-		timeOffsetSim = timeOffsetSim - timeShift
+	if settings.getValue("disableTimeSync") then
+		decoupledTimeShift = (simTimeError/5)*dtRaw
+		timeOffsetSim = timeOffsetSim - decoupledTimeShift
+		timeOffsetSimSmoother.state = timeOffsetSimSmoother.state - decoupledTimeShift
 	end
-	if not settings.getValue("disableTimeSync") and not isInReplay then--speedShiftEnabled then
+
+	timeOffsetSimSmooth = timeOffsetSimSmoother:get(timeOffsetSim,dtRaw)
+	timeOffsetSimChangeRate = (timeOffsetSimSmooth - lastTimeOffsetSim)/dtRaw
+
+	if not settings.getValue("disableTimeSync") and not isInReplay then
 		MPSpeedShift.syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 	end
 end
 
 local function timeSyncUpdate(dtReal, dtSim, dtRaw)
-    checkVehicleTime(dtSim)
+    checkVehicleTime(dtSim, dtRaw)
 	timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw)
 
 	local timeOffsetError = abs(timeOffsetCPU - targetTimeOffset)
@@ -211,7 +229,7 @@ local function timeSyncUpdate(dtReal, dtSim, dtRaw)
 		timeOffsetSimSmoother:set(timeOffsetSim)
 		timeOffsetSimSmooth = timeOffsetSim
 		lastTimeOffsetSim = timeOffsetSim
-		timeOffsetSimChangeRate = 1
+		timeOffsetSimChangeRate = -1
 		sendOffsetsToVE()
 		return
 	end
@@ -222,14 +240,11 @@ local function timeSyncUpdate(dtReal, dtSim, dtRaw)
 		simTimeError = 0
 	end
 
-	timeOffsetSimSmooth = timeOffsetSimSmoother:get(timeOffsetSim,dtRaw)
-	timeOffsetSimChangeRate = (timeOffsetSimSmooth - lastTimeOffsetSim)/dtRaw
+	checkSimulationSpeed(dtReal, dtSim, dtRaw)
 
 	if lastTimeOffsetCPU ~= timeOffsetCPU or queuedSimSpeed ~= 0 then
 		sendOffsetsToVE()
 	end
-
-	checkSimulationSpeed(dtReal, dtSim, dtRaw)
 
 	lastTimeOffsetCPU = timeOffsetCPU
 	lastTimeOffsetSim = timeOffsetSimSmooth
@@ -254,10 +269,6 @@ local function receivePing(data, dtRaw)
 		be:queueAllObjectLua("if MPTimeSyncVE then MPTimeSyncVE.useTimeSync = true end")
 	end
 	M.hasReceivedPing = true
-
---	local responseTime = math.max(0,os:clockhp() - gameTime - dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
---
---	local rawOffset = os:clockhp() - serverTime - dtRaw + responseTime/2 -- but dtRaw needs to also be subtracted here to get the correct offset
 
 	local responseTime = os:clockhp() - gameTime
 	local rawOffset = os:clockhp() - (serverTime + (responseTime/2))
@@ -295,9 +306,35 @@ end
 local function onBeamMPServerLeave()
 	M.hasReceivedPing = false
 
-	timeOffsetSimSmooth = 0
+	targetTimeOffset = 0
 	timeOffsetCPU = 0
+	lastTimeOffsetCPU = -1
+
+	simTimeError = 0
+
+	timeOffsetSim = 0
+	lastTimeOffsetSim = 0
+	timeOffsetSimSmooth = 0
 	timeOffsetSimChangeRate = 0
+
+	serverTimeRecOffsetSmoother:reset()
+	serverTimeOffsetSmoother:reset()
+
+	timeOffsetSimSmoother:reset()
+
+	speedSmoother:reset()
+	maxSpeedSmoother:reset()
+
+	pingCount = 0
+	pingTimer = 0
+
+	speedAverage = {}
+	for i=1,speedAverageBufferLen do
+		speedAverage[i] = {speed = 1,time = 0}
+	end
+
+	lastFrameTime = 0
+	showFPSwarnTimer = 0
 
 	sendOffsetsToVE()
 end

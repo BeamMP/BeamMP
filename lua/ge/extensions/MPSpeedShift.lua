@@ -6,7 +6,7 @@ local min = math.min
 M.showDebug = false
 
 local targetSpeedSmoother = newTemporalSmoothingNonLinear(10,10)
-local maxSpeedSmoother = newTemporalSmoothingNonLinear(25,15)
+local maxSpeedSmoother = newTemporalSmoothingNonLinear(15,15)
 
 local toFarAheadTimer = 0
 local toFarBehindTimer = 0
@@ -34,12 +34,11 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 	local maxCapableSpeedRaw = 1/dtRaw/20
 	local timeError = getBeamMPServerTime() - (getBeamMPSimTime() + dtSim)
 
-	local output = -gameSpeedPID:get((getBeamMPSimTime() + dtSim),getBeamMPServerTime(),dtRaw)/2
+	local speedModify = -gameSpeedPID:get((getBeamMPSimTime() + dtSim),getBeamMPServerTime(),dtRaw)/2
 
-	local targetSpeed = output
-	local maxCapableSpeed = min(1.2,maxCapableSpeedRaw)
-	local maxSpeedSmooth = maxSpeedSmoother:get(min(1.1,max(0.99,maxCapableSpeed)),dtRaw)
-	local rawSpeed = (1 - targetSpeed)
+	--TODO test catchupMaxSpeed on low spec machines
+	local maxCapableSpeed = min(4,maxCapableSpeedRaw)
+	local maxSpeedSmooth = maxSpeedSmoother:get(min(4,max(0.99,maxCapableSpeed)),dtRaw)
 
 	if not runawayPause and timeError < -0.1 then
 		toFarAheadTimer = toFarAheadTimer + dtRaw
@@ -51,7 +50,7 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 		toFarAheadTimer = 0
 	end
 
-	if not catchupMaxSpeed and timeError > 0.1 and maxSpeedSmooth > 1 then
+	if not catchupMaxSpeed and timeError > 0.1 and maxSpeedSmooth > 3 then
 		toFarBehindTimer = toFarBehindTimer + dtRaw
 		if toFarBehindTimer > 0.1 then
 			catchupMaxSpeed = true
@@ -78,17 +77,19 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 		be:setPhysicsSpeedFactor(0)
 	end
 
-	local speed = targetSpeedSmoother:get(min(maxCapableSpeed*1.01,max(0.99,rawSpeed)),dtRaw)
+	local speedModifyClamped = targetSpeedSmoother:get(max(-0.01,-speedModify),dtRaw)
+
+	local targetSpeed = allowSlowMotion and simTimeAuthority.getReal() or 1
+	local speed = targetSpeed + speedModifyClamped
 
 	if runawayPause then
 		speed = 0
 	end
-	local targetSpeed2 = simTimeAuthority.getReal()
 
 	if not catchupMaxSpeed and not isnaninf(speed) then
-		be:setSimulationTimeScale(speed * (allowSlowMotion and targetSpeed2 or 1))
+		be:setSimulationTimeScale(speed)
 	elseif catchupMaxSpeed then
-		be:setSimulationTimeScale((allowSlowMotion and targetSpeed2 or 1))
+		be:setSimulationTimeScale(targetSpeed)
 		be:setPhysicsSpeedFactor(1)
 	end
 
@@ -105,9 +106,15 @@ local function onExtensionUnloaded()
 	be:queueAllObjectLua("if positionVE then positionVE.enableSimTimeTracking = false end")
 end
 
+local function onDisableTimeSync()
+	be:setSimulationTimeScale(simTimeAuthority.get()*(be:getEnabled() and 1 or 0))
+	be:setPhysicsSpeedFactor(0)
+end
+
 M.syncTime = syncTime
 M.reset = reset
 M.onExtensionUnloaded = onExtensionUnloaded
 M.onBeamMPServerLeave = onExtensionUnloaded
+M.onDisableTimeSync = onDisableTimeSync
 
 return M

@@ -16,7 +16,7 @@ local noVECounter = 0
 
 local simTimeVehID -- this is the vehicleID of the vehicle i use to send the accurate simulation Time to GE, dtSim in GE seems to drift at low frame rates
 
-local function checkTrackingVehicle(dtSim) --TODO make sure this doesn't continuously retry if all vehicles fail, maybe it can be done from events only?
+local function checkTrackingVehicle(dtSim, dtRaw) --TODO make sure this doesn't continuously retry if all vehicles fail, maybe it can be done from events only?
 	if dtSim ~= 0 and lastDTSim ~= 0 and lastVeSimTime == veSimTime then
 		local vehCount = be:getObjectCount()--noVECounter
 		if foundCarLastFrame or framesSinceNewCar < 5 then
@@ -53,7 +53,7 @@ local function checkTrackingVehicle(dtSim) --TODO make sure this doesn't continu
 	end
     lastDTSim = dtSim
     lastVeSimTime = veSimTime
-    return veSimTime
+    return veSimTime - dtRaw
 end
 
 local function setSimTime(recSimTime,veCPUTime,objectID)

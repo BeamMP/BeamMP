@@ -36,7 +36,7 @@ local function getServerSimTime()
 end
 
 local function getSimSpeed()
-	return (1 - timeShiftSpeed)
+	return (1 + timeShiftSpeed)
 end
 
 local function updateSimTime()
@@ -60,6 +60,6 @@ end
 M.getServerTime    = getServerTime
 M.getServerSimTime = getServerSimTime
 M.getSimSpeed      = getSimSpeed
-M.updateGFX        = updateGFX
+M.onDebugDraw      = updateGFX
 
 return M

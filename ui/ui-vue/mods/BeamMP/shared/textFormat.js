@@ -41,6 +41,7 @@ export function stripBeamMPFormatting(value = "") {
 
 export function formatBeamMPText(value, options = {}) {
   const {
+    sanitize = null,
     escape = escapeHtml,
     renderIcon = null,
     allowServerHtml = false,
@@ -57,7 +58,7 @@ export function formatBeamMPText(value, options = {}) {
     }
   }
 
-  const tokens = raw.split(TOKEN_PATTERN)
+  const tokens = (sanitize ? String(sanitize(raw)) : raw).split(TOKEN_PATTERN)
   const classes = new Set()
   let result = ""
   let currentText = ""
@@ -81,7 +82,7 @@ export function formatBeamMPText(value, options = {}) {
     if (hexBackground) style += `background-color:${hexBackground};`
     if (style) attributes += ` style="${style}"`
 
-    const encoded = escape(currentText)
+    const encoded = sanitize ? currentText : escape(currentText)
     result += attributes ? `<span${attributes}>${encoded}</span>` : encoded
     currentText = ""
   }

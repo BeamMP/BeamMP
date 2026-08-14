@@ -268,7 +268,10 @@ async function showChat() {
 
 function formatChatMessage(string) {
 	if (!globalThis.beammpFormatText) return string;
-	return globalThis.beammpFormatText(string, { allowServerHtml: true });
+	return globalThis.beammpFormatText(string, {
+		sanitize: globalThis.DOMPurify ? (v) => globalThis.DOMPurify.sanitize(v) : null,
+		allowServerHtml: true,
+	});
 }
 
 // -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //

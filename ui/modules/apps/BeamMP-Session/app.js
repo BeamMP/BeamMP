@@ -174,7 +174,9 @@ app.controller("BeamMPSessionController", ['$scope', '$mdDialog', 'Settings', fu
 
 function formatServerName(string) {
 	if (!globalThis.beammpFormatText) return string;
-	return globalThis.beammpFormatText(string);
+	return globalThis.beammpFormatText(string, {
+		sanitize: globalThis.DOMPurify ? (v) => globalThis.DOMPurify.sanitize(v) : null,
+	});
 }
 
 function isMarqueeNeeded(block, element) {

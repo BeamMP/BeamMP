@@ -4691,7 +4691,7 @@
           "itemType": "checkbox",
           "component": "OptionsCheckbox",
           "separateLabel": true,
-          "lua": "",
+          "lua": "if MPSpeedShift then MPSpeedShift.onDisableTimeSync() end",
           "luaOff": "",
           "valueOn": true,
           "valueOff": false,

@@ -89,7 +89,7 @@ local function onBeamMPVehicleReady(vehID,MPveh,vehOBJ)
 	if getVehicleByGameID(vehID) then
 		local veh = getObjectByID(vehID)
 		if veh then
-			if MPTimeSync.hasReceivedPing then
+			if MPTimeSyncGE.hasReceivedPing then
 				veh:queueLuaCommand("if MPTimeSyncVE then MPTimeSyncVE.useTimeSync = true end")
 			end
 			if simTimeVehID == vehID then

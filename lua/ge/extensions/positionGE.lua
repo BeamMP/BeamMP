@@ -57,7 +57,7 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			if not MPTimeSync.hasReceivedPing then
+			if not MPTimeSyncGE.hasReceivedPing then
 				if #data == sendPacketSize then
 					ffi.copy(sendPacket, data, sendPacketSize)
 				else
@@ -94,7 +94,7 @@ local function applyPos(data, serverVehicleID)
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		if not MPTimeSync.hasReceivedPing then
+		if not MPTimeSyncGE.hasReceivedPing then
 			be:sendToMailbox("vehPosPcktTim" .. serverVehicleID ,tostring(os.clock()))
 		end
 		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)

@@ -17,7 +17,7 @@ local nodesTimer = 0
 local nodesTickrate = 1/15
 
 local positionTimer = 0
-local positionTickrate = 0.020
+local positionTickrate = 1/60
 
 local inputsTimer = 0
 local inputsTickrate = 1/30

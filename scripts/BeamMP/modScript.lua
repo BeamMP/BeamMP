@@ -49,8 +49,8 @@ setExtensionUnloadMode("MPSpeedShift", "manual")
 load("MPTimeSyncVehicleTracker")
 setExtensionUnloadMode("MPTimeSyncVehicleTracker", "manual")
 
-load("MPTimeSync")
-setExtensionUnloadMode("MPTimeSync", "manual")
+load("MPTimeSyncGE")
+setExtensionUnloadMode("MPTimeSyncGE", "manual")
 
 load("MPGameNetwork")
 setExtensionUnloadMode("MPGameNetwork", "manual")

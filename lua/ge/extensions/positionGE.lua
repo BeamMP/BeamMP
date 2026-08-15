@@ -11,21 +11,44 @@
 
 local M = {}
 
-local targetGameSpeed = 1
+local ok, err = pcall(function()
+    ffi.cdef[[
+        typedef struct { float x, y, z; } Vec3;
+        typedef struct { float x, y, z, w; } Quat;
+        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim; float ping, dt;} PosPacket;
+    ]]
+end)
+if not ok then
+    print("cdef error: " .. tostring(err))
+end
+
+local receivePacket = ffi.new("PosPacket")
+local sendPacket = ffi.new("PosPacket")
+local posPacketSize = ffi.sizeof(receivePacket);
+local sendPacketSize = ffi.sizeof(sendPacket);
+
 local actualSimSpeed = 1
-
-
 
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
 local function tick()
 	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
 		if v then
-			v:queueLuaCommand("positionVE.getVehicleRotation()")
+			v:queueLuaCommand("if positionVE then positionVE.getVehicleRotation() end")
 		end
 	end
 end
 
+
+local sendPos  = vec3()
+local sendVel  = vec3()
+local sendRot  = quat()
+local sendRvel = vec3()
+
+local structSendPos  = sendPacket.pos
+local structSendVel  = sendPacket.vel
+local structSendRot  = sendPacket.rot
+local structSendRvel = sendPacket.rvel
 --- Wraps vehicle position, rotation etc. data from player own vehicles and sends it to the server.
 -- INTERNAL USE
 -- @param data table The position and rotation data from VE
@@ -34,11 +57,30 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			if not MPTimeSync.hasReceivedPing then
+				if #data == sendPacketSize then
+					ffi.copy(sendPacket, data, sendPacketSize)
+				else
+					log('E','applyPos', 'Received invalid position packet with size '..#data..' Expected '..posPacketSize)
+					return
+				end
+				sendPacket.dt = os:clock()-sendPacket.dt
+				data = ffi.string(sendPacket, sendPacketSize)
+			end
 			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
 		end
 	end
 end
 
+local recPos  = vec3()
+local recVel  = vec3()
+local recRot  = quat()
+local recRvel = vec3()
+
+local structPos = receivePacket.pos
+local structVel = receivePacket.vel
+local structRot = receivePacket.rot
+local structRvel = receivePacket.rvel
 
 --- This function serves to send the position data received for another players vehicle from GE to VE, where it is handled.
 -- @param encoded json The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
@@ -46,40 +88,52 @@ end
 local function applyPos(data, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
-
 	local veh = getObjectByID(vehicle.gameVehicleID)
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
+		if not MPTimeSync.hasReceivedPing then
+			be:sendToMailbox("vehPosPcktTim" .. serverVehicleID ,tostring(os.clock()))
+		end
 		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
 	end
 
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
-		local decoded = jsonDecode(data)
-		local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
-		vehicle.lastDt = decoded.tim
+		if #data == posPacketSize then
+			ffi.copy(receivePacket, data, posPacketSize)
+		else
+			log('E','applyPos', 'Received invalid position packet with size '..#data..' Expected '..posPacketSize)
+			return
+		end
 
-		vehicle.position:set(decoded.pos[1],decoded.pos[2],decoded.pos[3])
-		vehicle.rotation:set(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
+		local deltaDt = math.max((receivePacket.tim or 0) - (vehicle.lastDt or 0), 0.001)
+		vehicle.lastDt = receivePacket.tim
+		recPos:set(structPos.x,structPos.y,structPos.z)
+		recVel:set(structVel.x,structVel.y,structVel.z)
+		recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
+		recRvel:set(structRvel.x,structRvel.y,structRvel.z)
 
-		if owner and not owner.updatedPing then
-			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
-			UI.setPlayerPing(owner.name, ping)
+		vehicle.position:set(recPos)
+		vehicle.rotation:set(recRot)
+
+		if owner and not owner.updatedPing then-- TODO place holder until we have a dedicated player list ping packet
+			local ping = math.floor(receivePacket.ping*1000)
+
+			UI.setPlayerPing(owner.name, ping) -- Send ping to UI
 			owner.ping = ping
 			owner.fps = 1/deltaDt
-		end-- Send ping to UI
+		end
 		owner.hasUpdatedPing = true
 	end
 end
 
-
 --- The raw message from the server. This is unpacked first and then sent to applyPos() or smoothPosExec()
 -- @param rawData string The raw message data.
 local function handle(rawData)
-	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:(.*)")
 
 	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
 
@@ -98,7 +152,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	be:queueAllObjectLua("positionVE.setPing("..p..")")
+	be:queueAllObjectLua("if positionVE then positionVE.setPing("..p..") end")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.
@@ -121,16 +175,17 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 	local localVel = veh:getVelocity()
 	local vehVel = positionData.vehVel
 
-	if math.abs(localVel.x) + math.abs(localVel.y) + math.abs(localVel.z) > (math.abs(vehVel.x) + math.abs(vehVel.y) + math.abs(vehVel.z))*5 then -- detect if velocity was a teleport
+	if localVel:length() > vehVel:length()*5 then -- detect if velocity was a teleport
 		return
 	end
 
 	local refNodeID = veh:getRefNodeId()
 	local vehRot = quatFromDir(-veh:getDirectionVector(), veh:getDirectionVectorUp())
 	local rot = vehRot:inversed() * newRot
-	veh:setClusterPosRelRot(refNodeID, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w)
 
-	vel = vel - localVel:rotated(rot) -- setClusterPosRelRot also rotates the velocity so we have to do that as well
+	veh:applyClusterVelocityScaleAdd(refNodeID, 1, -localVel.x, -localVel.y, -localVel.z) -- setting velocity to 0, seems more stable to do this before rotate then add velocity again after rotating
+	veh:setClusterPosRelRot(refNodeID, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w) -- this also rotates current velocity
+
 	veh:applyClusterVelocityScaleAdd(refNodeID, 1, vel.x, vel.y, vel.z) -- setting velocity with the GE command doesn't destroy vehicles so we set most of the velocity here
 
 	local noCounterVelocity = positionData.noCounter or 0
@@ -156,11 +211,6 @@ end
 local function onUpdate(dtReal, dtSim, dtRaw)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		setActualSimSpeed(dtSim/dtRaw)
-		local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
-		if targetGameSpeed ~= simSpeed then
-			be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
-		end
-		targetGameSpeed = simSpeed
 		local players = getPlayers()
 		for k,player in pairs(players) do
 			player.hasUpdatedPing = false

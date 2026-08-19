@@ -15,7 +15,7 @@ local ok, err = pcall(function()
     ffi.cdef[[
         typedef struct { float x, y, z; } Vec3;
         typedef struct { float x, y, z, w; } Quat;
-        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim; float ping, dt;} PosPacket;
+        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim;} PosPacket;
     ]]
 end)
 if not ok then
@@ -57,17 +57,12 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
-			if not MPTimeSyncGE.hasReceivedPing then
-				if #data == sendPacketSize then
-					ffi.copy(sendPacket, data, sendPacketSize)
-				else
-					log('E','applyPos', 'Received invalid position packet with size '..#data..' Expected '..posPacketSize)
-					return
-				end
-				sendPacket.dt = os:clock()-sendPacket.dt
-				data = ffi.string(sendPacket, sendPacketSize)
+			if MPTimeSyncGE.hasReceivedPing and #data == sendPacketSize then
+				MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zf',serverVehicleID,data))
+			else
+				local sendBuffer = MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data)
+				MPGameNetwork.send(sendBuffer)
 			end
-			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
 		end
 	end
 end
@@ -89,38 +84,61 @@ local function applyPos(data, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 	local veh = getObjectByID(vehicle.gameVehicleID)
+	local owner = vehicle:getOwner()
 	if veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		if not MPTimeSyncGE.hasReceivedPing then
-			be:sendToMailbox("vehPosPcktTim" .. serverVehicleID ,tostring(os.clock()))
-		end
 		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
-	end
-
-	local owner = vehicle:getOwner()
-	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+	elseif owner then
 		if #data == posPacketSize then
 			ffi.copy(receivePacket, data, posPacketSize)
+			recPos:set(structPos.x,structPos.y,structPos.z)
+			recVel:set(structVel.x,structVel.y,structVel.z)
+			recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
+			recRvel:set(structRvel.x,structRvel.y,structRvel.z)
 		else
 			log('E','applyPos', 'Received invalid position packet with size '..#data..' Expected '..posPacketSize)
 			return
 		end
 
-		local deltaDt = math.max((receivePacket.tim or 0) - (vehicle.lastDt or 0), 0.001)
-		vehicle.lastDt = receivePacket.tim
-		recPos:set(structPos.x,structPos.y,structPos.z)
-		recVel:set(structVel.x,structVel.y,structVel.z)
-		recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
-		recRvel:set(structRvel.x,structRvel.y,structRvel.z)
+		vehicle.position:set(recPos)
+		vehicle.rotation:set(recRot)
+	end
+end
+
+local function applyPosJson(data, serverVehicleID)
+	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
+	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
+	local veh = getObjectByID(vehicle.gameVehicleID)
+	if veh then -- vehicle already spawned, send data
+		if veh.mpVehicleType == nil then
+			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
+			veh.mpVehicleType = 'R'
+		end
+		be:sendToMailbox("vehPosPcktJson" .. serverVehicleID ,data)
+	end
+
+	local owner = vehicle:getOwner()
+	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+		local decodedData = jsonDecode(data)
+		local tim = decodedData.tim
+		local ping = decodedData.ping
+
+		recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
+		recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])
+		recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
+		recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
+
+		vehicle.lastDt = tim
+		local deltaDt = math.max((tim or 0) - (vehicle.lastDt or 0), 0.001)
 
 		vehicle.position:set(recPos)
 		vehicle.rotation:set(recRot)
 
-		if owner and not owner.updatedPing then-- TODO place holder until we have a dedicated player list ping packet
-			local ping = math.floor(receivePacket.ping*1000)
+		if owner and ping and not owner.updatedPing then-- TODO place holder until we have a dedicated player list ping packet
+			ping = math.floor(ping*1000)
 
 			UI.setPlayerPing(owner.name, ping) -- Send ping to UI
 			owner.ping = ping
@@ -141,8 +159,10 @@ local function handle(rawData)
 		return
 	end
 
-	if code == 'p' then
+	if code == 'f' then
 		applyPos(data, serverVehicleID)
+	elseif code == 'p' then
+		applyPosJson(data, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end

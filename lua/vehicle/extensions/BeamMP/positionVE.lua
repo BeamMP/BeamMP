@@ -14,7 +14,7 @@ local ok, err = pcall(function()
     ffi.cdef[[
         typedef struct { float x, y, z; } Vec3;
         typedef struct { float x, y, z, w; } Quat;
-        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim; float ping, dt;} PosPacket;
+        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim;} PosPacket;
     ]]
 end)
 if not ok then
@@ -96,7 +96,6 @@ local localVelSmoother = smoothers.newVectorSmoothing(50)             -- Smoothe
 local localAccSmoother = smoothers.newVectorSmoothing(50)             -- Smoother for local angular velocity
 local localRvelSmoother = smoothers.newVectorSmoothing(50)
 local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
-local timeOffsetSmoother2 = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
 local timeOffset = 0
 
 local collisionSmoother = newTemporalSmoothing(2,100)           -- Smoother for local angular velocity
@@ -244,22 +243,36 @@ local structPos = receivePacket.pos
 local structVel = receivePacket.vel
 local structRot = receivePacket.rot
 local structRvel = receivePacket.rvel
+local tim = 0
+local recPing = 0
 
-local function setVehiclePosRot(dt)
-	if posPacketSize == #posPacketRecBuff then
+local function setVehiclePosRot(dt, jsonData)
+	if jsonData then
+		local decodedData = jsonDecode(jsonData)
+		if not decodedData.pos then
+			log('E','setVehicleRotation', 'Received invalid position packet')
+			return
+		end
+		recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
+		recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])
+		recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
+		recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
+		tim  = decodedData.tim
+		recPing = decodedData.ping
+	elseif posPacketSize == #posPacketRecBuff then
 		ffi.copy(receivePacket, posPacketRecBuff, #posPacketRecBuff)
+		recPos:set(structPos.x,structPos.y,structPos.z)
+		recVel:set(structVel.x,structVel.y,structVel.z)
+		recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
+		recRvel:set(structRvel.x,structRvel.y,structRvel.z)
+		tim  = receivePacket.tim
 	else
 		log('E','setVehicleRotation', 'Received invalid position packet with size '..#posPacketRecBuff)
 		return
 	end
-	recPos:set(structPos.x,structPos.y,structPos.z)
-	recVel:set(structVel.x,structVel.y,structVel.z)
-	recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
-	recRvel:set(structRvel.x,structRvel.y,structRvel.z)
 
 	local speed = 1
 
-	local tim  = receivePacket.tim
 	local timer = MPTimeSyncVE.getServerSimTime()
 	if not tim then
 		return
@@ -274,17 +287,13 @@ local function setVehiclePosRot(dt)
 	end
 
 	if tim ~= receivedData.timer then
-		local predictTime = tim
-		if not MPTimeSyncVE.useTimeSync then
-			local mailDelay = os.clock()-obj:getLastMailbox("vehPosPcktTim" .. v.mpServerID)
-			local ping = ((ownPing/2) + (receivePacket.ping/2) + (dt/2) + receivePacket.dt + mailDelay)
-			receivedData.timeOffset = (timer-tim) - ping
-
-			local realPing = timer-tim
-			predictTime = tim + timeOffset
+		local localTime = timer
+		if not MPTimeSyncVE.useTimeSync or jsonData then
+			receivedData.timeOffset = timer-tim - ownPing/2 - recPing/2 - (dt or lastDt)
+			localTime = localTime - timeOffset
 		end
-		dirPredictor:add(recPos, recVel, predictTime, speed, timer)
-		quaternionPredictor:add(recRot, recRvel, predictTime, speed, timer)
+		dirPredictor:add(recPos, recVel, tim, speed, localTime)
+		quaternionPredictor:add(recRot, recRvel, tim, speed, localTime)
 		receivedData.pos:set(recPos)
 	end
 
@@ -292,17 +301,27 @@ local function setVehiclePosRot(dt)
 	receivedData.recTime = timer
 end
 
-local lastMailboxVersion = 0
+local lastMailboxVersion = -2
+local lastMailboxVersionJson = -2
 local function updateRemoteData(dt)
 	if not v.mpServerID or v.mpServerID == "" or v.mpVehicleType ~= "R" then return end
 	local mailboxName = "vehPosPckt" .. v.mpServerID
+	local mailboxNameJson = "vehPosPcktJson" .. v.mpServerID
 	local currentMailBoxVersion = obj:getLastMailboxVersion(mailboxName)
+	local currentMailBoxVersionJson = obj:getLastMailboxVersion(mailboxNameJson)
 
 	if lastMailboxVersion ~= currentMailBoxVersion then
 		obj:getLastMailboxToBuffer(mailboxName, posPacketRecBuff)
-		setVehiclePosRot(dt)
+		setVehiclePosRot()
+	end
+	if lastMailboxVersionJson ~= currentMailBoxVersionJson then
+		local jsonData = obj:getLastMailbox(mailboxNameJson, posPacketRecBuff)
+		if jsonData ~= "" then
+			setVehiclePosRot(dt,jsonData)
+		end
 	end
 	lastMailboxVersion = currentMailBoxVersion
+	lastMailboxVersionJson = currentMailBoxVersionJson
 end
 
 local posPacketBuff = stringBuffer.new()
@@ -326,29 +345,40 @@ local function getVehicleRotation(serverID)
 	pos:set(obj:getPositionXYZ())
 	pos:setAdd(cog)
 	vel:set(smoothVel)
-
-	if isnaninf(pos:squaredLength()) or isnaninf(vel:squaredLength()) or isnaninf(rvel:squaredLength()) then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
-
 	local simSpeed = MPTimeSyncVE.getSimSpeed()
+	local timeToSend = MPTimeSyncVE.getServerSimTime()
+
 	vel:setScaled(simSpeed)
 	rvel:setScaled(simSpeed)
 
-	sendPacket.tim = MPTimeSyncVE.getServerSimTime()
-	sendPacket.ping = ownPing
-	sendPacket.dt = os:clock()
-	sendStructPos.x, sendStructPos.y, sendStructPos.z = pos.x, pos.y, pos.z
-	sendStructVel.x, sendStructVel.y, sendStructVel.z = vel.x, vel.y, vel.z
-	sendStructRot.x, sendStructRot.y, sendStructRot.z, sendStructRot.w = rot.x, rot.y, rot.z, rot.w
-	sendStructRvel.x, sendStructRvel.y, sendStructRvel.z = rvel.x, rvel.y, rvel.z
+	if isnaninf(pos:squaredLength()) or isnaninf(vel:squaredLength()) or isnaninf(rvel:squaredLength()) then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
+	if MPTimeSyncVE.useTimeSync then
+		sendPacket.tim = timeToSend
+		sendStructPos.x, sendStructPos.y, sendStructPos.z = pos.x, pos.y, pos.z
+		sendStructVel.x, sendStructVel.y, sendStructVel.z = vel.x, vel.y, vel.z
+		sendStructRot.x, sendStructRot.y, sendStructRot.z, sendStructRot.w = rot.x, rot.y, rot.z, rot.w
+		sendStructRvel.x, sendStructRvel.y, sendStructRvel.z = rvel.x, rvel.y, rvel.z
 
-	local serializedFFIString = serialize(ffi.string(sendPacket, posPacketSize))
-	posPacketBuff:reset()
-	posPacketBuff:put('positionGE.sendVehiclePosRot(', serializedFFIString, ",", objectId, ")")
+		local serializedFFIString = serialize(ffi.string(sendPacket, posPacketSize))
+		posPacketBuff:reset()
+		posPacketBuff:put('positionGE.sendVehiclePosRot(', serializedFFIString, ",", objectId, ")")
 
-	-- this would be faster, but queues break with binary data so we need to serialize it
-	--posPacketBuff:put(",", objectId, ")")
-	--posPacketBuff:put('positionGE.sendVehiclePosRot(')
-	--posPacketBuff:putcdata(sendPacket, posPacketSize)
+		-- this would be faster, but queues break with binary data so we need to serialize it
+		--posPacketBuff:put(",", objectId, ")")
+		--posPacketBuff:put('positionGE.sendVehiclePosRot(')
+		--posPacketBuff:putcdata(sendPacket, posPacketSize)
+	else
+		posPacketBuff:set('positionGE.sendVehiclePosRot(')
+		posPacketBuff:put("'{")
+		posPacketBuff:putf('\"tim\":%.4f', timeToSend)
+		posPacketBuff:putf(',\"vel\":[%.3f,%.3f,%.3f]', vel.x, vel.y, vel.z)
+		posPacketBuff:putf(',\"rot\":[%.4f,%.4f,%.4f,%.4f]', rot.x, rot.y, rot.z, rot.w)
+		posPacketBuff:putf(',\"rvel\":[%.3f,%.3f,%.3f]', rvel.x, rvel.y, rvel.z)
+		posPacketBuff:putf(',\"pos\":[%.3f,%.3f,%.3f]', pos.x, pos.y, pos.z)
+		posPacketBuff:putf(',\"ping\":%.4f', ownPing + lastDt)
+		posPacketBuff:put("}'")
+		posPacketBuff:put(", ", objectId, ")")
+	end
 
 	obj:queueGameEngineLua(posPacketBuff)
 end
@@ -434,11 +464,14 @@ local function updateGFX(dt)
 	lastVehVel:set(vehVel)
 	lastVehRvel:set(vehRvel)
 
-	-- Smoothed difference between local and remote timestamps
-	timeOffset = timeOffsetSmoother:get(receivedData.timeOffset, dt)
-	if abs(timeOffset - receivedData.timeOffset) > 1 then
-		timeOffsetSmoother:set(receivedData.timeOffset)
-		timeOffset = receivedData.timeOffset
+	if not MPTimeSyncVE.useTimeSync then
+		-- Smoothed difference between local and remote timestamps
+		timeOffset = timeOffsetSmoother:get(receivedData.timeOffset, dt)
+		if abs(timeOffset - receivedData.timeOffset) > 1 then
+			timeOffsetSmoother:set(receivedData.timeOffset)
+			timeOffset = receivedData.timeOffset
+		end
+		timer = timer - timeOffset + dt
 	end
 
 	local predictOffset = 0

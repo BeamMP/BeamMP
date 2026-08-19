@@ -39,14 +39,19 @@ local function getSimSpeed()
 	return (1 + timeShiftSpeed)
 end
 
+local lastMailboxVersion = -2
 local function updateSimTime()
-	local data = obj:getLastMailbox("BeamMPTimeOffsets")
-	if #data ~= timeOffsetsSize then return end
-	ffi.copy(timeOffsets, data, timeOffsetsSize)
+	local currentMailBoxVersion = obj:getLastMailboxVersion("BeamMPTimeOffsets")
+	if lastMailboxVersion ~= currentMailBoxVersion then
+		local data = obj:getLastMailbox("BeamMPTimeOffsets")
+		if #data ~= timeOffsetsSize then return end
+		ffi.copy(timeOffsets, data, timeOffsetsSize)
 
-    simTimeOffset = timeOffsets[0].simTimeOffset
-    cpuTimeOffset = timeOffsets[0].cpuTimeOffset
-    timeShiftSpeed = timeOffsets[0].timeShiftSpeed
+    	simTimeOffset = timeOffsets[0].simTimeOffset
+    	cpuTimeOffset = timeOffsets[0].cpuTimeOffset
+    	timeShiftSpeed = timeOffsets[0].timeShiftSpeed
+	end
+	lastMailboxVersion = currentMailBoxVersion
 end
 
 local function updateGFX(dt)

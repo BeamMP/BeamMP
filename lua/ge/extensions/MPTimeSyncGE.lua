@@ -43,7 +43,6 @@ local pingSendRate = 1
 
 local targetTimeOffset = 0
 local timeOffsetCPU = 0
-local lastTimeOffsetCPU = -1
 
 local simTimeError = 0
 
@@ -87,6 +86,10 @@ function getBeamMPSimTime()
 	return veSimTime - timeOffsetSimSmooth --+ tempShiftTimeSmoother:get(tempShiftTime,lastDT) -- 0.2
 end
 
+function getBeamMPSimSpeed()
+	return 1 + timeOffsetSimChangeRate
+end
+
 local function setSimOffset()
 	local lastOffset = timeOffsetSim
 	local serverTime = getBeamMPServerTime()
@@ -116,7 +119,7 @@ end
 
 local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	if dtSim ~= 0 then
-		calculatedGameSpeedRaw = dtSim/(dtRaw + accumulatedDTRaw)
+		calculatedGameSpeedRaw = dtSim/guardZero(dtRaw + accumulatedDTRaw)
 
 		accumulatedDTRaw = 0
 	else
@@ -126,17 +129,17 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	calculatedGameSpeed = speedSmoother:get(calculatedGameSpeedRaw,dtRaw)
 
 	local maxCapableSpeedRaw = 1/dtRaw/20
+	local curTime = os.clock()
 
 	speedAverageIteration = speedAverageIteration + 1
 	if speedAverageBufferLen <= speedAverageIteration then
 		speedAverageIteration = 1
 	end
 	speedAverage[speedAverageIteration].speed = maxCapableSpeedRaw
-	speedAverage[speedAverageIteration].time = os.clock()
+	speedAverage[speedAverageIteration].time = curTime
 
 	avgSpeed = 0
 	local count = 0
-	local curTime = os.clock()
 	for k,v in pairs(speedAverage) do
 		if curTime - v.time < speedAverageTime then
 			avgSpeed = avgSpeed + v.speed
@@ -205,7 +208,7 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	end
 
 	timeOffsetSimSmooth = timeOffsetSimSmoother:get(timeOffsetSim,dtRaw)
-	timeOffsetSimChangeRate = (timeOffsetSimSmooth - lastTimeOffsetSim)/dtRaw
+	timeOffsetSimChangeRate = (timeOffsetSimSmooth - lastTimeOffsetSim)/guardZero(dtRaw)
 
 	if not settings.getValue("disableTimeSync") and not isInReplay then
 		MPSpeedShift.syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
@@ -241,13 +244,10 @@ local function timeSyncUpdate(dtReal, dtSim, dtRaw)
 	end
 
 	checkSimulationSpeed(dtReal, dtSim, dtRaw)
-
-	if lastTimeOffsetCPU ~= timeOffsetCPU or queuedSimSpeed ~= 0 then
+	if timeOffsets[0].cpuTimeOffset ~= timeOffsetCPU or timeOffsetSimSmooth ~= timeOffsets[0].simTimeOffset or timeOffsetSimChangeRate ~= timeOffsets[0].timeShiftSpeed then
 		sendOffsetsToVE()
+		lastTimeOffsetSim = timeOffsetSimSmooth
 	end
-
-	lastTimeOffsetCPU = timeOffsetCPU
-	lastTimeOffsetSim = timeOffsetSimSmooth
 end
 
 local function sendPing()
@@ -287,7 +287,7 @@ local function onUpdate(dtReal, dtSim,dtRaw)
 		pingTimer = 0
 		sendPing()
 	end
-	if not M.hasReceivedPing and pingCount < 2 then return end
+	--if not M.hasReceivedPing and pingCount < 2 then return end
     timeSyncUpdate(dtReal, dtSim, dtRaw)
 end
 
@@ -308,7 +308,6 @@ local function onBeamMPServerLeave()
 
 	targetTimeOffset = 0
 	timeOffsetCPU = 0
-	lastTimeOffsetCPU = -1
 
 	simTimeError = 0
 

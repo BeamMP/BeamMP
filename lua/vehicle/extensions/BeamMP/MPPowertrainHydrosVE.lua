@@ -36,7 +36,11 @@ local function getHydroBeams()
         end
     end
     if foundChangedBeams then
-	    obj:queueGameEngineLua("MPPowertrainGE.sendHydroBeamData(\'"..jsonEncode(hydroBeamsToSend).."\', "..obj:getID()..")")
+        if MPNetworkVE.socketConnected then
+            MPNetworkVE.send("Yh:", v.mpServerID, ":", jsonEncode(hydroBeamsToSend))
+        else
+            obj:queueGameEngineLua("MPPowertrainGE.sendHydroBeamData(\'"..jsonEncode(hydroBeamsToSend).."\', "..obj:getID()..")")
+        end
     end
 
     for _, electricsName in pairs(hydroBeamsElectricsNames) do

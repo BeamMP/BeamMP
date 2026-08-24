@@ -571,6 +571,20 @@ local function handleU(params)
 	end
 end
 
+-- Handles launcher responses to direct VE socket requests
+local function handleDirectVE(params)
+	local code, serverVehicleID, data = string.match(params, "^(%a)%:(%d+%-%d+)%:(.*)")
+	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
+	local veh = getObjectByID(gameVehicleID)
+	if veh then
+		if code == "a" then
+			veh:queueLuaCommand("MPNetworkVE.setSocketConnected(true)")
+		elseif code == "d" then
+			veh:queueLuaCommand("MPNetworkVE.setSocketConnected(false)")
+		end
+	end
+end
+
 --- Prompts the user for auto join confirmation.
 -- @param params string The parameters received for auto join confirmation.
 -- @usage MPCoreNetwork.promptAutoJoin(`...`)
@@ -601,6 +615,7 @@ local HandleNetwork = {
 	['N'] = function(params) loginReceived(params) end,
 	['P'] = function(params) setProxyPort(params) end,
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
+	['V'] = function(params) handleDirectVE(params) end, -- Messages related to direct VE sockets
 	['W'] = function(params) handleModWarning(params) end,
 	['Z'] = function(params) launcherVersion = params; end,
 }
@@ -742,6 +757,17 @@ runPostJoin = function() -- gets called once loaded into a map
 	end
 end
 
+-- Notify launcher of direct VE ports, port being nil means the socket is deleted
+local function setDirectVEPort(serverVehicleID, port)
+	if not serverVehicleID then return end
+
+	if port then
+		send("Va:"..serverVehicleID..":"..tostring(port))
+	else
+		send("Vd:"..serverVehicleID)
+	end
+end
+
 --- This event is called as part of the games level loading process. It also works as the start event which can be paired with the end event onClientEndMission
 --- @usage `extensions.hook('onClientStartMission')`
 local function onClientStartMission()
@@ -801,6 +827,7 @@ M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
 M.getProxyPort         = getProxyPort
+M.setDirectVEPort      = setDirectVEPort
 -- security
 M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload

@@ -193,36 +193,42 @@ end
 
 
 
+local function applyPositionData(jsonData)
+	local pr = jsonDecode(jsonData)
+	local pos  = vec3(pr.pos)
+	local vel  = vec3(pr.vel)
+	local rot  = quat(pr.rot)
+	local rvel = vec3(pr.rvel)
+	local tim  = pr.tim
+	local ping = pr.ping
+	local simspeedfraction = 1/simSpeedReal
+
+	if not tim then return end
+	if remoteData.timer > tim then return end
+
+	local remoteDT = max(tim - remoteData.timer, 0.001)
+
+	remoteData.pos = pos
+	remoteData.rot = rot
+	remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
+	remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
+	remoteData.vel = vel*simspeedfraction
+	remoteData.rvel = rvel*simspeedfraction
+	remoteData.timer = tim
+	remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
+	remoteData.recTime = timer
+	remoteData.localSimspeed = math.min(simspeedfraction, 25)
+end
+
+
+
 local function updateRemoteData()
-	if not v.mpServerID or v.mpServerID == "" then return end
+	if not v.mpServerID then return end
 	local mailBoxName = "vehPosPckt" .. v.mpServerID
 	local currentMailBoxVersion = obj:getLastMailboxVersion(mailBoxName)
 	if lastMailboxVersion ~= currentMailBoxVersion then
 		local jsonData = obj:getLastMailbox(mailBoxName)
-		local pr = jsonDecode(jsonData)
-		local pos  = vec3(pr.pos)
-		local vel  = vec3(pr.vel)
-		local rot  = quat(pr.rot)
-		local rvel = vec3(pr.rvel)
-		local tim  = pr.tim
-		local ping = pr.ping
-		local simspeedfraction = 1/simSpeedReal
-
-		if not tim then return end
-		if remoteData.timer > tim then return end
-
-		local remoteDT = max(tim - remoteData.timer, 0.001)
-
-		remoteData.pos = pos
-		remoteData.rot = rot
-		remoteData.acc = limitVecLength((vel - remoteData.vel)/remoteDT, maxAcc)
-		remoteData.racc = limitVecLength((rvel - remoteData.rvel)/remoteDT, maxRacc)
-		remoteData.vel = vel*simspeedfraction
-		remoteData.rvel = rvel*simspeedfraction
-		remoteData.timer = tim
-		remoteData.timeOffset = timer-tim - ownPing/2 - ping/2 - lastDT
-		remoteData.recTime = timer
-		remoteData.localSimspeed = math.min(simspeedfraction, 25)
+		applyPositionData(jsonData)
 	end
 	lastMailboxVersion = currentMailBoxVersion
 end
@@ -412,7 +418,12 @@ local function getVehicleRotation()
 		tim = timer,
 		ping = ownPing + lastDT
 	}
-	obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', "..obj:getID()..")") -- Send it
+
+	if MPNetworkVE.socketConnected then
+		MPNetworkVE.send("Zp:", v.mpServerID, ":", jsonEncode(tempTable))
+	else
+		obj:queueGameEngineLua("positionGE.sendVehiclePosRot(\'"..jsonEncode(tempTable).."\', "..obj:getID()..")") -- Send it
+	end
 end
 
 
@@ -431,6 +442,7 @@ M.onExtensionLoaded  = onInit
 M.onPhysicsStep      = update
 M.updateGFX          = updateGFX
 M.getVehicleRotation = getVehicleRotation
+M.applyPositionData  = applyPositionData
 M.setPing            = setPing
 M.setGameSpeed       = setGameSpeed
 

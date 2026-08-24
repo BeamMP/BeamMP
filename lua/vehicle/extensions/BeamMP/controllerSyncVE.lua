@@ -20,8 +20,12 @@ local framesSinceReset = 0
 local hookExstensions
 
 local function sendControllerData(tempTable) -- using nodesGE temporarely until launcher and server supports the new packet
-	--obj:queueGameEngineLua("MPControllerGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
-	obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+	if MPNetworkVE.socketConnected then
+		MPNetworkVE.send("Xc:", v.mpServerID, ":", jsonEncode(tempTable))
+	else
+		--obj:queueGameEngineLua("MPControllerGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+		obj:queueGameEngineLua("nodesGE.sendControllerData(\'" .. jsonEncode(tempTable) .. "\', " .. obj:getID() ..")") -- Send it to GE lua
+	end
 end
 
 local function mergeTable(tempTable , table)

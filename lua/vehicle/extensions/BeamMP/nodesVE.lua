@@ -95,7 +95,11 @@ local function getNodes()
     save.beams[beam.cid + 1] = d
   end]]
 
-	obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', "..obj:getID()..")") -- Send it to GE lua
+  if MPNetworkVE.socketConnected then
+		MPNetworkVE.send("Xn:", v.mpServerID, ":", jsonEncode(save))
+	else
+		obj:queueGameEngineLua("nodesGE.sendNodes(\'"..jsonEncode(save).."\', "..obj:getID()..")") -- Send it to GE lua
+	end
 end
 
 
@@ -218,7 +222,11 @@ local function getBreakGroups()
 		return
 	end
 
-	obj:queueGameEngineLua("nodesGE.sendBreakGroups(\'"..jsonEncode(breakGroupArray).."\', "..obj:getID()..")") -- Send it to GE lua
+  if MPNetworkVE.socketConnected then
+		MPNetworkVE.send("Xg:", v.mpServerID, ":", jsonEncode(breakGroupArray))
+	else
+	  obj:queueGameEngineLua("nodesGE.sendBreakGroups(\'"..jsonEncode(breakGroupArray).."\', "..obj:getID()..")") -- Send it to GE lua
+	end
 end
 
 local function onBreakGroupBroken(g)

@@ -132,7 +132,12 @@ local function getInputs()
 	lastInputs.g = electrics.values.gear
 
 	if tableIsEmpty(inputsToSend) then return end
-	obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
+
+	if MPNetworkVE.socketConnected then
+		MPNetworkVE.send("Vi:", v.mpServerID, ":", jsonEncode(inputsToSend))
+	else
+		obj:queueGameEngineLua("MPInputsGE.sendInputs(\'"..jsonEncode(inputsToSend).."\', "..obj:getID()..")") -- Send it to GE lua
+	end
 end
 
 local function storeTargetValue(inputName,inputState)

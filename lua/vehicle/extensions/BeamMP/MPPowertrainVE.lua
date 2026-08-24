@@ -47,7 +47,11 @@ local function getPowerTrainData()
 		end
 	end
 	if next(devicesToSend) then
-		obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', "..obj:getID()..")")
+		if MPNetworkVE.socketConnected then
+			MPNetworkVE.send("Yl:", v.mpServerID, ":", jsonEncode(devicesToSend))
+		else
+			obj:queueGameEngineLua("MPPowertrainGE.sendLivePowertrain(\'"..jsonEncode(devicesToSend).."\', "..obj:getID()..")")
+		end
 		-- print("Devices "..jsonEncode(devicesToSend).." sent")
 	end
 end
@@ -95,7 +99,11 @@ local function getEngineData() --TODO maybe hook the functions instead of checki
 	data = getCombustionEngineData(data)
 
 	if next(data) then
-		obj:queueGameEngineLua("MPPowertrainGE.sendEngineData(\'"..jsonEncode(data).."\', "..obj:getID()..")")
+		if MPNetworkVE.socketConnected then
+			MPNetworkVE.send("Ye:", v.mpServerID, ":", jsonEncode(data))
+		else
+			obj:queueGameEngineLua("MPPowertrainGE.sendEngineData(\'"..jsonEncode(data).."\', "..obj:getID()..")")
+		end
 	end
 end
 

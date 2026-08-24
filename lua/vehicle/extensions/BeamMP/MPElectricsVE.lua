@@ -391,7 +391,11 @@ local function check()
 		:: skip_electric ::
 	end
 	if electricsChanged then
-		obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', "..obj:getID()..")")
+		if MPNetworkVE.socketConnected then
+			MPNetworkVE.send("We:", v.mpServerID, ":", jsonEncode(electricsToSend))
+		else
+			obj:queueGameEngineLua("MPElectricsGE.sendElectrics(\'"..jsonEncode(electricsToSend).."\', "..obj:getID()..")")
+		end
 	end
 end
 

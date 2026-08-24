@@ -1668,6 +1668,9 @@ local function onVehicleDestroyed(gameVehicleID)
 		if not vehicle then return end
 		local serverVehicleID = vehicle.serverVehicleString -- Get the serverVehicleID
 
+		-- Set direct VE port to nil to notify launcher of deleted vehicle
+		MPCoreNetwork.setDirectVEPort(serverVehicleID, nil)
+
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
 

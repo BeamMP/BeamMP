@@ -5,7 +5,7 @@
 local M = {}
 
 v.mpVehicleType = "L" -- we assume vehicles are local (they're set to remove once we receive pos data from the server)
-v.mpServerID = ""
+v.mpServerID = nil
 
 local keyStates = {} -- table of keys and their states, used as a reference
 local keysToPoll = {} -- list of keys we want to poll for state changes
@@ -60,6 +60,8 @@ end
 
 local function setServerID(id)
   v.mpServerID = id
+
+  MPNetworkVE.createDirectVESocket()
 end
 
 local function updateGFX(dtReal)

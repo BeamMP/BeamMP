@@ -90,7 +90,13 @@ local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attach
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 
-		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
+		-- NOTE: 'O' packets are also used for vehicle spawns and other things, we can still send them over the direct VE socket, 
+		-- but receiving has to be done through GE Lua
+		if MPNetworkVE.socketConnected then
+            MPNetworkVE.send("Ot:", v.mpServerID, ":", jsonEncode(MPcouplerdata))
+        else
+            obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
+        end
 	end
 
 	lastNodeIDcoupled = nodeId
@@ -132,7 +138,13 @@ local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
 			table.insert(MPcouplerdata,MPcouplers)
 		end
 
-		obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
+		-- NOTE: 'O' packets are also used for vehicle spawns and other things, we can still send them over the direct VE socket, 
+		-- but receiving has to be done through GE Lua
+		if MPNetworkVE.socketConnected then
+            MPNetworkVE.send("Ot:", v.mpServerID, ":", jsonEncode(MPcouplerdata))
+        else
+            obj:queueGameEngineLua("MPVehicleGE.sendBeamstate(\'"..jsonEncode(MPcouplerdata).."\'," ..tostring(obj:getID())..")")
+        end
 	end
 
 	lastNodeIDdecoupled = nodeId

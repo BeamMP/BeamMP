@@ -294,6 +294,14 @@ function TriggerServerEvent(name, data)
 	M.send(MPNetworkHelpers.generatePacketBuffer('E',name,data))
 end
 
+--- Triggers an unreliable server event with the specified name and data.
+-- @tparam string name - The name of the event
+-- @tparam string data - The data to be sent with the event
+-- @usage TriggerServerEventUnreliable(`<name>`, `<data>`)
+function TriggerServerEventUnreliable(name, data)
+	M.send('e:'..name..':'..data)
+end
+
 --- Triggers a local client event with the specified name and data.
 -- @tparam string name - The name of the event
 -- @tparam string data - The data to be sent with the event
@@ -471,6 +479,7 @@ local HandleNetwork = {
 	['L'] = function(params) playerLeft(params) end, -- A player left
 	['S'] = function(params) sessionData(params) end, -- Update Session Data
 	['E'] = function(params) handleEvents(params) end, -- Event For another Resource
+	['e'] = function(params) handleEvents(params) end,
 	['T'] = function(params) quitMP(params) end, -- Player Kicked Event (old, doesn't contain reason)
 	['K'] = function(params) quitMP(params) end, -- Player Kicked Event (new, contains reason)
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event

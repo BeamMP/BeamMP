@@ -371,9 +371,9 @@ function vecDirPredictor:get(timeStamp, dt, offset, multiplier, set)
   end
 
   if self.enableDebug and debugDrawer then
-    debugDrawer:drawSphere(0.2, lastPosData.pos, color(255,0,255,200))
-    debugDrawer:drawSphere(0.3, remoteVehData.pos, color(0,0,255,200))
-    debugDrawer:drawSphere(0.2, bufferData[self.currentBufferID].pos, color(255,0,0,200))
+    --debugDrawer:drawSphere(0.2, lastPosData.pos, color(255,0,255,200))
+    debugDrawer:drawSphere(0.1, remoteVehData.pos, color(0,0,0,200))
+    --debugDrawer:drawSphere(0.2, bufferData[self.currentBufferID].pos, color(255,0,0,200))
 
   	local lastPos = vec3()
   	local lastTime2 = 0
@@ -465,9 +465,9 @@ function vecDirPredictor:get(timeStamp, dt, offset, multiplier, set)
   if self.enableDebug and debugDrawer then
     debugDrawer:drawText(pos:toFloat3(), color(0,0,0,255), string.format("Prediction: %.0f ms", predictTime*1000))
     debugDrawer:drawText(pos:toFloat3() + vec3(0,0,1), color(0,0,0,255), string.format("rawLatency: %.0f ms", rawLatency*1000))
-    debugDrawer:drawSphere(0.2, pos, color(0,255,0,200))
-    debugDrawer:drawSphere(0.1, bufferData[self.currentBufferID].pos, color(255,0,0,200))
-    debugDrawer:drawSphere(0.2, remoteVehData.pos+predictAdd, color(0,255,0,200))
+    debugDrawer:drawSphere(0.1, pos, color(0,255,0,200))
+    debugDrawer:drawSphere(0.1, bufferData[self.currentBufferID].pos, color(0,0,255,200))
+    debugDrawer:drawSphere(0.1, remoteVehData.pos+predictAdd, color(0,255,0,200))
   end
 
   return pos, remoteVehData.vel, remoteVehData.acc, isTeleport, predictTime
@@ -775,8 +775,12 @@ function quaternionPredictor:get(timeStamp, dt, offset, multiplier, set)
   predict_quaternion(self.rot, self.rotVel, tempQuat, current.rotVel, current.rotAcc, predictTime)
 
   if self.enableDebug and debugDrawer then
-    debugDrawer:drawCylinder(pos, (pos + vec3(0,-5,0):rotated(self.rot)):toFloat3(),0.1, color(0,255,0,200))
-    debugDrawer:drawCylinder(pos, (pos + vec3(0,-5,0):rotated(self.bufferData[self.currentBufferID].rot):toFloat3()),0.1, color(255,0,0,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3(0,-3,0):rotated(self.rot)):toFloat3(),0.05, color(0,255,0,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3( 3,0,0):rotated(self.rot)):toFloat3(),0.05, color(0,255,0,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3(0,-3,0):rotated(self.bufferData[self.currentBufferID].rot):toFloat3()),0.05, color(0,0,255,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3( 3,0,0):rotated(self.bufferData[self.currentBufferID].rot):toFloat3()),0.05, color(0,0,255,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3(0,-3,0):rotated(remoteVehData.rot):toFloat3()),0.05, color(0,0,0,200))
+    debugDrawer:drawCylinder(pos, (pos + vec3( 3,0,0):rotated(remoteVehData.rot):toFloat3()),0.05, color(0,0,0,200))
   end
 
   return isTeleport and remoteVehData.rot or self.rot, isTeleport and remoteVehData.rotVel or self.rotVel, isTeleport, predictTime

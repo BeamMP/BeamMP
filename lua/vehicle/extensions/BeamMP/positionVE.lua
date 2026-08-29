@@ -28,6 +28,8 @@ local posPacketSize = ffi.sizeof(sendPacket);
 local smoothers = require("common/BeamMP/smoothers")
 local predictors = require("common/BeamMP/predictors")
 local stringBuffer = require("string.buffer")
+local debugDrawer = obj.debugDrawProxy
+local enableDebug = false
 
 -- ============= VARIABLES =============
 -- Position
@@ -489,6 +491,11 @@ local function updateGFX(dt)
 
 	local predictedRot, predictedRvel, isRotTeleport = quaternionPredictor:get(timer,dt,predictOffset, simSpeed)
 
+	if enableDebug then
+    	debugDrawer:drawSphere(0.1, vehPos, color(255,0,0,200))
+		debugDrawer:drawCylinder(vehPos, (vehPos + vec3(0,-3,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
+		debugDrawer:drawCylinder(vehPos, (vehPos + vec3( 3,0,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
+	end
 	local targetRot = quatCache.targetRot
 	local targetRvel = vecCache.targetRvel
 	targetRot:set(predictedRot)
@@ -663,9 +670,11 @@ local function checkDebug()
 	if settings.getValue("enablePredictionDebug") then
 		dirPredictor.enableDebug = true
 		quaternionPredictor.enableDebug = true
+		enableDebug = true
 	else
 		dirPredictor.enableDebug = false
 		quaternionPredictor.enableDebug = false
+		enableDebug = false
 	end
 end
 

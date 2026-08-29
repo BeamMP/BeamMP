@@ -49,6 +49,7 @@ local structSendPos  = sendPacket.pos
 local structSendVel  = sendPacket.vel
 local structSendRot  = sendPacket.rot
 local structSendRvel = sendPacket.rvel
+
 --- Wraps vehicle position, rotation etc. data from player own vehicles and sends it to the server.
 -- INTERNAL USE
 -- @param data table The position and rotation data from VE
@@ -57,11 +58,18 @@ local function sendVehiclePosRot(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
 		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data))
+		end
+	end
+end
+
+
+local function sendVehiclePosRotFFI(data, gameVehicleID)
+	if MPGameNetwork.launcherConnected() then
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
 			if MPTimeSyncGE.hasReceivedPing and #data == sendPacketSize then
 				MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zf',serverVehicleID,data))
-			else
-				local sendBuffer = MPNetworkHelpers.generatePacketBuffer('Zp',serverVehicleID,data)
-				MPGameNetwork.send(sendBuffer)
 			end
 		end
 	end
@@ -242,6 +250,7 @@ M.applyPos                    = applyPos
 M.tick                        = tick
 M.handle                      = handle
 M.sendVehiclePosRot           = sendVehiclePosRot
+M.sendVehiclePosRotFFI        = sendVehiclePosRotFFI
 M.setPosition                 = setPosition
 M.setPositionRotationVelocity = setPositionRotationVelocity
 M.setPing                     = setPing

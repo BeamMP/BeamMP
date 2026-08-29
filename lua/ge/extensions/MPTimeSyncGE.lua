@@ -37,7 +37,8 @@ local isInReplay = false
 local queuedSimSpeed = 0
 local veSimTime = 0
 
-local pingCount = 0
+local pingSendCount = 0
+local pingRecCount = 0
 local pingTimer = 0
 local pingSendRate = 1
 
@@ -220,7 +221,7 @@ local function timeSyncUpdate(dtReal, dtSim, dtRaw)
 	timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw)
 
 	local timeOffsetError = abs(timeOffsetCPU - targetTimeOffset)
-	if timeOffsetError > 1 or pingCount == 5 then
+	if timeOffsetError > 1 or pingRecCount == 5 then
 		serverTimeOffsetSmoother:set(targetTimeOffset)
         timeOffsetCPU = targetTimeOffset
 		setSimOffset()
@@ -256,24 +257,24 @@ local function sendPing()
     MPGameNetwork.send("t"..data)
 end
 
-local function receivePing(data, dtRaw)
+local function receiveServerTime(data, dtRaw)
     if #data ~= ffi.sizeof("timeStruct") then return end
 	ffi.copy(timeData, data, ffi.sizeof("timeStruct"))
 
     local gameTime = timeData[0].gameTime
     local serverTime = tonumber(timeData[0].serverTime)/1000
 
-	pingCount = pingCount + 1
+	pingRecCount = pingRecCount + 1
 
 	if not M.hasReceivedPing then
-		be:queueAllObjectLua("if MPTimeSyncVE then MPTimeSyncVE.useTimeSync = true end")
+		be:sendToMailbox("BeamMPUseTimeSync","true")
 	end
 	M.hasReceivedPing = true
 
 	local responseTime = math.max(0,(os:clockhp() - gameTime)-dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
 	local rawOffset = (os:clockhp() - serverTime) - (responseTime/2) - dtRaw -- but dtRaw needs to also be subtracted here to get the correct offset
 
-	if abs(targetTimeOffset - rawOffset) > 1 or pingCount == 1 then
+	if abs(targetTimeOffset - rawOffset) > 1 or pingRecCount == 1 then
 		serverTimeRecOffsetSmoother:set(rawOffset)
 	end
 
@@ -284,10 +285,14 @@ local function onUpdate(dtReal, dtSim,dtRaw)
 	if not MPGameNetwork.launcherConnected() then return end
 	pingTimer = pingTimer + dtRaw
 	if pingTimer >= pingSendRate then
+		pingSendCount = pingSendCount + 1
+		if pingSendCount > 5 then
+			be:sendToMailbox("BeamMPTimeSyncReady","true")
+		end
 		pingTimer = 0
 		sendPing()
 	end
-	--if not M.hasReceivedPing and pingCount < 2 then return end
+	--if not M.hasReceivedPing and pingRecCount < 2 then return end
     timeSyncUpdate(dtReal, dtSim, dtRaw)
 end
 
@@ -324,7 +329,10 @@ local function onBeamMPServerLeave()
 	speedSmoother:reset()
 	maxSpeedSmoother:reset()
 
-	pingCount = 0
+	be:sendToMailbox("BeamMPTimeSyncReady","false")
+	be:sendToMailbox("BeamMPUseTimeSync","false")
+	pingSendCount = 0
+	pingRecCount = 0
 	pingTimer = 0
 
 	speedAverage = {}
@@ -341,7 +349,7 @@ end
 M.onReplayStateChanged = checkIfInReplay
 M.onExtensionLoaded = onExtensionLoaded
 M.onBeamMPServerLeave = onBeamMPServerLeave
-M.receivePing = receivePing
+M.receiveServerTime = receiveServerTime
 M.onUpdate = onUpdate
 
 return M

@@ -344,6 +344,7 @@ local sendStructRvel = sendPacket.rvel
 local sendStructTim = sendPacket.tim
 
 local function getVehicleRotation(serverID)
+	if not MPTimeSyncVE.ready then return end -- TODO start with a nop function and switch it to this instead of checking every tick
 	dir:set(obj:getDirectionVectorXYZ())
 	dir:setScaled(-1)
 	dirUp:set(obj:getDirectionVectorUpXYZ())

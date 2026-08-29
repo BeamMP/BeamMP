@@ -13,6 +13,7 @@ local timeOffsetsSize = ffi.sizeof("timeSyncStruct")
 
 M.isSimTimeTracker = false
 M.useTimeSync = false
+M.ready = false
 
 local simTimeOffset = 0
 local cpuTimeOffset = 0
@@ -40,8 +41,13 @@ local function getSimSpeed()
 end
 
 local lastMailboxVersion = -2
+local lastMailboxVersion1 = -2
+local lastMailboxVersion2 = -2
 local function updateSimTime()
 	local currentMailBoxVersion = obj:getLastMailboxVersion("BeamMPTimeOffsets")
+
+	local currentMailBoxVersion1 = obj:getLastMailboxVersion("BeamMPUseTimeSync")
+	local currentMailBoxVersion2 = obj:getLastMailboxVersion("BeamMPTimeSyncReady")
 	if lastMailboxVersion ~= currentMailBoxVersion then
 		local data = obj:getLastMailbox("BeamMPTimeOffsets")
 		if #data ~= timeOffsetsSize then return end
@@ -51,7 +57,28 @@ local function updateSimTime()
     	cpuTimeOffset = timeOffsets[0].cpuTimeOffset
     	timeShiftSpeed = timeOffsets[0].timeShiftSpeed
 	end
+
+	if lastMailboxVersion1 ~= currentMailBoxVersion1 then
+		local data = obj:getLastMailbox("BeamMPUseTimeSync")
+		if data == "true" then
+			M.useTimeSync = true
+		else
+			M.useTimeSync = false
+		end
+	end
+
+	if lastMailboxVersion2 ~= currentMailBoxVersion2 then
+		local data = obj:getLastMailbox("BeamMPTimeSyncReady")
+		if data == "true" then
+			M.ready = true
+		else
+			M.ready = false
+		end
+	end
+
 	lastMailboxVersion = currentMailBoxVersion
+	lastMailboxVersion1 = currentMailBoxVersion1
+	lastMailboxVersion2 = currentMailBoxVersion2
 end
 
 local function updateGFX(dt)

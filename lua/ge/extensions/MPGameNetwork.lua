@@ -477,7 +477,7 @@ local HandleNetwork = {
 	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
 	['n'] = function(params) local category, icon, message = params:match("([^:]+):?(.-):(.+)") UI.showNotification(message, category, icon) end, -- Custom UI notification
 	['D'] = function(params) spawnUiDialog(jsonDecode(params)) end, -- Custom UI Dialog
-	['t'] = function(params, dtRaw) MPTimeSyncGE.receivePing(params, dtRaw) end,
+	['t'] = function(params, dtRaw) MPTimeSyncGE.receiveServerTime(params, dtRaw) end,
 }
 
 

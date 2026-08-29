@@ -636,19 +636,19 @@ local function updateGFX(dt)
 		colliding = true
 	end
 	local collidingSmooth = collisionSmoother:get(colliding and 1 or 0,dt)
-	--local notCollidingSmooth = notCollidingSmoother:get(colliding and 0 or 1,dt)
+	local notCollidingSmooth = notCollidingSmoother:get(colliding and 0 or 1,dt)
 
 	local posErrorColMul = 1
 	local rotErrorColMul = 1
 
-	if collidingSmooth > 0 then
-		--local contactMul = ((posVehicleContactMul*collidingSmooth)+((1-posVehicleContactMul)*notCollidingSmooth))*collidingSmooth
-		--local contactMulR = ((rotVehicleContactMul*collidingSmooth)+((1-rotVehicleContactMul)*notCollidingSmooth))*collidingSmooth
-		--posErrorColMul = max(0,min(1,1-contactMul))
-		--rotErrorColMul = max(0,min(1,1-contactMulR))
+	if collidingSmooth > 0 then -- TODO properly test this
+		local contactMul = ((posVehicleContactMul*collidingSmooth)+((1-posVehicleContactMul)*notCollidingSmooth))*collidingSmooth
+		local contactMulR = ((rotVehicleContactMul*collidingSmooth)+((1-rotVehicleContactMul)*notCollidingSmooth))*collidingSmooth
+		posErrorColMul = max(0,min(1,1-contactMul))
+		rotErrorColMul = max(0,min(1,1-contactMulR))
 
-		posErrorColMul = max(0,min(1,1-(posVehicleContactMul*collidingSmooth)))
-		rotErrorColMul = max(0,min(1,1-(rotVehicleContactMul*collidingSmooth)))
+		--posErrorColMul = max(0,min(1,1-(posVehicleContactMul*collidingSmooth)))
+		--rotErrorColMul = max(0,min(1,1-(rotVehicleContactMul*collidingSmooth)))
 
 		posPIDx.integral = 0
 		posPIDy.integral = 0

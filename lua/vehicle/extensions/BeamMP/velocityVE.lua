@@ -21,6 +21,7 @@ local lastDamage = 0
 local damageTimer = 0
 local physicsFPS = 0
 M.cogRel = vec3(0,0,0)
+M.InitCogRel = vec3(0,0,0)
 
 local refNode = v.data.refNodes[0].ref
 
@@ -197,12 +198,14 @@ local function onInit()
 		end
 		
 		findConnectedNodes()
+		M.InitCogRel:set(M.cogRel)
 	else
 		log('M', 'onInit', "Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
 			nodes[#nodes+1] = {n.cid, obj:getNodeMass(n.cid)*physicsFPS}
 	    end
 		calcCOG()
+		M.InitCogRel:set(M.cogRel)
 	end
 
 	log('M', 'onInit', "velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..tostring(parentNode))

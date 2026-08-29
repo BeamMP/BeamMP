@@ -179,6 +179,8 @@ local smoothRvel = vec3(0,0,0)
 local accurateVel = vec3()
 local rawRVel = vec3()
 local cog1 = vec3()
+local dir = vec3()
+local dirUp = vec3()
 local rot1 = quat()
 
 local function onReset()
@@ -222,7 +224,10 @@ local function onPhysicsStep(dtSim)
 	local roll,pitch,yaw = obj:getRollPitchYawAngularVelocity() -- this is faster than doing them separately
 	rawRVel:set(pitch,roll,yaw) -- but it's in the wrong order so we need to correct them
 
-	rot1:set(obj:getRotation())
+	dir:set(obj:getDirectionVectorXYZ())
+	dir:setScaled(-1)
+	dirUp:set(obj:getDirectionVectorUpXYZ())
+	rot1:setFromDir(dir, dirUp)
 	rawRVel:setRotate(rot1)
 	cog1:set(velocityVE.cogRel)
 	cog1:setRotate(rot1)
@@ -339,7 +344,11 @@ local sendStructRvel = sendPacket.rvel
 local sendStructTim = sendPacket.tim
 
 local function getVehicleRotation(serverID)
-	rot:set(obj:getRotation())
+	dir:set(obj:getDirectionVectorXYZ())
+	dir:setScaled(-1)
+	dirUp:set(obj:getDirectionVectorUpXYZ())
+	rot:setFromDir(dir, dirUp)
+
 	rvel:set(smoothRvel)
 
 	cog:set(velocityVE.InitCogRel)
@@ -437,8 +446,10 @@ local function updateGFX(dt)
 	local lastVehVel = vecCache.lastVehVel
 	local lastVehRvel = vecCache.lastVehRvel
 
-	--
-	vehRot:set(obj:getRotation())
+	dir:set(obj:getDirectionVectorXYZ())
+	dir:setScaled(-1)
+	dirUp:set(obj:getDirectionVectorUpXYZ())
+	vehRot:setFromDir(dir, dirUp)
 	vehRvel:set(smoothRvel)
 	if isnaninf(vehRvel:squaredLength()) then return end
 

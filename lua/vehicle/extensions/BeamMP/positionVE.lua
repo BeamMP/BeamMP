@@ -363,7 +363,7 @@ local function getVehicleRotation(serverID)
 
 		local serializedFFIString = serialize(ffi.string(sendPacket, posPacketSize))
 		posPacketBuff:reset()
-		posPacketBuff:put('positionGE.sendVehiclePosRot(', serializedFFIString, ",", objectId, ")")
+		posPacketBuff:put('positionGE.sendVehiclePosRotFFI(', serializedFFIString, ",", objectId, ")")
 
 		-- this would be faster, but queues break with binary data so we need to serialize it
 		--posPacketBuff:put(",", objectId, ")")

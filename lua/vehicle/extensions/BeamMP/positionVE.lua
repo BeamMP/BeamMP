@@ -39,7 +39,7 @@ local posCollisionTrigger = 20
 local posVehicleContactMul = 0.4    -- position force reduction when in contact with another vehicle, 0 is no reduction and 1 removes all forces
 local posProportional  = 40
 local posIntegral = 20
-local posDerivative = 6
+local posDerivative = 8
 local minOutput = -1000
 local maxOutput = 1000
 local posMinIntegral = -0.7
@@ -95,12 +95,13 @@ local quaternionPredictor = predictors.newQuaternionPredictor(bufferLength, rotV
 
 -- Smoothing
 local localVelSmoother = smoothers.newVectorSmoothing(50)             -- Smoother for local velocity
-local localAccSmoother = smoothers.newVectorSmoothing(50)             -- Smoother for local angular velocity
-local localRvelSmoother = smoothers.newVectorSmoothing(50)
-local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for getting average time offset
+local localAccSmoother = smoothers.newVectorSmoothing(50)
+local localRvelSmoother = smoothers.newVectorSmoothing(50)            -- Smoother for local angular velocity
+local timeOffsetSmoother = newTemporalSmoothingNonLinear(1)           -- Smoother for getting average time offset
 local timeOffset = 0
 
-local collisionSmoother = newTemporalSmoothing(2,100)           -- Smoother for local angular velocity
+local collisionSmoother = newTemporalSmoothing(2,10000)
+local notCollidingSmoother = newTemporalSmoothing(1)
 
 local ownPing = 0
 
@@ -133,30 +134,30 @@ local varCache = {
 }
 
 local vecCache = {
+	cog = vec3(),
 	vehPos = vec3(),
 	vehVel = vec3(),
 	vehAcc = vec3(),
-	rawVehAcc = vec3(),
 	vehRvel = vec3(),
 	vehRacc = vec3(),
+	errorDir = vec3(),
 	rotError = vec3(),
-	cog = vec3(),
-	lastVehVel = vec3(),
-	lastVehRvel = vec3(),
+	posError = vec3(),
+	rawVehAcc = vec3(),
 	targetPos = vec3(),
 	targetAcc = vec3(),
 	targetRacc = vec3(),
 	targetRvel = vec3(),
-	posError = vec3(),
-	posErrorTimer = vec3(),
-	rotErrorTimer = vec3(),
-	lastPosError = vec3(),
-	lastRotError = vec3(),
+	lastVehVel = vec3(),
+	lastVehRvel = vec3(),
 	posErrorVel = vec3(),
 	rotErrorVel = vec3(),
-	errorDir = vec3(),
 	posErrorMul = vec3(),
-	rotErrorMul = vec3()
+	rotErrorMul = vec3(),
+	lastPosError = vec3(),
+	lastRotError = vec3(),
+	posErrorTimer = vec3(),
+	rotErrorTimer = vec3()
 }
 
 local quatCache = {
@@ -228,6 +229,7 @@ local function onPhysicsStep(dtSim)
 	dir:setScaled(-1)
 	dirUp:set(obj:getDirectionVectorUpXYZ())
 	rot1:setFromDir(dir, dirUp)
+
 	rawRVel:setRotate(rot1)
 	cog1:set(velocityVE.cogRel)
 	cog1:setRotate(rot1)
@@ -364,6 +366,7 @@ local function getVehicleRotation(serverID)
 	rvel:setScaled(simSpeed)
 
 	if isnaninf(pos:squaredLength()) or isnaninf(vel:squaredLength()) or isnaninf(rvel:squaredLength()) then log('E','getVehicleRotation', 'skipped invalid velocity values') return end
+
 	if MPTimeSyncVE.useTimeSync then
 		sendPacket.tim = timeToSend
 		sendStructPos.x, sendStructPos.y, sendStructPos.z = pos.x, pos.y, pos.z
@@ -425,7 +428,7 @@ local function updateGFX(dt)
 	local framesSinceTeleport = varCache.framesSinceTeleport
 
 	if framesSinceReset == 5 then
-		velocityVE.onReset() -- TODO find better fix, temp fix for instability desyncing COG
+		velocityVE.onReset() -- TODO find better fix, temp fix for instability de-syncing COG
 	end
 
 	if v.mpVehicleType == "L" or timer == 0 or receivedData.timer == 0 or not receivedData.pos or (timer-receivedData.recTime) > packetTimeout+2 or framesSinceTeleport < 2 then
@@ -451,6 +454,7 @@ local function updateGFX(dt)
 	dir:setScaled(-1)
 	dirUp:set(obj:getDirectionVectorUpXYZ())
 	vehRot:setFromDir(dir, dirUp)
+
 	vehRvel:set(smoothRvel)
 	if isnaninf(vehRvel:squaredLength()) then return end
 
@@ -508,6 +512,7 @@ local function updateGFX(dt)
 		debugDrawer:drawCylinder(vehPos, (vehPos + vec3(0,-3,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
 		debugDrawer:drawCylinder(vehPos, (vehPos + vec3( 3,0,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
 	end
+
 	local targetRot = quatCache.targetRot
 	local targetRvel = vecCache.targetRvel
 	targetRot:set(predictedRot)
@@ -536,6 +541,7 @@ local function updateGFX(dt)
 
 	local tpDist1 = tpDistAdd + maxVel*tpDistMul1
 	local tpDist2 = tpDistAdd + maxVel*tpDistMul2
+
 	-- Debug for teleport distances
 	--debugDrawer:drawSphere(tpDist1, vehPos, color(0,0,255,50))
 	--debugDrawer:drawSphere(tpDist2, vehPos, color(255,0,0,50))
@@ -610,6 +616,8 @@ local function updateGFX(dt)
 	targetRacc:set(rvelPIDX,rvelPIDY,rvelPIDZ)
 
 	-- if vehicle gets pushed locally we reduce force for a certian time to make jumps and collisions more natural
+	-- TODO: reduce force more if the position error is very low on impact
+
 	local rotErrorVel = vecCache.rotErrorVel
 	rotErrorVel:setSub2(rotError,vecCache.lastRotError)
 	rotErrorVel:setScaled(1/dt)
@@ -628,13 +636,27 @@ local function updateGFX(dt)
 		colliding = true
 	end
 	local collidingSmooth = collisionSmoother:get(colliding and 1 or 0,dt)
+	--local notCollidingSmooth = notCollidingSmoother:get(colliding and 0 or 1,dt)
 
 	local posErrorColMul = 1
 	local rotErrorColMul = 1
 
 	if collidingSmooth > 0 then
+		--local contactMul = ((posVehicleContactMul*collidingSmooth)+((1-posVehicleContactMul)*notCollidingSmooth))*collidingSmooth
+		--local contactMulR = ((rotVehicleContactMul*collidingSmooth)+((1-rotVehicleContactMul)*notCollidingSmooth))*collidingSmooth
+		--posErrorColMul = max(0,min(1,1-contactMul))
+		--rotErrorColMul = max(0,min(1,1-contactMulR))
+
 		posErrorColMul = max(0,min(1,1-(posVehicleContactMul*collidingSmooth)))
 		rotErrorColMul = max(0,min(1,1-(rotVehicleContactMul*collidingSmooth)))
+
+		posPIDx.integral = 0
+		posPIDy.integral = 0
+		posPIDz.integral = 0
+
+		rotPIDx.integral = 0
+		rotPIDy.integral = 0
+		rotPIDz.integral = 0
 	end
 
 	if predictTime > 0.01 then

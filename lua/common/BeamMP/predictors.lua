@@ -362,7 +362,7 @@ function vecDirPredictor:get(timeStamp, dt, offset, multiplier, set)
     vel:setSub2(nextPosData.pos, lastPosData.pos)
     vel:setScaled(1 / dt)
     local velDiff = abs((nextPosData.totalVel ^ 2) - vel:squaredLength())
-    if nextPosData.totalVel < 5 and velDiff > 5 ^ 2 or velDiff > 50 ^ 2 then
+    if nextPosData.totalVel < 2 and velDiff > 15 ^ 2 or velDiff > 50 ^ 2 then
       isTeleport = true
     end
     if not isTeleport then

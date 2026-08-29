@@ -342,7 +342,7 @@ local function getVehicleRotation(serverID)
 	rot:set(obj:getRotation())
 	rvel:set(smoothRvel)
 
-	cog:set(velocityVE.cogRel)
+	cog:set(velocityVE.InitCogRel)
 	cog:setRotate(rot)
 	pos:set(obj:getPositionXYZ())
 	pos:setAdd(cog)
@@ -445,7 +445,7 @@ local function updateGFX(dt)
 	vehRacc:setSub2(vehRvel,lastVehRvel or vehRvel)
 	if isnaninf(vehRacc:squaredLength()) then return end
 
-	cog:set(velocityVE.cogRel)
+	cog:set(velocityVE.InitCogRel)
 	cog:setRotate(vehRot)
 
 	vehPos:set(obj:getPositionXYZ()) -- functions that end with XYZ are usually garbage free
@@ -551,7 +551,7 @@ local function updateGFX(dt)
 
 			if not tpRot then return end
 			local predictPos, predictVel = dirPredictor:get(timer + min(dtRaw,0.3),dt,predictOffset,simSpeed,true)
-			tpPos:setSub2(predictPos, velocityVE.cogRel:rotated(predictedRot))
+			tpPos:setSub2(predictPos, velocityVE.InitCogRel:rotated(predictedRot))
 
 			if isnaninf(posError:squaredLength()) or isnaninf(predictVel:squaredLength()) or isnaninf(tpRvel:squaredLength()) or isnaninf(vehVel:squaredLength()) or targetRot ~= targetRot then
 			else

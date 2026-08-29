@@ -385,7 +385,11 @@ local function updateGFX(dt)
 		obj.debugDrawProxy:drawNodeSphere(nodes[i][1], 0.03, color(255, 0, 0, 200))
 	end
 	
+	for i = 1, #disconnectedNodes do
+		obj.debugDrawProxy:drawNodeSphere(disconnectedNodes[i][1], 0.03, color(0, 255, 0, 200))
+	end
 	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.cogRel:rotated(vehRot), color(0, 0, 255, 200))
+	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.InitCogRel:rotated(vehRot), color(0, 255, 0, 200))
 	--]]
 end
 

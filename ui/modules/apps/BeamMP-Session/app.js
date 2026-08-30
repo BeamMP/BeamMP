@@ -6,6 +6,7 @@ var app = angular.module('beamng.apps');
 var mdDialog;
 var mdDialogVisible = false;
 import('/ui/lib/ext/purify.min.js')
+import('/ui/ui-vue/mods/BeamMP/shared/textFormat.js')
 app.directive('beammpSession', [function () {
 	return {
 		templateUrl: '/ui/modules/apps/BeamMP-Session/app.html',
@@ -172,52 +173,10 @@ app.controller("BeamMPSessionController", ['$scope', '$mdDialog', 'Settings', fu
 
 
 function formatServerName(string) {
-    let result = '';
-    let currentText = '';
-    let classes = new Set();
-
-	string = DOMPurify.sanitize(string);
-
-    const tokens = string.split(/(\^.)/g);
-
-    const flush = () => {
-        if (!currentText) return;
-        const classList = Array.from(classes);
-        result += classList.length
-            ? `<span class="${classList.join(' ')}">${currentText}</span>`
-            : currentText;
-        currentText = '';
-    };
-
-    for (let i = 0; i < tokens.length; i++) {
-		const token = tokens[i];
-		const nextToken = tokens[i+1]?.trim() || '';
-		if (/^\^.$/.test(token)) {
-			flush();
-			if (token === '^r') {
-				classes.clear();
-			} else if (token === '^*') {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if(cls) classes.add(cls);
-				if (iconsOrig[nextToken]) {
-					currentText = iconsOrig[nextToken].glyph
-				};
-			} else {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if (cls?.startsWith('color-')) {
-					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
-					classes.add(cls);
-				} else if (cls) {
-					classes.add(cls);
-				}
-			}
-		} else if (tokens[i-1]!='^*') {
-			currentText += token;
-		}
-	}
-
-    flush();
-    return result;
+	if (!globalThis.beammpFormatText) return string;
+	return globalThis.beammpFormatText(string, {
+		sanitize: globalThis.DOMPurify ? (v) => globalThis.DOMPurify.sanitize(v) : null,
+	});
 }
 
 function isMarqueeNeeded(block, element) {

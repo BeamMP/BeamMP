@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div
     class="beammpChat2"
     :class="{ 'ui-style-redesigned': useUiAppRedesign }"
@@ -44,7 +44,7 @@
           :aria-label="$tt('ui.apps.beammp.chat.moveHorizontal') || 'Move chat horizontally'"
           @click="swapHorizontal"
         >
-          ↔
+          ג†”
         </button>
         <button
 		  id="chat-vertical-button"
@@ -54,7 +54,7 @@
           :aria-label="$tt('ui.apps.beammp.chat.moveVertical') || 'Move chat vertically'"
           @click="swapVertical"
         >
-          ↕
+          ג†•
         </button>
       </form>
     </div>
@@ -65,6 +65,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useBridge } from "@/bridge"
 import { BngDropdown, BngInput, ACCENTS } from "@/common/components/base"
+import { formatBeamMPText } from "/ui/ui-vue/mods/BeamMP/shared/textFormat.js"
 
 const { api, events } = useBridge()
 
@@ -103,87 +104,19 @@ const chatBoxStyle = computed(() => ({
   marginLeft: chatHorizontal.value === "right" ? "auto" : "0px",
 }))
 
-const sendButtonText = computed(() => (useUiAppRedesign.value ? "💬" : "Send"))
+const sendButtonText = computed(() => (useUiAppRedesign.value ? "נ’¬" : "Send"))
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-}
-
-function isSafeServerHtml(html) {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(`<div>${html}</div>`, "text/html")
-  const blockedTags = new Set(["script", "iframe", "form", "input", "button", "a"])
-  const elements = doc.body.querySelectorAll("*")
-
-  for (const element of elements) {
-    if (blockedTags.has(element.tagName.toLowerCase())) return false
-    for (const attr of element.attributes) {
-      if (/^(?:on.*|(?:form).*|action)$/i.test(attr.name)) return false
-      if (/javascript:|data:/i.test(attr.value)) return false
-    }
-  }
-  return true
+function renderChatIcon(name) {
+  const icon = globalThis.iconsOrig?.[name]
+  if (!icon?.glyph) return null
+  return { text: icon.glyph, className: "bngIcon" }
 }
 
 function formatChatMessage(value) {
-  const string = String(value ?? "")
-  if (string.startsWith("Server: ")) {
-    const messageContent = string.slice(8)
-    if (messageContent.includes("<") && messageContent.includes(">") && isSafeServerHtml(messageContent)) {
-      return `Server: ${messageContent}`
-    }
-  }
-
-  const tokens = string.split(/(\^.)/g)
-  const classes = new Set()
-  let currentText = ""
-  let result = ""
-
-  const flush = () => {
-    if (!currentText) return
-    const encoded = escapeHtml(currentText)
-    const classList = Array.from(classes).join(" ")
-    result += classList ? `<span class="${classList}">${encoded}</span>` : encoded
-    currentText = ""
-  }
-
-  for (let index = 0; index < tokens.length; index += 1) {
-    const token = tokens[index]
-    const nextToken = tokens[index + 1]?.trim() || ""
-
-    if (/^\^.$/.test(token)) {
-      flush()
-      if (token === "^r") {
-        classes.clear()
-      } else if (token === "^p") {
-        result += "<br>"
-      } else if (token === "^*") {
-        const cls = globalThis.beammpTextStyleMap?.[token]
-        if (cls) classes.add(cls)
-        if (globalThis.iconsOrig?.[nextToken]) currentText = globalThis.iconsOrig[nextToken].glyph
-      } else {
-        const cls = globalThis.beammpTextStyleMap?.[token]
-        if (cls?.startsWith("color-")) {
-          for (const activeClass of [...classes]) {
-            if (activeClass.startsWith("color-")) classes.delete(activeClass)
-          }
-          classes.add(cls)
-        } else if (cls) {
-          classes.add(cls)
-        }
-      }
-    } else if (tokens[index - 1] !== "^*") {
-      currentText += token
-    }
-  }
-
-  flush()
-  return result
+  return formatBeamMPText(value, {
+    renderIcon: renderChatIcon,
+    allowServerHtml: true,
+  })
 }
 
 function storeChatMessages() {
@@ -438,6 +371,10 @@ onUnmounted(() => {
   background: rgba(var(--bng-cool-gray-800-rgb), 0.7);
 }
 
+.beammpChat2 .chat-message-content span[style*="background-color"] {
+  text-shadow: none;
+}
+
 .beammpChat2 .chat-message:hover {
   border-left-color: var(--bng-orange-500);
   background: rgba(var(--bng-cool-gray-700-rgb), 0.82);
@@ -610,7 +547,7 @@ onUnmounted(() => {
   }
 
   .beammpChat2 .send-button::before {
-    content: "↗";
+    content: "ג†—";
     font-size: 1rem;
   }
 }

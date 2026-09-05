@@ -53,7 +53,7 @@ local function checkTrackingVehicle(dtSim, dtRaw) --TODO make sure this doesn't 
 	end
     lastDTSim = dtSim
     lastVeSimTime = veSimTime
-    return veSimTime - dtRaw
+    return veSimTime
 end
 
 local function setSimTime(recSimTime,veCPUTime,objectID)

@@ -26,9 +26,15 @@ ffi.cdef [[
 local cpuTime = ffi.new("double[1]")
 local cpuTimeSize = ffi.sizeof("double")
 
+local pingMS = ffi.new("uint16_t[1]")
+local pingMSSize = ffi.sizeof("uint16_t")
+
 local timeData = ffi.new("timeStruct[1]")
 local timeOffsets = ffi.new("timeSyncStruct[1]")
 local timeOffsetsSize = ffi.sizeof("timeSyncStruct")
+
+local stringBuffer = require("string.buffer")
+local sendStringBuff = stringBuffer.new()
 
 M.hasReceivedPing = false
 
@@ -37,6 +43,7 @@ local isInReplay = false
 local queuedSimSpeed = 0
 local veSimTime = 0
 
+local ping = 0
 local pingSendCount = 0
 local pingRecCount = 0
 local pingTimer = 0
@@ -257,8 +264,11 @@ end
 
 local function sendPing()
     cpuTime[0] = os:clockhp()
-    local data = ffi.string(cpuTime, cpuTimeSize)
-    MPGameNetwork.send("t"..data)
+	pingMS[0] = ping*1000
+	sendStringBuff:set("t")
+	sendStringBuff:putcdata(cpuTime, cpuTimeSize)
+	sendStringBuff:putcdata(pingMS, pingMSSize)
+    MPGameNetwork.send(sendStringBuff)
 end
 
 local function receiveServerTime(data, dtRaw)
@@ -275,7 +285,11 @@ local function receiveServerTime(data, dtRaw)
 	end
 	M.hasReceivedPing = true
 
-	local responseTime = math.max(0,(os:clockhp() - gameTime)-dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
+	local rawResponseTime = os:clockhp() - gameTime
+
+	ping = rawResponseTime
+
+	local responseTime = math.max(0,(rawResponseTime)-dtRaw) -- dtRaw removes frame time from ping so it's not divided by 2
 	local rawOffset = (os:clockhp() - serverTime) - (responseTime/2) - dtRaw -- but dtRaw needs to also be subtracted here to get the correct offset
 
 	if abs(targetTimeOffset - rawOffset) > 1 or pingRecCount == 1 then

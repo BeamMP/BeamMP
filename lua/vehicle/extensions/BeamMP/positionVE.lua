@@ -311,7 +311,10 @@ local function setVehiclePosRot(dt, jsonData)
 end
 
 local lastMailboxVersion = -2
+local lastFFITime = 0
 local lastMailboxVersionJson = -2
+local lastJsonTime = 0
+
 local function updateRemoteData(dt)
 	if not v.mpServerID or v.mpServerID == "" or v.mpVehicleType ~= "R" then return end
 	local mailboxName = "vehPosPcktFFI" .. v.mpServerID
@@ -321,12 +324,14 @@ local function updateRemoteData(dt)
 
 	if lastMailboxVersion ~= currentMailBoxVersion then
 		obj:getLastMailboxToBuffer(mailboxName, posPacketRecBuff)
+		lastFFITime = 0
 		setVehiclePosRot()
 	end
 	if lastMailboxVersionJson ~= currentMailBoxVersionJson then
 		local jsonData = obj:getLastMailbox(mailboxNameJson, posPacketRecBuff)
 		if jsonData ~= "" then
 			setVehiclePosRot(dt,jsonData)
+			lastJsonTime = 0
 		end
 	end
 	lastMailboxVersion = currentMailBoxVersion
@@ -418,6 +423,8 @@ end
 local function updateGFX(dt)
 	local timer = MPTimeSyncVE.getServerSimTime()
 	dtRaw = os:clockhp() - varCache.lastUpdateTime
+	lastFFITime = lastFFITime + dtRaw
+	lastJsonTime = lastJsonTime + dtRaw
 	updateRemoteData(dtRaw)
 	varCache.lastUpdateTime = os:clockhp()
 
@@ -482,7 +489,7 @@ local function updateGFX(dt)
 	lastVehVel:set(vehVel)
 	lastVehRvel:set(vehRvel)
 
-	if not MPTimeSyncVE.useTimeSync then
+	if not MPTimeSyncVE.useTimeSync or lastFFITime > 1 and lastJsonTime < 1 then
 		-- Smoothed difference between local and remote timestamps
 		timeOffset = timeOffsetSmoother:get(receivedData.timeOffset, dt)
 		if abs(timeOffset - receivedData.timeOffset) > 1 then

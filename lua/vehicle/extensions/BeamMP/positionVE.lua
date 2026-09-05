@@ -314,7 +314,7 @@ local lastMailboxVersion = -2
 local lastMailboxVersionJson = -2
 local function updateRemoteData(dt)
 	if not v.mpServerID or v.mpServerID == "" or v.mpVehicleType ~= "R" then return end
-	local mailboxName = "vehPosPckt" .. v.mpServerID
+	local mailboxName = "vehPosPcktFFI" .. v.mpServerID
 	local mailboxNameJson = "vehPosPcktJson" .. v.mpServerID
 	local currentMailBoxVersion = obj:getLastMailboxVersion(mailboxName)
 	local currentMailBoxVersionJson = obj:getLastMailboxVersion(mailboxNameJson)

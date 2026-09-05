@@ -100,7 +100,7 @@ local function applyPos(data, serverVehicleID)
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
+		be:sendToMailbox("vehPosPcktFFI" .. serverVehicleID ,data)
 	end
 
 	vehicle.posPackets = (vehicle.posPackets or 0) + 1 -- counted for the fps, as not every packet is decoded

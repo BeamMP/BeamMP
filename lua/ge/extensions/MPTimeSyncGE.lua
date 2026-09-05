@@ -53,7 +53,7 @@ local timeOffsetSimSmooth = 0
 local timeOffsetSimChangeRate = 0
 
 local serverTimeRecOffsetSmoother = newTemporalSmoothingNonLinear(1,1)
-local serverTimeOffsetSmoother = newTemporalSmoothingNonLinear(0.03,0.03)
+local serverTimeOffsetSmoother = newTemporalSmoothingNonLinear(0.05,0.05)
 
 local timeOffsetSimSmoother = newTemporalSmoothingNonLinear(3)
 
@@ -218,13 +218,17 @@ end
 
 local function timeSyncUpdate(dtReal, dtSim, dtRaw)
     checkVehicleTime(dtSim, dtRaw)
-	timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw)
 
 	local timeOffsetError = abs(timeOffsetCPU - targetTimeOffset)
-	if timeOffsetError > 1 or pingRecCount == 5 then
+	if timeOffsetError > 0.5 or pingRecCount == 5 then
 		serverTimeOffsetSmoother:set(targetTimeOffset)
         timeOffsetCPU = targetTimeOffset
 		setSimOffset()
+	end
+	if timeOffsetError > 0.1 then
+		timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw*10)
+	else
+		timeOffsetCPU = serverTimeOffsetSmoother:get(targetTimeOffset,dtRaw)
 	end
 
 	local isPaused = not be:getEnabled()
@@ -277,8 +281,7 @@ local function receiveServerTime(data, dtRaw)
 	if abs(targetTimeOffset - rawOffset) > 1 or pingRecCount == 1 then
 		serverTimeRecOffsetSmoother:set(rawOffset)
 	end
-
-	targetTimeOffset = serverTimeRecOffsetSmoother:get(rawOffset, pingSendRate)
+	targetTimeOffset = serverTimeRecOffsetSmoother:get(rawOffset, pingSendRate/3)
 end
 
 local function onUpdate(dtReal, dtSim,dtRaw)

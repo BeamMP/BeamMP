@@ -142,6 +142,8 @@ local function sessionData(data)
 	elseif code == "n" then
 		UI.setNickname(data)
 		MPConfig.setNickname(data)
+	elseif code == "p" then
+		UI.setPlayerPings(data)
 	end
 end
 

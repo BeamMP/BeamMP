@@ -32,9 +32,10 @@ local gameSpeedPID = newPIDParallel(kP, tI, tD, minOutput, maxOutput, integralIn
 
 local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 	local maxCapableSpeedRaw = 1/dtRaw/20
-	local timeError = getBeamMPServerTime() - (getBeamMPSimTime() + dtSim)
+	local simTime = getBeamMPSimTime()
+	local timeError = getBeamMPServerTime() - simTime
 
-	local speedModify = -gameSpeedPID:get((getBeamMPSimTime() + dtSim),getBeamMPServerTime(),dtRaw)/2
+	local speedModify = -gameSpeedPID:get(simTime,getBeamMPServerTime(),dtRaw)/2
 
 	--TODO test catchupMaxSpeed on low spec machines
 	local maxCapableSpeed = min(4,maxCapableSpeedRaw)

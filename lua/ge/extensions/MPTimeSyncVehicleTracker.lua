@@ -77,7 +77,7 @@ local function setSimTime(recSimTime,veCPUTime,objectID)
 		dump("objectID    ",objectID)
 		local veh = be:getObjectByID(objectID)
 		if veh then
-			veh:queueLuaCommand("if positionVE then positionVE.isSimTimeTracker = false end")
+			veh:queueLuaCommand("if MPTimeSyncVE then MPTimeSyncVE.isSimTimeTracker = false end")
 		end
 	elseif not recSimTime then
 		dump("received time from the wrong vehicle and the time was nil")

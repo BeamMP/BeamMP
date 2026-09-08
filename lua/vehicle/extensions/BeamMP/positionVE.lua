@@ -272,7 +272,7 @@ local function updateGFX(dt)
 
 
 	-- If there is no received data, or data is older than timeout, do nothing
-	if remoteData.timer < 0 or (timer-remoteData.recTime) > packetTimeout then return end
+	if v.mpVehicleType == "L" or remoteData.timer < 0 or (timer-remoteData.recTime) > packetTimeout then return end
 
 	-- Local vehicle data
 	dir:set(obj:getDirectionVectorXYZ())

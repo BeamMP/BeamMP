@@ -126,7 +126,7 @@ local function instabilityHandlerUpdate(dt)
 						local veh = getObjectByID(vehID)
 						if veh then
 							if states.instabilityCount > 10 then
-								ui_message(""..veh:getJBeamFilename().." had too many instabilities and was deleted\n\nRight click the player's name and queue deleted vehicles to respawn it", 10, 'instabilityDelete'..veh:getJBeamFilename()..''.. vehID, "warning")
+								ui_message(""..veh:getJBeamFilename().." had too many instabilities and was deleted\n\nRight click the player's name and queue deleted vehicles to respawn it", 20, 'instabilityDelete'..veh:getJBeamFilename()..''.. vehID, "warning")
 								veh:delete()
 								vehicleInstabilityState[vehID] = nil --TODO put in spawn queue instead of clearing it
 							else

@@ -11,6 +11,8 @@
 
 local M = {}
 
+local stringBuffer = require("string.buffer")
+
 local ok, err = pcall(function()
     ffi.cdef[[
         typedef struct { float x, y, z; } Vec3;
@@ -88,20 +90,20 @@ local structRvel = receivePacket.rvel
 --- This function serves to send the position data received for another players vehicle from GE to VE, where it is handled.
 -- @param encoded json The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
 -- @param serverVehicleID string The VehicleID according to the server.
-local function applyPos(data, serverVehicleID)
+local function applyPosFFI(recBuffer, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 	local veh = getObjectByID(vehicle.gameVehicleID)
 	local owner = vehicle:getOwner()
-	if veh then -- vehicle already spawned, send data
+	if veh and #recBuffer == posPacketSize then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		be:sendToMailbox("vehPosPcktFFI" .. serverVehicleID ,data)
+		be:sendToMailbox("vehPosPcktFFI" .. serverVehicleID ,recBuffer)
 	elseif owner then
-		if #data == posPacketSize then
-			ffi.copy(receivePacket, data, posPacketSize)
+		if #recBuffer == posPacketSize then
+			ffi.copy(receivePacket, recBuffer, posPacketSize)
 			recPos:set(structPos.x,structPos.y,structPos.z)
 			recVel:set(structVel.x,structVel.y,structVel.z)
 			recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
@@ -116,7 +118,7 @@ local function applyPos(data, serverVehicleID)
 	end
 end
 
-local function applyPosJson(data, serverVehicleID)
+local function applyPosJson(recBuffer, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 	local veh = getObjectByID(vehicle.gameVehicleID)
@@ -125,12 +127,12 @@ local function applyPosJson(data, serverVehicleID)
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		be:sendToMailbox("vehPosPcktJson" .. serverVehicleID ,data)
+		be:sendToMailbox("vehPosPcktJson" .. serverVehicleID ,recBuffer)
 	end
 
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
-		local decodedData = jsonDecode(data)
+		local decodedData = jsonDecode(recBuffer:get())
 		local tim = decodedData.tim
 		local ping = decodedData.ping
 
@@ -156,10 +158,17 @@ local function applyPosJson(data, serverVehicleID)
 	end
 end
 
---- The raw message from the server. This is unpacked first and then sent to applyPos() or smoothPosExec()
+local recBuffer = stringBuffer.new()
+--- The raw message from the server. This is put into a string buffer, then code and serverVehicleID is read and the rest gets sent to VE or read in GE
+--- creates 24 bytes of garbage with a spawned vehicle, the last 24 bytes comes from the sendToMailbox function
 -- @param rawData string The raw message data.
 local function handle(rawData)
-	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:(.*)")
+	recBuffer:set(rawData) -- set replaces the whole buffer with the new string
+	local code = recBuffer:get(1) -- get consumes the string buffer
+	recBuffer:skip(1) -- Skip/consumes the ":" between code and serverVehicleID
+	local startID, endID = string.find(rawData, "(%d+%-%d+)%:") -- find the serverVehicleID index
+	local serverVehicleID = recBuffer:get(endID-startID) -- read and consume only the serverVehicleID
+	recBuffer:skip(1) -- skip/consumes the ":" between serverVehicleID and position data
 
 	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
 
@@ -167,10 +176,11 @@ local function handle(rawData)
 		return
 	end
 
+	-- send the rest of the string buffer directly to minimize garbage, mailboxes can take string buffer objects
 	if code == 'f' then
-		applyPos(data, serverVehicleID)
+		applyPosFFI(recBuffer, serverVehicleID)
 	elseif code == 'p' then
-		applyPosJson(data, serverVehicleID)
+		applyPosJson(recBuffer, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end

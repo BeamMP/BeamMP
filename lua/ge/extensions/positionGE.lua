@@ -133,8 +133,12 @@ local function applyPosJson(recBuffer, serverVehicleID)
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
 		local decodedData = jsonDecode(recBuffer:get())
+		if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
+			log('E','setVehicleRotation', 'Received invalid position packet')
+			return
+		end
 		local tim = decodedData.tim
-		local ping = decodedData.ping
+		local ping = decodedData.ping or 0
 
 		recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
 		recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])

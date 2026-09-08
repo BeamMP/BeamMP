@@ -13,8 +13,6 @@ local M = {state={}}
 
 
 local originalGetDriverData
-local originalToggleWalkingMode
-local originalOnVehicleSwitched
 local original_onInstabilityDetected
 
 
@@ -31,31 +29,15 @@ local function modifiedGetDriverData(veh)
 	return core_camera.getDriverDataById(veh and veh:getID())
 end
 
-
---- Custom walking mode function that handles the getting of the unicycle and handles the deletion of it.
-local function modifiedToggleWalkingMode()
-	local unicycle = gameplay_walk.getCurrentUnicycle()
-	if unicycle ~= nil then
-		local veh = gameplay_walk.getVehicleInFront()
-		if not veh or veh:getJBeamFilename() == "unicycle" then return end
-	end
-	originalToggleWalkingMode()
-	
-	-- If we were in a unicycle and entered a vehicle, delete it so it disappears for other players as well
-	if unicycle ~= nil then
-		unicycle:delete()
-	end
-end
-
---- Custom walking mode function that handles the getting of the unicycle and handles the deletion of it.
-local function modifiedOnVehicleSwitched(oldId, newId, player)
-  	local unicycle = scenetree.findObjectById(oldId)
-	local walkData = gameplay_walk.onSerialize()
-
-	originalOnVehicleSwitched(oldId, newId, player)
-	-- If we were in a unicycle and entered a vehicle, delete it so it disappears for other players as well
-	if unicycle ~= nil and walkData.unicycleId == oldId then
-		unicycle:delete()
+local function onVehicleActiveChanged(vehicleID, active) -- delete unicycle if it gets deactivated locally so it syncs to others
+	if not active then
+		local MPVeh = getVehicleByGameID(vehicleID)
+		if MPVeh and not MPVeh.isLocal then return end
+		local walkData = gameplay_walk.onSerialize()
+		if walkData.unicycleId and walkData.unicycleId == vehicleID then
+  			local unicycle = getObjectByID(vehicleID)
+			unicycle:delete()
+		end
 	end
 end
 
@@ -84,18 +66,6 @@ local function onUpdate(dt)
 			log('W', 'onUpdate', 'Setting modifiedGetDriverData')
 			originalGetDriverData = core_camera.getDriverData
 			core_camera.getDriverData = modifiedGetDriverData
-		end
-		if gameplay_walk then
-			if gameplay_walk.toggleWalkingMode ~= modifiedToggleWalkingMode then
-				log('W', 'onUpdate', 'Setting modifiedToggleWalkingMode')
-				originalToggleWalkingMode = gameplay_walk.toggleWalkingMode
-				gameplay_walk.toggleWalkingMode = modifiedToggleWalkingMode
-			end
-			if gameplay_walk.onVehicleSwitched ~= modifiedOnVehicleSwitched then
-				log('W', 'onUpdate', 'Setting modifiedOnVehicleSwitched')
-				originalOnVehicleSwitched = gameplay_walk.onVehicleSwitched
-				gameplay_walk.onVehicleSwitched = modifiedOnVehicleSwitched
-			end
 		end
 
 		if worldReadyState == 0 then
@@ -127,8 +97,6 @@ end
 local function onServerLeave()
 	if original_onInstabilityDetected then onInstabilityDetected = original_onInstabilityDetected end
 	if originalGetDriverData then core_camera.getDriverData = originalGetDriverData end
-	if originalToggleWalkingMode and gameplay_walk and gameplay_walk.toggleWalkingMode then gameplay_walk.toggleWalkingMode = originalToggleWalkingMode end
-	if originalOnVehicleSwitched and gameplay_walk and gameplay_walk.onVehicleSwitched then gameplay_walk.onVehicleSwitched = originalOnVehicleSwitched end
 end
 
 
@@ -179,6 +147,7 @@ M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
 M.onBeamMPPostJoin = runPostJoin
 M.onBeamMPServerLeave = onServerLeave
+M.onVehicleActiveChanged = onVehicleActiveChanged
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

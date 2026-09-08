@@ -258,7 +258,7 @@ local recPing = 0
 local function setVehiclePosRot(dt, jsonData)
 	if jsonData then
 		local decodedData = jsonDecode(jsonData)
-		if not decodedData.pos then
+		if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
 			log('E','setVehicleRotation', 'Received invalid position packet')
 			return
 		end
@@ -267,7 +267,7 @@ local function setVehiclePosRot(dt, jsonData)
 		recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
 		recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
 		tim  = decodedData.tim
-		recPing = decodedData.ping
+		recPing = decodedData.ping or 0
 	elseif posPacketSize == #posPacketRecBuff then
 		ffi.copy(receivePacket, posPacketRecBuff, #posPacketRecBuff)
 		recPos:set(structPos.x,structPos.y,structPos.z)

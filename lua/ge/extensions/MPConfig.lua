@@ -81,8 +81,6 @@ local defaultSettings = {
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = true,
 	--unicycle_pc = nil, -- temp value introduced to share the user selected default unicycle config from the multiplayer.partial ui to MPConfig.setDefaultUnicycle()
 
-	disableInstabilityPausing = true,
-
 	refreshIngame = false,
 
 	playerlistLeftclick = 0, -- 0 - queue events, 1 - switch camera, 2 - open forum, 3 - delete, 4 - restore, 5 - copy name

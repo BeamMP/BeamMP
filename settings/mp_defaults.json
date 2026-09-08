@@ -23,7 +23,6 @@
   "showBlobDeleted"             : [ "cloud", true ],
   "autoSyncVehicles"            : [ "local", true ],
   "simplifyRemoteVehicles"      : [ "local" ],
-  "disableInstabilityPausing"   : [ "cloud", true ],
   "showSpectators"              : [ "cloud", true ],
   "showDebugOutput"             : [ "local" ],
   "enableNewChatMenu"           : [ "cloud", false ],

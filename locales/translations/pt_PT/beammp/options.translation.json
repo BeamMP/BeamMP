@@ -43,8 +43,6 @@
     "ui.options.beammp.showPlayerIDs.tooltip": "Enable to show player ID's in the player list.",
     "ui.options.beammp.disableLuaReload": "Disable Lua reloading when quitting a multiplayer server.",
     "ui.options.beammp.disableLuaReload.tooltip": "Lua reloads are required to ensure that the game is put back to a working state if mods had replaced game functions. Can be disabled for a smoother experience at your own risk.",
-    "ui.options.beammp.disableInstabilityPausing": "Disable pausing caused by instabilities",
-    "ui.options.beammp.disableInstabilityPausing.tooltip": "This will make gameplay smoother but can cause sync issues after several instabilities",
     "ui.options.beammp.simplifyRemoteVehicles": "Use simplified vehicles when available",
     "ui.options.beammp.simplifyRemoteVehicles.tooltip": "This setting will replace remote vehicles with the BeamNG provided 'traffic' versions. Reduces accuracy of collisions and visuals, but improves performance",
     "ui.options.beammp.enableBlobs": "Enable blobs for unspawned vehicles",

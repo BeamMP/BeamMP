@@ -468,7 +468,7 @@ local function updateGFX(dt)
 	vehRacc:setSub2(vehRvel,lastVehRvel or vehRvel)
 	if isnaninf(vehRacc:squaredLength()) then return end
 
-	cog:set(velocityVE.InitCogRel)
+	cog:set(velocityVE.cogRel)
 	cog:setRotate(vehRot)
 
 	vehPos:set(obj:getPositionXYZ()) -- functions that end with XYZ are usually garbage free
@@ -514,8 +514,13 @@ local function updateGFX(dt)
 
 	local predictedRot, predictedRvel, isRotTeleport = quaternionPredictor:get(timer,dt,predictOffset, simSpeed)
 
+	cog:set(velocityVE.cogRelDiff)
+	cog:setRotate(predictedRot)
+	targetPos:setAdd(cog)
+
 	if enableDebug then
     	debugDrawer:drawSphere(0.1, vehPos, color(255,0,0,200))
+    	debugDrawer:drawSphere(0.1, targetPos, color(0,255,0,200))
 		debugDrawer:drawCylinder(vehPos, (vehPos + vec3(0,-3,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
 		debugDrawer:drawCylinder(vehPos, (vehPos + vec3( 3,0,0):rotated(vehRot):toFloat3()),0.05, color(255,0,0,200))
 	end
@@ -576,7 +581,10 @@ local function updateGFX(dt)
 
 			if not tpRot then return end
 			local predictPos, predictVel = dirPredictor:get(timer + min(dtRaw,0.3),dt,predictOffset,simSpeed,true)
-			tpPos:setSub2(predictPos, velocityVE.InitCogRel:rotated(predictedRot))
+			cog:set(velocityVE.cogRelDiff)
+			cog:setRotate(tpRot)
+			predictPos:setAdd(cog)
+			tpPos:setSub2(predictPos, velocityVE.cogRel:rotated(tpRot))
 
 			if isnaninf(posError:squaredLength()) or isnaninf(predictVel:squaredLength()) or isnaninf(tpRvel:squaredLength()) or isnaninf(vehVel:squaredLength()) or targetRot ~= targetRot then
 			else

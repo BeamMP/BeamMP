@@ -9,7 +9,7 @@
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>
 
         <div class="input-group">
-          <label for="beammp-login-username">{{ $tt("ui.beammp.login.username") }}</label>
+          <label for="beammp-login-username">{{ $tt("ui.beammp.accounts.login.username") }}</label>
           <div class="input-shell">
             <span class="field-prefix" aria-hidden="true">@</span>
             <input
@@ -25,7 +25,7 @@
         </div>
 
         <div class="input-group">
-          <label for="beammp-login-password">{{ $tt("ui.beammp.login.password") }}</label>
+          <label for="beammp-login-password">{{ $tt("ui.beammp.accounts.login.password") }}</label>
           <div class="input-shell">
             <span class="field-prefix password-prefix" aria-hidden="true">•••</span>
             <input
@@ -40,8 +40,8 @@
         </div>
 
         <div class="actions">
-          <BngButton @click="submitLogin">{{ $tt("ui.beammp.login") }}</BngButton>
-          <BngButton accent="secondary" @click="register">{{ $tt("ui.beammp.register") }}</BngButton>
+          <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
+          <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton>
           <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
@@ -49,7 +49,7 @@
       <template v-else>
         <p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>
         <div class="actions">
-          <!--<BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>-->
+          <BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>
           <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>

@@ -69,6 +69,7 @@ end
 --- A custom onInstabilityDetected function to prevent the vehicles from being deleted instantly when in MP session
 --- @param jbeamFilename table Object jbeam data of the object causing the instability
 local vehicleInstabilityState = {}
+local canDeleteVehicles = true
 local vehInstability = false
 local instabilityTimer = 0
 local instabilityFrameCount = 0
@@ -125,7 +126,7 @@ local function instabilityHandlerUpdate(dt)
 					if states.triggered then
 						local veh = getObjectByID(vehID)
 						if veh then
-							if states.instabilityCount > 10 then
+							if canDeleteVehicles and states.instabilityCount > 10 then
 								ui_message(""..veh:getJBeamFilename().." had too many instabilities and was deleted\n\nRight click the player's name and queue deleted vehicles to respawn it", 20, 'instabilityDelete'..veh:getJBeamFilename()..''.. vehID, "warning")
 								veh:delete()
 								vehicleInstabilityState[vehID] = nil --TODO put in spawn queue instead of clearing it
@@ -169,6 +170,13 @@ local function instabilityHandlerUpdate(dt)
 	end
 end
 
+local function enableInstabilityDeletion()
+	canDeleteVehicles = true
+end
+
+local function disableInstabilityDeletion()
+	canDeleteVehicles = false
+end
 
 --- onUpdate is a game eventloop function. It is called each frame by the game engine.
 --- This is the main processing thread of BeamMP in the game
@@ -260,6 +268,8 @@ M.onWorldReadyState = onWorldReadyState
 M.onBigMapActivated = onBigMapActivated
 M.onBeamMPServerLeave = onServerLeave
 M.onInstabilityDetected = onInstabilityDetected
+M.enableInstabilityDeletion = enableInstabilityDeletion
+M.disableInstabilityDeletion = disableInstabilityDeletion
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

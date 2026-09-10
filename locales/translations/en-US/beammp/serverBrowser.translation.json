@@ -46,6 +46,9 @@
 	"ui.beammp.serverBrowser.server.modsTotalFilesize": "Total Filesize:",
 	"ui.beammp.serverBrowser.server.unknownMods": "Unknown mod list",
     "ui.beammp.serverBrowser.download.done": "Done — Are you stuck on this screen? Try these steps: https://docs.beammp.com/FAQ/Clearing-mods/ and if that doesn't help, contact us on the BeamMP discord or forum.",
-    "ui.beammp.serverBrowser.filters.totalModSize": "Total Mod Size",
-    "ui.beammp.serverBrowser.filters.matching": "Matching"
+    "ui.beammp.serverBrowser.filters.matching": "Matching",
+    "ui.beammp.server.noTags": "No tags",
+    "ui.beammp.serverBrowser.filters.advancedPlayerCount": "Advanced Player Count",
+    "ui.beammp.serverBrowser.filters.advancedPlayerCountTooltip": "Set exact min and max player count filters",
+    "ui.beammp.serverBrowser.visibleServers": "servers"
 }

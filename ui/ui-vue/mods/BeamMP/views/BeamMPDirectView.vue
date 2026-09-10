@@ -68,7 +68,7 @@ async function connect() {
 }
 
 async function favorite() {
-  if (!ip.value || !port.value) return
+  if (!ip.value && !port.value) return
   addFavorite({
     ip: ip.value,
     port: port.value,

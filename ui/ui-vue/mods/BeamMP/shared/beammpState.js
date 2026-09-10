@@ -15,6 +15,10 @@ const DEFAULT_FILTERS = {
   selectedTags: [],
   selectedServerLocations: [],
   matchAll: true,
+  emptyOnly: false,
+  notFull: false,
+  notEmpty: false,
+  advancedPlayerCount: false,
 }
 
 const tagThemes = {
@@ -287,6 +291,14 @@ function formatServerTags(commaList = "") {
     .map(formatRawTag)
 }
 
+function getBiggestModSize() {
+  return Math.max(...state.servers.value.map(server => server.modstotalsize || 0))
+}
+
+function getBiggestPlayerCount() {
+  return Math.max(...state.servers.value.map(server => Number(server.players || 0)))
+}
+
 function applyFilters(items, view) {
   const f = state.filters.value
   const tags = (f.selectedTags || []).map(tag => String(tag.raw || tag).toLowerCase())
@@ -306,8 +318,22 @@ function applyFilters(items, view) {
 
     const checks = []
 
-    checks.push(Number(server.players || 0) >= Number(f.playerCountMin ?? 0))
-    checks.push(Number(server.players || 0) <= Number(f.playerCountMax ?? 100))
+    if (f.advancedPlayerCount) {
+      checks.push(Number(server.players || 0) >= Number(f.playerCountMin ?? 0))
+      checks.push(Number(server.players || 0) <= Number(f.playerCountMax ?? 100))
+    }
+
+    if (f.emptyOnly) {
+      checks.push(Number(server.players || 0) === 0)
+    }
+
+    if (f.notFull) {
+      checks.push(Number(server.players || 0) != Number(server.maxplayers || 0))
+    }
+
+    if (f.notEmpty) {
+      checks.push(Number(server.players || 0) > 0)
+    }
 
     if (server.modstotalsize) {
       checks.push((Number(f.sliderMaxModSize) * 1048576) >= Number(server.modstotalsize))
@@ -434,8 +460,11 @@ async function refreshConnectionState() {
   state.loggedIn.value = Boolean(await extensionCall("MPCoreNetwork", "isLoggedIn"))
   state.launcherConnected.value = Boolean(await extensionCall("MPCoreNetwork", "isLauncherConnected"))
   state.auth.value = state.loggedIn.value
-    ? (await extensionCall("MPCoreNetwork", "getAuthResult")) || {}
-    : {}
+  const authResult = await extensionCall("MPCoreNetwork", "getAuthResult")
+  if (!authResult || typeof authResult !== "object" || Object.keys(authResult).length === 0 || authResult?.Auth === 0) {
+    state.loggedIn.value = false
+  }
+  state.auth.value = authResult || {}
 }
 
 async function requestServerList() {
@@ -481,11 +510,7 @@ async function connectToServer(ip, port, name = "", skipModWarning = false) {
   state.loadingOverlayVisible.value = true
   state.loadingStatus.value = ""
   state.downloadingMods.value = []
-  extensionCommand(
-    "MPCoreNetwork",
-    "connectToServer",
-    `\"${useIp}\", ${usePort}, \"${name || ""}\", ${skipModWarning ? "true" : "false"}`,
-  )
+  bngApi.engineLua(`MPCoreNetwork.connectToServer(mime.unb64("${btoa(useIp)}"), ${usePort}, ${bngApi.serializeToLua(name) || ""}, ${skipModWarning ? "true" : "false"})`)
 }
 
 function closeLoadingOverlay() {
@@ -545,6 +570,8 @@ function updateFilter(patch) {
 }
 
 function resetFilters() {
+  DEFAULT_FILTERS.sliderMaxModSize = getBiggestModSize()
+  DEFAULT_FILTERS.playerCountMax = getBiggestPlayerCount()
   state.filters.value = {
     ...DEFAULT_FILTERS,
   }
@@ -617,6 +644,9 @@ function ensureListeners(events) {
     state.launcherConnected.value = false
   })
   events.on("onBeamMPAuthReceived", data => {
+    if (!data || typeof data !== "object" || Object.keys(data).length === 0 || data?.Auth === 0) {
+      state.loggedIn.value = false
+    }
     state.auth.value = data || {}
   })
   events.on("onBeamMPServerJoined", () => {
@@ -664,6 +694,8 @@ const availableLocations = computed(() => {
 })
 
 const selectedServer = computed(() => state.servers.value.find(s => s.id === state.selectedServerId.value) || null)
+
+const allServersCount = computed(() => state.servers.value.length)
 
 const visibleServers = computed(() => {
   const source = state.view.value === "favorites"
@@ -760,5 +792,9 @@ export function useBeamMPState(events) {
     smoothMapName,
     updateFilter,
     visibleServers,
+    allServersCount,
+    getBiggestModSize,
+    getBiggestPlayerCount,
+    DEFAULT_FILTERS
   }
 }

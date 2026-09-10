@@ -109,6 +109,7 @@ local function send(data) -- TODO currently the socket keeps retrying indefinite
 			TCPLauncherSocket = nop
 			authResult = {}
 			guihooks.trigger("onBeamMPAuthReceived", authResult)
+			loggedIn = false
 		elseif error == "closed" then
 			-- socket died before we finished connecting, force new socket next attempt
 			TCPLauncherSocket = nop

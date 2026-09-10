@@ -2,7 +2,7 @@
 // import bridge and route definitions
 import { useBridge } from "@/bridge"
 import { ROUTE_SOURCE_ID, routeRecords } from "./routes.js"
-import { BEAMMP_ROUTE_NAME, BEAMMP_TOS_ROUTE_NAME, BEAMMP_LAUNCHER_ROUTE_NAME } from "./shared/constants.js"
+import { BEAMMP_ROUTE_NAME, BEAMMP_TOS_ROUTE_NAME, BEAMMP_LAUNCHER_ROUTE_NAME, BEAMMP_LOGIN_ROUTE_NAME } from "./shared/constants.js"
 import { useBeamMPState } from "./shared/beammpState.js"
 import { $translate } from "@/services/translation"
 import { ACCENTS } from "@/common/components/base"
@@ -77,15 +77,25 @@ async function unregisterRoutes() {
 const TAB_ID = "beammp"
 let activeBeamMPDialog = null
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+
 async function showBeamMPDialog(options = {}) {
   if (activeBeamMPDialog) return
 
   activeBeamMPDialog = openConfirmation(
-    options.title || $translate.instant("ui.beammp.mdDialog.disconnectGeneric"),
-    options.text || "",
+    escapeHtml(options.title) || $translate.instant("ui.beammp.mdDialog.disconnectGeneric"),
+    escapeHtml(options.text) || "",
     [
       {
-        label: options.okText || $translate.instant("ui.beammp.mdDialog.returnToMenu"),
+        label: escapeHtml(options.okText) || $translate.instant("ui.beammp.mdDialog.returnToMenu"),
         value: "returnToMenu",
         extras: { default: true, confirm: true, accent: ACCENTS.main },
       },

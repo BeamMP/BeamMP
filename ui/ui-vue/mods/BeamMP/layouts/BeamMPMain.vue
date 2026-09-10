@@ -216,8 +216,11 @@ const accountAvatar = computed(() => {
   }
   return avatar
 })
-const accountName = computed(() => state.auth.value?.username || "Guest")
-const accountRole = computed(() => state.auth.value?.role || "BeamMP")
+const accountName = computed(() => {
+ 
+  return state.auth.value?.username
+})
+const accountRole = computed(() => state.auth.value?.role || "User")
 
 function useFallbackAvatar(event) {
   const image = event.currentTarget

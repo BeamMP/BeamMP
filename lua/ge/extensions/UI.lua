@@ -533,8 +533,10 @@ local function onClientEndMission(mission)
 end
 
 local function fixOldHUDLayout()
+    if not FS:fileExists("/settings/ui_apps/layouts/default/multiplayer.uilayout.json") then return end
+
 	local layout = jsonReadFile("/settings/ui_apps/layouts/default/multiplayer.uilayout.json")
-	if layout and (layout.version==0.53 or layout.version == nil) then
+	if layout and next(layout) and (layout.version==0.53 or layout.version == nil) then
 		log('W', 'fixOldHUDLayout', "Updating pre-0.39 multiplayer (BeamMP) HUD layout")
         layout.version = 0.54
         for _,app in pairs(layout.apps) do

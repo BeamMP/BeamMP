@@ -13,7 +13,6 @@
         <div class="input-group">
           <label for="beammp-login-username">{{ $tt("ui.beammp.accounts.login.username") }}</label>
           <div class="input-shell">
-            <span class="field-prefix" aria-hidden="true">@</span>
             <input
               id="beammp-login-username"
               v-model="username"
@@ -29,7 +28,6 @@
         <div class="input-group">
           <label for="beammp-login-password">{{ $tt("ui.beammp.accounts.login.password") }}</label>
           <div class="input-shell">
-            <span class="field-prefix password-prefix" aria-hidden="true">•••</span>
             <input
               id="beammp-login-password"
               v-model="password"
@@ -49,7 +47,7 @@
       </template>
 
       <template v-else>
-        <!--p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>-->
+        <p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>
         <div class="actions">
           <BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>
           <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
@@ -71,7 +69,7 @@ const router = useRouter()
 const username = ref("")
 const password = ref("")
 const hasTriedToLogin = ref(false)
-const mode = ref("guest")
+const mode = ref("account")
 const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)

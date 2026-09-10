@@ -93,7 +93,7 @@ app.controller("BeamMPSessionController", ['$scope', '$mdDialog', 'Settings', fu
 							mdDialogVisible = false;
 
 							if (data.okJS !== undefined) {
-								eval(data.okJS);
+								//eval(data.okJS);
 								return;
 							} else if (data.okLua !== undefined) {
 								bngApi.engineLua(data.okLua);

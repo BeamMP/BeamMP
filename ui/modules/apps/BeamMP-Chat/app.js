@@ -2,6 +2,8 @@
 // Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+;(function() {
+
 var app = angular.module('beamng.apps');
 
 let lastSentMessage = "";
@@ -264,46 +266,22 @@ async function showChat() {
 
 // -------------------------------------------- MESSAGE FORMATTING -------------------------------------------- //
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
 
 function formatChatMessage(string) {
-    const blockedTags = new Set(['script', 'iframe', 'form', 'input', 'button', 'a']);
-    
-    const dangerousAttributePattern = /^(?:on.*|(?:form).*|action)$/i;
-
-    function isSafeHtml(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        
-        const elements = div.getElementsByTagName('*');
-        for (let element of elements) {
-            if (blockedTags.has(element.tagName.toLowerCase())) {
-                return false;
-            }
-            
-            for (let attr of element.attributes) {
-                if (dangerousAttributePattern.test(attr.name) || 
-                    /javascript:|data:/i.test(attr.value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    if (string.startsWith("Server: ")) {
-        const messageContent = string.substring(8);
-        if (messageContent.includes('<') && messageContent.includes('>')) {
-            if (isSafeHtml(messageContent)) {
-                return "Server: " + messageContent;
-            }
-        }
-    }
 
     let result = '';
     let currentText = '';
     let classes = new Set();
 
-    string = DOMPurify.sanitize(string);
+    string = escapeHtml(string);
     const tokens = string.split(/(\^.)/g);
 
     const flush = () => {
@@ -464,3 +442,4 @@ function onKeyDown(e) {
 		document.getElementById("send-button").click();
 	}
 }
+})();

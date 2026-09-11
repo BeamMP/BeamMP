@@ -31,6 +31,8 @@ local function applyControllerData(data, serverVehicleID)
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		local decodedData = jsonDecode(data)
+		if not decodedData then return end
+		
 		if decodedData.vehID then
 			decodedData.vehID = MPVehicleGE.getGameVehicleID(decodedData.vehID)
 		end

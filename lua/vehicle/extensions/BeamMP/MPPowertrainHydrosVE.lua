@@ -44,6 +44,8 @@ local function getHydroBeams()
     end
 end
 
+local hydroBeamsSmoothers = {}
+local hydroBeamsLastState = {}
 local hydroBeamsRecState = {}
 local hydroBeamsRecChanged = {}
 
@@ -53,6 +55,7 @@ local function applyHydroBeams(data)
         if hydroBeams[tagName] then
             hydroBeamsRecState[tagName] = beamLength
             hydroBeamsRecChanged[tagName] = 0
+            hydroBeamsLastState[tagName] = obj:getBeamLength(hydroBeams[tagName])
         end
     end
 end
@@ -69,15 +72,17 @@ local function updateGFX(dt)
         for tagName, time in pairs(hydroBeamsRecChanged) do
             local targetBeamRestLength = hydroBeamsRecState[tagName]
             local bcid = hydroBeams[tagName]
-            local currentBeamRestLength = obj:getBeamLength(bcid)
-            local diff = (targetBeamRestLength - currentBeamRestLength)
-            if abs(diff) > 0.001 or time < 2 then -- TODO find a better way to do calculate force and speed, this seems to work on the WL-40, but arm tilt is really slow, input sync masks this so it's only a problem when resyncing from a spawn, but it's possible it can also use to much force and break beams
-                hydroBeamsRecChanged[tagName] = hydroBeamsRecChanged[tagName] + dt
-                local device = hydroBeamsData[tagName]
-                local force = max(-device.minimumDragCoef/15,min(device.minimumDragCoef/15,((device.minimumDragCoef/20)*dt*2000*diff)))
-                obj:actuateBeam(bcid, force, device.maxSpeed*dt*2000, 0, 0, 0, device.minExtend, device.maxExtend, device.virtualMass, device.virtualMass)
+            local currentBeamLength = obj:getBeamLength(bcid)
+            local diff = (targetBeamRestLength - currentBeamLength)
+            if abs(diff) > 0.001 then
+                local maxSpeed = hydroBeamsData[tagName].maxSpeed or 0.5
+                local smoother = hydroBeamsSmoothers[tagName]
+                local maxSpeedSmooth = smoother:get(1,dt)
+                local speedLimit = min(0.003,maxSpeed*dt)*maxSpeedSmooth
+                obj:setBeamLength(bcid, currentBeamLength + min(speedLimit,max(-speedLimit,diff*100*dt)))
             else
                 hydroBeamsRecChanged[tagName] = nil
+                hydroBeamsSmoothers[tagName]:reset()
             end
         end
     end
@@ -86,6 +91,9 @@ end
 local function onReset()
     hydroBeamsRecChanged = {}
     hydroBeamsRecState = {}
+    for id, smoother in pairs(hydroBeamsSmoothers) do
+        smoother:reset()
+    end
 end
 
 local function onExtensionLoaded()
@@ -98,6 +106,7 @@ local function onExtensionLoaded()
                         hydroBeams[tagName] = beam.cid
                         hydroBeamsElectricsNames[tagName] = hydro.directionElectricsName
                         lastHydroBeamsElectricsValues[hydro.directionElectricsName] = 0
+                        hydroBeamsSmoothers[tagName] = newTemporalSmoothing(5,1)
                         hydroBeamsData[tagName] = hydro
                     end
                 end

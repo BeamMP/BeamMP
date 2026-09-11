@@ -110,7 +110,7 @@
             <div class="download-info">
               <div class="download-line">
                 <code>{{ mod.number }} - {{ mod.name }}</code>
-                <small>{{ index === 0 ? mod.speed : $tt("ui.beammp.download.downloaded") }}</small>
+                <small>{{ index === 0 ? mod.speed : $tt("ui.common.beammp.downloaded") }}</small>
               </div>
               <div v-if="index === 0 && mod.progress < 100" class="progress-track">
                 <span :style="{ width: `${Math.max(0, Math.min(100, mod.progress))}%` }" />
@@ -216,8 +216,11 @@ const accountAvatar = computed(() => {
   }
   return avatar
 })
-const accountName = computed(() => state.auth.value?.username || "Guest")
-const accountRole = computed(() => state.auth.value?.role || "BeamMP")
+const accountName = computed(() => {
+ 
+  return state.auth.value?.username
+})
+const accountRole = computed(() => state.auth.value?.role || "User")
 
 function useFallbackAvatar(event) {
   const image = event.currentTarget

@@ -7,7 +7,7 @@
       </div>
       <div class="identity">
         <span class="online-dot"></span>
-        <span>{{ state.auth.value?.username || "Guest" }}</span>
+        <span>{{ state.auth.value?.username }}</span>
       </div>
     </header>
 

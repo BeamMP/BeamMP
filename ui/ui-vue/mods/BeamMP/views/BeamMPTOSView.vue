@@ -32,7 +32,7 @@
 import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { BngButton } from "@/common/components/base"
-import { BEAMMP_LAUNCHER_ROUTE_NAME } from "../shared/constants.js"
+import { BEAMMP_LOGIN_ROUTE_NAME } from "../shared/constants.js"
 import { useBeamMPState } from "../shared/beammpState.js"
 
 const router = useRouter()
@@ -44,7 +44,7 @@ const canContinue = computed(() => tosAccepted.value && rulesAccepted.value)
 function proceed() {
   if (!canContinue.value) return
   acceptTos()
-  router.push({ name: BEAMMP_LAUNCHER_ROUTE_NAME })
+  router.push({ name: BEAMMP_LOGIN_ROUTE_NAME })
 }
 </script>
 

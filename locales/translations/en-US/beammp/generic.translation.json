@@ -35,5 +35,10 @@
 	"ui.beammp.mdDialog.continueOffline": "Continue offline",
 	"ui.beammp.mdDialog.returnToMenu": "Return to menu",
     "ui.beammp.server.hideAddress": "Hide server address",
-    "ui.beammp.server.revealAddress": "Reveal server address"
+    "ui.beammp.server.revealAddress": "Reveal server address",
+    "ui.beammp.download.downloaded": "Downloaded",
+    "ui.beammp.login": "Login",
+    "ui.beammp.register": "Register",
+    "ui.beammp.login.username": "Username",
+    "ui.beammp.login.password": "Password"
 }

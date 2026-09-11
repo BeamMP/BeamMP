@@ -3,15 +3,16 @@
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
-      <p v-if="state.loginError.value" class="error">{{ state.loginError.value }}</p>
+      <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
 
+      
+        <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription2temp") }}</h2>
       <template v-if="mode === 'account'">
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>
 
         <div class="input-group">
-          <label for="beammp-login-username">{{ $tt("ui.beammp.login.username") }}</label>
+          <label for="beammp-login-username">{{ $tt("ui.beammp.accounts.login.username") }}</label>
           <div class="input-shell">
-            <span class="field-prefix" aria-hidden="true">@</span>
             <input
               id="beammp-login-username"
               v-model="username"
@@ -25,9 +26,8 @@
         </div>
 
         <div class="input-group">
-          <label for="beammp-login-password">{{ $tt("ui.beammp.login.password") }}</label>
+          <label for="beammp-login-password">{{ $tt("ui.beammp.accounts.login.password") }}</label>
           <div class="input-shell">
-            <span class="field-prefix password-prefix" aria-hidden="true">•••</span>
             <input
               id="beammp-login-password"
               v-model="password"
@@ -40,8 +40,8 @@
         </div>
 
         <div class="actions">
-          <BngButton @click="submitLogin">{{ $tt("ui.beammp.login") }}</BngButton>
-          <BngButton accent="secondary" @click="register">{{ $tt("ui.beammp.register") }}</BngButton>
+          <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
+          <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton>
           <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
@@ -49,7 +49,7 @@
       <template v-else>
         <p class="guest-copy">{{ $tt("ui.beammp.accounts.guestDescription1") }}</p>
         <div class="actions">
-          <!--<BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>-->
+          <BngButton @click="switchToAccount">{{ $tt("ui.beammp.accounts.iHaveAnAccount") }}</BngButton>
           <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
@@ -68,7 +68,8 @@ import { useBeamMPState } from "../shared/beammpState.js"
 const router = useRouter()
 const username = ref("")
 const password = ref("")
-const mode = ref("guest")
+const hasTriedToLogin = ref(false)
+const mode = ref("account")
 const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
@@ -90,10 +91,12 @@ function switchToAccount() {
 
 async function submitLogin() {
   await login(username.value, password.value)
+  hasTriedToLogin.value = true
   password.value = ""
 }
 
 async function submitGuest() {
+  hasTriedToLogin.value = true
   await guestLogin()
 }
 
@@ -210,6 +213,7 @@ watch(() => state.loggedIn.value, value => {
 }
 
 .actions {
+  justify-content: center;
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -223,7 +227,8 @@ watch(() => state.loggedIn.value, value => {
 .error {
   margin: 0;
   text-align: center;
-  color: var(--bng-red-500);
+  color: var(--bng-add-red-500);
+
 }
 
 @media (max-width: 680px) {

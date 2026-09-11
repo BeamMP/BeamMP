@@ -18,6 +18,7 @@
     "ui.beammp.serverBrowser.filters.playerCountMax": "Maximum player count",
     "ui.beammp.serverBrowser.filters.activeFilters": "Active Filters: ",
     "ui.beammp.serverBrowser.filters.matchAll": "Match all filters",
+    "ui.beammp.serverBrowser.filters.matchAllSubtext": "Require every selected filter",
     "ui.beammp.serverBrowser.filters.matchAllTooltip": "Whether to match all or only some of the search filters",
     "ui.beammp.serverBrowser.filters.emptyOnly": "Empty only",
     "ui.beammp.serverBrowser.filters.emptyOnlyTooltip": "Only show empty servers",
@@ -44,5 +45,10 @@
 	"ui.beammp.serverBrowser.server.tags": "Tags:",
 	"ui.beammp.serverBrowser.server.modsTotalFilesize": "Total Filesize:",
 	"ui.beammp.serverBrowser.server.unknownMods": "Unknown mod list",
-    "ui.beammp.serverBrowser.download.done": "Done — Are you stuck on this screen? Try these steps: https://docs.beammp.com/FAQ/Clearing-mods/ and if that doesn't help, contact us on the BeamMP discord or forum."
+    "ui.beammp.serverBrowser.download.done": "Done — Are you stuck on this screen? Try these steps: https://docs.beammp.com/FAQ/Clearing-mods/ and if that doesn't help, contact us on the BeamMP discord or forum.",
+    "ui.beammp.serverBrowser.filters.matching": "Matching",
+    "ui.beammp.server.noTags": "No tags",
+    "ui.beammp.serverBrowser.filters.advancedPlayerCount": "Advanced Player Count",
+    "ui.beammp.serverBrowser.filters.advancedPlayerCountTooltip": "Set exact min and max player count filters",
+    "ui.beammp.serverBrowser.visibleServers": "servers"
 }

@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <span class="eyebrow">Current BeamMP session</span>
-        <h2>{{ serverTitle }}</h2>
+        <h2 v-if="serverTitle !== currentEndpoint" >{{ serverTitle }}</h2>
       </div>
       <span v-if="categoryLabel" class="category" :class="categoryClass">
         {{ categoryLabel }}

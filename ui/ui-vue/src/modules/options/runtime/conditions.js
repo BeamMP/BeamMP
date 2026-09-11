@@ -264,7 +264,7 @@ export default function (deps) {
         return values.showBlobDeleted===true
     },
     beammpNametagsEnabled(values) {
-        return values.hideNametags===false
+        return values.hideNameTags===false
     },
     beammpShortenNametagsEnabled(values) {
         return values.shortenNametags===true

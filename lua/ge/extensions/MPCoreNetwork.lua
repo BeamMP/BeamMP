@@ -27,7 +27,7 @@ local isConnecting = false
 local proxyPort = ""
 local socketPartialData
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.22.3" -- the mod version
+local modVersion = "4.22.4" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -109,6 +109,7 @@ local function send(data) -- TODO currently the socket keeps retrying indefinite
 			TCPLauncherSocket = nop
 			authResult = {}
 			guihooks.trigger("onBeamMPAuthReceived", authResult)
+			loggedIn = false
 		elseif error == "closed" then
 			-- socket died before we finished connecting, force new socket next attempt
 			TCPLauncherSocket = nop
@@ -586,6 +587,11 @@ local function handleModWarning(params)
 	end
 end
 
+local function requestServerInfo(ip_port)
+	log('I', 'requestServerInfo', 'Requesting server info for: '..ip_port)
+	send('I' .. ip_port)
+end
+
 -- VV============= EVENTS =============VV
 
 --- Handle network message events.
@@ -603,6 +609,7 @@ local HandleNetwork = {
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['W'] = function(params) handleModWarning(params) end,
 	['Z'] = function(params) launcherVersion = params; end,
+	['I'] = function(params) log('I', 'HandleNetwork', 'Received server info: '..params) guihooks.trigger('onBeamMPServerInfo', params) end,
 }
 
 local recvState = {
@@ -801,6 +808,7 @@ M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
 M.getProxyPort         = getProxyPort
+M.requestServerInfo    = requestServerInfo
 -- security
 M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload

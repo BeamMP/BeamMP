@@ -13,7 +13,7 @@
             </BngButton>
           </div>
           <span v-if="visibleServers.length != allServersCount" class="server-count"
-          >{{ visibleServers.length }} / {{ allServersCount }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
+          >{{ visibleServers.length }}{{ state.view.value === 'servers' ? " / " + allServersCount : "" }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
         </header>
 
         <table class="servers-table">

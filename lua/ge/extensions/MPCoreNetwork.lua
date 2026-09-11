@@ -587,6 +587,11 @@ local function handleModWarning(params)
 	end
 end
 
+local function requestServerInfo(ip_port)
+	log('I', 'requestServerInfo', 'Requesting server info for: '..ip_port)
+	send('I' .. ip_port)
+end
+
 -- VV============= EVENTS =============VV
 
 --- Handle network message events.
@@ -604,6 +609,7 @@ local HandleNetwork = {
 	['U'] = function(params) handleU(params) end, -- Loading into server UI, handles loading mods, pre-join kick messages and ping
 	['W'] = function(params) handleModWarning(params) end,
 	['Z'] = function(params) launcherVersion = params; end,
+	['I'] = function(params) log('I', 'HandleNetwork', 'Received server info: '..params) guihooks.trigger('onBeamMPServerInfo', params) end,
 }
 
 local recvState = {
@@ -802,6 +808,7 @@ M.disconnectLauncher   = disconnectLauncher
 M.isLauncherConnected  = isLauncherConnected
 M.getLauncherVersion   = getLauncherVersion
 M.getProxyPort         = getProxyPort
+M.requestServerInfo    = requestServerInfo
 -- security
 M.rejectModDownload    = rejectModDownload
 M.approveModDownload   = approveModDownload

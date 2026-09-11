@@ -68,10 +68,12 @@ async function connect() {
 }
 
 async function favorite() {
-  if (!ip.value && !port.value) return
+ let ipFav = ip.value || "127.0.0.1"
+ let portFav = port.value || "30814"
+  bngVue.toastr.success(`Adding ${ipFav}:${portFav} to favorites`, "BeamMP")
   addFavorite({
-    ip: ip.value,
-    port: port.value,
+    ip: ipFav,
+    port: portFav,
     sname: new Date().toLocaleString(),
     strippedName: new Date().toLocaleString(),
     custom: true,

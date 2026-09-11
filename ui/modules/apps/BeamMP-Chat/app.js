@@ -2,6 +2,8 @@
 // Licensed under AGPL-3.0 (or later), see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+;(function() {
+
 var app = angular.module('beamng.apps');
 
 let lastSentMessage = "";
@@ -440,3 +442,4 @@ function onKeyDown(e) {
 		document.getElementById("send-button").click();
 	}
 }
+})();

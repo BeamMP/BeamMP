@@ -52,5 +52,6 @@
     "ui.common.beammp.others": "Others",
     "ui.common.beammp.new": "New",
     "ui.common.beammp.reveal": "Reveal",
-    "ui.common.beammp.hide": "Hide"
+    "ui.common.beammp.hide": "Hide",
+    "ui.beammp.server.noPlayers": "No players",
 }

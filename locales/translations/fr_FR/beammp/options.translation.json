@@ -43,8 +43,6 @@
   "ui.options.beammp.showPlayerIDs.tooltip": "Activer cette option pour afficher les identifiants des joueurs dans la liste des joueurs.",
   "ui.options.beammp.disableLuaReload": "Désactiver le rechargement de Lua lors de la déconnexion d'un serveur multijoueur.",
   "ui.options.beammp.disableLuaReload.tooltip": "Le rechargement du script Lua est nécessaire pour que le jeu retrouve son état de fonctionnement normal si des mods ont modifié certaines fonctions. Vous pouvez le désactiver pour une expérience plus fluide, mais à vos risques et périls.",
-  "ui.options.beammp.disableInstabilityPausing": "Désactiver les pauses dues aux instabilités",
-  "ui.options.beammp.disableInstabilityPausing.tooltip": "Cela rendra le jeu plus fluide, mais peut entraîner des problèmes de synchronisation après plusieurs instabilités.",
   "ui.options.beammp.simplifyRemoteVehicles": "Utilisez des véhicules simplifiés lorsqu'ils sont disponibles",
   "ui.options.beammp.simplifyRemoteVehicles.tooltip": "Ce paramètre remplace les véhicules distants par les versions « trafic » fournies par BeamNG. Cela réduit la précision des collisions et des effets visuels, mais améliore les performances.",
   "ui.options.beammp.enableBlobs": "Activer les blobs pour les véhicules non générés",

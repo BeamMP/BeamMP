@@ -43,8 +43,6 @@
   "ui.options.beammp.showPlayerIDs.tooltip": "启用后，在玩家列表中显示玩家 ID。",
   "ui.options.beammp.disableLuaReload": "禁用退出多人服务器时的 Lua 重新加载",
   "ui.options.beammp.disableLuaReload.tooltip": "如果模组替换了游戏功能，重新加载 Lua 可确保游戏恢复正常运行。您可以禁用此功能以获得更流畅的体验，但需自行承担风险。",
-  "ui.options.beammp.disableInstabilityPausing": "禁用因连接不稳定导致的暂停",
-  "ui.options.beammp.disableInstabilityPausing.tooltip": "这将使游戏体验更加流畅，但在多次出现连接不稳定后可能会导致同步问题",
   "ui.options.beammp.simplifyRemoteVehicles": "可用时使用简化车辆",
   "ui.options.beammp.simplifyRemoteVehicles.tooltip": "此设置将使用 BeamNG 提供的“交通车辆”版本替换其他玩家的车辆。这样会降低碰撞效果和视觉表现的准确性，但可以提升性能。",
   "ui.options.beammp.enableBlobs": "为未生成的车辆启用 Blobs",

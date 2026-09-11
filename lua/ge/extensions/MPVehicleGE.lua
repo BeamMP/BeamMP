@@ -137,12 +137,13 @@ end
 -- Rounded nametags use the ImGui draw list on every game update, like BeamMP chat.
 local roundedNametags = { labels = {}, radius = 6 }
 
-function roundedNametags.add(position, text, alpha, background, useZ)
+function roundedNametags.add(position, text, alpha, background, useZ, ownerID, ownerName, vehicleID)
     if alpha <= 0 then return end
     local labels = roundedNametags.labels
     labels[#labels + 1] = {
         position = vec3(position), text = text, alpha = alpha,
         background = background, useZ = useZ,
+        ownerID = ownerID, ownerName = ownerName, vehicleID = vehicleID,
     }
 end
 
@@ -154,6 +155,122 @@ function roundedNametags.project(point, camera)
     local y = 0.5 - delta:dot(camera.up) / (2 * depth * camera.halfTan)
     if x < 0 or x > 1 or y < 0 or y > 1 then return nil end
     return x, y, depth
+end
+
+-- Use actual ImGui hit regions so clicks are captured instead of only polling
+-- the mouse over text drawn on a background draw list.
+function roundedNametags.canSpectate(label)
+    local player = M.getPlayers()[label.ownerID]
+    if not player or player.name ~= label.ownerName then return false end
+    for _, vehicle in pairs(M.getVehicles()) do
+        if vehicle.ownerName == label.ownerName and vehicle.jbeam ~= "unicycle"
+            and vehicle.gameVehicleID and getObjectByID(vehicle.gameVehicleID) then return true end
+    end
+    return false
+end
+
+function roundedNametags.playerIsPresent(label)
+    local player = M.getPlayers()[label.ownerID]
+    return player and player.name == label.ownerName
+end
+
+function roundedNametags.runAction(action, label)
+    if not roundedNametags.playerIsPresent(label) then return end
+    if action == "copy" then
+        setClipboard(label.ownerName)
+    elseif action == "delete" then
+        -- Mirror the player-list action: delete this player's local vehicle objects.
+        -- Collect first because deletion may update the vehicle table.
+        local objects = {}
+        for _, vehicle in pairs(M.getVehicles()) do
+            if vehicle.ownerName == label.ownerName and vehicle.gameVehicleID then
+                local object = be:getObjectByID(vehicle.gameVehicleID)
+                if object then objects[#objects + 1] = object end
+            end
+        end
+        for _, object in ipairs(objects) do object:delete() end
+    elseif action == "queue" then
+        M.applyPlayerQueues(label.ownerID)
+    elseif action == "camera" then
+        if roundedNametags.canSpectate(label) then M.focusCameraOnPlayer(label.ownerName) end
+    elseif action == "profile" then
+        local encodedName = label.ownerName:gsub("([^%w%-_%.~])", function(char)
+            return string.format("%%%02X", string.byte(char))
+        end)
+        openWebBrowser("https://forum.beammp.com/u/" .. encodedName .. "/summary")
+    elseif action == "restore" then
+        M.restorePlayerVehicle(label.ownerName)
+    end
+end
+
+roundedNametags.actions = {
+    { "Copy name", "copy" },
+    { "Delete all vehicles", "delete" },
+    { "Queue events", "queue" },
+    { "Switch camera to", "camera" },
+    { "Open profile", "profile" },
+    { "Queue deleted vehicles", "restore" },
+}
+
+function roundedNametags.menu(label)
+    local im = ui_imgui
+    im.PushStyleColor2(im.Col_PopupBg, im.ImVec4(0.105, 0.118, 0.137, 1))
+    im.PushStyleColor2(im.Col_Border, im.ImVec4(0.25, 0.27, 0.30, 1))
+    im.PushStyleColor2(im.Col_Button, im.ImVec4(0.212, 0.227, 0.259, 1))
+    im.PushStyleColor2(im.Col_ButtonHovered, im.ImVec4(0.36, 0.18, 0.08, 1))
+    im.PushStyleColor2(im.Col_ButtonActive, im.ImVec4(0.48, 0.24, 0.10, 1))
+    im.PushStyleColor2(im.Col_Text, im.ImVec4(0.91, 0.92, 0.94, 1))
+    im.PushStyleVar1(im.StyleVar_PopupRounding, 8)
+    im.PushStyleVar1(im.StyleVar_PopupBorderSize, 1)
+    im.PushStyleVar1(im.StyleVar_FrameRounding, 3)
+    im.PushStyleVar2(im.StyleVar_WindowPadding, im.ImVec2(7, 7))
+    im.PushStyleVar2(im.StyleVar_ItemSpacing, im.ImVec2(0, 4))
+    im.PushStyleVar2(im.StyleVar_FramePadding, im.ImVec2(9, 6))
+    im.PushStyleVar2(im.StyleVar_ButtonTextAlign, im.ImVec2(0, 0.5))
+    if im.BeginPopup("playerActions") then
+        local width = 196
+        for _, action in ipairs(roundedNametags.actions) do
+            width = math.max(width, im.CalcTextSize(action[1]).x + 18)
+        end
+        for _, action in ipairs(roundedNametags.actions) do
+            local enabled = roundedNametags.playerIsPresent(label)
+                and (action[2] ~= "camera" or roundedNametags.canSpectate(label))
+            im.BeginDisabled(not enabled)
+            local clicked = im.Button(action[1], im.ImVec2(width, 34))
+            im.EndDisabled()
+            if clicked and enabled then
+                im.CloseCurrentPopup()
+                roundedNametags.runAction(action[2], label)
+                break
+            end
+        end
+        im.EndPopup()
+    end
+    im.PopStyleVar(7)
+    im.PopStyleColor(6)
+end
+
+function roundedNametags.interact(label, left, top, width, height)
+    local im = ui_imgui
+    local input = core_vehicleTriggers and core_vehicleTriggers.state
+    -- The game tracks cursor visibility and mouse-lock changes here.
+    if not input or not input.cursorVisible or input.mouseLocked or not input.cefVisible then return end
+    local flags = im.WindowFlags_NoDecoration + im.WindowFlags_NoBackground + im.WindowFlags_NoMove
+        + im.WindowFlags_NoSavedSettings + im.WindowFlags_NoFocusOnAppearing + im.WindowFlags_NoNav
+    im.SetNextWindowPos(im.ImVec2(left, top), im.Cond_Always)
+    im.SetNextWindowSize(im.ImVec2(width, height), im.Cond_Always)
+    im.PushStyleVar2(im.StyleVar_WindowPadding, im.ImVec2(0, 0))
+    im.PushStyleVar2(im.StyleVar_WindowMinSize, im.ImVec2(1, 1))
+    local opened = im.Begin("##BeamMPNametag:" .. tostring(label.vehicleID), nil, flags)
+    im.PopStyleVar(2)
+    if opened then
+        im.SetCursorPos(im.ImVec2(0, 0))
+        if im.InvisibleButton("nametag", im.ImVec2(width, height)) then
+            im.OpenPopup1("playerActions")
+        end
+        roundedNametags.menu(label)
+    end
+    im.End()
 end
 
 function roundedNametags.draw()
@@ -208,6 +325,7 @@ function roundedNametags.draw()
                 local fg = im.GetColorU322(im.ImVec4(1, 1, 1, label.alpha))
                 im.ImDrawList_AddRectFilled(drawList, im.ImVec2(left, top), im.ImVec2(left + size.x + 14, top + size.y + 6), bg, roundedNametags.radius)
                 im.ImDrawList_AddText1(drawList, im.ImVec2(left + 7, top + 3), fg, text, nil)
+                roundedNametags.interact(label, left, top, size.x + 14, size.y + 6)
             end
         end
     end
@@ -2824,7 +2942,7 @@ local function onPreRender(dt)
 				local roleInfo = v.customRole or owner.customRole or owner.role
                 local spectators = settings.getValue("showSpectators") and v.spectatorsTag or ""
                 local label = v.nameTag .. dist .. spectators .. " "
-                roundedNametags.add(pos, label, nametagAlpha, roleInfo.backcolor, settings.getValue("nameTagsHideBehindObjects"))
+                roundedNametags.add(pos, label, nametagAlpha, roleInfo.backcolor, settings.getValue("nameTagsHideBehindObjects"), v.ownerID, v.ownerName, v.serverVehicleString)
 			end
 			:: skip_vehicle ::
 		end

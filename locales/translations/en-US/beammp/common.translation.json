@@ -1,5 +1,6 @@
 {
     "ui.common.beammp.beammp": "BeamMP",
+    "ui.common.beammp.downloaded": "Downloaded",
     "ui.common.beammp.location": "Location",
     "ui.common.beammp.title": "Title",
     "ui.common.beammp.map": "Map",

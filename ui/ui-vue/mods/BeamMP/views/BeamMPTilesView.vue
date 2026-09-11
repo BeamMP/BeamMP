@@ -1,10 +1,10 @@
 <template>
   <section class="tiles-grid">
-    <button class="tile" @click="openView('official')">{{ $tt("ui.beammp.official") }}</button>
-    <button class="tile" @click="openView('featured')">{{ $tt("ui.beammp.featured") }}</button>
-    <button class="tile" @click="openView('partner')">{{ $tt("ui.beammp.partner") }}</button>
+    <button class="tile" @click="openView('official')">{{ $tt("ui.common.beammp.official") }}</button>
+    <button class="tile" @click="openView('featured')">{{ $tt("ui.common.beammp.official") }}</button>
+    <button class="tile" @click="openView('partner')">{{ $tt("ui.common.beammp.partner") }}</button>
     <button class="tile" @click="openView('favorites')">{{ $tt("ui.beammp.serverBrowser.saveAsFavorites") }}</button>
-    <button class="tile" @click="openView('recent')">{{ $tt("ui.beammp.recent") }}</button>
+    <button class="tile" @click="openView('recent')">{{ $tt("ui.common.beammp.recent") }}</button>
 
     <button
       v-for="tag in availableTags"

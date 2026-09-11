@@ -102,6 +102,118 @@ end
 -- @usage local roleInfo = roleToInfo["USER"].tag
 -- @usage local roleInfo = roleToInfo["USER"].backcolor.r
 
+-- Nametag presentation helpers. Distances and limits are in metres.
+local nametagStyle = {
+    backgroundAlpha = 195,
+}
+
+-- Walk UTF-8 code points without depending on a Lua-version-specific utf8 library.
+-- This preserves complete encoded characters, including four-byte emoji.
+function nametagStyle.shorten(text, limit)
+    limit = math.max(1, math.floor(limit))
+    local count, cut = 0, #text
+    for byteIndex in text:gmatch("()[%z\1-\127\194-\244][\128-\191]*") do
+        count = count + 1
+        if count == limit + 1 then cut = byteIndex - 1 end
+    end
+    if count <= limit then return text end
+    return text:sub(1, cut) .. "..."
+end
+
+function nametagStyle.distance(metres, imperial)
+    local value = imperial and metres * 3.28084 or metres
+    local largeUnit = imperial and 5280 or 1000
+    local step = value < 100 and 1 or (value < 1000 and 5 or 25)
+    local rounded = math.floor(value / step + 0.5) * step
+    if value >= largeUnit or rounded >= largeUnit then
+        -- Round long distances to tenths of a mile/kilometre.
+        return string.format("%.1f %s", math.floor(value / largeUnit * 10 + 0.5) / 10, imperial and "mi" or "km")
+    end
+    return string.format("%.0f %s", rounded, imperial and "ft" or "m")
+end
+
+-- End nametag presentation helpers.
+
+-- Rounded nametags use the ImGui draw list on every game update, like BeamMP chat.
+local roundedNametags = { labels = {}, radius = 6 }
+
+function roundedNametags.add(position, text, alpha, background, useZ)
+    if alpha <= 0 then return end
+    local labels = roundedNametags.labels
+    labels[#labels + 1] = {
+        position = vec3(position), text = text, alpha = alpha,
+        background = background, useZ = useZ,
+    }
+end
+
+function roundedNametags.project(point, camera)
+    local delta = point - camera.position
+    local depth = delta:dot(camera.forward)
+    if depth <= 0.01 then return nil end
+    local x = 0.5 + delta:dot(camera.right) / (2 * depth * camera.halfTan * camera.aspect)
+    local y = 0.5 - delta:dot(camera.up) / (2 * depth * camera.halfTan)
+    if x < 0 or x > 1 or y < 0 or y > 1 then return nil end
+    return x, y, depth
+end
+
+function roundedNametags.draw()
+    -- ImGui needs draw commands every frame. onUpdate is unconditional;
+    -- onGuiUpdate is gated by getUpdateUIflag() and must not draw these labels.
+    -- onPreRender replaces it, including clearing it when the session ends.
+    local labels = roundedNametags.labels
+    if #labels == 0 or not MPGameNetwork or not MPGameNetwork.launcherConnected()
+        or settings.getValue("hideNameTags") or not nicknamesAllowed or hideNicknamesToggle then return end
+    local im = ui_imgui
+    if not im or not core_camera then return end
+    local viewport = im.GetMainViewport()
+    local canvas = scenetree.findObject("Canvas")
+    if not viewport or not canvas then return end
+    local width, height = canvas:getWindowClientSizeXY()
+    local fov = core_camera.getFovRad()
+    if not width or not height or width <= 0 or height <= 0 or not fov or fov <= 0 then return end
+    local rotation = quat(core_camera.getQuat())
+    local camera = {
+        position = vec3(core_camera.getPosition()),
+        right = rotation * vec3(1, 0, 0),
+        forward = rotation * vec3(0, 1, 0),
+        up = rotation * vec3(0, 0, 1),
+        halfTan = math.tan(fov * 0.5), aspect = width / height,
+    }
+    local drawList = im.GetBackgroundDrawList1()
+    -- Far labels first, so a nearer label wins when backgrounds overlap.
+    table.sort(labels, function(a, b)
+        return (a.position - camera.position):squaredLength() > (b.position - camera.position):squaredLength()
+    end)
+    for _, label in ipairs(labels) do
+        local x, y = roundedNametags.project(label.position, camera)
+        if x then
+            local visible = true
+            if label.useZ then
+                local ray = label.position - camera.position
+                local distance = ray:length()
+                if distance > 0.01 then
+                    -- Collision visibility is whole-label, not the old per-pixel depth test.
+                    visible = castRayStatic(camera.position, ray / distance, distance) >= distance - 0.05
+                end
+            end
+            if visible then
+                local text = label.text:gsub("^%s+", ""):gsub("%s+$", "")
+                local size = im.CalcTextSize(text)
+                local px = viewport.Pos.x + x * viewport.Size.x
+                local py = viewport.Pos.y + y * viewport.Size.y
+                local left = math.floor(px - size.x * 0.5 - 7)
+                local top = math.floor(py - size.y - 8)
+                local background = label.background
+                local bg = im.GetColorU322(im.ImVec4(background.r / 255, background.g / 255, background.b / 255, label.alpha * nametagStyle.backgroundAlpha / 255))
+                local fg = im.GetColorU322(im.ImVec4(1, 1, 1, label.alpha))
+                im.ImDrawList_AddRectFilled(drawList, im.ImVec2(left, top), im.ImVec2(left + size.x + 14, top + size.y + 6), bg, roundedNametags.radius)
+                im.ImDrawList_AddText1(drawList, im.ImVec2(left + 7, top + 3), fg, text, nil)
+            end
+        end
+    end
+end
+-- End rounded nametag renderer.
+
 local settingsCache = {
 }
 -- ============= VARIABLES =============
@@ -1059,20 +1171,14 @@ function Player:onSerialized()
 	return t
 end
 function Player:onSettingsChanged()
-	local charLimit = tonumber(settings.getValue("nametagCharLimit"))
-	if not settings.getValue("shortenNametags") or not charLimit or #self.name <= charLimit + 3 then
-		self.shortname = self.name
-		self:updateNameTagCache()
-		self:updateSpectatorsTagCache()
-		return
-	end
-
-	local short = self.name:sub(1, charLimit)
-	if #short ~= #self.name then short = short .. "..." end
-
-	self.shortname = short
-	self:updateNameTagCache()
-	self:updateSpectatorsTagCache()
+    local charLimit = tonumber(settings.getValue("nametagCharLimit"))
+    if settings.getValue("shortenNametags") and charLimit and charLimit > 0 and charLimit < math.huge then
+        self.shortname = nametagStyle.shorten(self.name, charLimit)
+    else
+        self.shortname = self.name
+    end
+    self:updateNameTagCache()
+    self:updateSpectatorsTagCache()
 end
 
 local Vehicle = {}
@@ -1167,25 +1273,20 @@ function Vehicle:updateNameTagCache()
 	for source, tag in pairs(owner.nickSuffixes) do
 		suffix = suffix..tag.." "
 	end
-	self.nameTag = String(" " .. table.concat({prefix, name, suffix, tag}) .. " ")
+	self.nameTag = String(" " .. table.concat({prefix, name, suffix, tag}):gsub("%s+$", ""))
 end
 function Vehicle:updateSpectatorsTagCache()
-	local owner = self:getOwner()
-	local spectators = ""
-	for spectatorID, _ in pairs(self.spectators) do
-		local spectator = players[spectatorID]
-		if not (spectator == owner or spectator.isLocal) then
-			local spectatorName = settings.getValue("shortenNametags") and spectator.shortname or spectator.name
-			spectators = spectators .. spectatorName .. ', '
-		end
-	end
-	if spectators ~= "" then
-		spectators = spectators:sub(1,-3) -- cut off tailing comma
-		self.spectatorsTag = String(" ".. spectators .." ")
-	else
-		self.spectatorsTag = ""
-	end
+    local owner = self:getOwner()
+    local count = 0
+    for spectatorID, _ in pairs(self.spectators) do
+        local spectator = players[spectatorID]
+        if spectator and spectator ~= owner and not spectator.isLocal then
+            count = count + 1
+        end
+    end
+    self.spectatorsTag = count > 0 and String(string.format(" · %d spectator%s", count, count == 1 and "" or "s")) or ""
 end
+
 function Vehicle:onSerialized()
 	local t = {
 		jbeam = self.jbeam,
@@ -1348,7 +1449,7 @@ core_vehicles.cloneCurrent = function ()
 end
 
 local core_vehicle_partmgmt_saveLocal = extensions.core_vehicle_partmgmt.saveLocal
-local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
+local function core_vehicle_partmgmt_saveLocal_overwrite(...)
 	local vehicle = getPlayerVehicle(0)
 	if vehicle:getField("protected", 0) == "1" then
 		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
@@ -1356,7 +1457,33 @@ local function core_vehicle_partmgmt_saveLocal_overwrite(p1)
 		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
 		return
 	else
-		core_vehicle_partmgmt_saveLocal(p1)
+		core_vehicle_partmgmt_saveLocal(...)
+	end
+end
+
+local core_vehicle_partmgmt_saveNewLocalConfig = extensions.core_vehicle_partmgmt.saveNewLocalConfig
+local function core_vehicle_partmgmt_saveNewLocalConfig_overwrite(...)
+	local vehicle = getPlayerVehicle(0)
+	if vehicle:getField("protected", 0) == "1" then
+		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
+		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
+		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
+		return
+	else
+		core_vehicle_partmgmt_saveNewLocalConfig(...)
+	end
+end
+
+local core_vehicle_partmgmt_saveExistingLocalConfig = extensions.core_vehicle_partmgmt.saveExistingLocalConfig
+local function core_vehicle_partmgmt_saveExistingLocalConfig_overwrite(...)
+	local vehicle = getPlayerVehicle(0)
+	if vehicle:getField("protected", 0) == "1" then
+		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
+		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
+		guihooks.trigger("toastrMsg", {type="error", title=title, msg=msg})
+		return
+	else
+		core_vehicle_partmgmt_saveExistingLocalConfig(...)
 	end
 end
 
@@ -1375,7 +1502,7 @@ end
 
 local gameplay_garageMode_start = gameplay_garageMode.start
 local function gameplay_garageMode_start_overwrite()
-	local vehicle = be:getPlayerVehicle(0)
+	local vehicle = getPlayerVehicle(0)
 	if vehicle and vehicle:getField("protected", 0) == "1" then
 		local title = MPTranslate("ui.beammp.configprotection.save.title", "Vehicle Save Error")
 		local msg = MPTranslate("ui.beammp.configprotection.save.message", "Sorry, you cannot save this vehicle.")
@@ -1385,6 +1512,60 @@ local function gameplay_garageMode_start_overwrite()
 		gameplay_garageMode_start()
 	end
 end
+
+local editor_setDynamicFieldValue = editor and editor.setDynamicFieldValue 
+function editor_setDynamicFieldValue_overwrite(id, name, ...)
+	if name ~= "protected0"  then    
+		editor_setDynamicFieldValue(id,name,...) 
+	end  
+end
+if editor and editor.setDynamicFieldValue then
+	editor.setDynamicFieldValue = editor_setDynamicFieldValue_overwrite
+end
+
+M.onEditorActivated = function()
+	if not editor_setDynamicFieldValue then
+		editor_setDynamicFieldValue = editor.setDynamicFieldValue
+		editor.setDynamicFieldValue = editor_setDynamicFieldValue_overwrite
+	end
+end
+
+M.onEditorObjectSelectionChanged = function()
+	if not editor_setDynamicFieldValue then
+		editor_setDynamicFieldValue = editor.setDynamicFieldValue
+		editor.setDynamicFieldValue = editor_setDynamicFieldValue_overwrite
+	end
+end
+
+local extensions_mcp_server_onUpdate = extensions.isExtensionLoaded("mcp_server") and extensions.mcp_server.onUpdate
+function extensions_mcp_server_onUpdate_overwrite(...)
+	if not MPCoreNetwork.isMPSession() then
+		if extensions_mcp_server_onUpdate then
+			extensions_mcp_server_onUpdate(...)
+		elseif extensions.isExtensionLoaded("mcp_server") then
+			extensions_mcp_server_onUpdate = extensions.mcp_server.onUpdate
+			extensions.mcp_server.onUpdate = extensions_mcp_server_onUpdate_overwrite
+		end
+	end
+end
+if extensions.isExtensionLoaded("mcp_server") then
+	extensions.mcp_server.onUpdate = extensions_mcp_server_onUpdate_overwrite
+	extensions.refresh("mcp_tools")
+end
+
+local Engine_setMcpPort = Engine.setMcpPort
+function Engine_setMcpPort_overwrite(port)
+	if extensions.isExtensionLoaded("mcp_server") then
+		if not extensions_mcp_server_onUpdate then 
+			extensions_mcp_server_onUpdate = extensions.mcp_server.onUpdate
+		end
+		extensions.mcp_server.onUpdate = extensions_mcp_server_onUpdate_overwrite
+		extensions.refresh("mcp_tools")
+	end
+
+	Engine_setMcpPort(port)
+end
+Engine.setMcpPort = Engine_setMcpPort_overwrite
 
 -- applying section
 
@@ -1410,7 +1591,6 @@ local function applyVehSpawn(event)
 		return
 	end
 
-	local playerServerID = decodedData.pid -- Server ID of the player that sent the vehicle
 	local gameVehicleID  = decodedData.vid -- gameVehicleID of the player that sent the vehicle
 	local vehicleName    = decodedData.jbm -- Vehicle name
 	local vehicleConfig  = decodedData.vcf -- Vehicle config, contains paint data
@@ -1448,7 +1628,7 @@ local function applyVehSpawn(event)
 		spawnedVeh:setField("absMode", 0, absMode or "")
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
-		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, centeredPosition = true, removeWhenNoPositionFound = false})
+		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true})
 		spawnedVehID = spawnedVeh:getID()
 		spawnedVeh:setField("protected", 0, protected or "0")
 		spawnedVeh:setField("absMode", 0, absMode or "")
@@ -1491,6 +1671,8 @@ local function applyVehEdit(serverID, data)
 	local vehicleConfig = decodedData.vcf -- Vehicle config
 	local protected       = decodedData.pro
 	local absMode         = decodedData.abs
+	decodedData.pid = string.match(serverID, "(%d+)%-(%d+)")
+	decodedData.pid = tonumber(decodedData.pid)
 
 	local playerName = players[decodedData.pid] and players[decodedData.pid].name or 'Unknown'
 
@@ -1734,6 +1916,8 @@ end
 --============================ ON VEHICLE SWITCHED (CLIENT) ============================
 local function onVehicleSwitched(oldGameVehicleID, newGameVehicleID)
 	extensions.core_vehicle_partmgmt.saveLocal = core_vehicle_partmgmt_saveLocal_overwrite
+	extensions.core_vehicle_partmgmt.saveNewLocalConfig = core_vehicle_partmgmt_saveNewLocalConfig_overwrite
+	extensions.core_vehicle_partmgmt.saveExistingLocalConfig = core_vehicle_partmgmt_saveExistingLocalConfig_overwrite
 	extensions.core_vehicle_partmgmt.savedefault = core_vehicle_partmgmnt_savedefault_overwrite
 	extensions.gameplay_garageMode.start = gameplay_garageMode_start_overwrite
 	if MPCoreNetwork.isMPSession() then
@@ -1859,7 +2043,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		return
 	end
 
-	local playerServerID = tonumber(decodedData.pid) -- Server ID of the owner
+	local playerServerID = string.match(serverVehicleID, "(%d+)%-(%d+)") -- Server ID of the owner
+	playerServerID = tonumber(playerServerID)
 	local gameVehicleID  = tonumber(decodedData.vid) -- remote gameVehicleID
 
 	--create player object if this is their first vehicle
@@ -1872,7 +2057,7 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		log("I", "onServerVehicleSpawned", "Received a vehicle spawn for player " .. playerNickname .. " with ID " .. serverVehicleID .. ' '..dumpsz(decodedData, 2))
 	end
 
-	if MPConfig.getPlayerServerID() == decodedData.pid then -- If the IDs match it's a local vehicle
+	if MPConfig.getPlayerServerID() == playerServerID then -- If the IDs match it's a local vehicle
 
 		local vehObject =
 			Vehicle:new({gameVehicleID=gameVehicleID, serverVehicleString=serverVehicleID, ownerName=playerNickname, isLocal = true, jbeam=decodedData.jbm})
@@ -1944,7 +2129,8 @@ local function onServerVehicleEdited(serverID, data)
 	log('I', 'onServerVehicleEdited', "Edit received for "..serverID)
 
 	if not vehicles[serverID] then
-		vehicles[serverID] = Vehicle:new({ ServerVehicleString = serverID, isSpawned = false })
+		return
+		--vehicles[serverID] = Vehicle:new({ serverVehicleString = serverID, isSpawned = false })
 	end
 	local owner = vehicles[serverID]:getOwner()
 	if not owner.vehicles.IDs[serverID] then owner:addVehicle(vehicles[serverID]) end
@@ -2452,6 +2638,7 @@ local function applyPlayerQueues(playerID)
 end
 
 local function onUpdate(dt)
+    roundedNametags.draw()
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		localCounter = localCounter + dt
 	end
@@ -2483,6 +2670,7 @@ end
 
 
 local function onPreRender(dt)
+    roundedNametags.labels = {}
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		if not hasInitColors then
 			initColors()
@@ -2612,28 +2800,10 @@ local function onPreRender(dt)
 
 			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
 
-				local dist = ""
-				if distfloat > 10 and settings.getValue("nameTagShowDistance") then
-					local mapEntry = distfloat
-					if settings.getValue("uiUnitLength") == "imperial" then
-						mapEntry = mapEntry * 3.28084
-						if mapEntry > 5280 then
-							mapEntry = math.floor((mapEntry / 5280 * 100) + 0.5) / 100
-							dist = string.format("%.2f mi ", mapEntry)
-						else
-							mapEntry = math.floor(mapEntry)
-							dist = string.format("%.f ft ", mapEntry)
-						end
-					else
-						if mapEntry >= 1000 then
-							mapEntry = math.floor((mapEntry / 10) + 0.5) / 100
-							dist = string.format("%.2f km ", mapEntry)
-						else
-							mapEntry = math.floor(mapEntry)
-							dist = string.format("%.f m ", mapEntry)
-						end
-					end
-				end
+                local dist = ""
+                if distfloat > 10 and settings.getValue("nameTagShowDistance") then
+                    dist = " · " .. nametagStyle.distance(distfloat, settings.getValue("uiUnitLength") == "imperial")
+                end
 
 				if settings.getValue("fadeVehicles") and veh then
 					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
@@ -2651,41 +2821,10 @@ local function onPreRender(dt)
 				if not settings.getValue("nameTagFadeEnabled") then nametagAlpha = 1 end
 				if settings.getValue("nameTagDontFullyHide") then nametagAlpha = math.max(0.3, nametagAlpha) end
 
-
 				local roleInfo = v.customRole or owner.customRole or owner.role
-				local backColor = color(roleInfo.backcolor.r, roleInfo.backcolor.g, roleInfo.backcolor.b, math.floor(nametagAlpha*127))
-				-- draw spectators
-				if settings.getValue("showSpectators") then
-					if v.spectatorsTag ~= "" then
-						local spectatorBackColor = backColor
-						if settings.getValue("spectatorUnifiedColors") then
-							spectatorBackColor = color(roleToInfo.USER.backcolor.r, roleToInfo.USER.backcolor.g, roleToInfo.USER.backcolor.b, math.floor(nametagAlpha*127))
-						end
-						drawTextAdvanced(
-							pos.x, pos.y, pos.z, -- Location
-							v.spectatorsTag, -- Text
-							color(255, 255, 255, nametagAlpha*254), -- Foreground Color, Alpha is multiplied by 254 because using 255 seems to break backround alpha in 0.37
-							true, -- Draw background 
-							false, -- Wtf
-							spectatorBackColor, -- Background Color
-							false, -- shadow
-							settings.getValue("nameTagsHideBehindObjects") -- useZ, makes it render behind objects if true
-						)
-
-						pos.z = pos.z + 0.01 -- has to be positive
-					end
-				end
-				-- draw main nametag
-				drawTextAdvanced(
-					pos.x, pos.y, pos.z, -- Location
-					v.nameTag .. dist, -- Text
-					color(255, 255, 255, nametagAlpha*254), -- Foreground Color, Alpha is multiplied by 254 because using 255 seems to break backround alpha in 0.37
-					true, -- Draw background 
-					false, -- Wtf
-					backColor, -- Background Color
-					false, -- shadow
-					settings.getValue("nameTagsHideBehindObjects") -- useZ, makes it render behind objects if true
-				)
+                local spectators = settings.getValue("showSpectators") and v.spectatorsTag or ""
+                local label = v.nameTag .. dist .. spectators .. " "
+                roundedNametags.add(pos, label, nametagAlpha, roleInfo.backcolor, settings.getValue("nameTagsHideBehindObjects"))
 			end
 			:: skip_vehicle ::
 		end
@@ -2784,6 +2923,8 @@ end
 
 local function onUIInitialised()
 	extensions.core_vehicle_partmgmt.saveLocal = core_vehicle_partmgmt_saveLocal_overwrite
+	extensions.core_vehicle_partmgmt.saveNewLocalConfig = core_vehicle_partmgmt_saveNewLocalConfig_overwrite
+	extensions.core_vehicle_partmgmt.saveExistingLocalConfig = core_vehicle_partmgmt_saveExistingLocalConfig_overwrite
 	extensions.core_vehicle_partmgmt.savedefault = core_vehicle_partmgmnt_savedefault_overwrite
 	extensions.gameplay_garageMode.start = gameplay_garageMode_start_overwrite
 	UI.updateQueue(getQueueCounts())
@@ -2800,7 +2941,18 @@ local function refreshNametagCache()
 	end
 end
 
+local previous = settings.getValue("protectConfigFromClone", false)
+
 local function onSettingsChanged()
+	local newVal = settings.getValue("protectConfigFromClone", false)
+	if newVal ~= previous then
+		for _,v in pairs(vehicles) do
+			if v.isLocal then
+				sendVehicleEdit(v.gameVehicleID)
+			end
+		end
+	end
+	previous = newVal
 	for playerID,player in pairs(players) do
 		player:onSettingsChanged()
 	end

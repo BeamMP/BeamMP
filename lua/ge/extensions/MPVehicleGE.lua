@@ -134,26 +134,56 @@ end
 
 -- End nametag presentation helpers.
 
--- Rounded nametags use the ImGui draw list on every game update, like BeamMP chat.
-local roundedNametags = { labels = {}, radius = 6 }
+-- Build in onPreRender; draw after all pre-render hooks have updated the camera.
+local roundedNametags = { labels = {}, cache = {}, radius = 6, count = 0 }
+
+function roundedNametags.enabled()
+    if not MPCoreNetwork or not MPCoreNetwork.isMPSession() then return false end
+    if settings.getValue("hideNameTags") or not nicknamesAllowed or hideNicknamesToggle then return false end
+    local router = ui_router or (extensions and extensions.ui_router)
+    local route = router and router.getCurrent()
+    -- These labels belong to the driving view, not the CEF settings/vehicle menus.
+    return route and route.resolved and route.resolved.name == "play"
+end
+
+function roundedNametags.beginFrame()
+    roundedNametags.active = roundedNametags.enabled()
+    for i = 1, roundedNametags.count do roundedNametags.labels[i] = nil end
+    roundedNametags.count = 0
+    if not roundedNametags.active then
+        if next(roundedNametags.cache) then roundedNametags.cache = {} end
+        return
+    end
+    for _, label in pairs(roundedNametags.cache) do label.used = false end
+end
 
 function roundedNametags.add(position, text, alpha, background, useZ, ownerID, ownerName, vehicleID)
-    if alpha <= 0 then return end
-    local labels = roundedNametags.labels
-    labels[#labels + 1] = {
-        position = vec3(position), text = text, alpha = alpha,
-        background = background, useZ = useZ,
-        ownerID = ownerID, ownerName = ownerName, vehicleID = vehicleID,
-    }
+    if not roundedNametags.active or alpha <= 0 then return end
+    local label = roundedNametags.cache[vehicleID]
+    if not label then
+        label = {position = vec3(), windowID = "##BeamMPNametag:" .. tostring(vehicleID)}
+        roundedNametags.cache[vehicleID] = label
+    end
+    if label.text ~= text then
+        label.text = text
+        label.displayText = text:match("^%s*(.-)%s*$")
+        label.size = nil
+    end
+    label.position:set(position)
+    label.alpha, label.background, label.useZ = alpha, background, useZ
+    label.ownerID, label.ownerName, label.vehicleID = ownerID, ownerName, vehicleID
+    label.used = true
+    roundedNametags.count = roundedNametags.count + 1
+    roundedNametags.labels[roundedNametags.count] = label
 end
 
 function roundedNametags.project(point, camera)
-    local delta = point - camera.position
-    local depth = delta:dot(camera.forward)
+    local dx, dy, dz = point.x-camera.position.x, point.y-camera.position.y, point.z-camera.position.z
+    local depth = dx*camera.forward.x + dy*camera.forward.y + dz*camera.forward.z
     if depth <= 0.01 then return nil end
-    local x = 0.5 + delta:dot(camera.right) / (2 * depth * camera.halfTan * camera.aspect)
-    local y = 0.5 - delta:dot(camera.up) / (2 * depth * camera.halfTan)
-    if x < 0 or x > 1 or y < 0 or y > 1 then return nil end
+    local x = 0.5 + (dx*camera.right.x + dy*camera.right.y + dz*camera.right.z) / (2*depth*camera.halfTan*camera.aspect)
+    local y = 0.5 - (dx*camera.up.x + dy*camera.up.y + dz*camera.up.z) / (2*depth*camera.halfTan)
+    if x ~= x or y ~= y or x < 0 or x > 1 or y < 0 or y > 1 then return nil end
     return x, y, depth
 end
 
@@ -214,6 +244,7 @@ roundedNametags.actions = {
 
 function roundedNametags.menu(label)
     local im = ui_imgui
+    if not im.IsPopupOpen("playerActions") then return end
     im.PushStyleColor2(im.Col_PopupBg, im.ImVec4(0.105, 0.118, 0.137, 1))
     im.PushStyleColor2(im.Col_Border, im.ImVec4(0.25, 0.27, 0.30, 1))
     im.PushStyleColor2(im.Col_Button, im.ImVec4(0.212, 0.227, 0.259, 1))
@@ -250,36 +281,44 @@ function roundedNametags.menu(label)
     im.PopStyleColor(6)
 end
 
-function roundedNametags.interact(label, left, top, width, height)
+function roundedNametags.interact(label, left, top, width, height, viewport)
     local im = ui_imgui
     local input = core_vehicleTriggers and core_vehicleTriggers.state
     -- The game tracks cursor visibility and mouse-lock changes here.
     if not input or not input.cursorVisible or input.mouseLocked or not input.cefVisible then return end
+    local buffers = roundedNametags.buffers
+    buffers.min.x, buffers.min.y = left, top
+    buffers.max.x, buffers.max.y = left + width, top + height
+    if not label.popup and not im.IsMouseHoveringRect(buffers.min, buffers.max, false) then return end
+    im.SetNextWindowViewport(viewport.ID)
     local flags = im.WindowFlags_NoDecoration + im.WindowFlags_NoBackground + im.WindowFlags_NoMove
         + im.WindowFlags_NoSavedSettings + im.WindowFlags_NoFocusOnAppearing + im.WindowFlags_NoNav
-    im.SetNextWindowPos(im.ImVec2(left, top), im.Cond_Always)
-    im.SetNextWindowSize(im.ImVec2(width, height), im.Cond_Always)
-    im.PushStyleVar2(im.StyleVar_WindowPadding, im.ImVec2(0, 0))
-    im.PushStyleVar2(im.StyleVar_WindowMinSize, im.ImVec2(1, 1))
-    local opened = im.Begin("##BeamMPNametag:" .. tostring(label.vehicleID), nil, flags)
+    im.SetNextWindowPos(buffers.min, im.Cond_Always)
+    buffers.size.x, buffers.size.y = width, height
+    im.SetNextWindowSize(buffers.size, im.Cond_Always)
+    im.PushStyleVar2(im.StyleVar_WindowPadding, buffers.zero)
+    im.PushStyleVar2(im.StyleVar_WindowMinSize, buffers.one)
+    local opened = im.Begin(label.windowID, nil, flags)
     im.PopStyleVar(2)
     if opened then
-        im.SetCursorPos(im.ImVec2(0, 0))
-        if im.InvisibleButton("nametag", im.ImVec2(width, height)) then
+        im.SetCursorPos(buffers.zero)
+        if im.InvisibleButton("nametag", buffers.size) then
             im.OpenPopup1("playerActions")
         end
         roundedNametags.menu(label)
+        label.popup = im.IsPopupOpen("playerActions")
     end
     im.End()
 end
 
+local function fartherLabel(a, b) return a.depth > b.depth end
+
 function roundedNametags.draw()
-    -- ImGui needs draw commands every frame. onUpdate is unconditional;
-    -- onGuiUpdate is gated by getUpdateUIflag() and must not draw these labels.
-    -- onPreRender replaces it, including clearing it when the session ends.
-    local labels = roundedNametags.labels
-    if #labels == 0 or not MPGameNetwork or not MPGameNetwork.launcherConnected()
-        or settings.getValue("hideNameTags") or not nicknamesAllowed or hideNicknamesToggle then return end
+    if not roundedNametags.active then return end
+    for id, label in pairs(roundedNametags.cache) do
+        if not label.used then roundedNametags.cache[id] = nil end
+    end
+    if roundedNametags.count == 0 then return end
     local im = ui_imgui
     if not im or not core_camera then return end
     local viewport = im.GetMainViewport()
@@ -287,48 +326,64 @@ function roundedNametags.draw()
     if not viewport or not canvas then return end
     local width, height = canvas:getWindowClientSizeXY()
     local fov = core_camera.getFovRad()
-    if not width or not height or width <= 0 or height <= 0 or not fov or fov <= 0 then return end
+    if not width or not height or width <= 0 or height <= 0 or not fov or fov <= 0
+        or viewport.Size.x <= 0 or viewport.Size.y <= 0 then return end
+    local buffers = roundedNametags.buffers
+    if not buffers then
+        buffers = { min=im.ImVec2(0,0), max=im.ImVec2(0,0), text=im.ImVec2(0,0),
+            size=im.ImVec2(0,0), zero=im.ImVec2(0,0), one=im.ImVec2(1,1),
+            color=im.ImVec4(1,1,1,1), ray=vec3() }
+        roundedNametags.buffers = buffers
+    end
     local rotation = quat(core_camera.getQuat())
-    local camera = {
-        position = vec3(core_camera.getPosition()),
-        right = rotation * vec3(1, 0, 0),
-        forward = rotation * vec3(0, 1, 0),
-        up = rotation * vec3(0, 0, 1),
-        halfTan = math.tan(fov * 0.5), aspect = width / height,
-    }
-    local drawList = im.GetBackgroundDrawList1()
-    -- Far labels first, so a nearer label wins when backgrounds overlap.
-    table.sort(labels, function(a, b)
-        return (a.position - camera.position):squaredLength() > (b.position - camera.position):squaredLength()
-    end)
+    local camera = roundedNametags.camera
+    if not camera then camera = {}; roundedNametags.camera = camera end
+    camera.position = core_camera.getPosition()
+    camera.right = rotation * vec3(1,0,0)
+    camera.forward = rotation * vec3(0,1,0)
+    camera.up = rotation * vec3(0,0,1)
+    camera.halfTan, camera.aspect = math.tan(fov*0.5), width/height
+    local labels = roundedNametags.labels
     for _, label in ipairs(labels) do
-        local x, y = roundedNametags.project(label.position, camera)
-        if x then
+        label.x, label.y, label.depth = roundedNametags.project(label.position, camera)
+        label.depth = label.depth or -1
+    end
+    table.sort(labels, fartherLabel)
+    local drawList = im.GetBackgroundDrawList2(viewport)
+    buffers.min.x, buffers.min.y = viewport.Pos.x, viewport.Pos.y
+    buffers.max.x, buffers.max.y = viewport.Pos.x+viewport.Size.x, viewport.Pos.y+viewport.Size.y
+    im.ImDrawList_PushClipRect(drawList, buffers.min, buffers.max, true)
+    for _, label in ipairs(labels) do
+        if label.x then
             local visible = true
             if label.useZ then
-                local ray = label.position - camera.position
-                local distance = ray:length()
+                buffers.ray:setSub2(label.position, camera.position)
+                local distance = buffers.ray:length()
                 if distance > 0.01 then
-                    -- Collision visibility is whole-label, not the old per-pixel depth test.
-                    visible = castRayStatic(camera.position, ray / distance, distance) >= distance - 0.05
+                    buffers.ray:setScaled(1/distance)
+                    visible = castRayStatic(camera.position, buffers.ray, distance) >= distance-0.05
                 end
             end
             if visible then
-                local text = label.text:gsub("^%s+", ""):gsub("%s+$", "")
-                local size = im.CalcTextSize(text)
-                local px = viewport.Pos.x + x * viewport.Size.x
-                local py = viewport.Pos.y + y * viewport.Size.y
-                local left = math.floor(px - size.x * 0.5 - 7)
-                local top = math.floor(py - size.y - 8)
-                local background = label.background
-                local bg = im.GetColorU322(im.ImVec4(background.r / 255, background.g / 255, background.b / 255, label.alpha * nametagStyle.backgroundAlpha / 255))
-                local fg = im.GetColorU322(im.ImVec4(1, 1, 1, label.alpha))
-                im.ImDrawList_AddRectFilled(drawList, im.ImVec2(left, top), im.ImVec2(left + size.x + 14, top + size.y + 6), bg, roundedNametags.radius)
-                im.ImDrawList_AddText1(drawList, im.ImVec2(left + 7, top + 3), fg, text, nil)
-                roundedNametags.interact(label, left, top, size.x + 14, size.y + 6)
+                if not label.size then label.size = im.CalcTextSize(label.displayText) end
+                local size = label.size
+                local left = math.floor(viewport.Pos.x+label.x*viewport.Size.x-size.x*0.5-7)
+                local top = math.floor(viewport.Pos.y+label.y*viewport.Size.y-size.y-8)
+                local color, bg = buffers.color, label.background
+                color.x, color.y, color.z, color.w = bg.r/255, bg.g/255, bg.b/255, label.alpha*nametagStyle.backgroundAlpha/255
+                local background = im.GetColorU322(color)
+                color.x, color.y, color.z, color.w = 1,1,1,label.alpha
+                local foreground = im.GetColorU322(color)
+                buffers.min.x, buffers.min.y = left,top
+                buffers.max.x, buffers.max.y = left+size.x+14,top+size.y+6
+                buffers.text.x, buffers.text.y = left+7,top+3
+                im.ImDrawList_AddRectFilled(drawList,buffers.min,buffers.max,background,roundedNametags.radius)
+                im.ImDrawList_AddText1(drawList,buffers.text,foreground,label.displayText,nil)
+                roundedNametags.interact(label,left,top,size.x+14,size.y+6,viewport)
             end
         end
     end
+    im.ImDrawList_PopClipRect(drawList)
 end
 -- End rounded nametag renderer.
 
@@ -2756,7 +2811,6 @@ local function applyPlayerQueues(playerID)
 end
 
 local function onUpdate(dt)
-    roundedNametags.draw()
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		localCounter = localCounter + dt
 	end
@@ -2788,7 +2842,7 @@ end
 
 
 local function onPreRender(dt)
-    roundedNametags.labels = {}
+    roundedNametags.beginFrame()
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		if not hasInitColors then
 			initColors()
@@ -2916,17 +2970,18 @@ local function onPreRender(dt)
 			distanceMap[gameVehicleID] = distfloat
 			nametagAlpha = clamp(linearScale(distfloat, nametagFadeoutDistance, 0, 0, 1), 0, 1)
 
-			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle then
+			if not settings.getValue("hideNameTags") and nicknamesAllowed and not hideNicknamesToggle
+                and settings.getValue("fadeVehicles") and veh then
+                if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
+                else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
+            end
+			if roundedNametags.active then
 
                 local dist = ""
                 if distfloat > 10 and settings.getValue("nameTagShowDistance") then
                     dist = " · " .. nametagStyle.distance(distfloat, settings.getValue("uiUnitLength") == "imperial")
                 end
 
-				if settings.getValue("fadeVehicles") and veh then
-					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
-					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
-				end
 
 				if v.hideNametag or owner.hideNametag then goto skip_vehicle end
 
@@ -3102,6 +3157,7 @@ M.sendPastVehicles = sendPastVehicles
 -- EVENTS
 M.onUpdate                 = onUpdate
 M.onPreRender              = onPreRender
+M.onDrawDebug              = roundedNametags.draw
 M.onDisconnect             = onDisconnect
 M.handle                   = handle
 M.onVehicleSpawned         = onVehicleSpawned

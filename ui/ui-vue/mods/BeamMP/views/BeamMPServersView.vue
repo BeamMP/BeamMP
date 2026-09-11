@@ -4,80 +4,52 @@
       <div class="server-pane">
         <header class="toolbar">
           <div class="toolbar-main">
-            <BngInput
-              class="search-input"
-              :model-value="uiFilters.searchText"
-              :placeholder="$tt('ui.common.beammp.searchPlaceholder')"
-              @update:model-value="onSearch"
-            />
+            <BngInput class="search-input" :model-value="uiFilters.searchText"
+              :placeholder="$tt('ui.common.beammp.searchPlaceholder')" @update:model-value="onSearch" />
             <BngButton class="refresh-btn" @click="requestServerList">{{ $tt("ui.common.beammp.refresh") }}</BngButton>
-            <span class="mod-size-summary">Total Mod Size &lt; {{ maxModSizeLabel }}</span>
-            <BngButton
-              v-if="state.view.value === 'recent'"
-              class="clear-recents-btn"
-              accent="secondary"
-              @click="clearRecents"
-            >
+            <BngButton v-if="state.view.value === 'recent'" class="clear-recents-btn" accent="secondary"
+              @click="clearRecents">
               {{ $tt("ui.beammp.serverBrowser.clearRecent") }}
             </BngButton>
           </div>
-          <span class="server-count">{{ visibleServers.length }} servers</span>
+          <span v-if="visibleServers.length != allServersCount" class="server-count"
+          >{{ visibleServers.length }} / {{ allServersCount }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
         </header>
 
         <table class="servers-table">
           <thead>
             <tr>
-              <th>{{ $tt("ui.common.beammp.location") }}</th>
-              <th>{{ $tt("ui.common.beammp.title") }}</th>
-              <th>{{ $tt("ui.common.beammp.map") }}</th>
-              <th>{{ $tt("ui.common.beammp.players") }}</th>
-              <th></th>
+              <th @click="sortServers('location')">{{ $tt("ui.common.beammp.location") }}</th>
+              <th @click="sortServers('title')">{{ $tt("ui.common.beammp.title") }}</th>
+              <th @click="sortServers('mapName')">{{ $tt("ui.common.beammp.map") }}</th>
+              <th @click="sortServers('players')">{{ $tt("ui.common.beammp.players") }}</th>
             </tr>
           </thead>
           <tbody ref="serversTbody" @scroll.passive="onServersScroll">
             <template v-for="server in renderedServers" :key="server.id">
-              <tr
-                class="server-row"
+              <tr class="server-row"
                 :class="[serverCategoryClass(server), { selected: state.selectedServerId.value === server.id }]"
-                tabindex="0"
-                @click="selectServer(server.id)"
-                @keydown.enter.prevent="selectServer(server.id)"
-                @keydown.space.prevent="selectServer(server.id)"
-              >
+                tabindex="0" @click="selectServer(server.id)" @keydown.enter.prevent="selectServer(server.id)"
+                @keydown.space.prevent="selectServer(server.id)">
                 <td class="location-cell">
-                  <img
-                    class="location-flag"
-                    :src="locationFlag(server.location)"
-                    :alt="`${server.location || 'Unknown'} flag`"
-                    :title="server.location || 'Unknown location'"
-                    @error="useFallbackFlag"
-                  />
+                  <img class="location-flag" :src="locationFlag(server.location)"
+                    :alt="`${server.location || 'Unknown'} flag`" :title="server.location || 'Unknown location'"
+                    @error="useFallbackFlag" />
                 </td>
                 <td class="title-cell">
-                  <span
-                    class="server-title server-title-viewport"
-                    @mouseenter="scrollServerTitle"
-                    @mouseleave="resetServerTitleScroll"
-                  >
+                  <span class="server-title server-title-viewport" @mouseenter="scrollServerTitle"
+                    @mouseleave="resetServerTitleScroll">
                     <span class="server-title-content" v-html="serverTitleMarkup(server)"></span>
                   </span>
                 </td>
-                <td>{{ server.mapName }}</td>
-                <td>{{ server.players }}/{{ server.maxplayers }}</td>
-                <td class="details-cell">
-                  <button class="details-button" @click.stop="selectServer(server.id)">
-                    {{ state.selectedServerId.value === server.id ? "Hide" : "Details" }}
-                  </button>
-                </td>
+                <td style="text-align: center;">{{ server.mapName }}</td>
+                <td style="text-align: center;">{{ server.players }}/{{ server.maxplayers }}</td>
               </tr>
               <tr v-if="state.selectedServerId.value === server.id" class="details-row">
                 <td colspan="5">
                   <section class="details">
-                    <h3
-                      class="server-title server-title--detail server-title-viewport"
-                      @mouseenter="scrollServerTitle"
-                      @mouseleave="resetServerTitleScroll"
-                    >
+                    <h3 class="server-title server-title--detail server-title-viewport" @mouseenter="scrollServerTitle"
+                      @mouseleave="resetServerTitleScroll">
                       <span class="server-title-content" v-html="serverTitleMarkup(server)"></span>
                     </h3>
 
@@ -102,7 +74,8 @@
                             <td>
                               <span v-if="!server.tagsList.length">{{ $tt("ui.common.beammp.noTags") }}</span>
                               <div v-else class="tag-list-container">
-                                <span v-for="tag in server.tagsList" :key="`${server.id}:${tag.raw}`" class="chip">{{ tag.text }}</span>
+                                <span v-for="tag in server.tagsList" :key="`${server.id}:${tag.raw}`" class="chip">{{
+                                  tag.text }}</span>
                               </div>
                             </td>
                           </tr>
@@ -111,13 +84,11 @@
 
                       <section class="players-panel">
                         <h4 class="section-header">{{ $tt("ui.common.beammp.playerList") }}</h4>
-                        <div v-if="!playerNames(server).length" class="muted">{{ $tt("ui.common.beammp.noPlayers") }}</div>
+                        <div v-if="!playerNames(server).length" class="muted">{{ $tt("ui.common.beammp.noPlayers") }}
+                        </div>
                         <div v-else class="tag-list-container">
-                          <span
-                            v-for="playerName in playerNames(server)"
-                            :key="`${server.id}:player:${playerName}`"
-                            class="chip chip-player"
-                          >
+                          <span v-for="playerName in playerNames(server)" :key="`${server.id}:player:${playerName}`"
+                            class="chip chip-player">
                             {{ playerName }}
                           </span>
                         </div>
@@ -125,19 +96,35 @@
                     </div>
 
                     <section class="mods mods-panel">
-                      <h4 class="section-header">{{ $tt("ui.common.beammp.mods") }} ({{ modList(server.modlist).length }})</h4>
+                      <h4 class="section-header">{{ $tt("ui.common.beammp.mods") }} ({{ modList(server.modlist).length
+                        }})</h4>
                       <div v-if="modList(server.modlist).length === 0">{{ $tt("ui.common.beammp.vanilla") }}</div>
                       <div v-else class="tag-list-container">
-                        <span v-for="mod in modList(server.modlist)" :key="`${server.id}:${mod}`" class="chip">{{ mod }}</span>
+                        <span v-for="mod in modList(server.modlist)" :key="`${server.id}:${mod}`" class="chip">{{ mod
+                          }}</span>
                       </div>
-                      <small>{{ $tt("ui.beammp.serverBrowser.server.modsTotalFilesize") }} {{ formatBytes(server.modstotalsize) }}</small>
+                      <small>{{ $tt("ui.beammp.serverBrowser.server.modsTotalFilesize") }} {{
+                        formatBytes(server.modstotalsize) }}</small>
                     </section>
 
                     <div class="actions">
                       <BngButton @click.stop="join(server)">{{ $tt("ui.common.beammp.connect") }}</BngButton>
-                      <BngButton v-if="!isFavorite(server)" accent="secondary" @click.stop="addFavorite(server)">{{ $tt("ui.beammp.serverBrowser.addFavorite") }}</BngButton>
-                      <BngButton v-else accent="secondary" @click.stop="removeFavorite(server)">{{ $tt("ui.beammp.serverBrowser.removeFavorite") }}</BngButton>
+                      <BngButton v-if="!isFavorite(server)" accent="secondary" @click.stop="addFavorite(server)">{{
+                        $tt("ui.beammp.serverBrowser.addFavorite") }}</BngButton>
+                      <BngButton v-else accent="secondary" @click.stop="removeFavorite(server)">{{
+                        $tt("ui.beammp.serverBrowser.removeFavorite") }}</BngButton>
+                      <BngButton v-if="isFavorite(server)" accent="secondary" @click.stop="editFavorite(server)">Rename favourite</BngButton>
                     </div>
+                    <form v-if="favoriteEditingId === server.id && isFavorite(server)" class="favorite-name-editor" @click.stop @submit.prevent="saveFavoriteName(server)">
+                      <label>
+                        <span>Favourite name</span>
+                        <BngInput v-model="favoriteNameDraft" :maxlength="100" :show-external-button="false" placeholder="Leave blank to use the server name" />
+                      </label>
+                      <div class="actions">
+                        <BngButton type="submit">Save name</BngButton>
+                        <BngButton type="button" accent="secondary" @click.stop="favoriteEditingId = ''">Cancel</BngButton>
+                      </div>
+                    </form>
                   </section>
                 </td>
               </tr>
@@ -148,143 +135,142 @@
 
       <aside ref="filtersRail" class="filters-rail" :style="filtersRailStyle">
         <h2 class="rail-title">Search Filters</h2>
-        <BngButton class="reset-button" accent="attention" @click="resetFilters">
+        <BngButton class="reset-button" :accent="!filtered ? 'secondary' : 'attention'" @click="resetFilters">
           {{ $tt("ui.beammp.serverBrowser.filters.resetFilters") }}
         </BngButton>
 
         <section class="filter-group">
           <h3>Player Count</h3>
-          <label class="filter-field">
-            <span>Range Min</span>
-            <input
-              v-bng-text-input
-              class="number-input"
-              type="text"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMin')"
-              :value="playerCountDrafts.min"
-              @input="event => updatePlayerCountDraft('min', event)"
-              @blur="commitPlayerCount('min')"
-              @keydown.enter.prevent="event => event.currentTarget.blur()"
-              @keydown.esc.prevent="restorePlayerCountDraft('min')"
-            />
+          
+
+
+          <label class="match-all">
+            <input type="checkbox" :checked="uiFilters.emptyOnly"
+              @change="event => updatePlayerCountFilter('emptyOnly', event.target.checked)" />
+            <span class="checkmark" aria-hidden="true" />
+            <span>
+              <strong>{{ $tt("ui.beammp.serverBrowser.filters.emptyOnly") }}</strong>
+              <small>{{ $tt("ui.beammp.serverBrowser.filters.emptyOnlyTooltip") }}</small>
+            </span>
+
           </label>
-          <label class="filter-field">
-            <span>Range Max</span>
-            <input
-              v-bng-text-input
-              class="number-input"
-              type="text"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMax')"
-              :value="playerCountDrafts.max"
-              @input="event => updatePlayerCountDraft('max', event)"
-              @blur="commitPlayerCount('max')"
+
+          <label class="match-all">
+            <input type="checkbox" :checked="uiFilters.notEmpty"
+              @change="event => updatePlayerCountFilter('notEmpty', event.target.checked)" />
+            <span class="checkmark" aria-hidden="true" />
+            <span>
+              <strong>{{ $tt("ui.beammp.serverBrowser.filters.notEmpty") }}</strong>
+              <small>{{ $tt("ui.beammp.serverBrowser.filters.notEmptyTooltip") }}</small>
+            </span>
+          </label>
+
+          <label class="match-all">
+            <input type="checkbox" :checked="uiFilters.notFull"
+              @change="event => updatePlayerCountFilter('notFull', event.target.checked)" />
+            <span class="checkmark" aria-hidden="true" />
+            <span>
+              <strong>{{ $tt("ui.beammp.serverBrowser.filters.notFull") }}</strong>
+              <small>{{ $tt("ui.beammp.serverBrowser.filters.notFullTooltip") }}</small>
+            </span>
+          </label>
+
+          <br>
+
+          <label class="match-all">
+            <input type="checkbox" :checked="uiFilters.advancedPlayerCount"
+              @change="event => updatePlayerCountFilter('advancedPlayerCount', event.target.checked)" />
+            <span class="checkmark" aria-hidden="true" />
+            <span>
+              <strong>{{ $tt("ui.beammp.serverBrowser.filters.advancedPlayerCount") }}</strong>
+              <small>{{ $tt("ui.beammp.serverBrowser.filters.advancedPlayerCountTooltip") }}</small>
+            </span>
+          </label>
+
+          <label v-if="uiFilters.advancedPlayerCount" class="filter-field">
+            <span>Range Min</span>
+            <input v-bng-text-input class="number-input" type="text" inputmode="numeric" pattern="[0-9]*"
+              :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMin')" :value="playerCountDrafts.min"
+              @input="event => updatePlayerCountDraft('min', event)" @blur="commitPlayerCount('min')"
               @keydown.enter.prevent="event => event.currentTarget.blur()"
-              @keydown.esc.prevent="restorePlayerCountDraft('max')"
-            />
+              @keydown.esc.prevent="restorePlayerCountDraft('min')" />
+          </label>
+          <label v-if="uiFilters.advancedPlayerCount" class="filter-field">
+            <span>Range Max</span>
+            <input v-bng-text-input class="number-input" type="text" inputmode="numeric" pattern="[0-9]*"
+              :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMax')" :value="playerCountDrafts.max"
+              @input="event => updatePlayerCountDraft('max', event)" @blur="commitPlayerCount('max')"
+              @keydown.enter.prevent="event => event.currentTarget.blur()"
+              @keydown.esc.prevent="restorePlayerCountDraft('max')" />
           </label>
         </section>
 
         <section class="filter-group">
-          <h3>Total Mod Size</h3>
+          <h3>{{ $tt("ui.beammp.serverBrowser.filters.modSize") }}</h3>
           <div class="range-row">
-            <input
-              class="range-input"
-              type="range"
-              min="0"
-              max="107520"
-              step="10"
-              :value="uiFilters.sliderMaxModSize"
-              @input="event => updateNumber('sliderMaxModSize', event.target.value)"
-            />
+            <input class="range-input" type="range" min="0" :max="100" :value="modSizeMaxConverted"
+              @input="event => updateNumber('sliderMaxModSize', event.target.value)" />
             <span>{{ maxModSizeLabel }}</span>
           </div>
         </section>
 
         <section class="filter-group">
-          <h3>Matching</h3>
-        <label class="match-all">
-          <input
-            type="checkbox"
-            :checked="uiFilters.matchAll"
-            @change="event => updateMatchAll(event.target.checked)"
-          />
-          <span class="checkmark" aria-hidden="true" />
-          <span>
-            <strong>Match all</strong>
-            <small>Require every selected filter</small>
-          </span>
-        </label>
+          <h3>{{ $tt("ui.beammp.serverBrowser.filters.matching") }}</h3>
+          <label class="match-all">
+            <input type="checkbox" :checked="uiFilters.matchAll"
+              @change="event => updateMatchAll(event.target.checked)" />
+            <span class="checkmark" aria-hidden="true" />
+            <span>
+              <strong>{{ $tt("ui.beammp.serverBrowser.filters.matchAll") }}</strong>
+              <small>{{ $tt("ui.beammp.serverBrowser.filters.matchAllSubtext") }}</small>
+            </span>
+          </label>
         </section>
 
         <section class="filter-group">
           <h3>{{ $tt("ui.common.beammp.tags") }}</h3>
-        <div class="filter-options">
-          <button
-            v-for="tag in availableTags"
-            :key="tag.raw"
-            class="filter-option"
-            :class="{ active: tagSelected(tag) }"
-            @click="toggleTag(tag)"
-          >
-            {{ tag.text }}
-          </button>
-        </div>
+          <div class="filter-options">
+            <button v-for="tag in availableTags" :key="tag.raw" class="filter-option"
+              :class="{ active: tagSelected(tag) }" @click="toggleTag(tag)">
+              {{ tag.text }}
+            </button>
+          </div>
         </section>
 
         <section class="filter-group">
           <h3>{{ $tt("ui.beammp.serverBrowser.filters.selectVersions") }}</h3>
-        <div class="filter-options">
-          <button
-            v-for="version in availableVersions"
-            :key="version"
-            class="filter-option"
-            :class="{ active: simpleFilterSelected('selectedServerVersions', version) }"
-            @click="toggleSimpleFilter('selectedServerVersions', version)"
-          >
-            {{ version }}
-          </button>
-        </div>
+          <div class="filter-options">
+            <button v-for="version in availableVersions" :key="version" class="filter-option"
+              :class="{ active: simpleFilterSelected('selectedServerVersions', version) }"
+              @click="toggleSimpleFilter('selectedServerVersions', version)">
+              {{ version }}
+            </button>
+          </div>
         </section>
 
         <section class="filter-group">
           <h3>{{ $tt("ui.beammp.serverBrowser.filters.selectServerLocations") }}</h3>
-        <div class="filter-options">
-          <button
-            v-for="location in availableLocations"
-            :key="location"
-            class="filter-option filter-option--location"
-            :class="{ active: simpleFilterSelected('selectedServerLocations', location) }"
-            @click="toggleSimpleFilter('selectedServerLocations', location)"
-          >
-            <img :src="locationFlag(location)" alt="" @error="useFallbackFlag" />
-            {{ location }}
-          </button>
-        </div>
+          <div class="filter-options">
+            <button v-for="location in availableLocations" :key="location" class="filter-option filter-option--location"
+              :class="{ active: simpleFilterSelected('selectedServerLocations', location) }"
+              @click="toggleSimpleFilter('selectedServerLocations', location)">
+              <img :src="locationFlag(location)" alt="" @error="useFallbackFlag" />
+              {{ location }}
+            </button>
+          </div>
         </section>
 
         <section class="filter-group">
           <h3>{{ $tt("ui.common.beammp.maps") }}</h3>
-        <div class="filter-options">
-          <button
-            v-for="map in availableMaps"
-            :key="map"
-            class="filter-option"
-            :class="{ active: simpleFilterSelected('selectedMaps', map) }"
-            @click="toggleSimpleFilter('selectedMaps', map)"
-          >
-            <img
-              v-if="officialMaps.includes(map)"
-              class="filter-option-icon filter-option-icon--beamng"
-              alt=""
-              aria-hidden="true"
-            />
-            {{ map }}
-          </button>
-        </div>
+          <div class="filter-options">
+            <button v-for="map in availableMaps" :key="map" class="filter-option"
+              :class="{ active: simpleFilterSelected('selectedMaps', map) }"
+              @click="toggleSimpleFilter('selectedMaps', map)">
+              <img v-if="officialMaps.includes(map)" class="filter-option-icon filter-option-icon--beamng" alt=""
+                aria-hidden="true" />
+              {{ map }}
+            </button>
+          </div>
         </section>
       </aside>
     </div>
@@ -300,11 +286,22 @@ import { useBeamMPState } from "../shared/beammpState.js"
 import { icons as bngIcons } from "/ui/ui-vue/src/assets/fonts/bngIcons/bngIcons.js"
 import { BEAMMP_TEXT_STYLE_MAP } from "../shared/constants.js"
 
+const favoriteEditingId = ref("")
+const favoriteNameDraft = ref("")
+function editFavorite(server) {
+  favoriteEditingId.value = server.id
+  favoriteNameDraft.value = getFavoriteName(server)
+}
+async function saveFavoriteName(server) {
+  if (await setFavoriteName(server, favoriteNameDraft.value)) favoriteEditingId.value = ""
+}
+
 const route = useRoute()
 const filtersRail = ref(null)
 const serversTbody = ref(null)
 const filtersRailMaxHeight = ref("")
 const uiFilters = ref({})
+
 const playerCountDrafts = ref({
   min: "0",
   max: "64",
@@ -318,6 +315,8 @@ const RENDER_SCROLL_THRESHOLD_PX = 360
 const renderedServerCount = ref(INITIAL_RENDER_COUNT)
 const {
   addFavorite,
+  getFavoriteName,
+  setFavoriteName,
   availableLocations,
   availableMaps,
   availableTags,
@@ -336,15 +335,91 @@ const {
   state,
   updateFilter,
   visibleServers,
+  allServersCount,
+  getBiggestModSize,
+  getBiggestPlayerCount,
+  DEFAULT_FILTERS,
 } = useBeamMPState()
 
-const maxModSizeLabel = computed(() => formatBytes(
-  Number(uiFilters.value.sliderMaxModSize || 0) * 1024 * 1024,
-))
 
-const renderedServers = computed(() => {
-  return visibleServers.value.slice(0, renderedServerCount.value)
+const maxModSizeLabel = computed(() => {
+  if (uiFilters.value.sliderMaxModSize == getBiggestModSize()) return "Max"
+
+  return formatBytes(
+    Number(uiFilters.value.sliderMaxModSize) || 0,
+  )
 })
+
+const maxPlayerCountMax = computed(() => {
+  return getBiggestPlayerCount()
+})
+
+function sortServers(by) {
+if (serverSort.value.by === by) {
+    serverSort.value.direction = serverSort.value.direction === "asc" ? "desc" : "asc"
+   return
+  }
+  serverSort.value.by = by
+  serverSort.value.direction = "desc"
+}
+
+const serverSort = ref({
+   by: null,
+   direction: "desc",
+ })
+
+ const sortedServers = computed(() => {
+   const servers = [...visibleServers.value]
+
+   if (serverSort.value.by === "players") {
+     const direction = serverSort.value.direction === "asc" ? 1 : -1
+
+     servers.sort((a, b) => {
+       const playerDiff = (Number(a.players) || 0) - (Number(b.players) || 0)
+
+       if (playerDiff !== 0) return playerDiff * direction
+
+       return String(b.strippedName || "").localeCompare(
+         String(a.strippedName || ""),
+         undefined,
+         { sensitivity: "base" },
+       )
+     })
+   } else if (serverSort.value.by === "title") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const titleA = String(a.strippedName || "")
+        const titleB = String(b.strippedName || "")
+  
+        return titleA.localeCompare(titleB, undefined, { sensitivity: "base" }) * direction
+      })
+    } else if (serverSort.value.by === "mapName") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const mapA = String(a.mapName || "")
+        const mapB = String(b.mapName || "")
+  
+        return mapA.localeCompare(mapB, undefined, { sensitivity: "base" }) * direction
+      })
+    } else if (serverSort.value.by === "location") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const locA = String(a.location || "")
+        const locB = String(b.location || "")
+  
+        return locA.localeCompare(locB, undefined, { sensitivity: "base" }) * direction
+      })
+   }
+
+   return servers
+ })
+
+ const renderedServers = computed(() => {
+   return sortedServers.value.slice(0, renderedServerCount.value)
+ })
 
 const filtersRailStyle = computed(() => {
   if (!filtersRailMaxHeight.value) return null
@@ -373,13 +448,28 @@ function updateFiltersRailMaxHeight() {
   filtersRailMaxHeight.value = availableHeight > 0 ? `${availableHeight}px` : ""
 }
 
+const k = 3
+
 function updateNumber(key, value) {
+  if (key === "sliderMaxModSize") {
+
+    // (m/100^k) * x^k
+
+    value = (getBiggestModSize() / Math.pow(100, k)) * Math.pow(value, k)
+  }
+
   uiFilters.value = {
     ...uiFilters.value,
     [key]: Number(value || 0),
   }
   queueFilterUpdate()
 }
+
+const modSizeMaxConverted = computed(() => {
+  // (100 * (x/m) ^ (1/k))
+
+  return Math.round(100 * Math.pow((uiFilters.value.sliderMaxModSize || 0) / getBiggestModSize(), 1 / k))
+})
 
 function playerCountFilterKey(field) {
   return field === "min" ? "playerCountMin" : "playerCountMax"
@@ -469,6 +559,36 @@ function updateMatchAll(value) {
   queueFilterUpdate()
 }
 
+function updatePlayerCountFilter(key, value) {
+  if (key == "notEmpty" && uiFilters.value.emptyOnly === true) {
+    uiFilters.value.emptyOnly = false
+  }
+
+  if (key == "emptyOnly" && uiFilters.value.notEmpty === true) {
+    uiFilters.value.notEmpty = false
+  }
+
+  if (key == "notFull" && uiFilters.value.emptyOnly === true) {
+    uiFilters.value.emptyOnly = false
+  }
+
+  if (key == "advancedPlayerCount" && value === false) {
+    uiFilters.value.playerCountMin = 0
+    uiFilters.value.playerCountMax = getBiggestPlayerCount()
+  }
+
+  if (key == "advancedPlayerCount" && value === true) {
+    uiFilters.value.playerCountMin = 0
+    uiFilters.value.playerCountMax = getBiggestPlayerCount()
+  }
+
+  uiFilters.value = {
+    ...uiFilters.value,
+    [key]: value,
+  }
+  queueFilterUpdate()
+}
+
 function normalizeFilters(filters = {}) {
   const source = filters || {}
   return {
@@ -485,8 +605,20 @@ function normalizeFilters(filters = {}) {
       : [],
     selectedServerLocations: Array.isArray(source.selectedServerLocations) ? [...source.selectedServerLocations] : [],
     matchAll: Boolean(source.matchAll),
+    emptyOnly: Boolean(source.emptyOnly),
+    notFull: Boolean(source.notFull),
+    notEmpty: Boolean(source.notEmpty),
+    advancedPlayerCount: Boolean(source.advancedPlayerCount),
   }
 }
+
+const filtered = computed(() => {
+  const currentFilters = normalizeFilters(uiFilters.value)
+  DEFAULT_FILTERS.sliderMaxModSize = getBiggestModSize()
+  DEFAULT_FILTERS.playerCountMax = getBiggestPlayerCount()
+
+  return JSON.stringify(currentFilters) !== JSON.stringify(DEFAULT_FILTERS)
+})
 
 function queueFilterUpdate() {
   if (applyFiltersDebounceTimer) {
@@ -552,6 +684,7 @@ function escapeHtml(value = "") {
 }
 
 function serverTitleMarkup(server) {
+  if (server?.favoriteName) return escapeHtml(server.favoriteName)
   const raw = String(server?.sname || server?.strippedName || "")
   if (!raw) return ""
 
@@ -648,7 +781,7 @@ function scrollServerTitle(event) {
   window.clearTimeout(viewport._beammpScrollTimer)
   viewport._beammpScrollTimer = window.setTimeout(() => {
     viewport.scrollTo({ left: viewport.scrollWidth, behavior: "smooth" })
-  }, 180)
+  }, 0)
 }
 
 function resetServerTitleScroll(event) {
@@ -736,6 +869,13 @@ onBeforeUnmount(() => {
 </style>
 
 <style scoped lang="scss">
+.favorite-name-editor {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  label { display: grid; gap: 0.35rem; max-width: 32rem; }
+}
+
 .servers-wrap {
   box-sizing: border-box;
   height: 100%;
@@ -786,6 +926,11 @@ onBeforeUnmount(() => {
 .search-input {
   flex: 1 1 22rem;
   min-width: 12rem;
+  text-align: center;
+}
+
+.search-input::placeholder {
+  text-align: center;
 }
 
 .refresh-btn,
@@ -1005,7 +1150,7 @@ onBeforeUnmount(() => {
     font-size: 0.72rem;
   }
 
-  input:checked + .checkmark {
+  input:checked+.checkmark {
     border-color: var(--bng-orange-500);
     background: var(--bng-orange-500);
 
@@ -1014,7 +1159,7 @@ onBeforeUnmount(() => {
     }
   }
 
-  input:focus-visible + .checkmark {
+  input:focus-visible+.checkmark {
     box-shadow: 0 0 0 0.12rem rgba(var(--bng-orange-500-rgb), 0.35);
   }
 }
@@ -1072,12 +1217,12 @@ onBeforeUnmount(() => {
 
   thead th:nth-child(1),
   .server-row td:nth-child(1) {
-    width: 3.5rem;
+    width: 0.1rem;
   }
 
   thead th:nth-child(2),
   .server-row td:nth-child(2) {
-    width: 46%;
+    width: 60%;
   }
 
   thead th:nth-child(3),
@@ -1087,12 +1232,7 @@ onBeforeUnmount(() => {
 
   thead th:nth-child(4),
   .server-row td:nth-child(4) {
-    width: 8.5rem;
-  }
-
-  thead th:nth-child(5),
-  .server-row td:nth-child(5) {
-    width: 5.5rem;
+    width: 1rem;
   }
 
   th,
@@ -1100,6 +1240,10 @@ onBeforeUnmount(() => {
     padding: 0.26rem 0.42rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     text-align: left;
+  }
+
+  thead th {
+    text-align: center;
   }
 }
 
@@ -1149,7 +1293,7 @@ onBeforeUnmount(() => {
 }
 
 .location-cell {
-  width: 3.5rem;
+  width: 1rem;
   text-align: center !important;
 }
 
@@ -1168,7 +1312,7 @@ onBeforeUnmount(() => {
 .server-title-viewport {
   overflow-x: hidden;
   overflow-y: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   scrollbar-width: none;
   -ms-overflow-style: none;
   cursor: default;

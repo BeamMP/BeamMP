@@ -15,6 +15,10 @@ const DEFAULT_FILTERS = {
   selectedTags: [],
   selectedServerLocations: [],
   matchAll: true,
+  emptyOnly: false,
+  notFull: false,
+  notEmpty: false,
+  advancedPlayerCount: false,
 }
 
 const tagThemes = {
@@ -247,11 +251,12 @@ function formatBytes(bytes = 0, decimals = 2) {
 
 function normalizeServer(server, listIndex) {
   const endpoint = `${server?.ip}:${server?.port}`
-  const displayName = server?.sname || server?.name || ""
+  const displayName = server?.favoriteName || server?.sname || server?.name || ""
+  const plainName = server?.favoriteName ? String(server.favoriteName) : stripCustomFormatting(displayName)
   return {
     ...server,
-    strippedName: stripCustomFormatting(displayName),
-    sortName: stripCustomFormatting(displayName).toLowerCase(),
+    strippedName: plainName,
+    sortName: plainName.toLowerCase(),
     mapName: smoothMapName(server?.map || ""),
     endpoint,
     id: Number.isInteger(listIndex) ? `${endpoint}#${listIndex}` : endpoint,
@@ -287,6 +292,14 @@ function formatServerTags(commaList = "") {
     .map(formatRawTag)
 }
 
+function getBiggestModSize() {
+  return Math.max(...state.servers.value.map(server => server.modstotalsize || 0))
+}
+
+function getBiggestPlayerCount() {
+  return Math.max(...state.servers.value.map(server => Number(server.players || 0)))
+}
+
 function applyFilters(items, view) {
   const f = state.filters.value
   const tags = (f.selectedTags || []).map(tag => String(tag.raw || tag).toLowerCase())
@@ -306,8 +319,22 @@ function applyFilters(items, view) {
 
     const checks = []
 
-    checks.push(Number(server.players || 0) >= Number(f.playerCountMin ?? 0))
-    checks.push(Number(server.players || 0) <= Number(f.playerCountMax ?? 100))
+    if (f.advancedPlayerCount) {
+      checks.push(Number(server.players || 0) >= Number(f.playerCountMin ?? 0))
+      checks.push(Number(server.players || 0) <= Number(f.playerCountMax ?? 100))
+    }
+
+    if (f.emptyOnly) {
+      checks.push(Number(server.players || 0) === 0)
+    }
+
+    if (f.notFull) {
+      checks.push(Number(server.players || 0) != Number(server.maxplayers || 0))
+    }
+
+    if (f.notEmpty) {
+      checks.push(Number(server.players || 0) > 0)
+    }
 
     if (server.modstotalsize) {
       checks.push((Number(f.sliderMaxModSize) * 1048576) >= Number(server.modstotalsize))
@@ -344,8 +371,24 @@ function readServerList(data) {
   }
 }
 
+function favoriteEndpoint(server) {
+  return `${String(server?.ip || "").trim()}:${String(server?.port || "").trim()}`
+}
+
+function getFavoriteName(server) {
+  return state.favorites.value.find(f => favoriteEndpoint(f) === favoriteEndpoint(server))?.favoriteName || ""
+}
+
+function setFavoriteName(server, name) {
+  const endpoint = favoriteEndpoint(server)
+  const favoriteName = String(name || "").trim().slice(0, 100)
+  if (!state.favorites.value.some(f => favoriteEndpoint(f) === endpoint)) return false
+  state.favorites.value = state.favorites.value.map(f => favoriteEndpoint(f) === endpoint ? { ...f, favoriteName } : f)
+  return saveFavorites()
+}
+
 function isFavorite(server) {
-  return state.favorites.value.some(f => `${f.ip}:${f.port}` === server.endpoint)
+  return state.favorites.value.some(f => favoriteEndpoint(f) === favoriteEndpoint(server))
 }
 
 function isRecent(server) {
@@ -376,7 +419,7 @@ function addRecent(server) {
 
 function saveFavorites() {
   const encoded = encodeBase64(JSON.stringify(state.favorites.value))
-  extensionCommand("MPConfig", "setFavorites", `'${encoded}'`)
+  return extensionCommand("MPConfig", "setFavorites", `'${encoded}'`)
 }
 
 async function loadFavorites() {
@@ -394,12 +437,16 @@ async function loadFavorites() {
 
 function addFavorite(server) {
   if (!server) return
-  const exists = state.favorites.value.some(f => f.ip === server.ip && f.port === server.port)
-  if (exists) return
+  const exists = isFavorite(server)
+  if (exists) {
+    if (Object.prototype.hasOwnProperty.call(server, "favoriteName")) return setFavoriteName(server, server.favoriteName)
+    return true
+  }
   state.favorites.value = [...state.favorites.value, {
     ip: server.ip,
     port: server.port,
     sname: server.sname,
+    favoriteName: String(server.favoriteName || "").trim().slice(0, 100),
     strippedName: server.strippedName,
     location: server.location,
     map: server.map,
@@ -407,11 +454,11 @@ function addFavorite(server) {
     addTime: Date.now(),
     custom: Boolean(server.custom),
   }]
-  saveFavorites()
+  return saveFavorites()
 }
 
 function removeFavorite(server) {
-  state.favorites.value = state.favorites.value.filter(f => !(f.ip === server.ip && f.port === server.port))
+  state.favorites.value = state.favorites.value.filter(f => favoriteEndpoint(f) !== favoriteEndpoint(server))
   saveFavorites()
 }
 
@@ -419,12 +466,26 @@ function selectServer(serverId) {
   state.selectedServerId.value = state.selectedServerId.value === serverId ? "" : serverId
 }
 
+function sortServers(by) {
+  const sorted = [...state.servers.value]
+  sorted.sort((a, b) => {
+    if (by === "players") {
+      return (Number(b.players || 0) - Number(a.players || 0)) || a.sortName.localeCompare(b.sortName)
+    }
+    return a.sortName.localeCompare(b.sortName)
+  })
+  state.servers.value = sorted
+}
+
 async function refreshConnectionState() {
   state.loggedIn.value = Boolean(await extensionCall("MPCoreNetwork", "isLoggedIn"))
   state.launcherConnected.value = Boolean(await extensionCall("MPCoreNetwork", "isLauncherConnected"))
   state.auth.value = state.loggedIn.value
-    ? (await extensionCall("MPCoreNetwork", "getAuthResult")) || {}
-    : {}
+  const authResult = await extensionCall("MPCoreNetwork", "getAuthResult")
+  if (!authResult)
+    loggedIn.value = false
+  
+  state.auth.value = authResult || {}
 }
 
 async function requestServerList() {
@@ -470,11 +531,7 @@ async function connectToServer(ip, port, name = "", skipModWarning = false) {
   state.loadingOverlayVisible.value = true
   state.loadingStatus.value = ""
   state.downloadingMods.value = []
-  extensionCommand(
-    "MPCoreNetwork",
-    "connectToServer",
-    `\"${useIp}\", ${usePort}, \"${name || ""}\", ${skipModWarning ? "true" : "false"}`,
-  )
+  bngApi.engineLua(`MPCoreNetwork.connectToServer(mime.unb64("${btoa(useIp)}"), ${usePort}, ${bngApi.serializeToLua(name) || ""}, ${skipModWarning ? "true" : "false"})`)
 }
 
 function closeLoadingOverlay() {
@@ -534,6 +591,8 @@ function updateFilter(patch) {
 }
 
 function resetFilters() {
+  DEFAULT_FILTERS.sliderMaxModSize = getBiggestModSize()
+  DEFAULT_FILTERS.playerCountMax = getBiggestPlayerCount()
   state.filters.value = {
     ...DEFAULT_FILTERS,
   }
@@ -654,6 +713,8 @@ const availableLocations = computed(() => {
 
 const selectedServer = computed(() => state.servers.value.find(s => s.id === state.selectedServerId.value) || null)
 
+const allServersCount = computed(() => state.servers.value.length)
+
 const visibleServers = computed(() => {
   const source = state.view.value === "favorites"
     ? state.favorites.value.map(favorite => {
@@ -662,6 +723,7 @@ const visibleServers = computed(() => {
         return normalizeServer({
           ...favorite,
           ...(liveServer || {}),
+          favoriteName: favorite.favoriteName || "",
         })
       })
     : state.view.value === "recent"
@@ -712,6 +774,8 @@ export function useBeamMPState(events) {
     state,
     acceptTos,
     addFavorite,
+    getFavoriteName,
+    setFavoriteName,
     addRecent,
     availableLocations,
     availableMaps,
@@ -742,11 +806,16 @@ export function useBeamMPState(events) {
     approveSecurityPrompt,
     rejectSecurityPrompt,
     selectServer,
+    sortServers,
     selectedServer,
     showSecurityPrompt,
     setView,
     smoothMapName,
     updateFilter,
     visibleServers,
+    allServersCount,
+    getBiggestModSize,
+    getBiggestPlayerCount,
+    DEFAULT_FILTERS
   }
 }

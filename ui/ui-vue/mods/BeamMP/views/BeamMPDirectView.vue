@@ -37,6 +37,11 @@
         </label>
       </div>
 
+      <label class="field">
+        <span>Favourite name (optional)</span>
+        <BngInput v-model="favoriteName" :maxlength="100" :show-external-button="false" placeholder="e.g. Weekend cruising" />
+      </label>
+      <p v-if="favoriteSaved" role="status">Favourite saved.</p>
       <div class="actions">
         <BngButton accent="secondary" @click="pasteFromClipboard">{{ $tt("ui.common.beammp.pasteFromClipboard") }}</BngButton>
         <BngButton @click="connect">{{ $tt("ui.common.beammp.connect") }}</BngButton>
@@ -51,6 +56,8 @@ import { ref } from "vue"
 import { BngButton, BngDropdown, BngInput, ACCENTS } from "@/common/components/base"
 import { useBeamMPState } from "../shared/beammpState.js"
 
+const favoriteName = ref("")
+const favoriteSaved = ref(false)
 const ip = ref("")
 const port = ref("")
 const { addFavorite, connectToServer, directConnectFromClipboard } = useBeamMPState()
@@ -68,17 +75,20 @@ async function connect() {
 }
 
 async function favorite() {
-  if (!ip.value || !port.value) return
-  addFavorite({
-    ip: ip.value,
-    port: port.value,
-    sname: new Date().toLocaleString(),
-    strippedName: new Date().toLocaleString(),
+  if (!ip.value && !port.value) return
+  favoriteSaved.value = false
+  const saved = await addFavorite({
+    ip: ip.value.trim() || "127.0.0.1",
+    port: port.value.trim() || "30814",
+    sname: `${ip.value.trim() || "127.0.0.1"}:${port.value.trim() || "30814"}`,
+    favoriteName: favoriteName.value,
+    strippedName: `${ip.value.trim() || "127.0.0.1"}:${port.value.trim() || "30814"}`,
     custom: true,
     tags: "",
     map: "",
     location: "--",
   })
+  favoriteSaved.value = Boolean(saved)
 }
 </script>
 

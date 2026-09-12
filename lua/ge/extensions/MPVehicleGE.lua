@@ -284,6 +284,12 @@ function getPlayerByName(name)
 	end
 end
 
+local function getPlayerNameByID(playerID)
+	return players[playerID] and players[playerID].name or nil
+end
+
+M.getPlayerNameByID = getPlayerNameByID
+
 --- Checks if the given vehicle belongs to this Client
 -- @tparam integer gameVehicleID
 -- @treturn[1] bool true if this Vehicle belongs to this Client
@@ -2864,6 +2870,10 @@ local function onVehicleReady(gameVehicleID)
 	end
 
 	MPGameNetwork.onVehicleReady(gameVehicleID)
+
+	if vehicles[vehiclesMap[gameVehicleID]] then
+		extensions.hook("onBeamMPVehicleReady",gameVehicleID,vehicles[vehiclesMap[gameVehicleID]],veh)
+	end
 end
 
 

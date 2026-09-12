@@ -567,7 +567,9 @@ local function handleU(params)
 		--	leaveServer(false) -- reset session variables
 		--end
 	elseif code == "p" and isMpSession then
-		UI.setPing(data.."")
+		if not MPTimeSyncGE.hasReceivedPing then -- time sync uses it's own more representative ping, so disable this ping if time sync exists
+			UI.setPing(data.."")
+		end
 		positionGE.setPing(data)
 	end
 end

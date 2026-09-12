@@ -168,7 +168,7 @@ function normalizePingMap(payload) {
 	const result = {}
 	if (!parsed || typeof parsed !== "object") return result
 	for (const [name, rawPing] of Object.entries(parsed)) {
-		const adjusted = Math.min(999, Math.max(0, Number(rawPing) - 16))
+		const adjusted = Math.min(999, Math.max(0, Number(rawPing)))
 		result[name] = Number.isFinite(adjusted) ? adjusted : "?"
 	}
 	return result

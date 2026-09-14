@@ -89,6 +89,7 @@ local timeOffsetSmoother = newTemporalSmoothingNonLinear(1) -- Smoother for gett
 
 -- Persistent data
 local lastMailboxVersion = 0
+local lastMailboxName = nil
 local framesSinceReset = 0
 local timer = 0
 local ownPing = 0
@@ -224,6 +225,15 @@ local function updateRemoteData()
 	if not v.mpServerID or v.mpServerID == "" then return end
 	local mailBoxName = "vehPosPckt" .. v.mpServerID
 	local currentMailBoxVersion = obj:getLastMailboxVersion(mailBoxName)
+	-- Server vehicle IDs get reused (e.g. every unicycle), and the mailbox still holds the last packet
+	-- of the previous vehicle with that ID. Treat whatever is already there as read, otherwise this
+	-- vehicle teleports to the old vehicle's last position and rejects every real packet until its
+	-- sender timer passes the old vehicle's timestamp.
+	if mailBoxName ~= lastMailboxName then
+		lastMailboxName = mailBoxName
+		lastMailboxVersion = currentMailBoxVersion
+		return
+	end
 	if lastMailboxVersion ~= currentMailBoxVersion then
 		local jsonData = obj:getLastMailbox(mailBoxName)
 		local pr = jsonDecode(jsonData)

@@ -27,7 +27,7 @@ local isConnecting = false
 local proxyPort = ""
 local socketPartialData
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.22.4" -- the mod version
+local modVersion = "4.22.5" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -446,7 +446,8 @@ local function loginReceived(params)
 		end
 
 		if authResult.role and authResult.role ~= "USER" then
-			local roleColor = MPVehicleGE.getRoleInfoTable()[authResult.role].backcolor
+			local roleInfo = MPVehicleGE.getRoleInfoTable()
+			local roleColor = (roleInfo[authResult.role] or roleInfo["USER"]).backcolor
 			authResult.color = "rgba(" .. roleColor.r .. "," .. roleColor.g .. "," .. roleColor.b .. "," .. (roleColor.a or 127)/255 .. ")"
 		end
 	end

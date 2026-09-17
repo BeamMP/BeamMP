@@ -15,6 +15,18 @@
         {{ $tt("ui.common.menu") }}
       </BngButton>
 
+      <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }" @click="openExternal('https://www.patreon.com/BeamMP')">
+        <div class="patreon-content">
+          <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" />
+          <div class="patreon-text">
+            <span class="patreon-message" :style="{ color: isEARole ? '#ff69b4' : '' }">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</span>
+          </div>
+        </div>
+        <BngButton class="patreon-button" :accent="ACCENTS.secondary" :style="{ visibility: isEARole ? 'hidden' : 'visible' }">
+          {{ $tt("ui.common.beammp.readMore") }}
+        </BngButton>
+      </div>
+
       <div class="topbar-tools">
         <div class="metrics">
           <span class="metric-item">
@@ -27,7 +39,7 @@
           </span>
         </div>
 
-        <section v-if="state.loggedIn.value" class="account-panel" aria-label="BeamMP account">
+        <section v-if="state.loggedIn.value" class="account-panel" :style="{ backgroundColor: isSpecialRole ? accountRoleColor : 'rgba(0, 0, 0, 0.42)' }" aria-label="BeamMP account">
           <img
             class="account-avatar"
             :src="accountAvatar"
@@ -35,10 +47,15 @@
             @error="useFallbackAvatar"
           />
           <div class="account-details">
-            <strong>{{ accountName }}</strong>
-            <small>{{ accountRole }}</small>
-          </div>
-          <BngButton accent="secondary" class="logout-button" @click="handleLogout">
+            <small v-if="isSpecialRole" class="account-role-badge">{{ accountRole }}</small> 
+            <div class="account-name-wrapper">
+              <strong>{{ accountName }}</strong>
+            </div>
+            <div class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
+              <span class="account-id">ID: {{ accountId }}</span> 
+            </div>
+          </div> 
+          <BngButton accent="destructive" class="logout-button" @click="handleLogout"> 
             {{ $tt("ui.beammp.accounts.logout") }}
           </BngButton>
         </section>
@@ -217,15 +234,43 @@ const accountAvatar = computed(() => {
   return avatar
 })
 const accountName = computed(() => {
- 
   return state.auth.value?.username
 })
-const accountRole = computed(() => state.auth.value?.role || "User")
+const accountRole = computed(() => state.auth.value?.role || "USER")
+const accountId = computed(() => {
+  // Try to get the ID from various possible fields
+  return state.auth.value?.id || state.auth.value?.Key || state.auth.value?.identifiers?.beammp || "N/A"
+})
+const accountRoleColor = computed(() => {
+  return state.auth.value?.color || "transparent"
+})
+const isSpecialRole = computed(() => {
+  const role = state.auth.value?.role || "USER"
+  return role && role !== "USER" && role !== "User" && role !== "user"
+})
+
+const isEARole = computed(() => {
+  const role = state.auth.value?.role || ""
+  return role === "EA" || role === "Early Access" 
+})
 
 function useFallbackAvatar(event) {
-  const image = event.currentTarget
+  const image = event.currentTarget 
   image.onerror = null
   image.src = fallbackAvatar
+}
+
+function copyAccountId() {
+  const id = accountId.value
+  if (id && id !== "N/A") {
+    navigator.clipboard.writeText(id)
+      .then(() => {
+        console.log("ID copied to clipboard:", id)
+      })
+      .catch(err => {
+        console.error("Failed to copy ID:", err)
+      })
+  }
 }
 
 function updateInfobarMarginBottom() {
@@ -330,6 +375,68 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.patreon-banner {
+  display: flex;
+  flex: 1;
+  min-width: 12rem;
+  align-items: center;
+  gap: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--bng-corners-2);
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  order: 2;
+  height: 100%;
+
+  &.patreon-banner--ea {
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .patreon-content {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 0.35rem;
+    justify-content: center;
+  }
+
+  .patreon-icon {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    object-fit: contain;
+    filter: brightness(1.6);
+  }
+
+  .patreon-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .patreon-message {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .patreon-button {
+    flex: 0 0 auto;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    --bng-transition-speed: 0s;
+  }
 }
 
 .topbar-tools {
@@ -339,7 +446,7 @@ onBeforeUnmount(() => {
   justify-content: flex-end;
   flex-wrap: nowrap;
   gap: 0.55rem;
-  max-width: calc(100% - 2.75rem);
+  order: 3;
 }
 
 .metrics {
@@ -382,12 +489,13 @@ onBeforeUnmount(() => {
   min-width: 14.5rem;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.3rem 0.4rem 0.3rem 0.35rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--bng-corners-2);
   background: rgba(0, 0, 0, 0.42);
+  transition: background-color 150ms ease;
 }
-
+ 
 .account-avatar {
   box-sizing: border-box;
   width: 2.2rem;
@@ -404,24 +512,75 @@ onBeforeUnmount(() => {
   min-width: 5rem;
   flex: 1;
   flex-direction: column;
-  line-height: 1.1;
+  line-height: 1.2;
+  padding: 0.35rem 0.4rem;
+  border-radius: 0.4rem;
+  text-align: center;
+  justify-content: center;
 
-  strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .account-role-badge {
+    margin-bottom: 0.15rem;
+    color: white;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    opacity: 0.9;
   }
 
-  small {
-    margin-top: 0.16rem;
-    color: var(--bng-cool-gray-300);
-    font-size: 0.72rem;
-    text-transform: capitalize;
+  .account-name-wrapper {
+    display: inline-block;
+    padding: 0.1rem 0;
+    background-color: transparent;
+    text-align: center;
+
+    strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      font-size: 0.85rem;
+    }
+  }
+
+  .account-id-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.15rem;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .account-id {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 }
 
 .logout-button {
   flex: 0 0 auto;
+  --bng-bg-enabled: var(--bng-add-red-600);
+  --bng-bg-hover: var(--bng-add-red-600);
+  --bng-bg-active: var(--bng-add-red-600);
+  --bng-bg-border-enabled: transparent;
+  --bng-bg-border-hover: transparent;
+  --bng-bg-border-active: transparent;
+  --bng-text-enabled: white;
+  --bng-text-hover: white;
+  --bng-text-active: white;
+  --bng-bg-enabled-opacity: 1;
+  --bng-bg-hover-opacity: 1;
+  --bng-bg-active-opacity: 1;
+  color: white !important;
 }
 
 .main-grid {
@@ -697,7 +856,36 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1000px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .patreon-banner {
+    order: 1;
+    width: 100%;
+    min-width: 10rem;
+    max-width: none;
+
+    .patreon-title {
+      font-size: 0.65rem;
+    }
+
+    .patreon-message {
+      font-size: 0.55rem;
+    }
+
+    .patreon-button {
+      font-size: 0.6rem;
+      padding: 0.25rem 0.4rem;
+    }
+  }
+
+  .back-button {
+    order: 2;
+  }
+
   .topbar-tools {
+    order: 3;
     gap: 0.35rem;
     margin-right: 2rem;
     max-width: calc(100% - 2rem);

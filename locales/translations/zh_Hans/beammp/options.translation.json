@@ -3,8 +3,6 @@
   "ui.options.beammp.protectConfigFromClone.tooltip": "保护此配置，防止其他玩家克隆。",
   "ui.options.beammp.enableNewChatMenu": "新聊天菜单",
   "ui.options.beammp.enableNewChatMenu.tooltip": "新的聊天菜单基于 ImGui 构建，支持自定义，界面简洁流畅且非常出色！",
-  "ui.options.beammp.enablePosSmoother": "启用车辆位置平滑",
-  "ui.options.beammp.enablePosSmoother.tooltip": "尝试平滑处理网络不稳定玩家的位置数据，以减少车辆跳跃和橡皮筋现象。",
   "ui.options.beammp.autoSyncVehicles": "启用自动部件同步",
   "ui.options.beammp.autoSyncVehicles.tooltip": "启用后，您的车辆部件将在几秒后自动同步给其他玩家。",
   "ui.options.beammp.queueSpawnEdit": "启用玩家车辆更新/编辑排队处理",

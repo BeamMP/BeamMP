@@ -3,8 +3,6 @@
   "ui.options.beammp.protectConfigFromClone.tooltip": "Protégez cette configuration contre le clonage par d'autres joueurs.",
   "ui.options.beammp.enableNewChatMenu": "Nouveau menu de chat",
   "ui.options.beammp.enableNewChatMenu.tooltip": "Le nouveau menu de chat utilise ImGui. Il est personnalisable, élégant et génial !",
-  "ui.options.beammp.enablePosSmoother": "Activer le lissage de la position du véhicule",
-  "ui.options.beammp.enablePosSmoother.tooltip": "Tente de lisser les données de position des joueurs ayant des connexions instables, réduisant ainsi les déformations/effets de « rubber banding » des véhicules.",
   "ui.options.beammp.autoSyncVehicles": "Activer la synchronisation automatique des pièces",
   "ui.options.beammp.autoSyncVehicles.tooltip": "Si cette option est activée, les pièces de votre véhicule seront automatiquement synchronisées avec celles des autres joueurs après quelques secondes.",
   "ui.options.beammp.queueSpawnEdit": "Activer la file d'attente des mises à jour/modifications des véhicules des joueurs",

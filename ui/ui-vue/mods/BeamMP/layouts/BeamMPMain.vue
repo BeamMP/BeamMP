@@ -17,18 +17,18 @@
 
       <div class="metrics">
         <span class="metric-item">
-          <img src="/ui/assets/BeamMP/icons/account-multiple.svg" />
+          <img src="/ui/assets/BeamMP/icons/account-multiple.svg" alt="" />
           <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
         </span>
         <span class="metric-item">
-          <img src="/ui/assets/BeamMP/icons/dns.svg"/>
+          <img src="/ui/assets/BeamMP/icons/dns.svg" alt="" />
           <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
         </span>
       </div>
 
       <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }" @click="openExternal('https://www.patreon.com/BeamMP')">
         <div class="patreon-content">
-          <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" />
+          <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="Patreon" class="patreon-icon" />
           <div class="patreon-text">
             <span class="patreon-message" :style="{ color: isEARole ? '#ff69b4' : '' }">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</span>
           </div>
@@ -320,6 +320,7 @@ onMounted(async () => {
 
   await loadFavorites()
   await refreshConnectionState()
+  
   if (state.loggedIn.value) await requestServerList()
   authStateReady.value = true
 

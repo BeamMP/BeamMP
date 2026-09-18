@@ -15,6 +15,17 @@
         {{ $tt("ui.common.menu") }}
       </BngButton>
 
+      <div class="metrics">
+        <span class="metric-item">
+          <img src="/ui/assets/BeamMP/icons/account-multiple.svg" />
+          <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
+        </span>
+        <span class="metric-item">
+          <img src="/ui/assets/BeamMP/icons/dns.svg"/>
+          <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
+        </span>
+      </div>
+
       <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }" @click="openExternal('https://www.patreon.com/BeamMP')">
         <div class="patreon-content">
           <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" />
@@ -28,18 +39,7 @@
       </div>
 
       <div class="topbar-tools">
-        <div class="metrics">
-          <span class="metric-item">
-            <img src="/ui/assets/BeamMP/icons/account-multiple.svg" alt="" />
-            <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
-          </span>
-          <span class="metric-item">
-            <img src="/ui/assets/BeamMP/icons/dns.svg" alt="" />
-            <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
-          </span>
-        </div>
-
-        <section v-if="state.loggedIn.value" class="account-panel" :style="{ backgroundColor: isSpecialRole ? accountRoleColor : 'rgba(0, 0, 0, 0.42)' }" aria-label="BeamMP account">
+        <section v-if="state.loggedIn.value" class="account-panel" :style="{ backgroundColor: isSpecialRole ? accountRoleColor : 'rgba(0, 0, 0, 0.35)' }" aria-label="BeamMP account">
           <img
             class="account-avatar"
             :src="accountAvatar"
@@ -378,16 +378,51 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
 }
 
+.metrics {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: fit-content;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--bng-corners-2);
+  background: rgba(0, 0, 0, 0.35);
+  height: 100%;
+
+  .metric-item {
+    display: flex;
+    flex: 0 1 auto;
+    min-width: fit-content;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    font-size: 0.85rem;
+
+    + .metric-item {
+      margin-left: 0.65rem;
+      padding-left: 0.65rem;
+      border-left: 1px solid rgba(255, 255, 255, 0.16);
+    }
+  }
+
+  img {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    filter: brightness(1.6);
+  }
+}
+
 .patreon-banner {
   display: flex;
   flex: 1;
   min-width: 12rem;
   align-items: center;
   gap: 0;
-  padding: 0.5rem 0.75rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--bng-corners-2);
   background: rgba(0, 0, 0, 0.35);
-  cursor: pointer;
   order: 2;
   height: 100%;
 
@@ -421,7 +456,7 @@ onBeforeUnmount(() => {
   }
 
   .patreon-message {
-    font-size: 0.88rem;
+    font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.9);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
@@ -445,42 +480,8 @@ onBeforeUnmount(() => {
   align-items: stretch;
   justify-content: flex-end;
   flex-wrap: nowrap;
-  gap: 0.55rem;
+  gap: 0.4rem;
   order: 3;
-}
-
-.metrics {
-  display: flex;
-  flex: 0 1 auto;
-  min-width: fit-content;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--bng-corners-2);
-  background: rgba(0, 0, 0, 0.35);
-
-  .metric-item {
-    display: flex;
-    flex: 0 1 auto;
-    min-width: fit-content;
-    align-items: center;
-    gap: 0.35rem;
-    white-space: nowrap;
-
-    + .metric-item {
-      margin-left: 0.65rem;
-      padding-left: 0.65rem;
-      border-left: 1px solid rgba(255, 255, 255, 0.16);
-    }
-  }
-
-  img {
-    width: 1rem;
-    height: 1rem;
-    flex: 0 0 1rem;
-    filter: brightness(1.6);
-  }
 }
 
 .account-panel {
@@ -488,9 +489,8 @@ onBeforeUnmount(() => {
   flex: 0 1 19rem;
   min-width: 14.5rem;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  gap: 0.45rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--bng-corners-2);
   background: rgba(0, 0, 0, 0.42);
   transition: background-color 150ms ease;
@@ -498,11 +498,11 @@ onBeforeUnmount(() => {
  
 .account-avatar {
   box-sizing: border-box;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 2.2rem;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
   object-fit: cover;
-  border: 1px solid rgba(var(--bng-orange-500-rgb), 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   background: var(--bng-cool-gray-700);
 }
@@ -512,16 +512,16 @@ onBeforeUnmount(() => {
   min-width: 5rem;
   flex: 1;
   flex-direction: column;
-  line-height: 1.2;
-  padding: 0.35rem 0.4rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
   border-radius: 0.4rem;
   text-align: center;
   justify-content: center;
 
   .account-role-badge {
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.05rem;
     color: white;
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     text-transform: uppercase;
     font-weight: 700;
     text-align: center;
@@ -532,7 +532,7 @@ onBeforeUnmount(() => {
 
   .account-name-wrapper {
     display: inline-block;
-    padding: 0.1rem 0;
+    padding: 0;
     background-color: transparent;
     text-align: center;
 
@@ -544,7 +544,7 @@ onBeforeUnmount(() => {
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       font-weight: 700;
       letter-spacing: 0.01em;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
     }
   }
 
@@ -552,14 +552,14 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 0.15rem;
+    margin-top: 0.1rem;
     cursor: pointer;
     padding: 0;
   }
 
   .account-id {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     font-weight: 500;
     letter-spacing: 0.01em;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -568,6 +568,8 @@ onBeforeUnmount(() => {
 
 .logout-button {
   flex: 0 0 auto;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.4rem;
   --bng-bg-enabled: var(--bng-add-red-600);
   --bng-bg-hover: var(--bng-add-red-600);
   --bng-bg-active: var(--bng-add-red-600);
@@ -671,6 +673,27 @@ onBeforeUnmount(() => {
 
 .secondary {
   opacity: 0.9;
+}
+
+.back-button {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--bng-off-white);
+  background: rgba(36, 36, 36, 0.75);
+  border-radius: var(--bng-corners-1);
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 100ms ease, background-color 100ms ease, box-shadow 100ms ease;
+  box-shadow: inset 0.22rem 0 var(--bng-orange-500);
+
+  &:hover {
+    background: rgba(var(--bng-orange-500-rgb), 0.2);
+  }
+
+  &:focus-visible {
+    outline: 0.12rem solid var(--bng-orange-500);
+    outline-offset: 0.08rem;
+  }
 }
 
 .external-link {
@@ -871,7 +894,7 @@ onBeforeUnmount(() => {
     }
 
     .patreon-message {
-      font-size: 0.55rem;
+      font-size: 0.85rem;
     }
 
     .patreon-button {

@@ -51,8 +51,8 @@
             <div class="account-name-wrapper">
               <strong>{{ accountName }}</strong>
             </div>
-            <div class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
-              <span class="account-id">ID: {{ accountId }}</span> 
+            <div v-if="!isGuest" class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
+              <span class="account-id">ID: {{ accountId }}</span>
             </div>
           </div> 
           <BngButton accent="destructive" class="logout-button" @click="handleLogout"> 
@@ -81,11 +81,15 @@
 
         <div class="spacer" />
 
-        <button class="nav-btn secondary external-link external-link--patreon" @click="openExternal('https://www.patreon.com/BeamMP')">
+        <button 
+          class="nav-btn secondary external-link external-link--patreon" 
+          :class="{ 'external-link--patreon-ea': isEARole }"
+          @click="openExternal('https://www.patreon.com/BeamMP')"
+        >
           <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="" class="external-link-icon" />
           <span class="external-link-copy">
             <span class="external-link-title">{{ $tt("ui.common.beammp.patreon") }}</span>
-            <small class="external-link-subtitle">{{ $tt("ui.beammp.patreon.message.user") }}</small>
+            <small class="external-link-subtitle">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</small>
           </span>
         </button>
         <button class="nav-btn secondary external-link" @click="openExternal('https://forum.beammp.com')">
@@ -236,7 +240,10 @@ const accountAvatar = computed(() => {
 const accountName = computed(() => {
   return state.auth.value?.username
 })
-const accountRole = computed(() => state.auth.value?.role || "USER")
+const accountRole = computed(() => {
+  const roleTag = state.auth.value?.roleInfo?.tag || ""
+  return roleTag.replace(/^\s*\[|\]\s*$/g, "").trim() || "USER"
+})
 const accountId = computed(() => {
   // Try to get the ID from various possible fields
   return state.auth.value?.id || state.auth.value?.Key || state.auth.value?.identifiers?.beammp || "N/A"
@@ -251,7 +258,14 @@ const isSpecialRole = computed(() => {
 
 const isEARole = computed(() => {
   const role = state.auth.value?.role || ""
-  return role === "EA" || role === "Early Access" 
+  return role === "EA" || role === "Early Access"
+})
+
+const isGuest = computed(() => {
+  const role = state.auth.value?.role || ""
+  const username = state.auth.value?.username || ""
+  return role === "GUEST" || role === "Guest" || role === "guest" ||
+         username.toLowerCase().startsWith("guest")
 })
 
 function useFallbackAvatar(event) {
@@ -320,7 +334,7 @@ onMounted(async () => {
 
   await loadFavorites()
   await refreshConnectionState()
-  
+
   if (state.loggedIn.value) await requestServerList()
   authStateReady.value = true
 
@@ -750,6 +764,20 @@ onBeforeUnmount(() => {
 
   .external-link-subtitle {
     color: var(--bng-add-green-200);
+  }
+
+  &.external-link--patreon-ea {
+    border-color: rgba(147, 51, 234, 0.92);
+    background: rgba(147, 51, 234, 0.2);
+
+    &:hover {
+      border-color: rgba(147, 51, 234, 1);
+      background: rgba(147, 51, 234, 0.32);
+    }
+
+    .external-link-subtitle {
+      color: rgba(216, 180, 254, 1);
+    }
   }
 }
 

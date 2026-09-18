@@ -26,14 +26,14 @@
         </span>
       </div>
 
-      <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }" @click="openExternal('https://www.patreon.com/BeamMP')">
+      <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }">
         <div class="patreon-content">
           <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="Patreon" class="patreon-icon" />
           <div class="patreon-text">
-            <span class="patreon-message" :style="{ color: isEARole ? '#ff69b4' : '' }">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</span>
+            <span class="patreon-message" :style="{ color: isEARole ? '#9333eaeb' : '' }">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</span>
           </div>
         </div>
-        <BngButton class="patreon-button" :accent="ACCENTS.secondary" :style="{ visibility: isEARole ? 'hidden' : 'visible' }">
+        <BngButton class="patreon-button" accent="secondary" :style="{ visibility: isEARole ? 'hidden' : 'visible' }" @click="openExternal('https://www.patreon.com/BeamMP')">
           {{ $tt("ui.common.beammp.readMore") }}
         </BngButton>
       </div>
@@ -51,7 +51,7 @@
             <div class="account-name-wrapper">
               <strong>{{ accountName }}</strong>
             </div>
-            <div v-if="!isGuest" class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
+            <div v-if="accountId" class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
               <span class="account-id">ID: {{ accountId }}</span>
             </div>
           </div> 
@@ -180,6 +180,7 @@ const { events } = useBridge()
 const route = useRoute()
 const router = useRouter()
 const bngVue = window.bngVue || { goBack() {} }
+const bngApi = window.bngApi
 const authStateReady = ref(false)
 const contentPanel = ref(null)
 const infobarMarginBottom = ref("1.75rem")
@@ -241,49 +242,36 @@ const accountName = computed(() => {
   return state.auth.value?.username
 })
 const accountRole = computed(() => {
-  const roleTag = state.auth.value?.roleInfo?.tag || ""
-  return roleTag.replace(/^\s*\[|\]\s*$/g, "").trim() || "USER"
+  const roleTag = state.auth.value?.roleInfo?.tag
+  return roleTag.replace(/^\s*\[|\]\s*$/g, "").trim() || state.auth.value?.role
 })
 const accountId = computed(() => {
-  // Try to get the ID from various possible fields
-  return state.auth.value?.id || state.auth.value?.Key || state.auth.value?.identifiers?.beammp || "N/A"
+  return state.auth.value?.id
 })
 const accountRoleColor = computed(() => {
-  return state.auth.value?.color || "transparent"
+  return state.auth.value?.color
 })
 const isSpecialRole = computed(() => {
   const role = state.auth.value?.role || "USER"
-  return role && role !== "USER" && role !== "User" && role !== "user"
+  return role !== "USER"
 })
 
 const isEARole = computed(() => {
   const role = state.auth.value?.role || ""
-  return role === "EA" || role === "Early Access"
-})
-
-const isGuest = computed(() => {
-  const role = state.auth.value?.role || ""
-  const username = state.auth.value?.username || ""
-  return role === "GUEST" || role === "Guest" || role === "guest" ||
-         username.toLowerCase().startsWith("guest")
+  return role === "EA" || role === "ET" || role === "MDEV" || role === "STAFF"
 })
 
 function useFallbackAvatar(event) {
-  const image = event.currentTarget 
+  const image = event.currentTarget
   image.onerror = null
   image.src = fallbackAvatar
 }
 
 function copyAccountId() {
-  const id = accountId.value
-  if (id && id !== "N/A") {
-    navigator.clipboard.writeText(id)
-      .then(() => {
-        console.log("ID copied to clipboard:", id)
-      })
-      .catch(err => {
-        console.error("Failed to copy ID:", err)
-      })
+  const id = state.auth.value?.id
+  if (id) {
+    bngApi.engineLua(`setClipboard("`+id+`")`)
+    bngVue.toastr.info("Copied ID to clipboard", "BeamMP")
   }
 }
 
@@ -586,8 +574,8 @@ onBeforeUnmount(() => {
   font-size: 0.65rem;
   padding: 0.25rem 0.4rem;
   --bng-bg-enabled: var(--bng-add-red-600);
-  --bng-bg-hover: var(--bng-add-red-600);
-  --bng-bg-active: var(--bng-add-red-600);
+  --bng-bg-hover: var(--bng-add-red-500);
+  --bng-bg-active: var(--bng-add-red-700);
   --bng-bg-border-enabled: transparent;
   --bng-bg-border-hover: transparent;
   --bng-bg-border-active: transparent;
@@ -598,6 +586,7 @@ onBeforeUnmount(() => {
   --bng-bg-hover-opacity: 1;
   --bng-bg-active-opacity: 1;
   color: white !important;
+  transition: all 150ms ease;
 }
 
 .main-grid {
@@ -956,4 +945,5 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
   }
 }
+
 </style>

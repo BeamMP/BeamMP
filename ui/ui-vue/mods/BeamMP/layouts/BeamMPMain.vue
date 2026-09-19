@@ -180,7 +180,6 @@ const { events } = useBridge()
 const route = useRoute()
 const router = useRouter()
 const bngVue = window.bngVue || { goBack() {} }
-const bngApi = window.bngApi
 const authStateReady = ref(false)
 const contentPanel = ref(null)
 const infobarMarginBottom = ref("1.75rem")
@@ -269,8 +268,8 @@ function useFallbackAvatar(event) {
 
 function copyAccountId() {
   const id = state.auth.value?.id
-  if (id) {
-    bngApi.engineLua(`setClipboard("`+id+`")`)
+  if (id && /^\d+$/.test(id)) {
+    window.bngApi.engineLua(`setClipboard("${id}")`)
     bngVue.toastr.info("Copied ID to clipboard", "BeamMP")
   }
 }

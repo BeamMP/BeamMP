@@ -116,13 +116,22 @@ local function applyPosFFI(recBuffer, serverVehicleID)
 			recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
 			recRvel:set(structRvel.x,structRvel.y,structRvel.z)
 		else
-			log('E','applyPos', 'Received invalid position packet with size '..#data..' Expected '..posPacketSize)
+			log('E','applyPos', 'Received invalid position packet with size '..#recBuffer..' Expected '..posPacketSize)
 			return
 		end
 
 		vehicle.position:set(recPos)
 		vehicle.rotation:set(recRot)
 	end
+end
+
+local jsonBuffer = stringBuffer.new()
+local function decodeJsonBuffer(buffer)
+	if type(buffer) == "string" then
+		jsonBuffer:set(buffer)
+		return jsonBuffer:jsondecode()
+	end
+	return buffer:jsondecode()
 end
 
 local function applyPosJson(recBuffer, serverVehicleID)
@@ -139,34 +148,36 @@ local function applyPosJson(recBuffer, serverVehicleID)
 
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
-		local decodedData = jsonDecode(recBuffer:get())
-		if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
-			log('E','setVehicleRotation', 'Received invalid position packet')
-			return
-		end
-		local tim = decodedData.tim
-		local ping = decodedData.ping or 0
+		local decodeSuccess , decodedData = pcall(decodeJsonBuffer, recBuffer)
+		if decodeSuccess then
+			if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
+				log('E','setVehicleRotation', 'Received invalid position packet')
+				return
+			end
+			local tim = decodedData.tim
+			local ping = decodedData.ping or 0
 
-		recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
-		recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])
-		recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
-		recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
+			recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
+			recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])
+			recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
+			recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
 
-		vehicle.lastDt = tim
-		local deltaDt = math.max((tim or 0) - (vehicle.lastDt or 0), 0.001)
+			vehicle.lastDt = tim
+			local deltaDt = math.max((tim or 0) - (vehicle.lastDt or 0), 0.001)
 
-		vehicle.position:set(recPos)
-		vehicle.rotation:set(recRot)
+			vehicle.position:set(recPos)
+			vehicle.rotation:set(recRot)
 
-		if owner and ping and not owner.hasUpdatedPing then-- TODO place holder until we have a dedicated player list ping packet -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
-			ping = math.floor(ping*1000)
+			if owner and ping and not owner.hasUpdatedPing then-- TODO place holder until we have a dedicated player list ping packet -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
+				ping = math.floor(ping*1000)
 
-			UI.setPlayerPing(owner.name, ping) -- Send ping to UI
-			owner.ping = ping
-			owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
+				UI.setPlayerPing(owner.name, ping) -- Send ping to UI
+				owner.ping = ping
+				owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
 			owner.hasUpdatedPing = true
+			end
+			vehicle.posPackets = 0
 		end
-		vehicle.posPackets = 0
 	end
 end
 
@@ -177,10 +188,12 @@ local recBuffer = stringBuffer.new()
 local function handle(rawData)
 	recBuffer:set(rawData) -- set replaces the whole buffer with the new string
 	local code = recBuffer:get(1) -- get consumes the string buffer
-	recBuffer:skip(1) -- Skip/consumes the ":" between code and serverVehicleID
+	recBuffer:skip(1) -- consumes the ":" between code and serverVehicleID
 	local startID, endID = string.find(rawData, "(%d+%-%d+)%:") -- find the serverVehicleID index
+	if not startID or not endID then return end -- no serverVehicleID found
+
 	local serverVehicleID = recBuffer:get(endID-startID) -- read and consume only the serverVehicleID
-	recBuffer:skip(1) -- skip/consumes the ":" between serverVehicleID and position data
+	recBuffer:skip(1) -- consumes the ":" between serverVehicleID and position data
 
 	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
 
@@ -278,7 +291,9 @@ local function onUpdate(dtReal, dtSim, dtRaw)
 	end
 end
 
-M.applyPos                    = applyPos
+M.applyPos                    = applyPosJson
+M.applyPosJson                = applyPosJson
+M.applyPosFFI                 = applyPosFFI
 M.tick                        = tick
 M.handle                      = handle
 M.sendVehiclePosRot           = sendVehiclePosRot

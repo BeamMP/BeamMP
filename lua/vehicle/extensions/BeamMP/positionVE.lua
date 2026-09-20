@@ -257,8 +257,8 @@ local recPing = 0
 
 local function setVehiclePosRot(dt, jsonData)
 	if jsonData then
-		local decodedData = jsonDecode(jsonData)
-		if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
+		local decodeSuccess, decodedData = pcall(posPacketRecBuff.jsondecode, posPacketRecBuff)
+		if not decodeSuccess or not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
 			log('E','setVehicleRotation', 'Received invalid position packet')
 			return
 		end
@@ -286,7 +286,6 @@ local function setVehiclePosRot(dt, jsonData)
 	if not tim then
 		return
 	end
-
 	if receivedData.timer > tim then
 		if receivedData.timer - tim > 5 then
 			receivedData.timer = tim
@@ -294,18 +293,20 @@ local function setVehiclePosRot(dt, jsonData)
 		end
 		return
 	end
-
-	if tim ~= receivedData.timer then
+	if receivedData.timer ~= tim or jsonData then
 		local localTime = timer
 		if not MPTimeSyncVE.useTimeSync or jsonData then
 			receivedData.timeOffset = timer-tim - ownPing/2 - recPing/2 - (dt or lastDt)
 			localTime = localTime - timeOffset
+			if receivedData.timer == tim then
+				timeOffsetSmoother:set(receivedData.timeOffset)
+				timeOffset = receivedData.timeOffset
+			end
 		end
 		dirPredictor:add(recPos, recVel, tim, speed, localTime)
 		quaternionPredictor:add(recRot, recRvel, tim, speed, localTime)
 		receivedData.pos:set(recPos)
 	end
-
 	receivedData.timer = tim
 	receivedData.recTime = timer
 end
@@ -328,9 +329,10 @@ local function updateRemoteData(dt)
 		setVehiclePosRot()
 	end
 	if lastMailboxVersionJson ~= currentMailBoxVersionJson then
-		local jsonData = obj:getLastMailbox(mailboxNameJson, posPacketRecBuff)
-		if jsonData ~= "" then
-			setVehiclePosRot(dt,jsonData)
+		obj:getLastMailboxToBuffer(mailboxNameJson, posPacketRecBuff)
+
+		if #posPacketRecBuff ~= 0 then
+			setVehiclePosRot(dt, true)
 			lastJsonTime = 0
 		end
 	end
@@ -488,7 +490,6 @@ local function updateGFX(dt)
 
 	lastVehVel:set(vehVel)
 	lastVehRvel:set(vehRvel)
-
 	if not MPTimeSyncVE.useTimeSync or lastFFITime > 1 and lastJsonTime < 1 then
 		-- Smoothed difference between local and remote timestamps
 		timeOffset = timeOffsetSmoother:get(receivedData.timeOffset, dt)

@@ -13,6 +13,8 @@ local function newVectorSmoothing(rate)
  return smoothers.newVectorSmoothing(rate)
 end
 
+local tempVec = vec3()
+
 -- Limit vector length
 local function limitVecLength(vec, length)
   local vecLength = vec:squaredLength()
@@ -131,8 +133,12 @@ function vecDirPredictor:add(pos, vel, time, mul, currentTime)
 
   time = time or os:clockhp()
 
-  local dt = max(time - lastData.time, 0.001)
+  local dt = time - lastData.time
   local ping = (currentTime or time) - lastData.time   --time
+  local dtScale = 1 / dt
+  if dt == 0 then
+    dtScale = 0
+  end
 
   if lastData.time ~= 0 then                 -- TODO figure out if we should use the DT from last time for the smoother, this makes interpolation smooth, but adds one more tick of latency
     self.bufferReadOffset = self.bufferOffsetSmoother:get(max(0, min(1, max(ping))), dt)
@@ -142,7 +148,7 @@ function vecDirPredictor:add(pos, vel, time, mul, currentTime)
   nextData.totalVel = vel:length()
 
   nextData.acc:setSub2(vel, lastData.vel)
-  nextData.acc:setScaled(1 / dt)
+  nextData.acc:setScaled(dtScale)
   --limitVecLength(nextData.acc, self.maxAcc)
   nextData.totalAcc = nextData.acc:length()
 
@@ -150,7 +156,7 @@ function vecDirPredictor:add(pos, vel, time, mul, currentTime)
   nextData.dir:normalize()
   nextData.dirAngularVel = calcAngularVelocity(lastData.dir, nextData.dir, dt)
   nextData.dirAngularAcc:setSub2(nextData.dirAngularVel, lastData.dirAngularVel)
-  nextData.dirAngularAcc:setScaled(1 / dt)
+  nextData.dirAngularAcc:setScaled(dtScale)
   --limitVecLength(nextData.dirAngularAcc, self.maxAcc)
 
   nextData.time = time
@@ -595,8 +601,12 @@ function quaternionPredictor:add(rot, rotVel, time, mul, currentTime)
 
   time = time or os:clockhp()
 
-  local dt = max(time - lastData.time, 0.001)
+  local dt = time - lastData.time
   local ping = max(currentTime - lastData.time, 0.001)
+  local dtScale = 1 / dt
+  if dt == 0 then
+    dtScale = 0
+  end
   --local ping = max(currentTime - time, 0.001)
   if lastData.time ~= 0 then
     self.bufferReadOffset = self.bufferOffsetSmoother:get(min(1, max(ping, abs(dt))), dt)
@@ -604,8 +614,10 @@ function quaternionPredictor:add(rot, rotVel, time, mul, currentTime)
 
   nextData.rot:set(rot)
   nextData.rotVel:set(rotVel)
-  nextData.rotAcc:set(limitVecLength((nextData.rotVel - lastData.rotVel) / dt, self.maxRotAcc))
+  nextData.rotAcc:setSub2(nextData.rotVel, lastData.rotVel)
 
+  nextData.rotAcc:setScaled(dtScale)
+  limitVecLength(nextData.rotAcc,self.maxRotAcc)
 
   nextData.time = time
   nextData.multiplier = mul

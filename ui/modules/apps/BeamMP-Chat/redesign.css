@@ -25,8 +25,19 @@ ul#chat-list {
 }
 
 #chat-list::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
+    width: 0 !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease;
+}
+
+#chat-list:hover::-webkit-scrollbar {
+    width: 4px !important;
+    opacity: 0.6 !important;
+}
+
+#chat-list::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: rgba(255, 140, 0, 0.5);
 }
 
 .chat-message {
@@ -36,10 +47,23 @@ ul#chat-list {
     text-shadow: 0px 0px 4px #000, 0px 0px 6px #000, 0px 0px 8px #000;
     border-radius: 6px;
     transition: transform .12s ease, opacity .12s;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chat-message:hover {
     transform: translateY(-2px);
+    background-color: rgba(255, 140, 0, 0.1);
 }
 
 .chat-message-timestamp {
@@ -48,17 +72,23 @@ ul#chat-list {
     color: rgba(255, 255, 255, 0.8);
     padding-right: 8px;
 	font-family: 'VueNotoSans Mono', monospace;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.chat-message:hover .chat-message-timestamp {
+    opacity: 1;
 }
 
 #chatbox {
     display: flex;
     min-height: 40px;
     width: 250px;
-    background-color: rgba(30, 30, 30, 0.25);
+    background-color: rgba(40, 40, 40, 0.7);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     transition: width 0.2s ease-in-out, background-color 0.3s ease;
     transition-delay: 700ms;
@@ -84,24 +114,46 @@ ul#chat-list {
 
 #chat-input::placeholder {
     color: #BBBBBB;
+    transition: opacity 0.15s ease;
 }
 
-.multiplayerChat .buttons {
+#chat-input:focus::placeholder {
+    opacity: 0.5;
+}
+
+.multiplayerChat .buttons,
+#chat-horizontal-button,
+#chat-vertical-button {
     color: #DDDDDD;
     border: none;
-    background-color: transparent;
+    background-color: transparent !important;
     height: 100%;
     transition: 0.2s;
     cursor: pointer;
-	font-family: var(--bmp-fnt-defs);
+    font-family: var(--bmp-fnt-defs);
+}
+
+#send-button {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border: none !important;
 }
 
 .multiplayerChat .buttons:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 140, 0, 0.3);
     color: #FFFFFF;
+    transform: scale(1.05);
 }
 
 .swap-buttons {
     min-width: 25px;
     text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.swap-buttons:hover {
+    transform: scale(1.15);
+    background: rgba(255, 140, 0, 0.3);
 }

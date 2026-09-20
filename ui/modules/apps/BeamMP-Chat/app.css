@@ -39,7 +39,6 @@
     overflow-y: auto;
     overflow-wrap: anywhere;
     list-style: none;
-    scrollbar-gutter: stable;
 }
 
 .beammpChat .chat-message {
@@ -179,31 +178,6 @@
 .beammpChat .swap-buttons:hover {
     transform: scale(1.15);
     background: rgba(var(--bng-orange-500-rgb), 0.4);
-}
-
-.beammpChat #chat-list::-webkit-scrollbar {
-    width: 0 !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease;
-}
-
-.beammpChat #chat-list:hover::-webkit-scrollbar {
-    width: 0.3rem !important;
-    opacity: 0.6 !important;
-}
-
-.beammpChat #chat-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.beammpChat #chat-list::-webkit-scrollbar-thumb {
-    border-radius: 0.2rem;
-    background: rgba(var(--bng-orange-500-rgb), 0.5);
-    transition: background-color 0.15s ease;
-}
-
-.beammpChat #chat-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--bng-orange-500-rgb), 0.7);
 }
 
 @media (max-width: 420px) {

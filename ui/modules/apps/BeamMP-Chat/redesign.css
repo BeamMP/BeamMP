@@ -24,22 +24,6 @@ ul#chat-list {
     width: 100%;
 }
 
-#chat-list::-webkit-scrollbar {
-    width: 0 !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease;
-}
-
-#chat-list:hover::-webkit-scrollbar {
-    width: 4px !important;
-    opacity: 0.6 !important;
-}
-
-#chat-list::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    background: rgba(255, 140, 0, 0.5);
-}
-
 .chat-message {
     padding: 4px 4px;
     color: white;

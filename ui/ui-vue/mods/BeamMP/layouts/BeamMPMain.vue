@@ -269,7 +269,7 @@ function useFallbackAvatar(event) {
 function copyAccountId() {
   const id = state.auth.value?.id
   if (id && /^\d+$/.test(id)) {
-    window.bngApi.engineLua(`setClipboard("${id}")`)
+    bngApi.engineLua(`setClipboard("${id}")`)
     bngVue.toastr.info("Copied ID to clipboard", "BeamMP")
   }
 }

@@ -52,7 +52,7 @@ local posPIDz = newPIDParallel(posProportional, posIntegral, posDerivative, minO
 -- Rotation
 local maxRotForce = 2            -- Maximum rotation correction force ---(rad/s^2)
 local rotCollisionMul = 0.65     -- rotation force reduction when in colliding with something, 0 is no reduction and 1 removes all forces
-local posCollisionTrigger = 10
+local rotCollisionTrigger = 10
 local rotVehicleContactMul = 0.5 -- rotation force reduction when in contact with another vehicle, 0 is no reduction and 1 removes all forces
 local rotProportional = 50
 local rotIntegral = 8
@@ -682,9 +682,9 @@ local function updateGFX(dt)
 		posErrorTimer.y , errorDir.y = calculateForceReduction(errorDir.y,posError.y,posErrorVel.y,posErrorTimer.y,posCollisionTrigger/estimatedSimSpeed,dt,predictTime)
 		posErrorTimer.z , errorDir.z = calculateForceReduction(errorDir.z,posError.z,posErrorVel.z,posErrorTimer.z,posCollisionTrigger/estimatedSimSpeed,dt,predictTime)
 
-		rotErrorTimer.x  = calculateForceReduction(errorDir.x,rotError.x,rotErrorVel.x,rotErrorTimer.x,posCollisionTrigger/estimatedSimSpeed,dt,predictTime)
-		rotErrorTimer.y  = calculateForceReduction(errorDir.y,rotError.y,rotErrorVel.y,rotErrorTimer.y,posCollisionTrigger/estimatedSimSpeed,dt,predictTime)
-		rotErrorTimer.z  = calculateForceReduction(errorDir.z,rotError.z,rotErrorVel.z,rotErrorTimer.z,posCollisionTrigger/estimatedSimSpeed,dt,predictTime)
+		rotErrorTimer.x  = calculateForceReduction(errorDir.x,rotError.x,rotErrorVel.x,rotErrorTimer.x,rotCollisionTrigger/estimatedSimSpeed,dt,predictTime)
+		rotErrorTimer.y  = calculateForceReduction(errorDir.y,rotError.y,rotErrorVel.y,rotErrorTimer.y,rotCollisionTrigger/estimatedSimSpeed,dt,predictTime)
+		rotErrorTimer.z  = calculateForceReduction(errorDir.z,rotError.z,rotErrorVel.z,rotErrorTimer.z,rotCollisionTrigger/estimatedSimSpeed,dt,predictTime)
 
 		local posErrorMul = vecCache.posErrorMul
 		posErrorMul.x = (1 - min(1,(posCollisionMul*(posErrorTimer.x/(predictTime*2)))))

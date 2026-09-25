@@ -449,7 +449,18 @@ function sortServers(by) {
   const sorted = [...state.servers.value]
   sorted.sort((a, b) => {
     if (by === "players") {
-      return (Number(b.players || 0) - Number(a.players || 0)) || a.sortName.localeCompare(b.sortName)
+      const playerDiff = (Number(b.players || 0) - Number(a.players || 0))
+      if (playerDiff !== 0) return playerDiff
+      return a.sortName.localeCompare(b.sortName)
+    }
+    if (by === "title") {
+      return a.sortName.localeCompare(b.sortName)
+    }
+    if (by === "mapName") {
+      return (a.mapName || "").localeCompare(b.mapName || "")
+    }
+    if (by === "location") {
+      return (a.location || "").localeCompare(b.location || "")
     }
     return a.sortName.localeCompare(b.sortName)
   })

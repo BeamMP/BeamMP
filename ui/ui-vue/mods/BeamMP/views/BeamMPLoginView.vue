@@ -16,7 +16,7 @@
 
     <div v-if="showReadMorePopup" class="popup-overlay" @click.self="showReadMorePopup = false">
       <div class="popup-content">
-        <h3>Account Information</h3>
+        <h3>Additional Information</h3>
         <p>Are you an Early Access Supporter who previously had an account? Please read this <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP/posts/moment-youve-all-169326895')" class="popup-link">Patreon post</a> for more information on how to recover your account.</p>
         <p>Are you an Early Access Supporter but don't have an account yet, or are you having issues with account recovery or login? Please make an Account Support ticket in <code># ❔️ Support</code> in our <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">Discord server</a></p>
         <BngButton class="popup-close-button" @click="showReadMorePopup = false">Close</BngButton>
@@ -25,6 +25,7 @@
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
+      <p class="error-notice">Something wrong? Please see the notice above.</p>
       <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
 
       <template v-if="mode === 'account'">
@@ -141,6 +142,7 @@ watch(() => state.loggedIn.value, value => {
   margin: 0;
   overflow: hidden;
   position: relative;
+  padding-top: 5rem;
 }
 
 .info-banner {
@@ -161,6 +163,7 @@ watch(() => state.loggedIn.value, value => {
   box-sizing: border-box;
   flex-shrink: 0;
   margin: 0;
+  z-index: 10;
 }
 
 .banner-icon {
@@ -235,6 +238,7 @@ watch(() => state.loggedIn.value, value => {
   flex-direction: column;
   gap: 0.7rem;
   color: var(--bng-off-white);
+  margin-top: 6rem;
 }
 
 .beammp-logo {
@@ -336,6 +340,17 @@ watch(() => state.loggedIn.value, value => {
   margin: 0;
   text-align: center;
   color: var(--bng-add-red-500);
+}
+
+.error-notice {
+  color: var(--bng-add-red-400);
+  font-weight: 600;
+  background: rgba(var(--bng-add-red-500-rgb), 0.1);
+  padding: 0.75rem;
+  border-radius: var(--bng-corners-1);
+  border: 1px solid rgba(var(--bng-add-red-500-rgb), 0.3);
+  text-align: center;
+  margin: 0.5rem 0;
 }
 
 @media (max-width: 900px) {

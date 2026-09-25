@@ -7,13 +7,14 @@
             <BngInput class="search-input" :model-value="uiFilters.searchText"
               :placeholder="$tt('ui.common.beammp.searchPlaceholder')" @update:model-value="onSearch" />
             <BngButton class="refresh-btn" @click="requestServerList">{{ $tt("ui.common.beammp.refresh") }}</BngButton>
+            <span v-if="getBiggestModSize() > 0 && maxModSizeLabel !== 'Max'" class="mod-size-summary">{{ $tt("ui.beammp.serverBrowser.filters.modSize") }}: {{ maxModSizeLabel }}</span>
+            <span v-if="allServersCount > 0" class="server-count"
+            >{{ visibleServers.length }}{{ state.view.value === 'servers' ? " / " + allServersCount : "" }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
             <BngButton v-if="state.view.value === 'recent'" class="clear-recents-btn" accent="secondary"
               @click="clearRecents">
               {{ $tt("ui.beammp.serverBrowser.clearRecent") }}
             </BngButton>
           </div>
-          <span v-if="visibleServers.length != allServersCount" class="server-count"
-          >{{ visibleServers.length }}{{ state.view.value === 'servers' ? " / " + allServersCount : "" }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
         </header>
 
         <table class="servers-table">
@@ -882,6 +883,7 @@ onBeforeUnmount(() => {
   background:
     linear-gradient(180deg, rgba(60, 66, 75, 0.96), rgba(44, 49, 57, 0.96)),
     radial-gradient(circle at 12% 0%, rgba(var(--bng-orange-500-rgb), 0.15), transparent 38%);
+  overflow: hidden;
 }
 
 .toolbar-main {
@@ -893,8 +895,9 @@ onBeforeUnmount(() => {
 }
 
 .search-input {
-  flex: 1 1 22rem;
-  min-width: 12rem;
+  flex: 3 1 auto;
+  min-width: 10rem;
+  max-width: 35rem;
   text-align: center;
 }
 
@@ -942,12 +945,13 @@ onBeforeUnmount(() => {
   gap: 0.65rem;
   box-sizing: border-box;
   min-height: 0;
-  max-height: 100%;
+  max-height: calc(100vh - 3.5rem - 1rem);
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--bng-corners-2);
   background: rgba(50, 57, 66, 0.94);
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -1453,21 +1457,43 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
   .toolbar {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .toolbar-main {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .search-input {
+    flex: 1 1 auto;
+    min-width: 8rem;
+    max-width: 12rem;
+  }
+
+  .refresh-btn {
+    flex: 0 0 auto;
   }
 
   .server-count {
-    justify-self: end;
+    flex: 0 0 auto;
+  }
+
+  .mod-size-summary {
+    flex: 0 0 auto;
   }
 
   .browser-layout {
     grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .search-input {
+    max-width: 40rem;
   }
 }
 

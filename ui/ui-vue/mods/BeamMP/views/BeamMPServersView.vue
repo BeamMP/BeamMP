@@ -333,71 +333,76 @@ const maxPlayerCountMax = computed(() => {
 })
 
 function sortServers(by) {
-if (serverSort.value.by === by) {
-    serverSort.value.direction = serverSort.value.direction === "asc" ? "desc" : "asc"
-   return
+  if (serverSort.value.by === by) {
+    if (serverSort.value.direction === "asc") {
+      serverSort.value.direction = "desc"
+    } else {
+      serverSort.value.by = null
+      serverSort.value.direction = "desc"
+    }
+    return
   }
   serverSort.value.by = by
   serverSort.value.direction = "desc"
 }
 
 const serverSort = ref({
-   by: null,
-   direction: "desc",
- })
+  by: null,
+  direction: "desc",
+})
 
- const sortedServers = computed(() => {
-   const servers = [...visibleServers.value]
+const sortedServers = computed(() => {
+  const servers = [...visibleServers.value]
 
-   if (serverSort.value.by === "players") {
-     const direction = serverSort.value.direction === "asc" ? 1 : -1
+  if (serverSort.value.by === "players") {
+    const direction = serverSort.value.direction === "asc" ? 1 : -1
 
-     servers.sort((a, b) => {
-       const playerDiff = (Number(a.players) || 0) - (Number(b.players) || 0)
+    servers.sort((a, b) => {
+      const playerDiff = (Number(a.players) || 0) - (Number(b.players) || 0)
 
-       if (playerDiff !== 0) return playerDiff * direction
+      if (playerDiff !== 0) return playerDiff * direction
 
-       return String(b.strippedName || "").localeCompare(
-         String(a.strippedName || ""),
-         undefined,
-         { sensitivity: "base" },
-       )
-     })
-   } else if (serverSort.value.by === "title") {
-      const direction = serverSort.value.direction === "asc" ? 1 : -1
-  
-      servers.sort((b, a) => {
-        const titleA = String(a.strippedName || "")
-        const titleB = String(b.strippedName || "")
-  
-        return titleA.localeCompare(titleB, undefined, { sensitivity: "base" }) * direction
-      })
-    } else if (serverSort.value.by === "mapName") {
-      const direction = serverSort.value.direction === "asc" ? 1 : -1
-  
-      servers.sort((b, a) => {
-        const mapA = String(a.mapName || "")
-        const mapB = String(b.mapName || "")
-  
-        return mapA.localeCompare(mapB, undefined, { sensitivity: "base" }) * direction
-      })
-    } else if (serverSort.value.by === "location") {
-      const direction = serverSort.value.direction === "asc" ? 1 : -1
-  
-      servers.sort((b, a) => {
-        const locA = String(a.location || "")
-        const locB = String(b.location || "")
-  
-        return locA.localeCompare(locB, undefined, { sensitivity: "base" }) * direction
-      })
-   }
+      return String(a.strippedName || "").localeCompare(
+        String(b.strippedName || ""),
+        undefined,
+        { sensitivity: "base" },
+      )
+    })
+  } else if (serverSort.value.by === "title") {
+    const direction = serverSort.value.direction === "asc" ? 1 : -1
 
-   return servers
- })
+    servers.sort((a, b) => {
+      const titleA = String(a.strippedName || "")
+      const titleB = String(b.strippedName || "")
 
- const renderedServers = computed(() => {
-   return sortedServers.value.slice(0, renderedServerCount.value)
- })
+      return titleA.localeCompare(titleB, undefined, { sensitivity: "base" }) * direction
+    })
+  } else if (serverSort.value.by === "mapName") {
+    const direction = serverSort.value.direction === "asc" ? 1 : -1
+
+    servers.sort((a, b) => {
+      const mapA = String(a.mapName || "")
+      const mapB = String(b.mapName || "")
+
+      return mapA.localeCompare(mapB, undefined, { sensitivity: "base" }) * direction
+    })
+  } else if (serverSort.value.by === "location") {
+    const direction = serverSort.value.direction === "asc" ? 1 : -1
+
+    servers.sort((a, b) => {
+      const locA = String(a.location || "")
+      const locB = String(b.location || "")
+
+      return locA.localeCompare(locB, undefined, { sensitivity: "base" }) * direction
+    })
+  }
+
+  return servers
+})
+
+const renderedServers = computed(() => {
+  return sortedServers.value.slice(0, renderedServerCount.value)
+})
 
 const filtersRailStyle = computed(() => {
   if (!filtersRailMaxHeight.value) return null

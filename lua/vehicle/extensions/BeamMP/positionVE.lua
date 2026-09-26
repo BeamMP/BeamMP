@@ -436,10 +436,6 @@ local function updateGFX(dt)
 	local framesSinceReset = varCache.framesSinceReset
 	local framesSinceTeleport = varCache.framesSinceTeleport
 
-	if framesSinceReset == 5 then
-		velocityVE.onReset() -- TODO find better fix, temp fix for instability de-syncing COG
-	end
-
 	if v.mpVehicleType == "L" or timer == 0 or receivedData.timer == 0 or not receivedData.pos or (timer-receivedData.recTime) > packetTimeout+2 or framesSinceTeleport < 2 then
 		return
 	end

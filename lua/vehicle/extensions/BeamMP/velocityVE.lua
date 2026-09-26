@@ -13,6 +13,7 @@ local damageThreshold = 100  -- Recalculate center of gravity if beamstate.damag
 local damageDelay = 0.2      -- How long to wait before recalculating connected nodes or COG after the car was damaged
 
 local connectedNodes = {}
+local connectedCouplerNodes = {}
 local nodes = {}
 local disconnectedNodes = {}
 local parentNode = nil
@@ -124,6 +125,21 @@ local function findConnectedNodes()
 				end
 			end
 		end
+
+		local couplerNodeID = connectedCouplerNodes[node]
+		if couplerNodeID then
+			if not visited[couplerNodeID] then
+				local nodePos1 = obj:getNodePosition(node)
+				local nodePos2 = obj:getNodePosition(couplerNodeID)
+				local dist = nodePos1:squaredDistance(nodePos2)
+				if dist < 0.5^2 then
+					stackIdx = stackIdx + 1
+					nodeStack[stackIdx] = couplerNodeID
+
+					visited[couplerNodeID] = true
+				end
+			end
+		end
 	end
 
 	for cid,_ in pairs(v.data.nodes) do
@@ -217,6 +233,7 @@ local function onInit()
 end
 
 local function onReset()
+	connectedCouplerNodes = {}
 	findConnectedNodes()
 end
 
@@ -395,9 +412,31 @@ local function updateGFX(dt)
 	for i = 1, #disconnectedNodes do
 		obj.debugDrawProxy:drawNodeSphere(disconnectedNodes[i][1], 0.03, color(0, 255, 0, 200))
 	end
+
+	for k,v in pairs(connectedCouplerNodes) do
+		obj.debugDrawProxy:drawNodeSphere(v, 0.08, color(255, 255, 0, 200))
+		obj.debugDrawProxy:drawNodeSphere(k, 0.08, color(0, 0, 0, 200))
+	end
+
 	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.cogRel:rotated(vehRot), color(0, 0, 255, 200))
 	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.InitCogRel:rotated(vehRot), color(0, 255, 0, 200))
 	--]]
+end
+
+local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attachEnergy)
+	if objectId and obj2id ~= objectId then
+		return
+	end
+	connectedCouplerNodes[nodeId] = obj2nodeId
+	beamsChanged = true
+end
+
+local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
+	if objectId and obj2id ~= objectId then
+		return
+	end
+	connectedCouplerNodes[nodeId] = nil
+	beamsChanged = true
 end
 
 -- public interface
@@ -410,4 +449,6 @@ M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity
 M.setAngularVelocity = setAngularVelocity
 
+M.onCouplerAttached  = onCouplerAttached
+M.onCouplerDetached  = onCouplerDetached
 return M

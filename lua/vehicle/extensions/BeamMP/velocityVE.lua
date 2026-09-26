@@ -203,19 +203,8 @@ local function onInit()
 	elseif connectedNodes[refNodes.up] then
 		parentNode = refNodes.up
 	end
-	
-	if parentNode then
-		-- TODO: find less hacky way to get beamBroke events
-		local beamBroke = powertrain.beamBroke
-		powertrain.beamBroke = function(id, ...)
-			local beamType = v.data.beams[id].beamType
-			if beamType ~= 3 and beamType ~= 4 and beamType ~= 7 then
-				beamsChanged = true
-			end
 
-			return beamBroke(id, ...)
-		end
-		
+	if parentNode then
 		findConnectedNodes()
 		M.InitCogRel:set(M.cogRel)
 		M.cogRelDiff:setSub2(M.cogRel,M.InitCogRel)
@@ -423,6 +412,13 @@ local function updateGFX(dt)
 	--]]
 end
 
+local function onBeamBroke(id, energy)
+	local beamType = v.data.beams[id].beamType
+	if beamType ~= 3 and beamType ~= 4 and beamType ~= 7 then
+		beamsChanged = true
+	end
+end
+
 local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attachEnergy)
 	if objectId and obj2id ~= objectId then
 		return
@@ -449,6 +445,7 @@ M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity
 M.setAngularVelocity = setAngularVelocity
 
+M.onBeamBroke = onBeamBroke
 M.onCouplerAttached  = onCouplerAttached
 M.onCouplerDetached  = onCouplerDetached
 return M

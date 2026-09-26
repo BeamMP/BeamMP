@@ -26,7 +26,7 @@
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
       <div v-if="state.loginError.value && hasTriedToLogin" class="error-notice">
-        <p>Something wrong? Please see the notice above.</p>
+        <p>Something unexpected? Please see the notice above.</p>
         <p class="error">{{ state.loginError.value }}</p>
       </div>
 
@@ -348,11 +348,15 @@ watch(() => state.loggedIn.value, value => {
   color: var(--bng-add-red-400);
   font-weight: 600;
   background: rgba(var(--bng-add-red-500-rgb), 0.1);
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--bng-corners-1);
   border: 1px solid rgba(var(--bng-add-red-500-rgb), 0.3);
   text-align: center;
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
+}
+
+.error-notice p {
+  margin: 0.25rem 0;
 }
 
 @media (max-width: 900px) {

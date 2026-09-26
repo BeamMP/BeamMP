@@ -269,7 +269,11 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 	dir:setScaled(-1)
 	dirUp:set(obj:getDirectionVectorUpXYZ())
 	rot:setFromDir(dir, dirUp)
-	cog:set(M.cogRel:rotated(rot))
+	--if isCounterVel then
+	--	cog:set(M.mainClusterCOG:rotated(rot)) -- not working, explodes the container trailer
+	--else
+		cog:set(M.cogRel:rotated(rot))
+	--end
 	local mainClusterID = obj:getNodeCluster(refNode)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	for i=#nodes, 1, -1 do -- backwards, entries can be removed from disconnectedNodes while iterating
@@ -300,27 +304,20 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 end
 
 local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity, noCounterVelocity)
-	dir:set(obj:getDirectionVectorXYZ())
-	dir:setScaled(-1)
-	dirUp:set(obj:getDirectionVectorUpXYZ())
-	rot:setFromDir(dir, dirUp)
-	cog:set(M.cogRel:rotated(rot))
-	
-	rvel:set(pitchAV, rollAV, yawAV)
-	vel:set(x, y, z)
-	cog:setCross(cog, rvel)
-	vel:setSub(cog)
-	local velMulti = 1
+local velMulti = 1
 
 	if onlyAngularVelocity then
 		velMulti = 0
 	end
+	rvel:set(pitchAV, rollAV, yawAV)
+	vel:set(x, y, z)
+	vel:setScaled(velMulti)
 
 	local connectedNodeCount = #nodes
 	local disconnectedNodeCount = #disconnectedNodes
 
-	if connectedNodeCount < disconnectedNodeCount then
-		addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV)
+	if disconnectedNodeCount ~= 0 then --connectedNodeCount < disconnectedNodeCount then
+		addAngularForce(nodes, vel.x, vel.y, vel.z, pitchAV, rollAV, yawAV)
 
 		local mainClusterID = obj:getNodeCluster(refNode)
 		for i=disconnectedNodeCount, 1, -1 do -- backwards, entries are removed while iterating
@@ -333,10 +330,10 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 		end
 	else
 		rvel:setScaled(-physicsFPS)
-		vel:setScaled(physicsFPS*velMulti)
+		vel:setScaled(physicsFPS)
 		obj:applyClusterLinearAngularAccel(refNode, vel, rvel)
 		if noCounterVelocity then return end -- used on spawn and reset to wait with the counter velocity for a bit so things like logs on the T-series don't slide off
-		addAngularForce(disconnectedNodes, -x, -y, -z, -pitchAV, -rollAV, -yawAV, true)
+		--addAngularForce(disconnectedNodes, -vel.x, -vel.y, -vel.z, -pitchAV, -rollAV, -yawAV, true) -- cluster velocity now uses the COG of the cluster, which as broken counter velocity logic, disable for now
 	end
 end
 
@@ -350,6 +347,8 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 	
 	rvel:set(pitchAV, rollAV, yawAV)
 	vehRvel.y, vehRvel.x, vehRvel.z = obj:getRollPitchYawAngularVelocity()
+	vehRvel:setRotate(rot)
+
 	local rvdX = rvel.x - vehRvel.x
 	local rvdY = rvel.y - vehRvel.y
 	local rvdZ = rvel.z - vehRvel.z

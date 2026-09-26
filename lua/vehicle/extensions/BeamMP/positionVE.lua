@@ -231,7 +231,7 @@ local function onPhysicsStep(dtSim)
 	rot1:setFromDir(dir, dirUp)
 
 	rawRVel:setRotate(rot1)
-	cog1:set(velocityVE.cogRel)
+	cog1:set(velocityVE.InitCogRel)
 	cog1:setRotate(rot1)
 
 	accurateVel:setCross(cog1,rawRVel) -- remove angular velocity from the directional velocity
@@ -593,7 +593,9 @@ local function updateGFX(dt)
 				if framesSinceReset == 6 then
 					noCounterVelocity = 1 -- logs on the t series count as not attached so they would fly backwards on spawn, this disables the counter velocity preventing that
 				end
-				local posData = {pos = tpPos, rot = tpRot, vel = predictVel, rvel = tpRvel ,vehVel = vehVel, noCounter = noCounterVelocity}
+				local posData = {pos = tpPos, rot = tpRot, vel = predictVel, rvel = tpRvel ,vehVel = obj:getVelocity(), noCounter = noCounterVelocity}
+				local onlyAngularVelocity = true
+				velocityVE.setAngularVelocity(0,0,0,rvel.x,rvel.y,rvel.z, onlyAngularVelocity)
 				obj:queueGameEngineLua("positionGE.setPositionRotationVelocity("..obj:getID()..","..serialize(posData)..")")
 			end
 			varCache.framesSinceTeleport = 0

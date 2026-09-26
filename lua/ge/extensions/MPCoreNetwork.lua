@@ -446,12 +446,14 @@ local function loginReceived(params)
 		end
 
 		if authResult.role and authResult.role ~= "USER" then
-			local roleInfo = MPVehicleGE.getRoleInfoTable()
-			local roleColor = (roleInfo[authResult.role] or roleInfo["USER"]).backcolor
+			local roleInfoTable = MPVehicleGE.getRoleInfoTable()
+			local roleInfo = roleInfoTable[authResult.role]
+			authResult.roleInfo = roleInfo
+			local roleColor = (roleInfo or roleInfoTable["USER"]).backcolor
 			authResult.color = "rgba(" .. roleColor.r .. "," .. roleColor.g .. "," .. roleColor.b .. "," .. (roleColor.a or 127)/255 .. ")"
 		end
 	end
-
+	
 	guihooks.trigger('onBeamMPAuthReceived', authResult)
 end
 

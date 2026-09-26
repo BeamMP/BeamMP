@@ -25,8 +25,10 @@
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
-      <p class="error-notice">Something wrong? Please see the notice above.</p>
-      <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
+      <div v-if="state.loginError.value && hasTriedToLogin" class="error-notice">
+        <p>Something wrong? Please see the notice above.</p>
+        <p class="error">{{ state.loginError.value }}</p>
+      </div>
 
       <template v-if="mode === 'account'">
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>

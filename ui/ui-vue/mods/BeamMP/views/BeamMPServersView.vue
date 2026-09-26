@@ -1459,7 +1459,7 @@ onBeforeUnmount(() => {
   }
 
   .toolbar-main {
-    flex-wrap: wrap;
+  flex-wrap: wrap;
   }
 
   .server-count {

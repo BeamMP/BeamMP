@@ -1,12 +1,35 @@
 <template>
   <section class="login-layout">
+    <div class="info-banner">
+      <svg class="banner-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="8" r="1" fill="currentColor"/>
+      </svg>
+      <div class="banner-text">
+        <p>The new accounts system is currently being tested by our <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP')" class="ea-link">Early Access Supporters</a>. It will become available to everyone once testing is concluded. Please use a guest account in the meantime. Visit our <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="discord-link">Discord</a> for the latest updates.</p>
+      </div>
+      <BngButton class="read-more-button" accent="secondary" @click="showReadMorePopup = true">
+        Read More
+      </BngButton>
+    </div>
+
+    <div v-if="showReadMorePopup" class="popup-overlay" @click.self="showReadMorePopup = false">
+      <div class="popup-content">
+        <h3>Additional Information</h3>
+        <p>Are you an Early Access Supporter who previously had an account? Please read this <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP/posts/moment-youve-all-169326895')" class="popup-link">Patreon post</a> for more information on how to recover your account.</p>
+        <p>Are you an Early Access Supporter but don't have an account yet, or are you having issues with account recovery or login? Please make an Account Support ticket in <code># ❔️ Support</code> in our <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">Discord server</a></p>
+        <BngButton class="popup-close-button" @click="showReadMorePopup = false">Close</BngButton>
+      </div>
+    </div>
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
-      <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
+      <div v-if="state.loginError.value && hasTriedToLogin" class="error-notice">
+        <p>Something unexpected? Please see the notice above.</p>
+        <p class="error">{{ state.loginError.value }}</p>
+      </div>
 
-      
-        <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription2temp") }}</h2>
       <template v-if="mode === 'account'">
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>
 
@@ -41,7 +64,6 @@
 
         <div class="actions">
           <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
-          <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton>
           <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
@@ -70,6 +92,7 @@ const username = ref("")
 const password = ref("")
 const hasTriedToLogin = ref(false)
 const mode = ref("account")
+const showReadMorePopup = ref(false)
 const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
@@ -113,8 +136,98 @@ watch(() => state.loggedIn.value, value => {
 .login-layout {
   min-height: min(40rem, 70vh);
   width: 100%;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  padding-top: 5rem;
+}
+
+.info-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(var(--bng-orange-400-rgb), 0.5);
+  border-radius: 0 0 var(--bng-corners-2) var(--bng-corners-2);
+  background: rgba(var(--bng-orange-500-rgb), 0.15);
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin: 0;
+  z-index: 10;
+}
+
+.banner-icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--bng-off-white);
+}
+
+.read-more-button {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  min-height: 2rem;
+}
+
+.banner-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--bng-off-white);
+  flex: 1;
+
+  p {
+    margin: 0;
+  }
+
+  strong {
+    font-weight: 700;
+    color: var(--bng-orange-400);
+  }
+
+  .ea-link,
+  .discord-link,
+  .popup-link {
+    color: rgb(193, 139, 255);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 120ms ease;
+
+    &:hover {
+      color: rgb(213, 159, 255);
+      text-decoration: underline;
+    }
+  }
+
+  .discord-link {
+    color: rgb(114, 137, 218);
+
+    &:hover {
+      color: rgb(134, 157, 238);
+    }
+  }
+
+  code {
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.2rem;
+    background: rgba(0, 0, 0, 0.3);
+    font-family: monospace;
+    color: var(--bng-off-white);
+  }
 }
 
 .login-popup {
@@ -127,6 +240,7 @@ watch(() => state.loggedIn.value, value => {
   flex-direction: column;
   gap: 0.7rem;
   color: var(--bng-off-white);
+  margin-top: 6rem;
 }
 
 .beammp-logo {
@@ -228,7 +342,38 @@ watch(() => state.loggedIn.value, value => {
   margin: 0;
   text-align: center;
   color: var(--bng-add-red-500);
+}
 
+.error-notice {
+  color: var(--bng-add-red-400);
+  font-weight: 600;
+  background: rgba(var(--bng-add-red-500-rgb), 0.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--bng-corners-1);
+  border: 1px solid rgba(var(--bng-add-red-500-rgb), 0.3);
+  text-align: center;
+  margin: 0.25rem 0;
+}
+
+.error-notice p {
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 900px) {
+  .info-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .banner-text {
+    font-size: 0.85rem;
+  }
+
+  .read-more-button {
+    align-self: center;
+  }
 }
 
 @media (max-width: 680px) {
@@ -237,5 +382,87 @@ watch(() => state.loggedIn.value, value => {
       flex: 1 1 100%;
     }
   }
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.popup-content {
+  background: linear-gradient(145deg, rgba(32, 32, 36, 0.98), rgba(24, 24, 28, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--bng-corners-3);
+  padding: 2rem;
+  max-width: 45rem;
+  width: 100%;
+  color: var(--bng-off-white);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+
+  h3 {
+    margin: 0 0 1.25rem;
+    color: var(--bng-orange-400);
+    font-size: 1.25rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.75rem;
+  }
+
+  p {
+    margin: 0 0 1.25rem;
+    line-height: 1.7;
+    color: var(--bng-cool-gray-100);
+    font-size: 0.95rem;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  p:last-of-type {
+    margin-bottom: 1.5rem;
+  }
+
+  code {
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9rem;
+    color: var(--bng-orange-300);
+  }
+
+  .popup-link {
+    color: rgb(114, 137, 218);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 120ms ease;
+
+    &:hover {
+      color: rgb(134, 157, 238);
+      text-decoration: underline;
+    }
+  }
+}
+
+.popup-close-button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  min-width: 6rem;
 }
 </style>

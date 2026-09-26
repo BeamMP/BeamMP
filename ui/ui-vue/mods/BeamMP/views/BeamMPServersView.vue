@@ -1459,18 +1459,7 @@ onBeforeUnmount(() => {
   }
 
   .toolbar-main {
-    flex-wrap: nowrap;
-    gap: 0.4rem;
-  }
-
-  .search-input {
-    flex: 1 1 auto;
-    min-width: 8rem;
-    max-width: 12rem;
-  }
-
-  .refresh-btn {
-    flex: 0 0 auto;
+  flex-wrap: wrap;
   }
 
   .server-count {

@@ -7,14 +7,13 @@
             <BngInput class="search-input" :model-value="uiFilters.searchText"
               :placeholder="$tt('ui.common.beammp.searchPlaceholder')" @update:model-value="onSearch" />
             <BngButton class="refresh-btn" @click="requestServerList">{{ $tt("ui.common.beammp.refresh") }}</BngButton>
-            <span v-if="getBiggestModSize() > 0 && maxModSizeLabel !== 'Max'" class="mod-size-summary">{{ $tt("ui.beammp.serverBrowser.filters.modSize") }}: {{ maxModSizeLabel }}</span>
-            <span v-if="allServersCount > 0" class="server-count"
-            >{{ visibleServers.length }}{{ state.view.value === 'servers' ? " / " + allServersCount : "" }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
             <BngButton v-if="state.view.value === 'recent'" class="clear-recents-btn" accent="secondary"
               @click="clearRecents">
               {{ $tt("ui.beammp.serverBrowser.clearRecent") }}
             </BngButton>
           </div>
+          <span v-if="visibleServers.length != allServersCount" class="server-count"
+          >{{ visibleServers.length }}{{ state.view.value === 'servers' ? " / " + allServersCount : "" }} {{ $tt("ui.beammp.serverBrowser.visibleServers") }}</span>
         </header>
 
         <table class="servers-table">
@@ -333,76 +332,71 @@ const maxPlayerCountMax = computed(() => {
 })
 
 function sortServers(by) {
-  if (serverSort.value.by === by) {
-    if (serverSort.value.direction === "asc") {
-      serverSort.value.direction = "desc"
-    } else {
-      serverSort.value.by = null
-      serverSort.value.direction = "desc"
-    }
-    return
+if (serverSort.value.by === by) {
+    serverSort.value.direction = serverSort.value.direction === "asc" ? "desc" : "asc"
+   return
   }
   serverSort.value.by = by
   serverSort.value.direction = "desc"
 }
 
 const serverSort = ref({
-  by: null,
-  direction: "desc",
-})
+   by: null,
+   direction: "desc",
+ })
 
-const sortedServers = computed(() => {
-  const servers = [...visibleServers.value]
+ const sortedServers = computed(() => {
+   const servers = [...visibleServers.value]
 
-  if (serverSort.value.by === "players") {
-    const direction = serverSort.value.direction === "asc" ? 1 : -1
+   if (serverSort.value.by === "players") {
+     const direction = serverSort.value.direction === "asc" ? 1 : -1
 
-    servers.sort((a, b) => {
-      const playerDiff = (Number(a.players) || 0) - (Number(b.players) || 0)
+     servers.sort((a, b) => {
+       const playerDiff = (Number(a.players) || 0) - (Number(b.players) || 0)
 
-      if (playerDiff !== 0) return playerDiff * direction
+       if (playerDiff !== 0) return playerDiff * direction
 
-      return String(a.strippedName || "").localeCompare(
-        String(b.strippedName || ""),
-        undefined,
-        { sensitivity: "base" },
-      )
-    })
-  } else if (serverSort.value.by === "title") {
-    const direction = serverSort.value.direction === "asc" ? 1 : -1
+       return String(b.strippedName || "").localeCompare(
+         String(a.strippedName || ""),
+         undefined,
+         { sensitivity: "base" },
+       )
+     })
+   } else if (serverSort.value.by === "title") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const titleA = String(a.strippedName || "")
+        const titleB = String(b.strippedName || "")
+  
+        return titleA.localeCompare(titleB, undefined, { sensitivity: "base" }) * direction
+      })
+    } else if (serverSort.value.by === "mapName") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const mapA = String(a.mapName || "")
+        const mapB = String(b.mapName || "")
+  
+        return mapA.localeCompare(mapB, undefined, { sensitivity: "base" }) * direction
+      })
+    } else if (serverSort.value.by === "location") {
+      const direction = serverSort.value.direction === "asc" ? 1 : -1
+  
+      servers.sort((b, a) => {
+        const locA = String(a.location || "")
+        const locB = String(b.location || "")
+  
+        return locA.localeCompare(locB, undefined, { sensitivity: "base" }) * direction
+      })
+   }
 
-    servers.sort((a, b) => {
-      const titleA = String(a.strippedName || "")
-      const titleB = String(b.strippedName || "")
+   return servers
+ })
 
-      return titleA.localeCompare(titleB, undefined, { sensitivity: "base" }) * direction
-    })
-  } else if (serverSort.value.by === "mapName") {
-    const direction = serverSort.value.direction === "asc" ? 1 : -1
-
-    servers.sort((a, b) => {
-      const mapA = String(a.mapName || "")
-      const mapB = String(b.mapName || "")
-
-      return mapA.localeCompare(mapB, undefined, { sensitivity: "base" }) * direction
-    })
-  } else if (serverSort.value.by === "location") {
-    const direction = serverSort.value.direction === "asc" ? 1 : -1
-
-    servers.sort((a, b) => {
-      const locA = String(a.location || "")
-      const locB = String(b.location || "")
-
-      return locA.localeCompare(locB, undefined, { sensitivity: "base" }) * direction
-    })
-  }
-
-  return servers
-})
-
-const renderedServers = computed(() => {
-  return sortedServers.value.slice(0, renderedServerCount.value)
-})
+ const renderedServers = computed(() => {
+   return sortedServers.value.slice(0, renderedServerCount.value)
+ })
 
 const filtersRailStyle = computed(() => {
   if (!filtersRailMaxHeight.value) return null
@@ -888,7 +882,6 @@ onBeforeUnmount(() => {
   background:
     linear-gradient(180deg, rgba(60, 66, 75, 0.96), rgba(44, 49, 57, 0.96)),
     radial-gradient(circle at 12% 0%, rgba(var(--bng-orange-500-rgb), 0.15), transparent 38%);
-  overflow: hidden;
 }
 
 .toolbar-main {
@@ -900,9 +893,8 @@ onBeforeUnmount(() => {
 }
 
 .search-input {
-  flex: 3 1 auto;
-  min-width: 10rem;
-  max-width: 35rem;
+  flex: 1 1 22rem;
+  min-width: 12rem;
   text-align: center;
 }
 
@@ -950,13 +942,12 @@ onBeforeUnmount(() => {
   gap: 0.65rem;
   box-sizing: border-box;
   min-height: 0;
-  max-height: calc(100vh - 3.5rem - 1rem);
+  max-height: 100%;
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--bng-corners-2);
   background: rgba(50, 57, 66, 0.94);
   overflow-y: auto;
-  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -1462,10 +1453,9 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1180px) {
   .toolbar {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
   }
 
   .toolbar-main {
@@ -1484,21 +1474,11 @@ onBeforeUnmount(() => {
   }
 
   .server-count {
-    flex: 0 0 auto;
-  }
-
-  .mod-size-summary {
-    flex: 0 0 auto;
+    justify-self: end;
   }
 
   .browser-layout {
     grid-template-columns: minmax(0, 1fr) 20rem;
-  }
-}
-
-@media (min-width: 1440px) {
-  .search-input {
-    max-width: 40rem;
   }
 }
 

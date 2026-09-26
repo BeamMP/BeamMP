@@ -64,7 +64,7 @@
 
         <div class="actions">
           <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
-          <BngButton accent="secondary" @click="submitGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
+          <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
 

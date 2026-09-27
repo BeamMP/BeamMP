@@ -246,6 +246,11 @@ local function timeSyncUpdate(dtReal, dtSim, dtRaw)
 		lastTimeOffsetSim = timeOffsetSim
 		timeOffsetSimChangeRate = -1
 		sendOffsetsToVE()
+
+		-- simulationSpeedReal is not updated by the game when it's paused, it would cause slow motion to not work if enabled while paused
+		if simTimeAuthority.simulationSpeed ~= 0 then -- if simulationSpeed is not 0 then slow motion was adjusted
+			simTimeAuthority.simulationSpeedReal = simTimeAuthority.simulationSpeed
+		end
 		return
 	end
 

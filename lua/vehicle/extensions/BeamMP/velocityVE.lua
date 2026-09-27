@@ -218,7 +218,7 @@ end
 -- NOTE: - very high values can cause instability
 local function addForce(nodes, x, y, z, isCounterVel)
 	local mainClusterID = obj:getNodeCluster(refNode)
-	for i=1, #nodes do
+	for i=#nodes, 1, -1 do -- backwards, entries can be removed from disconnectedNodes while iterating
 		local node = nodes[i]
 		if node then
 			if not isCounterVel or obj:getNodeCluster(node[1]) == mainClusterID then
@@ -264,7 +264,7 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 	cog:set(M.cogRel:rotated(rot))
 	local mainClusterID = obj:getNodeCluster(refNode)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
-	for i=1, #nodes do
+	for i=#nodes, 1, -1 do -- backwards, entries can be removed from disconnectedNodes while iterating
 		local node = nodes[i]
 		if node then
 			local cid = node[1]
@@ -315,7 +315,7 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 		addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV)
 
 		local mainClusterID = obj:getNodeCluster(refNode)
-		for i=1, disconnectedNodeCount do
+		for i=disconnectedNodeCount, 1, -1 do -- backwards, entries are removed while iterating
 			local node = disconnectedNodes[i]
 			if node then
 				if obj:getNodeCluster(node[1]) ~= mainClusterID then

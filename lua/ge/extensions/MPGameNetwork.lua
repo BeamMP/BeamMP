@@ -427,6 +427,7 @@ end
 -- @tparam boolean state - The state of the key ('true' for pressed, 'false' for released)
 -- @usage INTERNAL ONLY / GAME SPECIFIC
 local function onKeyStateChanged(key, state)
+	if keyStates[key] == state then return end -- every vehicle VM polls the keys and reports the same change, only fire the listeners once
 	keyStates[key] = state
 	--dump(keyStates)
 	--dump(keypressTriggers)

@@ -88,13 +88,13 @@ local function applyPos(data, serverVehicleID)
 		vehicle.position:set(decoded.pos[1],decoded.pos[2],decoded.pos[3])
 		vehicle.rotation:set(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
 
-		if owner and not owner.updatedPing then
+		if owner and not owner.hasUpdatedPing then -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
 			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 			UI.setPlayerPing(owner.name, ping)
 			owner.ping = ping
 			owner.fps = 1/deltaDt
+			owner.hasUpdatedPing = true
 		end-- Send ping to UI
-		owner.hasUpdatedPing = true
 	end
 end
 

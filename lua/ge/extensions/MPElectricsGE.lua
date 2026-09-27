@@ -13,7 +13,7 @@ local M = {}
 
 
 
-local lastElectrics
+local lastElectrics = {} -- [gameVehicleID] = last sent data, per vehicle so owning several vehicles doesn't defeat the duplicate check
 
 
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
@@ -34,9 +34,9 @@ end
 local function sendElectrics(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics[gameVehicleID] then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('We',serverVehicleID,data))
-			lastElectrics = data
+			lastElectrics[gameVehicleID] = data
 		end
 	end
 end

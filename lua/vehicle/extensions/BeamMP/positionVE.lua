@@ -312,8 +312,11 @@ local function setVehiclePosRot(dt, jsonData)
 end
 
 local lastMailboxVersion = -2
+local lastMailboxName = nil
 local lastFFITime = 0
+
 local lastMailboxVersionJson = -2
+local lastMailboxNameJson = nil
 local lastJsonTime = 0
 
 local function updateRemoteData(dt)
@@ -324,16 +327,23 @@ local function updateRemoteData(dt)
 	local currentMailBoxVersionJson = obj:getLastMailboxVersion(mailboxNameJson)
 
 	if lastMailboxVersion ~= currentMailBoxVersion then
-		obj:getLastMailboxToBuffer(mailboxName, posPacketRecBuff)
-		lastFFITime = 0
-		setVehiclePosRot()
+		if mailboxName ~= lastMailboxName then
+			lastMailboxName = mailboxName
+		else
+			obj:getLastMailboxToBuffer(mailboxName, posPacketRecBuff)
+			lastFFITime = 0
+			setVehiclePosRot()
+		end
 	end
 	if lastMailboxVersionJson ~= currentMailBoxVersionJson then
-		obj:getLastMailboxToBuffer(mailboxNameJson, posPacketRecBuff)
-
-		if #posPacketRecBuff ~= 0 then
-			setVehiclePosRot(dt, true)
-			lastJsonTime = 0
+		if mailboxNameJson ~= lastMailboxNameJson then
+			lastMailboxNameJson = mailboxNameJson
+		else
+			obj:getLastMailboxToBuffer(mailboxNameJson, posPacketRecBuff)
+			if #posPacketRecBuff ~= 0 then
+				setVehiclePosRot(dt, true)
+				lastJsonTime = 0
+			end
 		end
 	end
 	lastMailboxVersion = currentMailBoxVersion

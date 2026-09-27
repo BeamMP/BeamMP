@@ -234,7 +234,7 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 
 	-- but since it doesn't do rotational velocity we still need to use VE
 	-- apparently GE to VE queues are really fast, so we don't need any extra prediction with this queue
-	veh:queueLuaCommand("velocityVE.setAngularVelocity("..vel.x..", "..vel.y..", "..vel.z..", "..rvel.x..", "..rvel.y..", "..rvel.z..","..onlyAngularVelocity..","..noCounterVelocity..")")
+	veh:queueLuaCommand("if velocityVE then velocityVE.setAngularVelocity("..vel.x..", "..vel.y..", "..vel.z..", "..rvel.x..", "..rvel.y..", "..rvel.z..","..onlyAngularVelocity..","..noCounterVelocity..") end")
 end
 
 --- This function is used for setting the simulation speed 

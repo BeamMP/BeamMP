@@ -50,7 +50,7 @@ local function applyElectrics(data, serverVehicleID)
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		if not MPVehicleGE.isOwn(gameVehicleID) then
-			veh:queueLuaCommand("MPElectricsVE.applyElectrics(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+			veh:queueLuaCommand("if MPElectricsVE then MPElectricsVE.applyElectrics(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 		end
 	end
 end

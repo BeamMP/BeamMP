@@ -388,8 +388,9 @@ local function updateGFX(dt)
 	else
 		damageTimer = 0
 	end
-	
-	
+end
+
+local function onDebugDraw()
 	-- Connected nodes and COG debug
 	--[[
 	local vehRot = quatFromDir(-obj:getDirectionVector(), obj:getDirectionVectorUp())
@@ -448,4 +449,7 @@ M.setAngularVelocity = setAngularVelocity
 M.onBeamBroke = onBeamBroke
 M.onCouplerAttached  = onCouplerAttached
 M.onCouplerDetached  = onCouplerDetached
+
+--M.onDebugDraw = onDebugDraw
+
 return M

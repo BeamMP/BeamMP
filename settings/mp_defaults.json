@@ -23,6 +23,8 @@
   "showBlobDeleted"             : [ "cloud", true ],
   "autoSyncVehicles"            : [ "local", true ],
   "simplifyRemoteVehicles"      : [ "local" ],
+  "remoteVehicleCulling"        : [ "local", false ],
+  "remoteVehicleCullDistance"   : [ "local", 500 ],
   "showSpectators"              : [ "cloud", true ],
   "showDebugOutput"             : [ "local" ],
   "enableNewChatMenu"           : [ "cloud", false ],

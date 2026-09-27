@@ -69,7 +69,9 @@ local function applyPos(data, serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
 
 	local veh = getObjectByID(vehicle.gameVehicleID)
-	if veh then -- vehicle already spawned, send data
+	if veh and MPVehiclePoolGE and MPVehiclePoolGE.interceptPosition(serverVehicleID, data) then
+		-- vehicle is culled, the position is held in MPVehiclePoolGE until it wakes
+	elseif veh then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'

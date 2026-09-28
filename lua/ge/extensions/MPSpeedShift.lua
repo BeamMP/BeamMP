@@ -32,7 +32,7 @@ local gameSpeedPID = newPIDParallel(kP, tI, tD, minOutput, maxOutput, integralIn
 
 local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 	local maxCapableSpeedRaw = 1/dtRaw/20
-	local simTime = getBeamMPSimTime()
+	local simTime = getBeamMPSimTime() - dtRea
 	local timeError = getBeamMPServerTime() - simTime
 
 	local speedModify = -gameSpeedPID:get(simTime,getBeamMPServerTime(),dtRaw)/2
@@ -41,7 +41,7 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 	local maxCapableSpeed = min(4,maxCapableSpeedRaw)
 	local maxSpeedSmooth = maxSpeedSmoother:get(min(4,max(0.99,maxCapableSpeed)),dtRaw)
 
-	if not runawayPause and timeError < -0.1 then
+	if not runawayPause and timeError < -(0.1+dtRea) then
 		toFarAheadTimer = toFarAheadTimer + dtRaw
 		if toFarAheadTimer > 0.2 then
 			runawayPause = true
@@ -51,9 +51,9 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 		toFarAheadTimer = 0
 	end
 
-	if not catchupMaxSpeed and timeError > 0.1 and maxSpeedSmooth > 3 then
+	if not catchupMaxSpeed and timeError > (0.1+dtRea)  and maxSpeedSmooth > 3 then
 		toFarBehindTimer = toFarBehindTimer + dtRaw
-		if toFarBehindTimer > 0.1 then
+		if toFarBehindTimer > (0.1+dtRea)  then
 			catchupMaxSpeed = true
 			--dump("started catchupMaxSpeed to align simTime",timeError)
 		end
@@ -78,9 +78,9 @@ local function syncTime(dtRea, dtSim, dtRaw, allowSlowMotion)
 		be:setPhysicsSpeedFactor(0)
 	end
 
-	local speedModifyClamped = targetSpeedSmoother:get(max(-0.01,-speedModify),dtRaw)
-
 	local targetSpeed = allowSlowMotion and simTimeAuthority.getReal() or 1
+	local speedModifyClamped = targetSpeedSmoother:get(max(-targetSpeed*0.01,-speedModify),dtRaw)
+
 	local speed = targetSpeed + speedModifyClamped
 
 	if runawayPause then

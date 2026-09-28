@@ -121,7 +121,7 @@ end
 
 local function checkVehicleTime(dtSim, dtRaw)
     if MPTimeSyncVehicleTracker then
-        veSimTime = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim, dtRaw)
+        veSimTime = MPTimeSyncVehicleTracker.checkTrackingVehicle(dtSim, dtRaw) + dtSim
     end
 end
 
@@ -193,24 +193,26 @@ local function checkSimulationSpeed(dtRea, dtSim, dtRaw)
 	local targetSpeedOffset = (1-targetGameSpeed)
 	local lowFPSSpeedOffset = lowFPStimeShift and (1-maxSpeedSmooth) or 1
 
-	local totalTimeShift = targetSpeedOffset + lowFPSSpeedOffset
+	local totalTimeShift = targetGameSpeed - lowFPSSpeedOffset
+
+	local simTime = getBeamMPSimTime() - dtRea
+	local timeError = getBeamMPServerTime() - simTime
 
 	if totalTimeShift ~= 0 then
-		if targetSpeedOffset < 1 then
+		if targetGameSpeed < 1 then
 			local timeModify = (targetSpeedOffset*dtRaw)
 			timeOffsetSim = timeOffsetSim - timeModify
 			timeOffsetSimSmoother.state = timeOffsetSimSmoother.state - timeModify
 		end
 		if lowFPSSpeedOffset < 1 then
 			local speedDiff = max(0,(lowFPSSpeedOffset - targetSpeedOffset))
-			local offsetModifier = max(0,(speedDiff) + (simTimeError/2))
+			local offsetModifier = max(0,(speedDiff) + (timeError/2))
 
-			timeOffsetSim = timeOffsetSim - (offsetModifier*dtRaw)
+			timeOffsetSim = timeOffsetSim - min(timeError,offsetModifier*dtRaw)
 		end
 	end
-
 	if settings.getValue("disableTimeSync") then
-		decoupledTimeShift = (simTimeError/5)*dtRaw
+		decoupledTimeShift = (timeError/5)*dtRaw
 		timeOffsetSim = timeOffsetSim - decoupledTimeShift
 		timeOffsetSimSmoother.state = timeOffsetSimSmoother.state - decoupledTimeShift
 	end

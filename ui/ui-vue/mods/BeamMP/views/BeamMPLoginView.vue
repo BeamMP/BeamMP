@@ -7,26 +7,26 @@
         <circle cx="12" cy="8" r="1" fill="currentColor"/>
       </svg>
       <div class="banner-text">
-        <p>The new accounts system is currently being tested by our <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP')" class="ea-link">Early Access Supporters</a>. It will become available to everyone once testing is concluded. Please use a guest account in the meantime. Visit our <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="discord-link">Discord</a> for the latest updates.</p>
+        <p>{{ $tt("ui.beammp.accounts.Banner") }} <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP')" class="ea-link">{{ $tt("ui.beammp.accounts.eaSupporters") }}</a>. {{ $tt("ui.beammp.accounts.Banner2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="discord-link">{{ $tt("ui.common.beammp.discord") }}</a> {{ $tt("ui.beammp.accounts.Banner3") }}</p>
       </div>
       <BngButton class="read-more-button" accent="secondary" @click="showReadMorePopup = true">
-        Read More
+        {{ $tt("ui.beammp.accounts.readMore") }}
       </BngButton>
     </div>
 
     <div v-if="showReadMorePopup" class="popup-overlay" @click.self="showReadMorePopup = false">
       <div class="popup-content">
-        <h3>Additional Information</h3>
-        <p>Are you an Early Access Supporter who previously had an account? Please read this <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP/posts/moment-youve-all-169326895')" class="popup-link">Patreon post</a> for more information on how to recover your account.</p>
-        <p>Are you an Early Access Supporter but don't have an account yet, or are you having issues with account recovery or login? Please make an Account Support ticket in <code># ❔️ Support</code> in our <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">Discord server</a></p>
-        <BngButton class="popup-close-button" @click="showReadMorePopup = false">Close</BngButton>
+        <h3>{{ $tt("ui.beammp.accounts.additionalInfo") }}</h3>
+        <p>{{ $tt("ui.beammp.accounts.recoveryText") }} <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP/posts/moment-youve-all-169326895')" class="popup-link">{{ $tt("ui.beammp.accounts.patreonPost") }}</a> {{ $tt("ui.beammp.accounts.recoveryText2") }}</p>
+        <p>{{ $tt("ui.beammp.accounts.supportText") }} <code>{{ $tt("ui.beammp.accounts.supportChannel") }}</code> {{ $tt("ui.beammp.accounts.supportText2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">{{ $tt("ui.beammp.accounts.discordServer") }}</a></p>
+        <BngButton class="popup-close-button" @click="showReadMorePopup = false">{{ $tt("ui.beammp.accounts.close") }}</BngButton>
       </div>
     </div>
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
       <div v-if="state.loginError.value && hasTriedToLogin" class="error-notice">
-        <p>Something unexpected? Please see the notice above.</p>
+        <p>{{ $tt("ui.beammp.accounts.unexpectedError") }}</p>
         <p class="error">{{ state.loginError.value }}</p>
       </div>
 
@@ -65,6 +65,7 @@
 
         <div class="actions">
           <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
+          <!-- <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton> -->
           <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>

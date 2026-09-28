@@ -46,6 +46,9 @@ setExtensionUnloadMode("MPConfig", "manual")
 load("MPGameNetwork")
 setExtensionUnloadMode("MPGameNetwork", "manual")
 
+load("MPKeybindsGE")
+setExtensionUnloadMode("MPKeybindsGE", "manual")
+
 load("MPVehicleGE")
 setExtensionUnloadMode("MPVehicleGE", "manual")
 

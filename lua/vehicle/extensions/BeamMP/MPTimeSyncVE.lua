@@ -29,6 +29,7 @@ local function getSimTimeSafe()
 	if time == 0 then -- if an updateGFX frame runs in between two physics ticks then getSimTime return 0 instead of the simulation time
 		time = lastTime
 	end
+	lastTime = time
 	return time
 end
 
@@ -89,6 +90,7 @@ local function updateGFX(dt)
 	end
 end
 
+M.getSimTimeSafe   = getSimTimeSafe
 M.getServerTime    = getServerTime
 M.getServerSimTime = getServerSimTime
 M.getSimSpeed      = getSimSpeed

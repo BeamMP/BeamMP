@@ -13,6 +13,8 @@ local M = {}
 
 local targetGameSpeed = 1
 local actualSimSpeed = 1
+local PING_UPDATE_INTERVAL = 0.5 -- seconds, how often a spawned player's ping / fps is read from their position packets
+local pingTimer = 0
 
 --[[
 	["X-Y"] = table
@@ -78,7 +80,7 @@ local function applyPos(data, serverVehicleID)
 	end
 
 	local owner = vehicle:getOwner()
-	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+	if owner and not owner.hasUpdatedPing or not veh then -- only update twice a second per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
 		local decoded = jsonDecode(data)
 		local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 		vehicle.lastDt = decoded.tim
@@ -272,9 +274,14 @@ local function onUpdate(dtReal, dtSim, dtRaw)
 			be:queueAllObjectLua("if positionVE then positionVE.setGameSpeed("..simSpeed..") end")
 		end
 		targetGameSpeed = simSpeed
-		local players = getPlayers()
-		for k,player in pairs(players) do
-			player.hasUpdatedPing = false
+		-- the ping is only a number in the player list, it doesn't need a json decode per player every frame
+		pingTimer = pingTimer + dtReal
+		if pingTimer >= PING_UPDATE_INTERVAL then
+			pingTimer = 0
+			local players = getPlayers()
+			for k,player in pairs(players) do
+				player.hasUpdatedPing = false
+			end
 		end
 	end
 end

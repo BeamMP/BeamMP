@@ -391,6 +391,7 @@ local function loadLevel(map)
 	end
 	if not core_levels.expandMissionFileName(map) then --and not parsedMapName then
 		UI.updateLoading("lMap "..map.." not found. Check your server config.")
+		log('E', 'loadLevel', "Map "..map.." not found. Check your server config.")
 		status = ""
 		M.leaveServer()
 		return

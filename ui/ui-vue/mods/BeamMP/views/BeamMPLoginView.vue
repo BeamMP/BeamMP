@@ -25,7 +25,7 @@
     <article class="login-popup">
       <img :src="logoSrc" class="beammp-logo" alt="BeamMP" @error="onLogoError" />
 
-      <div v-if="state.loginError.value && hasTriedToLogin" class="error-notice">
+      <div v-if="state.loginError.value && hasTriedToLogin && mode === 'account'" class="error-notice">
         <p>{{ $tt("ui.beammp.accounts.unexpectedError") }}</p>
         <p class="error">{{ state.loginError.value }}</p>
       </div>
@@ -108,10 +108,12 @@ function onLogoError() {
 
 function switchToGuest() {
   mode.value = "guest"
+  hasTriedToLogin.value = false
 }
 
 function switchToAccount() {
   mode.value = "account"
+  hasTriedToLogin.value = false
 }
 
 async function submitLogin() {

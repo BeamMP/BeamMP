@@ -67,7 +67,7 @@
                           </tr>
                           <tr>
                             <th>{{ $tt("ui.beammp.serverBrowser.server.description") }}</th>
-                            <td class="desc-cell">{{ server.sdesc || "" }}</td>
+                            <td class="desc-cell" v-html="serverDescMarkup(server)"></td>
                           </tr>
                           <tr>
                             <th>{{ $tt("ui.beammp.serverBrowser.server.tags") }}</th>
@@ -697,10 +697,88 @@ function serverTitleMarkup(server) {
       }
 
       if (token === "^*") {
-        const icon = bngIcons?.[nextToken]
-        if (icon?.fileSvg) {
-          result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${icon.fileSvg}" alt="" aria-hidden="true" />`
+        if (nextToken && nextToken.length === 2) {
+          result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${nextToken}.svg" alt="" aria-hidden="true" />`
+          index += 1
         }
+        continue
+      }
+
+      const icon = bngIcons?.[nextToken]
+      if (icon?.fileSvg) {
+        result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${icon.fileSvg}" alt="" aria-hidden="true" />`
+        index += 1
+        continue
+      }
+
+      const mappedClass = BEAMMP_TEXT_STYLE_MAP[token]
+      if (mappedClass?.startsWith("color-")) {
+        for (const className of [...activeClasses]) {
+          if (className.startsWith("color-")) {
+            activeClasses.delete(className)
+          }
+        }
+        activeClasses.add(mappedClass)
+      } else if (mappedClass) {
+        activeClasses.add(mappedClass)
+      }
+      continue
+    }
+
+    currentText += token
+  }
+
+  flushText()
+  return result
+}
+
+function serverDescMarkup(server) {
+  const raw = String(server?.sdesc || "")
+  if (!raw) return ""
+
+  const tokens = raw.split(/(\^.)/g)
+  let result = ""
+  let currentText = ""
+  const activeClasses = new Set()
+
+  const flushText = () => {
+    if (!currentText) return
+    const classList = Array.from(activeClasses)
+    const encoded = escapeHtml(currentText)
+    result += classList.length
+      ? `<span class="${classList.join(" ")}">${encoded}</span>`
+      : encoded
+    currentText = ""
+  }
+
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index]
+    const nextToken = (tokens[index + 1] || "").trim()
+
+    if (/^\^.$/.test(token)) {
+      flushText()
+
+      if (token === "^r") {
+        activeClasses.clear()
+        continue
+      }
+
+      if (token === "^p") {
+        result += "<br>"
+        continue
+      }
+
+      if (token === "^*") {
+        if (nextToken && nextToken.length === 2) {
+          result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${nextToken}.svg" alt="" aria-hidden="true" />`
+          index += 1
+        }
+        continue
+      }
+
+      const icon = bngIcons?.[nextToken]
+      if (icon?.fileSvg) {
+        result += `<img class="server-title-icon" src="/ui/ui-vue/src/assets/fonts/bngIcons/${icon.fileSvg}" alt="" aria-hidden="true" />`
         index += 1
         continue
       }

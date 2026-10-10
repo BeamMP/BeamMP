@@ -5,8 +5,6 @@
 
       <p v-if="state.loginError.value && hasTriedToLogin" class="error">{{ state.loginError.value }}</p>
 
-      
-        <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription2temp") }}</h2>
       <template v-if="mode === 'account'">
         <h2 class="login-title">{{ $tt("ui.beammp.accounts.loginDescription1") }}</h2>
 
@@ -71,7 +69,7 @@ const username = ref("")
 const password = ref("")
 const hasTriedToLogin = ref(false)
 const mode = ref("account")
-const LEGACY_LOGO_PATH = "ui/assets/BeamMP/beammp_new_cropped.png"
+const LEGACY_LOGO_PATH = "/ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
 const { login, guestLogin, openExternal, state } = useBeamMPState()

@@ -2656,7 +2656,8 @@ local function onPreRender(dt)
 			local veh = getObjectByID(gameVehicleID)
 			local heightOffset = 0
 
-			if v.isSpawned and veh and veh:getActive() then -- update position if available
+			-- a vehicle that just woke from culling is still where it was culled for a moment, keep its network position
+			if v.isSpawned and veh and veh:getActive() and not (MPVehiclePoolGE and MPVehiclePoolGE.isSettling(serverVehicleID)) then -- update position if available
 				if not v.vehicleHeight or v.vehicleHeight == 0 then
 					v.vehicleHeight = veh:getInitialHeight()
 				end

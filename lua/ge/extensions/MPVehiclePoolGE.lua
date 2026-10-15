@@ -17,6 +17,7 @@ local POOL_NAME = "beammpRemoteVehicles"
 local UPDATE_INTERVAL = 0.25 -- seconds between distance evaluations
 local WAKE_BUFFER = 50 -- metres of hysteresis between waking and culling, prevents flickering at the edge
 local HOLD_AWAKE_TIME = 5 -- seconds a vehicle stays awake after being woken by an event (edit, reset, etc)
+local SETTLE_TIME = 1 -- seconds after waking where its network position is still used, until positionVE has moved it
 local MAX_QUEUED_EVENTS = 64 -- per vehicle cap for ordered event streams
 
 -- How held packets are combined while a vehicle is culled
@@ -58,6 +59,7 @@ local clock = 0
 local culled = {}
 local culledByGameID = {} -- [gameVehicleID] = serverVehicleID
 local holdAwakeUntil = {} -- [serverVehicleID] = clock time
+local wokeAt = {} -- [serverVehicleID] = clock time, see isSettling
 
 local camPos = vec3()
 local vehPos = vec3()
@@ -101,6 +103,14 @@ local function isCulled(serverVehicleID)
 	return culled[serverVehicleID] ~= nil
 end
 
+--- Returns true for a second after a vehicle wakes. It's still where it was culled until positionVE moves it, so
+--- nametags and the maps keep using its network position meanwhile instead of jumping back.
+-- @param serverVehicleID string X-Y
+local function isSettling(serverVehicleID)
+	local at = wokeAt[serverVehicleID]
+	return at ~= nil and clock - at < SETTLE_TIME
+end
+
 --- Called by packet handlers before sending data to VE. Returns true if the vehicle is culled,
 --- in which case the packet has been held and must not be sent to VE.
 -- @param serverVehicleID string X-Y
@@ -114,6 +124,10 @@ local function intercept(serverVehicleID, key, data)
 	if policy == "latest" then
 		state.streams[key] = data
 	elseif policy == "vehicle" then
+		if data:sub(1, 1) == "r" then
+			-- a reset repairs the vehicle, so damage held from before it must not be applied after it on wake
+			state.streams.n, state.streams.g, state.seen.g = nil, nil, nil
+		end
 		local last = state.vehicleEvents[#state.vehicleEvents]
 		if last and last:sub(1, 1) == "r" and data:sub(1, 1) == "r" then
 			state.vehicleEvents[#state.vehicleEvents] = data -- a newer reset supersedes the previous one
@@ -130,10 +144,19 @@ local function intercept(serverVehicleID, key, data)
 		local held = state.streams[key]
 		if not held then
 			state.streams[key] = decoded
+			if policy == "union" then
+				state.seen[key] = {}
+				for _, v in ipairs(decoded) do state.seen[key][v] = true end
+			end
 		elseif policy == "merge" then
 			deepMerge(held, decoded)
-		else -- union
-			for _, v in ipairs(decoded) do table.insert(held, v) end
+		else -- union, each entry once, a blocked vehicle can stay culled all session
+			for _, v in ipairs(decoded) do
+				if not state.seen[key][v] then
+					state.seen[key][v] = true
+					table.insert(held, v)
+				end
+			end
 		end
 	end
 	return true
@@ -143,15 +166,20 @@ end
 --- being sent to the VE mailbox.
 -- @param serverVehicleID string X-Y
 -- @param data string raw position json
+local refreshPosition
+
 local function interceptPosition(serverVehicleID, data)
 	local state = culled[serverVehicleID]
 	if not state then return false end
 	state.pos = data
 	state.posDirty = true
+	-- keep its position current for nametags and the maps, people use them to find each other
+	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
+	if vehicle then refreshPosition(vehicle, state) end
 	return true
 end
 
-local function refreshPosition(vehicle, state)
+function refreshPosition(vehicle, state)
 	if not state.posDirty then return end
 	state.posDirty = false
 	local decoded = jsonDecode(state.pos)
@@ -188,7 +216,7 @@ local function cull(serverVehicleID, gameVehicleID, veh)
 	local p = getPool()
 	if not p.allVehs[gameVehicleID] then p:insertVeh(gameVehicleID) end
 
-	culled[serverVehicleID] = { gameVehicleID = gameVehicleID, streams = {}, events = {}, vehicleEvents = {} }
+	culled[serverVehicleID] = { gameVehicleID = gameVehicleID, streams = {}, seen = {}, events = {}, vehicleEvents = {} }
 	culledByGameID[gameVehicleID] = serverVehicleID
 
 	p.fadeQueue[gameVehicleID] = nil
@@ -222,6 +250,7 @@ local function wake(serverVehicleID, holdAwake)
 	culled[serverVehicleID] = nil
 	culledByGameID[gameVehicleID] = nil
 	if not veh then return end
+	wokeAt[serverVehicleID] = clock
 
 	local p = getPool()
 	if not (p.allVehs[gameVehicleID] and p:setVeh(gameVehicleID, true, true)) then veh:setActive(1) end
@@ -240,6 +269,7 @@ local function reset()
 	culled = {}
 	culledByGameID = {}
 	holdAwakeUntil = {}
+	wokeAt = {}
 	pool = nil
 end
 
@@ -299,6 +329,22 @@ local function onVehicleDestroyed(gameVehicleID)
 		culled[serverVehicleID] = nil
 		culledByGameID[gameVehicleID] = nil
 		holdAwakeUntil[serverVehicleID] = nil
+		wokeAt[serverVehicleID] = nil
+	end
+end
+
+-- after a reload `culled` is empty, but vehicles we deactivated before it are still inactive in our pool, and nothing
+-- would wake them. Take them back, onUpdate then wakes or keeps them like any other culled vehicle
+local function adoptInactive()
+	local p = core_vehicleActivePooling and core_vehicleActivePooling.getPool(POOL_NAME)
+	if not p or not MPVehicleGE then return end
+	for gameVehicleID, active in pairs(p.allVehs) do
+		local serverVehicleID = active == 0 and MPVehicleGE.getServerVehicleID(gameVehicleID)
+		local vehicle = serverVehicleID and MPVehicleGE.getVehicleByServerID(serverVehicleID)
+		if vehicle and not vehicle.isLocal and not culledByGameID[gameVehicleID] then
+			culled[serverVehicleID] = { gameVehicleID = gameVehicleID, streams = {}, seen = {}, events = {}, vehicleEvents = {} }
+			culledByGameID[gameVehicleID] = serverVehicleID
+		end
 	end
 end
 
@@ -328,6 +374,7 @@ end
 M.intercept              = intercept
 M.interceptPosition      = interceptPosition
 M.isCulled               = isCulled
+M.isSettling             = isSettling
 M.wake                   = wake
 M.wakeAll                = wakeAll
 M.getCulledCount         = getCulledCount
@@ -339,7 +386,7 @@ M.onVehicleDestroyed     = onVehicleDestroyed
 M.onSettingsChanged      = onSettingsChanged
 M.onBeamMPServerLeave    = onBeamMPServerLeave
 M.onClientEndMission     = onClientEndMission
-M.onExtensionLoaded      = onSettingsChanged
+M.onExtensionLoaded      = function() onSettingsChanged() adoptInactive() end
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

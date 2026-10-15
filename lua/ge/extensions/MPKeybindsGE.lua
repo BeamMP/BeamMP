@@ -8,6 +8,7 @@
 --- The game only reads actions and default bindings from files, so they're written to the user folder while in use and
 --- removed again when you leave the server.
 --- The old key listener API (onKeyPressed, addKeyEventListener etc.) is on top of this now, input.keys is gone in 0.39.
+--- All keybinds are removed when you leave a server, so a mod that isn't a server mod needs to add its keybinds again.
 --- @module MPKeybindsGE
 --- @usage MPKeybindsGE.addAction("myModHorn", { title = "Air horn", default = "k", onDown = function() ... end })
 
@@ -37,8 +38,9 @@ local function cleanKey(key)
 	return key ~= "" and key or nil
 end
 
+-- symbols are kept as their byte, so keys like "-" and "=" don't end up as the same action
 local function keyActionName(key)
-	return "beammpKey_" .. cleanName(key)
+	return "beammpKey_" .. key:gsub("[^%w_]", function(c) return string.format("_%02x", c:byte()) end)
 end
 
 local function callListeners(action, down)
@@ -126,7 +128,7 @@ local function trigger(name, down)
 	action.state = down
 	callListeners(action, down)
 	if action.key and vehicleKeys[action.key] then
-		be:queueAllObjectLua("if MPVehicleVE then MPVehicleVE.onKeyStateChanged('" .. action.key .. "', " .. tostring(down) .. ") end")
+		be:queueAllObjectLua("if MPVehicleVE then MPVehicleVE.onKeyStateChanged(" .. string.format("%q", action.key) .. ", " .. tostring(down) .. ") end")
 	end
 end
 

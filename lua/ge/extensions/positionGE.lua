@@ -79,6 +79,8 @@ local function applyPos(data, serverVehicleID)
 		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
 	end
 
+	vehicle.posPackets = (vehicle.posPackets or 0) + 1 -- counted for the fps, as not every packet is decoded
+
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update twice a second per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
 		local decoded = jsonDecode(data)
@@ -92,9 +94,10 @@ local function applyPos(data, serverVehicleID)
 			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 			UI.setPlayerPing(owner.name, ping)
 			owner.ping = ping
-			owner.fps = 1/deltaDt
+			owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
 			owner.hasUpdatedPing = true
 		end-- Send ping to UI
+		vehicle.posPackets = 0
 	end
 end
 

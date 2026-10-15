@@ -48,8 +48,24 @@ function getKeyState(key)
 end
 
 
+-- things the game does for every vehicle that only make sense for your own, turned off on other players' vehicles
+local function disableForRemote()
+	-- the burnout and odometer stats only check that the AI is off, not that you're in the vehicle, so other players'
+	-- burnouts and distance were added to your own stats. The odometer still counts, part wear uses it
+	local stats = extensions.gameplayStatistic
+	if stats then
+		stats.metricAdd = nop
+		stats.metricSet = nop
+		stats.updateGFX = nil
+		extensions.hookUpdate("updateGFX")
+	end
+	-- recovery points, you can't recover another player's vehicle and their resets come from the server
+	recovery.updateGFX = nop
+end
+
 local function setVehicleType(x)
   v.mpVehicleType = x
+  if x == 'R' then disableForRemote() end
 end
 
 local function setServerID(id)

@@ -38,6 +38,7 @@ local oneSecCounter = 0
 local nicknamesAllowed = true
 local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
+local spawningRemote = false -- while spawn.spawnVehicle runs for a remote vehicle, its onVehicleSpawned comes before it's in vehiclesMap
 local editSyncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
@@ -1534,7 +1535,9 @@ local function applyVehSpawn(event)
 		spawnedVeh:setField("absMode", 0, absMode or "")
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
+		spawningRemote = true
 		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, centeredPosition = true, removeWhenNoPositionFound = false})
+		spawningRemote = false
 		spawnedVehID = spawnedVeh:getID()
 		spawnedVeh:setField("protected", 0, protected or "0")
 		spawnedVeh:setField("absMode", 0, absMode or "")
@@ -2883,6 +2886,29 @@ local function onUIInitialised()
 	UI.updateQueue(getQueueCounts())
 end
 
+--- Returns true if the vehicle is another player's, including while it's being spawned.
+-- @tparam number gameVehicleID
+-- @treturn boolean
+local function isRemote(gameVehicleID)
+	if spawningRemote then return true end
+	local vehicle = getVehicleByGameID(gameVehicleID)
+	return vehicle ~= nil and not vehicle.isLocal
+end
+
+-- the game reloads your input bindings from disk on every vehicle spawn, other players' vehicles (and their edits)
+-- don't change your bindings
+local function skipRemoteBindingsReload()
+	local bindings = core_input_bindings
+	if not bindings or not bindings.onVehicleSpawned or bindings.beammpSkipsRemote then return end
+	local onVehicleSpawned = bindings.onVehicleSpawned
+	bindings.onVehicleSpawned = function(gameVehicleID, ...)
+		if MPCoreNetwork.isMPSession() and MPVehicleGE.isRemote(gameVehicleID) then return end
+		return onVehicleSpawned(gameVehicleID, ...)
+	end
+	bindings.beammpSkipsRemote = true
+	extensions.hookUpdate("onVehicleSpawned")
+end
+
 local function onExtensionLoaded()
 	onSettingsChanged()
 end
@@ -2958,6 +2984,7 @@ M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, r
 M.getVehicleByServerID     = getVehicleByServerID     -- takes: string serverVehicleID, returns Vehicle
 M.getPlayerByName          = getPlayerByName          -- takes: string name, returns Player
 M.isOwn                    = isOwn                    -- takes: number vehID  returns: bool
+M.isRemote                 = isRemote                 -- takes: number gameVehicleID  returns: bool
 M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
 M.setOwn                   = setOwn                   -- takes: number vehID, bool own
 M.getDistanceMap           = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
@@ -2991,7 +3018,7 @@ M.onVehicleReady           = onVehicleReady           -- Called when our VE file
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.getRoleInfoTable         = getRoleInfoTable
 M.sendPendingVehicleEdits  = sendPendingVehicleEdits  -- takes: -
-M.onInit = function() setExtensionUnloadMode(M, "manual") end
+M.onInit = function() setExtensionUnloadMode(M, "manual") skipRemoteBindingsReload() end
 
 local function depricationWarning(oldFnName, replacementName)
 	local msg = "Deprecated function! Please update your code to use " .. tostring(replacementName)

@@ -45,6 +45,7 @@ local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local queueWaiting = false
+local queueToApply = {} -- serverVehicleIDs to apply from the queue, one per frame so a full queue isn't one long freeze
 local isAtSyncSpeed = true
 local hideNicknamesToggle = false
 
@@ -2035,10 +2036,11 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			UI.updateQueue(getQueueCounts())
 			UI.showNotification('Spawn received and queued for '..playerNickname, ''..playerNickname..''..serverVehicleID..'spawn', icon)
 		else
-			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle now")
+			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle next frame")
 
-			applyVehSpawn(eventdata)
-			UI.updateQueue(0, 0)
+			-- still one per frame, joining a full server sends every vehicle at once
+			vehicles[serverVehicleID].spawnQueue = eventdata
+			table.insert(queueToApply, serverVehicleID)
 		end
 	end
 end
@@ -2521,16 +2523,12 @@ local function applyVehicleQueues(serverVehicleID, vehicle)
 	end
 end
 
+-- the vehicles queued now are applied one per frame in onPreRender, anything queued after this waits for the next apply
 local function applyQueuedEvents()
-	local queueChanged = false
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		if vehicle.spawnQueue or vehicle.editQueue then
-			applyVehicleQueues(serverVehicleID, vehicle)
-			queueChanged = true
+			table.insert(queueToApply, serverVehicleID)
 		end
-	end
-	if queueChanged then
-		UI.updateQueue(getQueueCounts())
 	end
 	queueWaiting = false
 	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
@@ -2609,7 +2607,14 @@ local function onPreRender(dt)
 			groundMarkers(dt)
 		end
 
-		-- apply queue
+		-- apply queue, one vehicle per frame
+		local queuedVehicleID = table.remove(queueToApply, 1)
+		local queuedVehicle = queuedVehicleID and vehicles[queuedVehicleID]
+		if queuedVehicle and (queuedVehicle.spawnQueue or queuedVehicle.editQueue) then
+			applyVehicleQueues(queuedVehicleID, queuedVehicle)
+			UI.updateQueue(getQueueCounts())
+		end
+
 		if queueWaiting then
 			if activeVeh then
 				if settings.getValue("queueAutoSkipRemote") and not isOwn(activeVehID) then applyQueuedEvents() end
@@ -2845,6 +2850,7 @@ local function sendPastVehicles()
 end
 
 local function onDisconnect()
+	queueToApply = {}
 	for playerID, player in pairs(players) do
 		player:delete()
 	end

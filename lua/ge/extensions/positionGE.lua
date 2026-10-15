@@ -192,7 +192,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	be:queueAllObjectLua("positionVE.setPing("..p..")")
+	be:queueAllObjectLua("if positionVE then positionVE.setPing("..p..") end")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.
@@ -269,7 +269,7 @@ local function onUpdate(dtReal, dtSim, dtRaw)
 		setActualSimSpeed(dtSim/dtRaw)
 		local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
 		if targetGameSpeed ~= simSpeed then
-			be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+			be:queueAllObjectLua("if positionVE then positionVE.setGameSpeed("..simSpeed..") end")
 		end
 		targetGameSpeed = simSpeed
 		local players = getPlayers()

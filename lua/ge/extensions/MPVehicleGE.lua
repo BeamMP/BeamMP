@@ -809,15 +809,25 @@ local vehicleSimplifiers = {
 		vehicleConfig.mainPartName = newModel
 		return newModel
 	end,
-	sunburst = function(vehicleConfig)
+	sunburst2 = function(vehicleConfig) -- the sunburst was replaced by the sunburst2, the old simple_traffic_sunburst parts are gone too
 		local parts = vehicleConfig.parts
 		local newModel = "simple_traffic"
+		local isWagon = parts.sunburst2_body == "sunburst2_body_wagon"
+		local body = isWagon and "wagon" or "sedan"
 
-		parts.simple_traffic_model = "simple_traffic_sunburst"
-		parts.simple_traffic_sunburst_bumper_F = parts.sunburst_bumper_F == "" and "" or nil
-		parts.simple_traffic_sunburst_bumper_R = parts.sunburst_bumper_R == "" and "" or nil
-		parts.simple_traffic_sunburst_hood = parts.sunburst_hood == "" and "" or nil
-		parts.simple_traffic_sunburst_trunk = parts.sunburst_trunk == "" and "" or nil
+		-- the simple traffic trims are standard, sport (scooped hood / spoiler), wide and aero (wide with a spoiler)
+		local fender = parts.sunburst2_fender_L or ""
+		local spoiler = parts["sunburst2_spoiler_" .. body] or ""
+		local isWide = string.find(fender, "_wide") ~= nil or string.find(fender, "_cut") ~= nil
+		local isSport = spoiler ~= "" or string.find(parts.sunburst2_hood or "", "_scooped") ~= nil
+		local trim = isWide and (spoiler ~= "" and "aero" or "wide") or (isSport and "sport" or "standard")
+
+		parts.simple_traffic_model = isWagon and "simple_traffic_sunburst2_wagon" or "simple_traffic_sunburst2"
+		parts["simple_traffic_sunburst2_trim_" .. body] = "simple_traffic_sunburst2_trim_" .. body .. "_" .. trim
+		parts.simple_traffic_sunburst2_bumper_F = parts.sunburst2_bumper_F == "" and "" or nil
+		parts.simple_traffic_sunburst2_bumper_R = parts.sunburst2_bumper_R == "" and "" or nil
+		parts.simple_traffic_sunburst2_hood = parts.sunburst2_hood == "" and "" or nil
+		parts.simple_traffic_sunburst2_trunk = parts[isWagon and "sunburst2_tailgate_wagon" or "sunburst2_trunk_sedan"] == "" and "" or nil
 
 		vehicleConfig.model = newModel
 		vehicleConfig.mainPartName = newModel

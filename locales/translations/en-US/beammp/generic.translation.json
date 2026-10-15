@@ -41,5 +41,20 @@
     "ui.beammp.login": "Login",
     "ui.beammp.register": "Register",
     "ui.beammp.login.username": "Username",
-    "ui.beammp.login.password": "Password"
+    "ui.beammp.login.password": "Password",
+    "ui.beammp.accounts.Banner": "The new accounts system is currently being tested by our",
+    "ui.beammp.accounts.Banner2": "It will become available to everyone once testing is concluded. Please use a guest account in the meantime. Visit our",
+    "ui.beammp.accounts.Banner3": "for the latest updates.",
+    "ui.beammp.accounts.eaSupporters": "Early Access Supporters",
+    "ui.beammp.accounts.readMore": "Read More",
+    "ui.beammp.accounts.additionalInfo": "Additional Information",
+    "ui.beammp.accounts.recoveryText": "Are you an Early Access Supporter who previously had an account? Please read this",
+    "ui.beammp.accounts.recoveryText2": "for more information on how to recover your account.",
+    "ui.beammp.accounts.patreonPost": "Patreon post",
+    "ui.beammp.accounts.supportText": "Are you an Early Access Supporter but don't have an account yet, or are you having issues with account recovery or login? Please make an Account Support ticket in",
+    "ui.beammp.accounts.supportText2": "in our",
+    "ui.beammp.accounts.supportChannel": "# ❔️ Support",
+    "ui.beammp.accounts.discordServer": "Discord server",
+    "ui.beammp.accounts.close": "Close",
+    "ui.beammp.accounts.unexpectedError": "Something unexpected? Please see the notice above."
 }

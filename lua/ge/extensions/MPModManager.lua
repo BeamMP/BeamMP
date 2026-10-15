@@ -173,7 +173,7 @@ local function setServerMods(modsString)
 	local mods = {}
 	if (modsString) then -- takes: mod1.zip;mod2.zip;mod3.zip, returns a table of mod1,mod2,mod3
 		for mod in string.gmatch(modsString, "([^;]+)") do
-			local modFileName = mod:gsub(".zip",""):gsub(";","")
+			local modFileName = mod:gsub("%.zip;*$","")
 			table.insert(mods, modFileName)
 		end
 	end

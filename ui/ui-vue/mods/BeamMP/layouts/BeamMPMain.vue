@@ -15,19 +15,31 @@
         {{ $tt("ui.common.menu") }}
       </BngButton>
 
-      <div class="topbar-tools">
-        <div class="metrics">
-          <span class="metric-item">
-            <img src="/ui/assets/BeamMP/icons/account-multiple.svg" alt="" />
-            <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
-          </span>
-          <span class="metric-item">
-            <img src="/ui/assets/BeamMP/icons/dns.svg" alt="" />
-            <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
-          </span>
-        </div>
+      <div class="metrics">
+        <span class="metric-item">
+          <img src="/ui/assets/BeamMP/icons/account-multiple.svg" alt="" />
+          <span>{{ $tt("ui.common.beammp.players") }}: {{ state.beammpMetrics.value.players }}</span>
+        </span>
+        <span class="metric-item">
+          <img src="/ui/assets/BeamMP/icons/dns.svg" alt="" />
+          <span>{{ $tt("ui.common.beammp.servers") }}: {{ state.beammpMetrics.value.servers }}</span>
+        </span>
+      </div>
 
-        <section v-if="state.loggedIn.value" class="account-panel" aria-label="BeamMP account">
+      <div class="patreon-banner" :class="{ 'patreon-banner--ea': isEARole }">
+        <div class="patreon-content">
+          <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="Patreon" class="patreon-icon" />
+          <div class="patreon-text">
+            <span class="patreon-message" :style="{ color: isEARole ? '#9333eaeb' : '' }">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</span>
+          </div>
+        </div>
+        <BngButton class="patreon-button" accent="secondary" :style="{ visibility: isEARole ? 'hidden' : 'visible' }" @click="openExternal('https://www.patreon.com/BeamMP')">
+          {{ $tt("ui.common.beammp.readMore") }}
+        </BngButton>
+      </div>
+
+      <div class="topbar-tools">
+        <section v-if="state.loggedIn.value" class="account-panel" :style="{ backgroundColor: isSpecialRole ? accountRoleColor : 'rgba(0, 0, 0, 0.35)' }" aria-label="BeamMP account">
           <img
             class="account-avatar"
             :src="accountAvatar"
@@ -35,10 +47,15 @@
             @error="useFallbackAvatar"
           />
           <div class="account-details">
-            <strong>{{ accountName }}</strong>
-            <small>{{ accountRole }}</small>
-          </div>
-          <BngButton accent="secondary" class="logout-button" @click="handleLogout">
+            <small v-if="isSpecialRole" class="account-role-badge">{{ accountRole }}</small> 
+            <div class="account-name-wrapper">
+              <strong>{{ accountName }}</strong>
+            </div>
+            <div v-if="accountId" class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
+              <span class="account-id">ID: {{ accountId }}</span>
+            </div>
+          </div> 
+          <BngButton accent="destructive" class="logout-button" @click="handleLogout"> 
             {{ $tt("ui.beammp.accounts.logout") }}
           </BngButton>
         </section>
@@ -64,11 +81,15 @@
 
         <div class="spacer" />
 
-        <button class="nav-btn secondary external-link external-link--patreon" @click="openExternal('https://www.patreon.com/BeamMP')">
+        <button 
+          class="nav-btn secondary external-link external-link--patreon" 
+          :class="{ 'external-link--patreon-ea': isEARole }"
+          @click="openExternal('https://www.patreon.com/BeamMP')"
+        >
           <img src="/ui/assets/BeamMP/icons/PATREON_SYMBOL_1_WHITE_RGB.svg" alt="" class="external-link-icon" />
           <span class="external-link-copy">
             <span class="external-link-title">{{ $tt("ui.common.beammp.patreon") }}</span>
-            <small class="external-link-subtitle">{{ $tt("ui.beammp.patreon.message.user") }}</small>
+            <small class="external-link-subtitle">{{ isEARole ? $tt("ui.beammp.patreon.message.ea") : $tt("ui.beammp.patreon.message.user") }}</small>
           </span>
         </button>
         <button class="nav-btn secondary external-link" @click="openExternal('https://forum.beammp.com')">
@@ -217,15 +238,40 @@ const accountAvatar = computed(() => {
   return avatar
 })
 const accountName = computed(() => {
- 
   return state.auth.value?.username
 })
-const accountRole = computed(() => state.auth.value?.role || "User")
+const accountRole = computed(() => {
+  const roleTag = state.auth.value?.roleInfo?.tag
+  return roleTag.replace(/^\s*\[|\]\s*$/g, "").trim() || state.auth.value?.role
+})
+const accountId = computed(() => {
+  return state.auth.value?.id
+})
+const accountRoleColor = computed(() => {
+  return state.auth.value?.color
+})
+const isSpecialRole = computed(() => {
+  const role = state.auth.value?.role || "USER"
+  return role !== "USER"
+})
+
+const isEARole = computed(() => {
+  const role = state.auth.value?.role || ""
+  return role === "EA" || role === "ET" || role === "MDEV" || role === "STAFF"
+})
 
 function useFallbackAvatar(event) {
   const image = event.currentTarget
   image.onerror = null
   image.src = fallbackAvatar
+}
+
+function copyAccountId() {
+  const id = state.auth.value?.id
+  if (id && /^\d+$/.test(id)) {
+    bngApi.engineLua(`setClipboard("${id}")`)
+    bngVue.toastr.info("Copied ID to clipboard", "BeamMP")
+  }
 }
 
 function updateInfobarMarginBottom() {
@@ -275,6 +321,7 @@ onMounted(async () => {
 
   await loadFavorites()
   await refreshConnectionState()
+
   if (state.loggedIn.value) await requestServerList()
   authStateReady.value = true
 
@@ -330,16 +377,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.topbar-tools {
-  display: flex;
-  min-width: 0;
-  align-items: stretch;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-  gap: 0.55rem;
-  max-width: calc(100% - 2.75rem);
+  flex-wrap: wrap;
 }
 
 .metrics {
@@ -349,17 +387,19 @@ onBeforeUnmount(() => {
   flex-wrap: nowrap;
   align-items: center;
   gap: 0;
-  padding: 0.5rem 0.75rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--bng-corners-2);
   background: rgba(0, 0, 0, 0.35);
+  height: 100%;
 
   .metric-item {
     display: flex;
     flex: 0 1 auto;
     min-width: fit-content;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
     white-space: nowrap;
+    font-size: 0.85rem;
 
     + .metric-item {
       margin-left: 0.65rem;
@@ -376,25 +416,95 @@ onBeforeUnmount(() => {
   }
 }
 
+.patreon-banner {
+  display: flex;
+  flex: 1;
+  min-width: 12rem;
+  align-items: center;
+  gap: 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--bng-corners-2);
+  background: rgba(0, 0, 0, 0.35);
+  order: 2;
+  height: 100%;
+
+  &.patreon-banner--ea {
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .patreon-content {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 0.35rem;
+    justify-content: center;
+  }
+
+  .patreon-icon {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    object-fit: contain;
+    filter: brightness(1.6);
+  }
+
+  .patreon-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .patreon-message {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .patreon-button {
+    flex: 0 0 auto;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    --bng-transition-speed: 0s;
+  }
+}
+
+.topbar-tools {
+  display: flex;
+  min-width: 0;
+  align-items: stretch;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  order: 3;
+}
+
 .account-panel {
   display: flex;
   flex: 0 1 19rem;
   min-width: 14.5rem;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.3rem 0.4rem 0.3rem 0.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  gap: 0.45rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--bng-corners-2);
   background: rgba(0, 0, 0, 0.42);
+  transition: background-color 150ms ease;
 }
-
+ 
 .account-avatar {
   box-sizing: border-box;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 2.2rem;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
   object-fit: cover;
-  border: 1px solid rgba(var(--bng-orange-500-rgb), 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   background: var(--bng-cool-gray-700);
 }
@@ -404,24 +514,78 @@ onBeforeUnmount(() => {
   min-width: 5rem;
   flex: 1;
   flex-direction: column;
-  line-height: 1.1;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.4rem;
+  text-align: center;
+  justify-content: center;
 
-  strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .account-role-badge {
+    margin-bottom: 0.05rem;
+    color: white;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    opacity: 0.9;
   }
 
-  small {
-    margin-top: 0.16rem;
-    color: var(--bng-cool-gray-300);
-    font-size: 0.72rem;
-    text-transform: capitalize;
+  .account-name-wrapper {
+    display: inline-block;
+    padding: 0;
+    background-color: transparent;
+    text-align: center;
+
+    strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      font-size: 0.75rem;
+    }
+  }
+
+  .account-id-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.1rem;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .account-id {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 }
 
 .logout-button {
   flex: 0 0 auto;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.4rem;
+  --bng-bg-enabled: var(--bng-add-red-600);
+  --bng-bg-hover: var(--bng-add-red-500);
+  --bng-bg-active: var(--bng-add-red-700);
+  --bng-bg-border-enabled: transparent;
+  --bng-bg-border-hover: transparent;
+  --bng-bg-border-active: transparent;
+  --bng-text-enabled: white;
+  --bng-text-hover: white;
+  --bng-text-active: white;
+  --bng-bg-enabled-opacity: 1;
+  --bng-bg-hover-opacity: 1;
+  --bng-bg-active-opacity: 1;
+  color: white !important;
+  transition: all 150ms ease;
 }
 
 .main-grid {
@@ -514,6 +678,27 @@ onBeforeUnmount(() => {
   opacity: 0.9;
 }
 
+.back-button {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--bng-off-white);
+  background: rgba(36, 36, 36, 0.75);
+  border-radius: var(--bng-corners-1);
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 100ms ease, background-color 100ms ease, box-shadow 100ms ease;
+  box-shadow: inset 0.22rem 0 var(--bng-orange-500);
+
+  &:hover {
+    background: rgba(var(--bng-orange-500-rgb), 0.2);
+  }
+
+  &:focus-visible {
+    outline: 0.12rem solid var(--bng-orange-500);
+    outline-offset: 0.08rem;
+  }
+}
+
 .external-link {
   display: inline-flex;
   align-items: center;
@@ -567,6 +752,20 @@ onBeforeUnmount(() => {
 
   .external-link-subtitle {
     color: var(--bng-add-green-200);
+  }
+
+  &.external-link--patreon-ea {
+    border-color: rgba(147, 51, 234, 0.92);
+    background: rgba(147, 51, 234, 0.2);
+
+    &:hover {
+      border-color: rgba(147, 51, 234, 1);
+      background: rgba(147, 51, 234, 0.32);
+    }
+
+    .external-link-subtitle {
+      color: rgba(216, 180, 254, 1);
+    }
   }
 }
 
@@ -697,7 +896,36 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1000px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .patreon-banner {
+    order: 1;
+    width: 100%;
+    min-width: 10rem;
+    max-width: none;
+
+    .patreon-title {
+      font-size: 0.65rem;
+    }
+
+    .patreon-message {
+      font-size: 0.85rem;
+    }
+
+    .patreon-button {
+      font-size: 0.6rem;
+      padding: 0.25rem 0.4rem;
+    }
+  }
+
+  .back-button {
+    order: 2;
+  }
+
   .topbar-tools {
+    order: 3;
     gap: 0.35rem;
     margin-right: 2rem;
     max-width: calc(100% - 2rem);
@@ -716,4 +944,5 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
   }
 }
+
 </style>

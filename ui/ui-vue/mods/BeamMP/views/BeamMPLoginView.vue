@@ -37,6 +37,7 @@
               @keyup.enter="submitLogin"
             />
           </div>
+          <a href="#" class="forgot-password" @click.prevent="forgotPassword">{{ $tt("ui.beammp.accounts.forgotPassword") }}</a>
         </div>
 
         <div class="actions">
@@ -101,7 +102,11 @@ async function submitGuest() {
 }
 
 function register() {
-  openExternal("https://forum.beammp.com/signup")
+  openExternal("https://accounts.beammp.com/auth/register")
+}
+
+function forgotPassword() {
+  openExternal("https://accounts.beammp.com/auth/forgot-password")
 }
 
 watch(() => state.loggedIn.value, value => {
@@ -205,6 +210,16 @@ watch(() => state.loggedIn.value, value => {
 
 .password-prefix {
   letter-spacing: 0.08rem;
+}
+
+.forgot-password {
+  align-self: flex-end;
+  color: var(--bng-cool-gray-100);
+  font-size: 0.85rem;
+
+  &:hover {
+    color: var(--bng-off-white);
+  }
 }
 
 .guest-copy {

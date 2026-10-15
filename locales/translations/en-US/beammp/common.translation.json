@@ -54,4 +54,7 @@
     "ui.common.beammp.reveal": "Reveal",
     "ui.common.beammp.hide": "Hide",
     "ui.beammp.server.noPlayers": "No players",
+    "ui.beammp.patreon.banner.message": "Enjoying BeamMP? Consider supporting our work on Patreon!",
+    "ui.beammp.patreon.banner.message.donator": "Thank you for supporting BeamMP!",
+    "ui.beammp.patreon.banner.readMore": "Read more"
 }

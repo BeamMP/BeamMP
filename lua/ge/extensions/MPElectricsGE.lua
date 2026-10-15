@@ -76,10 +76,21 @@ local function handle(rawData)
 end
 
 
+local function onVehicleDestroyed(gameVehicleID)
+	lastElectrics[gameVehicleID] = nil
+end
+
+-- so the first electrics are sent again when you join the next server
+local function onBeamMPServerLeave()
+	lastElectrics = {}
+end
+
 
 M.tick 			 = tick
 M.handle     	 = handle
 M.sendElectrics  = sendElectrics
+M.onVehicleDestroyed  = onVehicleDestroyed
+M.onBeamMPServerLeave = onBeamMPServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

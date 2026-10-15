@@ -1748,6 +1748,7 @@ end
 
 
 local function onVehicleDestroyed(gameVehicleID)
+	missingServerIDLogged[gameVehicleID] = nil
 	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
@@ -2840,6 +2841,7 @@ local function onDisconnect()
 		vehicle:delete()
 	end
 	vehicles = {}
+	missingServerIDLogged = {}
 end
 
 local function onPlayerLeft(name)

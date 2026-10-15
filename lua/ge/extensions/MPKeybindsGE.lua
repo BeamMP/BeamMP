@@ -193,7 +193,7 @@ local function onUpdate()
 end
 
 -- mods register their keys again when you join, so a server's keys don't stay in Controls after you leave it
-local function onDisconnect()
+local function onBeamMPServerLeave()
 	if not next(actions) then return end
 	actions, vehicleKeys = {}, {}
 	nextOrder = ORDER_START
@@ -214,9 +214,9 @@ M.addKeyListener        = addKeyListener
 M.addVehicleKeyListener = addVehicleKeyListener
 M.getKeyState           = getKeyState
 
-M.onUpdate          = onUpdate
-M.onDisconnect      = onDisconnect
-M.onExtensionLoaded = onExtensionLoaded
+M.onUpdate            = onUpdate
+M.onBeamMPServerLeave = onBeamMPServerLeave
+M.onExtensionLoaded   = onExtensionLoaded
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

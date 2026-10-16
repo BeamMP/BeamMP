@@ -51,5 +51,8 @@
   "ui.common.beammp.others": "Autres",
   "ui.common.beammp.new": "Nouveau",
   "ui.common.beammp.reveal": "Révéler",
-  "ui.common.beammp.hide": "Cacher"
+  "ui.common.beammp.hide": "Cacher",
+  "ui.beammp.patreon.banner.message": "Vous aimez BeamMP ? Pensez à soutenir notre travail sur Patreon !",
+  "ui.beammp.patreon.banner.message.donator": "Merci de soutenir BeamMP !",
+  "ui.beammp.patreon.banner.readMore": "En savoir plus"
 }

@@ -39,7 +39,6 @@
     border: none;
     border-collapse: collapse;
     width: 100%;
-    padding-bottom: -0.25rem;
     background-color: rgba(0, 0, 0, 0.25);
     border: 0.125rem solid rgba(175, 175, 175, 0.45);
     table-layout: fixed;
@@ -132,6 +131,6 @@ table#players-table > tbody > tr:nth-child(even) {
 .playerslist-col-2 { min-width: 6.25rem; width: auto; }
 .playerslist-col-3 { width: 4rem; }
 #plist-container::-webkit-scrollbar {
-    width: 0px;
+    width: 0;
     background: transparent;
 }

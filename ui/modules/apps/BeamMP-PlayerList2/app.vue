@@ -43,15 +43,15 @@
 					>
 						<td
 							v-show="showPlayerIDs"
-							class="player-id"
+							class="player-id table-cell"
 							@click.stop="restorePlayerVehicle(player.name)"
 						>
 							{{ player.id }}
 						</td>
-						<td class="player-button" @click.stop="handlePrimaryAction(player)">
+						<td class="player-button table-cell" @click.stop="handlePrimaryAction(player)">
 							{{ player.formatted_name || player.name }}
 						</td>
-						<td class="ping-cell">
+						<td class="ping-cell table-cell">
 							<button class="buttons tp-button" type="button" @click.stop>
 								{{ formatPing(player.ping) }} ms
 							</button>
@@ -441,29 +441,37 @@ onUnmounted(() => {
 
 .players-table th {
 	min-height: 2.125rem;
-	padding: 0.4375rem;
+	padding: 0 0.4375rem;
 	border: 0;
 	border-bottom: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
 	color: var(--bng-cool-gray-100);
 	text-align: left;
 	text-transform: uppercase;
-	line-height: 1.25rem;
+	line-height: 2.125rem;
 	box-sizing: border-box;
 }
 
 .players-table td {
 	min-height: 2.125rem;
 	max-width: 0;
-	padding: 0.4375rem;
+	padding: 0 0.4375rem;
 	overflow: hidden;
-	border: 0;
+	border: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
 	border-bottom: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.14);
 	color: var(--bng-off-white);
 	text-overflow: ellipsis;
 	text-shadow: none;
 	white-space: nowrap;
-	line-height: 1.25rem;
+	line-height: 2.125rem;
 	box-sizing: border-box;
+}
+
+.table-cell {
+	border-right: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
+}
+
+.table-cell:last-child {
+	border-right: none;
 }
 
 .ui-style-redesigned .players-table th,
@@ -478,11 +486,12 @@ onUnmounted(() => {
 }
 
 .players-table tr:not(:first-child):hover {
-	background: rgba(var(--bng-orange-500-rgb), 0.16);
+	background: rgba(var(--bng-cool-gray-700-rgb), 0.5);
 }
 
 .players-table tr.queued {
 	background: rgba(var(--bng-orange-500-rgb), 0.18);
+	border-left: 0.1875rem solid var(--bng-orange-500);
 }
 
 .player-id {
@@ -501,8 +510,15 @@ onUnmounted(() => {
 	font-variant-numeric: tabular-nums;
 }
 
-.playerslist-col-1 { width: 2rem; }
-.playerslist-col-2 { width: auto; min-width: 6.25rem; }
+.playerslist-col-1 {
+	width: 2rem;
+}
+
+.playerslist-col-2 {
+	width: auto;
+	min-width: 6.25rem;
+}
+
 .playerslist-col-3 {
 	width: 4rem;
 	padding: 0 !important;
@@ -510,16 +526,19 @@ onUnmounted(() => {
 }
 
 .player-count-badge {
-	display: inline-grid;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 1.0625rem;
 	height: 1.0625rem;
 	margin-left: 0.3125rem;
 	padding: 0 0.1875rem;
-	place-items: center;
 	border-radius: 0.5625rem;
 	background: var(--bng-orange-500);
 	color: var(--bng-off-white);
 	font-size: 0.75rem;
+	line-height: 1;
+	vertical-align: middle;
 	box-sizing: border-box;
 }
 

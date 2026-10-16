@@ -24,6 +24,16 @@ ul#chat-list {
     width: 100%;
 }
 
+ul#chat-list.chat-list--scrollbar-hidden {
+    scrollbar-width: none;
+}
+
+ul#chat-list.chat-list--scrollbar-hidden::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
 .chat-message {
     padding: 4px 4px;
     color: white;

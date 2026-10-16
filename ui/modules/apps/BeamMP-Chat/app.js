@@ -209,6 +209,11 @@ var chatShown = false;
 var chatShowTime = 3500; // 5000ms
 var chatFadeSteps = 1/30; // 60 steps
 var chatFadeSpeed = 1000 / (1/chatFadeSteps); // 1000ms
+function setChatScrollbarVisible(visible) {
+	const chatlist = document.getElementById("chat-list");
+	if (chatlist) chatlist.classList.toggle("chat-list--scrollbar-hidden", !visible);
+}
+
 async function fadeNode(node) {
 	// Set the node opacity to 1.0
 	node.style.opacity = 1.0;
@@ -226,6 +231,8 @@ async function fadeNode(node) {
 		if (chatShown) return;
 		nodeOpacity = nodeOpacity - chatFadeSteps;
 		node.style.opacity = nodeOpacity;
+		const chatlist = document.getElementById("chat-list");
+		if (chatlist?.lastElementChild === node && nodeOpacity <= 0) setChatScrollbarVisible(false);
 		await sleep(chatFadeSpeed);
 	}
 }
@@ -244,6 +251,7 @@ async function showChat() {
 		}
 		// Set all messages opacity to 1.0
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = 1.0;
+		setChatScrollbarVisible(true);
 		await sleep(100);
 	}
 	// Once the mouse is not over the chat anymore, we wait before fading
@@ -261,6 +269,7 @@ async function showChat() {
 		for (var i = 0; i < chatMessages.length; ++i) chatMessages[i].style.opacity = chatOpacity;
 		await sleep(chatFadeSpeed);
 	}
+	if (!chatShown) setChatScrollbarVisible(false);
 }
 // -------------------------------------------- CHAT FADING -------------------------------------------- //
 
@@ -410,6 +419,7 @@ function addMessage(msg, time = null) {
 	}
 
 	chatList.appendChild(chatMessageNode);
+	setChatScrollbarVisible(true);
 
 	// Delete oldest chat message if more than 70 messages exist
 	if (chatList.children.length > 70) {

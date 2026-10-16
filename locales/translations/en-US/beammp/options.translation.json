@@ -85,5 +85,15 @@
     "ui.options.beammp.useUiAppRedesign": "HUD App Style",
     "ui.options.beammp.useUiAppRedesign.tooltip": "Choose the visual style for BeamMP's HUD apps.",
     "ui.options.beammp.useUiAppRedesign.redesign": "Redesign",
-    "ui.options.beammp.useUiAppRedesign.old": "Old"
+    "ui.options.beammp.useUiAppRedesign.old": "Old",
+    "ui.options.beammp.contentSafety": "Content & Safety",
+    "ui.options.beammp.chatFilterLevel": "Chat content filter",
+    "ui.options.beammp.chatFilterLevel.tooltip": "Hides offensive words in chat by replacing them with asterisks. This only changes what you see, other players still see the original message.",
+    "ui.options.beammp.chatFilterLevel.off": "Off",
+    "ui.options.beammp.chatFilterLevel.light": "Light",
+    "ui.options.beammp.chatFilterLevel.mild": "Mild",
+    "ui.options.beammp.chatFilterLevel.strong": "Strong",
+    "ui.options.beammp.chatFilterLevel.severe": "Severe",
+    "ui.options.beammp.filteredWords": "Custom filtered words",
+    "ui.options.beammp.filteredWords.tooltip": "Extra words or phrases to hide in chat, separated by commas. Capital letters and common letter swaps (like 3 for e) are ignored."
 }

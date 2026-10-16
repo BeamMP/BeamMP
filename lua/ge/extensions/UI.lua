@@ -14,6 +14,7 @@ local M = {}
 local chatWindow = require("beammp.ui.chat")
 local optionsWindow = require("beammp.ui.options")
 local playerListWindow = require("beammp.ui.playerList")
+local chatFilter = require("beammp.chatFilter")
 require('/common/extensions/ui/flowgraph/editor_api_luaintf')(M)
 local gui_module = require("ge/extensions/editor/api/gui")
 local gui = {setupEditorGuiTheme = nop}
@@ -473,23 +474,40 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 	local parts = split(message, ':')
 	local username = parts[1]
 	parts[1] = ''
-	local msg = string.gsub(message, username..': ', '')
+	-- cut the text off by position, a pattern goes wrong on usernames with characters like - or %
+	local prefix = username..': '
+	local hasPrefix = string.sub(message, 1, #prefix) == prefix
+	local msg = hasPrefix and string.sub(message, #prefix + 1) or string.gsub(message, prefix, '')
+	local originalMessage, originalMsg = message, msg
+
+	-- Chat filter (Options > BeamMP > Content & Safety), only changes what is shown here. Never the username, and
+	-- never your own messages: the server sends them back to you, and what you wrote should not show up as asterisks.
+	if username ~= MPConfig.getNickname() then
+		local ok, filtered = pcall(chatFilter.filter, msg, settings.getValue("chatFilterLevel"), settings.getValue("filteredWords"))
+		if not ok then
+			log('E', 'chatMessage', 'Chat filter failed: '..tostring(filtered))
+		elseif filtered ~= msg then
+			msg = filtered
+			message = (hasPrefix and prefix or '')..msg
+		end
+	end
+
 	local player = MPVehicleGE.getPlayerByName(username)
 	if player then
         username = username .. player.role.shorttag
 		local c = player.role.forecolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
-		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
+		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..originalMsg) -- DO NOT REMOVE
 		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter, color = color})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, chatcounter, color)
 	else
-		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..msg) -- DO NOT REMOVE
+		log('M', 'chatMessage', 'Chat message received from: '..username.. ' >' ..originalMsg) -- DO NOT REMOVE
 		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, id)
 	end
-	TriggerClientEvent("ChatMessageReceived", message, username) -- Username added last to not break other mods.
+	TriggerClientEvent("ChatMessageReceived", originalMessage, username) -- Username added last to not break other mods. Unfiltered, the filter is only for display.
 end
 
 

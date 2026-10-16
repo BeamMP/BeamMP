@@ -4651,6 +4651,113 @@
       "condition_visible": ""
     },
     {
+      "label": "ui.options.beammp.contentSafety",
+      "icon": "shieldCheckmark",
+      "categoryId": "beammpsafety",
+      "subcategory": true,
+      "persistent": false,
+      "spacer": false,
+      "divider": false,
+      "items": [
+        {
+          "version": "",
+          "label": "ui.options.beammp.contentSafety",
+          "tooltip": "",
+          "interactive": false,
+          "condition_always_off": false,
+          "condition_not_shipping": false,
+          "condition_simplemenu": "",
+          "condition_visible": "",
+          "condition_enabled": "",
+          "itemType": "heading",
+          "component": "OptionsHeading",
+          "icon": "_empty",
+          "variant": "h4",
+          "search": [
+            "label"
+          ]
+        },
+        {
+          "version": "0.39",
+          "label": "ui.options.beammp.chatFilterLevel",
+          "tooltip": "ui.options.beammp.chatFilterLevel.tooltip",
+          "setting": "chatFilterLevel",
+          "interactive": true,
+          "condition_always_off": false,
+          "condition_not_shipping": false,
+          "condition_simplemenu": "",
+          "condition_visible": "",
+          "condition_enabled": "",
+          "itemType": "options",
+          "component": "BngSmartSelect",
+          "separateLabel": true,
+          "optionsSource": "",
+          "options": [
+            {
+              "label": "ui.options.beammp.chatFilterLevel.off",
+              "value": 0
+            },
+            {
+              "label": "ui.options.beammp.chatFilterLevel.light",
+              "value": 1
+            },
+            {
+              "label": "ui.options.beammp.chatFilterLevel.mild",
+              "value": 2
+            },
+            {
+              "label": "ui.options.beammp.chatFilterLevel.strong",
+              "value": 3
+            },
+            {
+              "label": "ui.options.beammp.chatFilterLevel.severe",
+              "value": 4
+            }
+          ],
+          "lua": "",
+          "basic_interaction": false,
+          "search": [
+            "label",
+            "caption",
+            "tooltip",
+            "setting",
+            "optionsSource",
+            "options"
+          ]
+        },
+        {
+          "version": "0.39",
+          "label": "ui.options.beammp.filteredWords",
+          "tooltip": "ui.options.beammp.filteredWords.tooltip",
+          "setting": "filteredWords",
+          "interactive": true,
+          "condition_always_off": false,
+          "condition_not_shipping": false,
+          "condition_simplemenu": "",
+          "condition_visible": "",
+          "condition_enabled": "",
+          "itemType": "input",
+          "component": "BngInput",
+          "separateLabel": true,
+          "inputType": "text",
+          "unit": "",
+          "search": [
+            "label",
+            "caption",
+            "tooltip",
+            "setting",
+            "settingValue"
+          ]
+        }
+      ],
+      "reroute": "",
+      "categoryInfo": "",
+      "condition_always_off": false,
+      "condition_not_shipping": false,
+      "condition_simplemenu": "",
+      "condition_visible": ""
+    },
+    {
       "label": "ui.options.advanced",
       "icon": "code",
       "categoryId": "beammpadvanced",

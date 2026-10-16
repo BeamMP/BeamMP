@@ -7,7 +7,7 @@
         <circle cx="12" cy="8" r="1" fill="currentColor"/>
       </svg>
       <div class="banner-text">
-        <p>{{ $tt("ui.beammp.accounts.Banner") }} <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP')" class="ea-link">{{ $tt("ui.beammp.accounts.eaSupporters") }}</a>. {{ $tt("ui.beammp.accounts.Banner2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="discord-link">{{ $tt("ui.common.beammp.discord") }}</a> {{ $tt("ui.beammp.accounts.Banner3") }}</p>
+        <p><strong>{{ $tt("ui.beammp.accounts.accountsLive") }}</strong> {{ $tt("ui.beammp.accounts.Banner2") }}</p>
       </div>
       <BngButton class="read-more-button" accent="secondary" @click="showReadMorePopup = true">
         {{ $tt("ui.beammp.accounts.readMore") }}
@@ -17,8 +17,20 @@
     <div v-if="showReadMorePopup" class="popup-overlay" @click.self="showReadMorePopup = false">
       <div class="popup-content">
         <h3>{{ $tt("ui.beammp.accounts.additionalInfo") }}</h3>
-        <p>{{ $tt("ui.beammp.accounts.recoveryText") }} <a href="#" @click.prevent="openExternal('https://www.patreon.com/BeamMP/posts/moment-youve-all-169326895')" class="popup-link">{{ $tt("ui.beammp.accounts.patreonPost") }}</a> {{ $tt("ui.beammp.accounts.recoveryText2") }}</p>
-        <p>{{ $tt("ui.beammp.accounts.supportText") }} <code>{{ $tt("ui.beammp.accounts.supportChannel") }}</code> {{ $tt("ui.beammp.accounts.supportText2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">{{ $tt("ui.beammp.accounts.discordServer") }}</a></p>
+        <h4>{{ $tt("ui.beammp.accounts.recoveryHeading") }}</h4>
+        <p>{{ $tt("ui.beammp.accounts.recoveryIntro") }}</p>
+        <ol>
+          <li>{{ $tt("ui.beammp.accounts.recoveryStep1") }} <a href="#" @click.prevent="openExternal('https://accounts.beammp.com/')" class="popup-link">{{ $tt("ui.beammp.accounts.accountsPortal") }}</a> {{ $tt("ui.beammp.accounts.recoveryStep1End") }}</li>
+          <li>{{ $tt("ui.beammp.accounts.recoveryStep2") }}</li>
+          <li>{{ $tt("ui.beammp.accounts.recoveryStep3") }}</li>
+        </ol>
+        <p>{{ $tt("ui.beammp.accounts.recoveryException") }}</p>
+        <h4>{{ $tt("ui.beammp.accounts.afterRecoveryHeading") }}</h4>
+        <p>{{ $tt("ui.beammp.accounts.afterRecoveryText") }}</p>
+        <h4>{{ $tt("ui.beammp.accounts.keymasterHeading") }}</h4>
+        <p>{{ $tt("ui.beammp.accounts.keymasterText") }}</p>
+        <h4>{{ $tt("ui.beammp.accounts.supportHeading") }}</h4>
+        <p>{{ $tt("ui.beammp.accounts.supportText") }} <code>{{ $tt("ui.beammp.accounts.supportChannel") }}</code> {{ $tt("ui.beammp.accounts.supportText2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">{{ $tt("ui.beammp.accounts.discordServer") }}</a>.</p>
         <BngButton class="popup-close-button" @click="showReadMorePopup = false">{{ $tt("ui.beammp.accounts.close") }}</BngButton>
       </div>
     </div>
@@ -165,7 +177,7 @@ watch(() => state.loggedIn.value, value => {
   gap: 0.75rem;
   padding: 0.75rem 1.5rem;
   border: 1px solid rgba(var(--bng-orange-400-rgb), 0.5);
-  border-radius: 0 0 var(--bng-corners-2) var(--bng-corners-2);
+  border-radius: var(--bng-corners-2);
   background: rgba(var(--bng-orange-500-rgb), 0.15);
   width: 100%;
   max-width: 100%;
@@ -424,11 +436,13 @@ watch(() => state.loggedIn.value, value => {
   padding: 2rem;
   max-width: 45rem;
   width: 100%;
+  max-height: calc(100vh - 2rem);
   color: var(--bng-off-white);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
+  overflow-y: auto;
 
   h3 {
     margin: 0 0 1.25rem;
@@ -439,6 +453,13 @@ watch(() => state.loggedIn.value, value => {
     padding-bottom: 0.75rem;
   }
 
+  h4 {
+    margin: 1.25rem 0 0.5rem;
+    color: var(--bng-cool-gray-100);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
   p {
     margin: 0 0 1.25rem;
     line-height: 1.7;
@@ -447,6 +468,14 @@ watch(() => state.loggedIn.value, value => {
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
+  }
+
+  ol {
+    margin: 0 0 1.25rem;
+    padding-left: 1.5rem;
+    color: var(--bng-cool-gray-100);
+    line-height: 1.7;
+    font-size: 0.95rem;
   }
 
   p:last-of-type {

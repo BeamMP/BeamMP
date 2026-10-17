@@ -69,6 +69,7 @@ end
 -- @param data table The data to be applied as nodes
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyNodes(data, serverVehicleID)
+	if MPVehiclePoolGE and MPVehiclePoolGE.intercept(serverVehicleID, "n", data) then return end
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
@@ -81,6 +82,7 @@ end
 -- @param data table The data to be applied as break groups
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyBreakGroups(data, serverVehicleID)
+	if MPVehiclePoolGE and MPVehiclePoolGE.intercept(serverVehicleID, "g", data) then return end
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
@@ -120,6 +122,7 @@ M.applyNodes = applyNodes
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 M.sendBreakGroups  = sendBreakGroups
+M.applyBreakGroups = applyBreakGroups
 M.sendControllerData  = sendControllerData
 
 return M

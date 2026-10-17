@@ -275,6 +275,9 @@ export default function (deps) {
     beammpNameTagFadeEnabled(values) {
         return values.nameTagFadeEnabled===true
     },
+    beammpRemoteVehicleCullingEnabled(values) {
+        return values.remoteVehicleCulling===true
+    },
   }
 
   return { setInitialValues, conditions, initialValues }

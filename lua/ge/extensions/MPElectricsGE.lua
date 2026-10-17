@@ -46,6 +46,7 @@ end
 -- @param data table The data to be applied as electrics
 -- @param serverVehicleID string The VehicleID according to the server.
 local function applyElectrics(data, serverVehicleID)
+	if MPVehiclePoolGE and MPVehiclePoolGE.intercept(serverVehicleID, "e", data) then return end
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
@@ -80,6 +81,7 @@ end
 M.tick 			 = tick
 M.handle     	 = handle
 M.sendElectrics  = sendElectrics
+M.applyElectrics = applyElectrics
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

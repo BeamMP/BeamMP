@@ -4641,6 +4641,60 @@
             "tooltip",
             "setting"
           ]
+        },
+        {
+          "version": "0.38",
+          "label": "ui.options.beammp.remoteVehicleCulling",
+          "tooltip": "ui.options.beammp.remoteVehicleCulling.tooltip",
+          "setting": "remoteVehicleCulling",
+          "interactive": true,
+          "condition_always_off": false,
+          "condition_not_shipping": false,
+          "condition_simplemenu": "",
+          "condition_visible": "",
+          "condition_enabled": "",
+          "itemType": "checkbox",
+          "component": "OptionsCheckbox",
+          "separateLabel": true,
+          "lua": "",
+          "luaOff": "",
+          "valueOn": true,
+          "valueOff": false,
+          "search": [
+            "label",
+            "caption",
+            "tooltip",
+            "setting"
+          ]
+        },
+        {
+          "version": "0.38",
+          "label": "ui.options.beammp.remoteVehicleCullDistance",
+          "tooltip": "ui.options.beammp.remoteVehicleCullDistance.tooltip",
+          "setting": "remoteVehicleCullDistance",
+          "interactive": true,
+          "condition_always_off": false,
+          "condition_not_shipping": false,
+          "condition_simplemenu": "",
+          "condition_visible": "",
+          "condition_enabled": "beammpRemoteVehicleCullingEnabled",
+          "itemType": "slider",
+          "component": "BngSlider",
+          "separateLabel": true,
+          "min": 50.0,
+          "max": 2000.0,
+          "step": 10.0,
+          "compact": false,
+          "valueMultiplier": 1,
+          "unit": "m",
+          "lua": "",
+          "basic_interaction": false,
+          "search": [
+            "label",
+            "caption",
+            "tooltip",
+            "setting"
+          ]
         }
       ],
       "reroute": "",

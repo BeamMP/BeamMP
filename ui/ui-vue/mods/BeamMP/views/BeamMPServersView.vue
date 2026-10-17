@@ -803,10 +803,19 @@ watch(
 watch(
   visibleServers,
   async () => {
+    const tbody = serversTbody.value
+    const savedScrollTop = tbody ? tbody.scrollTop : 0
+
     resetRenderedServers()
     await nextTick()
-    const tbody = serversTbody.value
-    if (tbody) tbody.scrollTop = 0
+
+    if (tbody) {
+      if (savedScrollTop === 0 && tbody.scrollTop === 0) {
+        tbody.scrollTop = 0
+      } else {
+        tbody.scrollTop = savedScrollTop
+      }
+    }
     ensureRenderedServersFillContainer()
   },
   { immediate: true },

@@ -275,13 +275,37 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;")
 }
 
+function isSafeServerHtml(html) {
+	const parser = new DOMParser()
+	const doc = parser.parseFromString(`<div>${html}</div>`, "text/html")
+	const blockedTags = new Set(["script", "iframe", "form", "input", "button", "a", "object", "embed"])
+	const elements = doc.body.querySelectorAll("*")
+
+	for (const element of elements) {
+		if (blockedTags.has(element.tagName.toLowerCase())) return false
+		for (const attr of element.attributes) {
+			if (/^(?:on.*|(?:form).*|action)$/i.test(attr.name)) return false
+			if (/javascript:|data:/i.test(attr.value)) return false
+		}
+	}
+	return true
+}
+
 function formatChatMessage(string) {
+
+	string = String(string ?? "");
+	if (string.startsWith("Server: ")) {
+			const messageContent = string.slice(8);
+			if (messageContent.includes("<") && messageContent.includes(">") && isSafeServerHtml(messageContent)) {
+					return `Server: ${messageContent}`;
+			}
+	}
 
     let result = '';
     let currentText = '';
     let classes = new Set();
 
-    string = escapeHtml(string);
+	string = escapeHtml(string);
     const tokens = string.split(/(\^.)/g);
 
     const flush = () => {

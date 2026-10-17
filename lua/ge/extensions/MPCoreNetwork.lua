@@ -655,10 +655,6 @@ local function onUpdate(dt)
 
 				local received = recvState.data
 
-				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
-					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-				end
-
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)
 				local data = string.sub(received, 2)

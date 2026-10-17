@@ -212,6 +212,8 @@ local vehiclesMap = {}
 -- @usage local distanceTo = distanceMap[11171]
 local distanceMap = {}
 
+local missingServerIDLogged = {} -- [gameVehicleID] = true, limits getServerVehicleID error spam
+
 -- decoded vehicle data of all players
 local players_vehicle_configs = {}
 
@@ -244,8 +246,12 @@ function getServerVehicleID(gameVehicleID)
 	end
 
 	if not vehiclesMap[gameVehicleID] or not vehicles[vehiclesMap[gameVehicleID]] then
-		log('E', 'getServerVehicleID', "can't get server id from " .. tostring(gameVehicleID))
-		log('M', 'getServerVehicleID', debug.traceback())
+		-- this is hit by every send path (up to 50 times a second) while a vehicle is waiting for its server id, so only log the traceback once per vehicle
+		if not missingServerIDLogged[gameVehicleID or "nil"] then
+			missingServerIDLogged[gameVehicleID or "nil"] = true
+			log('E', 'getServerVehicleID', "can't get server id from " .. tostring(gameVehicleID))
+			log('M', 'getServerVehicleID', debug.traceback())
+		end
 		return
 	end
 
@@ -1742,6 +1748,7 @@ end
 
 
 local function onVehicleDestroyed(gameVehicleID)
+	missingServerIDLogged[gameVehicleID] = nil
 	if MPGameNetwork.launcherConnected() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
@@ -2131,7 +2138,7 @@ local function onServerVehicleCoupled(serverVehicleID, data)
 	if not vehicle.isLocal then
 		local veh = getObjectByID(vehicle.gameVehicleID)
 		if veh then
-			veh:queueLuaCommand("couplerVE.toggleCouplerState(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+			veh:queueLuaCommand("if couplerVE then couplerVE.toggleCouplerState(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 		end
 	end
 end
@@ -2834,6 +2841,7 @@ local function onDisconnect()
 		vehicle:delete()
 	end
 	vehicles = {}
+	missingServerIDLogged = {}
 end
 
 local function onPlayerLeft(name)
@@ -2863,8 +2871,6 @@ local function onVehicleReady(gameVehicleID)
 	if vehiclesMap[gameVehicleID] then
 		veh:queueLuaCommand("MPVehicleVE.setServerID(mime.unb64(\'".. MPHelpers.b64encode(vehiclesMap[gameVehicleID]) .."\'))")
 	end
-
-	MPGameNetwork.onVehicleReady(gameVehicleID)
 end
 
 

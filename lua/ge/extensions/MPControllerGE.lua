@@ -37,7 +37,7 @@ local function applyControllerData(data, serverVehicleID)
 			decodedData.vehID = MPVehicleGE.getGameVehicleID(decodedData.vehID)
 		end
 		data = jsonEncode(decodedData)
-		veh:queueLuaCommand("controllerSyncVE.applyControllerData(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+		veh:queueLuaCommand("if controllerSyncVE then controllerSyncVE.applyControllerData(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 	end
 end
 

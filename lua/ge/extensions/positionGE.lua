@@ -13,6 +13,8 @@ local M = {}
 
 local targetGameSpeed = 1
 local actualSimSpeed = 1
+local PING_UPDATE_INTERVAL = 0.5 -- seconds, how often a spawned player's ping / fps is read from their position packets
+local pingTimer = 0
 
 --[[
 	["X-Y"] = table
@@ -77,8 +79,10 @@ local function applyPos(data, serverVehicleID)
 		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
 	end
 
+	vehicle.posPackets = (vehicle.posPackets or 0) + 1 -- counted for the fps, as not every packet is decoded
+
 	local owner = vehicle:getOwner()
-	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+	if owner and not owner.hasUpdatedPing or not veh then -- only update twice a second per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
 		local decoded = jsonDecode(data)
 		local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
 		vehicle.lastDt = decoded.tim
@@ -86,13 +90,14 @@ local function applyPos(data, serverVehicleID)
 		vehicle.position:set(decoded.pos[1],decoded.pos[2],decoded.pos[3])
 		vehicle.rotation:set(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
 
-		if owner and not owner.updatedPing then
+		if owner and not owner.hasUpdatedPing then -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
 			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
 			UI.setPlayerPing(owner.name, ping)
 			owner.ping = ping
-			owner.fps = 1/deltaDt
+			owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
+			owner.hasUpdatedPing = true
 		end-- Send ping to UI
-		owner.hasUpdatedPing = true
+		vehicle.posPackets = 0
 	end
 end
 
@@ -192,7 +197,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	be:queueAllObjectLua("positionVE.setPing("..p..")")
+	be:queueAllObjectLua("if positionVE then positionVE.setPing("..p..") end")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.
@@ -232,7 +237,7 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 
 	-- but since it doesn't do rotational velocity we still need to use VE
 	-- apparently GE to VE queues are really fast, so we don't need any extra prediction with this queue
-	veh:queueLuaCommand("velocityVE.setAngularVelocity("..vel.x..", "..vel.y..", "..vel.z..", "..rvel.x..", "..rvel.y..", "..rvel.z..","..onlyAngularVelocity..","..noCounterVelocity..")")
+	veh:queueLuaCommand("if velocityVE then velocityVE.setAngularVelocity("..vel.x..", "..vel.y..", "..vel.z..", "..rvel.x..", "..rvel.y..", "..rvel.z..","..onlyAngularVelocity..","..noCounterVelocity..") end")
 end
 
 --- This function is used for setting the simulation speed 
@@ -269,12 +274,17 @@ local function onUpdate(dtReal, dtSim, dtRaw)
 		setActualSimSpeed(dtSim/dtRaw)
 		local simSpeed = simTimeAuthority.getReal() * (simTimeAuthority.getPause() and 0 or 1)
 		if targetGameSpeed ~= simSpeed then
-			be:queueAllObjectLua("positionVE.setGameSpeed("..simSpeed..")")
+			be:queueAllObjectLua("if positionVE then positionVE.setGameSpeed("..simSpeed..") end")
 		end
 		targetGameSpeed = simSpeed
-		local players = getPlayers()
-		for k,player in pairs(players) do
-			player.hasUpdatedPing = false
+		-- the ping is only a number in the player list, it doesn't need a json decode per player every frame
+		pingTimer = pingTimer + dtReal
+		if pingTimer >= PING_UPDATE_INTERVAL then
+			pingTimer = 0
+			local players = getPlayers()
+			for k,player in pairs(players) do
+				player.hasUpdatedPing = false
+			end
 		end
 	end
 end

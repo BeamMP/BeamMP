@@ -31,12 +31,6 @@ local socketPartialData
 ]]
 local eventTriggers = {}
 
---keypress handling
-
-local keyStates = {} -- table of keys and their states, used as a reference
-local keysToPoll = {} -- list of keys we want to poll for state changes
-local keypressTriggers = {}
-
 -- ============= VARIABLES =============
 
 setmetatable(_G,{}) -- temporarily disable global notifications
@@ -409,32 +403,13 @@ function onKeyReleased(keyname, f)
 end
 
 --- Adds a key event listener for the specified key and function.
+--- The key shows up in Options > Controls > BeamMP with this as the default, so players can change it. See MPKeybindsGE.
 -- @tparam string keyname - The name of the key
 -- @tparam function f - The function to be called when the key event is triggered
 -- @tparam string type - The type of key event ('down', 'up', or 'both')
 -- @usage addKeyEventListener("NUMPAD1", `<function>`, "up")
 function addKeyEventListener(keyname, f, type)
-	f = f or function() end
-	log('W','addKeyEventListener', "Adding a key event listener for key '"..keyname.."'")
-	table.insert(keypressTriggers, {key = keyname, func = f, type = type or 'both'})
-	table.insert(keysToPoll, keyname)
-
-	be:queueAllObjectLua("if true then addKeyEventListener(".. serialize(keysToPoll) ..") end")
-end
-
---- Handles the state change of a key.
--- @tparam string key - The name of the key
--- @tparam boolean state - The state of the key ('true' for pressed, 'false' for released)
--- @usage INTERNAL ONLY / GAME SPECIFIC
-local function onKeyStateChanged(key, state)
-	keyStates[key] = state
-	--dump(keyStates)
-	--dump(keypressTriggers)
-	for i=1,#keypressTriggers do
-		if keypressTriggers[i].key == key and (keypressTriggers[i].type == 'both' or keypressTriggers[i].type == (state and 'down' or 'up')) then
-			keypressTriggers[i].func(state)
-		end
-	end
+	MPKeybindsGE.addKeyListener(keyname, f, type)
 end
 
 --- Returns the state of the specified key.
@@ -442,19 +417,7 @@ end
 -- @return boolean - The state of the key ('true' for pressed, 'false' for released)
 -- @usage local state = getKeyState('NUMPAD1')
 function getKeyState(key)
-	return keyStates[key] or false
-end
-
---- Handles the event when a vehicle is ready.
--- @tparam integer gameVehicleID - The ID of the game vehicle
--- @usage MPGameNetwork.onVehicleReady(`<game vehicle id>`)
-local function onVehicleReady(gameVehicleID)
-	local veh = getObjectByID(gameVehicleID)
-	if not veh then
-		log('R', 'onVehicleReady', 'Vehicle does not exist!')
-		return
-	end
-	veh:queueLuaCommand("addKeyEventListener(".. serialize(keysToPoll) ..")")
+	return MPKeybindsGE.getKeyState(key)
 end
 
 -------------------------------------------------------------------------------
@@ -585,7 +548,6 @@ end
 
 --events
 M.onUpdate = onUpdate
-M.onKeyStateChanged = onKeyStateChanged
 
 --functions
 M.launcherConnected   = isLauncherConnected
@@ -599,7 +561,6 @@ M.spawnUiDialog       = spawnUiDialog
 
 M.addKeyEventListener = addKeyEventListener -- takes: string keyName, function listenerFunction
 M.getKeyState         = getKeyState         -- takes: string keyName
-M.onVehicleReady      = onVehicleReady
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

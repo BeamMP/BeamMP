@@ -43,7 +43,7 @@ local function applyLivePowertrain(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("MPPowertrainVE.applyLivePowertrain(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+		veh:queueLuaCommand("if MPPowertrainVE then MPPowertrainVE.applyLivePowertrain(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 	end
 end
 
@@ -62,7 +62,7 @@ local function applyEngineData(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1 -- get gameID
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("MPPowertrainVE.applyEngineData(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+		veh:queueLuaCommand("if MPPowertrainVE then MPPowertrainVE.applyEngineData(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 	end
 end
 
@@ -81,7 +81,7 @@ local function applyHydroBeams(data, serverVehicleID)
 	local gameVehicleID = MPVehicleGE.getGameVehicleID(serverVehicleID) or -1
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
-		veh:queueLuaCommand("MPPowertrainHydrosVE.applyHydroBeams(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+		veh:queueLuaCommand("if MPPowertrainHydrosVE then MPPowertrainHydrosVE.applyHydroBeams(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 	end
 end
 

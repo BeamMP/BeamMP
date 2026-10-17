@@ -123,13 +123,13 @@
       </div>
 
       <aside ref="filtersRail" class="filters-rail" :style="filtersRailStyle">
-        <h2 class="rail-title">Search Filters</h2>
+        <h2 class="rail-title">{{ $tt("ui.beammp.serverBrowser.filters.filterOptions") }}</h2>
         <BngButton class="reset-button" :accent="!filtered ? 'secondary' : 'attention'" @click="resetFilters">
           {{ $tt("ui.beammp.serverBrowser.filters.resetFilters") }}
         </BngButton>
 
         <section class="filter-group">
-          <h3>Player Count</h3>
+          <h3>{{ $tt("ui.beammp.serverBrowser.filters.playerCount") }}</h3>
           
 
 
@@ -177,7 +177,7 @@
           </label>
 
           <label v-if="uiFilters.advancedPlayerCount" class="filter-field">
-            <span>Range Min</span>
+            <span>{{ $tt("ui.beammp.serverBrowser.filters.playerCountMin") }}</span>
             <input v-bng-text-input class="number-input" type="text" inputmode="numeric" pattern="[0-9]*"
               :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMin')" :value="playerCountDrafts.min"
               @input="event => updatePlayerCountDraft('min', event)" @blur="commitPlayerCount('min')"
@@ -185,7 +185,7 @@
               @keydown.esc.prevent="restorePlayerCountDraft('min')" />
           </label>
           <label v-if="uiFilters.advancedPlayerCount" class="filter-field">
-            <span>Range Max</span>
+            <span>{{ $tt("ui.beammp.serverBrowser.filters.playerCountMax") }}</span>
             <input v-bng-text-input class="number-input" type="text" inputmode="numeric" pattern="[0-9]*"
               :aria-label="$tt('ui.beammp.serverBrowser.filters.playerCountMax')" :value="playerCountDrafts.max"
               @input="event => updatePlayerCountDraft('max', event)" @blur="commitPlayerCount('max')"

@@ -402,9 +402,12 @@ onUnmounted(() => {
 	margin: 0;
 	padding: 0;
 	overflow-y: auto;
-	border: 2px solid rgba(175, 175, 175, 0.45);
-	border-radius: var(--bng-corners-2, 6px);
-	background: rgba(0, 0, 0, 0.25);
+	border: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+	border-top: 0.1875rem solid var(--bng-orange-500);
+	border-radius: var(--bng-corners-2, 0.375rem);
+	background: rgba(var(--bng-cool-gray-900-rgb), 0.88);
+	box-shadow: 0 0.1875rem 0.75rem rgba(var(--bng-off-black-rgb), 0.28);
+	backdrop-filter: blur(0.75rem);
 }
 
 .ui-style-redesigned .plist-container,
@@ -412,9 +415,9 @@ onUnmounted(() => {
 	border-color: rgba(var(--bng-cool-gray-100-rgb), 0.24);
 	background: rgba(var(--bng-cool-gray-900-rgb), 0.34);
 	box-shadow:
-		0 3px 12px rgba(var(--bng-off-black-rgb), 0.2),
-		inset 0 0 0 1px rgba(var(--bng-off-white-rgb), 0.04);
-	backdrop-filter: blur(10px) saturate(115%);
+		0 0.1875rem 0.75rem rgba(var(--bng-off-black-rgb), 0.2),
+		inset 0 0 0 0.0625rem rgba(var(--bng-off-white-rgb), 0.04);
+	backdrop-filter: blur(0.625rem) saturate(115%);
 }
 
 .players-table {
@@ -428,7 +431,7 @@ onUnmounted(() => {
 }
 
 .players-table tr:first-child {
-	height: 34px;
+	min-height: 2.125rem;
 	background: rgba(var(--bng-cool-gray-700-rgb), 0.58);
 }
 
@@ -437,30 +440,34 @@ onUnmounted(() => {
 }
 
 .players-table th {
-	height: 34px;
-	padding: 0 7px;
+	min-height: 2.125rem;
+	padding: 0 0.4375rem;
 	border: 0;
-	border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
+	border-bottom: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.24);
 	color: var(--bng-cool-gray-100);
 	text-align: left;
 	text-transform: uppercase;
+	line-height: 2.125rem;
+	box-sizing: border-box;
 }
 
 .players-table td {
-	height: 34px;
+	min-height: 2.125rem;
 	max-width: 0;
-	padding: 0 7px;
+	padding: 0 0.4375rem;
 	overflow: hidden;
-	border: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
-	border-bottom: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.14);
+	border: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
+	border-bottom: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.14);
 	color: var(--bng-off-white);
 	text-overflow: ellipsis;
 	text-shadow: none;
 	white-space: nowrap;
+	line-height: 2.125rem;
+	box-sizing: border-box;
 }
 
 .table-cell {
-	border-right: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
+	border-right: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.3);
 }
 
 .table-cell:last-child {
@@ -470,7 +477,7 @@ onUnmounted(() => {
 .ui-style-redesigned .players-table th,
 .ui-style-redesigned .players-table td,
 .ui-style-redesigned .show-button {
-	text-shadow: 0 1px 2px rgba(var(--bng-off-black-rgb), 0.95);
+	text-shadow: 0 0.0625rem 0.125rem rgba(var(--bng-off-black-rgb), 0.95);
 }
 
 .players-table tr:not(:first-child) {
@@ -482,11 +489,9 @@ onUnmounted(() => {
 	background: rgba(var(--bng-cool-gray-700-rgb), 0.5);
 }
 
-
-
 .players-table tr.queued {
 	background: rgba(var(--bng-orange-500-rgb), 0.18);
-	border-left: 3px solid var(--bng-orange-500);
+	border-left: 0.1875rem solid var(--bng-orange-500);
 }
 
 .player-id {
@@ -506,35 +511,35 @@ onUnmounted(() => {
 }
 
 .playerslist-col-1 {
-	width: 32px;
+	width: 2rem;
 }
 
 .playerslist-col-2 {
 	width: auto;
-	min-width: 100px;
+	min-width: 6.25rem;
 }
 
 .playerslist-col-3 {
-	width: 64px;
+	width: 4rem;
 	padding: 0 !important;
 	text-align: right !important;
 }
 
 .player-count-badge {
 	display: inline-flex;
-	min-width: 17px;
-	height: 17px;
-	margin-left: 5px;
-	padding: 0 3px;
 	align-items: center;
 	justify-content: center;
-	border-radius: 9px;
+	min-width: 1.0625rem;
+	height: 1.0625rem;
+	margin-left: 0.3125rem;
+	padding: 0 0.1875rem;
+	border-radius: 0.5625rem;
 	background: var(--bng-orange-500);
 	color: var(--bng-off-white);
 	font-size: 0.75rem;
-	font-weight: 700;
-	box-shadow: 0 2px 8px rgba(var(--bng-orange-500-rgb), 0.5);
-	border: 2px solid rgba(255, 255, 255, 0.2);
+	line-height: 1;
+	vertical-align: middle;
+	box-sizing: border-box;
 }
 
 .buttons {
@@ -551,66 +556,79 @@ onUnmounted(() => {
 }
 
 .direction-buttons {
-	width: 30px;
-	height: 34px;
+	width: 1.875rem;
+	min-height: 2.125rem;
 	padding: 0;
-	font-size: 15px;
+	font-size: 0.9375rem;
+	line-height: 2.125rem;
+	box-sizing: border-box;
 }
 
 .tp-button {
 	width: 100%;
-	min-height: 34px;
-	padding: 0 5px;
+	min-height: 2.125rem;
+	padding: 0 0.3125rem;
 	color: var(--bng-cool-gray-300);
 	font-variant-numeric: tabular-nums;
+	line-height: 2.125rem;
+	box-sizing: border-box;
 }
 
 .show-button {
-	width: 25px;
-	height: 75px;
-	margin: 0;
+	width: 1.75rem;
+	min-height: 4.6875rem;
+	margin: 0 0 0 0.25rem;
 	padding: 0;
 	align-self: flex-start;
-	border: 2px solid rgba(175, 175, 175, 0.45);
-	border-radius: var(--bng-corners-2, 6px);
-	background: rgba(0, 0, 0, 0.25);
-	font-size: 17px;
+	border: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+	border-left: 0.1875rem solid var(--bng-orange-500);
+	border-radius: var(--bng-corners-2, 0.375rem);
+	background: rgba(var(--bng-cool-gray-900-rgb), 0.88);
+	box-shadow: 0 0.1875rem 0.75rem rgba(var(--bng-off-black-rgb), 0.28);
+	backdrop-filter: blur(0.75rem);
+	font-size: 1.0625rem;
 	font-weight: 700;
+	box-sizing: border-box;
 }
 
 .playerlist-contextmenu {
 	position: fixed;
 	z-index: 1000;
-	max-width: 210px;
-	padding: 6px;
-	border: 1px solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
-	border-radius: var(--bng-corners-2, 6px);
-	background: rgba(51, 51, 51, 0.95);
-	box-shadow: 0 5px 18px rgba(var(--bng-off-black-rgb), 0.4);
+	max-width: 13.125rem;
+	padding: 0.375rem;
+	border: 0.0625rem solid rgba(var(--bng-cool-gray-300-rgb), 0.34);
+	border-radius: var(--bng-corners-2, 0.375rem);
+	background: rgba(var(--bng-cool-gray-900-rgb), 0.96);
+	box-shadow: 0 0.3125rem 1.125rem rgba(var(--bng-off-black-rgb), 0.4);
+	box-sizing: border-box;
 }
 
 .playerlist-contextmenu > button {
 	width: 100%;
-	margin: 0 0 3px;
-	padding: 7px 9px;
+	min-height: 1.875rem;
+	margin: 0 0 0.1875rem;
+	padding: 0.4375rem 0.5625rem;
 	border: 0;
-	border-radius: var(--bng-corners-1, 3px);
-	background: rgba(68, 68, 68, 0.8);
+	border-radius: var(--bng-corners-1, 0.1875rem);
+	background: rgba(var(--bng-cool-gray-700-rgb), 0.72);
 	color: var(--bng-off-white);
 	text-align: left;
 	cursor: pointer;
+	line-height: 1.25;
+	white-space: normal;
+	box-sizing: border-box;
 }
 
 .playerlist-contextmenu > button:hover {
-	background: rgba(68, 68, 68, 0.9);
+	background: rgba(var(--bng-orange-500-rgb), 0.32);
 }
 
 .plist-container::-webkit-scrollbar {
-	width: 4px;
+	width: 0.25rem;
 }
 
 .plist-container::-webkit-scrollbar-thumb {
-	border-radius: 2px;
+	border-radius: 0.125rem;
 	background: rgba(var(--bng-cool-gray-300-rgb), 0.5);
 }
 </style>

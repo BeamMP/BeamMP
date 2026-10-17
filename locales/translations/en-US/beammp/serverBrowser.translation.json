@@ -14,6 +14,7 @@
     "ui.beammp.serverBrowser.modSecurityWarning.prompt": "The server you're joining has mods, which are downloaded and installed automatically. These mods can contain code which will run on your PC, and could be malicious. Please make sure you trust the server owner(s) before continuing. If you trust that the mods are not malicious, you can continue at your own risk. BeamMP is not responsible for any content downloaded from this server. This warning can be disabled in the settings.",
     "ui.beammp.serverBrowser.filters.filterOptions": "Search Filters",
     "ui.beammp.serverBrowser.filters.resetFilters": "Reset Filters",
+    "ui.beammp.serverBrowser.filters.playerCount": "Player Count",
     "ui.beammp.serverBrowser.filters.playerCountMin": "Minimum player count",
     "ui.beammp.serverBrowser.filters.playerCountMax": "Maximum player count",
     "ui.beammp.serverBrowser.filters.activeFilters": "Active Filters: ",

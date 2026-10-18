@@ -363,8 +363,7 @@ function applyFilters(items, view) {
 
 function readServerList(data) {
   const list = Array.isArray(data) ? data : []
-  const newServers = list.map((server, index) => normalizeServer(server, index))
-  state.servers.value = [...newServers]
+  state.servers.value = list.map((server, index) => normalizeServer(server, index))
   if (state.selectedServerId.value) {
     const exists = state.servers.value.some(server => server.id === state.selectedServerId.value)
     if (!exists) state.selectedServerId.value = ""
@@ -433,6 +432,7 @@ function addFavorite(server) {
     tags: server.tags,
     addTime: Date.now(),
     custom: Boolean(server.custom),
+    favoriteName: String(server.favoriteName || "").trim(),
   }]
   saveFavorites()
 }
@@ -706,6 +706,7 @@ const visibleServers = computed(() => {
         return normalizeServer({
           ...favorite,
           ...(liveServer || {}),
+          ...(favorite.favoriteName ? { sname: favorite.favoriteName } : {}),
         })
       })
     : state.view.value === "recent"

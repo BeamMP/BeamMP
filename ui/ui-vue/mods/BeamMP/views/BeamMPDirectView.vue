@@ -37,6 +37,19 @@
         </label>
       </div>
 
+      <label class="field">
+        <span>{{ $tt("ui.beammp.serverBrowser.favoriteName") }}</span>
+        <div class="input-shell">
+          <BngInput
+            v-model.trim="favoriteName"
+            class="direct-input"
+            type="text"
+            :placeholder="$tt('ui.beammp.serverBrowser.favoriteNamePlaceholder')"
+            :show-external-button="false"
+          />
+        </div>
+      </label>
+
       <div class="actions">
         <BngButton accent="secondary" @click="pasteFromClipboard">{{ $tt("ui.common.beammp.pasteFromClipboard") }}</BngButton>
         <BngButton @click="connect">{{ $tt("ui.common.beammp.connect") }}</BngButton>
@@ -53,6 +66,7 @@ import { useBeamMPState } from "../shared/beammpState.js"
 
 const ip = ref("")
 const port = ref("")
+const favoriteName = ref("")
 const { addFavorite, connectToServer, directConnectFromClipboard } = useBeamMPState()
 
 async function pasteFromClipboard() {
@@ -70,12 +84,15 @@ async function connect() {
 async function favorite() {
  let ipFav = ip.value || "127.0.0.1"
  let portFav = port.value || "30814"
+  const name = favoriteName.value.trim()
+  const displayName = name || new Date().toLocaleString()
   bngVue.toastr.success(`Adding ${ipFav}:${portFav} to favorites`, "BeamMP")
   addFavorite({
     ip: ipFav,
     port: portFav,
-    sname: new Date().toLocaleString(),
-    strippedName: new Date().toLocaleString(),
+    sname: displayName,
+    strippedName: displayName,
+    favoriteName: name,
     custom: true,
     tags: "",
     map: "",

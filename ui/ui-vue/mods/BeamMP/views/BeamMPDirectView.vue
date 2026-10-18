@@ -78,7 +78,7 @@ async function pasteFromClipboard() {
 }
 
 async function connect() {
-  await connectToServer(ip.value || "127.0.0.1", port.value || "30814")
+  await connectToServer(ip.value || "127.0.0.1", port.value || "30814", favoriteName.value.trim())
 }
 
 async function favorite() {

@@ -30,7 +30,7 @@
   "ui.beammp.patreon.popup.user": "在Patreon上支持BeamMP",
   "ui.beammp.patreon.popup.ea": "感谢您对BeamMP的支持喵！",
   "ui.beammp.pauseMenu.disconnectConfirmation": "这将断开您与服务器的连接，并返回主菜单。是否继续？",
-  "ui.beammp.queuedEvents": "有: {{count}} 个车辆更新正在等待。\n请选择 BeamMP 会话栏中的“事件队列”以应用这些更新。",
+  "ui.beammp.queuedEvents": "待应用车辆更新：{{count}} 项。\n请点击会话栏中的“事件队列”应用更新。",
   "ui.beammp.mdDialog.disconnectGeneric": "您已与服务器断开连接。",
   "ui.beammp.mdDialog.continueOffline": "继续离线模式",
   "ui.beammp.mdDialog.returnToMenu": "返回至菜单",

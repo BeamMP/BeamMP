@@ -4,11 +4,37 @@
       <div class="server-pane">
         <header class="toolbar">
           <div class="toolbar-main">
-            <BngInput class="search-input" :model-value="uiFilters.searchText"
-              :placeholder="$tt('ui.common.beammp.searchPlaceholder')" @update:model-value="onSearch" />
-            <BngButton class="refresh-btn" @click="requestServerList">{{ $tt("ui.common.beammp.refresh") }}</BngButton>
-            <BngButton v-if="state.view.value === 'recent'" class="clear-recents-btn" accent="secondary"
+            <div class="search-field">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.3" stroke="currentColor" stroke-width="1.8" />
+                <path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              <input v-bng-text-input class="search-input" type="search" :value="uiFilters.searchText"
+                :placeholder="$tt('ui.common.beammp.searchPlaceholder')"
+                :aria-label="$tt('ui.common.beammp.searchPlaceholder')"
+                @input="onSearch($event.target.value)" />
+            </div>
+            <BngButton class="clear-search-btn" accent="secondary"
+              :aria-label="$tt('ui.common.beammp.clearSearch')"
+              @click="onSearch('')">
+              <svg class="clear-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m7 7 10 10M17 7 7 17" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" />
+              </svg>
+            </BngButton>
+            <BngButton class="refresh-btn" @click="requestServerList">
+              <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 7v5h-5M4.9 9a7 7 0 0 1 11.6-2.6L20 12M4 17v-5h5m10.1 3a7 7 0 0 1-11.6 2.6L4 12"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {{ $tt("ui.common.beammp.refresh") }}
+            </BngButton>
+            <BngButton v-if="state.view.value === 'recent'" class="refresh-btn clear-recents-btn"
               @click="clearRecents">
+              <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
               {{ $tt("ui.beammp.serverBrowser.clearRecent") }}
             </BngButton>
           </div>
@@ -26,6 +52,14 @@
             </tr>
           </thead>
           <tbody ref="serversTbody" @scroll.passive="onServersScroll">
+            <tr v-if="state.view.value === 'recent' && state.recents.value.length === 0" class="recent-empty-row">
+              <td colspan="4">
+                <section class="recent-empty-state" role="status">
+                  <img src="/ui/assets/BeamMP/beammp_new_cropped.png" alt="BeamMP" />
+                  <p>{{ $tt("ui.beammp.serverBrowser.recentEmptyDescription") }}</p>
+                </section>
+              </td>
+            </tr>
             <template v-for="server in renderedServers" :key="server.id">
               <tr class="server-row"
                 :class="[serverCategoryClass(server), { selected: state.selectedServerId.value === server.id }]"
@@ -217,7 +251,27 @@
         </section>
 
         <section class="filter-group">
-          <h3>{{ $tt("ui.common.beammp.tags") }}</h3>
+          <h3>
+            <span>{{ $tt("ui.common.beammp.tags") }}</span>
+            <span class="filter-mode">
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: !uiFilters.excludeSelectedTags }"
+                type="button"
+                :aria-pressed="!uiFilters.excludeSelectedTags"
+                @click="setSelectionFilterMode('excludeSelectedTags', false)">
+                {{ $tt("ui.beammp.serverBrowser.filters.include") }}
+              </button>
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: uiFilters.excludeSelectedTags }"
+                type="button"
+                :aria-pressed="uiFilters.excludeSelectedTags"
+                @click="setSelectionFilterMode('excludeSelectedTags', true)">
+                {{ $tt("ui.beammp.serverBrowser.filters.exclude") }}
+              </button>
+            </span>
+          </h3>
           <div class="filter-options">
             <button v-for="tag in availableTags" :key="tag.raw" class="filter-option"
               :class="{ active: tagSelected(tag) }" @click="toggleTag(tag)">
@@ -238,7 +292,27 @@
         </section>
 
         <section class="filter-group">
-          <h3>{{ $tt("ui.beammp.serverBrowser.filters.selectServerLocations") }}</h3>
+          <h3>
+            <span>{{ $tt("ui.beammp.serverBrowser.filters.selectServerLocations") }}</span>
+            <span class="filter-mode">
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: !uiFilters.excludeSelectedServerLocations }"
+                type="button"
+                :aria-pressed="!uiFilters.excludeSelectedServerLocations"
+                @click="setSelectionFilterMode('excludeSelectedServerLocations', false)">
+                {{ $tt("ui.beammp.serverBrowser.filters.include") }}
+              </button>
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: uiFilters.excludeSelectedServerLocations }"
+                type="button"
+                :aria-pressed="uiFilters.excludeSelectedServerLocations"
+                @click="setSelectionFilterMode('excludeSelectedServerLocations', true)">
+                {{ $tt("ui.beammp.serverBrowser.filters.exclude") }}
+              </button>
+            </span>
+          </h3>
           <div class="filter-options">
             <button v-for="location in availableLocations" :key="location" class="filter-option filter-option--location"
               :class="{ active: simpleFilterSelected('selectedServerLocations', location) }"
@@ -250,7 +324,27 @@
         </section>
 
         <section class="filter-group">
-          <h3>{{ $tt("ui.common.beammp.maps") }}</h3>
+          <h3>
+            <span>{{ $tt("ui.common.beammp.maps") }}</span>
+            <span class="filter-mode">
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: !uiFilters.excludeSelectedMaps }"
+                type="button"
+                :aria-pressed="!uiFilters.excludeSelectedMaps"
+                @click="setSelectionFilterMode('excludeSelectedMaps', false)">
+                {{ $tt("ui.beammp.serverBrowser.filters.include") }}
+              </button>
+              <button
+                class="filter-option filter-mode__option"
+                :class="{ active: uiFilters.excludeSelectedMaps }"
+                type="button"
+                :aria-pressed="uiFilters.excludeSelectedMaps"
+                @click="setSelectionFilterMode('excludeSelectedMaps', true)">
+                {{ $tt("ui.beammp.serverBrowser.filters.exclude") }}
+              </button>
+            </span>
+          </h3>
           <div class="filter-options">
             <button v-for="map in availableMaps" :key="map" class="filter-option"
               :class="{ active: simpleFilterSelected('selectedMaps', map) }"
@@ -269,7 +363,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useRoute } from "vue-router"
-import { BngButton, BngInput } from "@/common/components/base"
+import { BngButton } from "@/common/components/base"
 import { vBngTextInput } from "@/common/directives"
 import { useBeamMPState } from "../shared/beammpState.js"
 import { icons as bngIcons } from "/ui/ui-vue/src/assets/fonts/bngIcons/bngIcons.js"
@@ -513,6 +607,15 @@ function toggleSimpleFilter(key, value) {
   queueFilterUpdate()
 }
 
+function setSelectionFilterMode(key, exclude) {
+  if (uiFilters.value[key] === exclude) return
+  uiFilters.value = {
+    ...uiFilters.value,
+    [key]: exclude,
+  }
+  queueFilterUpdate()
+}
+
 function tagSelected(tag) {
   return (uiFilters.value.selectedTags || []).some(selected => String(selected.raw || selected) === tag.raw)
 }
@@ -580,7 +683,10 @@ function normalizeFilters(filters = {}) {
         .map(tag => (typeof tag === "string" ? tag : String(tag?.raw || "")))
         .filter(Boolean)
       : [],
+    excludeSelectedTags: Boolean(source.excludeSelectedTags),
     selectedServerLocations: Array.isArray(source.selectedServerLocations) ? [...source.selectedServerLocations] : [],
+    excludeSelectedServerLocations: Boolean(source.excludeSelectedServerLocations),
+    excludeSelectedMaps: Boolean(source.excludeSelectedMaps),
     matchAll: Boolean(source.matchAll),
     emptyOnly: Boolean(source.emptyOnly),
     notFull: Boolean(source.notFull),
@@ -896,19 +1002,112 @@ onBeforeUnmount(() => {
 .toolbar-main {
   display: flex;
   min-width: 0;
-  gap: 0.5rem;
+  gap: 0.65rem;
   align-items: center;
   flex-wrap: nowrap;
 }
 
-.search-input {
+.search-field {
+  position: relative;
   flex: 1 1 22rem;
   min-width: 12rem;
-  text-align: center;
+}
+
+.search-icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.85rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  color: rgba(220, 226, 232, 0.58);
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: color 150ms ease;
+}
+
+.search-field:focus-within .search-icon {
+  color: var(--bng-orange-400);
+}
+
+.search-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 2.55rem;
+  padding-left: 2.55rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--bng-corners-1);
+  color: var(--bng-off-white);
+  background: rgba(17, 21, 27, 0.76);
+  text-align: left;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
 }
 
 .search-input::placeholder {
-  text-align: center;
+  color: rgba(220, 226, 232, 0.56);
+  text-align: left;
+}
+
+.search-input:focus {
+  border-color: rgba(var(--bng-orange-500-rgb), 0.8);
+  background: rgba(17, 21, 27, 0.94);
+  box-shadow: 0 0 0 2px rgba(var(--bng-orange-500-rgb), 0.16);
+}
+
+.search-input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.clear-search-btn {
+  display: inline-flex;
+  width: 2.55rem;
+  min-width: 2.55rem;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  --bng-bg-enabled: var(--bng-add-red-600);
+  --bng-bg-hover: var(--bng-add-red-500);
+  --bng-bg-active: var(--bng-add-red-700);
+  --bng-bg-border-enabled: transparent;
+  --bng-bg-border-hover: transparent;
+  --bng-bg-border-active: transparent;
+  --bng-text-enabled: white;
+  --bng-text-hover: white;
+  --bng-text-active: white;
+  --bng-bg-enabled-opacity: 1;
+  --bng-bg-hover-opacity: 1;
+  color: white !important;
+}
+
+.clear-search-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding-inline: 1rem;
+  font-weight: 600;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.refresh-btn:hover {
+  filter: brightness(1.08);
+}
+
+.refresh-btn:active {
+  transform: translateY(1px);
+}
+
+.refresh-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .refresh-btn,
@@ -989,6 +1188,10 @@ onBeforeUnmount(() => {
   padding-top: 0.2rem;
 
   h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
     position: relative;
     margin: 0 0 0.45rem;
     padding-left: 0.8rem;
@@ -1007,6 +1210,18 @@ onBeforeUnmount(() => {
       transform: skew(-12deg);
     }
   }
+}
+
+.filter-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.filter-mode__option {
+  padding: 0.16rem 0.32rem;
+  font-size: 0.62rem;
+  white-space: nowrap;
 }
 
 .filter-options {
@@ -1223,6 +1438,48 @@ onBeforeUnmount(() => {
   thead th {
     text-align: center;
   }
+}
+
+.recent-empty-row {
+  display: flex !important;
+  width: 100%;
+  height: 100%;
+  min-height: 20rem;
+  table-layout: auto !important;
+}
+
+.recent-empty-row td {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem !important;
+  border: 0;
+  text-align: center !important;
+}
+
+.recent-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.recent-empty-state img {
+  display: block;
+  width: min(9rem, 45vw);
+  height: auto;
+  object-fit: contain;
+}
+
+.recent-empty-state p {
+  margin: 0;
+  color: var(--bng-cool-gray-100);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .server-row {

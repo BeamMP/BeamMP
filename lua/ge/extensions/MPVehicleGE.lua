@@ -38,12 +38,14 @@ local oneSecCounter = 0
 local nicknamesAllowed = true
 local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
+local spawningRemote = false -- while spawn.spawnVehicle runs for a remote vehicle, its onVehicleSpawned comes before it's in vehiclesMap
 local editSyncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
 local sentPastVehiclesYet = true
 local queueApplyTimer = 0
 local queueWaiting = false
+local queueToApply = {} -- serverVehicleIDs to apply from the queue, one per frame so a full queue isn't one long freeze
 local isAtSyncSpeed = true
 local hideNicknamesToggle = false
 
@@ -808,15 +810,25 @@ local vehicleSimplifiers = {
 		vehicleConfig.mainPartName = newModel
 		return newModel
 	end,
-	sunburst = function(vehicleConfig)
+	sunburst2 = function(vehicleConfig) -- the sunburst was replaced by the sunburst2, the old simple_traffic_sunburst parts are gone too
 		local parts = vehicleConfig.parts
 		local newModel = "simple_traffic"
+		local isWagon = parts.sunburst2_body == "sunburst2_body_wagon"
+		local body = isWagon and "wagon" or "sedan"
 
-		parts.simple_traffic_model = "simple_traffic_sunburst"
-		parts.simple_traffic_sunburst_bumper_F = parts.sunburst_bumper_F == "" and "" or nil
-		parts.simple_traffic_sunburst_bumper_R = parts.sunburst_bumper_R == "" and "" or nil
-		parts.simple_traffic_sunburst_hood = parts.sunburst_hood == "" and "" or nil
-		parts.simple_traffic_sunburst_trunk = parts.sunburst_trunk == "" and "" or nil
+		-- the simple traffic trims are standard, sport (scooped hood / spoiler), wide and aero (wide with a spoiler)
+		local fender = parts.sunburst2_fender_L or ""
+		local spoiler = parts["sunburst2_spoiler_" .. body] or ""
+		local isWide = string.find(fender, "_wide") ~= nil or string.find(fender, "_cut") ~= nil
+		local isSport = spoiler ~= "" or string.find(parts.sunburst2_hood or "", "_scooped") ~= nil
+		local trim = isWide and (spoiler ~= "" and "aero" or "wide") or (isSport and "sport" or "standard")
+
+		parts.simple_traffic_model = isWagon and "simple_traffic_sunburst2_wagon" or "simple_traffic_sunburst2"
+		parts["simple_traffic_sunburst2_trim_" .. body] = "simple_traffic_sunburst2_trim_" .. body .. "_" .. trim
+		parts.simple_traffic_sunburst2_bumper_F = parts.sunburst2_bumper_F == "" and "" or nil
+		parts.simple_traffic_sunburst2_bumper_R = parts.sunburst2_bumper_R == "" and "" or nil
+		parts.simple_traffic_sunburst2_hood = parts.sunburst2_hood == "" and "" or nil
+		parts.simple_traffic_sunburst2_trunk = parts[isWagon and "sunburst2_tailgate_wagon" or "sunburst2_trunk_sedan"] == "" and "" or nil
 
 		vehicleConfig.model = newModel
 		vehicleConfig.mainPartName = newModel
@@ -1534,7 +1546,9 @@ local function applyVehSpawn(event)
 		spawnedVeh:setField("absMode", 0, absMode or "")
 	else
 		log('W', 'applyVehSpawn', "Spawning new vehicle "..vehicleName.." from server")
+		spawningRemote = true
 		spawnedVeh = spawn.spawnVehicle(vehicleName, serialize(vehicleConfig), pos, rot, { autoEnterVehicle=false, vehicleName="multiplayerVehicle", cling=true, centeredPosition = true, removeWhenNoPositionFound = false})
+		spawningRemote = false
 		spawnedVehID = spawnedVeh:getID()
 		spawnedVeh:setField("protected", 0, protected or "0")
 		spawnedVeh:setField("absMode", 0, absMode or "")
@@ -2022,10 +2036,11 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 			UI.updateQueue(getQueueCounts())
 			UI.showNotification('Spawn received and queued for '..playerNickname, ''..playerNickname..''..serverVehicleID..'spawn', icon)
 		else
-			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle now")
+			log("I", "onServerVehicleSpawned", "Queue disabled, spawning vehicle next frame")
 
-			applyVehSpawn(eventdata)
-			UI.updateQueue(0, 0)
+			-- still one per frame, joining a full server sends every vehicle at once
+			vehicles[serverVehicleID].spawnQueue = eventdata
+			table.insert(queueToApply, serverVehicleID)
 		end
 	end
 end
@@ -2508,16 +2523,12 @@ local function applyVehicleQueues(serverVehicleID, vehicle)
 	end
 end
 
+-- the vehicles queued now are applied one per frame in onPreRender, anything queued after this waits for the next apply
 local function applyQueuedEvents()
-	local queueChanged = false
 	for serverVehicleID, vehicle in pairs(vehicles) do
 		if vehicle.spawnQueue or vehicle.editQueue then
-			applyVehicleQueues(serverVehicleID, vehicle)
-			queueChanged = true
+			table.insert(queueToApply, serverVehicleID)
 		end
-	end
-	if queueChanged then
-		UI.updateQueue(getQueueCounts())
 	end
 	queueWaiting = false
 	--if currentVeh then be:enterVehicle(0, currentVeh) print("entered "..currentVeh:getJBeamFilename()) end -- Camera fix
@@ -2596,7 +2607,14 @@ local function onPreRender(dt)
 			groundMarkers(dt)
 		end
 
-		-- apply queue
+		-- apply queue, one vehicle per frame
+		local queuedVehicleID = table.remove(queueToApply, 1)
+		local queuedVehicle = queuedVehicleID and vehicles[queuedVehicleID]
+		if queuedVehicle and (queuedVehicle.spawnQueue or queuedVehicle.editQueue) then
+			applyVehicleQueues(queuedVehicleID, queuedVehicle)
+			UI.updateQueue(getQueueCounts())
+		end
+
 		if queueWaiting then
 			if activeVeh then
 				if settings.getValue("queueAutoSkipRemote") and not isOwn(activeVehID) then applyQueuedEvents() end
@@ -2832,6 +2850,7 @@ local function sendPastVehicles()
 end
 
 local function onDisconnect()
+	queueToApply = {}
 	for playerID, player in pairs(players) do
 		player:delete()
 	end
@@ -2881,6 +2900,29 @@ local function onUIInitialised()
 	extensions.core_vehicle_partmgmt.savedefault = core_vehicle_partmgmnt_savedefault_overwrite
 	extensions.gameplay_garageMode.start = gameplay_garageMode_start_overwrite
 	UI.updateQueue(getQueueCounts())
+end
+
+--- Returns true if the vehicle is another player's, including while it's being spawned.
+-- @tparam number gameVehicleID
+-- @treturn boolean
+local function isRemote(gameVehicleID)
+	if spawningRemote then return true end
+	local vehicle = getVehicleByGameID(gameVehicleID)
+	return vehicle ~= nil and not vehicle.isLocal
+end
+
+-- the game reloads your input bindings from disk on every vehicle spawn, other players' vehicles (and their edits)
+-- don't change your bindings
+local function skipRemoteBindingsReload()
+	local bindings = core_input_bindings
+	if not bindings or not bindings.onVehicleSpawned or bindings.beammpSkipsRemote then return end
+	local onVehicleSpawned = bindings.onVehicleSpawned
+	bindings.onVehicleSpawned = function(gameVehicleID, ...)
+		if MPCoreNetwork.isMPSession() and MPVehicleGE.isRemote(gameVehicleID) then return end
+		return onVehicleSpawned(gameVehicleID, ...)
+	end
+	bindings.beammpSkipsRemote = true
+	extensions.hookUpdate("onVehicleSpawned")
 end
 
 local function onExtensionLoaded()
@@ -2958,6 +3000,7 @@ M.getVehicleByGameID       = getVehicleByGameID       -- takes: number gameID, r
 M.getVehicleByServerID     = getVehicleByServerID     -- takes: string serverVehicleID, returns Vehicle
 M.getPlayerByName          = getPlayerByName          -- takes: string name, returns Player
 M.isOwn                    = isOwn                    -- takes: number vehID  returns: bool
+M.isRemote                 = isRemote                 -- takes: number gameVehicleID  returns: bool
 M.getOwnMap                = getOwnMap                -- takes: -      returns: { 'vehid' : true, '23456' : true }
 M.setOwn                   = setOwn                   -- takes: number vehID, bool own
 M.getDistanceMap           = getDistanceMap           -- takes: -      returns: { vehid : distanceinmeters, 123: 56 }
@@ -2991,7 +3034,7 @@ M.onVehicleReady           = onVehicleReady           -- Called when our VE file
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.getRoleInfoTable         = getRoleInfoTable
 M.sendPendingVehicleEdits  = sendPendingVehicleEdits  -- takes: -
-M.onInit = function() setExtensionUnloadMode(M, "manual") end
+M.onInit = function() setExtensionUnloadMode(M, "manual") skipRemoteBindingsReload() end
 
 local function depricationWarning(oldFnName, replacementName)
 	local msg = "Deprecated function! Please update your code to use " .. tostring(replacementName)

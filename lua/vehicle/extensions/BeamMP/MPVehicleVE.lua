@@ -48,8 +48,51 @@ function getKeyState(key)
 end
 
 
+local remoteDisabled = false
+local remoteEngines = {} -- combustion engines, a reset puts their failure limits back
+
+-- the engine's random over-rev / over-torque failures, the owner's gear can arrive a moment late and lock up our copy
+-- of their engine while theirs is fine
+local function disableEngineFailures()
+	for _, engine in ipairs(remoteEngines) do
+		if engine.maxPhysicalAV ~= math.huge then
+			engine.maxPhysicalAV = math.huge
+			engine.maxTorqueRating = 0
+		end
+	end
+end
+
+-- things the game does for every vehicle that only make sense for your own, turned off on other players' vehicles
+local function disableForRemote()
+	if remoteDisabled then return end
+	remoteDisabled = true
+
+	-- the burnout and odometer stats only check that the AI is off, not that you're in the vehicle, so other players'
+	-- burnouts and distance were added to your own stats. The odometer still counts, part wear uses it
+	local stats = extensions.gameplayStatistic
+	if stats then
+		stats.metricAdd = nop
+		stats.metricSet = nop
+		stats.updateGFX = nil
+		extensions.hookUpdate("updateGFX")
+	end
+	-- recovery points, you can't recover another player's vehicle and their resets come from the server
+	recovery.updateGFX = nop
+
+	-- UI messages, the stalled engine one has no check for who's in the vehicle and is sent every frame while it's stalled
+	local trigger = guihooks.trigger
+	guihooks.trigger = function(hookName, ...)
+		if hookName == "Message" then return end
+		return trigger(hookName, ...)
+	end
+
+	remoteEngines = powertrain.getDevicesByType("combustionEngine")
+	disableEngineFailures()
+end
+
 local function setVehicleType(x)
   v.mpVehicleType = x
+  if x == 'R' then disableForRemote() end
 end
 
 local function setServerID(id)
@@ -57,6 +100,7 @@ local function setServerID(id)
 end
 
 local function updateGFX(dtReal)
+	if remoteDisabled then disableEngineFailures() end
 	if v.mpVehicleType == 'R' and hydros.enableFFB then -- disable ffb if it got enabled by a reset
 		-- trigger a check that will set FFBID to -1
 		hydros.enableFFB = false

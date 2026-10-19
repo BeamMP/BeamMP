@@ -4,6 +4,8 @@
 	"ui.beammp.serverBrowser.addFavorite": "Add Favorite",
 	"ui.beammp.serverBrowser.removeFavorite": "Remove Favorite",
     "ui.beammp.serverBrowser.clearRecent": "Clear Recents",
+    "ui.beammp.serverBrowser.favoriteName": "Favorite name (optional)",
+    "ui.beammp.serverBrowser.favoriteNamePlaceholder": "Leave blank to use the current date and time",
     "ui.beammp.serverBrowser.serverIp": "Server IP",
     "ui.beammp.serverBrowser.serverPort": "Server Port",
     "ui.beammp.serverBrowser.addCustomServer": "Add Custom Server",

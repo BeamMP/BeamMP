@@ -433,6 +433,7 @@ function addFavorite(server) {
     tags: server.tags,
     addTime: Date.now(),
     custom: Boolean(server.custom),
+    favoriteName: String(server.favoriteName || "").trim(),
   }]
   saveFavorites()
 }
@@ -706,6 +707,7 @@ const visibleServers = computed(() => {
         return normalizeServer({
           ...favorite,
           ...(liveServer || {}),
+          ...(favorite.favoriteName ? { sname: favorite.favoriteName } : {}),
         })
       })
     : state.view.value === "recent"

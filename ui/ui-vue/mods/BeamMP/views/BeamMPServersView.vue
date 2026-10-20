@@ -26,8 +26,11 @@
             </tr>
           </thead>
           <tbody ref="serversTbody" @scroll.passive="onServersScroll">
+            <tr class="virtual-spacer">
+              <td colspan="5" :style="{ height: `${virtualRows.before}px` }"></td>
+            </tr>
             <template v-for="server in renderedServers" :key="server.id">
-              <tr class="server-row"
+              <tr class="server-row" :data-server-id="server.id"
                 :class="[serverCategoryClass(server), { selected: state.selectedServerId.value === server.id }]"
                 tabindex="0" @click="selectServer(server.id)" @keydown.enter.prevent="selectServer(server.id)"
                 @keydown.space.prevent="selectServer(server.id)">
@@ -37,19 +40,20 @@
                     @error="useFallbackFlag" />
                 </td>
                 <td class="title-cell">
-                  <span class="server-title server-title-viewport" @mouseenter="scrollServerTitle"
-                    @mouseleave="resetServerTitleScroll">
+                  <span class="server-title server-title-viewport" @mouseenter="activateServerTitleMarquee"
+                    @mouseleave="resetServerTitleMarquee">
                     <span class="server-title-content" v-html="serverTitleMarkup(server)"></span>
                   </span>
                 </td>
                 <td style="text-align: center;">{{ server.mapName }}</td>
                 <td style="text-align: center;">{{ server.players }}/{{ server.maxplayers }}</td>
               </tr>
-              <tr v-if="state.selectedServerId.value === server.id" class="details-row">
+              <tr v-if="state.selectedServerId.value === server.id" class="details-row"
+                :data-server-id="server.id">
                 <td colspan="5">
                   <section class="details">
-                    <h3 class="server-title server-title--detail server-title-viewport" @mouseenter="scrollServerTitle"
-                      @mouseleave="resetServerTitleScroll">
+                    <h3 class="server-title server-title--detail server-title-viewport"
+                      @mouseenter="activateServerTitleMarquee" @mouseleave="resetServerTitleMarquee">
                       <span class="server-title-content" v-html="serverTitleMarkup(server)"></span>
                     </h3>
 
@@ -118,6 +122,9 @@
                 </td>
               </tr>
             </template>
+            <tr class="virtual-spacer">
+              <td colspan="5" :style="{ height: `${virtualRows.after}px` }"></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -286,12 +293,17 @@ const playerCountDrafts = ref({
   max: "64",
 })
 let filtersRailResizeObserver = null
+let detailsResizeObserver = null
 let applyFiltersDebounceTimer = null
+let scrollFrame = 0
+let pendingScrollTop = 0
 const FILTERS_DEBOUNCE_MS = 400
-const INITIAL_RENDER_COUNT = 180
-const RENDER_BATCH_COUNT = 140
-const RENDER_SCROLL_THRESHOLD_PX = 360
-const renderedServerCount = ref(INITIAL_RENDER_COUNT)
+const BUFFER = 12
+const INITIAL_MEASURE_COUNT = 100
+const itemHeight = ref(0)
+const expandedRowHeight = ref(0)
+const serversViewportHeight = ref(0)
+const scrollRow = ref(0)
 const {
   addFavorite,
   availableLocations,
@@ -394,9 +406,45 @@ const serverSort = ref({
    return servers
  })
 
- const renderedServers = computed(() => {
-   return sortedServers.value.slice(0, renderedServerCount.value)
- })
+const selectedServerIndex = computed(() => {
+  return sortedServers.value.findIndex(server => server.id === state.selectedServerId.value)
+})
+
+const virtualRows = computed(() => {
+  const total = sortedServers.value.length
+  if (!itemHeight.value) {
+    return {
+      first: 0,
+      last: Math.min(total, INITIAL_MEASURE_COUNT),
+      before: 0,
+      after: 0,
+    }
+  }
+
+  const visibleCount = Math.ceil(serversViewportHeight.value / itemHeight.value)
+  const selectedIndex = selectedServerIndex.value
+  const first = Math.max(0, scrollRow.value - visibleCount + BUFFER)
+  const last = Math.min(total, scrollRow.value + visibleCount + BUFFER)
+  const selectedOutsideWindow = selectedIndex >= 0 && (selectedIndex < first || selectedIndex >= last)
+  let before = first * itemHeight.value
+  let after = (total - last) * itemHeight.value
+
+  if (selectedOutsideWindow) {
+    if (selectedIndex < scrollRow.value) before += expandedRowHeight.value
+    else after += expandedRowHeight.value
+  }
+
+  return {
+    first,
+    last,
+    before,
+    after,
+  }
+})
+
+const renderedServers = computed(() => {
+  return sortedServers.value.slice(virtualRows.value.first, virtualRows.value.last)
+})
 
 const filtersRailStyle = computed(() => {
   if (!filtersRailMaxHeight.value) return null
@@ -615,40 +663,74 @@ function applyFiltersNow() {
   updateFilter(normalizeFilters(uiFilters.value))
 }
 
-function growRenderedServers(batchSize = RENDER_BATCH_COUNT) {
-  const total = visibleServers.value.length
-  if (renderedServerCount.value >= total) return false
-  renderedServerCount.value = Math.min(total, renderedServerCount.value + batchSize)
-  return true
+function updateServersViewport() {
+  const tbody = serversTbody.value
+  if (!tbody) return
+  serversViewportHeight.value = tbody.clientHeight
 }
 
-function resetRenderedServers() {
-  renderedServerCount.value = Math.min(INITIAL_RENDER_COUNT, visibleServers.value.length)
-}
-
-function ensureRenderedServersFillContainer(maxIterations = 8) {
+async function measureRowHeights() {
+  await nextTick()
   const tbody = serversTbody.value
   if (!tbody) return
 
-  let iterations = 0
-  while (iterations < maxIterations && tbody.scrollHeight <= tbody.clientHeight + 2) {
-    const grew = growRenderedServers()
-    if (!grew) break
-    iterations += 1
+  const row = tbody.querySelector(".server-row")
+  const measuredRowHeight = row?.getBoundingClientRect().height || 0
+
+  if (measuredRowHeight > 0) itemHeight.value = measuredRowHeight
+
+  const selectedId = String(state.selectedServerId.value || "")
+  if (detailsResizeObserver) {
+    detailsResizeObserver.disconnect()
+    detailsResizeObserver = null
+  }
+
+  if (!selectedId) {
+    expandedRowHeight.value = 0
+    return
+  }
+
+  const detailsRow = [...tbody.querySelectorAll(".details-row")]
+    .find(element => element.dataset.serverId === selectedId)
+  const details = detailsRow?.querySelector(".details")
+  const measuredDetailsHeight = details?.getBoundingClientRect().height || 0
+
+  if (measuredDetailsHeight > 0) {
+    expandedRowHeight.value = measuredDetailsHeight
+  }
+
+  if (details && "ResizeObserver" in window) {
+    detailsResizeObserver = new ResizeObserver(() => {
+      const height = details.getBoundingClientRect().height
+      if (height > 0) expandedRowHeight.value = height
+    })
+    detailsResizeObserver.observe(details)
   }
 }
 
 function onServersScroll(event) {
   const tbody = event?.target
   if (!tbody) return
+  pendingScrollTop = tbody.scrollTop
 
-  const nearBottom = tbody.scrollTop + tbody.clientHeight >= tbody.scrollHeight - RENDER_SCROLL_THRESHOLD_PX
-  if (!nearBottom) return
+  if (scrollFrame) return
+  scrollFrame = requestAnimationFrame(() => {
+    scrollFrame = 0
+    const selectedIndex = selectedServerIndex.value
+    const rawRow = itemHeight.value
+      ? Math.floor(pendingScrollTop / itemHeight.value)
+      : 0
+    const detailsBeforeScroll = selectedIndex >= 0 && selectedIndex < rawRow
+      ? expandedRowHeight.value
+      : 0
+    const nextRow = itemHeight.value
+      ? Math.floor(Math.max(0, pendingScrollTop - detailsBeforeScroll) / itemHeight.value)
+      : 0
 
-  const grew = growRenderedServers()
-  if (grew) {
-    nextTick(() => ensureRenderedServersFillContainer(2))
-  }
+    if (nextRow !== scrollRow.value) {
+      scrollRow.value = nextRow
+    }
+  })
 }
 
 function escapeHtml(value = "") {
@@ -749,23 +831,34 @@ function useFallbackFlag(event) {
   image.src = "/ui/assets/BeamMP/flags/--.png"
 }
 
-function scrollServerTitle(event) {
+function activateServerTitleMarquee(event) {
   const viewport = event.currentTarget
-  if (!viewport || viewport.scrollWidth <= viewport.clientWidth) return
+  const content = viewport?.querySelector(".server-title-content")
+  if (!viewport || !content) return
 
-  viewport.scrollTo({ left: 0, behavior: "auto" })
-  window.clearTimeout(viewport._beammpScrollTimer)
-  viewport._beammpScrollTimer = window.setTimeout(() => {
-    viewport.scrollTo({ left: viewport.scrollWidth, behavior: "smooth" })
-  }, 0)
+  viewport.classList.remove("activate-marquee")
+  content.style.removeProperty("--marquee-distance")
+  content.style.removeProperty("--marquee-duration")
+
+  requestAnimationFrame(() => {
+    if (!viewport.matches(":hover")) return
+    const distance = content.getBoundingClientRect().width - viewport.clientWidth
+    if (distance <= 1) return
+
+    content.style.setProperty("--marquee-distance", `${distance}px`)
+    content.style.setProperty("--marquee-duration", `${Math.max(4, distance / 45 + 4)}s`)
+    viewport.classList.add("activate-marquee")
+  })
 }
 
-function resetServerTitleScroll(event) {
+function resetServerTitleMarquee(event) {
   const viewport = event.currentTarget
   if (!viewport) return
 
-  window.clearTimeout(viewport._beammpScrollTimer)
-  viewport.scrollTo({ left: 0, behavior: "smooth" })
+  viewport.classList.remove("activate-marquee")
+  const content = viewport.querySelector(".server-title-content")
+  content?.style.removeProperty("--marquee-distance")
+  content?.style.removeProperty("--marquee-duration")
 }
 
 function serverCategoryClass(server) {
@@ -804,27 +897,28 @@ watch(
   visibleServers,
   async () => {
     const tbody = serversTbody.value
-    const savedScrollTop = tbody ? tbody.scrollTop : 0
-
-    resetRenderedServers()
-    await nextTick()
-
     if (tbody) {
-      if (savedScrollTop === 0 && tbody.scrollTop === 0) {
-        tbody.scrollTop = 0
-      } else {
-        tbody.scrollTop = savedScrollTop
-      }
+      tbody.scrollTop = 0
     }
-    ensureRenderedServersFillContainer()
+    scrollRow.value = 0
+    expandedRowHeight.value = 0
+    await measureRowHeights()
   },
   { immediate: true },
 )
 
-onMounted(async () => {
-  await nextTick()
+watch(
+  () => state.selectedServerId.value,
+  async () => {
+    expandedRowHeight.value = 0
+    await measureRowHeights()
+  },
+)
+
+onMounted(() => {
   updateFiltersRailMaxHeight()
-  ensureRenderedServersFillContainer()
+  updateServersViewport()
+  measureRowHeights()
 
   const rail = filtersRail.value
   const container = rail?.closest(".content")
@@ -834,9 +928,14 @@ onMounted(async () => {
   }
 
   window.addEventListener("resize", updateFiltersRailMaxHeight)
+  window.addEventListener("resize", updateServersViewport)
 })
 
 onBeforeUnmount(() => {
+  if (scrollFrame) {
+    cancelAnimationFrame(scrollFrame)
+    scrollFrame = 0
+  }
   if (applyFiltersDebounceTimer) {
     clearTimeout(applyFiltersDebounceTimer)
     applyFiltersDebounceTimer = null
@@ -845,7 +944,12 @@ onBeforeUnmount(() => {
     filtersRailResizeObserver.disconnect()
     filtersRailResizeObserver = null
   }
+  if (detailsResizeObserver) {
+    detailsResizeObserver.disconnect()
+    detailsResizeObserver = null
+  }
   window.removeEventListener("resize", updateFiltersRailMaxHeight)
+  window.removeEventListener("resize", updateServersViewport)
 })
 </script>
 
@@ -1183,6 +1287,7 @@ onBeforeUnmount(() => {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    overflow-anchor: none;
     overscroll-behavior: contain;
   }
 
@@ -1222,6 +1327,16 @@ onBeforeUnmount(() => {
 
   thead th {
     text-align: center;
+  }
+}
+
+.virtual-spacer {
+  pointer-events: none;
+
+  td {
+    height: 0;
+    padding: 0;
+    border: 0;
   }
 }
 
@@ -1307,6 +1422,20 @@ onBeforeUnmount(() => {
   line-height: 1.1;
   width: max-content;
   min-width: 100%;
+}
+
+.server-title-viewport.activate-marquee .server-title-content {
+  animation: server-title-marquee var(--marquee-duration, 6s) linear infinite alternate;
+}
+
+@keyframes server-title-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-1 * var(--marquee-distance)));
+  }
 }
 
 .server-title-icon {

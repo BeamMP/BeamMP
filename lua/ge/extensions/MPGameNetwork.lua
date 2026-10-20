@@ -235,11 +235,11 @@ local function spawnUiDialog(dialogInfo)
 	end
 
 	be:queueJS(string.format([[
-			angular.element(document.body).injector().get('ConfirmationDialog').open(
-				DOMPurify.sanitize(JSON.parse(atob(`%s`))), 
+			bngVue.popup.openConfirmation(
 				DOMPurify.sanitize(JSON.parse(atob(`%s`))),
-				JSON.parse(atob(`%s`)),
-				{ class: atob(`%s`) }
+				DOMPurify.sanitize(JSON.parse(atob(`%s`))),
+				JSON.parse(atob(`%s`)).map(b => ({ label: b.label, value: b.key, extras: { default: !!b.default, cancel: !!b.isCancel } })),
+				atob(`%s`)
 			).then(res => {
 				if (res) {
 					if (%s) {

@@ -1,0 +1,34 @@
+[1mdiff --git a/ui/modules/apps/BeamMP-Chat2/app.vue b/ui/modules/apps/BeamMP-Chat2/app.vue[m
+[1mindex 3d14990d..a1a42616 100644[m
+[1m--- a/ui/modules/apps/BeamMP-Chat2/app.vue[m
+[1m+++ b/ui/modules/apps/BeamMP-Chat2/app.vue[m
+[36m@@ -23,7 +23,7 @@[m
+         </li>[m
+       </ul>[m
+ [m
+[31m-      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat" @keydown.capture="onInputKeydown">[m
+[32m+[m[32m      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat">[m
+         <button[m
+           class="chat-control-button chat2-send-button"[m
+           type="submit"[m
+[36m@@ -42,6 +42,7 @@[m
+           placeholder="Chat here"[m
+           aria-label="BeamMP chat message"[m
+           @focus="focusChat"[m
+[32m+[m[32m          @click="focusChat"[m
+           @blur="blurChat"[m
+           @keydown="onInputKeydown"[m
+         />[m
+[36m@@ -289,10 +290,12 @@[m [mfunction swapVertical() {[m
+ function focusChat() {[m
+   isFocused.value = true[m
+   api.engineLua("setCEFFocus(true)")[m
+[32m+[m[32m  api.engineLua("setCEFTyping(true)")[m
+ }[m
+ [m
+ function blurChat() {[m
+   isFocused.value = false[m
+[32m+[m[32m  api.engineLua("setCEFTyping(false)")[m
+ }[m
+ [m
+ function sendChat() {[m

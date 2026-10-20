@@ -23,7 +23,7 @@
         </li>
       </ul>
 
-      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat" @keydown.capture="onInputKeydown">
+      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat">
         <button
           class="chat-control-button chat2-send-button"
           type="submit"
@@ -42,6 +42,7 @@
           placeholder="Chat here"
           aria-label="BeamMP chat message"
           @focus="focusChat"
+          @click="focusChat"
           @blur="blurChat"
           @keydown="onInputKeydown"
         />
@@ -289,10 +290,12 @@ function swapVertical() {
 function focusChat() {
   isFocused.value = true
   api.engineLua("setCEFFocus(true)")
+  api.engineLua("setCEFTyping(true)")
 }
 
 function blurChat() {
   isFocused.value = false
+  api.engineLua("setCEFTyping(false)")
 }
 
 function sendChat() {

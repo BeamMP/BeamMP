@@ -13,6 +13,7 @@ local damageThreshold = 100  -- Recalculate center of gravity if beamstate.damag
 local damageDelay = 0.2      -- How long to wait before recalculating connected nodes or COG after the car was damaged
 
 local connectedNodes = {}
+local connectedCouplerNodes = {}
 local nodes = {}
 local disconnectedNodes = {}
 local parentNode = nil
@@ -21,6 +22,8 @@ local lastDamage = 0
 local damageTimer = 0
 local physicsFPS = 0
 M.cogRel = vec3(0,0,0)
+M.InitCogRel = vec3(0,0,0)
+M.cogRelDiff = vec3(0,0,0)
 
 local refNode = v.data.refNodes[0].ref
 
@@ -66,6 +69,7 @@ local function calcCOG()
 	rot:setFromDir(dir, dirUp)
 	rot:inverse()
 	M.cogRel = cog:rotated(rot)
+	M.cogRelDiff:setSub2(M.cogRel,M.InitCogRel)
 end
 
 -- Find all nodes that are connected to the parent node
@@ -121,6 +125,21 @@ local function findConnectedNodes()
 				end
 			end
 		end
+
+		local couplerNodeID = connectedCouplerNodes[node]
+		if couplerNodeID then
+			if not visited[couplerNodeID] then
+				local nodePos1 = obj:getNodePosition(node)
+				local nodePos2 = obj:getNodePosition(couplerNodeID)
+				local dist = nodePos1:squaredDistance(nodePos2)
+				if dist < 0.5^2 then
+					stackIdx = stackIdx + 1
+					nodeStack[stackIdx] = couplerNodeID
+
+					visited[couplerNodeID] = true
+				end
+			end
+		end
 	end
 
 	for cid,_ in pairs(v.data.nodes) do
@@ -139,6 +158,7 @@ local function findConnectedNodes()
 	rot:setFromDir(dir, dirUp)
 	rot:inverse()
 	M.cogRel = cog:rotated(rot)
+	M.cogRelDiff:setSub2(M.cogRel,M.InitCogRel)
 end
 
 local function onInit()
@@ -183,32 +203,26 @@ local function onInit()
 	elseif connectedNodes[refNodes.up] then
 		parentNode = refNodes.up
 	end
-	
-	if parentNode then
-		-- TODO: find less hacky way to get beamBroke events
-		local beamBroke = powertrain.beamBroke
-		powertrain.beamBroke = function(id, ...)
-			local beamType = v.data.beams[id].beamType
-			if beamType ~= 3 and beamType ~= 4 and beamType ~= 7 then
-				beamsChanged = true
-			end
 
-			return beamBroke(id, ...)
-		end
-		
+	if parentNode then
 		findConnectedNodes()
+		M.InitCogRel:set(M.cogRel)
+		M.cogRelDiff:setSub2(M.cogRel,M.InitCogRel)
 	else
 		log('M', 'onInit', "Vehicle has no connections to ref nodes! Using all nodes.")
 	    for _, n in pairs(v.data.nodes) do
 			nodes[#nodes+1] = {n.cid, obj:getNodeMass(n.cid)*physicsFPS}
 	    end
 		calcCOG()
+		M.InitCogRel:set(M.cogRel)
+		M.cogRelDiff:setSub2(M.cogRel,M.InitCogRel)
 	end
 
 	log('M', 'onInit', "velocityVE init, physicsFPS: "..physicsFPS..", parentNode: "..tostring(parentNode))
 end
 
 local function onReset()
+	connectedCouplerNodes = {}
 	findConnectedNodes()
 end
 
@@ -261,7 +275,11 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 	dir:setScaled(-1)
 	dirUp:set(obj:getDirectionVectorUpXYZ())
 	rot:setFromDir(dir, dirUp)
-	cog:set(M.cogRel:rotated(rot))
+	--if isCounterVel then
+	--	cog:set(M.mainClusterCOG:rotated(rot)) -- not working, explodes the container trailer
+	--else
+		cog:set(M.cogRel:rotated(rot))
+	--end
 	local mainClusterID = obj:getNodeCluster(refNode)
 	--print("addAngularVelocity: pitchAV: "..pitchAV..", rollAV: "..rollAV..", yawAV: "..yawAV)
 	for i=#nodes, 1, -1 do -- backwards, entries can be removed from disconnectedNodes while iterating
@@ -292,27 +310,20 @@ local function addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV, isCounter
 end
 
 local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVelocity, noCounterVelocity)
-	dir:set(obj:getDirectionVectorXYZ())
-	dir:setScaled(-1)
-	dirUp:set(obj:getDirectionVectorUpXYZ())
-	rot:setFromDir(dir, dirUp)
-	cog:set(M.cogRel:rotated(rot))
-	
-	rvel:set(pitchAV, rollAV, yawAV)
-	vel:set(x, y, z)
-	cog:setCross(cog, rvel)
-	vel:setSub(cog)
-	local velMulti = 1
+local velMulti = 1
 
 	if onlyAngularVelocity then
 		velMulti = 0
 	end
+	rvel:set(pitchAV, rollAV, yawAV)
+	vel:set(x, y, z)
+	vel:setScaled(velMulti)
 
 	local connectedNodeCount = #nodes
 	local disconnectedNodeCount = #disconnectedNodes
 
-	if connectedNodeCount < disconnectedNodeCount then
-		addAngularForce(nodes, x, y, z, pitchAV, rollAV, yawAV)
+	if disconnectedNodeCount ~= 0 then --connectedNodeCount < disconnectedNodeCount then
+		addAngularForce(nodes, vel.x, vel.y, vel.z, pitchAV, rollAV, yawAV)
 
 		local mainClusterID = obj:getNodeCluster(refNode)
 		for i=disconnectedNodeCount, 1, -1 do -- backwards, entries are removed while iterating
@@ -325,10 +336,10 @@ local function addAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 		end
 	else
 		rvel:setScaled(-physicsFPS)
-		vel:setScaled(physicsFPS*velMulti)
+		vel:setScaled(physicsFPS)
 		obj:applyClusterLinearAngularAccel(refNode, vel, rvel)
 		if noCounterVelocity then return end -- used on spawn and reset to wait with the counter velocity for a bit so things like logs on the T-series don't slide off
-		addAngularForce(disconnectedNodes, -x, -y, -z, -pitchAV, -rollAV, -yawAV, true)
+		--addAngularForce(disconnectedNodes, -vel.x, -vel.y, -vel.z, -pitchAV, -rollAV, -yawAV, true) -- cluster velocity now uses the COG of the cluster, which as broken counter velocity logic, disable for now
 	end
 end
 
@@ -342,6 +353,8 @@ local function setAngularVelocity(x, y, z, pitchAV, rollAV, yawAV, onlyAngularVe
 	
 	rvel:set(pitchAV, rollAV, yawAV)
 	vehRvel.y, vehRvel.x, vehRvel.z = obj:getRollPitchYawAngularVelocity()
+	vehRvel:setRotate(rot)
+
 	local rvdX = rvel.x - vehRvel.x
 	local rvdY = rvel.y - vehRvel.y
 	local rvdZ = rvel.z - vehRvel.z
@@ -375,8 +388,9 @@ local function updateGFX(dt)
 	else
 		damageTimer = 0
 	end
-	
-	
+end
+
+local function onDebugDraw()
 	-- Connected nodes and COG debug
 	--[[
 	local vehRot = quatFromDir(-obj:getDirectionVector(), obj:getDirectionVectorUp())
@@ -385,8 +399,41 @@ local function updateGFX(dt)
 		obj.debugDrawProxy:drawNodeSphere(nodes[i][1], 0.03, color(255, 0, 0, 200))
 	end
 	
+	for i = 1, #disconnectedNodes do
+		obj.debugDrawProxy:drawNodeSphere(disconnectedNodes[i][1], 0.03, color(0, 255, 0, 200))
+	end
+
+	for k,v in pairs(connectedCouplerNodes) do
+		obj.debugDrawProxy:drawNodeSphere(v, 0.08, color(255, 255, 0, 200))
+		obj.debugDrawProxy:drawNodeSphere(k, 0.08, color(0, 0, 0, 200))
+	end
+
 	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.cogRel:rotated(vehRot), color(0, 0, 255, 200))
+	obj.debugDrawProxy:drawSphere(0.3, obj:getPosition()+M.InitCogRel:rotated(vehRot), color(0, 255, 0, 200))
 	--]]
+end
+
+local function onBeamBroke(id, energy)
+	local beamType = v.data.beams[id].beamType
+	if beamType ~= 3 and beamType ~= 4 and beamType ~= 7 then
+		beamsChanged = true
+	end
+end
+
+local function onCouplerAttached(nodeId, obj2id, obj2nodeId, attachSpeed, attachEnergy)
+	if objectId and obj2id ~= objectId then
+		return
+	end
+	connectedCouplerNodes[nodeId] = obj2nodeId
+	beamsChanged = true
+end
+
+local function onCouplerDetached(nodeId, obj2id, obj2nodeId)
+	if objectId and obj2id ~= objectId then
+		return
+	end
+	connectedCouplerNodes[nodeId] = nil
+	beamsChanged = true
 end
 
 -- public interface
@@ -398,5 +445,11 @@ M.addVelocity        = addVelocity
 M.setVelocity        = setVelocity
 M.addAngularVelocity = addAngularVelocity
 M.setAngularVelocity = setAngularVelocity
+
+M.onBeamBroke = onBeamBroke
+M.onCouplerAttached  = onCouplerAttached
+M.onCouplerDetached  = onCouplerDetached
+
+--M.onDebugDraw = onDebugDraw
 
 return M

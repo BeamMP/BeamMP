@@ -524,6 +524,43 @@ local function setPlayerPing(playerName, ping)
 	pings[playerName] = ping
 end
 
+local stringBuffer = require("string.buffer")
+local pingBuff = stringBuffer.new()
+local pingHeader = ffi.new("uint8_t[1]")
+
+ffi.cdef[[
+    typedef struct __attribute__((packed)) {
+    uint8_t id;
+    uint16_t ping;
+} pingsS;
+]]
+
+local pingStruct = ffi.new("pingsS")
+
+local function setPlayerPings(data)
+    pingBuff:set(data)
+    local header = pingBuff:get(1)
+    if #header ~= 1 then return end
+
+    ffi.copy(pingHeader, header, 1)
+    local headerLen = pingHeader[0]
+
+    if headerLen == 0 or headerLen*3 ~= #pingBuff then return end
+
+    for i=1, headerLen do
+        ffi.copy(pingStruct, pingBuff, 3)
+        pingBuff:skip(3)
+        local playerName = MPVehicleGE.getPlayerNameByID(pingStruct.id)
+        if MPConfig.getPlayerServerID() == pingStruct.id then -- this is to show your own ping before you spawn a vehicles, Player ID's only exist after a vehicle has been spawned
+            setPing(pingStruct.ping)
+            playerName = MPConfig.getNickname()
+        end
+        if playerName then
+            setPlayerPing(playerName, pingStruct.ping)
+        end
+    end
+end
+
 --- Executes when the user or mod ends a mission/session (map) .
 -- @param mission table The mission object.
 local function onClientEndMission(mission)
@@ -660,6 +697,7 @@ M.chatSend = chatSend
 M.setPlayerCount = setPlayerCount
 M.showNotification = showNotification
 M.setPlayerPing = setPlayerPing
+M.setPlayerPings = setPlayerPings
 M.updateQueue = updateQueue
 M.sendQueue = sendQueue
 M.showMdDialog = showMdDialog

@@ -11,43 +11,48 @@
 
 local M = {}
 
-local targetGameSpeed = 1
+local stringBuffer = require("string.buffer")
+
+local ok, err = pcall(function()
+    ffi.cdef[[
+        typedef struct { float x, y, z; } Vec3;
+        typedef struct { float x, y, z, w; } Quat;
+        typedef struct { Vec3 pos; Quat rot; Vec3 vel; Vec3 rvel; double tim;} PosPacket;
+    ]]
+end)
+if not ok then
+    print("cdef error: " .. tostring(err))
+end
+
+local receivePacket = ffi.new("PosPacket")
+local sendPacket = ffi.new("PosPacket")
+local posPacketSize = ffi.sizeof(receivePacket);
+local sendPacketSize = ffi.sizeof(sendPacket);
+
 local actualSimSpeed = 1
 local PING_UPDATE_INTERVAL = 0.5 -- seconds, how often a spawned player's ping / fps is read from their position packets
 local pingTimer = 0
-
---[[
-	["X-Y"] = table
-		[data] = table
-			[pos] = array[3]
-			[rot] = array[4]
-			[vel] = array[3]
-			[rvel] = array[4]
-			[tim] = float
-			[ping] = float
-		[last_executed_tim] = float
-		[executed_last] = hptimerstruct
-		[median] = float
-		[median_array] = array
-			[1] = next index
-			[2] = max array buffer size
-			[3..[2] + 2] = float
-		[median_timer] = hptimerstruct
-		[executed] = bool
-]]
-local POSSMOOTHER = {}
-local TIMER = (HighPerfTimer or hptimer) -- game own timer that is much more accurate then os.clock()
-
 
 
 --- Called on specified interval by positionGE to simulate our own tick event to collect data.
 local function tick()
 	for i,v in pairs(MPVehicleGE.getPlayerVehicleObjects(MPConfig.getPlayerServerID())) do
 		if v then
-			v:queueLuaCommand("positionVE.getVehicleRotation()")
+			v:queueLuaCommand("if positionVE then positionVE.getVehicleRotation() end")
 		end
 	end
 end
+
+
+local sendPos  = vec3()
+local sendVel  = vec3()
+local sendRot  = quat()
+local sendRvel = vec3()
+
+local structSendPos  = sendPacket.pos
+local structSendVel  = sendPacket.vel
+local structSendRot  = sendPacket.rot
+local structSendRvel = sendPacket.rvel
 
 --- Wraps vehicle position, rotation etc. data from player own vehicles and sends it to the server.
 -- INTERNAL USE
@@ -63,117 +68,132 @@ local function sendVehiclePosRot(data, gameVehicleID)
 end
 
 
+local function sendVehiclePosRotFFI(data, gameVehicleID)
+	if MPGameNetwork.launcherConnected() then
+		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) then -- If serverVehicleID not null and player own vehicle
+			if MPTimeSyncGE.hasReceivedPing and #data == sendPacketSize then
+				MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Zf',serverVehicleID,data))
+			end
+		end
+	end
+end
+
+local recPos  = vec3()
+local recVel  = vec3()
+local recRot  = quat()
+local recRvel = vec3()
+
+local structPos = receivePacket.pos
+local structVel = receivePacket.vel
+local structRot = receivePacket.rot
+local structRvel = receivePacket.rvel
+
 --- This function serves to send the position data received for another players vehicle from GE to VE, where it is handled.
 -- @param encoded json The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
 -- @param serverVehicleID string The VehicleID according to the server.
-local function applyPos(data, serverVehicleID)
+local function applyPosFFI(recBuffer, serverVehicleID)
 	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
 	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
-
 	local veh = getObjectByID(vehicle.gameVehicleID)
-	if veh then -- vehicle already spawned, send data
+	local owner = vehicle:getOwner()
+	if veh and #recBuffer == posPacketSize then -- vehicle already spawned, send data
 		if veh.mpVehicleType == nil then
 			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
 			veh.mpVehicleType = 'R'
 		end
-		be:sendToMailbox("vehPosPckt" .. serverVehicleID ,data)
+		be:sendToMailbox("vehPosPcktFFI" .. serverVehicleID ,recBuffer)
 	end
 
 	vehicle.posPackets = (vehicle.posPackets or 0) + 1 -- counted for the fps, as not every packet is decoded
 
 	local owner = vehicle:getOwner()
 	if owner and not owner.hasUpdatedPing or not veh then -- only update twice a second per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
-		local decoded = jsonDecode(data)
-		local deltaDt = math.max((decoded.tim or 0) - (vehicle.lastDt or 0), 0.001)
-		vehicle.lastDt = decoded.tim
+		if #recBuffer == posPacketSize then
+			ffi.copy(receivePacket, recBuffer, posPacketSize)
+			recPos:set(structPos.x,structPos.y,structPos.z)
+			recVel:set(structVel.x,structVel.y,structVel.z)
+			recRot:set(structRot.x,structRot.y,structRot.z,structRot.w)
+			recRvel:set(structRvel.x,structRvel.y,structRvel.z)
+		else
+			log('E','applyPos', 'Received invalid position packet with size '..#recBuffer..' Expected '..posPacketSize)
+			return
+		end
 
-		vehicle.position:set(decoded.pos[1],decoded.pos[2],decoded.pos[3])
-		vehicle.rotation:set(decoded.rot[1],decoded.rot[2],decoded.rot[3],decoded.rot[4])
-
-		if owner and not owner.hasUpdatedPing then -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
-			local ping = math.floor(decoded.ping*1000) -- (d.ping-deltaDt)
-			UI.setPlayerPing(owner.name, ping)
-			owner.ping = ping
-			owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
-			owner.hasUpdatedPing = true
-		end-- Send ping to UI
-		vehicle.posPackets = 0
+		vehicle.position:set(recPos)
+		vehicle.rotation:set(recRot)
 	end
 end
 
---- Tries to delay the positional update execution to match the average update interval from this vehicle
--- Reduces vehicle warping
--- @tparam serverVehicleID string X-Y
--- @tparam decoded table The data to be applied to a vehicle, needs to contain "pos", "rot", "vel", "rvel", "ping" and "tim"
-local function smoothPosExec(serverVehicleID, decoded)
-	--[[ Alternate idea
-		Buffer the unexecuted received packets in a by tim sorted table
-			[0] = packet
-			[1] = packet
-			[2] = packet
-		Tick at a specific interval (eg every 22 miliseconds)
-		Look at the buffer of packets, take packet that is closest to it.
-		If we want to exec a packet with tim 0.044 but we only have 0.022 and 0.066
-		then produce the 0.044 packet from those two. We need to calc where the car would be in relation of these two packets, not just make a median of two packets. This Idea needs to be thought through.
-	]]
-	if POSSMOOTHER[serverVehicleID] == nil then
-		local new = {}
-		new.data = decoded
-		new.last_executed_tim = decoded.tim
-		new.executed_last = TIMER()
-		new.executed = false
-		new.median = 32
-		new.median_array = {3,10,32,32,32,32,32,32,32,32,32,32}
-		--new.median_array = {3,20,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32}
-		new.median_timer = TIMER()
-		POSSMOOTHER[serverVehicleID] = new
-				
-	elseif decoded.tim < 3 or (POSSMOOTHER[serverVehicleID].last_executed_tim - decoded.tim) > 3 then -- if remote timer got reset or if new data is 3 seconds earlier then the known, expect that the remote vehicle got reset.
-		POSSMOOTHER[serverVehicleID].data = decoded
-		POSSMOOTHER[serverVehicleID].last_executed_tim = decoded.tim
-		POSSMOOTHER[serverVehicleID].executed = false
-				
-	elseif POSSMOOTHER[serverVehicleID].last_executed_tim > decoded.tim then
-		-- nothing, outdated data
-		
-	else
-		-- notes
-		-- right order 0.022 -- 0.044 -- 0.066
-		-- wrong order 0.022 -- 0.066 -- 0.044 (if 0.066 is received first, we overwrite it with 0.044 -> if 0.066 wasnt executed yet. otherwise this wouldnt be reached)
-		-- Todo: When this happens, try to calc a median packet between the two for all relevant data. eg. (decoded.pos + POSSMOOTHER[serverVehicleID].data.pos) / 2POSSMOOTHER[serverVehicleID].data.pos) / 2
-		-- This likely proposes an issue if the tim values are to far away from each other.
-		
-		-- ensure that there is a min age distance between the remote packages of 15ms.
-		if (decoded.tim - POSSMOOTHER[serverVehicleID].last_executed_tim) < 0.015 then return nil end
-		
-		local median_time = POSSMOOTHER[serverVehicleID].median_timer:stopAndReset()
-		POSSMOOTHER[serverVehicleID].data = decoded -- also outdates unexecuted packets
-		POSSMOOTHER[serverVehicleID].executed = false
-		if median_time > 14 then -- there can be lower intervals then 32ms, so we cover that
-			if median_time < 80 then
-				local median_array = POSSMOOTHER[serverVehicleID].median_array
-				local next_index = median_array[1]
-				median_array[next_index] = median_time
-				median_array[1] = next_index + 1
-				if next_index == median_array[2] + 2 then
-					median_array[1] = 3
-					local median = 0
-					for i = 3, median_array[2] + 2 do
-						median = median + median_array[i]
-					end
-					-- median + X to artificially count in small fluctuations
-					POSSMOOTHER[serverVehicleID].median = (median / median_array[2]) + 3
-				end
-				POSSMOOTHER[serverVehicleID].median_array = median_array
+local jsonBuffer = stringBuffer.new()
+local function decodeJsonBuffer(buffer)
+	if type(buffer) == "string" then
+		jsonBuffer:set(buffer)
+		return jsonBuffer:jsondecode()
+	end
+	return buffer:jsondecode()
+end
+
+local function applyPosJson(recBuffer, serverVehicleID)
+	local vehicle = MPVehicleGE.getVehicleByServerID(serverVehicleID)
+	if not vehicle then log('E', 'applyPos', 'Could not find vehicle by ID '..serverVehicleID) return end
+	local veh = getObjectByID(vehicle.gameVehicleID)
+	if veh then -- vehicle already spawned, send data
+		if veh.mpVehicleType == nil then
+			veh:queueLuaCommand("MPVehicleVE.setVehicleType('R')")
+			veh.mpVehicleType = 'R'
+		end
+		be:sendToMailbox("vehPosPcktJson" .. serverVehicleID ,recBuffer)
+	end
+
+	local owner = vehicle:getOwner()
+	if owner and not owner.hasUpdatedPing or not veh then -- only update once per frame per player unless the vehicle is not spawned, spawned vehicles already gets their position and rotation in MPvehicleGE
+		local decodeSuccess , decodedData = pcall(decodeJsonBuffer, recBuffer)
+		if decodeSuccess then
+			if not decodedData.pos or not decodedData.vel or not decodedData.rot or not decodedData.rvel or not decodedData.tim then
+				log('E','setVehicleRotation', 'Received invalid position packet')
+				return
 			end
+			local tim = decodedData.tim
+			local ping = decodedData.ping or 0
+
+			recPos:set(decodedData.pos[1],decodedData.pos[2],decodedData.pos[3])
+			recVel:set(decodedData.vel[1],decodedData.vel[2],decodedData.vel[3])
+			recRot:set(decodedData.rot[1],decodedData.rot[2],decodedData.rot[3],decodedData.rot[4])
+			recRvel:set(decodedData.rvel[1],decodedData.rvel[2],decodedData.rvel[3])
+
+			vehicle.lastDt = tim
+			local deltaDt = math.max((tim or 0) - (vehicle.lastDt or 0), 0.001)
+
+			vehicle.position:set(recPos)
+			vehicle.rotation:set(recRot)
+
+			if owner and ping and not owner.hasUpdatedPing then-- TODO place holder until we have a dedicated player list ping packet -- was owner.updatedPing, which is never set, so unspawned vehicles pushed the ping to the UI on every packet
+				ping = math.floor(ping*1000)
+
+				UI.setPlayerPing(owner.name, ping) -- Send ping to UI
+				owner.ping = ping
+				owner.fps = vehicle.posPackets/deltaDt -- packets since the last decoded one, over the time between them
+			owner.hasUpdatedPing = true
+			end
+			vehicle.posPackets = 0
 		end
 	end
 end
 
---- The raw message from the server. This is unpacked first and then sent to applyPos() or smoothPosExec()
+local recBuffer = stringBuffer.new()
+--- The raw message from the server. This is put into a string buffer, then code and serverVehicleID is read and the rest gets sent to VE or read in GE
+--- creates 24 bytes of garbage with a spawned vehicle, the last 24 bytes comes from the sendToMailbox function
 -- @param rawData string The raw message data.
 local function handle(rawData)
-	local code, serverVehicleID, data = string.match(rawData, "^(%a)%:(%d+%-%d+)%:({.*})")
+	recBuffer:set(rawData) -- set replaces the whole buffer with the new string
+	local code = recBuffer:get(1) -- get consumes the string buffer
+	recBuffer:skip(1) -- consumes the ":" between code and serverVehicleID
+	local startID, endID = string.find(rawData, "(%d+%-%d+)%:") -- find the serverVehicleID index
+	if not startID or not endID then return end -- no serverVehicleID found
+
+	local serverVehicleID = recBuffer:get(endID-startID) -- read and consume only the serverVehicleID
+	recBuffer:skip(1) -- consumes the ":" between serverVehicleID and position data
 
 	local veh = MPVehicleGE.getVehicles()[serverVehicleID]
 
@@ -181,13 +201,11 @@ local function handle(rawData)
 		return
 	end
 
-	if code == 'p' then
-		if settings.getValue("enablePosSmoother") then
-			local decoded = jsonDecode(data)
-			smoothPosExec(serverVehicleID, decoded)
-		else
-			applyPos(data, serverVehicleID)
-		end
+	-- send the rest of the string buffer directly to minimize garbage, mailboxes can take string buffer objects
+	if code == 'f' then
+		applyPosFFI(recBuffer, serverVehicleID)
+	elseif code == 'p' then
+		applyPosJson(recBuffer, serverVehicleID)
 	else
 		log('W', 'handle', "Received unknown packet '"..tostring(code).."'! ".. rawData)
 	end
@@ -197,7 +215,7 @@ end
 -- @param ping number The Ping value
 local function setPing(ping)
 	local p = ping/1000
-	be:queueAllObjectLua("if positionVE then positionVE.setPing("..p..") end")
+	be:queueAllObjectLua("if positionVE then if positionVE then positionVE.setPing("..p..") end end")
 end
 
 --- This function is to allow for the setting of the vehicle/objects position.
@@ -220,16 +238,17 @@ local function setPositionRotationVelocity(gameVehicleID, positionData) -- this 
 	local localVel = veh:getVelocity()
 	local vehVel = positionData.vehVel
 
-	if math.abs(localVel.x) + math.abs(localVel.y) + math.abs(localVel.z) > (math.abs(vehVel.x) + math.abs(vehVel.y) + math.abs(vehVel.z))*5 then -- detect if velocity was a teleport
+	if localVel:length() > vehVel:length()*5 then -- detect if velocity was a teleport
 		return
 	end
 
 	local refNodeID = veh:getRefNodeId()
 	local vehRot = quatFromDir(-veh:getDirectionVector(), veh:getDirectionVectorUp())
 	local rot = vehRot:inversed() * newRot
-	veh:setClusterPosRelRot(refNodeID, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w)
 
-	vel = vel - localVel:rotated(rot) -- setClusterPosRelRot also rotates the velocity so we have to do that as well
+	veh:applyClusterVelocityScaleAdd(refNodeID, 1, -localVel.x, -localVel.y, -localVel.z) -- setting velocity to 0, seems more stable to do this before rotate then add velocity again after rotating
+	veh:setClusterPosRelRot(refNodeID, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w) -- this also rotates current velocity
+
 	veh:applyClusterVelocityScaleAdd(refNodeID, 1, vel.x, vel.y, vel.z) -- setting velocity with the GE command doesn't destroy vehicles so we set most of the velocity here
 
 	local noCounterVelocity = positionData.noCounter or 0
@@ -252,23 +271,6 @@ local function getActualSimSpeed()
 	return actualSimSpeed
 end
 
---- This function is used to execute smoothed positional updates if enabled
-local function onPreRender(dt)
-	-- tick pos updates per vehicle based on their median pos update interval
-	for serverVehicleID, data in pairs(POSSMOOTHER) do
-		local timedif = data.executed_last:stop()
-		if not data.executed and timedif >= data.median then
-			POSSMOOTHER[serverVehicleID].executed_last:stopAndReset()
-			POSSMOOTHER[serverVehicleID].executed = true
-			POSSMOOTHER[serverVehicleID].last_executed_tim = data.data.tim
-			applyPos(jsonEncode(data.data), serverVehicleID)
-			
-		elseif timedif > 60000 then -- seconds. vehicle potentially removed. rem entry
-			POSSMOOTHER[serverVehicleID] = nil
-		end
-	end
-end
-
 local function onUpdate(dtReal, dtSim, dtRaw)
 	if MPGameNetwork and MPGameNetwork.launcherConnected() then
 		setActualSimSpeed(dtSim/dtRaw)
@@ -289,28 +291,19 @@ local function onUpdate(dtReal, dtSim, dtRaw)
 	end
 end
 
---- This function is used to reset the positional update smoother when it is disabled
-local function onSettingsChanged()
-	if not settings.getValue("enablePosSmoother") then -- nil/false
-		for serverVehicleID, _ in pairs(POSSMOOTHER) do
-			POSSMOOTHER[serverVehicleID] = nil
-		end
-	end
-end
-
-M.applyPos                    = applyPos
+M.applyPos                    = applyPosJson
+M.applyPosJson                = applyPosJson
+M.applyPosFFI                 = applyPosFFI
 M.tick                        = tick
 M.handle                      = handle
 M.sendVehiclePosRot           = sendVehiclePosRot
+M.sendVehiclePosRotFFI        = sendVehiclePosRotFFI
 M.setPosition                 = setPosition
 M.setPositionRotationVelocity = setPositionRotationVelocity
 M.setPing                     = setPing
 M.setActualSimSpeed           = setActualSimSpeed
 M.getActualSimSpeed           = getActualSimSpeed
-M.onPreRender                 = onPreRender
 M.onUpdate                    = onUpdate
-M.onSettingsChanged           = onSettingsChanged
-M.posSmoother                 = POSSMOOTHER -- debug entry
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

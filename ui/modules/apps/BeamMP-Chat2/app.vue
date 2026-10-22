@@ -165,16 +165,41 @@ function formatChatMessage(value) {
     }
   }
 
-  const tokens = string.split(/(\^.)/g)
+  // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
+  const tokens = string.split(/(\^(?:[#@][0-9a-fA-F]{6}|.))/g)
   const classes = new Set()
+  let inlineColor = ""
+  let inlineBackground = ""
   let currentText = ""
   let result = ""
+
+  const isForegroundClass = (cls) => cls.startsWith("color-") || cls === "rainbow"
+  const isBackgroundClass = (cls) => cls.startsWith("bg-")
+
+  const clearForeground = () => {
+    for (const activeClass of [...classes]) {
+      if (isForegroundClass(activeClass)) classes.delete(activeClass)
+    }
+    inlineColor = ""
+  }
+
+  const clearBackground = () => {
+    for (const activeClass of [...classes]) {
+      if (isBackgroundClass(activeClass)) classes.delete(activeClass)
+    }
+    inlineBackground = ""
+  }
 
   const flush = () => {
     if (!currentText) return
     const encoded = escapeHtml(currentText)
     const classList = Array.from(classes).join(" ")
-    result += classList ? `<span class="${classList}">${encoded}</span>` : encoded
+    const styles = []
+    if (inlineColor) styles.push(`color:${inlineColor}`)
+    if (inlineBackground) styles.push(`background-color:${inlineBackground}`)
+    const classAttr = classList ? ` class="${classList}"` : ""
+    const styleAttr = styles.length ? ` style="${styles.join(";")}"` : ""
+    result += classAttr || styleAttr ? `<span${classAttr}${styleAttr}>${encoded}</span>` : encoded
     currentText = ""
   }
 
@@ -182,23 +207,31 @@ function formatChatMessage(value) {
     const token = tokens[index]
     const nextToken = tokens[index + 1]?.trim() || ""
 
-    if (/^\^.$/.test(token)) {
+    if (/^\^/.test(token)) {
       flush()
       if (token === "^r") {
         classes.clear()
+        inlineColor = ""
+        inlineBackground = ""
       } else if (token === "^p") {
         result += "<br>"
       } else if (token === "^*") {
         const cls = globalThis.beammpTextStyleMap?.[token]
         if (cls) classes.add(cls)
         if (globalThis.iconsOrig?.[nextToken]) currentText = globalThis.iconsOrig[nextToken].glyph
+      } else if (/^\^#[0-9a-fA-F]{6}$/.test(token)) {
+        clearForeground()
+        inlineColor = `#${token.slice(2)}`
+      } else if (/^\^@[0-9a-fA-F]{6}$/.test(token)) {
+        clearBackground()
+        inlineBackground = `#${token.slice(2)}`
       } else {
         const cls = globalThis.beammpTextStyleMap?.[token]
-        if (cls?.startsWith("color-") || cls?.startsWith("bg-")) {
-          const family = `${cls.split("-")[0]}-`
-          for (const activeClass of [...classes]) {
-            if (activeClass.startsWith(family)) classes.delete(activeClass)
-          }
+        if (cls && isForegroundClass(cls)) {
+          clearForeground()
+          classes.add(cls)
+        } else if (cls && isBackgroundClass(cls)) {
+          clearBackground()
           classes.add(cls)
         } else if (cls) {
           classes.add(cls)

@@ -299,49 +299,79 @@ function formatChatMessage(string) {
 
     let result = '';
     let currentText = '';
-    let classes = new Set();
+    const classes = new Set();
+    let inlineColor = '';
+    let inlineBackground = '';
 
     string = escapeHtml(string);
-    const tokens = string.split(/(\^.)/g);
+    // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
+    const tokens = string.split(/(\^(?:[#@][0-9a-fA-F]{6}|.))/g);
+
+    const isForegroundClass = (cls) => cls.startsWith('color-') || cls === 'rainbow';
+    const isBackgroundClass = (cls) => cls.startsWith('bg-');
+
+    const clearForeground = () => {
+        [...classes].forEach(c => isForegroundClass(c) && classes.delete(c));
+        inlineColor = '';
+    };
+    const clearBackground = () => {
+        [...classes].forEach(c => isBackgroundClass(c) && classes.delete(c));
+        inlineBackground = '';
+    };
 
     const flush = () => {
         if (!currentText) return;
         const classList = Array.from(classes);
-        result += classList.length
-            ? `<span class="${classList.join(' ')}">${currentText}</span>`
+        const styles = [];
+        if (inlineColor) styles.push('color:' + inlineColor);
+        if (inlineBackground) styles.push('background-color:' + inlineBackground);
+        const classAttr = classList.length ? ` class="${classList.join(' ')}"` : '';
+        const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
+        result += (classAttr || styleAttr)
+            ? `<span${classAttr}${styleAttr}>${currentText}</span>`
             : currentText;
         currentText = '';
     };
 
     for (let i = 0; i < tokens.length; i++) {
-		const token = tokens[i];
-		const nextToken = tokens[i+1]?.trim() || '';
-		if (/^\^.$/.test(token)) {
-			flush();
-			if (token === '^r') {
-				classes.clear();
-			} else if (token === '^p') {
-				currentText += '<br>';
-			} else if (token === '^*') {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if(cls) classes.add(cls);
-				if (iconsOrig[nextToken]) {
-					currentText = iconsOrig[nextToken].glyph
-				};
-			} else {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if (cls?.startsWith('color-') || cls?.startsWith('bg-')) {
-					const family = cls.split('-')[0] + '-';
-					[...classes].forEach(c => c.startsWith(family) && classes.delete(c));
-					classes.add(cls);
-				} else if (cls) {
-					classes.add(cls);
-				}
-			}
-		} else if (tokens[i-1]!='^*') {
-			currentText += token;
-		}
-	}
+        const token = tokens[i];
+        const nextToken = tokens[i+1]?.trim() || '';
+        if (/^\^/.test(token)) {
+            flush();
+            if (token === '^r') {
+                classes.clear();
+                inlineColor = '';
+                inlineBackground = '';
+            } else if (token === '^p') {
+                currentText += '<br>';
+            } else if (token === '^*') {
+                const cls = globalThis.beammpTextStyleMap?.[token];
+                if(cls) classes.add(cls);
+                if (iconsOrig[nextToken]) {
+                    currentText = iconsOrig[nextToken].glyph
+                };
+            } else if (/^\^#[0-9a-fA-F]{6}$/.test(token)) {
+                clearForeground();
+                inlineColor = '#' + token.slice(2);
+            } else if (/^\^@[0-9a-fA-F]{6}$/.test(token)) {
+                clearBackground();
+                inlineBackground = '#' + token.slice(2);
+            } else {
+                const cls = globalThis.beammpTextStyleMap?.[token];
+                if (cls && isForegroundClass(cls)) {
+                    clearForeground();
+                    classes.add(cls);
+                } else if (cls && isBackgroundClass(cls)) {
+                    clearBackground();
+                    classes.add(cls);
+                } else if (cls) {
+                    classes.add(cls);
+                }
+            }
+        } else if (tokens[i-1] != '^*') {
+            currentText += token;
+        }
+    }
 
     flush();
     return result;

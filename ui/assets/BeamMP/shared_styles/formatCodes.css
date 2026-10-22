@@ -44,6 +44,14 @@
 /* Extended server codes: ^s shadow, ^R/^G/^B/^K/^W background colours, ^z animated rainbow, ^+ / ^++ larger text. */
 .font-150 { font-size: 1.5em; }
 .font-200 { font-size: 2em; }
+
+/* Typeface codes: ^A sans, ^S serif, ^M mono, ^C comic, ^I impact. */
+.typeface-sans { font-family: Arial, Helvetica, sans-serif; }
+.typeface-serif { font-family: Georgia, "Times New Roman", Times, serif; }
+.typeface-mono { font-family: Consolas, "Courier New", monospace; }
+.typeface-comic { font-family: "Comic Sans MS", "Comic Sans", cursive; }
+.typeface-impact { font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; }
+
 .drop-shadow { text-shadow: 0.1em 0.1em 0.15em #000, 0 0 0.25em #000; }
 .bg-red { background-color: #AA0000; }
 .bg-green { background-color: #00AA00; }

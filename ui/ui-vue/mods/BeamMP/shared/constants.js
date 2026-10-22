@@ -38,6 +38,11 @@ export const BEAMMP_TEXT_STYLE_MAP = {
   '^z': 'rainbow',
   '^+': 'font-150',
   '^++': 'font-200',
+  '^A': 'typeface-sans',
+  '^S': 'typeface-serif',
+  '^M': 'typeface-mono',
+  '^C': 'typeface-comic',
+  '^I': 'typeface-impact',
 }
 
 globalThis.beammpTextStyleMap = BEAMMP_TEXT_STYLE_MAP

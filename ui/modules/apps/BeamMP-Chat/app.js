@@ -310,6 +310,7 @@ function formatChatMessage(string) {
     const isForegroundClass = (cls) => cls.startsWith('color-') || cls === 'rainbow';
     const isBackgroundClass = (cls) => cls.startsWith('bg-');
     const isFontClass = (cls) => cls.startsWith('font-');
+    const isTypefaceClass = (cls) => cls.startsWith('typeface-');
 
     const clearForeground = () => {
         [...classes].forEach(c => isForegroundClass(c) && classes.delete(c));
@@ -321,6 +322,9 @@ function formatChatMessage(string) {
     };
     const clearFont = () => {
         [...classes].forEach(c => isFontClass(c) && classes.delete(c));
+    };
+    const clearTypeface = () => {
+        [...classes].forEach(c => isTypefaceClass(c) && classes.delete(c));
     };
 
     const flush = () => {
@@ -370,6 +374,9 @@ function formatChatMessage(string) {
                     classes.add(cls);
                 } else if (cls && isFontClass(cls)) {
                     clearFont();
+                    classes.add(cls);
+                } else if (cls && isTypefaceClass(cls)) {
+                    clearTypeface();
                     classes.add(cls);
                 } else if (cls) {
                     classes.add(cls);

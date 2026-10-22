@@ -305,10 +305,11 @@ function formatChatMessage(string) {
 
     string = escapeHtml(string);
     // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
-    const tokens = string.split(/(\^(?:[#@][0-9a-fA-F]{6}|.))/g);
+    const tokens = string.split(/(\^(?:\+{1,2}|[#@][0-9a-fA-F]{6}|.))/g);
 
     const isForegroundClass = (cls) => cls.startsWith('color-') || cls === 'rainbow';
     const isBackgroundClass = (cls) => cls.startsWith('bg-');
+    const isFontClass = (cls) => cls.startsWith('font-');
 
     const clearForeground = () => {
         [...classes].forEach(c => isForegroundClass(c) && classes.delete(c));
@@ -317,6 +318,9 @@ function formatChatMessage(string) {
     const clearBackground = () => {
         [...classes].forEach(c => isBackgroundClass(c) && classes.delete(c));
         inlineBackground = '';
+    };
+    const clearFont = () => {
+        [...classes].forEach(c => isFontClass(c) && classes.delete(c));
     };
 
     const flush = () => {
@@ -363,6 +367,9 @@ function formatChatMessage(string) {
                     classes.add(cls);
                 } else if (cls && isBackgroundClass(cls)) {
                     clearBackground();
+                    classes.add(cls);
+                } else if (cls && isFontClass(cls)) {
+                    clearFont();
                     classes.add(cls);
                 } else if (cls) {
                     classes.add(cls);

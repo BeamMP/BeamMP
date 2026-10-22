@@ -166,7 +166,7 @@ function formatChatMessage(value) {
   }
 
   // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
-  const tokens = string.split(/(\^(?:[#@][0-9a-fA-F]{6}|.))/g)
+  const tokens = string.split(/(\^(?:\+{1,2}|[#@][0-9a-fA-F]{6}|.))/g)
   const classes = new Set()
   let inlineColor = ""
   let inlineBackground = ""
@@ -175,6 +175,7 @@ function formatChatMessage(value) {
 
   const isForegroundClass = (cls) => cls.startsWith("color-") || cls === "rainbow"
   const isBackgroundClass = (cls) => cls.startsWith("bg-")
+  const isFontClass = (cls) => cls.startsWith("font-")
 
   const clearForeground = () => {
     for (const activeClass of [...classes]) {
@@ -188,6 +189,12 @@ function formatChatMessage(value) {
       if (isBackgroundClass(activeClass)) classes.delete(activeClass)
     }
     inlineBackground = ""
+  }
+
+  const clearFont = () => {
+    for (const activeClass of [...classes]) {
+      if (isFontClass(activeClass)) classes.delete(activeClass)
+    }
   }
 
   const flush = () => {
@@ -232,6 +239,9 @@ function formatChatMessage(value) {
           classes.add(cls)
         } else if (cls && isBackgroundClass(cls)) {
           clearBackground()
+          classes.add(cls)
+        } else if (cls && isFontClass(cls)) {
+          clearFont()
           classes.add(cls)
         } else if (cls) {
           classes.add(cls)

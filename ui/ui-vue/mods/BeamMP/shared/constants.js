@@ -36,6 +36,8 @@ export const BEAMMP_TEXT_STYLE_MAP = {
   '^K': 'bg-black',
   '^W': 'bg-white',
   '^z': 'rainbow',
+  '^+': 'font-150',
+  '^++': 'font-200',
 }
 
 globalThis.beammpTextStyleMap = BEAMMP_TEXT_STYLE_MAP

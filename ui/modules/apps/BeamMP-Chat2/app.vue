@@ -19,7 +19,10 @@
         >
           <span class="chat-message-timestamp">{{ message.time }}</span>
           <span v-if="message.html" class="chat-message-content" v-html="message.html"></span>
-          <span v-else class="chat-message-content">{{ message.text }}</span>
+          <template v-else>
+            <span v-if="message.nameColor" class="chat-message-username" :style="{ color: message.nameColor }">{{ message.username }}</span>
+            <span class="chat-message-content">{{ message.text }}</span>
+          </template>
         </li>
       </ul>
 
@@ -127,6 +130,16 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;")
 }
 
+function colorToRgba(color) {
+  if (!color) return null
+  const r = color.r ?? color[0]
+  const g = color.g ?? color[1]
+  const b = color.b ?? color[2]
+  const a = color.a ?? color[3] ?? 255
+  if (r == null || g == null || b == null) return null
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`
+}
+
 function isSafeServerHtml(html) {
   const parser = new DOMParser()
   const doc = parser.parseFromString(`<div>${html}</div>`, "text/html")
@@ -181,9 +194,10 @@ function formatChatMessage(value) {
         if (globalThis.iconsOrig?.[nextToken]) currentText = globalThis.iconsOrig[nextToken].glyph
       } else {
         const cls = globalThis.beammpTextStyleMap?.[token]
-        if (cls?.startsWith("color-")) {
+        if (cls?.startsWith("color-") || cls?.startsWith("bg-")) {
+          const family = `${cls.split("-")[0]}-`
           for (const activeClass of [...classes]) {
-            if (activeClass.startsWith("color-")) classes.delete(activeClass)
+            if (activeClass.startsWith(family)) classes.delete(activeClass)
           }
           classes.add(cls)
         } else if (cls) {
@@ -205,6 +219,7 @@ function storeChatMessages() {
     JSON.stringify(messages.value.slice(-70).map((message) => ({
       message: message.raw,
       time: message.time,
+      color: message.color,
     })))
   )
 }
@@ -216,19 +231,36 @@ function loadStoredMessages() {
   try {
     const parsed = JSON.parse(storedMessages)
     if (!Array.isArray(parsed)) return
-    messages.value = parsed.slice(-70).map((entry, index) => createMessage(entry.message, entry.time, `stored-${index}`))
+    messages.value = parsed.slice(-70).map((entry, index) => createMessage(entry.message, entry.time, `stored-${index}`, entry.color))
   } catch {
     messages.value = []
   }
 }
 
-function createMessage(message, time, key) {
+function createMessage(message, time, key, color = null) {
   const raw = String(message ?? "")
   const formatted = raw.startsWith("Server: ") ? formatChatMessage(raw) : ""
+  let nameColor = formatted ? null : colorToRgba(color)
+  let username = ""
+  let text = raw
+
+  if (nameColor) {
+    const usernameEnd = raw.indexOf(": ")
+    if (usernameEnd > 0) {
+      username = raw.slice(0, usernameEnd + 2)
+      text = raw.slice(usernameEnd + 2)
+    } else {
+      nameColor = null
+    }
+  }
+
   return {
     key,
     raw,
-    text: raw,
+    color,
+    text,
+    username,
+    nameColor,
     html: formatted,
     time,
     createdAt: Date.now(),
@@ -323,8 +355,8 @@ function onInputKeydown(event) {
   }
 }
 
-function addMessage(message, time = currentTimeString(), messageId = null) {
-  const entry = createMessage(message, time, messageId ?? `local-${Date.now()}-${messages.value.length}`)
+function addMessage(message, time = currentTimeString(), messageId = null, color = null) {
+  const entry = createMessage(message, time, messageId ?? `local-${Date.now()}-${messages.value.length}`, color)
   messages.value = [...messages.value, entry].slice(-70)
   storeChatMessages()
   scrollToLastMessage()
@@ -334,7 +366,7 @@ function onBeamMPChatMessage(payload) {
   if (!payload || payload.id <= lastMessageId.value) return
   lastMessageId.value = payload.id
   const time = currentTimeString()
-  addMessage(payload.message, time, `remote-${payload.id}`)
+  addMessage(payload.message, time, `remote-${payload.id}`, payload.colorRgb || payload.color)
 }
 
 function onClearHistory() {

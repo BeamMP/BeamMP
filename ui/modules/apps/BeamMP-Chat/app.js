@@ -75,7 +75,7 @@ app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, 
 
 		if (chatMessages) {
 			chatMessages.map((v, i) => {
-				addMessage(v.message, v.time)
+				addMessage(v.message, v.time, v.color)
 			})
 		}
 
@@ -161,8 +161,9 @@ app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, 
 		
 			var time = hour + ":" + minute + ":" + second;
 			
-			storeChatMessage({message: data.message, time: time})
-			addMessage(data.message);
+			const roleColor = data.colorRgb || data.color;
+			storeChatMessage({message: data.message, time: time, color: roleColor})
+			addMessage(data.message, null, roleColor);
 		}
 	});
 
@@ -284,6 +285,16 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;")
 }
 
+function colorToRgba(color) {
+  if (!color) return null;
+  const r = color.r ?? color[0];
+  const g = color.g ?? color[1];
+  const b = color.b ?? color[2];
+  const a = color.a ?? color[3] ?? 255;
+  if (r == null || g == null || b == null) return null;
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+}
+
 function formatChatMessage(string) {
 
     let result = '';
@@ -319,8 +330,9 @@ function formatChatMessage(string) {
 				};
 			} else {
 				const cls = globalThis.beammpTextStyleMap?.[token];
-				if (cls?.startsWith('color-')) {
-					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
+				if (cls?.startsWith('color-') || cls?.startsWith('bg-')) {
+					const family = cls.split('-')[0] + '-';
+					[...classes].forEach(c => c.startsWith(family) && classes.delete(c));
 					classes.add(cls);
 				} else if (cls) {
 					classes.add(cls);
@@ -374,7 +386,7 @@ function retrieveChatMessages() {
 	}
 }
 
-function addMessage(msg, time = null) {
+function addMessage(msg, time = null, color = null) {
 	//getting current time and adding it to the message before displaying
 	if (time == null) {
 		var now = new Date();
@@ -414,8 +426,19 @@ function addMessage(msg, time = null) {
 		const formattedInnerHtml = formatChatMessage(msgText);
 		chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
 	} else {
-		const textNode = document.createTextNode(msgText);
-		chatMessageNode.appendChild(textNode);
+		const usernameColor = colorToRgba(color);
+		const usernameEnd = msgText.indexOf(": ");
+		if (usernameColor && usernameEnd > 0) {
+			const usernameNode = document.createElement("span");
+			usernameNode.className = "chat-message-username";
+			usernameNode.style.color = usernameColor;
+			usernameNode.textContent = msgText.slice(0, usernameEnd + 2);
+			chatMessageNode.appendChild(usernameNode);
+			chatMessageNode.appendChild(document.createTextNode(msgText.slice(usernameEnd + 2)));
+		} else {
+			const textNode = document.createTextNode(msgText);
+			chatMessageNode.appendChild(textNode);
+		}
 	}
 
 	chatList.appendChild(chatMessageNode);

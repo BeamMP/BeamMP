@@ -479,8 +479,9 @@ local function chatMessage(rawMessage) -- chat message received (angular)
         username = username .. player.role.shorttag
 		local c = player.role.forecolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
+		local roleColor = {r = c.r, g = c.g, b = c.b, a = c.a}
 		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
-		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter, color = color})
+		guihooks.trigger("onBeamMPChatMessage", {username = username, message = message, id = chatcounter, color = color, colorRgb = roleColor})
 		-- For IMGUI
 		chatWindow.addMessage(username, msg, chatcounter, color)
 	else

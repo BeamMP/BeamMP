@@ -29,6 +29,13 @@ export const BEAMMP_TEXT_STYLE_MAP = {
   '^m': 'line-through',
   '^n': 'underline',
   '^o': 'italic',
+  '^s': 'drop-shadow',
+  '^R': 'bg-red',
+  '^G': 'bg-green',
+  '^B': 'bg-blue',
+  '^K': 'bg-black',
+  '^W': 'bg-white',
+  '^z': 'rainbow',
 }
 
 globalThis.beammpTextStyleMap = BEAMMP_TEXT_STYLE_MAP

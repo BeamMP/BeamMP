@@ -165,7 +165,10 @@ app.controller("BeamMPSessionController", ['$scope', '$mdDialog', 'Settings', fu
 	});
 
 	$scope.$on('onBeamMPSetPlayerCount', function (event, count) {
-		document.getElementById("Session-PlayerCount").innerHTML = count;
+		let playercount = document.getElementById("Session-PlayerCount")
+		if (playercount) {
+			playercount.innerHTML = count;
+		}
 	});
 }]);
 

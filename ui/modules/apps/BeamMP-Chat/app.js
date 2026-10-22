@@ -437,29 +437,40 @@ function addMessage(msg, time = null, color = null) {
 		time = hour + ":" + minute + ":" + second;
 	}
 
-  const msgText = "" + msg
-	msg = time + " " + msg;
+  let msgText = "" + msg
+	const isServerMessage = msgText.startsWith("Server: ")
+	let hideTimestamp = false
+
+	if (isServerMessage) {
+		// ^t and ^x are per-message flags, not formatting styles.
+		hideTimestamp = msgText.includes("^t")
+		const hideServerPrefix = msgText.includes("^x")
+		msgText = msgText.replace(/\^[tx]/g, "")
+		if (hideServerPrefix) msgText = msgText.slice("Server: ".length)
+	}
 
 	// Create the message node
 	const chatMessageNode = document.createElement("li");
 	chatMessageNode.className = "chat-message";
 	fadeNode(chatMessageNode);
 
-	// create node for the timestamp
-	const messageTimestampNode = document.createElement("span");
-	messageTimestampNode.className = "chat-message-timestamp";
+	if (!hideTimestamp) {
+		// create node for the timestamp
+		const messageTimestampNode = document.createElement("span");
+		messageTimestampNode.className = "chat-message-timestamp";
 
-	const timestampTextNode = document.createTextNode(time);
-	messageTimestampNode.appendChild(timestampTextNode);
+		const timestampTextNode = document.createTextNode(time);
+		messageTimestampNode.appendChild(timestampTextNode);
 
-	chatMessageNode.appendChild(messageTimestampNode)
+		chatMessageNode.appendChild(messageTimestampNode)
+	}
 
 	// create text for the message itself, add it to chat message list
 	const chatList = document.getElementById("chat-list");
 
 	// check if this message is a server message before
 	// doing rich formatting
-	if (msgText.startsWith("Server: ")) {
+	if (isServerMessage) {
 		const formattedInnerHtml = formatChatMessage(msgText);
 		chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
 	} else {

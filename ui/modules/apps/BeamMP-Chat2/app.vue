@@ -17,8 +17,8 @@
           class="chat-message"
           :style="messageStyle(message)"
         >
-          <span class="chat-message-timestamp">{{ message.time }}</span>
-          <span v-if="message.html" class="chat-message-content" v-html="message.html"></span>
+          <span v-if="!message.hideTimestamp" class="chat-message-timestamp">{{ message.time }}</span>
+          <span v-if="message.isServerMessage" class="chat-message-content" v-html="message.html"></span>
           <template v-else>
             <span v-if="message.nameColor" class="chat-message-username" :style="{ color: message.nameColor }">{{ message.username }}</span>
             <span class="chat-message-content">{{ message.text }}</span>
@@ -282,8 +282,22 @@ function loadStoredMessages() {
 
 function createMessage(message, time, key, color = null) {
   const raw = String(message ?? "")
-  const formatted = raw.startsWith("Server: ") ? formatChatMessage(raw) : ""
-  let nameColor = formatted ? null : colorToRgba(color)
+  const isServerMessage = raw.startsWith("Server: ")
+  let clean = raw
+  let hideTimestamp = false
+  let hideServerPrefix = false
+
+  if (isServerMessage) {
+    // ^t and ^x are per-message flags, not formatting styles.
+    hideTimestamp = raw.includes("^t")
+    hideServerPrefix = raw.includes("^x")
+    clean = raw.replace(/\^[tx]/g, "")
+  }
+
+  let formatted = isServerMessage ? formatChatMessage(clean) : ""
+  if (hideServerPrefix) formatted = formatted.replace(/^Server: /, "")
+
+  let nameColor = isServerMessage ? null : colorToRgba(color)
   let username = ""
   let text = raw
 
@@ -305,6 +319,8 @@ function createMessage(message, time, key, color = null) {
     username,
     nameColor,
     html: formatted,
+    isServerMessage,
+    hideTimestamp,
     time,
     createdAt: Date.now(),
   }

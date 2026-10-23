@@ -123,6 +123,19 @@ local function textToColorAndText(text, nocolor)
     return txtList
 end
 
+--- Removes formatting codes that ImGui cannot render.
+--- @param text string The input text to be formatted.
+--- @return string Returns the text without unsupported formatting codes.
+local function stripUnsupportedCodes(text)
+    -- ImGui only supports colour changes; drop the codes it cannot represent.
+    text = text:gsub("%^%+%+", "")
+    text = text:gsub("%^%+", "")
+    text = text:gsub("%^#[%x][%x][%x][%x][%x][%x]", "")
+    text = text:gsub("%^@[%x][%x][%x][%x][%x][%x]", "")
+    text = text:gsub("%^[lmnopstxzASMCIRGBKW]", "")
+    return text
+end
+
 --- Formats a text string with color codes and returns a list of colored text segments for use in IMGUI.
 --- @param text string The input text to be formatted.
 --- @param nocolor boolean (optional) If true, all text segments will have the default color.
@@ -242,11 +255,19 @@ end
 --- @param id number The ID of the message.
 --- @param color string The color of the message.
 local function addMessage(username, message, id, color)
-    if(username == "Server") then
-        message = formatTextWithColor(message, false)
-    else
-        message = formatTextWithColor(message, true)
+    local isServerMessage = username == "Server"
+    local hideTimestamp = false
+    local hideServerPrefix = false
+
+    if isServerMessage then
+        -- ^t and ^x are per-message flags, not formatting styles.
+        hideTimestamp = message:find("^t", 1, true) ~= nil
+        hideServerPrefix = message:find("^x", 1, true) ~= nil
+        message = message:gsub("%^[tx]", "")
     end
+
+    message = stripUnsupportedCodes(message)
+    message = formatTextWithColor(message, not isServerMessage)
 
     local messageTable = {
         username = username,
@@ -254,7 +275,9 @@ local function addMessage(username, message, id, color)
         message = message,
         sentTime = os.time(),
         id = #M.chatMessages + 1,
-        currentWidth = imgui.CalcTextSize(username .. ": ").x,
+        hideTimestamp = hideTimestamp,
+        hideServerPrefix = hideServerPrefix,
+        currentWidth = hideServerPrefix and 0 or imgui.CalcTextSize(username .. ": ").x,
         currentHeight = imgui.CalcTextSize(username .. ": ").y
     }
     if messageTable.color then
@@ -331,19 +354,23 @@ local function render()
 
             columnWidth = columnWidth - 10
             
-            if message.color then
+            if not message.hideServerPrefix then
+                if message.color then
                     imgui.TextColored(message.color, message.username)
-                imgui.SameLine()
-            else
-                imgui.Text(message.username .. ": ")
-                imgui.SameLine()
+                    imgui.SameLine()
+                else
+                    imgui.Text(message.username .. ": ")
+                    imgui.SameLine()
+                end
             end
       
             local currentWidth = message.currentWidth
 
             for _, v in ipairs(message.message) do
                 if (currentWidth + v.width <= columnWidth) then
-                    imgui.SameLine(currentWidth)
+                    if currentWidth > 0 then
+                        imgui.SameLine(currentWidth)
+                    end
                 else
                     currentWidth = 0
                 end
@@ -356,7 +383,9 @@ local function render()
             end
 
             imgui.NextColumn()
-            imgui.Text(os.date("%H:%M", message.sentTime))
+            if not message.hideTimestamp then
+                imgui.Text(os.date("%H:%M", message.sentTime))
+            end
 
             imgui.Columns(1)
         end

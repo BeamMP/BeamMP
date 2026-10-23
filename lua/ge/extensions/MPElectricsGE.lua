@@ -13,7 +13,7 @@ local M = {}
 
 
 
-local lastElectrics
+local lastElectrics = {} -- [gameVehicleID] = last sent data, per vehicle so owning several vehicles doesn't defeat the duplicate check
 
 
 --- Called on specified interval by MPUpdatesGE to simulate our own tick event to collect data.
@@ -34,9 +34,9 @@ end
 local function sendElectrics(data, gameVehicleID)
 	if MPGameNetwork.launcherConnected() then
 		local serverVehicleID = MPVehicleGE.getServerVehicleID(gameVehicleID) -- Get serverVehicleID
-		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics then -- If serverVehicleID not null and player own vehicle
+		if serverVehicleID and MPVehicleGE.isOwn(gameVehicleID) and data ~= lastElectrics[gameVehicleID] then -- If serverVehicleID not null and player own vehicle
 			MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('We',serverVehicleID,data))
-			lastElectrics = data
+			lastElectrics[gameVehicleID] = data
 		end
 	end
 end
@@ -50,7 +50,7 @@ local function applyElectrics(data, serverVehicleID)
 	local veh = getObjectByID(gameVehicleID)
 	if veh then
 		if not MPVehicleGE.isOwn(gameVehicleID) then
-			veh:queueLuaCommand("MPElectricsVE.applyElectrics(mime.unb64(\'".. MPHelpers.b64encode(data) .."\'))")
+			veh:queueLuaCommand("if MPElectricsVE then MPElectricsVE.applyElectrics(mime.unb64(\'".. MPHelpers.b64encode(data) .."\')) end")
 		end
 	end
 end
@@ -76,10 +76,21 @@ local function handle(rawData)
 end
 
 
+local function onVehicleDestroyed(gameVehicleID)
+	lastElectrics[gameVehicleID] = nil
+end
+
+-- so the first electrics are sent again when you join the next server
+local function onBeamMPServerLeave()
+	lastElectrics = {}
+end
+
 
 M.tick 			 = tick
 M.handle     	 = handle
 M.sendElectrics  = sendElectrics
+M.onVehicleDestroyed  = onVehicleDestroyed
+M.onBeamMPServerLeave = onBeamMPServerLeave
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 
 return M

@@ -363,7 +363,8 @@ function applyFilters(items, view) {
 
 function readServerList(data) {
   const list = Array.isArray(data) ? data : []
-  state.servers.value = list.map((server, index) => normalizeServer(server, index))
+  const newServers = list.map((server, index) => normalizeServer(server, index))
+  state.servers.value = [...newServers]
   if (state.selectedServerId.value) {
     const exists = state.servers.value.some(server => server.id === state.selectedServerId.value)
     if (!exists) state.selectedServerId.value = ""

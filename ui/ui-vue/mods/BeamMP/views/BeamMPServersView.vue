@@ -214,7 +214,7 @@
           <div class="range-row">
             <input class="range-input" type="range" min="0" :max="100" :value="modSizeMaxConverted"
               @input="event => updateNumber('sliderMaxModSize', event.target.value)" />
-            <span>{{ maxModSizeLabel }}</span>
+            <span>{{ maxModSizeLabel === 'Max' ? $tt("ui.beammp.serverBrowser.filters.modSizeMax") : maxModSizeLabel }}</span>
           </div>
         </section>
 
@@ -742,10 +742,19 @@ watch(
 watch(
   visibleServers,
   async () => {
+    const tbody = serversTbody.value
+    const savedScrollTop = tbody ? tbody.scrollTop : 0
+
     resetRenderedServers()
     await nextTick()
-    const tbody = serversTbody.value
-    if (tbody) tbody.scrollTop = 0
+
+    if (tbody) {
+      if (savedScrollTop === 0 && tbody.scrollTop === 0) {
+        tbody.scrollTop = 0
+      } else {
+        tbody.scrollTop = savedScrollTop
+      }
+    }
     ensureRenderedServersFillContainer()
   },
   { immediate: true },

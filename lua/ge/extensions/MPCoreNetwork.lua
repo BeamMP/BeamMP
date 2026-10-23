@@ -27,7 +27,7 @@ local isConnecting = false
 local proxyPort = ""
 local socketPartialData
 local launcherVersion = "" -- used only for the server list
-local modVersion = "4.22.6" -- the mod version
+local modVersion = "4.23.1" -- the mod version
 -- server
 
 local serverList -- server list JSON
@@ -654,10 +654,6 @@ local function onUpdate(dt)
 				end
 
 				local received = recvState.data
-
-				if settings.getValue("showDebugOutput") then -- TODO: add option to filter out heartbeat packets
-					log('M', 'onUpdate', 'Receiving Data ('..#received..'): '..received)
-				end
 
 				-- break it up into code + data
 				local code = string.sub(received, 1, 1)

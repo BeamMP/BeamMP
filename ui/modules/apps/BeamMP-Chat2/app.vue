@@ -546,6 +546,10 @@ onUnmounted(() => {
   background: rgba(var(--bng-cool-gray-700-rgb), 0.82);
 }
 
+.beammpChat2 .chat-message-content {
+  white-space: pre-wrap;
+}
+
 .beammpChat2 .chat-message-timestamp {
   padding-right: 0.45rem;
   color: var(--bng-cool-gray-300);

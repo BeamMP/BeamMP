@@ -60,12 +60,13 @@
 .bg-white { background-color: #FFFFFF; }
 
 .rainbow {
-    background-image: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #ff00ff, #ff0000);
+    background-image: linear-gradient(90deg, #ff5555, #ffaa00, #ffff55, #55ff55, #55ffff, #5599ff, #ff55ff, #ff5555);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+    text-shadow: none;
     animation: beammp-rainbow 3s linear infinite;
 }
 

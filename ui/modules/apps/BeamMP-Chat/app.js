@@ -161,7 +161,7 @@ app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, 
 		
 			var time = hour + ":" + minute + ":" + second;
 			
-			const roleColor = data.colorRgb || data.color;
+			const roleColor = data.color;
 			storeChatMessage({message: data.message, time: time, color: roleColor})
 			addMessage(data.message, null, roleColor);
 		}

@@ -435,7 +435,7 @@ function onBeamMPChatMessage(payload) {
   if (!payload || payload.id <= lastMessageId.value) return
   lastMessageId.value = payload.id
   const time = currentTimeString()
-  addMessage(payload.message, time, `remote-${payload.id}`, payload.colorRgb || payload.color)
+  addMessage(payload.message, time, `remote-${payload.id}`, payload.color)
 }
 
 function onClearHistory() {

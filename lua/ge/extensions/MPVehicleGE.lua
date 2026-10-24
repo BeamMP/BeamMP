@@ -75,19 +75,22 @@ local drawSphere = ffiFound and ffi.C.BNG_DBG_DRAW_Sphere or nop
 -- @tfield roleToInfo_subtable RoleName_N ..
 -- @usage local roleInfo = roleToInfo["USER"]
 local roleToInfo = {
-	['USER']	= { backcolor = { r = 000, g = 000, b = 000 }, forecolor = { r = 255, g = 255, b = 255 }, tag = "", shorttag = "" },
-	['EA']		= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Early Access]", shorttag = " [EA]" },
-	['CONT']	= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Contributor]", shorttag = " [CO]" },
-	['YT']		= { backcolor = { r = 200, g = 000, b = 000 }, forecolor = { r = 255, g = 000, b = 000 }, tag = " [Content Creator]", shorttag = " [CC]" },
-	['ET']		= { backcolor = { r = 210, g = 214, b = 109 }, forecolor = { r = 210, g = 214, b = 109 }, tag = " [Events Team]", shorttag = " [Events]" },
-	['SUPPORT']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Support]", shorttag = " [Staff]" },
-	['STAFF']	= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [BeamMP Staff]", shorttag = " [Staff]" },
-	['MOD']		= { backcolor = { r = 068, g = 109, b = 184 }, forecolor = { r = 099, g = 154, b = 255 }, tag = " [Moderator]", shorttag = " [Mod]" },
-	['PM']		= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [BeamMP Project Manager]", shorttag = " [PM]" },
-	['MDEV']	= { backcolor = { r = 194, g = 055, b = 055 }, forecolor = { r = 255, g = 070, b = 101 }, tag = " [BeamMP Dev]", shorttag = " [Dev]" },
-	['NGDEV']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Developer]", shorttag = " [BNG]" },
-	['NGSTAFF']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Staff]", shorttag = " [BNG]" },
-	['NGAFFIL']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
+    ['USER']	= { backcolor = { r = 000, g = 000, b = 000 }, forecolor = { r = 255, g = 255, b = 255 }, tag = "", shorttag = "" },
+    ['EA']	= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Early Access]", shorttag = " [EA]" },
+    ['CONT']	= { backcolor = { r = 069, g = 000, b = 150 }, forecolor = { r = 193, g = 139, b = 255 }, tag = " [Contributor]", shorttag = " [CO]" },
+    ['YT']	= { backcolor = { r = 200, g = 000, b = 000 }, forecolor = { r = 255, g = 000, b = 000 }, tag = " [Content Creator]", shorttag = " [CC]" },
+    ['ET']	= { backcolor = { r = 038, g = 157, b = 014 }, forecolor = { r = 038, g = 157, b = 014 }, tag = " [BeamMP Events Team]", shorttag = " [EVENTS]" },
+    ['MT']	= { backcolor = { r = 255, g = 217, b = 102 }, forecolor = { r = 255, g = 217, b = 102 }, tag = " [BeamMP Media Team]", shorttag = " [MEDIA]" },
+    ['CM']	= { backcolor = { r = 255, g = 217, b = 102 }, forecolor = { r = 255, g = 217, b = 102 }, tag = " [BeamMP Community Manager]", shorttag = " [CM]" },
+    ['IT']	= { backcolor = { r = 069, g = 255, b = 165 }, forecolor = { r = 069, g = 255, b = 165 }, tag = " [BeamMP Infrastructure Team]", shorttag = " [INFRA]" },
+    ['SUPPORT']	= { backcolor = { r = 091, g = 143, b = 225 }, forecolor = { r = 091, g = 143, b = 225 }, tag = " [BeamMP Support]", shorttag = " [SUP]" },
+    ['STAFF']	= { backcolor = { r = 091, g = 143, b = 225 }, forecolor = { r = 091, g = 143, b = 225 }, tag = " [BeamMP Staff]", shorttag = " [STAFF]" },
+    ['MOD']	= { backcolor = { r = 255, g = 075, b = 000 }, forecolor = { r = 255, g = 180, b = 092 }, tag = " [BeamMP Moderator]", shorttag = " [MOD]" },
+    ['PM']	= { backcolor = { r = 218, g = 000, b = 078 }, forecolor = { r = 255, g = 000, b = 089 }, tag = " [BeamMP Project Manager]", shorttag = " [PM]" },
+    ['MDEV']	= { backcolor = { r = 194, g = 055, b = 055 }, forecolor = { r = 255, g = 070, b = 101 }, tag = " [BeamMP Dev]", shorttag = " [DEV]" },
+    ['NGDEV']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Developer]", shorttag = " [BNG]" },
+    ['NGSTAFF']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Staff]", shorttag = " [BNG]" },
+    ['NGAFFIL']	= { backcolor = { r = 252, g = 107, b = 003 }, forecolor = { r = 252, g = 107, b = 003 }, tag = " [BeamNG Affiliate]", shorttag = " [BNG]" }
 }
 
 local function getRoleInfoTable()

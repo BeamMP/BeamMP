@@ -23,7 +23,7 @@
         </li>
       </ul>
 
-      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat">
+      <form ref="chatBoxRef" class="chatbox" :style="chatBoxStyle" @submit.prevent="sendChat" @keydown.capture="onInputKeydown">
         <button
           class="chat-control-button chat2-send-button"
           type="submit"

@@ -35,9 +35,11 @@ local function onVehicleActiveChanged(vehicleID, active) -- delete unicycle if i
 		if MPVeh and not MPVeh.isLocal then return end
 		if not gameplay_walk then return end -- only loaded once the player has walked
 		local walkData = gameplay_walk.onSerialize()
-		if walkData.unicycleId and walkData.unicycleId == vehicleID then
-  			local unicycle = getObjectByID(vehicleID)
-			unicycle:delete()
+		for gamePlayerID, vehID in pairs(walkData.unicycleIds or {}) do
+			if vehID == vehicleID then
+  				local unicycle = getObjectByID(vehicleID)
+				unicycle:delete()
+			end
 		end
 	end
 end

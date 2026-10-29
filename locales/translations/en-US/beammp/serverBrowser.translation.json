@@ -55,5 +55,6 @@
     "ui.beammp.server.noTags": "No tags",
     "ui.beammp.serverBrowser.filters.advancedPlayerCount": "Advanced Player Count",
     "ui.beammp.serverBrowser.filters.advancedPlayerCountTooltip": "Set exact min and max player count filters",
-    "ui.beammp.serverBrowser.visibleServers": "servers"
+    "ui.beammp.serverBrowser.visibleServers": "servers",
+    "ui.beammp.serverBrowser.filters.modSizeMax": "Unlimited"
 }

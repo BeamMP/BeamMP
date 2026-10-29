@@ -10,14 +10,16 @@
 					<tr>
 						<th v-show="showPlayerIDs" class="playerslist-col-1">ID</th>
 						<th class="playerslist-col-2">
-							<span>{{ $tt("ui.apps.beammp.playerlist.players") }}</span>
-							<span class="player-count-badge">{{ players.length }}</span>
+							<span class="player-count-group">
+								<span>{{ $tt("ui.apps.beammp.playerlist.players") }}</span>
+								<span class="player-count-badge">{{ players.length }}</span>
+							</span>
 						</th>
 						<th class="playerslist-col-3">
 							<button
 								class="buttons direction-buttons"
 								type="button"
-								:title="$tt('ui.apps.beammp.playerlist.moveHorizontal') || 'Move player list horizontally'"
+								:title="$tt('ui.apps.beammp.playerlist.moveHorizontal')"
 								@click.stop="swapHorizontal"
 							>
 								↔
@@ -25,7 +27,7 @@
 							<button
 								class="buttons direction-buttons"
 								type="button"
-								:title="$tt('ui.apps.beammp.playerlist.moveVertical') || 'Move player list vertically'"
+								:title="$tt('ui.apps.beammp.playerlist.moveVertical')"
 								@click.stop="swapVertical"
 							>
 								↕
@@ -64,7 +66,7 @@
 				class="buttons show-button"
 				type="button"
 				:style="panelAnchorStyle"
-				:title="$tt('ui.apps.beammp.playerlist.toggle') || 'Show or hide player list'"
+				:title="$tt('ui.apps.beammp.playerlist.toggle')"
 				@click.stop="toggleShown"
 			>
 				{{ showButtonLabel }}
@@ -412,12 +414,20 @@ onUnmounted(() => {
 
 .ui-style-redesigned .plist-container,
 .ui-style-redesigned .show-button {
-	border-color: rgba(var(--bng-cool-gray-100-rgb), 0.24);
-	background: rgba(var(--bng-cool-gray-900-rgb), 0.34);
+	border-color: rgba(var(--bng-cool-gray-100-rgb), 0.34);
+	background: rgba(var(--bng-cool-gray-900-rgb), 0.68);
 	box-shadow:
 		0 0.1875rem 0.75rem rgba(var(--bng-off-black-rgb), 0.2),
 		inset 0 0 0 0.0625rem rgba(var(--bng-off-white-rgb), 0.04);
 	backdrop-filter: blur(0.625rem) saturate(115%);
+}
+
+.ui-style-redesigned .plist-container {
+	border-top: 0.1875rem solid var(--bng-orange-500);
+}
+
+.ui-style-redesigned .show-button {
+	border-left: 0.1875rem solid var(--bng-orange-500);
 }
 
 .players-table {
@@ -436,7 +446,15 @@ onUnmounted(() => {
 }
 
 .ui-style-redesigned .players-table tr:first-child {
-	background: rgba(var(--bng-cool-gray-700-rgb), 0.26);
+	background: rgba(var(--bng-cool-gray-700-rgb), 0.48);
+}
+
+.ui-style-redesigned .players-table tr:not(:first-child):nth-child(even) {
+	background: rgba(var(--bng-cool-gray-700-rgb), 0.2);
+}
+
+.ui-style-redesigned .players-table tr:not(:first-child):hover {
+	background: rgba(var(--bng-orange-500-rgb), 0.2);
 }
 
 .players-table th {
@@ -490,8 +508,17 @@ onUnmounted(() => {
 }
 
 .players-table tr.queued {
-	background: rgba(var(--bng-orange-500-rgb), 0.18);
+	background: rgba(var(--bng-orange-500-rgb), 0.24);
 	border-left: 0.1875rem solid var(--bng-orange-500);
+}
+
+.ui-style-redesigned .players-table tr:not(:first-child).queued,
+.ui-style-redesigned .players-table tr:not(:first-child).queued:hover {
+	background: rgba(var(--bng-orange-500-rgb), 0.24);
+}
+
+.ui-style-redesigned .players-table tr.queued .player-button {
+	color: var(--bng-off-white);
 }
 
 .player-id {
@@ -519,6 +546,14 @@ onUnmounted(() => {
 	min-width: 6.25rem;
 }
 
+.player-count-group {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3125rem;
+	line-height: 1;
+	vertical-align: middle;
+}
+
 .playerslist-col-3 {
 	width: 4rem;
 	padding: 0 !important;
@@ -531,14 +566,13 @@ onUnmounted(() => {
 	justify-content: center;
 	min-width: 1.0625rem;
 	height: 1.0625rem;
-	margin-left: 0.3125rem;
 	padding: 0 0.1875rem;
 	border-radius: 0.5625rem;
 	background: var(--bng-orange-500);
 	color: var(--bng-off-white);
 	font-size: 0.75rem;
 	line-height: 1;
-	vertical-align: middle;
+	font-variant-numeric: tabular-nums;
 	box-sizing: border-box;
 }
 

@@ -26,6 +26,7 @@
   "showSpectators"              : [ "cloud", true ],
   "showDebugOutput"             : [ "local" ],
   "enableNewChatMenu"           : [ "cloud", false ],
+  "chatMentionSound"            : [ "cloud", true ],
   "showAdvancedMPOptions"       : [ "cloud" ],
   "launcherPort"                : [ "local", 4444 ],
   "queueApplySpeed"             : [ "cloud", 2 ],

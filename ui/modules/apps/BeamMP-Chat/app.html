@@ -3,9 +3,67 @@
 	<link type="text/css" rel="stylesheet" href="/ui/assets/BeamMP/shared_styles/formatCodes.css">
     <div id="chat-window">
         <ul id="chat-list"></ul>
+        <button
+            class="new-messages-indicator"
+            ng-class="{'has-new-mention': unreadMentions > 0}"
+            type="button"
+            ng-if="unreadMessages > 0"
+            ng-click="jumpToLatest()"
+            aria-live="polite"
+        >
+            <span ng-if="unreadMentions > 0 && unreadMessages === unreadMentions">
+                {{'ui.apps.beammp.chat.newMention' | translate}}
+            </span>
+            <span ng-if="unreadMentions === 0 || unreadMessages !== unreadMentions">
+                {{'ui.apps.beammp.chat.newMessages' | translate}}
+            </span>
+            <span class="new-messages-count">{{unreadMentions > 0 && unreadMessages === unreadMentions ? unreadMentions : unreadMessages}}</span>
+            <span ng-if="unreadMentions > 0 && unreadMessages > unreadMentions">
+                ({{'ui.apps.beammp.chat.includingMentions' | translate:{count: unreadMentions}}})
+            </span>
+        </button>
+        <div class="reply-composer" ng-if="replyTarget">
+            <div class="reply-composer-content">
+                <span class="reply-composer-label">{{'ui.apps.beammp.chat.replyingTo' | translate}}</span>
+                <strong>{{replyTarget.author}}</strong>
+            </div>
+            <button class="reply-composer-cancel" type="button" ng-click="cancelReply()" title="Cancel reply" aria-label="Cancel reply">×</button>
+        </div>
         <form id="chatbox">
+			<div
+				class="mention-suggestions"
+				ng-if="mentionQuery !== null && mentionSuggestions.length"
+			>
+				<div class="mention-suggestions-heading">
+					{{:: 'ui.apps.beammp.chat.mentionMembers' | translate}}
+				</div>
+				<div
+					class="mention-suggestion-list"
+					ng-style="mentionSuggestionListStyle"
+					role="listbox"
+					aria-label="{{:: 'ui.apps.beammp.chat.mentionMembers' | translate}}"
+				>
+					<div
+						ng-repeat="player in mentionSuggestions track by $index"
+						class="mention-suggestion"
+						ng-class="{selected: $index === selectedMentionIndex}"
+						role="option"
+						aria-selected="{{$index === selectedMentionIndex}}"
+						ng-mousedown="$event.preventDefault(); selectMention(player)"
+						ng-click="selectMention(player)"
+					>
+						<span class="mention-player-name">{{player.name}}</span>
+						<span class="mention-player-id">ID: {{player.id}}</span>
+					</div>
+				</div>
+			</div>
 			<button id="send-button" type="button" class="buttons" ng-click="chatSend()" title="Send message" aria-label="Send message">Send</button>
-			<input id="chat-input" type="text" maxlength="500" autocomplete="off" ng-click="select()" placeholder="Chat here" aria-label="beammp chat message">
+			<div class="chat-input-wrap">
+				<div class="chat-input-highlight" aria-hidden="true">
+					<span ng-repeat="segment in chatInputSegments track by $index" ng-class="{'chat-input-mention': segment.isMention}">{{segment.text}}</span>
+				</div>
+				<input id="chat-input" type="text" ng-attr-maxlength="{{chatInputMaxLength}}" autocomplete="off" ng-model="chatInputText" ng-class="{'has-highlight-text': chatInputText.length > 0}" ng-change="updateMentionSuggestions()" ng-keydown="handleChatInputKeydown($event)" ng-click="select()" placeholder="Chat here" aria-label="beammp chat message">
+			</div>
 			<button id="chat-horizontal-button" type="button" class="buttons swap-buttons" ng-click="chatSwapHorizontal()" title="Move chat horizontally" aria-label="Move chat horizontally">↔</button>
 			<button id="chat-vertical-button" type="button" class="buttons swap-buttons" ng-click="chatSwapVertical()" title="Move chat vertically" aria-label="Move chat vertically">↕</button>
 		</form>

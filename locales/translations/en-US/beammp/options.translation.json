@@ -3,6 +3,8 @@
     "ui.options.beammp.protectConfigFromClone.tooltip": "Protect this config from being cloned by other players.",
     "ui.options.beammp.enableNewChatMenu": "New chat menu",
     "ui.options.beammp.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
+    "ui.options.beammp.chatMentionSound": "Mention sound",
+    "ui.options.beammp.chatMentionSound.tooltip": "Play a sound when someone mentions your name in chat.",
     "ui.options.beammp.enablePosSmoother": "Enable vehicle position smoothing",
     "ui.options.beammp.enablePosSmoother.tooltip": "Tries to smooth position data from players with unstable connections, reducing vehicle warping/rubber banding",
     "ui.options.beammp.autoSyncVehicles": "Enable automatic part sync",

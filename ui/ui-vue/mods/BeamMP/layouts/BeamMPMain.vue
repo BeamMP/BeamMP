@@ -115,8 +115,18 @@
       </section>
     </main>
 
-    <div v-if="state.loadingOverlayVisible.value" class="loading-overlay">
-      <div class="loading-card">
+    <!-- The essentials of .loading-overlay/.loading-card are repeated inline: when a server mod with a Vue UI is
+         mounted while joining, the game reloads the UI mods and drops this component's styles until BeamMP's
+         onLoad rebuilds the page, which can take minutes on big mod sets. Inline styles keep the progress readable. -->
+    <div
+      v-if="state.loadingOverlayVisible.value"
+      class="loading-overlay"
+      style="position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.72); color: var(--bng-off-white)"
+    >
+      <div
+        class="loading-card"
+        style="box-sizing: border-box; width: min(50vw, 56rem); max-width: 94vw; max-height: 40vh; overflow: hidden; display: flex; flex-direction: column; gap: 0.5rem; background: rgba(16, 16, 16, 0.95); border: 0.125rem solid var(--bng-cool-gray-700); border-radius: var(--bng-corners-3); padding: 1.25rem"
+      >
         <h2>{{ $tt("ui.beammp.serverBrowser.connectingToServer") }}</h2>
         <p>{{ state.loadingStatus.value || $tt("ui.common.beammp.connecting") }}</p>
 

@@ -100,15 +100,20 @@ local waitForFilesChanged = false
 -- Deactivating mods one by one makes the game unmount, notify every file and run its full state update
 -- (UI mod list, vehicle scan, db.json rewrite) for each mod, which takes minutes with hundreds of local mods
 -- and was followed by a crash on map load in testing. Same approach as core_modmanager.deactivateAllMods().
+-- Mods in /mods/multiplayer/ are deleted afterwards.
 -- @param modsToDeactivate table Array of mod entries from the mod db
-local function deactivateModsBatch(modsToDeactivate)
+-- @param logPrefix string Logged before each mod name
+-- @param removeFilesDirectly boolean Delete the /mods/multiplayer/ files with FS:remove instead of deleteMod(), which
+-- runs the full state update again for every mod. The game drops the db entries of the missing files in its next
+-- initDB ("mod vanished"), and a later join with the same mod reuses its entry ("mod already known").
+local function deactivateModsBatch(modsToDeactivate, logPrefix, removeFilesDirectly)
 	local count = #modsToDeactivate
 	if count == 0 then return end
-	log('W', 'deactivateModsBatch', 'Deactivating '..count..' mods that should not be running')
+	log('W', 'deactivateModsBatch', 'Deactivating '..count..' mods')
 
 	local unmountList = {}
 	for _, mod in ipairs(modsToDeactivate) do
-		log('W', 'checkMod', "This mod should not be running: "..mod.modname)
+		log('W', 'deactivateModsBatch', logPrefix..mod.modname)
 		if mod.fullpath and FS:isMounted(mod.fullpath) then
 			table.insert(unmountList, mod.fullpath)
 		end
@@ -130,7 +135,13 @@ local function deactivateModsBatch(modsToDeactivate)
 
 	for _, mod in ipairs(modsToDeactivate) do
 		if mod.dirname == '/mods/multiplayer/' then
-			core_modmanager.deleteMod(mod.modname)
+			if removeFilesDirectly then
+				if FS:fileExists(mod.fullpath) and FS:remove(mod.fullpath) ~= 0 then
+					log('E', 'deactivateModsBatch', 'Could not delete '..mod.fullpath)
+				end
+			else
+				core_modmanager.deleteMod(mod.modname)
+			end
 		end
 	end
 end
@@ -147,7 +158,7 @@ local function checkAllMods() --add counters?
 			checkMod(mod)
 		end
 	end
-	deactivateModsBatch(modsToDeactivate)
+	deactivateModsBatch(modsToDeactivate, "This mod should not be running: ")
 end
 
 --- Load the Servers mods, these are put in by the BeamMP Launcher
@@ -188,15 +199,32 @@ end
 --- Cleanup the mods from the ended session ready for another.
 local function cleanUpSessionMods()
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
-	local count = 0
+	local activeSessionMods = {}
+	local otherSessionMods = {}
 	for modname, mod in pairs(getModList()) do
 		if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
 			hasMods = true
-			count = count + 1
-			core_modmanager.deleteMod(modname)
+			if mod.active and core_modmanager.getModDB(modname) then
+				table.insert(activeSessionMods, mod)
+			else
+				table.insert(otherSessionMods, modname)
+			end
 		end
 	end
-	log('M', "cleanUpSessionMods", count.." Mods cleaned up")
+	-- unmount the session's mods together, send their file notifications once and run the mod manager state update
+	-- once, then delete the files: removing them one by one with deleteMod() runs that state update for every mod
+	-- (~0.5 s each), and in testing the game crashed right after such a series, on map load and when leaving
+	deactivateModsBatch(activeSessionMods, "Removing session mod: ", true)
+	for _, modname in ipairs(otherSessionMods) do
+		core_modmanager.deleteMod(modname)
+	end
+	if #activeSessionMods > 0 then
+		-- the mod manager still lists the removed files (as inactive) until its next initDB, and joining again
+		-- would then turn every one of them back on one by one; the Lua reload runs initDB, which drops them.
+		-- Leaving a session already reloads Lua (MPCoreNetwork.leaveServer), cancelling a join did not.
+		M.reloadLuaReloadWithDelay()
+	end
+	log('M', "cleanUpSessionMods", (#activeSessionMods + #otherSessionMods).." Mods cleaned up")
 	log('M', "cleanUpSessionMods", "Unloading extensions...")
 	--dump(getModList())
 	-- TODO: Need to find an alternative for this...

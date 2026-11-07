@@ -675,7 +675,7 @@ local function onUpdate(dt)
 			heartbeatTimer = 0
 			send('A') -- Launcher heartbeat
 		end
-		if updateUiTimer >= 0.1 and status == "LoadingResources" then
+		if updateUiTimer >= 0.016 and status == "LoadingResources" then -- the launcher waits for this poll before placing the next mod, so poll about once a frame
 			updateUiTimer = 0
 			send('Ul') -- Ask the launcher for a loading screen update
 		end

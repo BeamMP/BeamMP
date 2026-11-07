@@ -90,8 +90,55 @@ end
 --- The mods json object which the game manages.
 -- @return table mods The mods according to the game managed db
 local function getModList()
+	-- The mod manager's in-memory list is always current (db.json can lag behind it while joining, see
+	-- startDeferringModManagerState) and avoids re-reading and parsing db.json, which is large with many mods.
+	if core_modmanager and core_modmanager.getMods and core_modmanager.isReady and core_modmanager.isReady() then
+		local mods = {}
+		for modname, mod in pairs(core_modmanager.getMods()) do
+			mods[modname] = mod
+		end
+		return mods
+	end
 	local modsDB = jsonReadFile("mods/db.json")
-	return modsDB.mods
+	return modsDB and modsDB.mods or {}
+end
+
+-- While the server's mods are synced and loaded, the game's mod manager runs its full state update after every mod
+-- it adds: it rewrites mods/db.json (tens of MB with a few hundred mods) and sends its whole mod and vehicle lists to
+-- the UI, twice per mod. On a 404-mod server that was most of the join time. Both are held until loading is done;
+-- the next state update then writes db.json once, and the UI gets the lists once.
+local deferringModManagerState = false
+local originalJsonWriteFile
+local originalGuiTrigger
+local deferredUiUpdate = false
+
+local function startDeferringModManagerState()
+	if deferringModManagerState or not (core_modmanager and core_modmanager.requestState) then return end
+	deferringModManagerState = true
+	deferredUiUpdate = false
+	originalJsonWriteFile = jsonWriteFile
+	jsonWriteFile = function(filename, ...)
+		if filename == 'mods/db.json' then return true end
+		return originalJsonWriteFile(filename, ...)
+	end
+	originalGuiTrigger = guihooks.trigger
+	guihooks.trigger = function(name, ...)
+		if name == 'ModManagerModsChanged' or name == 'ModManagerVehiclesChanged' then
+			deferredUiUpdate = true
+			return
+		end
+		return originalGuiTrigger(name, ...)
+	end
+	log('M', 'startDeferringModManagerState', 'Holding mod manager db.json writes and UI updates while loading server mods')
+end
+
+local function stopDeferringModManagerState()
+	if not deferringModManagerState then return end
+	deferringModManagerState = false
+	jsonWriteFile = originalJsonWriteFile
+	guihooks.trigger = originalGuiTrigger
+	if deferredUiUpdate then core_modmanager.requestState() end
+	log('M', 'stopDeferringModManagerState', 'Mod manager db.json writes and UI updates restored')
 end
 
 local waitForFilesChanged = false
@@ -120,6 +167,7 @@ local function loadServerMods()
             end
             job.sleep(0)
         end
+        stopDeferringModManagerState() -- before checkAllMods, so its state update writes db.json
         checkAllMods()
         MPCoreNetwork.requestMap()
     end)
@@ -185,6 +233,7 @@ local function setServerMods(modsString)
 	end
 	serverMods = mods
 	guihooks.trigger("onBeamMPServerModsChanged", serverModDisplayNames)
+	startDeferringModManagerState() -- until loadServerMods is done (or the session ends)
 end
 
 local function getServerMods()
@@ -284,10 +333,12 @@ end
 local function onExtensionUnloaded() -- restore functions back to their default values
 	--registerCoreModule = original_registerCoreModule and original_registerCoreModule
 	if core_repository then core_repository.modUnsubscribe = original_Unsubscribe and original_Unsubscribe end
+	stopDeferringModManagerState() -- never leave db.json writes or the mod manager UI updates held
 end
 
 --- This is used to ensure the cleanup of the mods from the mod manager is done at the end of the session.
 local function onServerLeave()
+	stopDeferringModManagerState() -- before the cleanup, so its state update writes db.json
 	if MPCoreNetwork.isMPSession() or MPCoreNetwork.isGoingMPSession() then
 		log('W', 'onServerLeave', 'MPModManager')
 		serverMods = {}

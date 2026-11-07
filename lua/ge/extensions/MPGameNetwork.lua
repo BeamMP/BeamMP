@@ -22,6 +22,7 @@ local TCPLauncherSocket
 local launcherConnected = false
 local isConnecting = false
 local socketPartialData
+local connectRetryTimer = 0 -- declared here so that disconnectLauncher() resets this local, not a new global
 
 --[[ Format
 	["eventname"] = table
@@ -444,7 +445,6 @@ local HandleNetwork = {
 
 
 local heartbeatTimer = 0
-local connectRetryTimer = 0
 
 local recvState = {
 	-- 'ready': ready to receive a new packet, data is contained within `data` if any

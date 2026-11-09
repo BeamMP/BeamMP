@@ -163,6 +163,8 @@ local players = {}
 -- @tfield vehicles_subtable serverVehicleID_N ..
 -- @usage local vehicle = vehicles["0-0"]
 local vehicles = {}
+-- Reused each frame to highlight every nametag owned by a player with queued events.
+local queuedNametagPlayers = {}
 
 --- (in table) Specifies the table in vehicles
 -- @table vehicles_subtable
@@ -2643,6 +2645,18 @@ local function onPreRender(dt)
 			editSyncTimer = 0
 		end
 
+		-- Match the player-list highlight, including queues on another vehicle owned by the same player.
+		for playerID in pairs(queuedNametagPlayers) do
+			queuedNametagPlayers[playerID] = nil
+		end
+		if settings.getValue("highlightQueuedPlayers") then
+			for _, vehicle in pairs(vehicles) do
+				if vehicle.spawnQueue or vehicle.editQueue then
+					queuedNametagPlayers[vehicle.ownerID] = true
+				end
+			end
+		end
+
 		--playerCount = 0
 		for serverVehicleID, v in pairs(vehicles) do
 			--playerCount = playerCount + 1
@@ -2768,6 +2782,12 @@ local function onPreRender(dt)
 						pos.z = pos.z + 0.01 -- has to be positive
 					end
 				end
+				-- Only override the main nametag background; keep role labels and spectator colors.
+				local nametagBackColor = backColor
+				if queuedNametagPlayers[v.ownerID] then
+					nametagBackColor = color(200, 90, 0, math.floor(nametagAlpha*127))
+				end
+
 				-- draw main nametag
 				drawTextAdvanced(
 					pos.x, pos.y, pos.z, -- Location
@@ -2775,7 +2795,7 @@ local function onPreRender(dt)
 					color(255, 255, 255, nametagAlpha*254), -- Foreground Color, Alpha is multiplied by 254 because using 255 seems to break backround alpha in 0.37
 					true, -- Draw background 
 					false, -- Wtf
-					backColor, -- Background Color
+					nametagBackColor, -- Background Color
 					false, -- shadow
 					settings.getValue("nameTagsHideBehindObjects") -- useZ, makes it render behind objects if true
 				)

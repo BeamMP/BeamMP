@@ -1115,30 +1115,18 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
 }
 
-.mod-size-summary {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.1875rem;
-  padding: 0 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--bng-corners-1);
-  color: var(--bng-cool-gray-50);
-  background: rgba(20, 24, 31, 0.6);
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
 .server-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.1875rem;
-  padding: 0 0.75rem;
+  min-height: 2.55rem;
+  padding: 0 1rem;
   border: 1px solid rgba(var(--bng-orange-500-rgb), 0.35);
   border-radius: var(--bng-corners-1);
   color: var(--bng-cool-gray-100);
   background: rgba(0, 0, 0, 0.28);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -1592,29 +1580,6 @@ onBeforeUnmount(() => {
   background-color: var(--bng-orange-400);
   -webkit-mask: url("/ui/ui-vue/src/assets/fonts/bngIcons/svg/beamNG.svg") center / contain no-repeat;
   mask: url("/ui/ui-vue/src/assets/fonts/bngIcons/svg/beamNG.svg") center / contain no-repeat;
-}
-
-.details-cell {
-  width: 5.5rem;
-  text-align: right !important;
-}
-
-.details-button {
-  min-width: 4.6rem;
-  padding: 0.25rem 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--bng-corners-1);
-  color: var(--bng-off-white);
-  background: rgba(var(--bng-add-blue-500-rgb), 0.45);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.32);
-    background: rgba(var(--bng-add-blue-500-rgb), 0.62);
-  }
 }
 
 .selected {

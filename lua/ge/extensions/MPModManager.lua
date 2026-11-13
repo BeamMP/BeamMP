@@ -108,7 +108,20 @@ end
 local function loadServerMods()
 	log('W', 'loadServerMods', 'loadServerMods')
 
-	local modsDir = FS:findFiles("/mods/multiplayer", "*.zip", -1, false, false)
+	local modsDir = {}
+	local alreadyLoaded = 0
+	for _, path in ipairs(FS:findFiles("/mods/multiplayer", "*.zip", -1, false, false)) do
+		-- The game's auto-mount already added and activated most server mods while the launcher placed them.
+		-- workOffChangedMod() on those only repeats their file notifications and the mod manager's full state
+		-- update (UI mod list, vehicle scan, db.json rewrite), which made joining take twice as long.
+		local mod = core_modmanager.getModDB(getModNameFromPath(path))
+		if mod and mod.active and mod.fullpath and FS:isMounted(mod.fullpath) then
+			alreadyLoaded = alreadyLoaded + 1
+		else
+			table.insert(modsDir, path)
+		end
+	end
+	log('M', 'loadServerMods', alreadyLoaded..' server mods already loaded, loading '..#modsDir)
 
     core_jobsystem.create(function(job)
 		local amount = #modsDir

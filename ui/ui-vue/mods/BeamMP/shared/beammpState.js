@@ -13,7 +13,10 @@ const DEFAULT_FILTERS = {
   selectedMaps: [],
   selectedServerVersions: [],
   selectedTags: [],
+  excludeSelectedTags: false,
   selectedServerLocations: [],
+  excludeSelectedServerLocations: false,
+  excludeSelectedMaps: false,
   matchAll: true,
   emptyOnly: false,
   notFull: false,
@@ -340,7 +343,9 @@ function applyFilters(items, view) {
     }
 
     if (maps.length > 0) {
-      checks.push(maps.includes(server.mapName))
+      checks.push(f.excludeSelectedMaps
+        ? !maps.includes(server.mapName)
+        : maps.includes(server.mapName))
     }
 
     if (versions.length > 0) {
@@ -348,13 +353,17 @@ function applyFilters(items, view) {
     }
 
     if (locations.length > 0) {
-      checks.push(locations.includes(server.location))
+      checks.push(f.excludeSelectedServerLocations
+        ? !locations.includes(server.location)
+        : locations.includes(server.location))
     }
 
     if (tags.length > 0) {
       const lowerTags = (server.tags || "").toLowerCase().split(",").map(t => t.trim())
       const matched = tags.filter(tag => lowerTags.includes(tag)).length
-      checks.push(f.matchAll ? matched === tags.length : matched > 0)
+      checks.push(f.excludeSelectedTags
+        ? matched === 0
+        : f.matchAll ? matched === tags.length : matched > 0)
     }
 
     return checks.every(Boolean)

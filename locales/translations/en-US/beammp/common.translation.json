@@ -21,6 +21,7 @@
     "ui.common.beammp.sync": "Sync",
     "ui.common.beammp.perks": "Perks",
     "ui.common.beammp.searchPlaceholder": "Search…",
+    "ui.common.beammp.clearSearch": "Clear search",
     "ui.common.beammp.maps": "Maps",
     "ui.common.beammp.tags": "Tags",
     "ui.common.beammp.information": "Information",

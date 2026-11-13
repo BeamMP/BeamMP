@@ -7,7 +7,14 @@
         <circle cx="12" cy="8" r="1" fill="currentColor"/>
       </svg>
       <div class="banner-text">
-        <p><strong>{{ $tt("ui.beammp.accounts.accountsLive") }}</strong> {{ $tt("ui.beammp.accounts.Banner2") }}</p>
+        <p>
+          <template v-for="(part, index) in parseTranslation('ui.beammp.accounts.banner')" :key="index">
+            <strong v-if="part.type === 'highlight'">{{ part.text }}</strong>
+            <br v-else-if="part.type === 'br'" />
+            <a v-else-if="part.type === 'link'" href="#" @click.prevent="openExternal(part.href)" class="popup-link">{{ part.text }}</a>
+            <template v-else>{{ part.text }}</template>
+          </template>
+        </p>
       </div>
       <BngButton class="read-more-button" accent="secondary" @click="showReadMorePopup = true">
         {{ $tt("ui.beammp.accounts.readMore") }}
@@ -17,20 +24,14 @@
     <div v-if="showReadMorePopup" class="popup-overlay" @click.self="showReadMorePopup = false">
       <div class="popup-content">
         <h3>{{ $tt("ui.beammp.accounts.additionalInfo") }}</h3>
-        <h4>{{ $tt("ui.beammp.accounts.recoveryHeading") }}</h4>
-        <p>{{ $tt("ui.beammp.accounts.recoveryIntro") }}</p>
-        <ol>
-          <li>{{ $tt("ui.beammp.accounts.recoveryStep1") }} <a href="#" @click.prevent="openExternal('https://accounts.beammp.com/')" class="popup-link">{{ $tt("ui.beammp.accounts.accountsPortal") }}</a> {{ $tt("ui.beammp.accounts.recoveryStep1End") }}</li>
-          <li>{{ $tt("ui.beammp.accounts.recoveryStep2") }}</li>
-          <li>{{ $tt("ui.beammp.accounts.recoveryStep3") }}</li>
-        </ol>
-        <p>{{ $tt("ui.beammp.accounts.recoveryException") }}</p>
-        <h4>{{ $tt("ui.beammp.accounts.afterRecoveryHeading") }}</h4>
-        <p>{{ $tt("ui.beammp.accounts.afterRecoveryText") }}</p>
-        <h4>{{ $tt("ui.beammp.accounts.keymasterHeading") }}</h4>
-        <p>{{ $tt("ui.beammp.accounts.keymasterText") }}</p>
-        <h4>{{ $tt("ui.beammp.accounts.supportHeading") }}</h4>
-        <p>{{ $tt("ui.beammp.accounts.supportText") }} <code>{{ $tt("ui.beammp.accounts.supportChannel") }}</code> {{ $tt("ui.beammp.accounts.supportText2") }} <a href="#" @click.prevent="openExternal('https://discord.gg/beammp')" class="popup-link">{{ $tt("ui.beammp.accounts.discordServer") }}</a>.</p>
+        <div class="popup-body">
+          <template v-for="(part, index) in parseTranslation('ui.beammp.accounts.additionalInfoBody')" :key="index">
+            <br v-if="part.type === 'br'" />
+            <a v-else-if="part.type === 'link'" href="#" @click.prevent="openExternal(part.href)" class="popup-link">{{ part.text }}</a>
+            <h4 v-else-if="part.type === 'heading'">{{ part.text }}</h4>
+            <template v-else>{{ part.text }}</template>
+          </template>
+        </div>
         <BngButton class="popup-close-button" @click="showReadMorePopup = false">{{ $tt("ui.beammp.accounts.close") }}</BngButton>
       </div>
     </div>
@@ -77,7 +78,7 @@
 
         <div class="actions">
           <BngButton @click="submitLogin">{{ $tt("ui.beammp.accounts.login") }}</BngButton>
-          <!-- <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton> -->
+          <BngButton accent="secondary" @click="register">{{ $tt("ui.common.beammp.register") }}</BngButton>
           <BngButton accent="secondary" @click="switchToGuest">{{ $tt("ui.beammp.accounts.playAsGuest") }}</BngButton>
         </div>
       </template>
@@ -98,6 +99,7 @@ import { ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { BngButton } from "@/common/components/base"
 import { vBngTextInput } from "@/common/directives"
+import { $translate } from "@/services/translation"
 import { BEAMMP_SERVERS_ROUTE_NAME } from "../shared/constants.js"
 import { useBeamMPState } from "../shared/beammpState.js"
 
@@ -111,6 +113,43 @@ const LEGACY_LOGO_PATH = "/ui/assets/BeamMP/beammp_new_cropped.png"
 const LOGO_FALLBACK = "/ui/assets/BeamMP/icons/account-multiple.svg"
 const logoSrc = ref(LEGACY_LOGO_PATH)
 const { login, guestLogin, openExternal, state } = useBeamMPState()
+
+const links = {
+  accountsPortal: "https://accounts.beammp.com/",
+  discordServer: "https://discord.gg/beammp",
+}
+
+function parseTranslation(key) {
+  const text = $translate.instant(key)
+  const parts = []
+  const marker = /\[(accountsPortal|discordServer|highlight)\]([\s\S]*?)\[\/\1\]|\[h4\]([\s\S]*?)\[\/h4\]|\[br\]/g
+  let lastIndex = 0
+  let match
+
+  while ((match = marker.exec(text)) !== null) {
+    const [value, tag, label, heading] = match
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", text: text.slice(lastIndex, match.index) })
+    }
+
+    if (value === "[br]") {
+      parts.push({ type: "br" })
+    } else if (heading !== undefined) {
+      parts.push({ type: "heading", text: heading })
+    } else if (tag === "highlight") {
+      parts.push({ type: "highlight", text: label })
+    } else {
+      parts.push({ type: "link", href: links[tag], text: label })
+    }
+    lastIndex = marker.lastIndex
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: "text", text: text.slice(lastIndex) })
+  }
+
+  return parts
+}
 
 function onLogoError() {
   if (logoSrc.value !== LOGO_FALLBACK) {
@@ -468,6 +507,22 @@ watch(() => state.loggedIn.value, value => {
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
+  }
+
+  .popup-body {
+    line-height: 1.7;
+    color: var(--bng-cool-gray-100);
+    font-size: 0.95rem;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .popup-body h4 {
+    margin: 1.25rem 0 0.5rem;
+    color: var(--bng-cool-gray-100);
+    font-size: 1rem;
+    font-weight: 700;
   }
 
   ol {

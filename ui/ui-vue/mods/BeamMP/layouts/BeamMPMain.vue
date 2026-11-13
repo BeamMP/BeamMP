@@ -49,7 +49,10 @@
           <div class="account-details">
             <small v-if="isSpecialRole" class="account-role-badge">{{ accountRole }}</small> 
             <div class="account-name-wrapper">
-              <strong>{{ accountName }}</strong>
+              <strong
+                class="account-name"
+                @click="openExternal('https://accounts.beammp.com/app/profile/general')"
+              >{{ accountName }}</strong>
             </div>
             <div v-if="accountId" class="account-id-wrapper" @click="copyAccountId" :title="$tt('ui.beammp.accounts.copyid')">
               <span class="account-id">ID: {{ accountId }}</span>
@@ -257,7 +260,7 @@ const isSpecialRole = computed(() => {
 
 const isEARole = computed(() => {
   const role = state.auth.value?.role || ""
-  return role === "EA" || role === "ET" || role === "MDEV" || role === "STAFF"
+  return role === "EA" || role === "ET" || role === "MDEV" || role === "STAFF" || role === "MOD" || role === "MT" || role === "CM" || role === "IT" || role === "SUPPORT" || role === "PM"
 })
 
 function useFallbackAvatar(event) {

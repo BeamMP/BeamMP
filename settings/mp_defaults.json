@@ -38,7 +38,6 @@
   "enableBlobs"                 : [ "cloud", true ],
   "blobColorIllegal"            : [ "cloud", "#000000" ],
   "showBlobIllegal"             : [ "cloud", true ],
-  "enablePosSmoother"           : [ "cloud", false ],
   "showPlayerIDs"               : [ "cloud", true  ],
   "licensePlateUsesPlayerName"  : [ "cloud", true ],
   "protectConfigFromClone"      : [ "cloud", false ],

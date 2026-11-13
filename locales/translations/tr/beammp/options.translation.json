@@ -3,7 +3,6 @@
   "ui.options.beammp.protectConfigFromClone.tooltip": "Bu yapılandırmanın diğer oyuncular tarafından kopyalanmasını engelle.",
   "ui.options.beammp.enableNewChatMenu": "Yeni sohbet menüsü",
   "ui.options.beammp.enableNewChatMenu.tooltip": "Yeni sohbet menüsü ImGui kullanıyor. Özelleştirilebilir, şık ve harika!",
-  "ui.options.beammp.enablePosSmoother": "Araç konumu yumuşatmayı etkinleştir",
   "ui.options.beammp.autoSyncVehicles": "Otomatik parça senkronizasyonunu etkinleştir",
   "ui.options.beammp.autoSyncVehicles.tooltip": "Etkinleştirilirse, araç parçalarınız birkaç saniye sonra diğer oyuncularla otomatik olarak senkronize edilir.",
   "ui.options.beammp.queueSpawnEdit": "Oyuncu aracı güncelleme/düzenleme kuyruğunu etkinleştir",

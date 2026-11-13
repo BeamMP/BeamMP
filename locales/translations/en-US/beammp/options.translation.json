@@ -3,8 +3,6 @@
     "ui.options.beammp.protectConfigFromClone.tooltip": "Protect this config from being cloned by other players.",
     "ui.options.beammp.enableNewChatMenu": "New chat menu",
     "ui.options.beammp.enableNewChatMenu.tooltip": "The new chat menu uses ImGui. It's customisable, sleek and awesome!",
-    "ui.options.beammp.enablePosSmoother": "Enable vehicle position smoothing",
-    "ui.options.beammp.enablePosSmoother.tooltip": "Tries to smooth position data from players with unstable connections, reducing vehicle warping/rubber banding",
     "ui.options.beammp.autoSyncVehicles": "Enable automatic part sync",
     "ui.options.beammp.autoSyncVehicles.tooltip": "If enabled, your vehicle parts will automatically be synced to other players after a few seconds",
     "ui.options.beammp.queueSpawnEdit": "Enable player vehicle update/edit queuing",
@@ -85,5 +83,9 @@
     "ui.options.beammp.useUiAppRedesign": "HUD App Style",
     "ui.options.beammp.useUiAppRedesign.tooltip": "Choose the visual style for BeamMP's HUD apps.",
     "ui.options.beammp.useUiAppRedesign.redesign": "Redesign",
-    "ui.options.beammp.useUiAppRedesign.old": "Old"
+    "ui.options.beammp.useUiAppRedesign.old": "Old",
+    "ui.options.beammp.disableTimeSync": "Disable Simulation time synchronization",
+    "ui.options.beammp.disableTimeSync.tooltip": "Disable the speed modifier that keeps simulation time synced to the Server time, Only disable this if your game speed is having issues,\n\n disabling time sync will likely make the game run slower and loose a lot of lap time when racing \n\nIt may also make prediction more jumpy",
+    "ui.options.beammp.enablePredictionDebug": "Enable prediction Debug Drawer",
+    "ui.options.beammp.enablePredictionDebug.tooltip": "shows various debug draws for the prediction"
 }

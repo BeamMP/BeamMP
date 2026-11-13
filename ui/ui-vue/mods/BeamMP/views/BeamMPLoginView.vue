@@ -65,12 +65,28 @@
           <div class="input-shell">
             <input
               id="beammp-login-password"
+              ref="passwordInput"
               v-model="password"
               v-bng-text-input
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               autocomplete="current-password"
               @keyup.enter="submitLogin"
             />
+            <button
+              class="password-action-button"
+              type="button"
+              :aria-pressed="showPassword"
+              @mousedown.prevent
+              @click="togglePasswordVisibility"
+            >
+              <svg v-if="showPassword" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A10.8 10.8 0 0112 5c5.5 0 9 7 9 7a15.6 15.6 0 01-3.1 3.8M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 004-.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </button>
           </div>
           <a href="#" class="forgot-password" @click.prevent="forgotPassword">{{ $tt("ui.beammp.accounts.forgotPassword") }}</a>
         </div>
@@ -94,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { nextTick, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { BngButton } from "@/common/components/base"
 import { vBngTextInput } from "@/common/directives"
@@ -104,6 +120,8 @@ import { useBeamMPState } from "../shared/beammpState.js"
 const router = useRouter()
 const username = ref("")
 const password = ref("")
+const showPassword = ref(false)
+const passwordInput = ref(null)
 const hasTriedToLogin = ref(false)
 const mode = ref("account")
 const showReadMorePopup = ref(false)
@@ -116,6 +134,25 @@ function onLogoError() {
   if (logoSrc.value !== LOGO_FALLBACK) {
     logoSrc.value = LOGO_FALLBACK
   }
+}
+
+function togglePasswordVisibility() {
+  const input = passwordInput.value
+  const selectionStart = input?.selectionStart ?? input?.value.length ?? 0
+  const selectionEnd = input?.selectionEnd ?? selectionStart
+  const selectionDirection = input?.selectionDirection
+
+  showPassword.value = !showPassword.value
+
+  nextTick(() => {
+    const updatedInput = passwordInput.value
+    if (!updatedInput) return
+
+    updatedInput.focus()
+    requestAnimationFrame(() => {
+      updatedInput.setSelectionRange(selectionStart, selectionEnd, selectionDirection || "none")
+    })
+  })
 }
 
 function switchToGuest() {
@@ -322,6 +359,32 @@ watch(() => state.loggedIn.value, value => {
       -webkit-text-fill-color: var(--bng-off-white);
       box-shadow: 0 0 0 1000px rgb(12, 15, 20) inset;
     }
+  }
+}
+
+.password-action-button {
+  display: grid;
+  flex: 0 0 2.7rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: var(--bng-cool-gray-200);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bng-off-white);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bng-orange-500);
+    outline-offset: -3px;
+  }
+
+  svg {
+    width: 1.2rem;
+    height: 1.2rem;
   }
 }
 

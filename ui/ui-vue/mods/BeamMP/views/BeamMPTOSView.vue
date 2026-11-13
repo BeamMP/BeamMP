@@ -23,7 +23,7 @@
     </div>
 
     <div class="actions">
-      <BngButton :disabled="!canContinue" @click="proceed">{{ $tt("ui.common.continue") }}</BngButton>
+      <BngButton :disabled="!canContinue || isAccepting" @click="proceed">{{ $tt("ui.common.continue") }}</BngButton>
     </div>
   </section>
 </template>
@@ -39,12 +39,18 @@ const router = useRouter()
 const { acceptTos, openExternal } = useBeamMPState()
 const tosAccepted = ref(false)
 const rulesAccepted = ref(false)
+const isAccepting = ref(false)
 const canContinue = computed(() => tosAccepted.value && rulesAccepted.value)
 
-function proceed() {
-  if (!canContinue.value) return
-  acceptTos()
-  router.push({ name: BEAMMP_LOGIN_ROUTE_NAME })
+async function proceed() {
+  if (!canContinue.value || isAccepting.value) return
+  isAccepting.value = true
+  try {
+    if (!await acceptTos()) return
+    await router.replace({ name: BEAMMP_LOGIN_ROUTE_NAME })
+  } finally {
+    isAccepting.value = false
+  }
 }
 </script>
 

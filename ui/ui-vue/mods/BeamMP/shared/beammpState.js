@@ -552,10 +552,13 @@ async function getLauncherVersion() {
   return await extensionCall("MPCoreNetwork", "getLauncherVersion")
 }
 
-function acceptTos() {
+async function acceptTos() {
+  const accepted = await extensionCommand("MPConfig", "acceptTos")
+  if (!accepted) return false
+
   localStorage.setItem("tosAccepted", "true")
   state.tosAccepted.value = true
-  extensionCommand("MPConfig", "acceptTos")
+  return true
 }
 
 function setView(viewName) {

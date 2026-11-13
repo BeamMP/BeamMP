@@ -23,12 +23,20 @@
 
 .beammpPlayerList.ui-style-redesigned #plist-container,
 .beammpPlayerList.ui-style-redesigned #show-button {
-  border-color: rgba(var(--bng-cool-gray-100-rgb), 0.24);
-  background: rgba(var(--bng-cool-gray-900-rgb), 0.34);
+  border-color: rgba(var(--bng-cool-gray-100-rgb), 0.34);
+  background: rgba(var(--bng-cool-gray-900-rgb), 0.68);
   box-shadow:
     0 3px 12px rgba(var(--bng-off-black-rgb), 0.2),
     inset 0 0 0 1px rgba(var(--bng-off-white-rgb), 0.04);
   backdrop-filter: blur(10px) saturate(115%);
+}
+
+.beammpPlayerList.ui-style-redesigned #plist-container {
+  border-top: 3px solid var(--bng-orange-500);
+}
+
+.beammpPlayerList.ui-style-redesigned #show-button {
+  border-left: 3px solid var(--bng-orange-500);
 }
 
 .beammpPlayerList #players-table {
@@ -47,7 +55,15 @@
 }
 
 .beammpPlayerList.ui-style-redesigned #players-table tr:first-child {
-  background: rgba(var(--bng-cool-gray-700-rgb), 0.26);
+  background: rgba(var(--bng-cool-gray-700-rgb), 0.48);
+}
+
+.beammpPlayerList.ui-style-redesigned #players-table tr:not(:first-child):nth-child(even) {
+  background: rgba(var(--bng-cool-gray-700-rgb), 0.2);
+}
+
+.beammpPlayerList.ui-style-redesigned #players-table tr:not(:first-child):hover {
+  background: rgba(var(--bng-orange-500-rgb), 0.2);
 }
 
 .beammpPlayerList #players-table th {
@@ -112,6 +128,14 @@
   min-width: 100px;
 }
 
+.beammpPlayerList .player-count-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .beammpPlayerList .playerslist-col-3 {
   width: 64px;
   padding: 0 !important;
@@ -119,16 +143,19 @@
 }
 
 .beammpPlayerList #player-count-badge {
-  display: inline-grid;
+  display: inline-flex;
   min-width: 17px;
   height: 17px;
-  margin-left: 5px;
   padding: 0 3px;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   border-radius: 9px;
   background: var(--bng-orange-500);
   color: var(--bng-off-white);
   font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  box-sizing: border-box;
 }
 
 .beammpPlayerList .buttons {

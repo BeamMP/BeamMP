@@ -39,6 +39,7 @@ ul#chat-list.chat-list--scrollbar-hidden::-webkit-scrollbar {
     color: white;
     background-color: transparent;
     text-shadow: 0px 0px 4px #000, 0px 0px 6px #000, 0px 0px 8px #000;
+    white-space: pre-wrap;
     border-radius: 6px;
     transition: transform .12s ease, opacity .12s;
     animation: fadeIn 0.3s ease-out;

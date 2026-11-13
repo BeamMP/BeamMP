@@ -49,6 +49,7 @@
     color: var(--bng-off-white);
     line-height: 1.3;
     text-shadow: 0 1px 2px rgba(var(--bng-off-black-rgb), 0.95);
+    white-space: pre-wrap;
     transition: border-color 100ms ease, background-color 100ms ease, opacity 120ms ease, transform 0.15s ease;
     animation: fadeIn 0.3s ease-out;
 }

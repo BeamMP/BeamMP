@@ -140,30 +140,8 @@ function colorToRgba(color) {
   return `rgba(${r}, ${g}, ${b}, ${a / 255})`
 }
 
-function isSafeServerHtml(html) {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(`<div>${html}</div>`, "text/html")
-  const blockedTags = new Set(["script", "iframe", "form", "input", "button", "a"])
-  const elements = doc.body.querySelectorAll("*")
-
-  for (const element of elements) {
-    if (blockedTags.has(element.tagName.toLowerCase())) return false
-    for (const attr of element.attributes) {
-      if (/^(?:on.*|(?:form).*|action)$/i.test(attr.name)) return false
-      if (/javascript:|data:/i.test(attr.value)) return false
-    }
-  }
-  return true
-}
-
 function formatChatMessage(value) {
   const string = String(value ?? "")
-  if (string.startsWith("Server: ")) {
-    const messageContent = string.slice(8)
-    if (messageContent.includes("<") && messageContent.includes(">") && isSafeServerHtml(messageContent)) {
-      return `Server: ${messageContent}`
-    }
-  }
 
   // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
   const tokens = string.split(/(\^(?:\+{1,2}|[#@][0-9a-fA-F]{6}|.))/g)

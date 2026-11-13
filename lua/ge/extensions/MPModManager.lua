@@ -96,12 +96,69 @@ end
 
 local waitForFilesChanged = false
 
+--- Deactivate several mods with one unmount, one file change notification and one mod manager state update.
+-- Deactivating mods one by one makes the game unmount, notify every file and run its full state update
+-- (UI mod list, vehicle scan, db.json rewrite) for each mod, which takes minutes with hundreds of local mods
+-- and was followed by a crash on map load in testing. Same approach as core_modmanager.deactivateAllMods().
+-- Mods in /mods/multiplayer/ are deleted afterwards.
+-- @param modsToDeactivate table Array of mod entries from the mod db
+-- @param logPrefix string Logged before each mod name
+-- @param removeFilesDirectly boolean Delete the /mods/multiplayer/ files with FS:remove instead of deleteMod(), which
+-- runs the full state update again for every mod. The game drops the db entries of the missing files in its next
+-- initDB ("mod vanished"), and a later join with the same mod reuses its entry ("mod already known").
+local function deactivateModsBatch(modsToDeactivate, logPrefix, removeFilesDirectly)
+	local count = #modsToDeactivate
+	if count == 0 then return end
+	log('W', 'deactivateModsBatch', 'Deactivating '..count..' mods')
+
+	local unmountList = {}
+	for _, mod in ipairs(modsToDeactivate) do
+		log('W', 'deactivateModsBatch', logPrefix..mod.modname)
+		if mod.fullpath and FS:isMounted(mod.fullpath) then
+			table.insert(unmountList, mod.fullpath)
+		end
+	end
+	if #unmountList > 0 and not FS:unmountList(unmountList) then
+		log('E', 'deactivateModsBatch', 'FS:unmountList failed, deactivateMod will unmount the remaining mods one by one')
+	end
+
+	local filesChanged = {}
+	for i, mod in ipairs(modsToDeactivate) do
+		-- only the last call updates the mod manager state (db.json, UI), file notifications are sent once below
+		local preventStateChange = i < count
+		local changes = deactivateMod(mod.modname, preventStateChange, true)
+		if changes then arrayConcat(filesChanged, changes) end
+	end
+	if #filesChanged > 0 then
+		_G.onFileChanged(filesChanged)
+	end
+
+	for _, mod in ipairs(modsToDeactivate) do
+		if mod.dirname == '/mods/multiplayer/' then
+			if removeFilesDirectly then
+				if FS:fileExists(mod.fullpath) and FS:remove(mod.fullpath) ~= 0 then
+					log('E', 'deactivateModsBatch', 'Could not delete '..mod.fullpath)
+				end
+			else
+				core_modmanager.deleteMod(mod.modname)
+			end
+		end
+	end
+end
+
 --- Check the game mod list against BeamMP's expected
 local function checkAllMods() --add counters?
 	log('M', 'checkAllMods', 'Checking all mods...')
+	local modsToDeactivate = {}
 	for modname, mod in pairs(getModList()) do
-		checkMod(mod)
+		if mod.active and not isModWhitelisted(mod.modname) and not isModAllowed(mod.modname)
+			and core_modmanager.getModDB(mod.modname) then -- known to the mod manager, so its deactivateMod call goes through
+			table.insert(modsToDeactivate, mod) -- deactivated together below instead of one by one in checkMod
+		else
+			checkMod(mod)
+		end
 	end
+	deactivateModsBatch(modsToDeactivate, "This mod should not be running: ")
 end
 
 --- Load the Servers mods, these are put in by the BeamMP Launcher
@@ -142,15 +199,32 @@ end
 --- Cleanup the mods from the ended session ready for another.
 local function cleanUpSessionMods()
 	log('M', "cleanUpSessionMods", "Deleting all multiplayer mods")
-	local count = 0
+	local activeSessionMods = {}
+	local otherSessionMods = {}
 	for modname, mod in pairs(getModList()) do
 		if mod.dirname == "/mods/multiplayer/" and modname ~= "multiplayerbeammp" then
 			hasMods = true
-			count = count + 1
-			core_modmanager.deleteMod(modname)
+			if mod.active and core_modmanager.getModDB(modname) then
+				table.insert(activeSessionMods, mod)
+			else
+				table.insert(otherSessionMods, modname)
+			end
 		end
 	end
-	log('M', "cleanUpSessionMods", count.." Mods cleaned up")
+	-- unmount the session's mods together, send their file notifications once and run the mod manager state update
+	-- once, then delete the files: removing them one by one with deleteMod() runs that state update for every mod
+	-- (~0.5 s each), and in testing the game crashed right after such a series, on map load and when leaving
+	deactivateModsBatch(activeSessionMods, "Removing session mod: ", true)
+	for _, modname in ipairs(otherSessionMods) do
+		core_modmanager.deleteMod(modname)
+	end
+	if #activeSessionMods > 0 then
+		-- the mod manager still lists the removed files (as inactive) until its next initDB, and joining again
+		-- would then turn every one of them back on one by one; the Lua reload runs initDB, which drops them.
+		-- Leaving a session already reloads Lua (MPCoreNetwork.leaveServer), cancelling a join did not.
+		M.reloadLuaReloadWithDelay()
+	end
+	log('M', "cleanUpSessionMods", (#activeSessionMods + #otherSessionMods).." Mods cleaned up")
 	log('M', "cleanUpSessionMods", "Unloading extensions...")
 	--dump(getModList())
 	-- TODO: Need to find an alternative for this...

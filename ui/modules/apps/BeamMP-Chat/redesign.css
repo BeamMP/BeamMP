@@ -308,6 +308,7 @@ ul#chat-list::-webkit-scrollbar {
     background-color: rgba(30, 36, 44, 0.52);
     text-shadow: 0px 0px 4px #000, 0px 0px 6px #000, 0px 0px 8px #000;
     border-left: 2px solid transparent;
+    white-space: pre-wrap;
     border-radius: 6px;
     transition: transform .12s ease, opacity .12s, background-color .12s ease, border-color .12s ease;
     animation: fadeIn 0.3s ease-out;

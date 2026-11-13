@@ -37,6 +37,12 @@
             :aria-label="$tt('ui.apps.beammp.chat.reply')"
             @click.stop="replyToMessage(message)"
           >↩</button>
+          <span v-if="!message.hideTimestamp" class="chat-message-timestamp">{{ message.time }}</span>
+          <span v-if="message.isServerMessage" class="chat-message-content" v-html="message.html"></span>
+          <template v-else>
+            <span v-if="message.nameColor" class="chat-message-username" :style="{ color: message.nameColor }">{{ message.username }}</span>
+            <span class="chat-message-content">{{ message.text }}</span>
+          </template>
         </li>
       </ul>
 
@@ -375,6 +381,14 @@ function isSafeServerHtml(html) {
     }
   }
   return true
+function colorToRgba(color) {
+  if (!color) return null
+  const r = color.r ?? color[0]
+  const g = color.g ?? color[1]
+  const b = color.b ?? color[2]
+  const a = color.a ?? color[3] ?? 255
+  if (r == null || g == null || b == null) return null
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`
 }
 
 function buildMentionSegments(value, usernames) {
@@ -422,23 +436,56 @@ function formatTextWithMention(value, username) {
 
 function formatChatMessage(value, username = localUsername.value) {
   const string = String(value ?? "")
-  if (string.startsWith("Server: ")) {
-    const messageContent = string.slice(8)
-    if (messageContent.includes("<") && messageContent.includes(">") && isSafeServerHtml(messageContent)) {
-      return `Server: ${messageContent}`
+
+  // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
+  const tokens = string.split(/(\^(?:\+{1,2}|[#@][0-9a-fA-F]{6}|.))/g)
+  const classes = new Set()
+  let inlineColor = ""
+  let inlineBackground = ""
+  let currentText = ""
+  let result = ""
+
+  const isForegroundClass = (cls) => cls.startsWith("color-") || cls === "rainbow"
+  const isBackgroundClass = (cls) => cls.startsWith("bg-")
+  const isFontClass = (cls) => cls.startsWith("font-")
+  const isTypefaceClass = (cls) => cls.startsWith("typeface-")
+
+  const clearForeground = () => {
+    for (const activeClass of [...classes]) {
+      if (isForegroundClass(activeClass)) classes.delete(activeClass)
+    }
+    inlineColor = ""
+  }
+
+  const clearBackground = () => {
+    for (const activeClass of [...classes]) {
+      if (isBackgroundClass(activeClass)) classes.delete(activeClass)
+    }
+    inlineBackground = ""
+  }
+
+  const clearFont = () => {
+    for (const activeClass of [...classes]) {
+      if (isFontClass(activeClass)) classes.delete(activeClass)
     }
   }
 
-  const tokens = string.split(/(\^.)/g)
-  const classes = new Set()
-  let currentText = ""
-  let result = ""
+  const clearTypeface = () => {
+    for (const activeClass of [...classes]) {
+      if (isTypefaceClass(activeClass)) classes.delete(activeClass)
+    }
+  }
 
   const flush = () => {
     if (!currentText) return
     const encoded = formatTextWithMention(currentText, username)
     const classList = Array.from(classes).join(" ")
-    result += classList ? `<span class="${classList}">${encoded}</span>` : encoded
+    const styles = []
+    if (inlineColor) styles.push(`color:${inlineColor}`)
+    if (inlineBackground) styles.push(`background-color:${inlineBackground}`)
+    const classAttr = classList ? ` class="${classList}"` : ""
+    const styleAttr = styles.length ? ` style="${styles.join(";")}"` : ""
+    result += classAttr || styleAttr ? `<span${classAttr}${styleAttr}>${encoded}</span>` : encoded
     currentText = ""
   }
 
@@ -446,22 +493,37 @@ function formatChatMessage(value, username = localUsername.value) {
     const token = tokens[index]
     const nextToken = tokens[index + 1]?.trim() || ""
 
-    if (/^\^.$/.test(token)) {
+    if (/^\^/.test(token)) {
       flush()
       if (token === "^r") {
         classes.clear()
+        inlineColor = ""
+        inlineBackground = ""
       } else if (token === "^p") {
         result += "<br>"
       } else if (token === "^*") {
         const cls = globalThis.beammpTextStyleMap?.[token]
         if (cls) classes.add(cls)
         if (globalThis.iconsOrig?.[nextToken]) currentText = globalThis.iconsOrig[nextToken].glyph
+      } else if (/^\^#[0-9a-fA-F]{6}$/.test(token)) {
+        clearForeground()
+        inlineColor = `#${token.slice(2)}`
+      } else if (/^\^@[0-9a-fA-F]{6}$/.test(token)) {
+        clearBackground()
+        inlineBackground = `#${token.slice(2)}`
       } else {
         const cls = globalThis.beammpTextStyleMap?.[token]
-        if (cls?.startsWith("color-")) {
-          for (const activeClass of [...classes]) {
-            if (activeClass.startsWith("color-")) classes.delete(activeClass)
-          }
+        if (cls && isForegroundClass(cls)) {
+          clearForeground()
+          classes.add(cls)
+        } else if (cls && isBackgroundClass(cls)) {
+          clearBackground()
+          classes.add(cls)
+        } else if (cls && isFontClass(cls)) {
+          clearFont()
+          classes.add(cls)
+        } else if (cls && isTypefaceClass(cls)) {
+          clearTypeface()
           classes.add(cls)
         } else if (cls) {
           classes.add(cls)
@@ -498,6 +560,7 @@ function loadStoredMessages() {
     const parsed = JSON.parse(storedMessages)
     if (!Array.isArray(parsed)) return
     messages.value = parsed.slice(-70).map((entry, index) => createMessage(entry.message, entry.time, `stored-${index}`, entry))
+    messages.value = parsed.slice(-70).map((entry, index) => createMessage(entry.message, entry.time, `stored-${index}`, entry.color))
   } catch {
     messages.value = []
   }
@@ -529,12 +592,44 @@ function createMessage(message, time, key, chatData = null) {
     formatted = reply
       ? replyPreview
       : `<span${roleColor} class="chat-message-identity">${roleTag}${escapeHtml(chatData.username)}</span>: ${replyPreview}`
+function createMessage(message, time, key, color = null) {
+  const raw = String(message ?? "")
+  const isServerMessage = raw.startsWith("Server: ")
+  let clean = raw
+  let hideTimestamp = false
+  let hideServerPrefix = false
+
+  if (isServerMessage) {
+    // ^t and ^x are per-message flags, not formatting styles.
+    hideTimestamp = raw.includes("^t")
+    hideServerPrefix = raw.includes("^x")
+    clean = raw.replace(/\^[tx]/g, "")
+  }
+
+  let formatted = isServerMessage ? formatChatMessage(clean) : ""
+  if (hideServerPrefix) formatted = formatted.replace(/^Server: /, "")
+
+  let nameColor = isServerMessage ? null : colorToRgba(color)
+  let username = ""
+  let text = raw
+
+  if (nameColor) {
+    const usernameEnd = raw.indexOf(": ")
+    if (usernameEnd > 0) {
+      username = raw.slice(0, usernameEnd + 2)
+      text = raw.slice(usernameEnd + 2)
+    } else {
+      nameColor = null
+    }
   }
 
   return {
     key,
     raw,
-    text: raw,
+    color,
+    text,
+    username,
+    nameColor,
     html: formatted,
     username: hasChatIdentity ? chatData.username : null,
     roleTag: hasChatIdentity ? chatData.roleTag : null,
@@ -544,6 +639,8 @@ function createMessage(message, time, key, chatData = null) {
     reply,
     color: hasChatIdentity ? chatData.color : null,
     isServer,
+    isServerMessage,
+    hideTimestamp,
     time,
     createdAt: Date.now(),
   }
@@ -883,6 +980,8 @@ function addMessage(message, time = currentTimeString(), messageId = null, chatD
   const chatList = chatListRef.value
   const shouldFollowLatestMessage = isFollowingLatestMessage(chatList)
   const entry = createMessage(message, time, messageId ?? `local-${Date.now()}-${messages.value.length}`, chatData)
+function addMessage(message, time = currentTimeString(), messageId = null, color = null) {
+  const entry = createMessage(message, time, messageId ?? `local-${Date.now()}-${messages.value.length}`, color)
   messages.value = [...messages.value, entry].slice(-70)
   storeChatMessages()
   if (shouldFollowLatestMessage) scrollToLastMessage()
@@ -927,6 +1026,7 @@ function onBeamMPSetNickname(payload) {
     localUsername.value = payload.trim()
     updateMentionSuggestions()
   }
+  addMessage(payload.message, time, `remote-${payload.id}`, payload.color)
 }
 
 function onClearHistory() {
@@ -1181,6 +1281,8 @@ onUnmounted(() => {
     linear-gradient(rgba(var(--bng-orange-500-rgb), 0.34), rgba(var(--bng-orange-500-rgb), 0.34)),
     rgba(var(--bng-cool-gray-900-rgb), 0.92);
   box-shadow: inset 0 0 0 1px rgba(var(--bng-orange-500-rgb), 0.65);
+.beammpChat2 .chat-message-content {
+  white-space: pre-wrap;
 }
 
 .beammpChat2 .chat-message-timestamp {

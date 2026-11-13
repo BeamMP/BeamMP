@@ -151,8 +151,9 @@ local function updatePlayersList(data)
 		local color = {}
 		local id = '?'
 		if player then
-			username = username .. player.role.shorttag
-			local c = player.role.forecolor
+			local role = player.customRole or player.role
+			username = username .. role.shorttag
+			local c = role.forecolor or role.backcolor
 			color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 			id = player.playerID
 		end
@@ -518,6 +519,9 @@ local function chatMessage(rawMessage) -- chat message received (angular)
 		local roleTag = string.gsub(player.role.shorttag or '', '^%s*(.-)%s*$', '%1')
 		username = username .. player.role.shorttag
 		local c = player.role.forecolor
+        local role = player.customRole or player.role
+        username = username .. role.shorttag
+		local c = role.forecolor or role.backcolor
 		local color = {[0] = c.r, [1] = c.g, [2] = c.b, [3] = c.a}
 		log('M', 'chatMessage', 'Chat message received from: '..username..' >' ..msg) -- DO NOT REMOVE
 		guihooks.trigger("onBeamMPChatMessage", {username = chatUsername, roleTag = roleTag, body = msg, message = message, id = chatcounter, color = color})

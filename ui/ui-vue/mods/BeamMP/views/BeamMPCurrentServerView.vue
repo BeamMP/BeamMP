@@ -66,7 +66,12 @@
 
       <section class="panel">
         <h3>{{ $tt("ui.beammp.serverBrowser.server.description") }}</h3>
-        <p class="description">{{ currentServer.sdesc || "No description supplied." }}</p>
+        <p class="description">
+          <template v-for="(segment, index) in parseBeamMPFormatting(currentServer.sdesc || 'No description supplied.')" :key="index">
+            <span v-if="segment.type === 'text'" :class="segment.classes">{{ segment.text }}</span>
+            <br v-else-if="segment.type === 'br'" />
+          </template>
+        </p>
       </section>
 
       <section class="panel">
@@ -100,6 +105,7 @@ import { useBridge } from "@/bridge"
 import { BngButton } from "@/common/components/base"
 import { BEAMMP_SERVERS_ROUTE_NAME } from "../shared/constants.js"
 import { useBeamMPState } from "../shared/beammpState.js"
+import { parseBeamMPFormatting } from "../shared/beammpFormatting.js"
 
 const { events } = useBridge()
 const router = useRouter()
@@ -213,6 +219,10 @@ onUnmounted(() => {
   events.off("onBeamMPServerModsChanged", updateSessionMods)
 })
 </script>
+
+<style lang="scss">
+@import url("/ui/assets/BeamMP/shared_styles/formatCodes.css");
+</style>
 
 <style scoped lang="scss">
 .current-server {

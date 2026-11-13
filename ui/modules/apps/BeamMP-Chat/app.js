@@ -75,7 +75,7 @@ app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, 
 
 		if (chatMessages) {
 			chatMessages.map((v, i) => {
-				addMessage(v.message, v.time)
+				addMessage(v.message, v.time, v.color)
 			})
 		}
 
@@ -161,8 +161,9 @@ app.controller("BeamMPChatController", ['$scope', 'Settings', function ($scope, 
 		
 			var time = hour + ":" + minute + ":" + second;
 			
-			storeChatMessage({message: data.message, time: time})
-			addMessage(data.message);
+			const roleColor = data.color;
+			storeChatMessage({message: data.message, time: time, color: roleColor})
+			addMessage(data.message, null, roleColor);
 		}
 	});
 
@@ -284,52 +285,107 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;")
 }
 
+function colorToRgba(color) {
+  if (!color) return null;
+  const r = color.r ?? color[0];
+  const g = color.g ?? color[1];
+  const b = color.b ?? color[2];
+  const a = color.a ?? color[3] ?? 255;
+  if (r == null || g == null || b == null) return null;
+  return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+}
+
 function formatChatMessage(string) {
 
     let result = '';
     let currentText = '';
-    let classes = new Set();
+    const classes = new Set();
+    let inlineColor = '';
+    let inlineBackground = '';
 
     string = escapeHtml(string);
-    const tokens = string.split(/(\^.)/g);
+    // ^#RRGGBB / ^@RRGGBB are arbitrary text/background colours; only validated hex reaches the style attribute.
+    const tokens = string.split(/(\^(?:\+{1,2}|[#@][0-9a-fA-F]{6}|.))/g);
+
+    const isForegroundClass = (cls) => cls.startsWith('color-') || cls === 'rainbow';
+    const isBackgroundClass = (cls) => cls.startsWith('bg-');
+    const isFontClass = (cls) => cls.startsWith('font-');
+    const isTypefaceClass = (cls) => cls.startsWith('typeface-');
+
+    const clearForeground = () => {
+        [...classes].forEach(c => isForegroundClass(c) && classes.delete(c));
+        inlineColor = '';
+    };
+    const clearBackground = () => {
+        [...classes].forEach(c => isBackgroundClass(c) && classes.delete(c));
+        inlineBackground = '';
+    };
+    const clearFont = () => {
+        [...classes].forEach(c => isFontClass(c) && classes.delete(c));
+    };
+    const clearTypeface = () => {
+        [...classes].forEach(c => isTypefaceClass(c) && classes.delete(c));
+    };
 
     const flush = () => {
         if (!currentText) return;
         const classList = Array.from(classes);
-        result += classList.length
-            ? `<span class="${classList.join(' ')}">${currentText}</span>`
+        const styles = [];
+        if (inlineColor) styles.push('color:' + inlineColor);
+        if (inlineBackground) styles.push('background-color:' + inlineBackground);
+        const classAttr = classList.length ? ` class="${classList.join(' ')}"` : '';
+        const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
+        result += (classAttr || styleAttr)
+            ? `<span${classAttr}${styleAttr}>${currentText}</span>`
             : currentText;
         currentText = '';
     };
 
     for (let i = 0; i < tokens.length; i++) {
-		const token = tokens[i];
-		const nextToken = tokens[i+1]?.trim() || '';
-		if (/^\^.$/.test(token)) {
-			flush();
-			if (token === '^r') {
-				classes.clear();
-			} else if (token === '^p') {
-				currentText += '<br>';
-			} else if (token === '^*') {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if(cls) classes.add(cls);
-				if (iconsOrig[nextToken]) {
-					currentText = iconsOrig[nextToken].glyph
-				};
-			} else {
-				const cls = globalThis.beammpTextStyleMap?.[token];
-				if (cls?.startsWith('color-')) {
-					[...classes].forEach(c => c.startsWith('color-') && classes.delete(c));
-					classes.add(cls);
-				} else if (cls) {
-					classes.add(cls);
-				}
-			}
-		} else if (tokens[i-1]!='^*') {
-			currentText += token;
-		}
-	}
+        const token = tokens[i];
+        const nextToken = tokens[i+1]?.trim() || '';
+        if (/^\^/.test(token)) {
+            flush();
+            if (token === '^r') {
+                classes.clear();
+                inlineColor = '';
+                inlineBackground = '';
+            } else if (token === '^p') {
+                currentText += '<br>';
+            } else if (token === '^*') {
+                const cls = globalThis.beammpTextStyleMap?.[token];
+                if(cls) classes.add(cls);
+                if (iconsOrig[nextToken]) {
+                    currentText = iconsOrig[nextToken].glyph
+                };
+            } else if (/^\^#[0-9a-fA-F]{6}$/.test(token)) {
+                clearForeground();
+                inlineColor = '#' + token.slice(2);
+            } else if (/^\^@[0-9a-fA-F]{6}$/.test(token)) {
+                clearBackground();
+                inlineBackground = '#' + token.slice(2);
+            } else {
+                const cls = globalThis.beammpTextStyleMap?.[token];
+                if (cls && isForegroundClass(cls)) {
+                    clearForeground();
+                    classes.add(cls);
+                } else if (cls && isBackgroundClass(cls)) {
+                    clearBackground();
+                    classes.add(cls);
+                } else if (cls && isFontClass(cls)) {
+                    clearFont();
+                    classes.add(cls);
+                } else if (cls && isTypefaceClass(cls)) {
+                    clearTypeface();
+                    classes.add(cls);
+                } else if (cls) {
+                    classes.add(cls);
+                }
+            }
+        } else if (tokens[i-1] != '^*') {
+            currentText += token;
+        }
+    }
 
     flush();
     return result;
@@ -374,7 +430,7 @@ function retrieveChatMessages() {
 	}
 }
 
-function addMessage(msg, time = null) {
+function addMessage(msg, time = null, color = null) {
 	//getting current time and adding it to the message before displaying
 	if (time == null) {
 		var now = new Date();
@@ -388,34 +444,56 @@ function addMessage(msg, time = null) {
 		time = hour + ":" + minute + ":" + second;
 	}
 
-  const msgText = "" + msg
-	msg = time + " " + msg;
+  let msgText = "" + msg
+	const isServerMessage = msgText.startsWith("Server: ")
+	let hideTimestamp = false
+
+	if (isServerMessage) {
+		// ^t and ^x are per-message flags, not formatting styles.
+		hideTimestamp = msgText.includes("^t")
+		const hideServerPrefix = msgText.includes("^x")
+		msgText = msgText.replace(/\^[tx]/g, "")
+		if (hideServerPrefix) msgText = msgText.slice("Server: ".length)
+	}
 
 	// Create the message node
 	const chatMessageNode = document.createElement("li");
 	chatMessageNode.className = "chat-message";
 	fadeNode(chatMessageNode);
 
-	// create node for the timestamp
-	const messageTimestampNode = document.createElement("span");
-	messageTimestampNode.className = "chat-message-timestamp";
+	if (!hideTimestamp) {
+		// create node for the timestamp
+		const messageTimestampNode = document.createElement("span");
+		messageTimestampNode.className = "chat-message-timestamp";
 
-	const timestampTextNode = document.createTextNode(time);
-	messageTimestampNode.appendChild(timestampTextNode);
+		const timestampTextNode = document.createTextNode(time);
+		messageTimestampNode.appendChild(timestampTextNode);
 
-	chatMessageNode.appendChild(messageTimestampNode)
+		chatMessageNode.appendChild(messageTimestampNode)
+	}
 
 	// create text for the message itself, add it to chat message list
 	const chatList = document.getElementById("chat-list");
 
 	// check if this message is a server message before
 	// doing rich formatting
-	if (msgText.startsWith("Server: ")) {
+	if (isServerMessage) {
 		const formattedInnerHtml = formatChatMessage(msgText);
 		chatMessageNode.innerHTML = chatMessageNode.innerHTML + formattedInnerHtml;
 	} else {
-		const textNode = document.createTextNode(msgText);
-		chatMessageNode.appendChild(textNode);
+		const usernameColor = colorToRgba(color);
+		const usernameEnd = msgText.indexOf(": ");
+		if (usernameColor && usernameEnd > 0) {
+			const usernameNode = document.createElement("span");
+			usernameNode.className = "chat-message-username";
+			usernameNode.style.color = usernameColor;
+			usernameNode.textContent = msgText.slice(0, usernameEnd + 2);
+			chatMessageNode.appendChild(usernameNode);
+			chatMessageNode.appendChild(document.createTextNode(msgText.slice(usernameEnd + 2)));
+		} else {
+			const textNode = document.createTextNode(msgText);
+			chatMessageNode.appendChild(textNode);
+		}
 	}
 
 	chatList.appendChild(chatMessageNode);

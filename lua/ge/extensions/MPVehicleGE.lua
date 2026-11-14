@@ -304,6 +304,32 @@ function isOwn(gameVehicleID)
 	return vehicles[vehiclesMap[gameVehicleID]] and vehicles[vehiclesMap[gameVehicleID]].isLocal == true or false
 end
 
+local function onResolveVehiclePresenceMode(query)
+	if not MPCoreNetwork.isMPSession() then return end
+	if query.mode ~= nil then return end
+	if isOwn(query.vehicleId) then
+		query.mode = "unrestricted"
+	end
+end
+
+local function refreshUnseatedLocalPresence(gameVehicleID)
+	if not MPCoreNetwork.isMPSession() or not isOwn(gameVehicleID) then return end
+	if not gameplay_seatOccupants then return end
+
+	for _, presence in ipairs(gameplay_seatOccupants.getVehiclePresences(gameVehicleID)) do
+		local playerPresence = gameplay_seatOccupants.getPlayerPresence(presence.player)
+		if presence.unseated and presence.permissionMode == "passenger"
+			and playerPresence and playerPresence.permissionOverride == nil
+			and be:getPlayerVehicleID(presence.player) == gameVehicleID then
+			-- Ownership arrives after spawn; resolve again without a persistent permission override.
+			local success, reason = gameplay_seatOccupants.requestUnseatedPresence(presence.player, gameVehicleID)
+			if not success then
+				log('W', 'refreshUnseatedLocalPresence', "Unable to refresh player "..presence.player.." in vehicle "..gameVehicleID..": "..tostring(reason))
+			end
+		end
+	end
+end
+
 --- Returns a table that contains a list of all Vehicles that are owned by this Client
 -- @treturn table {gameVehicleID_1 = vehicles_subtable}
 -- @treturn table {gameVehicleID_N = vehicles_subtable}
@@ -1985,6 +2011,8 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 		if not veh or not veh:getActive() then
 			log("W", "onServerVehicleSpawned", "Local vehicle "..gameVehicleID.." does not exist anymore, triggering delete event for server vehicle "..serverVehicleID)
 			onVehicleDestroyed(gameVehicleID)
+		else
+			refreshUnseatedLocalPresence(gameVehicleID)
 		end
 
 	elseif vehicles[serverVehicleID] and vehicles[serverVehicleID].remoteVehID == gameVehicleID then
@@ -2942,6 +2970,7 @@ M.handle                   = handle
 M.onVehicleSpawned         = onVehicleSpawned
 M.onVehicleDestroyed       = onVehicleDestroyed
 M.onVehicleSwitched        = onVehicleSwitched
+M.onResolveVehiclePresenceMode = onResolveVehiclePresenceMode
 M.onVehicleResetted        = onVehicleResetted
 M.onVehicleColorChanged    = onVehicleColorChanged
 M.onPlayerLeft             = onPlayerLeft

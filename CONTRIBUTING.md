@@ -62,5 +62,46 @@ In general, we follow the ["fork-and-pull" Git workflow](https://github.com/susa
 
 ## Getting Help
 
+### Testing unseated vehicle control (BeamNG.drive 0.40)
+
+The vehicle-presence hook allows unseated control of locally owned vehicles in a
+BeamMP session. Remote vehicles and explicit presence modes are left unchanged.
+When the server acknowledges a local spawn, unseated players whose default mode
+was already resolved as passenger are re-evaluated. This does not disable the
+occupant system, add dummies, or change seated passenger permissions.
+
+Run the standalone regression checks from the repository root with LuaJIT:
+
+```sh
+luajit tests/vehiclePresence.test.lua
+```
+
+These checks load the actual BeamMP module with mocked engine services, including
+the server spawn-acknowledgement path. They do not replace in-game testing.
+
+For manual testing, use a backup of your installed BeamMP mod and replace
+`lua/ge/extensions/MPVehicleGE.lua` in that mod with the modified file. Avoid
+running two copies of BeamMP or replacing files in the stock game installation.
+Restart the game after changing the mod, and restore the backup after testing.
+For this local test build, launch with `BeamMP-Launcher.exe --no-download --no-update`
+so the launcher does not replace the modified archive or remove an unpacked copy.
+Resume normal launcher updates after restoring the original mod.
+
+On a test server, verify:
+
+1. Spawn a car configuration with the driver seat removed: steering, throttle,
+   and brakes work after the server acknowledges the spawn.
+2. Remove and reinstall the driver seat through the parts selector; reset,
+   replace, and switch between your vehicles. Controls remain usable.
+3. Spawn a normal seated car and the spinner prop; both retain their behavior.
+4. Switch to another player's vehicle: this fix must not grant unseated driving
+   permissions or take over that vehicle's physics.
+5. Use a passenger seat in your own and another player's vehicle: passenger
+   controls remain restricted. Dummy seats and normal driver seats still work.
+6. Disconnect and reconnect, and return to single-player. Repeat with multiseat
+   if available; the fix must not grant driving permissions to seated passengers.
+
+### Community support
+
 Join us in the BeamMP Community [Forum](https://forum.beammp.com) and post your question there in the correct category with a descriptive tag.
 Alternatively contact us on [Discord](https://discord.gg/beammp) (Not recommended for this subject).

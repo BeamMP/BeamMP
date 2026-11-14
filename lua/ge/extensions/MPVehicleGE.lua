@@ -38,6 +38,19 @@ local oneSecCounter = 0
 local nicknamesAllowed = true
 local onVehicleDestroyedAllowed = true
 local nextSpawnIsRemote = false
+local proxyTestActive = false -- set by MPProxyTest: lets the remote-vehicle pipeline run without a launcher connection
+local PROXY_TEST_MIN_PLAYER_ID = 900000 -- fake test players use IDs >= this, never sent to the server
+
+-- true for server vehicle IDs that belong to MPProxyTest fake players
+local function isFakeServerVehicleID(serverVehicleID)
+	local pid = tonumber(tostring(serverVehicleID or ""):match("^(%d+)%-"))
+	return pid ~= nil and pid >= PROXY_TEST_MIN_PLAYER_ID
+end
+
+-- the remote vehicle pipeline (prediction, nametags, proxies) runs when connected, or in proxy test mode
+local function pipelineActive()
+	return proxyTestActive or (MPGameNetwork and MPGameNetwork.launcherConnected())
+end
 local editSyncTimer = 0
 local localCounter = 0
 local vehiclesToSync = {}
@@ -46,6 +59,7 @@ local queueApplyTimer = 0
 local queueWaiting = false
 local isAtSyncSpeed = true
 local hideNicknamesToggle = false
+local proxyDemoting = {} -- [gameVehicleID] = true while a real remote vehicle is being swapped back to a proxy
 
 local original_removeAllExceptCurrent
 local original_spawnNewVehicle
@@ -1115,6 +1129,7 @@ function Vehicle:new(data)
 	o.isLocal = data.isLocal or false
 	o.isSpawned = data.isSpawned ~= false -- default to true
 	o.isDeleted = data.isDeleted or false
+	o.isProxy = data.isProxy or false -- remote vehicle that is not spawned but drawn as a proxy (see MPProxyGE)
 
 	o.position = vec3()
 	o.rotation = quat()
@@ -1139,6 +1154,7 @@ function Vehicle:delete()
 	if self.serverVehicleString then vehicles[self.serverVehicleString] = nil end
 
 	players_vehicle_configs[self.serverVehicleString] = nil
+	if self.proxy and MPProxyMeshGE then MPProxyMeshGE.release(self.proxy) end -- return pooled proxy meshes
 
 	self = nil
 end
@@ -1204,7 +1220,8 @@ function Vehicle:onSerialized()
 		ownerName = self.ownerName,
 		isLocal = self.isLocal,
 		isSpawned = self.isSpawned,
-		isDeleted = self.isDeleted
+		isDeleted = self.isDeleted,
+		isProxy = self.isProxy
 	}
 	return t
 end
@@ -1549,6 +1566,9 @@ local function applyVehSpawn(event)
 
 		vehicle.gameVehicleID = spawnedVehID
 		vehicle.isSpawned = true
+		vehicle.isProxy = false
+		-- during a proxy -> real handover the proxy stays drawn until the real vehicle is placed (MPProxyGE)
+		if vehicle.proxy and MPProxyMeshGE and not vehicle.proxyHandover then MPProxyMeshGE.release(vehicle.proxy) end
 		vehicle.jbeam = vehicleName
 		vehicle.protected = protected
 		vehicle.absMode = absMode
@@ -1645,9 +1665,18 @@ end
 --============================ ON VEHICLE SPAWNED (CLIENT) ============================
 local function onVehicleSpawned(gameVehicleID)
 
-	if not MPCoreNetwork.isMPSession() then return end -- do nothing if singleplayer
+	if not MPCoreNetwork.isMPSession() then -- do nothing if singleplayer
+		-- proxy test mode: only remote (fake) vehicles and proxy colliders get the VE extensions, own spawns stay untouched
+		if not proxyTestActive then return end
+		if not (nextSpawnIsRemote or (MPProxyGE and MPProxyGE.isCollider(gameVehicleID))) then return end
+	end
 
 	local veh = getObjectByID(gameVehicleID)
+	if MPProxyGE and MPProxyGE.isCollider(gameVehicleID) then -- pooled proxy collider, never sent to the server
+		nextSpawnIsRemote = false
+		veh:queueLuaCommand("extensions.loadModulesInDirectory('lua/vehicle/extensions/BeamMP')")
+		return
+	end
 	local newJbeamName = veh:getJBeamFilename()
 
 	local vehicle = getVehicleByGameID(gameVehicleID)
@@ -1698,9 +1727,31 @@ local function spawnDestroyedVehicles(serverVehID)
 		return
 	end
 
+	-- removed by the user while proxies were on: it is a proxy now, restoring means spawning it for real again
+	if vehicles[serverVehID].proxyUserUnloaded and MPProxyGE and MPProxyGE.isEnabled() then
+		MPProxyGE.requestReal(vehicles[serverVehID])
+		UI.showNotification('Restoring '..tostring(vehicles[serverVehID].ownerName).."'s "..tostring(vehicles[serverVehID].jbeam), ''..serverVehID..'respawn', 'directions_car')
+		return
+	end
+
 	if vehicles[serverVehID].isDeleted == false then
 		UI.showNotification(''..vehicles[serverVehID].ownerName.."'s "..vehicles[serverVehID].jbeam.." hasn't been deleted yet?", ''..serverVehID..'delete', 'warning')
 		log("I", "restorePlayerVehicle", "This vehicle hasn't been deleted yet")
+		return
+	end
+
+	if MPProxyGE and MPProxyGE.isEnabled() then
+		-- let the proxy manager decide whether it is close enough to be spawned for real
+		local oldGameVehicleID = vehicles[serverVehID].gameVehicleID
+		if oldGameVehicleID and oldGameVehicleID > 0 and not getObjectByID(oldGameVehicleID) then
+			vehiclesMap[oldGameVehicleID] = nil
+			vehicles[serverVehID].gameVehicleID = -1
+		end
+		vehicles[serverVehID].isDeleted = false
+		vehicles[serverVehID].isProxy = true
+		vehicles[serverVehID].proxyUserUnloaded = nil
+		MPProxyGE.initProxy(vehicles[serverVehID], vehdata)
+		UI.showNotification('Restored '..vehicles[serverVehID].ownerName.."'s "..tostring(vehicles[serverVehID].jbeam), ''..serverVehID..'respawn', 'directions_car')
 		return
 	end
 
@@ -1728,6 +1779,145 @@ local function spawnDestroyedVehicles(serverVehID)
 	end
 end
 
+--============================ PROXY VEHICLES ============================
+-- Remote vehicles can be kept as proxies (no game object, see MPProxyGE). These functions do the actual swaps.
+
+--- Returns true if the spawn data of a remote vehicle is known (needed to swap a proxy for a real vehicle).
+-- @tparam string serverVehicleID X-Y
+local function hasSpawnData(serverVehicleID)
+	return players_vehicle_configs[serverVehicleID] ~= nil
+end
+
+--- Swaps a proxy for a real vehicle, using the stored spawn data and the existing spawn queue.
+-- The current proxy position is used as spawn position (applyVehSpawn prefers vehicle.position).
+-- @tparam string serverVehicleID X-Y
+-- @treturn bool true if a spawn was started or queued
+local function promoteToReal(serverVehicleID)
+	local vehicle = vehicles[serverVehicleID]
+	local data = players_vehicle_configs[serverVehicleID]
+	if not vehicle or not data or vehicle.isLocal or vehicle.isSpawned or vehicle.spawnQueue then return false end
+	local owner = vehicle:getOwner()
+	local eventdata = {
+		playerNickname = owner and owner.name or vehicle.ownerName or "unknown",
+		serverVehicleID = serverVehicleID,
+		data = jsonEncode(data)
+	}
+	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and data.jbm == "unicycle") then
+		log("I", "promoteToReal", "Queueing real spawn for proxy "..serverVehicleID)
+		vehicle.spawnQueue = eventdata
+		queueWaiting = true
+		UI.updateQueue(getQueueCounts())
+	else
+		log("I", "promoteToReal", "Spawning real vehicle for proxy "..serverVehicleID)
+		applyVehSpawn(eventdata)
+	end
+	return true
+end
+
+--- Swaps a real remote vehicle (or a queued spawn) back to a proxy. The vehicle keeps its serverVehicleID,
+-- owner, nametag and spectators, it only loses its game object.
+-- @tparam string serverVehicleID X-Y
+-- @treturn bool true if the vehicle is (now) a proxy
+local function demoteToProxy(serverVehicleID)
+	local vehicle = vehicles[serverVehicleID]
+	if not vehicle or vehicle.isLocal then return false end
+	if MPProxyGE and not vehicle.proxy then MPProxyGE.initProxy(vehicle, players_vehicle_configs[serverVehicleID]) end
+	if vehicle.spawnQueue and not vehicle.isSpawned then -- spawn not applied yet, just drop it from the queue
+		vehicle.spawnQueue = nil
+		vehicle.isProxy = true
+		UI.updateQueue(getQueueCounts())
+		return true
+	end
+	local gameVehicleID = vehicle.gameVehicleID
+	local veh = gameVehicleID and gameVehicleID > 0 and getObjectByID(gameVehicleID) or nil
+	if not veh then
+		vehicle.isSpawned = false
+		vehicle.isProxy = true
+		return true
+	end
+	local current = getPlayerVehicle(0)
+	if current and current:getID() == gameVehicleID then return false end -- never pull the vehicle the camera is in
+	if vehicle.editQueue then -- already merged into players_vehicle_configs, used when it is spawned again
+		vehicle.editQueue = nil
+		UI.updateQueue(getQueueCounts())
+	end
+	vehicle.proxyHandover = nil
+	if MPProxyGE then MPProxyGE.seedFromVehicle(vehicle, veh) end
+	proxyDemoting[gameVehicleID] = true
+	log("I", "demoteToProxy", "Swapping "..serverVehicleID.." ("..gameVehicleID..") to a proxy")
+	veh:delete() -- onVehicleDestroyed turns the vehicle into a proxy, see proxyDemoting
+	if proxyDemoting[gameVehicleID] then -- in case the destroy hook did not run synchronously
+		vehiclesMap[gameVehicleID] = nil
+		vehicle.gameVehicleID = -1
+		vehicle.isSpawned = false
+		vehicle.isDeleted = false
+		vehicle.isProxy = true
+		vehicle.vehicleHeight = nil
+	end
+	return true
+end
+
+--- Spawns a pooled collision vehicle for MPProxyGE. It is not sent to the server and not mapped to any serverVehicleID.
+-- @treturn number gameVehicleID or nil
+local function spawnProxyCollider(model, position, rotation, config)
+	nextSpawnIsRemote = true -- don't send this spawn to the server
+	local spawnRot = quat(0,0,1,0) * quat(rotation) -- the car rotates 180 degrees on spawn, same as applyVehSpawn
+	local opts = { autoEnterVehicle=false, vehicleName="beammpProxyCollider", cling=true, centeredPosition = true, removeWhenNoPositionFound = false}
+	local veh = spawn.spawnVehicle(model, config, vec3(position), spawnRot, opts)
+	if not veh and config then -- config not found: the model's default one
+		log('W', 'spawnProxyCollider', "Proxy collider config "..tostring(config).." failed, spawning the default "..tostring(model))
+		nextSpawnIsRemote = true
+		veh = spawn.spawnVehicle(model, nil, vec3(position), spawnRot, opts)
+	end
+	-- nextSpawnIsRemote is consumed by onVehicleSpawned, like in applyVehSpawn
+	if not veh then log('E', 'spawnProxyCollider', "Failed to spawn proxy collider "..tostring(model)) return nil end
+	veh.playerUsable = false
+	veh.mpVehicleType = 'R'
+	veh:queueLuaCommand("hydros.onFFBConfigChanged(nil)")
+	log('I', 'spawnProxyCollider', "Spawned proxy collider "..veh:getID())
+	return veh:getID()
+end
+
+--- Returns true if the remote vehicle is currently a proxy (no game object, gameVehicleID is -1).
+-- @tparam string serverVehicleID X-Y
+local function isProxy(serverVehicleID)
+	local vehicle = vehicles[serverVehicleID]
+	return vehicle ~= nil and vehicle.isProxy == true and not vehicle.isSpawned
+end
+
+--- Returns the position and rotation of any vehicle, real or proxy. Use this instead of be:getObjectByID for remote vehicles.
+-- @tparam string serverVehicleID X-Y
+-- @treturn vec3 position (copy) or nil
+-- @treturn quat rotation (copy, same convention as the position packets) or nil
+local function getVehiclePosRot(serverVehicleID)
+	local vehicle = vehicles[serverVehicleID]
+	if not vehicle then return nil end
+	local veh = vehicle.gameVehicleID and vehicle.gameVehicleID > 0 and getObjectByID(vehicle.gameVehicleID) or nil
+	if veh then
+		local d = vec3(veh:getDirectionVectorXYZ())
+		local u = vec3(veh:getDirectionVectorUpXYZ())
+		return vec3(be:getObjectOOBBCenterXYZ(vehicle.gameVehicleID)), quatFromDir(-d, u)
+	end
+	if vehicle.position then return vec3(vehicle.position), quat(vehicle.rotation) end
+	return nil
+end
+
+--- Returns all remote vehicles that are proxies right now.
+-- @treturn table { [serverVehicleID] = Vehicle }
+local function getProxyVehicles()
+	local t = {}
+	for serverVehicleID, vehicle in pairs(vehicles) do
+		if vehicle.isProxy and not vehicle.isSpawned then t[serverVehicleID] = vehicle end
+	end
+	return t
+end
+
+--- Asks for a proxy to be swapped for a real vehicle as soon as possible (ignores distance and limits, stutters).
+-- @tparam string serverVehicleID X-Y
+local function requestRealVehicle(serverVehicleID)
+	return MPProxyGE and MPProxyGE.requestReal(vehicles[serverVehicleID]) or false
+end
+
 local function restorePlayerVehicle(playerName)
 	-- not a proper way of doing this
 
@@ -1749,13 +1939,50 @@ end
 
 local function onVehicleDestroyed(gameVehicleID)
 	missingServerIDLogged[gameVehicleID] = nil
-	if MPGameNetwork.launcherConnected() then
+	if pipelineActive() then
 		local vehicle = getVehicleByGameID(gameVehicleID)
 
 		log('W', 'onVehicleDestroyed', gameVehicleID .. ' ' )
 
+		if MPProxyGE and MPProxyGE.isCollider(gameVehicleID) then MPProxyGE.onColliderDestroyed(gameVehicleID) return end
+
+		if proxyDemoting[gameVehicleID] then -- real -> proxy swap, keep the vehicle and keep tracking it as a proxy
+			proxyDemoting[gameVehicleID] = nil
+			if vehiclesMap[gameVehicleID] then vehiclesMap[gameVehicleID] = nil end
+			if vehicle then
+				vehicle.gameVehicleID = -1
+				vehicle.isSpawned = false
+				vehicle.isDeleted = false
+				vehicle.isProxy = true
+				vehicle.vehicleHeight = nil
+				log('I', 'onVehicleDestroyed', string.format("Vehicle %i (%s) swapped to a proxy", gameVehicleID, vehicle.serverVehicleString or "?"))
+			end
+			return
+		end
+
 		if not vehicle then return end
 		local serverVehicleID = vehicle.serverVehicleString -- Get the serverVehicleID
+
+		-- proxies replace the "deleted" blob: a remote vehicle removed here (ctrl+delete, the game's remove, ...) stays
+		-- tracked as a proxy. Nothing is sent to the server (only own vehicles send a delete), and it is marked as
+		-- unloaded by the user so it is not spawned for real again until asked for (Tab, spectate, restore)
+		if onVehicleDestroyedAllowed and not vehicle.isLocal and serverVehicleID and MPProxyGE and MPProxyGE.isEnabled()
+			and players_vehicle_configs[serverVehicleID] and not vehicle.isIllegal then
+			if vehiclesMap[gameVehicleID] then vehiclesMap[gameVehicleID] = nil end
+			vehicle.gameVehicleID = -1
+			vehicle.isSpawned = false
+			vehicle.isDeleted = false
+			vehicle.isProxy = true
+			vehicle.vehicleHeight = nil
+			local hadQueue = vehicle.spawnQueue or vehicle.editQueue
+			vehicle.spawnQueue, vehicle.editQueue = nil, nil -- the stored config already holds queued edits
+			vehicle.proxyHandover = nil
+			vehicle.proxyUserUnloaded = true
+			if hadQueue then UI.updateQueue(getQueueCounts()) end
+			MPProxyGE.initProxy(vehicle, players_vehicle_configs[serverVehicleID])
+			log('I', 'onVehicleDestroyed', string.format("Vehicle %i (%s) removed by local player, kept as a proxy (user unloaded)", gameVehicleID, serverVehicleID))
+			return
+		end
 
 		vehicle.isSpawned = false
 		vehicle.isDeleted = true
@@ -1814,7 +2041,10 @@ local function sendActiveVehicleID(newVehObj)
 	if not newServerVehicleID then
 		newServerVehicleID = tostring(MPConfig.getPlayerServerID()) .. '-' .. -1 -- if the vehicle doesn't exist we still want to send that it changed to remove the spectator nametag
 	end
-	if newServerVehicleID then
+	if isFakeServerVehicleID(newServerVehicleID) or newVehObj.isFakeTest then -- MPProxyTest vehicle, the server must never hear about it
+		newServerVehicleID = tostring(MPConfig.getPlayerServerID()) .. '-' .. -1
+	end
+	if newServerVehicleID and MPGameNetwork.launcherConnected() then
 		local playerID = MPConfig.getPlayerServerID()
 		MPGameNetwork.send(MPNetworkHelpers.generatePacketBuffer('Om',tostring(playerID),newServerVehicleID))
 	end
@@ -2008,7 +2238,19 @@ local function onServerVehicleSpawned(playerRole, playerNickname, serverVehicleI
 
 		players_vehicle_configs[serverVehicleID] = decodedData
 
-		if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
+		if MPProxyGE and MPProxyGE.isEnabled() then
+			-- proxy mode: never spawn here, MPProxyGE swaps close vehicles for real ones (rate limited)
+			vehObject.jbeam = decodedData.jbm
+			local p = MPProxyGE.initProxy(vehObject, decodedData)
+			if p.validModel then
+				vehObject.isProxy = true
+				log("I", "onServerVehicleSpawned", "Vehicle "..serverVehicleID.." of "..playerNickname.." added as proxy")
+			else
+				vehObject.isIllegal = true
+				log('W', 'onServerVehicleSpawned', "The received vehicle "..tostring(decodedData.jbm).." is not valid (likely a missing mod), kept as blob")
+				UI.showNotification("Player "..playerNickname.." spawned an illegal vehicle ("..tostring(decodedData.jbm).."), it was skipped", ""..playerNickname..""..tostring(decodedData.jbm).."illegal", "remove_circle")
+			end
+		elseif settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
 			log("I", "onServerVehicleSpawned", "Adding spawn for " .. playerNickname .. " to queue")
 
 			vehicles[serverVehicleID].spawnQueue = eventdata
@@ -2045,9 +2287,24 @@ local function onServerVehicleEdited(serverID, data)
 	local saveVehicleRot = players_vehicle_configs[serverID].rot
 	local saveVehiclePos = players_vehicle_configs[serverID].pos
 
+	-- a paused (hybrid mode) vehicle has to run to be respawned with the new config
+	if MPProxyGE and MPProxyGE.isHybridPaused(vehicles[serverID]) then MPProxyGE.hybridWake(vehicles[serverID], "edit") end
+
 	players_vehicle_configs[serverID] = decodedData
 	players_vehicle_configs[serverID].pos = saveVehiclePos
 	players_vehicle_configs[serverID].rot = saveVehicleRot
+
+	local editedVehicle = vehicles[serverID]
+	if editedVehicle.isProxy and not editedVehicle.isSpawned then
+		-- proxies only need their shape/colour updated, the stored config is used when it gets swapped for a real vehicle
+		if editedVehicle.spawnQueue then
+			editedVehicle.spawnQueue.data = jsonEncode(players_vehicle_configs[serverID])
+		end
+		editedVehicle.jbeam = decodedData.jbm
+		if MPProxyGE then MPProxyGE.initProxy(editedVehicle, decodedData) end
+		log('I', 'onServerVehicleEdited', "edit "..serverID.." applied to proxy")
+		return
+	end
 
 
 	if settings.getValue("enableSpawnQueue") and not (settings.getValue("queueSkipUnicycle") and decodedData.jbm == "unicycle") then
@@ -2112,6 +2369,19 @@ end
 local function onServerVehicleResetted(serverVehicleID, data)
 	--print("Reset Event Received for a player")
 	local gameVehicleID = getGameVehicleID(serverVehicleID) -- Get game ID
+	local resetVehicle = vehicles[serverVehicleID]
+	if resetVehicle and resetVehicle.isProxy and not resetVehicle.isSpawned then
+		local pr = jsonDecode(data)
+		if pr and MPProxyGE then MPProxyGE.snapProxy(resetVehicle, pr.pos, pr.rot) end
+		if MPProxyGE then MPProxyGE.onVehicleResetWhileHeld(resetVehicle) end
+		lastResetTime[serverVehicleID] = localCounter
+		return
+	end
+	if resetVehicle and MPProxyGE and MPProxyGE.isHybridPaused(resetVehicle) then -- paused: the proxy shows the reset pose
+		local pr = jsonDecode(data)
+		if pr then MPProxyGE.snapProxy(resetVehicle, pr.pos, pr.rot) end
+		MPProxyGE.onVehicleResetWhileHeld(resetVehicle)
+	end
 	if localCounter - (lastResetTime[serverVehicleID] or 0) > 0.2 then
 		if gameVehicleID then
 			local veh = getObjectByID(gameVehicleID) -- Get associated vehicle
@@ -2196,6 +2466,7 @@ local function onServerVehicleColorChanged(serverVehicleID, data)
         if deletedVehicleData and deletedVehicleData.vcf then
             local paint = jsonDecode(data)
             players_vehicle_configs[serverVehicleID].vcf.paints = paint
+            if vehicle.isProxy and MPProxyGE then MPProxyGE.initProxy(vehicle, deletedVehicleData) end
         end
     end
 end
@@ -2469,6 +2740,13 @@ local function focusCameraOnPlayer(targetName)
 	log('I', "focusCameraOnPlayer", "Teleporting camera to: "..targetName)
 
 	for serverVehicleID, vehicle in pairs(vehicles) do
+		if vehicle.ownerName == targetName and vehicle.jbeam ~= "unicycle" and vehicle.isProxy and not vehicle.isSpawned and MPProxyGE then
+			-- proxies have no game object to enter, ask for a real vehicle and let the player retry once it spawned
+			if MPProxyGE.requestReal(vehicle) then
+				UI.showNotification("Spawning "..targetName.."'s vehicle, try again in a moment", targetName.."proxyfocus", "directions_car")
+			end
+			return
+		end
 		if vehicle.ownerName == targetName and vehicle.jbeam ~= "unicycle" then
 			log('I', "focusCameraOnPlayer", "Found vehicle: "..vehicle.gameVehicleID)
 			local targetVeh = getObjectByID(vehicle.gameVehicleID)
@@ -2545,7 +2823,7 @@ local function applyPlayerQueues(playerID)
 end
 
 local function onUpdate(dt)
-	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+	if pipelineActive() then
 		localCounter = localCounter + dt
 	end
 
@@ -2576,7 +2854,7 @@ end
 
 
 local function onPreRender(dt)
-	if MPGameNetwork and MPGameNetwork.launcherConnected() then
+	if pipelineActive() then
 		if not hasInitColors then
 			initColors()
 		end
@@ -2635,6 +2913,8 @@ local function onPreRender(dt)
 		end
 
 
+		if MPProxyGE then MPProxyGE.update(dt, cameraPos, activeVehID) end
+
 		--if not activeVeh and be:getObjectCount() == 0 then return end -- If no vehicle do nothing
 		-- Vehicles syncing timer
 		editSyncTimer = editSyncTimer + dt
@@ -2664,6 +2944,14 @@ local function onPreRender(dt)
 				dir:set(veh:getDirectionVectorXYZ())
 				dirUp:set(veh:getDirectionVectorUpXYZ())
 				v.rotation:setFromDir(dir,dirUp)
+			elseif (v.isProxy or v.hybridPaused) and v.proxy then -- proxy (mesh, box, prism or person), use the drawn position and height
+				local p = v.proxy
+				if not p.hasData then goto skip_vehicle end -- nothing drawn yet, the position would be the map origin
+				v.position:set(p.rpos)
+				local top = p.H or 1.5
+				if p.isPerson then top = 1.85
+				elseif p.meshObjects and p.meshShape and p.meshShape.maxZ then top = p.meshShape.maxZ - (p.meshShape.groundZ or 0) end
+				heightOffset = top - (p.cogH or 0.5) + 0.3
 			end
 
 			if not v.position then goto skip_vehicle end -- return if no position has been received yet
@@ -2671,7 +2959,7 @@ local function onPreRender(dt)
 			pos:set(v.position)
 			pos.z = pos.z + heightOffset
 
-			if settings.getValue("enableBlobs") and not v.isSpawned then
+			if settings.getValue("enableBlobs") and not v.isSpawned and not (v.isProxy and not v.isDeleted) then -- proxies are drawn by MPProxyGE
 				local colors = nil
 
 				if v.spawnQueue then -- in queue
@@ -2728,7 +3016,7 @@ local function onPreRender(dt)
 					end
 				end
 
-				if settings.getValue("fadeVehicles") and veh then
+				if settings.getValue("fadeVehicles") and veh and not (MPProxyGE and MPProxyGE.isInHandover(v)) then
 					if activeVehID == gameVehicleID then veh:setMeshAlpha(1, "", false)
 					else veh:setMeshAlpha(1 - clamp(linearScale(distfloat, 20, 0, 0, 1), 0, 1), "", false) end
 				end
@@ -2832,6 +3120,8 @@ local function sendPastVehicles()
 end
 
 local function onDisconnect()
+	if MPProxyGE then MPProxyGE.reset() end
+	proxyDemoting = {}
 	for playerID, player in pairs(players) do
 		player:delete()
 	end
@@ -2861,6 +3151,8 @@ local function onVehicleReady(gameVehicleID)
 		return
 	end
 
+	if MPProxyGE and MPProxyGE.onColliderReady(gameVehicleID) then return end
+
 	if getOwnMap()[gameVehicleID] then
 		commands.setGameCamera()
 	end
@@ -2871,6 +3163,8 @@ local function onVehicleReady(gameVehicleID)
 	if vehiclesMap[gameVehicleID] then
 		veh:queueLuaCommand("MPVehicleVE.setServerID(mime.unb64(\'".. MPHelpers.b64encode(vehiclesMap[gameVehicleID]) .."\'))")
 	end
+	local vehicle = getVehicleByGameID(gameVehicleID)
+	if MPProxyGE and vehicle and not vehicle.isLocal then MPProxyGE.onRealVehicleReady(vehicle, veh) end
 end
 
 
@@ -2990,6 +3284,23 @@ M.sendVehicleEdit          = sendVehicleEdit          -- UI 'Sync' button
 M.onVehicleReady           = onVehicleReady           -- Called when our VE files load and the vehicle is ready
 M.onSettingsChanged        = onSettingsChanged        -- takes: -
 M.getRoleInfoTable         = getRoleInfoTable
+M.isProxy                  = isProxy                  -- takes: string serverVehicleID  returns: bool
+M.getVehiclePosRot         = getVehiclePosRot         -- takes: string serverVehicleID  returns: vec3, quat (works for proxies)
+M.getProxyVehicles         = getProxyVehicles         -- takes: -      returns: { serverVehicleID : Vehicle }
+M.requestRealVehicle       = requestRealVehicle       -- takes: string serverVehicleID  returns: bool
+M.setProxyTestActive       = function(active) proxyTestActive = active and true or false end
+M.isProxyTestActive        = function() return proxyTestActive end
+M.isFakeServerVehicleID    = isFakeServerVehicleID    -- takes: string serverVehicleID  returns: bool
+M.PROXY_TEST_MIN_PLAYER_ID = PROXY_TEST_MIN_PLAYER_ID
+-- MPProxyTest entry point: same path as a received 'Os' packet, minus the past-vehicles resend the 's' handler does
+M.injectTestSpawn          = function(playerRole, playerNickname, serverVehicleID, data)
+	if not isFakeServerVehicleID(serverVehicleID) then log('E', 'injectTestSpawn', 'refusing non-test id '..tostring(serverVehicleID)) return end
+	onServerVehicleSpawned(playerRole, playerNickname, serverVehicleID, data)
+end
+M.hasSpawnData             = hasSpawnData             -- internal, used by MPProxyGE
+M.promoteToReal            = promoteToReal            -- internal, used by MPProxyGE
+M.demoteToProxy            = demoteToProxy            -- internal, used by MPProxyGE
+M.spawnProxyCollider       = spawnProxyCollider       -- internal, used by MPProxyGE
 M.sendPendingVehicleEdits  = sendPendingVehicleEdits  -- takes: -
 M.onInit = function() setExtensionUnloadMode(M, "manual") end
 

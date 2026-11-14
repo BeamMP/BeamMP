@@ -59,6 +59,7 @@ local function handle(rawData)
 	if not veh or veh.isLocal then
 		return
 	end
+	if MPProxyGE and MPProxyGE.captureState("inputs", veh, code, data) then return end -- proxy / spawning: kept for later
 
 	if code == 'i' then
 		applyInputs(data, serverVehicleID)

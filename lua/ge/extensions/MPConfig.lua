@@ -77,6 +77,12 @@ local defaultSettings = {
 	
 	enablePosSmoother = false, -- experimental
 
+	-- proxy vehicles: far away remote vehicles are drawn as cheap proxies instead of being spawned (see MPProxyGE)
+	enableProxyVehicles = true, proxyAutoReal = false, proxyRealSpawnDistance = 200, proxyRealDespawnDistance = 260, proxyMaxRealVehicles = 12,
+	proxyMinSpawnInterval = 3, proxySwapCooldown = 10, proxyDrawDistance = 3000,
+	proxyCollision = false, proxyCollisionRadius = 60, proxyColliderPoolSize = 4, proxyColliderModel = "simple_traffic",
+	proxyMeshEnabled = true, proxyMeshDistance = 500, proxyMaxMeshProxies = 48, proxyMeshWheels = true,
+
 	-- unicycle configurations
 	unicycleConfigs = getUnicycleConfigs(), unicycleAutoSave = true,
 	--unicycle_pc = nil, -- temp value introduced to share the user selected default unicycle config from the multiplayer.partial ui to MPConfig.setDefaultUnicycle()

@@ -498,6 +498,7 @@ end
 --- Sends a chat message to the server for viewing by other players.
 -- @param msg string The chat message typed by the user
 local function chatSend(msg)
+	if MPProxyTest and string.sub(tostring(msg), 1, 10) == "/proxytest" and MPProxyTest.chatCommand(msg) then return end -- local test command, never sent
 	local c = 'C:'..MPConfig.getNickname()..": "..msg
 	MPGameNetwork.send(c)
 	TriggerClientEvent("ChatMessageSent", c)

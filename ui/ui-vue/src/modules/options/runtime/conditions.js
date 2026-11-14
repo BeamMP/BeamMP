@@ -274,6 +274,36 @@ export default function (deps) {
     beammpEnableQueueAutoEnabled(values) {
         return values.enableQueueAuto===true
     },
+    beammpEnableProxyVehicles(values) {
+        return values.enableProxyVehicles!==false
+    },
+    beammpProxyMesh(values) {
+        return values.enableProxyVehicles!==false && values.proxyMeshEnabled!==false
+    },
+    beammpProxyCollision(values) {
+        return values.enableProxyVehicles!==false && values.proxyCollision===true
+    },
+    beammpProxyHybrid(values) {
+        return values.enableProxyVehicles!==false && values.proxyHybridMode===true
+    },
+    beammpProxyEngineSound(values) {
+        return values.enableProxyVehicles!==false && values.proxyEngineSound===true
+    },
+    beammpProxyRealWheels(values) {
+        return values.enableProxyVehicles!==false && values.proxyMeshEnabled!==false && values.proxyMeshRealWheels!==false
+    },
+    beammpProxySuspension(values) {
+        return values.enableProxyVehicles!==false && values.proxyMeshEnabled!==false && values.proxySuspension===true
+    },
+    beammpProxyTireScreech(values) {
+        return values.enableProxyVehicles!==false && values.proxyTireScreech===true
+    },
+    beammpProxySmoke(values) {
+        return values.enableProxyVehicles!==false && values.proxySmoke===true
+    },
+    beammpProxyAutoReal(values) {
+        return values.enableProxyVehicles!==false && values.proxyAutoReal===true
+    },
     beammpEnableBlobs(values) {
         return values.enableBlobs===true
     },

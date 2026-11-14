@@ -99,6 +99,7 @@ local function handle(rawData)
 	if not veh or veh.isLocal then
 		return
 	end
+	if MPProxyGE and MPProxyGE.captureState("nodes", veh, code, data) then return end -- proxy / spawning: kept for later
 
 	if code == "n" then
 		applyNodes(data, serverVehicleID)

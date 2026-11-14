@@ -52,6 +52,14 @@ setExtensionUnloadMode("MPKeybindsGE", "manual")
 load("MPVehicleGE")
 setExtensionUnloadMode("MPVehicleGE", "manual")
 
+load("MPProxyMeshGE")
+setExtensionUnloadMode("MPProxyMeshGE", "manual")
+
+load("MPProxyGE")
+setExtensionUnloadMode("MPProxyGE", "manual")
+load("MPProxyTest")
+setExtensionUnloadMode("MPProxyTest", "manual")
+
 load("MPInputsGE")
 setExtensionUnloadMode("MPInputsGE", "manual")
 

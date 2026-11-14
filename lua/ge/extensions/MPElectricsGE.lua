@@ -67,6 +67,7 @@ local function handle(rawData)
 	if not veh or veh.isLocal then
 		return
 	end
+	if MPProxyGE and MPProxyGE.captureState("electrics", veh, code, data) then return end -- proxy / spawning: kept for later
 
 	if code == "e" then -- Electrics (indicators, lights etc...)
 		applyElectrics(data, serverVehicleID)

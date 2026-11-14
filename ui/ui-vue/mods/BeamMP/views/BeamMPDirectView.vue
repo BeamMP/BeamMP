@@ -53,12 +53,12 @@ import { useBeamMPState } from "../shared/beammpState.js"
 
 const ip = ref("")
 const port = ref("")
-const { addFavorite, connectToServer, directConnectFromClipboard } = useBeamMPState()
+const { addFavorite, connectToServer, directConnectFromClipboard, parseEndpoint } = useBeamMPState()
 
 async function pasteFromClipboard() {
   const text = String(await directConnectFromClipboard() || "")
-  if (!text.includes(".")) return
-  const [nextIp, nextPort] = text.split(":")
+  if (!text.trim()) return
+  const { ip: nextIp, port: nextPort } = parseEndpoint(text)
   ip.value = nextIp || ip.value
   if (nextPort) port.value = nextPort
 }

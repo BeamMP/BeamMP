@@ -543,6 +543,19 @@ async function directConnectFromClipboard() {
   return await luaCall("getClipboard()")
 }
 
+// Splits pasted "host:port" / "[host]:port" text, keeping bare IPv6 literals
+// (multiple colons, no brackets) intact as the host with no port.
+function parseEndpoint(text) {
+  const cleaned = String(text || "").trim()
+  const bracketed = cleaned.match(/^\[(.+)\](?::(\d+))?$/)
+  if (bracketed) return { ip: bracketed[1], port: bracketed[2] || "" }
+  const lastColon = cleaned.lastIndexOf(":")
+  if (lastColon !== -1 && cleaned.indexOf(":") === lastColon) {
+    return { ip: cleaned.slice(0, lastColon), port: cleaned.slice(lastColon + 1) }
+  }
+  return { ip: cleaned, port: "" }
+}
+
 function openExternal(url) {
   if (!url) return
   extensionCommand("MPCoreNetwork", "openURL", bridgeApi.serializeToLua(String(url)))
@@ -779,6 +792,7 @@ export function useBeamMPState(events) {
     logout,
     modList,
     openExternal,
+    parseEndpoint,
     refreshConnectionState,
     removeFavorite,
     requestServerList,

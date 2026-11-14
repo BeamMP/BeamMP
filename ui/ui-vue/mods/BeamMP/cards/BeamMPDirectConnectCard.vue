@@ -30,7 +30,7 @@ import { useBeamMPState } from "../shared/beammpState.js"
 
 const ip = ref("")
 const port = ref("")
-const { connectToServer, directConnectFromClipboard } = useBeamMPState()
+const { connectToServer, directConnectFromClipboard, parseEndpoint } = useBeamMPState()
 
 async function connect() {
   await connectToServer(ip.value || "127.0.0.1", port.value || "30814")
@@ -38,8 +38,8 @@ async function connect() {
 
 async function pasteFromClipboard() {
   const text = String(await directConnectFromClipboard() || "")
-  if (!text.includes(".")) return
-  const [nextIp, nextPort] = text.split(":")
+  if (!text.trim()) return
+  const { ip: nextIp, port: nextPort } = parseEndpoint(text)
   ip.value = nextIp || ip.value
   if (nextPort) port.value = nextPort
 }

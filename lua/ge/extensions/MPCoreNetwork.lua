@@ -331,7 +331,9 @@ local function connectToServer(ip, port, name, skipModWarning)
 		return
 	end
 
-	local ipString = currentServer.ip..':'..currentServer.port
+	local ip = currentServer.ip
+	if ip:find(':') then ip = '['..ip..']' end -- bracket IPv6 literals: [::1]:30814
+	local ipString = ip..':'..currentServer.port
 	send('C'..ipString..'')
 
 	log('M', 'connectToServer', "Connecting to server "..ipString)

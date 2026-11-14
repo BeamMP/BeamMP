@@ -70,7 +70,13 @@ const officialMaps = [
   "West Coast Usa",
 ]
 
-const state = {
+// The game re-evaluates this file whenever it reloads the UI mods (every time a file under /ui/ui-vue/mods/ changes,
+// e.g. when a server mod with a Vue UI is mounted while joining). The state and the event listeners are kept on
+// globalThis so that a fresh copy carries on with the same connection, download progress and server list instead
+// of starting empty while the previous copy's listeners keep updating a state nothing displays any more.
+const shared = globalThis.__beammpUiShared || (globalThis.__beammpUiShared = { state: null, listenersReady: false })
+
+const state = shared.state || (shared.state = {
   isReady: ref(false),
   tosAccepted: ref(localStorage.getItem("tosAccepted") === "true"),
   launcherConnected: ref(false),
@@ -94,9 +100,8 @@ const state = {
   favorites: ref([]),
   recents: ref(loadRecents()),
   view: ref("servers"),
-}
+})
 
-let listenersReady = false
 let lastExtensionErrorNotificationAt = 0
 const EXTENSION_ERROR_NOTIFICATION_COOLDOWN_MS = 10000
 const LUA_IDENTIFIER_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/
@@ -615,8 +620,8 @@ function onLoadingInfo(payload) {
 }
 
 function ensureListeners(events) {
-  if (listenersReady) return
-  listenersReady = true
+  if (shared.listenersReady) return
+  shared.listenersReady = true
 
   events.on("onBeamMPServerListReceived", data => readServerList(data))
   events.on("onBeamMPInfo", data => {
